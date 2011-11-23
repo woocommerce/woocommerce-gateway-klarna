@@ -336,7 +336,7 @@ class woocommerce_klarna extends woocommerce_payment_gateway {
 				$k->addArticle(
 		    		$qty = $item['qty'], //Quantity
 		    		$artNo = $item['id'], //Article number
-		    		$title = $item['name'] . $item['taxrate'], //Article name/title
+		    		$title = $item['name'], //Article name/title
 		    		$price = $klarna_item_price_including_tax, // Price
 		    		$vat = $item['taxrate'], //19% VAT
 		    		$discount = 0, 
@@ -363,13 +363,15 @@ class woocommerce_klarna extends woocommerce_payment_gateway {
 		// Shipping
 		if ($order->order_shipping>0) :
 			// We manually calculate the shipping tax percentage here
-			$calculated_shipping_tax_percentage = ($order->order_shipping_tax/$order->order_shipping)*100;
+			$calculated_shipping_tax_percentage = ($order->order_shipping_tax/$order->order_shipping)*100; //25.00
+			$calculated_shipping_tax_decimal = ($order->order_shipping_tax/$order->order_shipping)+1; //0.25
+			$klarna_shipping_price_including_tax = $order->order_shipping*$calculated_shipping_tax_decimal;
 			
 			$k->addArticle(
 			    $qty = 1,
 			    $artNo = "",
 			    $title = __('Shipping cost', 'woothemes'),
-			    $price = number_format($order->order_shipping, 2),
+			    $price = $klarna_shipping_price_including_tax,
 			    $vat = $calculated_shipping_tax_percentage,
 			    $discount = 0,
 			    $flags = KlarnaFlags::INC_VAT + KlarnaFlags::IS_SHIPMENT //Price is including VAT and is shipment fee
@@ -394,6 +396,7 @@ class woocommerce_klarna extends woocommerce_payment_gateway {
     		$email = $order->billing_email,
     		$telno = '', //We skip the normal land line phone, only one is needed.
     		$cellno = $order->billing_phone,
+    		//$company = $order->billing_company,
     		$fname = $order->billing_first_name,
     		$lname = $order->billing_last_name,
     		$careof = $order->billing_address_2,  //No care of, C/O.
@@ -409,6 +412,7 @@ class woocommerce_klarna extends woocommerce_payment_gateway {
     		$email = $order->billing_email,
     		$telno = '', //We skip the normal land line phone, only one is needed.
     		$cellno = $order->billing_phone,
+    		//$company = $order->shipping_company,
     		$fname = $order->shipping_first_name,
     		$lname = $order->shipping_last_name,
     		$careof = $order->shipping_address_2,  //No care of, C/O.
@@ -466,11 +470,11 @@ class woocommerce_klarna extends woocommerce_payment_gateway {
                 break;
             case KlarnaFlags::PENDING:
                 $order->add_order_note( __('Order is PENDING APPROVAL by Klarna. Please visit Klarna Online for the latest status on this order. Klarna Invoice number: ', 'woothemes') . $invno );
-                // Payment complete
-				$order->payment_complete();		
+                // Payment on-hold
+				$order->update_status('on-hold', $message );
 				// Remove cart
-				$woocommerce->add_error( __('Order is PENDING APPROVAL by Klarna. Please contact us for the latest status on this order. Klarna Invoice number:', 'woothemes') . $invno );
 				$woocommerce->cart->empty_cart();
+				// $woocommerce->add_error( __('Order is PENDING APPROVAL by Klarna. Please contact us for the latest status on this order. Klarna Invoice number:', 'woothemes') . $invno );
 				return array(
 					'result' 	=> 'success',
 					'redirect'	=> add_query_arg('order', $order->id, add_query_arg('key', $order->order_key, get_permalink(get_option('woocommerce_pay_page_id'))))
