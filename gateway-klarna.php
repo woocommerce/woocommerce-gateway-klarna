@@ -42,47 +42,9 @@ class woocommerce_klarna extends woocommerce_payment_gateway {
 		global $woocommerce;
 		
         $this->id			= 'klarna';
-        $this->icon 		= plugins_url(basename(dirname(__FILE__))."/images/klarna.gif");
+        $this->icon 		= plugins_url(basename(dirname(__FILE__))."/images/klarna.png");
         $this->has_fields 	= false;
 		$this->shop_country	= get_option('woocommerce_default_country');
-		
-		// Country and language
-		switch ( $this->shop_country )
-		{
-		case 'DK':
-			$this->klarna_country = 'DK';
-			$this->klarna_language = 'DA';
-			$this->klarna_currency = 'DKK';
-			break;
-		case 'DE' :
-			$this->klarna_country = 'DE';
-			$this->klarna_language = 'DE';
-			$this->klarna_currency = 'EUR';
-			break;
-		case 'NL' :
-			$this->klarna_country = 'NL';
-			$this->klarna_language = 'NL';
-			$this->klarna_currency = 'EUR';
-			break;
-		case 'NO' :
-			$this->klarna_country = 'NO';
-			$this->klarna_language = 'NB';
-			$this->klarna_currency = 'NOK';
-			break;
-		case 'FI' :
-			$this->klarna_country = 'FI';
-			$this->klarna_language = 'FI';
-			$this->klarna_currency = 'EUR';
-			break;
-		case 'SE' :
-			$this->klarna_country = 'SE';
-			$this->klarna_language = 'SV';
-			$this->klarna_currency = 'SEK';
-			break;
-		default:
-			// The sound of one hand clapping
-		}
-
 
 		// Load the form fields.
 		$this->init_form_fields();
@@ -102,6 +64,51 @@ class woocommerce_klarna extends woocommerce_payment_gateway {
 		
 		if ( $this->handlingfee == "") $this->handlingfee = 0;
 		if ( $this->handlingfee_tax == "") $this->handlingfee_tax = 0;
+		
+		
+		// Country and language
+		switch ( $this->shop_country )
+		{
+		case 'DK':
+			$this->klarna_country = 'DK';
+			$this->klarna_language = 'DA';
+			$this->klarna_currency = 'DKK';
+			$this->klarna_invoice_terms = 'https://online.klarna.com/villkor_dk.yaws?eid=' . $this->eid . '&charge=' . $this->handlingfee;
+			break;
+		case 'DE' :
+			$this->klarna_country = 'DE';
+			$this->klarna_language = 'DE';
+			$this->klarna_currency = 'EUR';
+			$this->klarna_invoice_terms = 'https://online.klarna.com/villkor_de.yaws?eid=' . $this->eid . '&charge=' . $this->handlingfee;
+			break;
+		case 'NL' :
+			$this->klarna_country = 'NL';
+			$this->klarna_language = 'NL';
+			$this->klarna_currency = 'EUR';
+			$this->klarna_invoice_terms = 'https://online.klarna.com/villkor_nl.yaws?eid=' . $this->eid . '&charge=' . $this->handlingfee;
+			break;
+		case 'NO' :
+			$this->klarna_country = 'NO';
+			$this->klarna_language = 'NB';
+			$this->klarna_currency = 'NOK';
+			$this->klarna_invoice_terms = 'https://online.klarna.com/villkor_no.yaws?eid=' . $this->eid . '&charge=' . $this->handlingfee;
+			break;
+		case 'FI' :
+			$this->klarna_country = 'FI';
+			$this->klarna_language = 'FI';
+			$this->klarna_currency = 'EUR';
+			$this->klarna_invoice_terms = 'https://online.klarna.com/villkor_fi.yaws?eid=' . $this->eid . '&charge=' . $this->handlingfee;
+			break;
+		case 'SE' :
+			$this->klarna_country = 'SE';
+			$this->klarna_language = 'SV';
+			$this->klarna_currency = 'SEK';
+			$this->klarna_invoice_terms = 'https://online.klarna.com/villkor.yaws?eid=' . $this->eid . '&charge=' . $this->handlingfee;
+			break;
+		default:
+			// The sound of one hand clapping
+		}
+
 		
 
 		// Actions
@@ -146,7 +153,7 @@ class woocommerce_klarna extends woocommerce_payment_gateway {
 							'title' => __( 'Description', 'woothemes' ), 
 							'type' => 'textarea', 
 							'description' => __( 'This controls the description which the user sees during checkout.', 'woothemes' ), 
-							'default' => __("Get your product first - pay your invoice later!", 'woothemes')
+							'default' => __("Klarna invoice - Pay within 14 days.", 'woothemes')
 						), 
 			'eid' => array(
 							'title' => __( 'Eid', 'woothemes' ), 
@@ -238,6 +245,8 @@ class woocommerce_klarna extends woocommerce_payment_gateway {
     	<?php if ($this->testmode=='yes') : ?><p><?php _e('TEST MODE ENABLED', 'woothemes'); ?></p><?php endif; ?>
 		<?php if ($this->description) : ?><p><?php echo $this->description; ?></p><?php endif; ?>
 		<?php if ($this->handlingfee>0) : ?><p><?php printf(__('An invoice/handling fee of %1$s %2$s will be added. This cost will only be visible on your invoice from Klarna.', 'woothemes'), $this->handlingfee, get_option('woocommerce_currency') ); ?></p><?php endif; ?>
+		
+		<p><a href="<?php echo $this->klarna_invoice_terms;?>" target="_blank"><?php echo __("Terms for invoice", 'woocommerce') ?></a></p>
 		
 		<fieldset>
 			<p class="form-row form-row-first">
@@ -336,7 +345,7 @@ class woocommerce_klarna extends woocommerce_payment_gateway {
 				$k->addArticle(
 		    		$qty = $item['qty'], //Quantity
 		    		$artNo = $item['id'], //Article number
-		    		$title = $item['name'], //Article name/title
+		    		$title = utf8_decode ($item['name']), //Article name/title
 		    		$price = $klarna_item_price_including_tax, // Price
 		    		$vat = $item['taxrate'], //19% VAT
 		    		$discount = 0, 
@@ -397,15 +406,15 @@ class woocommerce_klarna extends woocommerce_payment_gateway {
     		$telno = '', //We skip the normal land line phone, only one is needed.
     		$cellno = $order->billing_phone,
     		//$company = $order->billing_company,
-    		$fname = $order->billing_first_name,
-    		$lname = $order->billing_last_name,
-    		$careof = $order->billing_address_2,  //No care of, C/O.
-    		$street = $order->billing_address_1, //For DE and NL specify street number in houseNo.
-    		$zip = $order->billing_postcode,
-    		$city = $order->billing_city,
-    		$country = $order->billing_country,
-    		$houseNo = $klarna_house_number, //For DE and NL we need to specify houseNo.
-    		$houseExt = $klarna_house_extension //Only required for NL.
+    		$fname = utf8_decode ($order->billing_first_name),
+    		$lname = utf8_decode ($order->billing_last_name),
+    		$careof = utf8_decode ($order->billing_address_2),  //No care of, C/O.
+    		$street = utf8_decode ($order->billing_address_1), //For DE and NL specify street number in houseNo.
+    		$zip = utf8_decode ($order->billing_postcode),
+    		$city = utf8_decode ($order->billing_city),
+    		$country = utf8_decode ($order->billing_country),
+    		$houseNo = utf8_decode ($klarna_house_number), //For DE and NL we need to specify houseNo.
+    		$houseExt = utf8_decode ($klarna_house_extension) //Only required for NL.
 		);
 		
 		$addr_shipping = new KlarnaAddr(
@@ -413,15 +422,15 @@ class woocommerce_klarna extends woocommerce_payment_gateway {
     		$telno = '', //We skip the normal land line phone, only one is needed.
     		$cellno = $order->billing_phone,
     		//$company = $order->shipping_company,
-    		$fname = $order->shipping_first_name,
-    		$lname = $order->shipping_last_name,
-    		$careof = $order->shipping_address_2,  //No care of, C/O.
-    		$street = $order->shipping_address_1, //For DE and NL specify street number in houseNo.
-    		$zip = $order->shipping_postcode,
-    		$city = $order->shipping_city,
-    		$country = $order->shipping_country,
-    		$houseNo = $klarna_house_number, //For DE and NL we need to specify houseNo.
-    		$houseExt = $klarna_house_extension //Only required for NL.
+    		$fname = utf8_decode ($order->shipping_first_name),
+    		$lname = utf8_decode ($order->shipping_last_name),
+    		$careof = utf8_decode ($order->shipping_address_2),  //No care of, C/O.
+    		$street = utf8_decode ($order->shipping_address_1), //For DE and NL specify street number in houseNo.
+    		$zip = utf8_decode ($order->shipping_postcode),
+    		$city = utf8_decode ($order->shipping_city),
+    		$country = utf8_decode ($order->shipping_country),
+    		$houseNo = utf8_decode ($klarna_house_number), //For DE and NL we need to specify houseNo.
+    		$houseExt = utf8_decode ($klarna_house_extension) //Only required for NL.
 		);
 
 
@@ -459,26 +468,36 @@ class woocommerce_klarna extends woocommerce_payment_gateway {
     		switch($result[1]) {
             case KlarnaFlags::ACCEPTED:
                 $order->add_order_note( __('Klarna payment completed. Klarna Invoice number: ', 'woothemes') . $invno );
+                
                 // Payment complete
 				$order->payment_complete();		
+				
 				// Remove cart
 				$woocommerce->cart->empty_cart();			
+				
+				// Return thank you redirect
 				return array(
-					'result' 	=> 'success',
-					'redirect'	=> add_query_arg('order', $order->id, add_query_arg('key', $order->order_key, get_permalink(get_option('woocommerce_pay_page_id'))))
-				);			
+						'result' 	=> 'success',
+						'redirect'	=> add_query_arg('key', $order->order_key, add_query_arg('order', $order_id, get_permalink(get_option('woocommerce_thanks_page_id'))))
+				);
+						
                 break;
             case KlarnaFlags::PENDING:
                 $order->add_order_note( __('Order is PENDING APPROVAL by Klarna. Please visit Klarna Online for the latest status on this order. Klarna Invoice number: ', 'woothemes') . $invno );
+                
                 // Payment on-hold
 				$order->update_status('on-hold', $message );
+				
 				// Remove cart
 				$woocommerce->cart->empty_cart();
 				// $woocommerce->add_error( __('Order is PENDING APPROVAL by Klarna. Please contact us for the latest status on this order. Klarna Invoice number:', 'woothemes') . $invno );
+				
+				// Return thank you redirect
 				return array(
-					'result' 	=> 'success',
-					'redirect'	=> add_query_arg('order', $order->id, add_query_arg('key', $order->order_key, get_permalink(get_option('woocommerce_pay_page_id'))))
+						'result' 	=> 'success',
+						'redirect'	=> add_query_arg('key', $order->order_key, add_query_arg('order', $order_id, get_permalink(get_option('woocommerce_thanks_page_id'))))
 				);
+				
                 break;
             case KlarnaFlags::DENIED:
                 //Order is denied, store it in a database.

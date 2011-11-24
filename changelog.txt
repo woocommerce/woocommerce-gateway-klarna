@@ -1,0 +1,5 @@
+*** Klarna Changelog ***
+
+ 
+2011.11.24 - version 1.0
+ * First Release
