@@ -2,23 +2,17 @@
 
 By Niklas Högefjord - http://krokedil.com/
 
-
-
 == DESCRIPTION ==
 
 Klarna Gateway is a plugin that extends WooCommerce, allowing your customers to get their products first and pay by invoice to Klarna later (http://www.klarna.com/). This plugin utilizes the Klarna Invoice (Standard Integration type).
 
 Klarna is a great payment alternative for merchants and customers in Sweden, Denmark, Finland, Norway, Germany and the Nederlands.
 
-
-
 == Important Note ==
 
 You *must* enable SSL from the settings panel to use this plugin in live mode - this is for your customers safety and security.
 
-This plugin does not support Klarna Account, Campaigns or Mobile payments at the moment.
-
-
+This plugin does not currently support Klarna Account, Campaigns or Mobile payments.
 
 == INSTALLATION	 ==
 
