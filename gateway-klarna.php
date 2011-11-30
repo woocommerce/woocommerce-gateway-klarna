@@ -336,15 +336,15 @@ if ( !class_exists( 'woocommerce_payment_gateway' ) ) return;
 			if (sizeof($order->items)>0) : foreach ($order->items as $item) :
 				$_product = $order->get_product_from_item( $item );
 				if ($_product->exists() && $item['qty']) :		
-					$klarna_item_price_including_tax = $item['cost'] * (($item['taxrate']/100)+1);
+					// $klarna_item_price_including_tax = $item['cost'] * (($item['taxrate']/100)+1);
 					$k->addArticle(
-			    		$qty = $item['qty'], //Quantity
-			    		$artNo = $item['id'], //Article number
-			    		$title = utf8_decode ($item['name']), //Article name/title
-			    		$price = $klarna_item_price_including_tax, // Price
-			    		$vat = $item['taxrate'], //19% VAT
+			    		$qty = $item['qty'], 								//Quantity
+			    		$artNo = $item['id'], 								//Article number
+			    		$title = utf8_decode ($item['name'] . $order->get_item_cost( $item, true )), 				//Article name/title
+			    		$price = $order->get_item_cost( $item, true ), 		// Price
+			    		$vat = $item['taxrate'], 							//19% VAT
 			    		$discount = 0, 
-			    		$flags = KlarnaFlags::INC_VAT //Price is including VAT.
+			    		$flags = KlarnaFlags::INC_VAT 						//Price is including VAT.
 					);
 										
 				endif;
