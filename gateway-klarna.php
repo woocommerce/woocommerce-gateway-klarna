@@ -340,7 +340,7 @@ if ( !class_exists( 'woocommerce_payment_gateway' ) ) return;
 					$k->addArticle(
 			    		$qty = $item['qty'], 								//Quantity
 			    		$artNo = $item['id'], 								//Article number
-			    		$title = utf8_decode ($item['name'] . $order->get_item_cost( $item, true )), 				//Article name/title
+			    		$title = utf8_decode ($item['name'], 				//Article name/title
 			    		$price = $order->get_item_cost( $item, true ), 		// Price
 			    		$vat = $item['taxrate'], 							//19% VAT
 			    		$discount = 0, 
