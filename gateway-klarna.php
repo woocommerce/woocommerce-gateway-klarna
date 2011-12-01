@@ -25,6 +25,17 @@ Author URI: http://krokedil.com
     
 */
 
+/**
+ * Plugin updates
+ * */
+if (is_admin()) {
+	if ( ! class_exists( 'WooThemes_Plugin_Updater' ) ) require_once( 'woo-updater/plugin-updater.class.php' );
+	
+	$woo_plugin_updater_klarna = new WooThemes_Plugin_Updater( __FILE__ );
+	$woo_plugin_updater_klarna->api_key = 'c10ceaa5d5c8c34eadc20ade748e27bc';
+	$woo_plugin_updater_klarna->init();
+}
+
 // Init Google Checkout Gateway after WooCommerce has loaded
 add_action('plugins_loaded', 'init_klarna_gateway', 0);
 
