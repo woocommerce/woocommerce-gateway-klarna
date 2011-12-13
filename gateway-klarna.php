@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: WooCommerce Klarna Gateway
-Plugin URI: http://woocommerce.com
+Plugin URI: http://woothemes.com/woocommerce
 Description: Extends WooCommerce. Provides a <a href="http://www.klarna.se" target="_blank">klarna</a> API gateway for WooCommerce.<br /> Email <a href="mailto:niklas@krokedil.se">niklas@krokedil.se</a> with any questions.
 Version: 1.0
 Author: Niklas Högefjord
