@@ -344,16 +344,19 @@ if ( !class_exists( 'woocommerce_payment_gateway' ) ) return;
 			Klarna::$debug = false;
 			
 			// Cart Contents
-			if (sizeof($order->items)>0) : foreach ($order->items as $item) :
+			if (sizeof($order->get_items())>0) : foreach ($order->get_items() as $item) :
 				$_product = $order->get_product_from_item( $item );
 				if ($_product->exists() && $item['qty']) :		
-					// $klarna_item_price_including_tax = $item['cost'] * (($item['taxrate']/100)+1);
+					
+					// We manually calculate the tax percentage here
+					$item_tax_percentage 	= number_format( ( $order->get_line_tax($item) / $order->get_line_total( $item, false ) )*100, 2, '.', '');
+
 					$k->addArticle(
 			    		$qty = $item['qty'], 								//Quantity
 			    		$artNo = $item['id'], 								//Article number
 			    		$title = utf8_decode ($item['name']), 				//Article name/title
-			    		$price = $order->get_item_cost( $item, true ), 		// Price
-			    		$vat = $item['taxrate'], 							//19% VAT
+			    		$price = $order->get_item_total( $item, true ), 	// Price
+			    		$vat = $item_tax_percentage,						// Tax
 			    		$discount = 0, 
 			    		$flags = KlarnaFlags::INC_VAT 						//Price is including VAT.
 					);
@@ -377,6 +380,7 @@ if ( !class_exists( 'woocommerce_payment_gateway' ) ) return;
 			
 			// Shipping
 			if ($order->order_shipping>0) :
+				
 				// We manually calculate the shipping tax percentage here
 				$calculated_shipping_tax_percentage = ($order->order_shipping_tax/$order->order_shipping)*100; //25.00
 				$calculated_shipping_tax_decimal = ($order->order_shipping_tax/$order->order_shipping)+1; //0.25
