@@ -3,7 +3,7 @@
 Plugin Name: WooCommerce Klarna Gateway
 Plugin URI: http://woothemes.com/woocommerce
 Description: Extends WooCommerce. Provides a <a href="http://www.klarna.se" target="_blank">klarna</a> API gateway for WooCommerce.<br /> Email <a href="mailto:niklas@krokedil.se">niklas@krokedil.se</a> with any questions.
-Version: 1.0
+Version: 1.1
 Author: Niklas Högefjord
 Author URI: http://krokedil.com
 */
@@ -130,6 +130,7 @@ if ( !class_exists( 'woocommerce_payment_gateway' ) ) return;
 		/**
 	 	* Check if SSL is enabled and notify the user
 	 	**/
+	 	/*
 		function klarna_ssl_check() {
 		     
 		     if (get_option('woocommerce_force_ssl_checkout')=='no' && $this->enabled=='yes') :
@@ -138,6 +139,7 @@ if ( !class_exists( 'woocommerce_payment_gateway' ) ) return;
 		     
 		     endif;
 		}
+	    */
 	    
 		/**
 	     * Initialise Gateway Settings Form Fields
@@ -314,13 +316,18 @@ if ( !class_exists( 'woocommerce_payment_gateway' ) ) return;
 			$klarna_house_number	= isset($_POST['klarna_house_number']) ? woocommerce_clean($_POST['klarna_house_number']) : '';
 			$klarna_house_extension	= isset($_POST['klarna_house_extension']) ? woocommerce_clean($_POST['klarna_house_extension']) : '';
 			
-					
-			// Disable SSL if in testmode
+			// Test mode or Live mode		
 			if ( $this->testmode == 'yes' ):
+				// Disable SSL if in testmode
 				$klarna_ssl = 'false';
 				$klarna_mode = Klarna::BETA;
 			else :
-				$klarna_ssl = 'true';
+				// Set SSL if used in webshop
+				if (is_ssl()) {
+					$klarna_ssl = 'true';
+				} else {
+					$klarna_ssl = 'false';
+				}
 				$klarna_mode = Klarna::LIVE;
 			endif;
 				

@@ -14,8 +14,6 @@ Klarna is a great payment alternative for merchants and customers in Sweden, Den
 
 == IMPORTANT NOTE ==
 
-You *must* enable SSL from the settings panel to use this plugin in live mode - this is for your customers safety and security.
-
 This plugin does not currently support Klarna Account, Campaigns or Mobile payments.
 
 

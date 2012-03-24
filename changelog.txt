@@ -1,4 +1,7 @@
 *** Klarna Changelog ***
+
+2012.03.15 - version 1.1
+ * Gateway can now be used without SSL certificate.
  
 2011.12.01 - version 1.0
  * First Release
