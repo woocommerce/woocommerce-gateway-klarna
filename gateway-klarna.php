@@ -121,9 +121,11 @@ if ( !class_exists( 'woocommerce_payment_gateway' ) ) return;
 	
 			// Actions
 			add_action('woocommerce_receipt_klarna', array(&$this, 'receipt_page'));
+			/*
 			if ( $this->testmode !== 'yes' ):
 				add_action('admin_notices', array(&$this,'klarna_ssl_check'));
 			endif;
+			*/
 			add_action('woocommerce_update_options_payment_gateways', array(&$this, 'process_admin_options'));
 	    } 
     
