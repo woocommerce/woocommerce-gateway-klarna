@@ -41,8 +41,15 @@ add_action('plugins_loaded', 'init_klarna_gateway', 0);
 
 function init_klarna_gateway() {
 
-// If the WooCommerce payment gateway class is not available, do nothing
-if ( !class_exists( 'woocommerce_payment_gateway' ) ) return;
+	// If the WooCommerce payment gateway class is not available, do nothing
+	if ( !class_exists( 'woocommerce_payment_gateway' ) ) return;
+	
+	
+	/**
+	 * Localisation
+	 */
+	load_plugin_textdomain('klarna', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/');
+
 
 	// Define Klarna lib
 	define('KLARNA_LIB', dirname(__FILE__) . '/library/');
@@ -137,7 +144,7 @@ if ( !class_exists( 'woocommerce_payment_gateway' ) ) return;
 		     
 		     if (get_option('woocommerce_force_ssl_checkout')=='no' && $this->enabled=='yes') :
 		     
-		     	echo '<div class="error"><p>'.sprintf(__('Klarna is enabled and the <a href="%s">force SSL option</a> is disabled; your checkout is not secure! Please enable SSL and ensure your server has a valid SSL certificate.', 'woothemes'), admin_url('admin.php?page=woocommerce')).'</p></div>';
+		     	echo '<div class="error"><p>'.sprintf(__('Klarna is enabled and the <a href="%s">force SSL option</a> is disabled; your checkout is not secure! Please enable SSL and ensure your server has a valid SSL certificate.', 'klarna'), admin_url('admin.php?page=woocommerce')).'</p></div>';
 		     
 		     endif;
 		}
@@ -150,51 +157,51 @@ if ( !class_exists( 'woocommerce_payment_gateway' ) ) return;
 	    
 	    	$this->form_fields = array(
 				'enabled' => array(
-								'title' => __( 'Enable/Disable', 'woothemes' ), 
+								'title' => __( 'Enable/Disable', 'klarna' ), 
 								'type' => 'checkbox', 
-								'label' => __( 'Enable klarna standard', 'woothemes' ), 
+								'label' => __( 'Enable klarna standard', 'klarna' ), 
 								'default' => 'yes'
 							), 
 				'title' => array(
-								'title' => __( 'Title', 'woothemes' ), 
+								'title' => __( 'Title', 'klarna' ), 
 								'type' => 'text', 
-								'description' => __( 'This controls the title which the user sees during checkout.', 'woothemes' ), 
-								'default' => __( 'Klarna', 'woothemes' )
+								'description' => __( 'This controls the title which the user sees during checkout.', 'klarna' ), 
+								'default' => __( 'Klarna', 'klarna' )
 							),
 				'description' => array(
-								'title' => __( 'Description', 'woothemes' ), 
+								'title' => __( 'Description', 'klarna' ), 
 								'type' => 'textarea', 
-								'description' => __( 'This controls the description which the user sees during checkout.', 'woothemes' ), 
-								'default' => __("Klarna invoice - Pay within 14 days.", 'woothemes')
+								'description' => __( 'This controls the description which the user sees during checkout.', 'klarna' ), 
+								'default' => __("Klarna invoice - Pay within 14 days.", 'klarna')
 							), 
 				'eid' => array(
-								'title' => __( 'Eid', 'woothemes' ), 
+								'title' => __( 'Eid', 'klarna' ), 
 								'type' => 'text', 
-								'description' => __( 'Please enter your Klarna Eid; this is needed in order to take payment!', 'woothemes' ), 
-								'default' => __( '', 'woothemes' )
+								'description' => __( 'Please enter your Klarna Eid; this is needed in order to take payment!', 'klarna' ), 
+								'default' => __( '', 'klarna' )
 							),
 				'secret' => array(
-								'title' => __( 'Shared Secret', 'woothemes' ), 
+								'title' => __( 'Shared Secret', 'klarna' ), 
 								'type' => 'text', 
-								'description' => __( 'Please enter your Klarna Shared Secret; this is needed in order to take payment!', 'woothemes' ), 
-								'default' => __( '', 'woothemes' )
+								'description' => __( 'Please enter your Klarna Shared Secret; this is needed in order to take payment!', 'klarna' ), 
+								'default' => __( '', 'klarna' )
 							),
 				'handlingfee' => array(
-								'title' => __( 'Handling Fee', 'woothemes' ), 
+								'title' => __( 'Handling Fee', 'klarna' ), 
 								'type' => 'text', 
-								'description' => __( 'Fee <em>including</em> tax. Enter an amount, e.g. 25.5. Leave blank to disable.', 'woothemes' ), 
-								'default' => __( '', 'woothemes' )
+								'description' => __( 'Fee <em>including</em> tax. Enter an amount, e.g. 25.5. Leave blank to disable.', 'klarna' ), 
+								'default' => __( '', 'klarna' )
 							),
 				'handlingfee_tax' => array(
-								'title' => __( 'Tax for Handling Fee', 'woothemes' ), 
+								'title' => __( 'Tax for Handling Fee', 'klarna' ), 
 								'type' => 'text', 
-								'description' => __( '%. Enter tax rate for Handling Fee, e.g. 25.00. Leave blank to disable Tax on Handling Fee.', 'woothemes' ), 
-								'default' => __( '', 'woothemes' )
+								'description' => __( '%. Enter tax rate for Handling Fee, e.g. 25.00. Leave blank to disable Tax on Handling Fee.', 'klarna' ), 
+								'default' => __( '', 'klarna' )
 							),
 				'testmode' => array(
-								'title' => __( 'Test Mode', 'woothemes' ), 
+								'title' => __( 'Test Mode', 'klarna' ), 
 								'type' => 'checkbox', 
-								'label' => __( 'Enable Klarna Test Mode. This will only work if you have a Klarna test account. For test purchases with a live account, <a href="http://integration.klarna.com/en/testing/test-persons" target="_blank">follow these instructions</a>.', 'woothemes' ), 
+								'label' => __( 'Enable Klarna Test Mode. This will only work if you have a Klarna test account. For test purchases with a live account, <a href="http://integration.klarna.com/en/testing/test-persons" target="_blank">follow these instructions</a>.', 'klarna' ), 
 								'default' => 'no'
 							)
 				);
@@ -210,8 +217,8 @@ if ( !class_exists( 'woocommerce_payment_gateway' ) ) return;
 		public function admin_options() {
 	
 	    	?>
-	    	<h3><?php _e('Klarna', 'woothemes'); ?></h3>
-		    	<p><?php _e('With Klarna your customers can pay by invoice. Klarna works by adding extra personal information fields and then sending the details to Klarna for verification.', 'woothemes'); ?></p>
+	    	<h3><?php _e('Klarna', 'klarna'); ?></h3>
+		    	<p><?php _e('With Klarna your customers can pay by invoice. Klarna works by adding extra personal information fields and then sending the details to Klarna for verification.', 'klarna'); ?></p>
 	    	<table class="form-table">
 	    	<?php
 	    		// Generate the HTML For the settings form.
@@ -254,21 +261,21 @@ if ( !class_exists( 'woocommerce_payment_gateway' ) ) return;
 	    function payment_fields() {
 	    	global $woocommerce;
 	    	?>
-	    	<?php if ($this->testmode=='yes') : ?><p><?php _e('TEST MODE ENABLED', 'woothemes'); ?></p><?php endif; ?>
+	    	<?php if ($this->testmode=='yes') : ?><p><?php _e('TEST MODE ENABLED', 'klarna'); ?></p><?php endif; ?>
 			<?php if ($this->description) : ?><p><?php echo $this->description; ?></p><?php endif; ?>
-			<?php if ($this->handlingfee>0) : ?><p><?php printf(__('An invoice/handling fee of %1$s %2$s will be added. This cost will only be visible on your invoice from Klarna.', 'woothemes'), $this->handlingfee, get_option('woocommerce_currency') ); ?></p><?php endif; ?>
+			<?php if ($this->handlingfee>0) : ?><p><?php printf(__('An invoice/handling fee of %1$s %2$s will be added. This cost will only be visible on your invoice from Klarna.', 'klarna'), $this->handlingfee, get_option('woocommerce_currency') ); ?></p><?php endif; ?>
 			
-			<p><a href="<?php echo $this->klarna_invoice_terms;?>" target="_blank"><?php echo __("Terms for invoice", 'woocommerce') ?></a></p>
+			<p><a href="<?php echo $this->klarna_invoice_terms;?>" target="_blank"><?php echo __("Terms for invoice", 'klarna') ?></a></p>
 			
 			<fieldset>
 				<p class="form-row form-row-first">
-					<label for="klarna_pno"><?php echo __("Social Security Number", 'woocommerce') ?> <span class="required">*</span></label>
+					<label for="klarna_pno"><?php echo __("Social Security Number", 'klarna') ?> <span class="required">*</span></label>
 					<input type="text" class="input-text" name="klarna_pno" />
 				</p>
 				
 				<?php if ( in_array(get_option('woocommerce_default_country'), array('DE', 'NL'))) : ?>
 					<p class="form-row form-row-last">
-						<label for="klarna_gender"><?php echo __("Gender", 'woocommerce') ?> <span class="required">*</span></label><br/>
+						<label for="klarna_gender"><?php echo __("Gender", 'klarna') ?> <span class="required">*</span></label><br/>
 						<select id="klarna_gender" name="klarna_gender" class="woocommerce-select">
 							<option value="MALE">Male</options>
 							<option value="FEMALE">Female</options>
@@ -280,14 +287,14 @@ if ( !class_exists( 'woocommerce_payment_gateway' ) ) return;
 				
 				<?php if ( in_array(get_option('woocommerce_default_country'), array('DE', 'NL'))) : ?>	
 					<p class="form-row form-row-first">
-						<label for="klarna_house_number"><?php echo __("House Number", 'woocommerce') ?> <span class="required">*</span></label>
+						<label for="klarna_house_number"><?php echo __("House Number", 'klarna') ?> <span class="required">*</span></label>
 						<input type="text" class="input-text" name="klarna_house_number" />
 					</p>
 				<?php endif; ?>
 				
 				<?php if ( get_option('woocommerce_default_country') == 'NL' ) : ?>
 					<p class="form-row form-row-last">
-						<label for="klarna_house_extension"><?php echo __("House Extension", 'woocommerce') ?> <span class="required">*</span></label>
+						<label for="klarna_house_extension"><?php echo __("House Extension", 'klarna') ?> <span class="required">*</span></label>
 						<input type="text" class="input-text" name="klarna_house_extension" />
 					</p>
 				<?php endif; ?>
@@ -379,7 +386,7 @@ if ( !class_exists( 'woocommerce_payment_gateway' ) ) return;
 				$k->addArticle(
 				    $qty = 1,
 				    $artNo = "",
-				    $title = __('Discount', 'woothemes'),
+				    $title = __('Discount', 'klarna'),
 				    $price = -$order->order_discount,
 				    $vat = 0,
 				    $discount = 0,
@@ -398,7 +405,7 @@ if ( !class_exists( 'woocommerce_payment_gateway' ) ) return;
 				$k->addArticle(
 				    $qty = 1,
 				    $artNo = "",
-				    $title = __('Shipping cost', 'woothemes'),
+				    $title = __('Shipping cost', 'klarna'),
 				    $price = $klarna_shipping_price_including_tax,
 				    $vat = $calculated_shipping_tax_percentage,
 				    $discount = 0,
@@ -411,7 +418,7 @@ if ( !class_exists( 'woocommerce_payment_gateway' ) ) return;
 				$k->addArticle(
 				    $qty = 1,
 				    $artNo = "",
-				    $title = __('Handling Fee', 'woothemes'),
+				    $title = __('Handling Fee', 'klarna'),
 				    $price = $this->handlingfee,
 				    $vat = $this->handlingfee_tax,
 				    $discount = 0,
@@ -484,7 +491,7 @@ if ( !class_exists( 'woocommerce_payment_gateway' ) ) return;
 	    		$invno = $result[0];
 	    		switch($result[1]) {
 	            case KlarnaFlags::ACCEPTED:
-	                $order->add_order_note( __('Klarna payment completed. Klarna Invoice number: ', 'woothemes') . $invno );
+	                $order->add_order_note( __('Klarna payment completed. Klarna Invoice number: ', 'klarna') . $invno );
 	                
 	                // Payment complete
 					$order->payment_complete();		
@@ -500,7 +507,7 @@ if ( !class_exists( 'woocommerce_payment_gateway' ) ) return;
 							
 	                break;
 	            case KlarnaFlags::PENDING:
-	                $order->add_order_note( __('Order is PENDING APPROVAL by Klarna. Please visit Klarna Online for the latest status on this order. Klarna Invoice number: ', 'woothemes') . $invno );
+	                $order->add_order_note( __('Order is PENDING APPROVAL by Klarna. Please visit Klarna Online for the latest status on this order. Klarna Invoice number: ', 'klarna') . $invno );
 	                
 	                // Payment on-hold
 					$order->update_status('on-hold', $message );
@@ -517,14 +524,14 @@ if ( !class_exists( 'woocommerce_payment_gateway' ) ) return;
 	                break;
 	            case KlarnaFlags::DENIED:
 	                //Order is denied, store it in a database.
-					$order->add_order_note( __('Klarna payment denied.', 'woothemes') );
-					$woocommerce->add_error( __('Klarna payment denied.', 'woothemes') );
+					$order->add_order_note( __('Klarna payment denied.', 'klarna') );
+					$woocommerce->add_error( __('Klarna payment denied.', 'klarna') );
 	                return;
 	                break;
 	            default:
 	            	//Unknown response, store it in a database.
-					$order->add_order_note( __('Unknown response from Klarna.', 'woothemes') );
-					$woocommerce->add_error( __('Unknown response from Klarna.', 'woothemes') );
+					$order->add_order_note( __('Unknown response from Klarna.', 'klarna') );
+					$woocommerce->add_error( __('Unknown response from Klarna.', 'klarna') );
 	                return;
 	                break;
 	        	}
@@ -534,7 +541,7 @@ if ( !class_exists( 'woocommerce_payment_gateway' ) ) return;
 			
 			catch(Exception $e) {
 	    		//The purchase was denied or something went wrong, print the message:
-				$woocommerce->add_error( sprintf(__('Klarna payment failed (Correlation ID: %s). Payment was rejected due to an error: ', 'woothemes'), $e->getMessage() ) . '"' . $e->getCode() . '"' );
+				$woocommerce->add_error( sprintf(__('Klarna payment failed (Correlation ID: %s). Payment was rejected due to an error: ', 'klarna'), $e->getMessage() ) . '"' . $e->getCode() . '"' );
 				return;
 			}
 	
@@ -545,7 +552,7 @@ if ( !class_exists( 'woocommerce_payment_gateway' ) ) return;
 		 **/
 		function receipt_page( $order ) {
 			
-			echo '<p>'.__('Thank you for your order.', 'woothemes').'</p>';
+			echo '<p>'.__('Thank you for your order.', 'klarna').'</p>';
 			
 		}	
 	

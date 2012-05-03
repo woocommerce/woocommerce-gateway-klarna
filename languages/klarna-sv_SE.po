@@ -1,0 +1,211 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Klarna\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2012-05-03 10:53+0100\n"
+"PO-Revision-Date: 2012-05-03 10:53+0100\n"
+"Last-Translator: Niklas <niklas@krokedil.se>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Poedit-KeywordsList: __;_e\n"
+"X-Poedit-Basepath: .\n"
+"X-Poedit-SearchPath-0: ..\n"
+
+#: ../gateway-klarna.php:160
+msgid "Enable/Disable"
+msgstr "Aktivera/avaktivera"
+
+#: ../gateway-klarna.php:162
+msgid "Enable klarna standard"
+msgstr "Aktivera Klarna standard"
+
+#: ../gateway-klarna.php:166
+msgid "Title"
+msgstr "Titel"
+
+#: ../gateway-klarna.php:168
+msgid "This controls the title which the user sees during checkout."
+msgstr "Det här kontrollerar vilken titel kunden ser i kassan."
+
+#: ../gateway-klarna.php:169
+#: ../gateway-klarna.php:220
+msgid "Klarna"
+msgstr "Klarna"
+
+#: ../gateway-klarna.php:172
+msgid "Description"
+msgstr "Beskrivning"
+
+#: ../gateway-klarna.php:174
+msgid "This controls the description which the user sees during checkout."
+msgstr "Det här kontrollerar den beskrivning kunden ser i kassan."
+
+#: ../gateway-klarna.php:175
+msgid "Klarna invoice - Pay within 14 days."
+msgstr "Klarna faktura - betala inom 14 dagar."
+
+#: ../gateway-klarna.php:178
+msgid "Eid"
+msgstr "Eid"
+
+#: ../gateway-klarna.php:180
+msgid "Please enter your Klarna Eid; this is needed in order to take payment!"
+msgstr "Ange ditt Klarna Eid. Detta behövs för att du ska ta betalt."
+
+#: ../gateway-klarna.php:184
+msgid "Shared Secret"
+msgstr "Shared Secret"
+
+#: ../gateway-klarna.php:186
+msgid "Please enter your Klarna Shared Secret; this is needed in order to take payment!"
+msgstr "Ange din Klarna Shared Secret. Detta behövs för att du ska ta betalt."
+
+#: ../gateway-klarna.php:190
+#: ../gateway-klarna.php:421
+msgid "Handling Fee"
+msgstr "Fakturaavgift"
+
+#: ../gateway-klarna.php:192
+msgid "Fee <em>including</em> tax. Enter an amount, e.g. 25.5. Leave blank to disable."
+msgstr "Avgift <em>inklusive</em> moms. Ange en summa, ex. 25.5. Lämna tomt för att avaktivera."
+
+#: ../gateway-klarna.php:196
+msgid "Tax for Handling Fee"
+msgstr "Moms för fakturaavgift"
+
+#: ../gateway-klarna.php:198
+msgid "%. Enter tax rate for Handling Fee, e.g. 25.00. Leave blank to disable Tax on Handling Fee."
+msgstr "%. Ange momssatsen för fakturaavgiften, ex. 25.00. Lämna tomt för att avaktivera moms på fakturaavgiften."
+
+#: ../gateway-klarna.php:202
+msgid "Test Mode"
+msgstr "Test Mode"
+
+#: ../gateway-klarna.php:204
+msgid "Enable Klarna Test Mode. This will only work if you have a Klarna test account. For test purchases with a live account, <a href=\"http://integration.klarna.com/en/testing/test-persons\" target=\"_blank\">follow these instructions</a>."
+msgstr "Aktivera Klarna Test Mode. Detta fungerar endast om du har ett Klarna Testkonto. För testköp med ett live-konto, <a href=\"http://integration.klarna.com/en/testing/test-persons\" target=\"_blank\">följ dessa instruktioner</a>."
+
+#: ../gateway-klarna.php:221
+msgid "With Klarna your customers can pay by invoice. Klarna works by adding extra personal information fields and then sending the details to Klarna for verification."
+msgstr "Med Klarna kan dina kunder betala via faktura. Klarna fungerar genom att lägga till fler formulärfält i kassan och skicka informationen till Klarna för verifikation."
+
+#: ../gateway-klarna.php:264
+msgid "TEST MODE ENABLED"
+msgstr "TEST MODE AKTIVERAT"
+
+#: ../gateway-klarna.php:266
+#, php-format
+msgid "An invoice/handling fee of %1$s %2$s will be added. This cost will only be visible on your invoice from Klarna."
+msgstr "En fakturaavgift om %1$s %2$s tillkommer. Denna kostnad kommer endast att synas på fakturan som skickas från Klarna."
+
+#: ../gateway-klarna.php:268
+msgid "Terms for invoice"
+msgstr "Villkor för faktura"
+
+#: ../gateway-klarna.php:272
+msgid "Social Security Number"
+msgstr "Personnummer"
+
+#: ../gateway-klarna.php:278
+msgid "Gender"
+msgstr "Kön"
+
+#: ../gateway-klarna.php:290
+msgid "House Number"
+msgstr ""
+
+#: ../gateway-klarna.php:297
+msgid "House Extension"
+msgstr ""
+
+#: ../gateway-klarna.php:389
+msgid "Discount"
+msgstr "Rabatt"
+
+#: ../gateway-klarna.php:408
+msgid "Shipping cost"
+msgstr "Fraktkostnad"
+
+#: ../gateway-klarna.php:494
+msgid "Klarna payment completed. Klarna Invoice number: "
+msgstr "Klarna betalning genomförd. Klarna fakturanummer: "
+
+#: ../gateway-klarna.php:510
+msgid "Order is PENDING APPROVAL by Klarna. Please visit Klarna Online for the latest status on this order. Klarna Invoice number: "
+msgstr "Ordern är markerad PENDING APPROVAL av Klarna. Vänligen besök Klarna för aktuell status om den här ordern. Klarna fakturanummer: "
+
+#: ../gateway-klarna.php:527
+#: ../gateway-klarna.php:528
+msgid "Klarna payment denied."
+msgstr "Klarna betalning nekad."
+
+#: ../gateway-klarna.php:533
+#: ../gateway-klarna.php:534
+msgid "Unknown response from Klarna."
+msgstr "Okänt svar från Klarna."
+
+#: ../gateway-klarna.php:544
+#, php-format
+msgid "Klarna payment failed (Correlation ID: %s). Payment was rejected due to an error: "
+msgstr "Klarna betalning mosslyckades (Correlation ID: %s). Betalningen nekades på grund av ett fel: "
+
+#: ../gateway-klarna.php:555
+msgid "Thank you for your order."
+msgstr "Tack för din order."
+
+#: ../woo-updater/plugin-updater.class.php:147
+msgid "WooThemes Updates"
+msgstr ""
+
+#: ../woo-updater/plugin-updater.class.php:167
+msgid "WooThemes Plugin Updater"
+msgstr ""
+
+#: ../woo-updater/plugin-updater.class.php:174
+msgid "WooThemes Username"
+msgstr ""
+
+#: ../woo-updater/plugin-updater.class.php:178
+msgid "WooThemes Password"
+msgstr ""
+
+#: ../woo-updater/plugin-updater.class.php:187
+msgid "Login"
+msgstr ""
+
+#: ../woo-updater/plugin-updater.class.php:238
+msgid "Switch WooThemes Account"
+msgstr ""
+
+#: ../woo-updater/plugin-updater.class.php:240
+#, php-format
+msgid "You are currently logged in as %1$s. To switch to a different WooThemes account, please fill in the login details below."
+msgstr ""
+
+#: ../woo-updater/plugin-updater.class.php:243
+msgid "Update your Plugins"
+msgstr ""
+
+#: ../woo-updater/plugin-updater.class.php:250
+msgid "Login Error"
+msgstr ""
+
+#: ../woo-updater/plugin-updater.class.php:252
+msgid "The login details supplied are invalid. Please try again."
+msgstr ""
+
+#: ../woo-updater/plugin-updater.class.php:262
+msgid "Enable WooThemes Plugin Updates."
+msgstr ""
+
+#: ../woo-updater/plugin-updater.class.php:264
+#, php-format
+msgid "Please <a href=\"%1$s\">login</a> to enable automatic plugin updates."
+msgstr ""
+
+#: ../woo-updater/plugin-updater.class.php:277
+msgid "Hide This Message"
+msgstr "Dölj det här meddelandet"
+
