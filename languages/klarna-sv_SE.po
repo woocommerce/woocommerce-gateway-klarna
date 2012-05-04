@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: Klarna\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2012-05-03 10:53+0100\n"
-"PO-Revision-Date: 2012-05-03 10:53+0100\n"
+"PO-Revision-Date: 2012-05-04 13:58+0100\n"
 "Last-Translator: Niklas <niklas@krokedil.se>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -149,7 +149,7 @@ msgstr "Okänt svar från Klarna."
 #: ../gateway-klarna.php:544
 #, php-format
 msgid "Klarna payment failed (Correlation ID: %s). Payment was rejected due to an error: "
-msgstr "Klarna betalning mosslyckades (Correlation ID: %s). Betalningen nekades på grund av ett fel: "
+msgstr "Klarna betalning misslyckades (Correlation ID: %s). Betalningen nekades på grund av ett fel: "
 
 #: ../gateway-klarna.php:555
 msgid "Thank you for your order."
