@@ -36,7 +36,7 @@ if (is_admin()) {
 	$woo_plugin_updater_klarna->init();
 }
 
-// Init Google Checkout Gateway after WooCommerce has loaded
+// Init Klarna Gateway after WooCommerce has loaded
 add_action('plugins_loaded', 'init_klarna_gateway', 0);
 
 function init_klarna_gateway() {
@@ -51,8 +51,12 @@ function init_klarna_gateway() {
 	load_plugin_textdomain('klarna', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/');
 
 
+	// Define Klarna root Dir
+	define('KLARNA_DIR', dirname(__FILE__) . '/');
+	
 	// Define Klarna lib
 	define('KLARNA_LIB', dirname(__FILE__) . '/library/');
+	
 	
 	class WC_Gateway_Klarna extends WC_Payment_Gateway {
 			
@@ -62,77 +66,8 @@ function init_klarna_gateway() {
 	        
 			$this->shop_country	= get_option('woocommerce_default_country');
 	
-		
-			
-			// Country and language
-			switch ( $this->shop_country )
-			{
-			case 'DK':
-				$this->klarna_country = 'DK';
-				$this->klarna_language = 'DA';
-				$this->klarna_currency = 'DKK';
-				$this->klarna_invoice_terms = 'https://online.klarna.com/villkor_dk.yaws?eid=' . $this->eid . '&charge=' . $this->handlingfee;
-				break;
-			case 'DE' :
-				$this->klarna_country = 'DE';
-				$this->klarna_language = 'DE';
-				$this->klarna_currency = 'EUR';
-				$this->klarna_invoice_terms = 'https://online.klarna.com/villkor_de.yaws?eid=' . $this->eid . '&charge=' . $this->handlingfee;
-				break;
-			case 'NL' :
-				$this->klarna_country = 'NL';
-				$this->klarna_language = 'NL';
-				$this->klarna_currency = 'EUR';
-				$this->klarna_invoice_terms = 'https://online.klarna.com/villkor_nl.yaws?eid=' . $this->eid . '&charge=' . $this->handlingfee;
-				break;
-			case 'NO' :
-				$this->klarna_country = 'NO';
-				$this->klarna_language = 'NB';
-				$this->klarna_currency = 'NOK';
-				$this->klarna_invoice_terms = 'https://online.klarna.com/villkor_no.yaws?eid=' . $this->eid . '&charge=' . $this->handlingfee;
-				break;
-			case 'FI' :
-				$this->klarna_country = 'FI';
-				$this->klarna_language = 'FI';
-				$this->klarna_currency = 'EUR';
-				$this->klarna_invoice_terms = 'https://online.klarna.com/villkor_fi.yaws?eid=' . $this->eid . '&charge=' . $this->handlingfee;
-				break;
-			case 'SE' :
-				$this->klarna_country = 'SE';
-				$this->klarna_language = 'SV';
-				$this->klarna_currency = 'SEK';
-				$this->klarna_invoice_terms = 'https://online.klarna.com/villkor.yaws?eid=' . $this->eid . '&charge=' . $this->handlingfee;
-				break;
-			default:
-				// The sound of one hand clapping
-			}
-	
-			
 	    } 
-    
-    	    
-
-	    
-		/**
-		 * Admin Panel Options 
-		 * - Options for bits like 'title' and availability on a country-by-country basis
-		 *
-		 * @since 1.0.0
-		 */
-		public function admin_options() {
-	
-	    	?>
-	    	<h3><?php _e('Klarna', 'klarna'); ?></h3>
-		    	<p><?php _e('With Klarna your customers can pay by invoice. Klarna works by adding extra personal information fields and then sending the details to Klarna for verification.', 'klarna'); ?></p>
-	    	<table class="form-table">
-	    	<?php
-	    		// Generate the HTML For the settings form.
-	    		$this->generate_settings_html();
-	    	?>
-			</table><!--/.form-table-->
-	    	<?php
-	    } // End admin_options()
-	    
+       
 		
 	
 	} // End class WC_Gateway_Klarna
@@ -140,6 +75,9 @@ function init_klarna_gateway() {
 	
 	// Include our Klarna Invoice class
 	require_once 'class-klarna-invoice.php';
+	
+	// Include our Klarna Account class
+	require_once 'class-klarna-account.php';
 
 
 } // End init_klarna_gateway
@@ -149,6 +87,7 @@ function init_klarna_gateway() {
  **/
 function add_klarna_gateway( $methods ) { 
 	$methods[] = 'WC_Gateway_Klarna_Invoice';
+	$methods[] = 'WC_Gateway_Klarna_Account';
 	return $methods;
 }
 

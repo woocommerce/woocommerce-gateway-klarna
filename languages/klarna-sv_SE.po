@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Klarna\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2012-05-03 10:53+0100\n"
-"PO-Revision-Date: 2012-05-04 13:58+0100\n"
+"POT-Creation-Date: 2012-05-15 11:34+0100\n"
+"PO-Revision-Date: 2012-05-15 11:40+0100\n"
 "Last-Translator: Niklas <niklas@krokedil.se>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -13,147 +13,222 @@ msgstr ""
 "X-Poedit-Basepath: .\n"
 "X-Poedit-SearchPath-0: ..\n"
 
-#: ../gateway-klarna.php:160
+#: ../class-klarna-account.php:15
+#: ../class-klarna-account.php:153
+msgid "Klarna Account"
+msgstr "Klarna Konto"
+
+#: ../class-klarna-account.php:104
+#: ../class-klarna-invoice.php:176
 msgid "Enable/Disable"
 msgstr "Aktivera/avaktivera"
 
-#: ../gateway-klarna.php:162
-msgid "Enable klarna standard"
-msgstr "Aktivera Klarna standard"
+#: ../class-klarna-account.php:106
+msgid "Enable Klarna Account"
+msgstr "Aktivera Klarna Konto"
 
-#: ../gateway-klarna.php:166
+#: ../class-klarna-account.php:110
+#: ../class-klarna-invoice.php:182
 msgid "Title"
 msgstr "Titel"
 
-#: ../gateway-klarna.php:168
+#: ../class-klarna-account.php:112
+#: ../class-klarna-invoice.php:184
 msgid "This controls the title which the user sees during checkout."
 msgstr "Det här kontrollerar vilken titel kunden ser i kassan."
 
-#: ../gateway-klarna.php:169
-#: ../gateway-klarna.php:220
-msgid "Klarna"
-msgstr "Klarna"
+#: ../class-klarna-account.php:113
+msgid "Part Payment - Klarna"
+msgstr "Klarna delbetalning"
 
-#: ../gateway-klarna.php:172
+#: ../class-klarna-account.php:116
+#: ../class-klarna-invoice.php:188
 msgid "Description"
 msgstr "Beskrivning"
 
-#: ../gateway-klarna.php:174
+#: ../class-klarna-account.php:118
+#: ../class-klarna-invoice.php:190
 msgid "This controls the description which the user sees during checkout."
 msgstr "Det här kontrollerar den beskrivning kunden ser i kassan."
 
-#: ../gateway-klarna.php:175
-msgid "Klarna invoice - Pay within 14 days."
-msgstr "Klarna faktura - betala inom 14 dagar."
+#: ../class-klarna-account.php:119
+msgid "Part Payment."
+msgstr "Delbetalning."
 
-#: ../gateway-klarna.php:178
+#: ../class-klarna-account.php:122
+#: ../class-klarna-invoice.php:194
 msgid "Eid"
 msgstr "Eid"
 
-#: ../gateway-klarna.php:180
+#: ../class-klarna-account.php:124
+#: ../class-klarna-invoice.php:196
 msgid "Please enter your Klarna Eid; this is needed in order to take payment!"
 msgstr "Ange ditt Klarna Eid. Detta behövs för att du ska ta betalt."
 
-#: ../gateway-klarna.php:184
+#: ../class-klarna-account.php:128
+#: ../class-klarna-invoice.php:200
 msgid "Shared Secret"
 msgstr "Shared Secret"
 
-#: ../gateway-klarna.php:186
+#: ../class-klarna-account.php:130
+#: ../class-klarna-invoice.php:202
 msgid "Please enter your Klarna Shared Secret; this is needed in order to take payment!"
 msgstr "Ange din Klarna Shared Secret. Detta behövs för att du ska ta betalt."
 
-#: ../gateway-klarna.php:190
-#: ../gateway-klarna.php:421
-msgid "Handling Fee"
-msgstr "Fakturaavgift"
-
-#: ../gateway-klarna.php:192
-msgid "Fee <em>including</em> tax. Enter an amount, e.g. 25.5. Leave blank to disable."
-msgstr "Avgift <em>inklusive</em> moms. Ange en summa, ex. 25.5. Lämna tomt för att avaktivera."
-
-#: ../gateway-klarna.php:196
-msgid "Tax for Handling Fee"
-msgstr "Moms för fakturaavgift"
-
-#: ../gateway-klarna.php:198
-msgid "%. Enter tax rate for Handling Fee, e.g. 25.00. Leave blank to disable Tax on Handling Fee."
-msgstr "%. Ange momssatsen för fakturaavgiften, ex. 25.00. Lämna tomt för att avaktivera moms på fakturaavgiften."
-
-#: ../gateway-klarna.php:202
+#: ../class-klarna-account.php:134
+#: ../class-klarna-invoice.php:224
 msgid "Test Mode"
 msgstr "Test Mode"
 
-#: ../gateway-klarna.php:204
+#: ../class-klarna-account.php:136
+#: ../class-klarna-invoice.php:226
 msgid "Enable Klarna Test Mode. This will only work if you have a Klarna test account. For test purchases with a live account, <a href=\"http://integration.klarna.com/en/testing/test-persons\" target=\"_blank\">follow these instructions</a>."
 msgstr "Aktivera Klarna Test Mode. Detta fungerar endast om du har ett Klarna Testkonto. För testköp med ett live-konto, <a href=\"http://integration.klarna.com/en/testing/test-persons\" target=\"_blank\">följ dessa instruktioner</a>."
 
-#: ../gateway-klarna.php:221
+#: ../class-klarna-account.php:154
+#: ../class-klarna-invoice.php:245
 msgid "With Klarna your customers can pay by invoice. Klarna works by adding extra personal information fields and then sending the details to Klarna for verification."
 msgstr "Med Klarna kan dina kunder betala via faktura. Klarna fungerar genom att lägga till fler formulärfält i kassan och skicka informationen till Klarna för verifikation."
 
-#: ../gateway-klarna.php:264
+#: ../class-klarna-account.php:156
+msgid "Note that read and write permissions for the directory <i>srv</i> (located in woocommerce-gateway-klarna) and the containing file <i>pclasses.json</i> must be set to 777 in order to fetch the available PClasses from Klarna."
+msgstr "Notera att läs och skrivrättigheterna för mappen <i>srv</i> (som ligger i woocommerce-gateway-klarna) samt den innehållande filen <i>pclasses.json</i> måste sättas till 777 för att kunna hämta PClasser från Klarna."
+
+#: ../class-klarna-account.php:247
+#: ../class-klarna-invoice.php:292
 msgid "TEST MODE ENABLED"
 msgstr "TEST MODE AKTIVERAT"
 
-#: ../gateway-klarna.php:266
+#: ../class-klarna-account.php:262
+msgid "Payment plan"
+msgstr "Betalningsplan"
+
+#: ../class-klarna-account.php:278
 #, php-format
-msgid "An invoice/handling fee of %1$s %2$s will be added. This cost will only be visible on your invoice from Klarna."
-msgstr "En fakturaavgift om %1$s %2$s tillkommer. Denna kostnad kommer endast att synas på fakturan som skickas från Klarna."
+msgid "Klarna PClass problem: %s. Error code: "
+msgstr "Klarna PClass problem: %s. Error code: "
 
-#: ../gateway-klarna.php:268
-msgid "Terms for invoice"
-msgstr "Villkor för faktura"
+#: ../class-klarna-account.php:299
+#, php-format
+msgid "From %s %s/month"
+msgstr "Från %s %s/månad"
 
-#: ../gateway-klarna.php:272
+#: ../class-klarna-account.php:306
+#: ../class-klarna-invoice.php:298
 msgid "Social Security Number"
 msgstr "Personnummer"
 
-#: ../gateway-klarna.php:278
+#: ../class-klarna-account.php:312
+#: ../class-klarna-invoice.php:304
 msgid "Gender"
 msgstr "Kön"
 
-#: ../gateway-klarna.php:290
+#: ../class-klarna-account.php:324
+#: ../class-klarna-invoice.php:316
 msgid "House Number"
 msgstr ""
 
-#: ../gateway-klarna.php:297
+#: ../class-klarna-account.php:331
+#: ../class-klarna-invoice.php:323
 msgid "House Extension"
 msgstr ""
 
-#: ../gateway-klarna.php:389
+#: ../class-klarna-account.php:339
+msgid "Read more"
+msgstr "Läs mer"
+
+#: ../class-klarna-account.php:436
+#: ../class-klarna-invoice.php:425
 msgid "Discount"
 msgstr "Rabatt"
 
-#: ../gateway-klarna.php:408
+#: ../class-klarna-account.php:458
+#: ../class-klarna-invoice.php:447
 msgid "Shipping cost"
 msgstr "Fraktkostnad"
 
-#: ../gateway-klarna.php:494
+#: ../class-klarna-account.php:531
+#: ../class-klarna-invoice.php:579
 msgid "Klarna payment completed. Klarna Invoice number: "
 msgstr "Klarna betalning genomförd. Klarna fakturanummer: "
 
-#: ../gateway-klarna.php:510
+#: ../class-klarna-account.php:547
+#: ../class-klarna-invoice.php:595
 msgid "Order is PENDING APPROVAL by Klarna. Please visit Klarna Online for the latest status on this order. Klarna Invoice number: "
 msgstr "Ordern är markerad PENDING APPROVAL av Klarna. Vänligen besök Klarna för aktuell status om den här ordern. Klarna fakturanummer: "
 
-#: ../gateway-klarna.php:527
-#: ../gateway-klarna.php:528
+#: ../class-klarna-account.php:564
+#: ../class-klarna-account.php:565
+#: ../class-klarna-invoice.php:612
+#: ../class-klarna-invoice.php:613
 msgid "Klarna payment denied."
 msgstr "Klarna betalning nekad."
 
-#: ../gateway-klarna.php:533
-#: ../gateway-klarna.php:534
+#: ../class-klarna-account.php:570
+#: ../class-klarna-account.php:571
+#: ../class-klarna-invoice.php:618
+#: ../class-klarna-invoice.php:619
 msgid "Unknown response from Klarna."
 msgstr "Okänt svar från Klarna."
 
-#: ../gateway-klarna.php:544
+#: ../class-klarna-account.php:581
+#: ../class-klarna-invoice.php:629
 #, php-format
-msgid "Klarna payment failed (Correlation ID: %s). Payment was rejected due to an error: "
-msgstr "Klarna betalning misslyckades (Correlation ID: %s). Betalningen nekades på grund av ett fel: "
+msgid "%s (Error code: %s)"
+msgstr ""
 
-#: ../gateway-klarna.php:555
+#: ../class-klarna-account.php:593
+#: ../class-klarna-invoice.php:640
 msgid "Thank you for your order."
 msgstr "Tack för din order."
+
+#: ../class-klarna-invoice.php:14
+#: ../class-klarna-invoice.php:244
+msgid "Klarna Invoice"
+msgstr "Klarna Faktura"
+
+#: ../class-klarna-invoice.php:145
+#, php-format
+msgid "The Klarna Invoice Fee handling has changed since version 1.1. Please visit <a href=\"%1$s\"> the Klarna Invoice settings page</a> to make changes."
+msgstr "Hanteringen av fakturaavgift för Klarna har ändrats från och med version 1.1. Besök <a href=\"%1$s\"> inställningssidan för Klarna faktura</a> för att göra ändringar."
+
+#: ../class-klarna-invoice.php:147
+#, php-format
+msgid "<a class=\"submitdelete\" href=\"%1$s\"> Hide this message</a>"
+msgstr "<a class=\"submitdelete\" href=\"%1$s\"> Dölj det här meddelandet</a>"
+
+#: ../class-klarna-invoice.php:178
+msgid "Enable klarna standard"
+msgstr "Aktivera Klarna standard"
+
+#: ../class-klarna-invoice.php:185
+msgid "Klarna"
+msgstr "Klarna"
+
+#: ../class-klarna-invoice.php:191
+msgid "Klarna invoice - Pay within 14 days."
+msgstr "Klarna faktura - betala inom 14 dagar."
+
+#: ../class-klarna-invoice.php:218
+msgid "Invoice Fee"
+msgstr "Fakturaavgift"
+
+#: ../class-klarna-invoice.php:220
+msgid "Create a hidden (simple) product that acts as the invoice fee. Enter the ID number in this textfield. The price must be in the range 0 to 30 SEK. Leave blank to disable. "
+msgstr "Skapa en dold (enkel) produkt som agerar fakturaavgift. Ange produktens ID-nummer här i textfältet. Lämna tomt för att avaktivera."
+
+#: ../class-klarna-invoice.php:294
+#, php-format
+msgid "An invoice fee of %1$s %2$s will be added to your order."
+msgstr "En fakturaavgift om %1$s %2$s tillkommer på din order."
+
+#: ../class-klarna-invoice.php:331
+msgid "Terms for invoice"
+msgstr "Villkor för faktura"
+
+#: ../class-klarna-invoice.php:468
+msgid "Handling Fee"
+msgstr "Fakturaavgift"
 
 #: ../woo-updater/plugin-updater.class.php:147
 msgid "WooThemes Updates"
@@ -209,3 +284,26 @@ msgstr ""
 msgid "Hide This Message"
 msgstr "Dölj det här meddelandet"
 
+#~ msgid ""
+#~ "Fee <em>including</em> tax. Enter an amount, e.g. 25.5. Leave blank to "
+#~ "disable."
+#~ msgstr ""
+#~ "Avgift <em>inklusive</em> moms. Ange en summa, ex. 25.5. Lämna tomt för "
+#~ "att avaktivera."
+
+#~ msgid "Tax for Handling Fee"
+#~ msgstr "Moms för fakturaavgift"
+
+#~ msgid ""
+#~ "%. Enter tax rate for Handling Fee, e.g. 25.00. Leave blank to disable "
+#~ "Tax on Handling Fee."
+#~ msgstr ""
+#~ "%. Ange momssatsen för fakturaavgiften, ex. 25.00. Lämna tomt för att "
+#~ "avaktivera moms på fakturaavgiften."
+
+#~ msgid ""
+#~ "Klarna payment failed (Correlation ID: %s). Payment was rejected due to "
+#~ "an error: "
+#~ msgstr ""
+#~ "Klarna betalning misslyckades (Correlation ID: %s). Betalningen nekades "
+#~ "på grund av ett fel: "

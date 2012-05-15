@@ -1,21 +1,21 @@
 <?php
 
-class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
+		
+class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 	
 	/**
-     * Class for Klarna Invoice payment.
+     * Class for Klarna Account payment.
      *
      */
      
 	public function __construct() {
 		global $woocommerce;
-		
 		parent::__construct();
 		
-		$this->id			= 'klarna';
-		$this->method_title = __('Klarna Invoice', 'klarna');
+		$this->id			= 'klarna_account';
+		$this->method_title = __('Klarna Account', 'klarna');
 		$this->icon 		= plugins_url(basename(dirname(__FILE__))."/images/klarna.png");
-		$this->has_fields 	= false;
+		$this->has_fields 	= true;
 		
 		// Load the form fields.
 		$this->init_form_fields();
@@ -24,60 +24,12 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 		$this->init_settings();
 		
 		// Define user set variables
-		$this->enabled			= ( isset( $this->settings['enabled'] ) ) ? $this->settings['enabled'] : '';
-		$this->title 			= ( isset( $this->settings['title'] ) ) ? $this->settings['title'] : '';
-		$this->description  	= ( isset( $this->settings['description'] ) ) ? $this->settings['description'] : '';
-		$this->eid				= ( isset( $this->settings['eid'] ) ) ? $this->settings['eid'] : '';
-		$this->secret			= ( isset( $this->settings['secret'] ) ) ? $this->settings['secret'] : '';
-		//$this->handlingfee		= $this->settings['handlingfee'];
-		//$this->handlingfee_tax	= $this->settings['handlingfee_tax'];
-		$this->invoice_fee_id	= ( isset( $this->settings['invoice_fee_id'] ) ) ? $this->settings['invoice_fee_id'] : '';
-		$this->testmode			= ( isset( $this->settings['testmode'] ) ) ? $this->settings['testmode'] : '';
-		
-		//if ( $this->handlingfee == "") $this->handlingfee = 0;
-		//if ( $this->handlingfee_tax == "") $this->handlingfee_tax = 0;
-		if ( $this->invoice_fee_id == "") $this->invoice_fee_id = 0;
-		
-		
-		// Actions
-		add_action('init', array(&$this, 'klarna_invoice_init'));
-		add_action('woocommerce_receipt_klarna', array(&$this, 'receipt_page'));
-		add_action('woocommerce_update_options_payment_gateways', array(&$this, 'process_admin_options'));
-		
-		// Add admin notice about the invoice fee update, if user can manage options
-		if ( current_user_can( 'manage_options' )) :
-			add_action('admin_notices', array(&$this, 'klarna_invoice_fee_admin_notice'));
-			add_action('admin_init', array(&$this, 'klarna_invoice_fee_nag_ignore'));
-		endif;
-	}
-	
-	function klarna_invoice_init() {
-		// Get the invoice fee product if invoice fee is used
-		// We retreive it early because the fee will be added to the invoice terms
-		if ( $this->invoice_fee_id > 0 ) :
-			
-			$product = new WC_Product( $this->invoice_fee_id );
-		
-			if ( $product->exists() ) :
-			
-				// We manually calculate the tax percentage here
-				$this->invoice_fee_tax_percentage = number_format( (( $product->get_price() / $product->get_price_excluding_tax() )-1)*100, 2, '.', '');
-				
-				// apply_filters to invoice fee price so we can filter this if needed
-				$klarna_invoice_fee_price_including_tax = $product->get_price();
-				$this->invoice_fee_price = apply_filters( 'klarna_invoice_fee_price_including_tax', $klarna_invoice_fee_price_including_tax );
-				
-			else :
-			
-				$this->invoice_fee_price = 0;	
-							
-			endif;
-		
-		else :
-		
-		$this->invoice_fee_price = 0;
-		
-		endif;
+		$this->enabled			= $this->settings['enabled'];
+		$this->title 			= $this->settings['title'];
+		$this->description  	= $this->settings['description'];
+		$this->eid				= $this->settings['eid'];
+		$this->secret			= $this->settings['secret'];
+		$this->testmode			= $this->settings['testmode'];
 		
 		
 		// Country and language
@@ -87,112 +39,85 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 			$klarna_country = 'DK';
 			$klarna_language = 'DA';
 			$klarna_currency = 'DKK';
-			$klarna_invoice_terms = 'https://online.klarna.com/villkor_dk.yaws?eid=' . $this->eid . '&charge=' . $this->invoice_fee_price;
+			$klarna_account_info = 'https://online.klarna.com/account_dk.yaws?eid=' . $this->eid;
 			break;
 		case 'DE' :
 			$klarna_country = 'DE';
 			$klarna_language = 'DE';
 			$klarna_currency = 'EUR';
-			$klarna_invoice_terms = 'https://online.klarna.com/villkor_de.yaws?eid=' . $this->eid . '&charge=' . $this->invoice_fee_price;
+			$klarna_account_info = 'https://online.klarna.com/account_de.yaws?eid=' . $this->eid;
 			break;
 		case 'NL' :
 			$klarna_country = 'NL';
 			$klarna_language = 'NL';
 			$klarna_currency = 'EUR';
-			$klarna_invoice_terms = 'https://online.klarna.com/villkor_nl.yaws?eid=' . $this->eid . '&charge=' . $this->invoice_fee_price;
+			$klarna_account_info = 'https://online.klarna.com/account_nl.yaws?eid=' . $this->eid;
 			break;
 		case 'NO' :
 			$klarna_country = 'NO';
 			$klarna_language = 'NB';
 			$klarna_currency = 'NOK';
-			$klarna_invoice_terms = 'https://online.klarna.com/villkor_no.yaws?eid=' . $this->eid . '&charge=' . $this->invoice_fee_price;
+			$klarna_account_info = 'https://online.klarna.com/account_no.yaws?eid=' . $this->eid;
 			break;
 		case 'FI' :
 			$klarna_country = 'FI';
 			$klarna_language = 'FI';
 			$klarna_currency = 'EUR';
-			$klarna_invoice_terms = 'https://online.klarna.com/villkor_fi.yaws?eid=' . $this->eid . '&charge=' . $this->invoice_fee_price;
+			$klarna_account_info = 'https://online.klarna.com/account_fi.yaws?eid=' . $this->eid;
 			break;
 		case 'SE' :
 			$klarna_country = 'SE';
 			$klarna_language = 'SV';
 			$klarna_currency = 'SEK';
-			$klarna_invoice_terms = 'https://online.klarna.com/villkor.yaws?eid=' . $this->eid . '&charge=' . $this->invoice_fee_price;
+			$klarna_account_info = 'https://online.klarna.com/account_se.yaws?eid=' . $this->eid;
 			break;
 		default:
 			$klarna_country = '';
 			$klarna_language = '';
 			$klarna_currency = '';
-			$klarna_invoice_terms = '';
+			$klarna_account_info = '';
 		}
+		
+		
+		// Actions
+		add_action('woocommerce_receipt_klarna_account', array(&$this, 'receipt_page'));
+
+		add_action('woocommerce_update_options_payment_gateways', array(&$this, 'process_admin_options'));
 		
 		// Apply filters to Country and language
 		$this->klarna_country = apply_filters( 'klarna_country', $klarna_country );
 		$this->klarna_language = apply_filters( 'klarna_language', $klarna_language );
 		$this->klarna_currency = apply_filters( 'klarna_currency', $klarna_currency );
-		$this->klarna_invoice_terms = apply_filters( 'klarna_invoice_terms', $klarna_invoice_terms );
+		$this->klarna_account_info = apply_filters( 'klarna_account_info', $klarna_account_info );
 		
-	} // End klarna_invoice_init()
-	
-	
-	
-	/**
-	 *  Display a notice about the changes to the Invoice fee handling
-	 */
-	 
-	function klarna_invoice_fee_admin_notice() {
-	    global $current_user ;
-        $user_id = $current_user->ID;
-        /* Check that the user hasn't already clicked to ignore the message */
-    	if ( ! get_user_meta($user_id, 'klarna_invoice_fee_ignore_notice') ) {
-        	echo '<div class="updated fade"><p class="alignleft">';
-        	printf(__('The Klarna Invoice Fee handling has changed since version 1.1. Please visit <a href="%1$s"> the Klarna Invoice settings page</a> to make changes.', 'klarna'), 'admin.php?page=woocommerce&tab=payment_gateways&subtab=gateway-klarna');
-        	echo '</p><p class="alignright">';
-        	printf(__('<a class="submitdelete" href="%1$s"> Hide this message</a>', 'klarna'), '?klarna_invoice_fee_nag_ignore=0');
-        	echo '</p><br class="clear">';
-        	echo '</div>';
-    	}
-	}
-	
-
-	/**
-	 * Hide the notice about the changes to the Invoice fee handling if ignore link has been clicked 
-	 */
-	
-	function klarna_invoice_fee_nag_ignore() {
-    	global $current_user;
-		$user_id = $current_user->ID;
-		/* If user clicks to ignore the notice, add that to their user meta */
-		if ( isset($_GET['klarna_invoice_fee_nag_ignore']) && '0' == $_GET['klarna_invoice_fee_nag_ignore'] ) {
-			add_user_meta($user_id, 'klarna_invoice_fee_ignore_notice', 'true', true);
-		}
+				
 	}
 	
 	
-	
+		
 	/**
 	 * Initialise Gateway Settings Form Fields
 	 */
 	function init_form_fields() {
 	    
-	   	$this->form_fields = apply_filters('klarna_invoice_form_fields', array(
+	   	$this->form_fields = array(
 			'enabled' => array(
 							'title' => __( 'Enable/Disable', 'klarna' ), 
 							'type' => 'checkbox', 
-							'label' => __( 'Enable klarna standard', 'klarna' ), 
+							'label' => __( 'Enable Klarna Account', 'klarna' ), 
 							'default' => 'yes'
 						), 
 			'title' => array(
 							'title' => __( 'Title', 'klarna' ), 
 							'type' => 'text', 
 							'description' => __( 'This controls the title which the user sees during checkout.', 'klarna' ), 
-							'default' => __( 'Klarna', 'klarna' )
+							'default' => __( 'Part Payment - Klarna', 'klarna' )
 						),
 			'description' => array(
 							'title' => __( 'Description', 'klarna' ), 
 							'type' => 'textarea', 
 							'description' => __( 'This controls the description which the user sees during checkout.', 'klarna' ), 
-							'default' => __("Klarna invoice - Pay within 14 days.", 'klarna')
+							'default' => __("Part Payment.", 'klarna')
 						), 
 			'eid' => array(
 							'title' => __( 'Eid', 'klarna' ), 
@@ -206,22 +131,15 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 							'description' => __( 'Please enter your Klarna Shared Secret; this is needed in order to take payment!', 'klarna' ), 
 							'default' => __( '', 'klarna' )
 						),
-			'invoice_fee_id' => array(
-								'title' => __( 'Invoice Fee', 'klarna' ), 
-								'type' => 'text', 
-								'description' => __( 'Create a hidden (simple) product that acts as the invoice fee. Enter the ID number in this textfield. The price must be in the range 0 to 30 SEK. Leave blank to disable. ', 'klarna' ), 
-								'default' => __( '', 'klarna' )
-							),
 			'testmode' => array(
 							'title' => __( 'Test Mode', 'klarna' ), 
 							'type' => 'checkbox', 
 							'label' => __( 'Enable Klarna Test Mode. This will only work if you have a Klarna test account. For test purchases with a live account, <a href="http://integration.klarna.com/en/testing/test-persons" target="_blank">follow these instructions</a>.', 'klarna' ), 
 							'default' => 'no'
 						)
-		) );
+		);
 	    
 	} // End init_form_fields()
-	
 	
 	
 	/**
@@ -233,14 +151,18 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 	public function admin_options() {
 
     	?>
-    	<h3><?php _e('Klarna Invoice', 'klarna'); ?></h3>
+    	<h3><?php _e('Klarna Account', 'klarna'); ?></h3>
 	    	<p><?php _e('With Klarna your customers can pay by invoice. Klarna works by adding extra personal information fields and then sending the details to Klarna for verification.', 'klarna'); ?></p>
+	    	<div class="updated inline">
+		    	<p><?php _e('Note that read and write permissions for the directory <i>srv</i> (located in woocommerce-gateway-klarna) and the containing file <i>pclasses.json</i> must be set to 777 in order to fetch the available PClasses from Klarna.', 'klarna'); ?></p>
+		    </div>
     	<table class="form-table">
     	<?php
     		// Generate the HTML For the settings form.
     		$this->generate_settings_html();
     	?>
 		</table><!--/.form-table-->
+		
     	<?php
     } // End admin_options()
 	
@@ -278,23 +200,118 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 	 * Payment form on checkout page
 	 */
 	
-	function payment_fields() {
+	function payment_fields( ) {
 	   	global $woocommerce;
+	   	
+	   	
+	   	
+	   	// Get PClasses so that the customer can chose between different payment plans.
+	  	require_once(KLARNA_LIB . 'Klarna.php');
+		require_once(KLARNA_LIB . 'pclasses/storage.intf.php');
+		require_once(KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc.inc');
+		require_once(KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc_wrappers.inc');
+		
+		// Test mode or Live mode		
+		if ( $this->testmode == 'yes' ):
+			// Disable SSL if in testmode
+			$klarna_ssl = 'false';
+			$klarna_mode = Klarna::BETA;
+		else :
+			// Set SSL if used in webshop
+			if (is_ssl()) {
+				$klarna_ssl = 'true';
+			} else {
+				$klarna_ssl = 'false';
+			}
+			$klarna_mode = Klarna::LIVE;
+		endif;
+	   	
+  		$k = new Klarna();
+		
+		$k->config(
+		    $eid = $this->settings['eid'],
+		    $secret = $this->settings['secret'],
+		    $country = $this->klarna_country,
+		    $language = $this->klarna_language,
+		    $currency = $this->klarna_currency,
+		    $mode = $klarna_mode,
+		    $pcStorage = 'json',
+		    $pcURI = KLARNA_DIR . 'srv/pclasses.json',
+		    $ssl = $klarna_ssl,
+		    $candice = true
+		);
+
+		Klarna::$xmlrpcDebug = false;
+		Klarna::$debug = false;
 	   	?>
+	   	
 	   	<?php if ($this->testmode=='yes') : ?><p><?php _e('TEST MODE ENABLED', 'klarna'); ?></p><?php endif; ?>
 		<?php if ($this->description) : ?><p><?php echo $this->description; ?></p><?php endif; ?>
-		<?php if ($this->invoice_fee_price>0) : ?><p><?php printf(__('An invoice fee of %1$s %2$s will be added to your order.', 'klarna'), $this->invoice_fee_price, $this->klarna_currency ); ?></p><?php endif; ?>
 		
 		<fieldset>
 			<p class="form-row form-row-first">
-				<label for="klarna_invo_pno"><?php echo __("Social Security Number", 'klarna') ?> <span class="required">*</span></label>
-				<input type="text" class="input-text" name="klarna_invo_pno" />
+			
+				<?php
+				/**
+ 				* 2. Retrieve the PClasses from Klarna.
+ 				*/
+				
+				try {
+				    $k->fetchPClasses(); //You can specify country (and language, currency if you wish) if you don't want to use the configured country.
+				    	/* PClasses successfully fetched, now you can use getPClasses() to load them locally or getPClass to load a specific PClass locally. */
+						?>
+						<label for="klarna_pclass"><?php echo __("Payment plan", 'klarna') ?> <span class="required">*</span></label><br/>
+						<select id="klarna_pclass" name="klarna_pclass" class="woocommerce-select">
+						
+						<?php
+				    	// Loop through the available PClasses
+						foreach ($k->getPClasses() as $pclass) {
+				   			echo '<option value="' . $pclass->getId() . '">'. $pclass->getDescription() . '</option>';
+						}
+						?>
+						
+						</select>
+						
+						<?php
+					}
+				catch(Exception $e) {
+				    //Something went wrong, print the message:
+				    $woocommerce->add_error( sprintf(__('Klarna PClass problem: %s. Error code: ', 'klarna'), utf8_encode($e->getMessage()) ) . '"' . $e->getCode() . '"' );
+				}
+				?>
+				
+			</p>
+			<?php
+			// Calculate monthly cost and display it
+			$sum = $woocommerce->cart->total; // Cart total.
+			$flag = KlarnaFlags::CHECKOUT_PAGE; //or KlarnaFlags::PRODUCT_PAGE, if you want to do it for one item.
+			$pclass = $k->getCheapestPClass($sum, $flag);
+	
+			//Did we get a PClass? (it is false if we didn't)
+			if($pclass) {
+	    		//Here we reuse the same values as above:
+    			$value = KlarnaCalc::calc_monthly_cost(
+    	    	$sum,
+    	    	$pclass,
+    	    	$flag
+    			);
+	
+	    		/* $value is now a rounded monthly cost amount to be displayed to the customer. */
+	    		echo '<p class="form-row form-row-last">' . sprintf(__('From %s %s/month', 'klarna'), $value, $this->klarna_currency ) . '</p>';
+	    		
+			}
+			?>
+			<div class="clear"></div>
+			
+			<p class="form-row form-row-first">
+				<label for="klarna_pno"><?php echo __("Social Security Number", 'klarna') ?> <span class="required">*</span></label>
+				<input type="text" class="input-text" name="klarna_pno" />
 			</p>
 			
 			<?php if ( in_array(get_option('woocommerce_default_country'), array('DE', 'NL'))) : ?>
 				<p class="form-row form-row-last">
-					<label for="klarna_invo_gender"><?php echo __("Gender", 'klarna') ?> <span class="required">*</span></label><br/>
-					<select id="klarna_invo_gender" name="klarna_invo_gender" class="woocommerce-select">
+					<label for="klarna_gender"><?php echo __("Gender", 'klarna') ?> <span class="required">*</span></label><br/>
+					<select id="klarna_gender" name="klarna_gender" class="woocommerce-select">
 						<option value="MALE">Male</options>
 						<option value="FEMALE">Female</options>
 					</select>
@@ -305,23 +322,22 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 			
 			<?php if ( in_array(get_option('woocommerce_default_country'), array('DE', 'NL'))) : ?>	
 				<p class="form-row form-row-first">
-					<label for="klarna_invo_house_number"><?php echo __("House Number", 'klarna') ?> <span class="required">*</span></label>
-					<input type="text" class="input-text" name="klarna_invo_house_number" />
+					<label for="klarna_house_number"><?php echo __("House Number", 'klarna') ?> <span class="required">*</span></label>
+					<input type="text" class="input-text" name="klarna_house_number" />
 				</p>
 			<?php endif; ?>
 			
 			<?php if ( get_option('woocommerce_default_country') == 'NL' ) : ?>
 				<p class="form-row form-row-last">
-					<label for="klarna_invo_house_extension"><?php echo __("House Extension", 'klarna') ?> <span class="required">*</span></label>
-					<input type="text" class="input-text" name="klarna_invo_house_extension" />
+					<label for="klarna_house_extension"><?php echo __("House Extension", 'klarna') ?> <span class="required">*</span></label>
+					<input type="text" class="input-text" name="klarna_house_extension" />
 				</p>
 			<?php endif; ?>
 			
 			<div class="clear"></div>
 		</fieldset>
 		
-		<p><a href="<?php echo $this->klarna_invoice_terms;?>" target="_blank"><?php echo __("Terms for invoice", 'klarna') ?></a></p>
-		
+		<p><a href="<?php echo $this->klarna_account_info;?>" target="_blank" class="iframe"><?php echo __('Read more', 'klarna') ?></a></p>
 		<div class="clear"></div>
 		
 		<?php	
@@ -337,14 +353,17 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 		$order = &new woocommerce_order( $order_id );
 		
 		require_once(KLARNA_LIB . 'Klarna.php');
+		require_once(KLARNA_LIB . 'pclasses/storage.intf.php');
 		require_once(KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc.inc');
 		require_once(KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc_wrappers.inc');
 		
 		// Get values from klarna form on checkout page
-		$klarna_pno 			= isset($_POST['klarna_invo_pno']) ? woocommerce_clean($_POST['klarna_invo_pno']) : '';
-		$klarna_gender 			= isset($_POST['klarna_invo_gender']) ? woocommerce_clean($_POST['klarna_invo_gender']) : '';
-		$klarna_house_number	= isset($_POST['klarna_invo_house_number']) ? woocommerce_clean($_POST['klarna_invo_house_number']) : '';
-		$klarna_house_extension	= isset($_POST['klarna_invo_house_extension']) ? woocommerce_clean($_POST['klarna_invo_house_extension']) : '';
+		$klarna_pclass 			= isset($_POST['klarna_pclass']) ? woocommerce_clean($_POST['klarna_pclass']) : '';
+		$klarna_pno 			= isset($_POST['klarna_pno']) ? woocommerce_clean($_POST['klarna_pno']) : '';
+		$klarna_gender 			= isset($_POST['klarna_gender']) ? woocommerce_clean($_POST['klarna_gender']) : '';
+		$klarna_house_number	= isset($_POST['klarna_house_number']) ? woocommerce_clean($_POST['klarna_house_number']) : '';
+		$klarna_house_extension	= isset($_POST['klarna_house_extension']) ? woocommerce_clean($_POST['klarna_house_extension']) : '';
+		
 		
 		// Test mode or Live mode		
 		if ( $this->testmode == 'yes' ):
@@ -394,7 +413,8 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 					$k->addArticle(
 		    		$qty = $item['qty'], 					//Quantity
 		    		$artNo = $item['id'], 					//Article number
-		    		$title = utf8_decode ($item['name']), 	//Article name/title
+		    		// $title = utf8_decode ($item['name']), 	//Article name/title
+		    		$title = 'Konto', 	//Article name/title
 		    		$price = $item_price, 					// Price including tax
 		    		$vat = $item_tax_percentage,			// Tax
 		    		$discount = 0, 
@@ -445,65 +465,6 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 		endif;
 		
 		
-		// Invoice/handling fee
-		
-		// Get the invoice fee product if invoice fee is used
-		if ( $this->invoice_fee_price > 0 ) :
-
-			// We have already checked that the product exists in klarna_invoice_init()		
-			$product = new WC_Product( $this->invoice_fee_id );
-							
-			$k->addArticle(
-			    $qty = 1,
-			    $artNo = "",
-			    $title = __('Handling Fee', 'klarna'),
-			    $price = $this->invoice_fee_price,
-			    $vat = $this->invoice_fee_tax_percentage,
-			    $discount = 0,
-			    $flags = KlarnaFlags::INC_VAT + KlarnaFlags::IS_HANDLING //Price is including VAT and is handling/invoice fee
-			);
-			
-			// Add the invoice fee to the order
-			// Get all order items and unserialize the array
-			$originalarray = unserialize($order->order_custom_fields['_order_items'][0]);
-			
-			
-			// TODO: check that Invoice fee can't be added multiple times to order?
-			$addfee[] = array (
-   				'id' => $this->invoice_fee_id,
-   				'variation_id' => '',
-    			'name' => $product->get_title(),
-    			'qty' => '1',
-    			'item_meta' => 
-    				array (
-    				),
-    			'line_subtotal' => $product->get_price_excluding_tax(),
-    			'line_subtotal_tax' => $product->get_price()-$product->get_price_excluding_tax(),
-    			'line_total' => $product->get_price_excluding_tax(),
-    			'line_tax' => $product->get_price()-$product->get_price_excluding_tax(),
-    			'tax_class' => $product->get_tax_class(),
-  			);
-  				
-  			// Merge the invoice fee product to order items
-			$newarray = array_merge($originalarray, $addfee);
-			
-			// Update order items with the added invoice fee product
-			update_post_meta( $order->id, '_order_items', $newarray );
-			
-			// Update _order_total
-			$old_order_total = $order->order_custom_fields['_order_total'][0];
-			$new_order_total = $old_order_total+$product->get_price();
-			update_post_meta( $order->id, '_order_total', $new_order_total );
-			
-			// Update _order_tax	
-			$invoice_fee_tax = $product->get_price()-$product->get_price_excluding_tax();
-			$old_order_tax = $order->order_custom_fields['_order_tax'][0];
-			$new_order_tax = $old_order_tax+$invoice_fee_tax;
-			update_post_meta( $order->id, '_order_tax', $new_order_tax );
-		
-		endif;
-			
-		
 		//Create the address object and specify the values.
 		$addr_billing = new KlarnaAddr(
     		$email = $order->billing_email,
@@ -553,6 +514,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 
 		//Normal shipment is defaulted, delays the start of invoice expiration/due-date.
 		// $k->setShipmentInfo('delay_adjust', KlarnaFlags::EXPRESS_SHIPMENT);
+
 		try {
     		//Transmit all the specified data, from the steps above, to Klarna.
     		$result = $k->addTransaction(
@@ -560,7 +522,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
     		    
     		    $gender = intval($klarna_gender),//Gender.
     		    $flags = KlarnaFlags::NO_FLAG, //No specific behaviour like RETURN_OCR or TEST_MODE.
-    		    $pclass = KlarnaPClass::INVOICE //-1, notes that this is an invoice purchase, for part payment purchase you will have a pclass object which you use getId() from.
+    		    $pclass = $klarna_pclass // Get the pclass object that the customer has choosen.
     		);
     		
     		// Retreive response
@@ -621,6 +583,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 			return;
 		}
 
+	
 	}
 	
 	/**
