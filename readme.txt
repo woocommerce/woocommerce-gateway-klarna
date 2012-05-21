@@ -24,6 +24,8 @@ To create a Invoice fee product:
 
 This plugin does not currently support Campaigns or Mobile payments.
 
+The plugin only works if the currency is set to Swedish Krona, Norwegian Krone, Danish Krone or Euros and the Base country is set to Sweden, Norway, Denmark, Finland, Germany or Netherlands.
+
 Make sure that read and write permissions for the directory "srv" (located in woocommerce-gateway-klarna) and the containing file "pclasses.json" is set to 777 in order to fetch the available PClasses from Klarna. This is for use of Klarna Account.
 
 

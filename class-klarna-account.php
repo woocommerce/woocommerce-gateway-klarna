@@ -404,7 +404,12 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 			if ($_product->exists() && $item['qty']) :		
 				
 				// We manually calculate the tax percentage here
-				$item_tax_percentage 	= number_format( ( $order->get_line_tax($item) / $order->get_line_total( $item, false ) )*100, 2, '.', '');
+				if ($order->get_total_tax() >0) :
+					// Calculate tax percentage
+					$item_tax_percentage = number_format( ( $order->get_line_tax($item) / $order->get_line_total( $item, false ) )*100, 2, '.', '');
+				else :
+					$item_tax_percentage = 0.00;
+				endif;
 				
 				// apply_filters to item price so we can filter this if needed
 				$klarna_item_price_including_tax = $order->get_item_total( $item, true );
