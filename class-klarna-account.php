@@ -257,7 +257,7 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
  				*/
 				
 				try {
-				    $k->fetchPClasses(); //You can specify country (and language, currency if you wish) if you don't want to use the configured country.
+				    $k->fetchPClasses($this->klarna_country); //You can specify country (and language, currency if you wish) if you don't want to use the configured country.
 				    	/* PClasses successfully fetched, now you can use getPClasses() to load them locally or getPClass to load a specific PClass locally. */
 						?>
 						<label for="klarna_pclass"><?php echo __("Payment plan", 'klarna') ?> <span class="required">*</span></label><br/>
