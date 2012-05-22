@@ -1,11 +1,13 @@
 *** Klarna Changelog ***
 
-2012.05.17 - version 1.1
- * The gateway can now be used without SSL certificate.
+2012.05.24 - version 1.2
  * The gateway now supports Klarna Account.
  * Added Klarna localization files.
  * Improved handlig of invoice fee. The gateway now uses a simple (hidden) product that acts as invoice fee.
  * Added apply_filters to country, language, currency, invoice_terms, invoice_fee.
+ 
+2012.03.15 - version 1.1
+ * Gateway can now be used without SSL certificate.
  
 2011.12.01 - version 1.0
  * First Release
