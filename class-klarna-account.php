@@ -246,7 +246,13 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 	   	?>
 	   	
 	   	<?php if ($this->testmode=='yes') : ?><p><?php _e('TEST MODE ENABLED', 'klarna'); ?></p><?php endif; ?>
-		<?php if ($this->description) : ?><p><?php echo $this->description; ?></p><?php endif; ?>
+		<?php 
+		if ($this->description) :
+			// apply_filters to the description so we can filter this if needed
+			$klarna_description = $this->description;
+			echo '<p>' . apply_filters( 'klarna_account_description', $klarna_description ) . '</p>';
+		endif; 
+		?>
 		
 		<fieldset>
 			<p class="form-row form-row-first">
@@ -283,7 +289,10 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 			</p>
 			<?php
 			// Calculate monthly cost and display it
-			$sum = $woocommerce->cart->total; // Cart total.
+			
+			// apply_filters to cart total so we can filter this if needed
+			$klarna_cart_total = $woocommerce->cart->total;
+			$sum = apply_filters( 'klarna_cart_total', $klarna_cart_total ); // Cart total.
 			$flag = KlarnaFlags::CHECKOUT_PAGE; //or KlarnaFlags::PRODUCT_PAGE, if you want to do it for one item.
 			$pclass = $k->getCheapestPClass($sum, $flag);
 	
@@ -297,7 +306,10 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
     			);
 	
 	    		/* $value is now a rounded monthly cost amount to be displayed to the customer. */
-	    		echo '<p class="form-row form-row-last">' . sprintf(__('From %s %s/month', 'klarna'), $value, $this->klarna_currency ) . '</p>';
+	    		// apply_filters to the monthly cost message so we can filter this if needed
+	    		
+	    		$klarna_account_monthly_cost_message = sprintf(__('From %s %s/month', 'klarna'), $value, $this->klarna_currency );
+	    		echo '<p class="form-row form-row-last klarna-monthly-cost">' . apply_filters( 'klarna_account_monthly_cost_message', $klarna_account_monthly_cost_message ) . '</p>';
 	    		
 			}
 			?>
@@ -401,12 +413,12 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 		// Cart Contents
 		if (sizeof($order->get_items())>0) : foreach ($order->get_items() as $item) :
 			$_product = $order->get_product_from_item( $item );
-			if ($_product->exists() && $item['qty']) :		
-				
+			if ($_product->exists() && $item['qty']) :
+			
 				// We manually calculate the tax percentage here
-				if ($order->get_total_tax() >0) :
+				if ($order->get_line_tax($item) !==0) :
 					// Calculate tax percentage
-					$item_tax_percentage = number_format( ( $order->get_line_tax($item) / $order->get_line_total( $item, false ) )*100, 2, '.', '');
+					$item_tax_percentage = @number_format( ( $order->get_line_tax($item) / $order->get_line_total( $item, false ) )*100, 2, '.', '');
 				else :
 					$item_tax_percentage = 0.00;
 				endif;
@@ -418,8 +430,7 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 					$k->addArticle(
 		    		$qty = $item['qty'], 					//Quantity
 		    		$artNo = $item['id'], 					//Article number
-		    		// $title = utf8_decode ($item['name']), 	//Article name/title
-		    		$title = 'Konto', 	//Article name/title
+		    		$title = utf8_decode ($item['name']), 	//Article name/title
 		    		$price = $item_price, 					// Price including tax
 		    		$vat = $item_tax_percentage,			// Tax
 		    		$discount = 0, 
