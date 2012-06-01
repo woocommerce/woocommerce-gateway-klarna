@@ -99,6 +99,7 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 	 * Initialise Gateway Settings Form Fields
 	 */
 	function init_form_fields() {
+	
 	    
 	   	$this->form_fields = array(
 			'enabled' => array(
