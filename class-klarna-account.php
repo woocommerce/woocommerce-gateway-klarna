@@ -317,7 +317,7 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 			<div class="clear"></div>
 			
 			<p class="form-row form-row-first">
-				<label for="klarna_pno"><?php echo __("Social Security Number", 'klarna') ?> <span class="required">*</span></label>
+				<label for="klarna_pno"><?php echo __("Date of Birth", 'klarna') ?> <span class="required">*</span></label>
 				<input type="text" class="input-text" name="klarna_pno" />
 			</p>
 			

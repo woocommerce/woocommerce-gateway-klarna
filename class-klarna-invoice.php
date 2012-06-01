@@ -287,7 +287,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 		
 		<fieldset>
 			<p class="form-row form-row-first">
-				<label for="klarna_invo_pno"><?php echo __("Social Security Number", 'klarna') ?> <span class="required">*</span></label>
+				<label for="klarna_invo_pno"><?php echo __("Date of Birth", 'klarna') ?> <span class="required">*</span></label>
 				<input type="text" class="input-text" name="klarna_invo_pno" />
 			</p>
 			
