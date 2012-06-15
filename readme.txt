@@ -7,13 +7,13 @@ By Niklas Högefjord - http://krokedil.com/
 
 Klarna Gateway is a plugin that extends WooCommerce, allowing your customers to get their products first and pay by invoice to Klarna later (http://www.klarna.com/). This plugin utilizes Klarna Invoice and Klarna Account (Standard Integration type).
 
-When the order is passed to Klarna a credit record of the customer is made. If the check turns out all right, Klarna creates an invoice in their system. After you as a merchant completes the order in WooCommerce, you need to log in to Klarna and approve/send the invoice.
+When the order is passed to Klarna a credit record of the customer is made. If the check turns out all right, Klarna creates an invoice in their system. After you (as the merchant) completes the order in WooCommerce, you need to log in to Klarna to approve/send the invoice.
 
 Klarna is a great payment alternative for merchants and customers in Sweden, Denmark, Finland, Norway, Germany and the Nederlands.
 
 
 INVOICE FEE HANDLING
-Since of version 1.1 the Invoice Fee for Klarna Invoice are added as a simple (hidden) product. This is to match order total in WooCommerce and your Klarna account (in version 1.0 the invoice fee only were added to Klarna).
+Since of version 1.2 the Invoice Fee for Klarna Invoice are added as a simple (hidden) product. This is to match order total in WooCommerce and your Klarna account (in earlier versions the invoice fee only were added to Klarna).
 
 To create a Invoice fee product: 
 - Add a simple (hidden) product. Mark it as a taxable product.
