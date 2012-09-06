@@ -1,5 +1,13 @@
 *** Klarna Changelog ***
 
+2012.09.06 - version 1.4
+ * Check to remove region/state for NL in variable shop_country.
+ * Included date of birth select boxes for Netherlands and Germany.
+ * Fetch PClasses from Klarna now moved from checkout to the Klarna settings page. This enables the possibility to manually upload pclasses via ftp.
+ * Customers date of birth/pno stored in order as post meta.
+ * Added Dutch translation files (Vincent Suurenbroek).
+ * Added Norwegian translation files (Kenneth Bårdseng).
+
 2012.06.01 - version 1.3.1
  * Changed expression Social Security Number to Date of Birth.
 

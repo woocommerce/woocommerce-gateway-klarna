@@ -2,13 +2,13 @@
 /*
 Plugin Name: WooCommerce Klarna Gateway
 Plugin URI: http://woothemes.com/woocommerce
-Description: Extends WooCommerce. Provides a <a href="http://www.klarna.se" target="_blank">klarna</a> API gateway for WooCommerce.<br /> Email <a href="mailto:niklas@krokedil.se">niklas@krokedil.se</a> with any questions.
-Version: 1.3.1
+Description: Extends WooCommerce. Provides a <a href="http://www.klarna.se" target="_blank">klarna</a> API gateway for WooCommerce.
+Version: 1.4
 Author: Niklas Högefjord
 Author URI: http://krokedil.com
 */
 
-/*  Copyright 2011  Niklas Högefjord  (email : niklas@krokedil.se)
+/*  Copyright 2011-2012  Niklas Högefjord  (email : niklas@krokedil.se)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License, version 2, as 
@@ -65,9 +65,16 @@ function init_klarna_gateway() {
 			
 	        
 			$this->shop_country	= get_option('woocommerce_default_country');
-	
-	    } 
-       
+			
+			// Check if woocommerce_default_country includes state as well. If it does, remove state
+        	if (strstr($this->shop_country, ':')) :
+        		$this->shop_country = current(explode(':', $this->shop_country));
+        	else :
+        		$this->shop_country = $this->shop_country;
+        	endif;
+        	
+	    }
+	    
 		
 	
 	} // End class WC_Gateway_Klarna

@@ -84,6 +84,8 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 
 		add_action('woocommerce_update_options_payment_gateways', array(&$this, 'process_admin_options'));
 		
+		add_action('admin_init', array(&$this, 'update_pclasses_from_klarna'));
+		
 		// Apply filters to Country and language
 		$this->klarna_country = apply_filters( 'klarna_country', $klarna_country );
 		$this->klarna_language = apply_filters( 'klarna_language', $klarna_language );
@@ -154,9 +156,46 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
     	?>
     	<h3><?php _e('Klarna Account', 'klarna'); ?></h3>
 	    	<p><?php _e('With Klarna your customers can pay by invoice. Klarna works by adding extra personal information fields and then sending the details to Klarna for verification.', 'klarna'); ?></p>
-	    	<div class="updated inline">
-		    	<p><?php _e('Note that read and write permissions for the directory <i>srv</i> (located in woocommerce-gateway-klarna) and the containing file <i>pclasses.json</i> must be set to 777 in order to fetch the available PClasses from Klarna.', 'klarna'); ?></p>
-		    </div>
+	    	
+		    
+		    
+		    <?php
+		    // Check if the pclasses.json file exist
+		    $klarna_filename = KLARNA_DIR . 'srv/pclasses.json';
+		    $klarna_filename_path = KLARNA_DIR . 'srv/';
+
+			if (file_exists($klarna_filename)) {
+    			echo '<p>';
+    			echo sprintf(__('The file pclasses.json does exist on your web server. You can update the file by clicking the button below or create the file manually and upload it to <i>%s</i>. Note that read and write permissions for the directory <i>srv</i> and the containing file <i>pclasses.json</i> must be set to 777 in order to fetch the available PClasses from Klarna. This does not apply if you manually upload your pclasses.json file via ftp.', 'klarna'),$klarna_filename_path);
+				echo '</p>';
+    			/*
+    			if (is_writable ( $klarna_filename )) {
+    				echo __("Writable.", 'klarna');
+    			} else {
+	    			echo __("NOT Writable.", 'klarna');
+    			}
+    			*/
+			} else {
+				
+				echo '<div class="error inline">';
+    			echo sprintf(__('The file pclasses.json does not exist on your web server. This is needed to store your Klarna PClasses. Either create and update the file by clicking the button below or create the file manually and upload it to <i>%s</i>. Note that read and write permissions for the directory <i>srv</i> and the containing file <i>pclasses.json</i> must be set to 777 in order to fetch the available PClasses from Klarna. This does not apply if you manually upload your pclasses.json file via ftp.', 'klarna'),$klarna_filename_path);
+    			echo '</div>';
+			}
+			
+			if (isset($_GET['klarna_error_status']) && $_GET['klarna_error_status'] == '0') {
+				// pclasses.json file saved sucessfully
+				echo '<div class="updated">The file pclasses.json was sucessfully updated.</div>';
+			}
+			
+			if (isset($_GET['klarna_error_status']) && $_GET['klarna_error_status'] == '1') {
+				// pclasses.json file could not be updated
+				echo '<div class="error">The file pclasses.json could not be updated. Klarna error code: ' . $_GET['klarna_error_code'] . '</div>';
+			}
+			?>
+			<p>
+		    <a class="button" href="<?php echo admin_url('admin.php?page=woocommerce_settings&klarnaPclassListener=1');?>">Update the PClass file pclasses.json</a>
+		    
+		    </p>
     	<table class="form-table">
     	<?php
     		// Generate the HTML For the settings form.
@@ -183,7 +222,7 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 			// if (!in_array(get_option('woocommerce_currency'), array('DKK', 'EUR', 'NOK', 'SEK'))) return false;
 			
 			// Base country check
-			if (!in_array(get_option('woocommerce_default_country'), array('DK', 'DE', 'FI', 'NL', 'NO', 'SE'))) return false;
+			// if (!in_array(get_option('woocommerce_default_country'), array('DK', 'DE', 'FI', 'NL', 'NO', 'SE'))) return false;
 			
 			// Required fields check
 			if (!$this->eid || !$this->secret) return false;
@@ -195,6 +234,93 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 		return false;
 	}
 	
+
+		/**
+ 		* Retrieve the PClasses from Klarna and store it in the file pclasses.json.
+ 		*/
+ 		function update_pclasses_from_klarna( ) {
+ 		
+ 		global $woocommerce;
+
+ 		if (isset($_GET['klarnaPclassListener']) && $_GET['klarnaPclassListener'] == '1'):
+ 		
+ 			// Get PClasses so that the customer can chose between different payment plans.
+	  		require_once(KLARNA_LIB . 'Klarna.php');
+			require_once(KLARNA_LIB . 'pclasses/storage.intf.php');
+			require_once(KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc.inc');
+			require_once(KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc_wrappers.inc');
+			
+			// Test mode or Live mode		
+			if ( $this->testmode == 'yes' ):
+				// Disable SSL if in testmode
+				$klarna_ssl = 'false';
+				$klarna_mode = Klarna::BETA;
+			else :
+				// Set SSL if used in webshop
+				if (is_ssl()) {
+					$klarna_ssl = 'true';
+				} else {
+					$klarna_ssl = 'false';
+				}
+				$klarna_mode = Klarna::LIVE;
+			endif;
+	   		
+  			$k = new Klarna();
+			
+			$k->config(
+			    $eid = $this->settings['eid'],
+			    $secret = $this->settings['secret'],
+			    $country = $this->klarna_country,
+			    $language = $this->klarna_language,
+			    $currency = $this->klarna_currency,
+			    $mode = $klarna_mode,
+			    $pcStorage = 'json',
+			    $pcURI = KLARNA_DIR . 'srv/pclasses.json',
+			    $ssl = $klarna_ssl,
+			    $candice = true
+			);
+	
+			Klarna::$xmlrpcDebug = false;
+			Klarna::$debug = false;
+	   
+			// Check if the pclasses.json file exist
+		    $klarna_pclass_file = KLARNA_DIR . 'srv/pclasses.json';
+
+			if (!file_exists($klarna_pclass_file)) {
+    			$file=fopen($klarna_pclass_file,"w") or exit("Unable to open file!");
+    			fclose($file);
+    			/*
+    			if (is_writable ( $klarna_filename )) {
+    				echo __("Writable.", 'klarna');
+    			} else {
+	    			echo __("NOT Writable.", 'klarna');
+    			}
+    			*/
+    		}
+
+				
+			try {
+			    $k->fetchPClasses($this->klarna_country); //You can specify country (and language, currency if you wish) if you don't want to use the configured country.
+			    /* PClasses successfully fetched, now you can use getPClasses() to load them locally or getPClass to load a specific PClass locally. */
+				// Redirect to settings page
+				wp_redirect(admin_url('admin.php?page=woocommerce_settings&tab=payment_gateways&subtab=gateway-klarna_account&klarna_error_status=0'));
+				}
+				catch(Exception $e) {
+				    //Something went wrong, print the message:
+				    // $woocommerce->add_error( sprintf(__('Klarna PClass problem: %s. Error code: ', 'klarna'), utf8_encode($e->getMessage()) ) . '"' . $e->getCode() . '"' );
+				    //$klarna_error_code = utf8_encode($e->getMessage()) . 'Error code: ' . $e->getCode();
+				    
+				    $redirect_url = 'admin.php?page=woocommerce_settings&tab=payment_gateways&subtab=gateway-klarna_account&klarna_error_status=1&klarna_error_code=' . $e->getCode();
+				    
+				    //wp_redirect(admin_url($redirect_url));
+				    wp_redirect(admin_url($redirect_url));
+				}
+				
+			endif;
+				
+			}
+
+	
 	
 	
 	/**
@@ -203,7 +329,6 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 	
 	function payment_fields( ) {
 	   	global $woocommerce;
-	   	
 	   	
 	   	
 	   	// Get PClasses so that the customer can chose between different payment plans.
@@ -259,33 +384,27 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 			<p class="form-row form-row-first">
 			
 				<?php
-				/**
- 				* 2. Retrieve the PClasses from Klarna.
- 				*/
-				
-				try {
-				    $k->fetchPClasses($this->klarna_country); //You can specify country (and language, currency if you wish) if you don't want to use the configured country.
-				    	/* PClasses successfully fetched, now you can use getPClasses() to load them locally or getPClass to load a specific PClass locally. */
-						?>
+				// Check if we have any PClasses
+				// TODO Deactivate this gateway if the file pclasses.json doesn't exist 
+				if($k->getPClasses()) {
+				?>
 						<label for="klarna_pclass"><?php echo __("Payment plan", 'klarna') ?> <span class="required">*</span></label><br/>
 						<select id="klarna_pclass" name="klarna_pclass" class="woocommerce-select">
 						
 						<?php
-				    	// Loop through the available PClasses
+				    	// Loop through the available PClasses stored in the file srv/pclasses.json
 						foreach ($k->getPClasses() as $pclass) {
 				   			echo '<option value="' . $pclass->getId() . '">'. $pclass->getDescription() . '</option>';
 						}
 						?>
 						
 						</select>
-						
-						<?php
-					}
-				catch(Exception $e) {
-				    //Something went wrong, print the message:
-				    $woocommerce->add_error( sprintf(__('Klarna PClass problem: %s. Error code: ', 'klarna'), utf8_encode($e->getMessage()) ) . '"' . $e->getCode() . '"' );
+				<?php
+				} else {
+					echo __('Klarna PClasses seem to be missing. Klarna Account does not work.', 'klarna');
 				}
 				?>
+						
 				
 			</p>
 			<?php
@@ -317,32 +436,178 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 			<div class="clear"></div>
 			
 			<p class="form-row form-row-first">
+				<?php if ( $this->shop_country == 'NL' || $this->shop_country == 'DE' ) : ?>
+				
 				<label for="klarna_pno"><?php echo __("Date of Birth", 'klarna') ?> <span class="required">*</span></label>
-				<input type="text" class="input-text" name="klarna_pno" />
+                    <select class="dob_select dob_day" name="date_of_birth_day" style="width:60px;">
+                        <option value="">
+                        <?php echo __("Day", 'klarna') ?>
+                        </option>
+                        <option value="01">01</option>
+                        <option value="02">02</option>
+                        <option value="03">03</option>
+                        <option value="04">04</option>
+                        <option value="05">05</option>
+                        <option value="06">06</option>
+                        <option value="07">07</option>
+                        <option value="08">08</option>
+                        <option value="09">09</option>
+                        <option value="10">10</option>
+                        <option value="11">11</option>
+                        <option value="12">12</option>
+                        <option value="13">13</option>
+                        <option value="14">14</option>
+                        <option value="15">15</option>
+                        <option value="16">16</option>
+                        <option value="17">17</option>
+                        <option value="18">18</option>
+                        <option value="19">19</option>
+                        <option value="20">20</option>
+                        <option value="21">21</option>
+                        <option value="22">22</option>
+                        <option value="23">23</option>
+                        <option value="24">24</option>
+                        <option value="25">25</option>
+                        <option value="26">26</option>
+                        <option value="27">27</option>
+                        <option value="28">28</option>
+                        <option value="29">29</option>
+                        <option value="30">30</option>
+                        <option value="31">31</option>
+                    </select>
+                    <select class="dob_select dob_month" name="date_of_birth_month" style="width:80px;">
+                        <option value="">
+                        <?php echo __("Month", 'klarna') ?>
+                        </option>
+                        <option value="01"><?php echo __("Jan", 'klarna') ?></option>
+                        <option value="02"><?php echo __("Feb", 'klarna') ?></option>
+                        <option value="03"><?php echo __("Mar", 'klarna') ?></option>
+                        <option value="04"><?php echo __("Apr", 'klarna') ?></option>
+                        <option value="05"><?php echo __("May", 'klarna') ?></option>
+                        <option value="06"><?php echo __("Jun", 'klarna') ?></option>
+                        <option value="07"><?php echo __("Jul", 'klarna') ?></option>
+                        <option value="08"><?php echo __("Aug", 'klarna') ?></option>
+                        <option value="09"><?php echo __("Sep", 'klarna') ?></option>
+                        <option value="10"><?php echo __("Oct", 'klarna') ?></option>
+                        <option value="11"><?php echo __("Nov", 'klarna') ?></option>
+                        <option value="12"><?php echo __("Dec", 'klarna') ?></option>
+                    </select>
+                    <select class="dob_select dob_year" name="date_of_birth_year" style="width:60px;">
+                        <option value="">
+                        <?php echo __("Year", 'klarna') ?>
+                        </option>
+                        <option value="1920">1920</option>
+                        <option value="1921">1921</option>
+                        <option value="1922">1922</option>
+                        <option value="1923">1923</option>
+                        <option value="1924">1924</option>
+                        <option value="1925">1925</option>
+                        <option value="1926">1926</option>
+                        <option value="1927">1927</option>
+                        <option value="1928">1928</option>
+                        <option value="1929">1929</option>
+                        <option value="1930">1930</option>
+                        <option value="1931">1931</option>
+                        <option value="1932">1932</option>
+                        <option value="1933">1933</option>
+                        <option value="1934">1934</option>
+                        <option value="1935">1935</option>
+                        <option value="1936">1936</option>
+                        <option value="1937">1937</option>
+                        <option value="1938">1938</option>
+                        <option value="1939">1939</option>
+                        <option value="1940">1940</option>
+                        <option value="1941">1941</option>
+                        <option value="1942">1942</option>
+                        <option value="1943">1943</option>
+                        <option value="1944">1944</option>
+                        <option value="1945">1945</option>
+                        <option value="1946">1946</option>
+                        <option value="1947">1947</option>
+                        <option value="1948">1948</option>
+                        <option value="1949">1949</option>
+                        <option value="1950">1950</option>
+                        <option value="1951">1951</option>
+                        <option value="1952">1952</option>
+                        <option value="1953">1953</option>
+                        <option value="1954">1954</option>
+                        <option value="1955">1955</option>
+                        <option value="1956">1956</option>
+                        <option value="1957">1957</option>
+                        <option value="1958">1958</option>
+                        <option value="1959">1959</option>
+                        <option value="1960">1960</option>
+                        <option value="1961">1961</option>
+                        <option value="1962">1962</option>
+                        <option value="1963">1963</option>
+                        <option value="1964">1964</option>
+                        <option value="1965">1965</option>
+                        <option value="1966">1966</option>
+                        <option value="1967">1967</option>
+                        <option value="1968">1968</option>
+                        <option value="1969">1969</option>
+                        <option value="1970">1970</option>
+                        <option value="1971">1971</option>
+                        <option value="1972">1972</option>
+                        <option value="1973">1973</option>
+                        <option value="1974">1974</option>
+                        <option value="1975">1975</option>
+                        <option value="1976">1976</option>
+                        <option value="1977">1977</option>
+                        <option value="1978">1978</option>
+                        <option value="1979">1979</option>
+                        <option value="1980">1980</option>
+                        <option value="1981">1981</option>
+                        <option value="1982">1982</option>
+                        <option value="1983">1983</option>
+                        <option value="1984">1984</option>
+                        <option value="1985">1985</option>
+                        <option value="1986">1986</option>
+                        <option value="1987">1987</option>
+                        <option value="1988">1988</option>
+                        <option value="1989">1989</option>
+                        <option value="1990">1990</option>
+                        <option value="1991">1991</option>
+                        <option value="1992">1992</option>
+                        <option value="1993">1993</option>
+                        <option value="1994">1994</option>
+                        <option value="1995">1995</option>
+                        <option value="1996">1996</option>
+                        <option value="1997">1997</option>
+                        <option value="1998">1998</option>
+                        <option value="1999">1999</option>
+                        <option value="2000">2000</option>
+                    </select>
+					
+				<?php else : ?>
+					<label for="klarna_pno"><?php echo __("Date of Birth", 'klarna') ?> <span class="required">*</span></label>
+					<input type="text" class="input-text" name="klarna_pno" />
+				<?php endif; ?>
 			</p>
 			
-			<?php if ( in_array(get_option('woocommerce_default_country'), array('DE', 'NL'))) : ?>
+			<?php if ( $this->shop_country == 'NL' || $this->shop_country == 'DE' ) : ?>
 				<p class="form-row form-row-last">
-					<label for="klarna_gender"><?php echo __("Gender", 'klarna') ?> <span class="required">*</span></label><br/>
-					<select id="klarna_gender" name="klarna_gender" class="woocommerce-select">
-						<option value="MALE">Male</options>
-						<option value="FEMALE">Female</options>
+					<label for="klarna_gender"><?php echo __("Gender", 'klarna') ?> <span class="required">*</span></label>
+					<select id="klarna_gender" name="klarna_gender" class="woocommerce-select" style="width:120px;">
+						<option value=""><?php echo __("Select gender", 'klarna') ?></options>
+						<option value="MALE"><?php echo __("Male", 'klarna') ?></options>
+						<option value="FEMALE"><?php echo __("Female", 'klarna') ?></options>
 					</select>
 				</p>
 			<?php endif; ?>
 			
 			<div class="clear"></div>
 			
-			<?php if ( in_array(get_option('woocommerce_default_country'), array('DE', 'NL'))) : ?>	
+			<?php if ( $this->shop_country == 'NL' || $this->shop_country == 'DE' ) : ?>	
 				<p class="form-row form-row-first">
 					<label for="klarna_house_number"><?php echo __("House Number", 'klarna') ?> <span class="required">*</span></label>
 					<input type="text" class="input-text" name="klarna_house_number" />
 				</p>
 			<?php endif; ?>
 			
-			<?php if ( get_option('woocommerce_default_country') == 'NL' ) : ?>
+			<?php if ( $this->shop_country == 'NL' ) : ?>
 				<p class="form-row form-row-last">
-					<label for="klarna_house_extension"><?php echo __("House Extension", 'klarna') ?> <span class="required">*</span></label>
+					<label for="klarna_house_extension"><?php echo __("House Extension", 'klarna') ?></label>
 					<input type="text" class="input-text" name="klarna_house_extension" />
 				</p>
 			<?php endif; ?>
@@ -371,11 +636,25 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 		require_once(KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc_wrappers.inc');
 		
 		// Get values from klarna form on checkout page
+		
+		// Collect the dob different depending on country
+		if ( $this->shop_country == 'NL' || $this->shop_country == 'DE' ) :
+			$klarna_pno_day 			= isset($_POST['date_of_birth_day']) ? woocommerce_clean($_POST['date_of_birth_day']) : '';
+			$klarna_pno_month 			= isset($_POST['date_of_birth_month']) ? woocommerce_clean($_POST['date_of_birth_month']) : '';
+			$klarna_pno_year 			= isset($_POST['date_of_birth_year']) ? woocommerce_clean($_POST['date_of_birth_year']) : '';
+			$klarna_pno 		= $klarna_pno_day . $klarna_pno_month . $klarna_pno_year;
+		else :
+			$klarna_pno 			= isset($_POST['klarna_pno']) ? woocommerce_clean($_POST['klarna_pno']) : '';
+		endif;
+		
 		$klarna_pclass 			= isset($_POST['klarna_pclass']) ? woocommerce_clean($_POST['klarna_pclass']) : '';
-		$klarna_pno 			= isset($_POST['klarna_pno']) ? woocommerce_clean($_POST['klarna_pno']) : '';
 		$klarna_gender 			= isset($_POST['klarna_gender']) ? woocommerce_clean($_POST['klarna_gender']) : '';
 		$klarna_house_number	= isset($_POST['klarna_house_number']) ? woocommerce_clean($_POST['klarna_house_number']) : '';
 		$klarna_house_extension	= isset($_POST['klarna_house_extension']) ? woocommerce_clean($_POST['klarna_house_extension']) : '';
+		
+		
+		// Store Klarna specific form values in order as post meta
+		update_post_meta( $order_id, 'klarna_pno', $klarna_pno);
 		
 		
 		// Test mode or Live mode		
