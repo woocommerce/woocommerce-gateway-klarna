@@ -14,8 +14,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 		
 		$this->id			= 'klarna';
 		$this->method_title = __('Klarna Invoice', 'klarna');
-		$this->icon 		= plugins_url(basename(dirname(__FILE__))."/images/klarna.png");
-		$this->has_fields 	= false;
+		$this->has_fields 	= true;
 		
 		// Load the form fields.
 		$this->init_form_fields();
@@ -24,15 +23,16 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 		$this->init_settings();
 		
 		// Define user set variables
-		$this->enabled			= ( isset( $this->settings['enabled'] ) ) ? $this->settings['enabled'] : '';
-		$this->title 			= ( isset( $this->settings['title'] ) ) ? $this->settings['title'] : '';
-		$this->description  	= ( isset( $this->settings['description'] ) ) ? $this->settings['description'] : '';
-		$this->eid				= ( isset( $this->settings['eid'] ) ) ? $this->settings['eid'] : '';
-		$this->secret			= ( isset( $this->settings['secret'] ) ) ? $this->settings['secret'] : '';
-		//$this->handlingfee		= $this->settings['handlingfee'];
-		//$this->handlingfee_tax	= $this->settings['handlingfee_tax'];
-		$this->invoice_fee_id	= ( isset( $this->settings['invoice_fee_id'] ) ) ? $this->settings['invoice_fee_id'] : '';
-		$this->testmode			= ( isset( $this->settings['testmode'] ) ) ? $this->settings['testmode'] : '';
+		$this->enabled				= ( isset( $this->settings['enabled'] ) ) ? $this->settings['enabled'] : '';
+		$this->title 				= ( isset( $this->settings['title'] ) ) ? $this->settings['title'] : '';
+		$this->description  		= ( isset( $this->settings['description'] ) ) ? $this->settings['description'] : '';
+		$this->eid					= ( isset( $this->settings['eid'] ) ) ? $this->settings['eid'] : '';
+		$this->secret				= ( isset( $this->settings['secret'] ) ) ? $this->settings['secret'] : '';
+		$this->lower_threshold		= ( isset( $this->settings['lower_threshold'] ) ) ? $this->settings['lower_threshold'] : '';
+		$this->upper_threshold		= ( isset( $this->settings['upper_threshold'] ) ) ? $this->settings['upper_threshold'] : '';
+		$this->invoice_fee_id		= ( isset( $this->settings['invoice_fee_id'] ) ) ? $this->settings['invoice_fee_id'] : '';
+		$this->testmode				= ( isset( $this->settings['testmode'] ) ) ? $this->settings['testmode'] : '';
+		$this->de_consent_terms		= ( isset( $this->settings['de_consent_terms'] ) ) ? $this->settings['de_consent_terms'] : '';
 		
 		//if ( $this->handlingfee == "") $this->handlingfee = 0;
 		//if ( $this->handlingfee_tax == "") $this->handlingfee_tax = 0;
@@ -43,13 +43,22 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 		add_action('init', array(&$this, 'klarna_invoice_init'));
 		add_action('woocommerce_receipt_klarna', array(&$this, 'receipt_page'));
 		add_action('woocommerce_update_options_payment_gateways', array(&$this, 'process_admin_options'));
+		add_action('woocommerce_checkout_process', array(&$this, 'klarna_invoice_checkout_field_process'));
 		
-		// Add admin notice about the invoice fee update, if user can manage options
+		add_action('wp_footer', array(&$this, 'klarna_invoice_terms_js'));
+		
+		
+		
+		// Add admin notice about updates, if user can manage options
+		// Not used at the moment
+		/*
 		if ( current_user_can( 'manage_options' )) :
 			add_action('admin_notices', array(&$this, 'klarna_invoice_fee_admin_notice'));
 			add_action('admin_init', array(&$this, 'klarna_invoice_fee_nag_ignore'));
 		endif;
+		*/
 	}
+	
 	
 	function klarna_invoice_init() {
 		// Get the invoice fee product if invoice fee is used
@@ -88,49 +97,63 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 			$klarna_language = 'DA';
 			$klarna_currency = 'DKK';
 			$klarna_invoice_terms = 'https://online.klarna.com/villkor_dk.yaws?eid=' . $this->eid . '&charge=' . $this->invoice_fee_price;
+			//$klarna_invoice_icon = plugins_url(basename(dirname(__FILE__))."/images/klarna_invoice_dk.png");
+			$klarna_invoice_icon = 'https://cdn.klarna.com/public/images/DK/badges/v1/invoice/DK_invoice_badge_std_blue.png?width=60&eid=' . $this->eid;
 			break;
 		case 'DE' :
 			$klarna_country = 'DE';
 			$klarna_language = 'DE';
 			$klarna_currency = 'EUR';
 			$klarna_invoice_terms = 'https://online.klarna.com/villkor_de.yaws?eid=' . $this->eid . '&charge=' . $this->invoice_fee_price;
+			//$klarna_invoice_icon = plugins_url(basename(dirname(__FILE__))."/images/klarna_invoice_de.png");
+			$klarna_invoice_icon = 'https://cdn.klarna.com/public/images/DE/badges/v1/invoice/DE_invoice_badge_std_blue.png?width=60&eid=' . $this->eid;
 			break;
 		case 'NL' :
 			$klarna_country = 'NL';
 			$klarna_language = 'NL';
 			$klarna_currency = 'EUR';
 			$klarna_invoice_terms = 'https://online.klarna.com/villkor_nl.yaws?eid=' . $this->eid . '&charge=' . $this->invoice_fee_price;
+			//$klarna_invoice_icon = plugins_url(basename(dirname(__FILE__))."/images/klarna_invoice_nl.png");
+			$klarna_invoice_icon = 'https://cdn.klarna.com/public/images/NL/badges/v1/invoice/NL_invoice_badge_std_blue.png?width=60&eid=' . $this->eid;
 			break;
 		case 'NO' :
 			$klarna_country = 'NO';
 			$klarna_language = 'NB';
 			$klarna_currency = 'NOK';
 			$klarna_invoice_terms = 'https://online.klarna.com/villkor_no.yaws?eid=' . $this->eid . '&charge=' . $this->invoice_fee_price;
+			//$klarna_invoice_icon = plugins_url(basename(dirname(__FILE__))."/images/klarna_invoice_no.png");
+			$klarna_invoice_icon = 'https://cdn.klarna.com/public/images/NO/badges/v1/invoice/NO_invoice_badge_std_blue.png?width=60&eid=' . $this->eid;
 			break;
 		case 'FI' :
 			$klarna_country = 'FI';
 			$klarna_language = 'FI';
 			$klarna_currency = 'EUR';
 			$klarna_invoice_terms = 'https://online.klarna.com/villkor_fi.yaws?eid=' . $this->eid . '&charge=' . $this->invoice_fee_price;
+			//$klarna_invoice_icon = plugins_url(basename(dirname(__FILE__))."/images/klarna_invoice_fi.png");
+			$klarna_invoice_icon = 'https://cdn.klarna.com/public/images/FI/badges/v1/invoice/FI_invoice_badge_std_blue.png?width=60&eid=' . $this->eid;
 			break;
 		case 'SE' :
 			$klarna_country = 'SE';
 			$klarna_language = 'SV';
 			$klarna_currency = 'SEK';
 			$klarna_invoice_terms = 'https://online.klarna.com/villkor.yaws?eid=' . $this->eid . '&charge=' . $this->invoice_fee_price;
+			//$klarna_invoice_icon = plugins_url(basename(dirname(__FILE__))."/images/klarna_invoice_se.png");
+			$klarna_invoice_icon = 'https://cdn.klarna.com/public/images/SE/badges/v1/invoice/SE_invoice_badge_std_blue.png?width=60&eid=' . $this->eid;
 			break;
 		default:
 			$klarna_country = '';
 			$klarna_language = '';
 			$klarna_currency = '';
 			$klarna_invoice_terms = '';
+			$klarna_invoice_icon = '';
 		}
 		
 		// Apply filters to Country and language
-		$this->klarna_country = apply_filters( 'klarna_country', $klarna_country );
-		$this->klarna_language = apply_filters( 'klarna_language', $klarna_language );
-		$this->klarna_currency = apply_filters( 'klarna_currency', $klarna_currency );
+		$this->klarna_country 		= apply_filters( 'klarna_country', $klarna_country );
+		$this->klarna_language 		= apply_filters( 'klarna_language', $klarna_language );
+		$this->klarna_currency 		= apply_filters( 'klarna_currency', $klarna_currency );
 		$this->klarna_invoice_terms = apply_filters( 'klarna_invoice_terms', $klarna_invoice_terms );
+		$this->icon 				= apply_filters( 'klarna_invoice_icon', $klarna_invoice_icon );
 		
 	} // End klarna_invoice_init()
 	
@@ -153,6 +176,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
         	echo '</div>';
     	}
 	}
+	
 	
 
 	/**
@@ -186,32 +210,50 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 							'title' => __( 'Title', 'klarna' ), 
 							'type' => 'text', 
 							'description' => __( 'This controls the title which the user sees during checkout.', 'klarna' ), 
-							'default' => __( 'Klarna', 'klarna' )
+							'default' => __( 'Klarna Invoice - pay within 14 days', 'klarna' )
 						),
 			'description' => array(
 							'title' => __( 'Description', 'klarna' ), 
 							'type' => 'textarea', 
 							'description' => __( 'This controls the description which the user sees during checkout.', 'klarna' ), 
-							'default' => __("Klarna invoice - Pay within 14 days.", 'klarna')
+							'default' => ''
 						), 
 			'eid' => array(
 							'title' => __( 'Eid', 'klarna' ), 
 							'type' => 'text', 
 							'description' => __( 'Please enter your Klarna Eid; this is needed in order to take payment!', 'klarna' ), 
-							'default' => __( '', 'klarna' )
+							'default' => ''
 						),
 			'secret' => array(
 							'title' => __( 'Shared Secret', 'klarna' ), 
 							'type' => 'text', 
 							'description' => __( 'Please enter your Klarna Shared Secret; this is needed in order to take payment!', 'klarna' ), 
-							'default' => __( '', 'klarna' )
+							'default' => ''
+						),
+			'lower_threshold' => array(
+							'title' => __( 'Lower threshold', 'klarna' ), 
+							'type' => 'text', 
+							'description' => __( 'Disable Klarna Invoice if Cart Total is lower than the specified value. Leave blank to disable this feature.', 'klarna' ), 
+							'default' => ''
+						),
+			'upper_threshold' => array(
+							'title' => __( 'Upper threshold', 'klarna' ), 
+							'type' => 'text', 
+							'description' => __( 'Disable Klarna Invoice if Cart Total is higher than the specified value. Leave blank to disable this feature.', 'klarna' ), 
+							'default' => ''
 						),
 			'invoice_fee_id' => array(
 								'title' => __( 'Invoice Fee', 'klarna' ), 
 								'type' => 'text', 
 								'description' => __( 'Create a hidden (simple) product that acts as the invoice fee. Enter the ID number in this textfield. Leave blank to disable. ', 'klarna' ), 
-								'default' => __( '', 'klarna' )
+								'default' => ''
 							),
+			'de_consent_terms' => array(
+							'title' => __( 'Klarna concent terms (DE only)', 'klarna' ), 
+							'type' => 'checkbox', 
+							'label' => __( 'Enable Klarna concent terms checkbox in checkout. This only apply to German merchants.', 'klarna' ), 
+							'default' => 'no'
+						),
 			'testmode' => array(
 							'title' => __( 'Test Mode', 'klarna' ), 
 							'type' => 'checkbox', 
@@ -234,7 +276,10 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 
     	?>
     	<h3><?php _e('Klarna Invoice', 'klarna'); ?></h3>
-	    	<p><?php _e('With Klarna your customers can pay by invoice. Klarna works by adding extra personal information fields and then sending the details to Klarna for verification.', 'klarna'); ?></p>
+	    	
+	    	<p><?php printf(__('With Klarna your customers can pay by invoice. Klarna works by adding extra personal information fields and then sending the details to Klarna for verification. Documentation <a href="%s" target="_blank">can be found here</a>.', 'klarna'), 'http://wcdocs.woothemes.com/user-guide/extensions/klarna/' ); ?></p>
+	    	
+	    	
     	<table class="form-table">
     	<?php
     		// Generate the HTML For the settings form.
@@ -265,6 +310,20 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 			// Required fields check
 			if (!$this->eid || !$this->secret) return false;
 			
+			// Cart totals check - Lower threshold
+			if ( $this->lower_threshold !== '' ) {
+				if ( $woocommerce->cart->total < $this->lower_threshold ) return false;
+			}
+			
+			// Cart totals check - Upper threshold
+			if ( $this->upper_threshold !== '' ) {
+				if ( $woocommerce->cart->total > $this->upper_threshold ) return false;
+			}
+			
+			// Only activate the payment gateway if the customers country is the same as the filtered shop country ($this->klarna_country)
+	   		if ( $woocommerce->customer->get_country() == true && $woocommerce->customer->get_country() != $this->klarna_country ) return false;
+			
+								
 			return true;
 					
 		endif;	
@@ -274,14 +333,16 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 	
 	
 	
+	
+	
 	/**
 	 * Payment form on checkout page
 	 */
 	
 	function payment_fields() {
 	   	global $woocommerce;
-	   	
 	   	?>
+	   	
 	   	<?php if ($this->testmode=='yes') : ?><p><?php _e('TEST MODE ENABLED', 'klarna'); ?></p><?php endif; ?>
 		<?php if ($this->description) : ?><p><?php echo $this->description; ?></p><?php endif; ?>
 		<?php if ($this->invoice_fee_price>0) : ?><p><?php printf(__('An invoice fee of %1$s %2$s will be added to your order.', 'klarna'), $this->invoice_fee_price, $this->klarna_currency ); ?></p><?php endif; ?>
@@ -449,31 +510,82 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 					</select>
 				</p>
 			<?php endif; ?>
-			
+						
 			<div class="clear"></div>
-			
-			<?php if ( $this->shop_country == 'NL' || $this->shop_country == 'DE' ) : ?>	
-				<p class="form-row form-row-first">
-					<label for="klarna_invo_house_number"><?php echo __("House Number", 'klarna') ?> <span class="required">*</span></label>
-					<input type="text" class="input-text" name="klarna_invo_house_number" />
+		
+			<p><a id="klarna_invoice" onclick="ShowKlarnaInvoicePopup();return false;" href="#"><?php echo $this->get_invoice_terms_link_text($this->klarna_country); ?></a></p>
+        	
+			<div class="clear"></div>
+		
+			<?php if ( $this->shop_country == 'DE' && $this->de_consent_terms == 'yes' ) : ?>
+				<p class="form-row">
+					<label for="klarna_invo_de_consent_terms"></label>
+					<input type="checkbox" class="input-checkbox" value="yes" name="klarna_invo_de_consent_terms" />
+					<?php echo sprintf(__('Mit der Übermittlung der für die Abwicklungdes Rechnungskaufes und einer Identitäts-und Bonitätsprüfung erforderlichen Daten an Klarna bin ich einverstanden. Meine <a href="%s" target="_blank">Einwilligung</a> kann ich jederzeit mit Wirkung für die Zukunft widerrufen. Es gelten die AGB des Händlers.', 'klarna'), 'https://online.klarna.com/consent_de.yaws') ?>
+					
 				</p>
 			<?php endif; ?>
 			
-			<?php if ( $this->shop_country == 'NL' ) : ?>
-				<p class="form-row form-row-last">
-					<label for="klarna_invo_house_extension"><?php echo __("House Extension", 'klarna') ?></label>
-					<input type="text" class="input-text" name="klarna_invo_house_extension" />
-				</p>
-			<?php endif; ?>
-			
-			<div class="clear"></div>
 		</fieldset>
-		
-		<p><a href="<?php echo $this->klarna_invoice_terms;?>" target="_blank"><?php echo __("Terms for invoice", 'klarna') ?></a></p>
-		
-		<div class="clear"></div>
-		
 		<?php	
+	}
+	
+		
+	/**
+ 	 * Process the gateway specific checkout form fields
+ 	 **/
+	function klarna_invoice_checkout_field_process() {
+    	global $woocommerce;
+ 		
+ 		// Only run this if Klarna invoice is the choosen payment method
+ 		if ($_POST['payment_method'] == 'klarna') {
+ 			
+ 			// SE, NO, DK & FI
+	 		if ( $this->shop_country == 'SE' || $this->shop_country == 'NO' || $this->shop_country == 'DK' || $this->shop_country == 'FI' ){
+ 			
+    			// Check if set, if its not set add an error.
+    			if (!$_POST['klarna_invo_pno'])
+    	    	 	$woocommerce->add_error( __('<strong>Date of birth</strong> is a required field', 'klarna') );
+
+			}
+			// NL & DE
+	 		if ( $this->shop_country == 'NL' || $this->shop_country == 'DE' ){
+	    		// Check if set, if its not set add an error.
+	    		
+	    		// Gender
+	    		if (!$_POST['klarna_invo_gender'])
+	        	 	$woocommerce->add_error( __('<strong>Gender</strong> is a required field', 'klarna') );
+	         	
+	         	// Date of birth
+				if (!$_POST['klarna_invo_date_of_birth_day'] || !$_POST['klarna_invo_date_of_birth_month'] || !$_POST['klarna_invo_date_of_birth_year'])
+	         		$woocommerce->add_error( __('<strong>Date of birth</strong> is a required field', 'klarna') );
+	         	
+	         	// Shipping and billing address must be the same
+	         	$klarna_shiptobilling = ( isset( $_POST['shiptobilling'] ) ) ? $_POST['shiptobilling'] : '';
+	         	
+	         	if ($klarna_shiptobilling !=1 && isset($_POST['shipping_first_name']) && $_POST['shipping_first_name'] !== $_POST['billing_first_name'])
+	        	 	$woocommerce->add_error( __('Shipping and billing address must be the same when paying via Klarna.', 'klarna') );
+	        	 
+	        	 if ($klarna_shiptobilling !=1 && isset($_POST['shipping_last_name']) && $_POST['shipping_last_name'] !== $_POST['billing_last_name'])
+	        	 	$woocommerce->add_error( __('Shipping and billing address must be the same when paying via Klarna', 'klarna') );
+	        	 
+	        	 if ($klarna_shiptobilling !=1 && isset($_POST['shipping_address_1']) && $_POST['shipping_address_1'] !== $_POST['billing_address_1'])
+	        	 	$woocommerce->add_error( __('Shipping and billing address must be the same when paying via Klarna', 'klarna') );
+	        	 
+	        	 if ($klarna_shiptobilling !=1 && isset($_POST['shipping_postcode']) && $_POST['shipping_postcode'] !== $_POST['billing_postcode'])
+	        	 	$woocommerce->add_error( __('Shipping and billing address must be the same when paying via Klarna', 'klarna') );
+	        	 	
+	        	 if ($klarna_shiptobilling !=1 && isset($_POST['shipping_city']) && $_POST['shipping_city'] !== $_POST['billing_city'])
+	        	 	$woocommerce->add_error( __('Shipping and billing address must be the same when paying via Klarna', 'klarna') );
+			}
+			
+			// DE
+			if ( $this->shop_country == 'DE' && $this->de_consent_terms == 'yes'){
+	    		// Check if set, if its not set add an error.
+	    		if (!isset($_POST['klarna_invo_de_consent_terms']))
+	        	 	$woocommerce->add_error( __('You must accept the Klarna consent terms.', 'klarna') ); 	
+			}
+		}
 	}
 	
 	
@@ -496,14 +608,45 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 			$klarna_pno_day 			= isset($_POST['klarna_invo_date_of_birth_day']) ? woocommerce_clean($_POST['klarna_invo_date_of_birth_day']) : '';
 			$klarna_pno_month 			= isset($_POST['klarna_invo_date_of_birth_month']) ? woocommerce_clean($_POST['klarna_invo_date_of_birth_month']) : '';
 			$klarna_pno_year 			= isset($_POST['klarna_invo_date_of_birth_year']) ? woocommerce_clean($_POST['klarna_invo_date_of_birth_year']) : '';
-			$klarna_pno 		= $klarna_pno_day . $klarna_pno_month . $klarna_pno_year;
+			$klarna_pno 				= $klarna_pno_day . $klarna_pno_month . $klarna_pno_year;
 		else :
-			$klarna_pno 			= isset($_POST['klarna_invo_pno']) ? woocommerce_clean($_POST['klarna_invo_pno']) : '';
+			$klarna_pno 				= isset($_POST['klarna_invo_pno']) ? woocommerce_clean($_POST['klarna_invo_pno']) : '';
 		endif;
 		
-		$klarna_gender 			= isset($_POST['klarna_invo_gender']) ? woocommerce_clean($_POST['klarna_invo_gender']) : '';
-		$klarna_house_number	= isset($_POST['klarna_invo_house_number']) ? woocommerce_clean($_POST['klarna_invo_house_number']) : '';
-		$klarna_house_extension	= isset($_POST['klarna_invo_house_extension']) ? woocommerce_clean($_POST['klarna_invo_house_extension']) : '';
+		$klarna_gender 					= isset($_POST['klarna_invo_gender']) ? woocommerce_clean($_POST['klarna_invo_gender']) : '';
+		$klarna_de_consent_terms		= isset($_POST['klarna_invo_de_consent_terms']) ? woocommerce_clean($_POST['klarna_invo_de_consent_terms']) : '';
+		
+		
+		// Split address into House number and House extension for NL & DE customers
+		if ( $this->shop_country == 'NL' || $this->shop_country == 'DE' ) :
+		
+			require_once('split-address.php');
+			
+			$klarna_billing_address				= $order->billing_address_1;
+			$splitted_address 					= splitAddress($klarna_billing_address);
+			
+			$klarna_billing_address				= $splitted_address[0];
+			$klarna_billing_house_number		= $splitted_address[1];
+			$klarna_billing_house_extension		= $splitted_address[2];
+			
+			$klarna_shipping_address			= $order->shipping_address_1;
+			$splitted_address 					= splitAddress($klarna_shipping_address);
+			
+			$klarna_shipping_address			= $splitted_address[0];
+			$klarna_shipping_house_number		= $splitted_address[1];
+			$klarna_shipping_house_extension	= $splitted_address[2];
+		
+		else :
+			
+			$klarna_billing_address				= $order->billing_address_1;
+			$klarna_billing_house_number		= '';
+			$klarna_billing_house_extension		= '';
+			
+			$klarna_shipping_address			= $order->shipping_address_1;
+			$klarna_shipping_house_number		= '';
+			$klarna_shipping_house_extension	= '';
+			
+		endif;
 		
 		// Store Klarna specific form values in order as post meta
 		update_post_meta( $order_id, 'klarna_pno', $klarna_pno);
@@ -673,6 +816,8 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 			
 		
 		//Create the address object and specify the values.
+		
+		// Billing address
 		$addr_billing = new KlarnaAddr(
     		$email = $order->billing_email,
     		$telno = '', //We skip the normal land line phone, only one is needed.
@@ -681,29 +826,53 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
     		$fname = utf8_decode ($order->billing_first_name),
     		$lname = utf8_decode ($order->billing_last_name),
     		$careof = utf8_decode ($order->billing_address_2),  //No care of, C/O.
-    		$street = utf8_decode ($order->billing_address_1), //For DE and NL specify street number in houseNo.
+    		$street = utf8_decode ($klarna_billing_address), //For DE and NL specify street number in houseNo.
     		$zip = utf8_decode ($order->billing_postcode),
     		$city = utf8_decode ($order->billing_city),
     		$country = utf8_decode ($order->billing_country),
-    		$houseNo = utf8_decode ($klarna_house_number), //For DE and NL we need to specify houseNo.
-    		$houseExt = utf8_decode ($klarna_house_extension) //Only required for NL.
+    		$houseNo = utf8_decode ($klarna_billing_house_number), //For DE and NL we need to specify houseNo.
+    		$houseExt = utf8_decode ($klarna_billing_house_extension) //Only required for NL.
 		);
 		
-		$addr_shipping = new KlarnaAddr(
-    		$email = $order->billing_email,
-    		$telno = '', //We skip the normal land line phone, only one is needed.
-    		$cellno = $order->billing_phone,
-    		//$company = $order->shipping_company,
-    		$fname = utf8_decode ($order->shipping_first_name),
-    		$lname = utf8_decode ($order->shipping_last_name),
-    		$careof = utf8_decode ($order->shipping_address_2),  //No care of, C/O.
-    		$street = utf8_decode ($order->shipping_address_1), //For DE and NL specify street number in houseNo.
-    		$zip = utf8_decode ($order->shipping_postcode),
-    		$city = utf8_decode ($order->shipping_city),
-    		$country = utf8_decode ($order->shipping_country),
-    		$houseNo = utf8_decode ($klarna_house_number), //For DE and NL we need to specify houseNo.
-    		$houseExt = utf8_decode ($klarna_house_extension) //Only required for NL.
-		);
+		// Shipping address
+		if ( $order->get_shipping_method() == '' ) {
+			
+			// Use billing address if Shipping is disabled in Woocommerce
+			$addr_shipping = new KlarnaAddr(
+    			$email = $order->billing_email,
+    			$telno = '', //We skip the normal land line phone, only one is needed.
+    			$cellno = $order->billing_phone,
+    			//$company = $order->shipping_company,
+    			$fname = utf8_decode ($order->billing_first_name),
+    			$lname = utf8_decode ($order->billing_last_name),
+    			$careof = utf8_decode ($order->billing_address_2),  //No care of, C/O.
+    			$street = utf8_decode ($klarna_billing_address), //For DE and NL specify street number in houseNo.
+    			$zip = utf8_decode ($order->billing_postcode),
+    			$city = utf8_decode ($order->billing_city),
+    			$country = utf8_decode ($order->billing_country),
+    			$houseNo = utf8_decode ($klarna_billing_house_number), //For DE and NL we need to specify houseNo.
+    			$houseExt = utf8_decode ($klarna_billing_house_extension) //Only required for NL.
+			);
+		
+		} else {
+		
+			$addr_shipping = new KlarnaAddr(
+    			$email = $order->billing_email,
+    			$telno = '', //We skip the normal land line phone, only one is needed.
+    			$cellno = $order->billing_phone,
+    			//$company = $order->shipping_company,
+    			$fname = utf8_decode ($order->shipping_first_name),
+    			$lname = utf8_decode ($order->shipping_last_name),
+    			$careof = utf8_decode ($order->shipping_address_2),  //No care of, C/O.
+    			$street = utf8_decode ($klarna_shipping_address), //For DE and NL specify street number in houseNo.
+    			$zip = utf8_decode ($order->shipping_postcode),
+    			$city = utf8_decode ($order->shipping_city),
+    			$country = utf8_decode ($order->shipping_country),
+    			$houseNo = utf8_decode ($klarna_shipping_house_number), //For DE and NL we need to specify houseNo.
+    			$houseExt = utf8_decode ($klarna_shipping_house_extension) //Only required for NL.
+			);
+		
+		}
 
 
 		//Next we tell the Klarna instance to use the address in the next order.
@@ -798,6 +967,60 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 		
 		echo '<p>'.__('Thank you for your order.', 'klarna').'</p>';
 		
-	}	
+	}
+	
+	
+	/**
+	 * Javascript for Invoice terms popup on checkout page
+	 **/
+	function klarna_invoice_terms_js() {
+		if ( is_checkout() ) {
+			?>
+			<script type="text/javascript">
+				var klarna_eid = "<?php echo $this->eid; ?>";
+				var klarna_country = "<?php echo strtolower($this->klarna_country); ?>";
+				var klarna_invoice_fee_price = "<?php echo $this->invoice_fee_price; ?>";
+				addKlarnaInvoiceEvent(function(){InitKlarnaInvoiceElements('klarna_invoice', klarna_eid, klarna_country, klarna_invoice_fee_price); });
+			</script>
+			<?php
+		}
+	}
+	
+	
+	/**
+	 * get_terms_invoice_link_text function.
+	 * Helperfunction - Get Invoice Terms link text based on selected Billing Country in the Ceckout form
+	 * Defaults to $this->klarna_country
+	 * At the moment $this->klarna_country is allways returned. This will change in the next update.
+	 **/
+	 
+	function get_invoice_terms_link_text($country) {
+				
+		switch ( $country )
+		{
+		case 'SE':
+			$term_link_account = 'Villkor f&ouml;r faktura';
+			break;
+		case 'NO':
+			$term_link_account = 'Vilk&aring;r for faktura';
+			break;
+		case 'DK':
+			$term_link_account = 'Vilk&aring;r for faktura';
+			break;
+		case 'DE':
+			$term_link_account = 'Rechnungsbedingungen';
+			break;
+		case 'FI':
+			$term_link_account = 'Laskuehdot';
+			break;
+		case 'NL':
+			$term_link_account = 'Factuurvoorwaarden';
+			break;
+		default:
+			$term_link_account = __('Terms for Invoice', 'klarna');
+		}
+		
+		return $term_link_account;
+	} // end function get_account_terms_link_text()
 
 } // End class WC_Gateway_Klarna_Invoice

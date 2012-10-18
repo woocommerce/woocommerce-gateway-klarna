@@ -2,68 +2,75 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Klarna\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2012-06-01 22:24+0100\n"
-"PO-Revision-Date: 2012-08-20 10:24+0100\n"
-"Last-Translator: Kenneth <post@kktrend.no>\n"
+"POT-Creation-Date: 2012-10-18 14:34+0100\n"
+"PO-Revision-Date: 2012-10-18 14:34+0100\n"
+"Last-Translator: Niklas <niklas@krokedil.se>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "X-Poedit-KeywordsList: __;_e\n"
 "X-Poedit-Basepath: .\n"
+"X-Generator: Poedit 1.5.4\n"
 "X-Poedit-SearchPath-0: ..\n"
 
-#: ../class-klarna-account.php:16 ../class-klarna-account.php:155
+#: ../class-klarna-account.php:16 ../class-klarna-account.php:279
 msgid "Klarna Account"
 msgstr "Klarna Konto"
 
-#: ../class-klarna-account.php:106 ../class-klarna-invoice.php:180
+#: ../class-klarna-account.php:162 ../class-klarna-campaign.php:127
+#: ../class-klarna-invoice.php:204
 msgid "Enable/Disable"
 msgstr "Aktiver/Deaktiver"
 
-#: ../class-klarna-account.php:108
+#: ../class-klarna-account.php:164
 msgid "Enable Klarna Account"
 msgstr "Aktiver Klarna Konto"
 
-#: ../class-klarna-account.php:112 ../class-klarna-invoice.php:186
+#: ../class-klarna-account.php:168 ../class-klarna-campaign.php:133
+#: ../class-klarna-invoice.php:210
 msgid "Title"
 msgstr "Tittel"
 
-#: ../class-klarna-account.php:114 ../class-klarna-invoice.php:188
+#: ../class-klarna-account.php:170 ../class-klarna-campaign.php:135
+#: ../class-klarna-invoice.php:212
 msgid "This controls the title which the user sees during checkout."
 msgstr "Dette kontrollerer tittelen som brukeren ser ved betaling"
 
-#: ../class-klarna-account.php:115
-msgid "Part Payment - Klarna"
-msgstr "Del Betaling - Klarna"
+#: ../class-klarna-account.php:171
+#, fuzzy
+msgid "Klarna - Part Payment"
+msgstr "Del Betaling"
 
-#: ../class-klarna-account.php:118 ../class-klarna-invoice.php:192
+#: ../class-klarna-account.php:174 ../class-klarna-campaign.php:145
+#: ../class-klarna-invoice.php:216
 msgid "Description"
 msgstr "Beskrivelse"
 
-#: ../class-klarna-account.php:120 ../class-klarna-invoice.php:194
-msgid "This controls the description which the user sees during checkout."
+#: ../class-klarna-account.php:176 ../class-klarna-campaign.php:147
+#, fuzzy
+msgid "This controls the description which the user sees during checkout. "
 msgstr "Denne kontollere beskrivelsen som brukeren ser ved betaling."
 
-#: ../class-klarna-account.php:121
-msgid "Part Payment."
-msgstr "Del Betaling"
-
-#: ../class-klarna-account.php:124 ../class-klarna-invoice.php:198
+#: ../class-klarna-account.php:180 ../class-klarna-campaign.php:151
+#: ../class-klarna-invoice.php:222
 msgid "Eid"
 msgstr "Bruker ID"
 
-#: ../class-klarna-account.php:126 ../class-klarna-invoice.php:200
+#: ../class-klarna-account.php:182 ../class-klarna-campaign.php:153
+#: ../class-klarna-invoice.php:224
 msgid "Please enter your Klarna Eid; this is needed in order to take payment!"
 msgstr ""
 "Vennligst skriv inn din Klarna Brukerid; dette er nødvendig for at du skal "
 "ta betalingen!"
 
-#: ../class-klarna-account.php:130 ../class-klarna-invoice.php:204
+#: ../class-klarna-account.php:186 ../class-klarna-campaign.php:157
+#: ../class-klarna-invoice.php:228
 msgid "Shared Secret"
 msgstr "Felles Hemmelighet"
 
-#: ../class-klarna-account.php:132 ../class-klarna-invoice.php:206
+#: ../class-klarna-account.php:188 ../class-klarna-campaign.php:159
+#: ../class-klarna-invoice.php:230
 msgid ""
 "Please enter your Klarna Shared Secret; this is needed in order to take "
 "payment!"
@@ -71,11 +78,172 @@ msgstr ""
 "Vennligst skriv din Klarna Felles Hemmelighet; dette er nødvendig for å ta "
 "betalt!"
 
-#: ../class-klarna-account.php:136 ../class-klarna-invoice.php:216
+#: ../class-klarna-account.php:192 ../class-klarna-campaign.php:163
+#: ../class-klarna-invoice.php:234
+msgid "Lower threshold"
+msgstr ""
+
+#: ../class-klarna-account.php:194
+msgid ""
+"Disable Klarna Account if Cart Total is lower than the specified value. "
+"Leave blank to disable this feature."
+msgstr ""
+
+#: ../class-klarna-account.php:198 ../class-klarna-campaign.php:169
+#: ../class-klarna-invoice.php:240
+msgid "Upper threshold"
+msgstr ""
+
+#: ../class-klarna-account.php:200
+msgid ""
+"Disable Klarna Account if Cart Total is higher than the specified value. "
+"Leave blank to disable this feature."
+msgstr ""
+
+#: ../class-klarna-account.php:204
+msgid "Display monthly cost - product page"
+msgstr ""
+
+#: ../class-klarna-account.php:206
+msgid "Display monthly cost on single products page."
+msgstr ""
+
+#: ../class-klarna-account.php:210
+msgid "Text for Monthly cost - product page"
+msgstr ""
+
+#: ../class-klarna-account.php:212
+msgid ""
+"This controls the Monthly cost text displayed on the single product page. "
+"You can use the following shortcodes: [klarna_img] [klarna_price] "
+"[klarna_currency] & [klarna_account_info_link]."
+msgstr ""
+
+#: ../class-klarna-account.php:213
+msgid ""
+"[klarna_img]<br/>Part pay from [klarna_price] [klarna_currency]/month.<br/>"
+"[klarna_account_info_link]"
+msgstr ""
+
+#: ../class-klarna-account.php:216
+msgid "Placement of monthly cost - product page"
+msgstr ""
+
+#: ../class-klarna-account.php:218
+#, fuzzy
+msgid "Above Title"
+msgstr "Tittel"
+
+#: ../class-klarna-account.php:218
+msgid "Between Title and Price"
+msgstr ""
+
+#: ../class-klarna-account.php:218
+msgid "Between Price and Excerpt"
+msgstr ""
+
+#: ../class-klarna-account.php:218
+msgid "Between Excerpt and Add to cart-button"
+msgstr ""
+
+#: ../class-klarna-account.php:218
+msgid "Between Add to cart-button and Product meta"
+msgstr ""
+
+#: ../class-klarna-account.php:218
+msgid "Between Product meta and Product sharing-buttons"
+msgstr ""
+
+#: ../class-klarna-account.php:218
+msgid "After Product sharing-buttons"
+msgstr ""
+
+#: ../class-klarna-account.php:219
+msgid ""
+"Select where on the products page the Monthly cost information should be "
+"displayed."
+msgstr ""
+
+#: ../class-klarna-account.php:223
+msgid "Display monthly cost - shop page"
+msgstr ""
+
+#: ../class-klarna-account.php:225
+msgid "Display monthly cost next to each product on shop page."
+msgstr ""
+
+#: ../class-klarna-account.php:229
+msgid "Text for Monthly cost - shop page"
+msgstr ""
+
+#: ../class-klarna-account.php:231
+msgid ""
+"This controls the text displayed next to each product on shop page. You can "
+"use the following shortcodes: [klarna_img] [klarna_price] [klarna_currency] "
+"& [klarna_account_info_link]."
+msgstr ""
+
+#: ../class-klarna-account.php:232
+msgid "From [klarna_price] [klarna_currency]/month"
+msgstr ""
+
+#: ../class-klarna-account.php:235
+msgid "Placement of monthly cost - shop page"
+msgstr ""
+
+#: ../class-klarna-account.php:237
+msgid "Above Add to cart button"
+msgstr ""
+
+#: ../class-klarna-account.php:237
+msgid "Below Add to cart button"
+msgstr ""
+
+#: ../class-klarna-account.php:238
+msgid ""
+"Select where on the shop page the Monthly cost information should be "
+"displayed."
+msgstr ""
+
+#: ../class-klarna-account.php:242
+msgid "Lower threshold for monthly cost"
+msgstr ""
+
+#: ../class-klarna-account.php:244
+msgid ""
+"Disable the monthly cost feature if <i>Product price</i> is lower than the "
+"specified value. Leave blank to disable."
+msgstr ""
+
+#: ../class-klarna-account.php:248
+msgid "Upper threshold for monthly cost"
+msgstr ""
+
+#: ../class-klarna-account.php:250
+msgid ""
+"Disable the monthly cost feature if <i>Product price</i> is higher than the "
+"specified value. Leave blank to disable."
+msgstr ""
+
+#: ../class-klarna-account.php:254 ../class-klarna-campaign.php:175
+#: ../class-klarna-invoice.php:252
+msgid "Klarna concent terms (DE only)"
+msgstr ""
+
+#: ../class-klarna-account.php:256 ../class-klarna-campaign.php:177
+#: ../class-klarna-invoice.php:254
+msgid ""
+"Enable Klarna concent terms checkbox in checkout. This only apply to German "
+"merchants."
+msgstr ""
+
+#: ../class-klarna-account.php:260 ../class-klarna-campaign.php:181
+#: ../class-klarna-invoice.php:258
 msgid "Test Mode"
 msgstr "Test Modus"
 
-#: ../class-klarna-account.php:138 ../class-klarna-invoice.php:218
+#: ../class-klarna-account.php:262 ../class-klarna-campaign.php:183
+#: ../class-klarna-invoice.php:260
 msgid ""
 "Enable Klarna Test Mode. This will only work if you have a Klarna test "
 "account. For test purchases with a live account, <a href=\"http://"
@@ -87,77 +255,223 @@ msgstr ""
 "klarna.com/en/testing/test-persons\" target=\"_blank\">følg disse "
 "instruksjonene</a>."
 
-#: ../class-klarna-account.php:156 ../class-klarna-invoice.php:237
+#: ../class-klarna-account.php:280 ../class-klarna-campaign.php:201
+#: ../class-klarna-invoice.php:280
+#, fuzzy, php-format
 msgid ""
 "With Klarna your customers can pay by invoice. Klarna works by adding extra "
 "personal information fields and then sending the details to Klarna for "
-"verification."
+"verification. Documentation <a href=\"%s\" target=\"_blank\">can be found "
+"here</a>."
 msgstr ""
 "Med Klarna kan dine kunder betale med faktura. Klarna virker ved å legge "
 "ekstra personlig informasjon felter og deretter sender detaljene til Klarna "
 "for godkjenning."
 
-#: ../class-klarna-account.php:158
+#: ../class-klarna-account.php:290
+#, php-format
 msgid ""
-"Note that read and write permissions for the directory <i>srv</i> (located "
-"in woocommerce-gateway-klarna) and the containing file <i>pclasses.json</i> "
-"must be set to 777 in order to fetch the available PClasses from Klarna."
+"The file pclasses.json does exist on your web server. You can update the "
+"file by clicking the button below or create the file manually and upload it "
+"to <i>%s</i>. Note that read and write permissions for the directory <i>srv</"
+"i> and the containing file <i>pclasses.json</i> must be set to 777 in order "
+"to fetch the available PClasses from Klarna. This does not apply if you "
+"manually upload your pclasses.json file via ftp."
 msgstr ""
-"Noter at les/skriv tillatelser for mappen <i>srv</i> (lokalisert i "
-"woocommerce-gateway-klarna) og filen i mappen <i>pclasses.json</i> må være "
-"satt til 777 for å hente tilgjengelige PClasses fra Klarna."
 
-#: ../class-klarna-account.php:249 ../class-klarna-invoice.php:284
+#: ../class-klarna-account.php:302
+#, php-format
+msgid ""
+"The file pclasses.json does not exist on your web server. This is needed to "
+"store your Klarna PClasses. Either create and update the file by clicking "
+"the button below or manually upload a previous created file to <i>%s</i>. "
+"Note that read and write permissions for the directory <i>srv</i> and the "
+"containing file <i>pclasses.json</i> must be set to 777 in order to fetch "
+"the available PClasses from Klarna. This does not apply if you manually "
+"upload your pclasses.json file via ftp."
+msgstr ""
+
+#: ../class-klarna-account.php:568 ../class-klarna-campaign.php:382
+#: ../class-klarna-invoice.php:346
 msgid "TEST MODE ENABLED"
 msgstr "TEST MODUS AKTIVERT"
 
-#: ../class-klarna-account.php:270
+#: ../class-klarna-account.php:593 ../class-klarna-campaign.php:405
 msgid "Payment plan"
 msgstr "Nedbetalings plan"
 
-#: ../class-klarna-account.php:286
-#, php-format
-msgid "Klarna PClass problem: %s. Error code: "
-msgstr "Klarna PClass problem: %s. Error kode:"
+#: ../class-klarna-account.php:621 ../class-klarna-account.php:629
+#, fuzzy, php-format
+msgid "%s - %s %s/month - %s%s"
+msgstr "Fra %s %s/mnd"
 
-#: ../class-klarna-account.php:312
+#: ../class-klarna-account.php:624
+#, php-format
+msgid "%s - %s %s/month - %s%s - Start %s - Tot %s %s"
+msgstr ""
+
+#: ../class-klarna-account.php:632
+#, php-format
+msgid "%s - %s %s/month - %s%s - Start %s"
+msgstr ""
+
+#: ../class-klarna-account.php:644
+msgid "Klarna PClasses seem to be missing. Klarna Account does not work."
+msgstr ""
+
+#: ../class-klarna-account.php:666 ../class-klarna-campaign.php:461
 #, php-format
 msgid "From %s %s/month"
 msgstr "Fra %s %s/mnd"
 
-#: ../class-klarna-account.php:320 ../class-klarna-invoice.php:290
+#: ../class-klarna-account.php:677 ../class-klarna-account.php:819
+#: ../class-klarna-campaign.php:472 ../class-klarna-campaign.php:614
+#: ../class-klarna-invoice.php:354 ../class-klarna-invoice.php:498
 msgid "Date of Birth"
 msgstr "Fødselsdato"
 
-#: ../class-klarna-account.php:326 ../class-klarna-invoice.php:296
+#: ../class-klarna-account.php:680 ../class-klarna-campaign.php:475
+#: ../class-klarna-invoice.php:358
+msgid "Day"
+msgstr ""
+
+#: ../class-klarna-account.php:716 ../class-klarna-campaign.php:511
+#: ../class-klarna-invoice.php:394
+msgid "Month"
+msgstr ""
+
+#: ../class-klarna-account.php:718 ../class-klarna-campaign.php:513
+#: ../class-klarna-invoice.php:396
+msgid "Jan"
+msgstr ""
+
+#: ../class-klarna-account.php:719 ../class-klarna-campaign.php:514
+#: ../class-klarna-invoice.php:397
+msgid "Feb"
+msgstr ""
+
+#: ../class-klarna-account.php:720 ../class-klarna-campaign.php:515
+#: ../class-klarna-invoice.php:398
+msgid "Mar"
+msgstr ""
+
+#: ../class-klarna-account.php:721 ../class-klarna-campaign.php:516
+#: ../class-klarna-invoice.php:399
+msgid "Apr"
+msgstr ""
+
+#: ../class-klarna-account.php:722 ../class-klarna-campaign.php:517
+#: ../class-klarna-invoice.php:400
+msgid "May"
+msgstr ""
+
+#: ../class-klarna-account.php:723 ../class-klarna-campaign.php:518
+#: ../class-klarna-invoice.php:401
+msgid "Jun"
+msgstr ""
+
+#: ../class-klarna-account.php:724 ../class-klarna-campaign.php:519
+#: ../class-klarna-invoice.php:402
+msgid "Jul"
+msgstr ""
+
+#: ../class-klarna-account.php:725 ../class-klarna-campaign.php:520
+#: ../class-klarna-invoice.php:403
+msgid "Aug"
+msgstr ""
+
+#: ../class-klarna-account.php:726 ../class-klarna-campaign.php:521
+#: ../class-klarna-invoice.php:404
+msgid "Sep"
+msgstr ""
+
+#: ../class-klarna-account.php:727 ../class-klarna-campaign.php:522
+#: ../class-klarna-invoice.php:405
+msgid "Oct"
+msgstr ""
+
+#: ../class-klarna-account.php:728 ../class-klarna-campaign.php:523
+#: ../class-klarna-invoice.php:406
+msgid "Nov"
+msgstr ""
+
+#: ../class-klarna-account.php:729 ../class-klarna-campaign.php:524
+#: ../class-klarna-invoice.php:407
+msgid "Dec"
+msgstr ""
+
+#: ../class-klarna-account.php:733 ../class-klarna-campaign.php:528
+#: ../class-klarna-invoice.php:411
+msgid "Year"
+msgstr ""
+
+#: ../class-klarna-account.php:826 ../class-klarna-campaign.php:621
+#: ../class-klarna-invoice.php:505
 msgid "Gender"
 msgstr "Kjønn"
 
-#: ../class-klarna-account.php:338 ../class-klarna-invoice.php:308
-msgid "House Number"
-msgstr "Hus Nummer"
+#: ../class-klarna-account.php:828 ../class-klarna-campaign.php:623
+#: ../class-klarna-invoice.php:507
+msgid "Select gender"
+msgstr ""
 
-#: ../class-klarna-account.php:345 ../class-klarna-invoice.php:315
-msgid "House Extension"
-msgstr "Hus Bokstav"
+#: ../class-klarna-account.php:829 ../class-klarna-campaign.php:624
+#: ../class-klarna-invoice.php:508
+msgid "Male"
+msgstr ""
 
-#: ../class-klarna-account.php:353
-msgid "Read more"
-msgstr "Les mer"
+#: ../class-klarna-account.php:830 ../class-klarna-campaign.php:625
+#: ../class-klarna-invoice.php:509
+msgid "Female"
+msgstr ""
 
-#: ../class-klarna-account.php:454 ../class-klarna-invoice.php:423
+#: ../class-klarna-account.php:869 ../class-klarna-account.php:883
+#: ../class-klarna-campaign.php:663 ../class-klarna-campaign.php:677
+#: ../class-klarna-invoice.php:548 ../class-klarna-invoice.php:561
+msgid "<strong>Date of birth</strong> is a required field"
+msgstr ""
+
+#: ../class-klarna-account.php:879 ../class-klarna-campaign.php:673
+#: ../class-klarna-invoice.php:557
+msgid "<strong>Gender</strong> is a required field"
+msgstr ""
+
+#: ../class-klarna-account.php:889 ../class-klarna-campaign.php:683
+#: ../class-klarna-invoice.php:567
+msgid "Shipping and billing address must be the same when paying via Klarna."
+msgstr ""
+
+#: ../class-klarna-account.php:892 ../class-klarna-account.php:895
+#: ../class-klarna-account.php:898 ../class-klarna-account.php:901
+#: ../class-klarna-campaign.php:686 ../class-klarna-campaign.php:689
+#: ../class-klarna-campaign.php:692 ../class-klarna-campaign.php:695
+#: ../class-klarna-invoice.php:570 ../class-klarna-invoice.php:573
+#: ../class-klarna-invoice.php:576 ../class-klarna-invoice.php:579
+msgid "Shipping and billing address must be the same when paying via Klarna"
+msgstr ""
+
+#: ../class-klarna-account.php:908 ../class-klarna-campaign.php:702
+#: ../class-klarna-invoice.php:586
+msgid "You must accept the Klarna consent terms."
+msgstr ""
+
+#: ../class-klarna-account.php:1053 ../class-klarna-campaign.php:845
+#: ../class-klarna-invoice.php:728
 msgid "Discount"
 msgstr "Rabatt"
 
-#: ../class-klarna-account.php:476 ../class-klarna-invoice.php:445
+#: ../class-klarna-account.php:1075 ../class-klarna-campaign.php:867
+#: ../class-klarna-invoice.php:750
 msgid "Shipping cost"
 msgstr "Frakt kostnader"
 
-#: ../class-klarna-account.php:549 ../class-klarna-invoice.php:576
+#: ../class-klarna-account.php:1173 ../class-klarna-campaign.php:966
+#: ../class-klarna-invoice.php:907
 msgid "Klarna payment completed. Klarna Invoice number: "
 msgstr "Klarna betaling fullført. Klarna Faktura nummer:"
 
-#: ../class-klarna-account.php:565 ../class-klarna-invoice.php:592
+#: ../class-klarna-account.php:1189 ../class-klarna-campaign.php:982
+#: ../class-klarna-invoice.php:923
 msgid ""
 "Order is PENDING APPROVAL by Klarna. Please visit Klarna Online for the "
 "latest status on this order. Klarna Invoice number: "
@@ -165,30 +479,80 @@ msgstr ""
 "Ordre er UNDER GODKJENNING hos Klarna. Vennligst besøk Klarna Online for den "
 "siste statusen for denne ordren. Klarna Faktura nummer:"
 
-#: ../class-klarna-account.php:582 ../class-klarna-account.php:583
-#: ../class-klarna-invoice.php:609 ../class-klarna-invoice.php:610
+#: ../class-klarna-account.php:1206 ../class-klarna-account.php:1207
+#: ../class-klarna-campaign.php:999 ../class-klarna-campaign.php:1000
+#: ../class-klarna-invoice.php:940 ../class-klarna-invoice.php:941
 msgid "Klarna payment denied."
 msgstr "Klarne betaling avslått."
 
-#: ../class-klarna-account.php:588 ../class-klarna-account.php:589
-#: ../class-klarna-invoice.php:615 ../class-klarna-invoice.php:616
+#: ../class-klarna-account.php:1212 ../class-klarna-account.php:1213
+#: ../class-klarna-campaign.php:1005 ../class-klarna-campaign.php:1006
+#: ../class-klarna-invoice.php:946 ../class-klarna-invoice.php:947
 msgid "Unknown response from Klarna."
 msgstr "Ukjent tilbakemelding fra Klarna"
 
-#: ../class-klarna-account.php:599 ../class-klarna-invoice.php:626
+#: ../class-klarna-account.php:1223 ../class-klarna-campaign.php:1016
+#: ../class-klarna-invoice.php:957
 #, php-format
 msgid "%s (Error code: %s)"
 msgstr "%s (Error kode: %s)"
 
-#: ../class-klarna-account.php:611 ../class-klarna-invoice.php:637
+#: ../class-klarna-account.php:1235 ../class-klarna-campaign.php:1028
+#: ../class-klarna-invoice.php:968
 msgid "Thank you for your order."
 msgstr "Takk for at du bruker oss."
 
-#: ../class-klarna-invoice.php:16 ../class-klarna-invoice.php:236
+#: ../class-klarna-account.php:1518 ../class-klarna-campaign.php:633
+msgid "Read more"
+msgstr "Les mer"
+
+#: ../class-klarna-campaign.php:16 ../class-klarna-campaign.php:200
+msgid "Klarna Special Campaign"
+msgstr ""
+
+#: ../class-klarna-campaign.php:129
+#, fuzzy
+msgid "Enable Klarna Special Campaigns"
+msgstr "Aktiver Klarna Konto"
+
+#: ../class-klarna-campaign.php:136
+msgid "Klarna Special Campaigns"
+msgstr ""
+
+#: ../class-klarna-campaign.php:139
+msgid "Icon URL"
+msgstr ""
+
+#: ../class-klarna-campaign.php:141
+msgid "Enter URL to the icon image. Leave blank to disable."
+msgstr ""
+
+#: ../class-klarna-campaign.php:165
+msgid ""
+"Disable Klarna Special Campaigns if Cart Total is lower than the specified "
+"value. Leave blank to disable this feature."
+msgstr ""
+
+#: ../class-klarna-campaign.php:171
+msgid ""
+"Disable Klarna Special Campaigns if Cart Total is higher than the specified "
+"value. Leave blank to disable this feature."
+msgstr ""
+
+#: ../class-klarna-campaign.php:428
+#, php-format
+msgid "%s - Start %s"
+msgstr ""
+
+#: ../class-klarna-campaign.php:439
+msgid "Klarna PClasses seem to be missing. Klarna Campaign does not work."
+msgstr ""
+
+#: ../class-klarna-invoice.php:16 ../class-klarna-invoice.php:278
 msgid "Klarna Invoice"
 msgstr "Klarna Faktura"
 
-#: ../class-klarna-invoice.php:149
+#: ../class-klarna-invoice.php:172
 #, php-format
 msgid ""
 "The Klarna Invoice Fee handling has changed since version 1.1. Please visit "
@@ -197,49 +561,64 @@ msgstr ""
 "Klarna Faktura gebyr har forandret seg siden versjon 1.1. Vennligst besøk <a "
 "href=\"%1$s\"> Klarna Faktura instillinger</a> for å gjøre forandringer."
 
-#: ../class-klarna-invoice.php:151
+#: ../class-klarna-invoice.php:174
 #, php-format
 msgid "<a class=\"submitdelete\" href=\"%1$s\"> Hide this message</a>"
 msgstr "<a class=\"submitdelete\" href=\"%1$s\"> Skjul denne beskjeden</a>"
 
-#: ../class-klarna-invoice.php:182
-msgid "Enable klarna standard"
-msgstr "Aktiver Klarna standard"
+#: ../class-klarna-invoice.php:206
+#, fuzzy
+msgid "Enable Klarna Invoice"
+msgstr "Klarna Faktura"
 
-#: ../class-klarna-invoice.php:189
-msgid "Klarna"
-msgstr ""
-
-#: ../class-klarna-invoice.php:195
-msgid "Klarna invoice - Pay within 14 days."
+#: ../class-klarna-invoice.php:213
+#, fuzzy
+msgid "Klarna Invoice - pay within 14 days"
 msgstr "Klarna Faktura - Betal innen 14 dager."
 
-#: ../class-klarna-invoice.php:210
+#: ../class-klarna-invoice.php:218
+msgid "This controls the description which the user sees during checkout."
+msgstr "Denne kontollere beskrivelsen som brukeren ser ved betaling."
+
+#: ../class-klarna-invoice.php:236
+msgid ""
+"Disable Klarna Invoice if Cart Total is lower than the specified value. "
+"Leave blank to disable this feature."
+msgstr ""
+
+#: ../class-klarna-invoice.php:242
+msgid ""
+"Disable Klarna Invoice if Cart Total is higher than the specified value. "
+"Leave blank to disable this feature."
+msgstr ""
+
+#: ../class-klarna-invoice.php:246
 msgid "Invoice Fee"
 msgstr "Faktura Gebyr"
 
-#: ../class-klarna-invoice.php:212
+#: ../class-klarna-invoice.php:248
+#, fuzzy
 msgid ""
 "Create a hidden (simple) product that acts as the invoice fee. Enter the ID "
-"number in this textfield. The price must be in the range 0 to 30 SEK. Leave "
-"blank to disable. "
+"number in this textfield. Leave blank to disable. "
 msgstr ""
 "Lag en skjult ( enkelt ) produkt som brukes som faktura gebyret. Skriv inn "
 "ID nummer i dette tekstfeltet. Prisen må være fra 0 til 30 NOK. La den stå "
 "tom for å deaktivere."
 
-#: ../class-klarna-invoice.php:286
+#: ../class-klarna-invoice.php:348
 #, php-format
 msgid "An invoice fee of %1$s %2$s will be added to your order."
 msgstr "Et faktura gebyr på %1$s %2$s vil bli lagt til din ordre."
 
-#: ../class-klarna-invoice.php:323
-msgid "Terms for invoice"
-msgstr "Vilkår for faktura"
-
-#: ../class-klarna-invoice.php:465
+#: ../class-klarna-invoice.php:770
 msgid "Handling Fee"
 msgstr "Behandlings Gebyr"
+
+#: ../class-klarna-invoice.php:1020
+#, fuzzy
+msgid "Terms for Invoice"
+msgstr "Vilkår for faktura"
 
 #: ../woo-updater/plugin-updater.class.php:147
 msgid "WooThemes Updates"
@@ -301,3 +680,28 @@ msgstr ""
 #: ../woo-updater/plugin-updater.class.php:277
 msgid "Hide This Message"
 msgstr "Skjul Denne Beskjeden"
+
+#~ msgid "Part Payment - Klarna"
+#~ msgstr "Del Betaling - Klarna"
+
+#~ msgid ""
+#~ "Note that read and write permissions for the directory <i>srv</i> "
+#~ "(located in woocommerce-gateway-klarna) and the containing file "
+#~ "<i>pclasses.json</i> must be set to 777 in order to fetch the available "
+#~ "PClasses from Klarna."
+#~ msgstr ""
+#~ "Noter at les/skriv tillatelser for mappen <i>srv</i> (lokalisert i "
+#~ "woocommerce-gateway-klarna) og filen i mappen <i>pclasses.json</i> må "
+#~ "være satt til 777 for å hente tilgjengelige PClasses fra Klarna."
+
+#~ msgid "Klarna PClass problem: %s. Error code: "
+#~ msgstr "Klarna PClass problem: %s. Error kode:"
+
+#~ msgid "House Number"
+#~ msgstr "Hus Nummer"
+
+#~ msgid "House Extension"
+#~ msgstr "Hus Bokstav"
+
+#~ msgid "Enable klarna standard"
+#~ msgstr "Aktiver Klarna standard"

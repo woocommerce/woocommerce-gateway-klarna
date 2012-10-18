@@ -1,5 +1,22 @@
 *** Klarna Changelog ***
 
+2012.10.18 - version 1.5
+ * Added Monthly cost display on single product page (enable/disable via settings).
+ * Added Monthly cost display on shop page (enable/disable via settings).
+ * Added Klarna Special Campaigns as a separate payment method.
+ * Added Country specific Klarna icons. Loaded from cdn.klarna.com.
+ * Added apply_filters to Klarna icons.
+ * Added Cart total Lower and Higher threshold for payment gateway enabling/disabling.
+ * Added Product price Lower and Higher threshold for monthly cost display.
+ * Added credit warning banner display for NL users. Image loaded from /www.afm.nl.
+ * Added check: Shipping and billing address must be the same in NL and DE.
+ * Removed extra checkout fields House Number and House Extension for NL & DE. Customer address is now entered via the ordinary checkout form and then separated via the splitAddress-function.
+ * Added Approve consent terms checkbox for DE.
+ * Invoice terms and Account info now linked via Klarna popup javascript.
+ * Payment gateway now only available on checkout page if Billing Country equals Shop base country.
+ * Created helper functions get_invoice_terms_link_text, get_account_terms_link_text & get_terms_country. Used for better display of terms text in the right language.
+
+
 2012.09.06 - version 1.4
  * Check to remove region/state for NL in variable shop_country.
  * Included date of birth select boxes for Netherlands and Germany.
@@ -8,12 +25,15 @@
  * Added Dutch translation files (Vincent Suurenbroek).
  * Added Norwegian translation files (Kenneth Bårdseng).
 
+
 2012.06.01 - version 1.3.1
  * Changed expression Social Security Number to Date of Birth.
+
 
 2012.06.01 - version 1.3
  * Bug fix - country now specified in fetchPClasses (Klarna Account).
  * Added apply_filters to Description in Klarna Account.
+
 
 2012.05.24 - version 1.2
  * The gateway now supports Klarna Account.
@@ -21,8 +41,10 @@
  * Improved handlig of invoice fee. The gateway now uses a simple (hidden) product that acts as invoice fee.
  * Added apply_filters to country, language, currency, invoice_terms, invoice_fee.
  
+
 2012.03.15 - version 1.1
  * Gateway can now be used without SSL certificate.
+
  
 2011.12.01 - version 1.0
  * First Release

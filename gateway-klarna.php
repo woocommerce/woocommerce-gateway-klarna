@@ -3,7 +3,7 @@
 Plugin Name: WooCommerce Klarna Gateway
 Plugin URI: http://woothemes.com/woocommerce
 Description: Extends WooCommerce. Provides a <a href="http://www.klarna.se" target="_blank">klarna</a> API gateway for WooCommerce.
-Version: 1.4
+Version: 1.5
 Author: Niklas Högefjord
 Author URI: http://krokedil.com
 */
@@ -73,9 +73,33 @@ function init_klarna_gateway() {
         		$this->shop_country = $this->shop_country;
         	endif;
         	
+        	add_action( 'wp_enqueue_scripts', array(&$this, 'klarna_load_scripts'), 5 );
+        	
 	    }
 	    
-		
+				
+		/**
+	 	 * Register and Enqueue Klarna scripts
+	 	 */
+		function klarna_load_scripts() {
+			
+			wp_enqueue_script( 'jquery' );
+			
+			// Invoice terms popup
+			if ( is_checkout() ) {
+				wp_register_script( 'klarna-invoice-js', 'https://static.klarna.com:444/external/js/klarnainvoice.js', array('jquery'), '1.0', false );
+				wp_enqueue_script( 'klarna-invoice-js' );
+			}
+			
+			// Account terms popup
+			if ( is_checkout() || is_product() || is_shop() || is_product_category() || is_product_tag() ) {	
+				// Original file: https://static.klarna.com:444/external/js/klarnapart.js
+				wp_register_script( 'klarna-part-js', plugins_url( '/js/klarnapart.js', __FILE__ ), array('jquery'), '1.0', false );
+				wp_enqueue_script( 'klarna-part-js' );
+			}
+
+		}
+	
 	
 	} // End class WC_Gateway_Klarna
 	
@@ -85,6 +109,9 @@ function init_klarna_gateway() {
 	
 	// Include our Klarna Account class
 	require_once 'class-klarna-account.php';
+	
+	// Include our Klarna Special campaign class
+	require_once 'class-klarna-campaign.php';
 
 
 } // End init_klarna_gateway
@@ -95,6 +122,7 @@ function init_klarna_gateway() {
 function add_klarna_gateway( $methods ) { 
 	$methods[] = 'WC_Gateway_Klarna_Invoice';
 	$methods[] = 'WC_Gateway_Klarna_Account';
+	$methods[] = 'WC_Gateway_Klarna_Campaign';
 	return $methods;
 }
 
