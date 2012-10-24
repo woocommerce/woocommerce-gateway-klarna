@@ -971,7 +971,6 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 			$klarna_shipping_house_extension	= '';
 			
 		endif;
-		
 				
 		// Store Klarna specific form values in order as post meta
 		update_post_meta( $order_id, 'klarna_pno', $klarna_pno);

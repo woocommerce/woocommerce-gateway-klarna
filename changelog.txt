@@ -15,6 +15,7 @@
  * Invoice terms and Account info now linked via Klarna popup javascript.
  * Payment gateway now only available on checkout page if Billing Country equals Shop base country.
  * Created helper functions get_invoice_terms_link_text, get_account_terms_link_text & get_terms_country. Used for better display of terms text in the right language.
+ * Updated Swedish and Norwegian translations.
 
 
 2012.09.06 - version 1.4
