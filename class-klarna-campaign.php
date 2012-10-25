@@ -127,7 +127,7 @@ class WC_Gateway_Klarna_Campaign extends WC_Gateway_Klarna {
 							'title' => __( 'Enable/Disable', 'klarna' ), 
 							'type' => 'checkbox', 
 							'label' => __( 'Enable Klarna Special Campaigns', 'klarna' ), 
-							'default' => 'yes'
+							'default' => 'no'
 						), 
 			'title' => array(
 							'title' => __( 'Title', 'klarna' ), 

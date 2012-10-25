@@ -413,6 +413,7 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 				if ( $woocommerce->cart->total > $this->upper_threshold ) return false;
 			}
 			
+			
 			// Only activate the payment gateway if the customers country is the same as the filtered shop country ($this->klarna_country)
 	   		if ( $woocommerce->customer->get_country() == true && $woocommerce->customer->get_country() != $this->klarna_country ) return false;
 			
