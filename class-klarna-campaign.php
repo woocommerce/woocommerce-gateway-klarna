@@ -110,6 +110,8 @@ class WC_Gateway_Klarna_Campaign extends WC_Gateway_Klarna {
 		add_action('woocommerce_update_options_payment_gateways', array(&$this, 'process_admin_options'));
 		
 		add_action('woocommerce_checkout_process', array(&$this, 'klarna_campaign_checkout_field_process'));
+		
+		add_action('wp_footer', array(&$this, 'klarna_special_terms_js'));
 				
 	}
 	
@@ -621,8 +623,8 @@ class WC_Gateway_Klarna_Campaign extends WC_Gateway_Klarna {
 					<label for="klarna_campaign_gender"><?php echo __("Gender", 'klarna') ?> <span class="required">*</span></label>
 					<select id="klarna_campaign_gender" name="klarna_campaign_gender" class="woocommerce-select" style="width:120px;">
 						<option value=""><?php echo __("Select gender", 'klarna') ?></options>
-						<option value="MALE"><?php echo __("Male", 'klarna') ?></options>
-						<option value="FEMALE"><?php echo __("Female", 'klarna') ?></options>
+						<option value="0"><?php echo __("Female", 'klarna') ?></options>
+						<option value="1"><?php echo __("Male", 'klarna') ?></options>
 					</select>
 				</p>
 			<?php endif; ?>
@@ -630,8 +632,9 @@ class WC_Gateway_Klarna_Campaign extends WC_Gateway_Klarna {
 			<div class="clear"></div>
 		
 		
-			<p><a id="klarna_partpayment" onclick="ShowKlarnaPartPaymentPopup();return false;" href="#"><?php echo __('Read more', 'klarna'); ?></a></p>
-		
+			
+			
+			<p><a id="klarna_specialpayment" onclick="ShowKlarnaSpecialPaymentPopup();return false;" href="#"><?php echo $this->get_terms_link_text($this->klarna_country); ?></a></p>
 			<?php if ( $this->shop_country == 'DE' && $this->de_consent_terms == 'yes' ) : ?>
 				<p class="form-row">
 					<label for="klarna_de_terms"></label>
@@ -669,7 +672,7 @@ class WC_Gateway_Klarna_Campaign extends WC_Gateway_Klarna {
 	    		// Check if set, if its not set add an error.
 	    		
 	    		// Gender
-	    		if (!$_POST['klarna_gender'])
+	    		if (!isset($_POST['klarna_campaign_gender']))
 	        	 	$woocommerce->add_error( __('<strong>Gender</strong> is a required field', 'klarna') );
 	         	
 	         	// Date of birth
@@ -1028,6 +1031,87 @@ class WC_Gateway_Klarna_Campaign extends WC_Gateway_Klarna {
 		echo '<p>'.__('Thank you for your order.', 'klarna').'</p>';
 		
 	}
+	
+	
+	
+	
+	/**
+	 * Javascript for Special Campaign info/terms popup on checkout page
+	 **/
+	function klarna_special_terms_js() {
+		
+		if ( is_checkout() ) {
+			?>
+			<script type="text/javascript">
+				var klarna_eid = "<?php echo $this->eid; ?>";
+				var klarna_special_linktext = "<?php echo $this->get_terms_link_text($this->klarna_country); ?>";
+				var klarna_special_country = "<?php echo $this->get_terms_country(); ?>";
+				addKlarnaSpecialPaymentEvent(function(){InitKlarnaSpecialPaymentElements('klarna_specialpayment', klarna_eid, klarna_special_country, klarna_special_linktext, 0); });
+			</script>
+			<?php
+		}
+	}
+	
+	
+	/**
+	* get_terms_country function.
+ 	* Helperfunction - Get Terms Country based on selected Billing Country in the Ceckout form
+ 	* Defaults to $this->klarna_country
+ 	* At the moment $this->klarna_country is allways returned. This will change in the next update.
+ 	**/
+	
+	function get_terms_country() {
+		global $woocommerce;
+			
+		if ( $woocommerce->customer->get_country() == true && in_array( $woocommerce->customer->get_country(), array('SE', 'NO', 'DK', 'DE', 'FI', 'NL') ) ) {
+			
+			// 
+			//return strtolower($woocommerce->customer->get_country());
+			return strtolower($this->klarna_country);
+			
+		} else {
+		
+			return strtolower($this->klarna_country);
+		
+		}
+	} // End function get_terms_country()
+	
+	
+	/**
+	 * get_terms_link_text function.
+	 * Helperfunction - Get Terms link text based on selected Billing Country in the Ceckout form
+	 * Defaults to $this->klarna_country
+	 * At the moment $this->klarna_country is allways returned. This will change in the next update.
+	 **/
+	 
+	function get_terms_link_text($country) {
+				
+		switch ( $country )
+		{
+		case 'SE':
+			$term_link = 'Läs mer';
+			break;
+		case 'NO':
+			$term_link = 'Les mer';
+			break;
+		case 'DK':
+			$term_link = 'L&aelig;s mere';
+			break;
+		case 'DE':
+			$term_link = 'Lesen Sie mehr!';
+			break;
+		case 'FI':
+			$term_link = 'Lue lis&auml;&auml;';
+			break;
+		case 'NL':
+			$term_link = 'Lees meer!';
+			break;
+		default:
+			$term_link = __('Read more', 'klarna');
+		}
+		
+		return $term_link;
+	} // end function get_account_terms_link_text()
 	
 		 
 	

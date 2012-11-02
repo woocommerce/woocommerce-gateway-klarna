@@ -505,8 +505,8 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 					<label for="klarna_invo_gender"><?php echo __("Gender", 'klarna') ?> <span class="required">*</span></label>
 					<select id="klarna_invo_gender" name="klarna_invo_gender" class="woocommerce-select" style="width:120px;">
 						<option value=""><?php echo __("Select gender", 'klarna') ?></options>
-						<option value="MALE"><?php echo __("Male", 'klarna') ?></options>
-						<option value="FEMALE"><?php echo __("Female", 'klarna') ?></options>
+						<option value="0"><?php echo __("Female", 'klarna') ?></options>
+						<option value="1"><?php echo __("Male", 'klarna') ?></options>
 					</select>
 				</p>
 			<?php endif; ?>
@@ -553,7 +553,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 	    		// Check if set, if its not set add an error.
 	    		
 	    		// Gender
-	    		if (!$_POST['klarna_invo_gender'])
+	    		if (!isset($_POST['klarna_invo_gender']))
 	        	 	$woocommerce->add_error( __('<strong>Gender</strong> is a required field', 'klarna') );
 	         	
 	         	// Date of birth
@@ -616,7 +616,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 		$klarna_gender 					= isset($_POST['klarna_invo_gender']) ? woocommerce_clean($_POST['klarna_invo_gender']) : '';
 		$klarna_de_consent_terms		= isset($_POST['klarna_invo_de_consent_terms']) ? woocommerce_clean($_POST['klarna_invo_de_consent_terms']) : '';
 		
-		
+
 		// Split address into House number and House extension for NL & DE customers
 		if ( $this->shop_country == 'NL' || $this->shop_country == 'DE' ) :
 		

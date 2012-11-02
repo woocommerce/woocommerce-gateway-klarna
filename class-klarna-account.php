@@ -114,6 +114,8 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 			$klarna_language = '';
 			$klarna_currency = '';
 			$klarna_account_info = '';
+			$klarna_account_icon = '';
+			$klarna_basic_icon = '';
 		}
 		
 		
@@ -824,11 +826,11 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 			
 			<?php if ( $this->shop_country == 'NL' || $this->shop_country == 'DE' ) : ?>
 				<p class="form-row form-row-last">
-					<label for="klarna_gender"><?php echo __("Gender", 'klarna') ?> <span class="required">*</span></label>
-					<select id="klarna_gender" name="klarna_gender" class="woocommerce-select" style="width:120px;">
+					<label for="klarna_account_gender"><?php echo __("Gender", 'klarna') ?> <span class="required">*</span></label>
+					<select id="klarna_account_gender" name="klarna_account_gender" class="woocommerce-select" style="width:120px;">
 						<option value=""><?php echo __("Select gender", 'klarna') ?></options>
-						<option value="MALE"><?php echo __("Male", 'klarna') ?></options>
-						<option value="FEMALE"><?php echo __("Female", 'klarna') ?></options>
+						<option value="0"><?php echo __("Female", 'klarna') ?></options>
+						<option value="1"><?php echo __("Male", 'klarna') ?></options>
 					</select>
 				</p>
 			<?php endif; ?>
@@ -876,7 +878,7 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 	    		// Check if set, if its not set add an error.
 	    		
 	    		// Gender
-	    		if (!$_POST['klarna_gender'])
+	    		if (!isset($_POST['klarna_account_gender']))
 	        	 	$woocommerce->add_error( __('<strong>Gender</strong> is a required field', 'klarna') );
 	         	
 	         	// Date of birth
@@ -937,7 +939,7 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 		endif;
 		
 		$klarna_pclass 				= isset($_POST['klarna_pclass']) ? woocommerce_clean($_POST['klarna_pclass']) : '';
-		$klarna_gender 				= isset($_POST['klarna_gender']) ? woocommerce_clean($_POST['klarna_gender']) : '';
+		$klarna_gender 				= isset($_POST['klarna_account_gender']) ? woocommerce_clean($_POST['klarna_account_gender']) : '';
 		
 		$klarna_de_consent_terms	= isset($_POST['klarna_de_consent_terms']) ? woocommerce_clean($_POST['klarna_de_consent_terms']) : '';
 		
@@ -1154,8 +1156,7 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 		/** Shipment type? **/
 
 		//Normal shipment is defaulted, delays the start of invoice expiration/due-date.
-		// $k->setShipmentInfo('delay_adjust', KlarnaFlags::EXPRESS_SHIPMENT);
-
+		// $k->setShipmentInfo('delay_adjust', KlarnaFlags::EXPRESS_SHIPMENT);		    
 		try {
     		//Transmit all the specified data, from the steps above, to Klarna.
     		$result = $k->addTransaction(

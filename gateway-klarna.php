@@ -97,6 +97,13 @@ function init_klarna_gateway() {
 				wp_register_script( 'klarna-part-js', plugins_url( '/js/klarnapart.js', __FILE__ ), array('jquery'), '1.0', false );
 				wp_enqueue_script( 'klarna-part-js' );
 			}
+			
+			// Special Campaign terms popup
+			if ( is_checkout() ) {
+				// Original file: https://static.klarna.com:444/external/js/klarnaspecial.js
+				wp_register_script( 'klarna-special-js', plugins_url( '/js/klarnaspecial.js', __FILE__ ), array('jquery'), '1.0', false );
+				wp_enqueue_script( 'klarna-special-js' );
+			}
 
 		}
 	

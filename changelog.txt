@@ -1,5 +1,9 @@
 *** Klarna Changelog ***
 
+2012.11.02 - version 1.5.1
+ * Bugfix - Gender sent to Klarna.
+ * Added Special Campaign terms, linked via Klarna popup javascript.
+
 2012.10.18 - version 1.5
  * Added Monthly cost display on single product page (enable/disable via settings).
  * Added Monthly cost display on shop page (enable/disable via settings).
