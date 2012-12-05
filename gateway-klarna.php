@@ -34,7 +34,7 @@ if ( ! function_exists( 'woothemes_queue_update' ) )
 /**
  * Plugin updates
  */
-woothemes_queue_update( plugin_basename( __FILE__ ), 'XXX', 'XXX' );
+woothemes_queue_update( plugin_basename( __FILE__ ), '4edd8b595d6d4b76f31b313ba4e4f3f6', '18624' );
 
 // Init Klarna Gateway after WooCommerce has loaded
 add_action('plugins_loaded', 'init_klarna_gateway', 0);
