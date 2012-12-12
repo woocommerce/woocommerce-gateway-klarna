@@ -26,15 +26,15 @@ Author URI: http://krokedil.com
 */
 
 /**
+ * Required functions
+ */
+if ( ! function_exists( 'woothemes_queue_update' ) )
+	require_once( 'woo-includes/woo-functions.php' );
+
+/**
  * Plugin updates
- * */
-if (is_admin()) {
-	if ( ! class_exists( 'WooThemes_Plugin_Updater' ) ) require_once( 'woo-updater/plugin-updater.class.php' );
-	
-	$woo_plugin_updater_klarna = new WooThemes_Plugin_Updater( __FILE__ );
-	$woo_plugin_updater_klarna->api_key = 'c10ceaa5d5c8c34eadc20ade748e27bc';
-	$woo_plugin_updater_klarna->init();
-}
+ */
+woothemes_queue_update( plugin_basename( __FILE__ ), '4edd8b595d6d4b76f31b313ba4e4f3f6', '18624' );
 
 // Init Klarna Gateway after WooCommerce has loaded
 add_action('plugins_loaded', 'init_klarna_gateway', 0);
