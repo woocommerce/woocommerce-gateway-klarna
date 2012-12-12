@@ -822,7 +822,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
     		$email = $order->billing_email,
     		$telno = '', //We skip the normal land line phone, only one is needed.
     		$cellno = $order->billing_phone,
-    		//$company = $order->billing_company,
+    		//$company = utf8_decode ($order->billing_company),
     		$fname = utf8_decode ($order->billing_first_name),
     		$lname = utf8_decode ($order->billing_last_name),
     		$careof = utf8_decode ($order->billing_address_2),  //No care of, C/O.
@@ -834,6 +834,10 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
     		$houseExt = utf8_decode ($klarna_billing_house_extension) //Only required for NL.
 		);
 		
+		// Add Company if one is set
+		if($order->billing_company)
+			$addr_billing->setCompanyName($order->billing_company);
+		
 		// Shipping address
 		if ( $order->get_shipping_method() == '' ) {
 			
@@ -842,7 +846,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
     			$email = $order->billing_email,
     			$telno = '', //We skip the normal land line phone, only one is needed.
     			$cellno = $order->billing_phone,
-    			//$company = $order->shipping_company,
+    			//$company = utf8_decode ($order->billing_company),
     			$fname = utf8_decode ($order->billing_first_name),
     			$lname = utf8_decode ($order->billing_last_name),
     			$careof = utf8_decode ($order->billing_address_2),  //No care of, C/O.
@@ -860,7 +864,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
     			$email = $order->billing_email,
     			$telno = '', //We skip the normal land line phone, only one is needed.
     			$cellno = $order->billing_phone,
-    			//$company = $order->shipping_company,
+    			//$company = utf8_decode ($order->shipping_company),
     			$fname = utf8_decode ($order->shipping_first_name),
     			$lname = utf8_decode ($order->shipping_last_name),
     			$careof = utf8_decode ($order->shipping_address_2),  //No care of, C/O.
@@ -873,8 +877,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 			);
 		
 		}
-
-
+		
 		//Next we tell the Klarna instance to use the address in the next order.
 		$k->setAddress(KlarnaFlags::IS_BILLING, $addr_billing); //Billing / invoice address
 		$k->setAddress(KlarnaFlags::IS_SHIPPING, $addr_shipping); //Shipping / delivery address
@@ -922,8 +925,8 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
             case KlarnaFlags::PENDING:
                 $order->add_order_note( __('Order is PENDING APPROVAL by Klarna. Please visit Klarna Online for the latest status on this order. Klarna Invoice number: ', 'klarna') . $invno );
                 
-                // Payment on-hold
-				$order->update_status('on-hold', $message );
+                // Payment complete
+				$order->payment_complete();
 				
 				// Remove cart
 				$woocommerce->cart->empty_cart();
@@ -974,7 +977,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 	 * Javascript for Invoice terms popup on checkout page
 	 **/
 	function klarna_invoice_terms_js() {
-		if ( is_checkout() ) {
+		if ( is_checkout() && $this->enabled=="yes" ) {
 			?>
 			<script type="text/javascript">
 				var klarna_eid = "<?php echo $this->eid; ?>";

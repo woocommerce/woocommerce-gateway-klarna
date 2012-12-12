@@ -1,5 +1,14 @@
 *** Klarna Changelog ***
 
+2012.12.12 - version 1.5.2
+ * Bugfix - Better load of js in footer for Terms & Conditions popup (Invoice, Account, Special Campaign)
+ * Bugfix - Lower and Upper Threshold (Account & Special Campaign) did not work properly.
+ * Bugfix - PClass id sent to Klarna for Special Campaigns was wrong.
+ * Changed payment status from "On Hold" to "Processing" when KlarnaFlags::PENDING is returned from Klarna. This because the customer should experience that the order is confirmed.
+ * Added check: Cart total must be greater than current $pclass->getMinAmount() when displaying a PClass as a available Payment Plan on Checkout.
+ * Added ability for companies to make purchases via Klarna Invoice
+ * Changed Norwegian translation (Fødelsedato to Personnummer)
+
 2012.11.02 - version 1.5.1
  * Bugfix - Gender sent to Klarna.
  * Added Special Campaign terms, linked via Klarna popup javascript.

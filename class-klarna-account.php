@@ -384,12 +384,7 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 				Klarna::$xmlrpcDebug = false;
 				Klarna::$debug = false;
 				
-				if($k->getPClasses()) {
-				
-    	        	// PClasses available for Klarna Account
-    	        	return true;
-    	        	
-				} else {
+				if (!$k->getPClasses()) {
 				
 					// No PClasses available for Klarna Account
 					return false;
@@ -576,7 +571,6 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 			// apply_filters to the description so we can filter this if needed
 			$klarna_description = $this->description;
 			echo '<p>' . apply_filters( 'klarna_account_description', $klarna_description ) . '</p>';
-		
 		endif; 
 		
 		// Show klarna_warning_banner if NL
@@ -593,8 +587,8 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 				// TODO Deactivate this gateway if the file pclasses.json doesn't exist 
 				if($k->getPClasses()) {
 				?>
-					<label for="klarna_pclass"><?php echo __("Payment plan", 'klarna') ?> <span class="required">*</span></label><br/>
-					<select id="klarna_pclass" name="klarna_pclass" class="woocommerce-select">
+					<label for="klarna_account_pclass"><?php echo __("Payment plan", 'klarna') ?> <span class="required">*</span></label><br/>
+					<select id="klarna_account_pclass" name="klarna_account_pclass" class="woocommerce-select">
 						
 					<?php
 				   	// Loop through the available PClasses stored in the file srv/pclasses.json
@@ -616,28 +610,35 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
     	    									$pclass,
     	    									$flag
     										);
-    										
-			   				echo '<option value="' . $pclass->getId() . '">';
-			   				if ($this->klarna_country == 'NO') {
-								if ( $pclass->getType() == 1 ) {
-									//If Account - Do not show startfee. This is always 0.
-									echo sprintf(__('%s - %s %s/month - %s%s', 'klarna'), $pclass->getDescription(), $monthly_cost, $this->klarna_currency, $pclass->getInterestRate(), '%');
-								} else {
-									// Norway - Show total cost
-									echo sprintf(__('%s - %s %s/month - %s%s - Start %s - Tot %s %s', 'klarna'), $pclass->getDescription(), $monthly_cost, $this->klarna_currency, $pclass->getInterestRate(), '%', $pclass->getStartFee(), $total_credit_purchase_cost, $this->klarna_currency );
-								}
-							} else {
-								if ( $pclass->getType() == 1 ) {
-									//If Account - Do not show startfee. This is always 0.
-									echo sprintf(__('%s - %s %s/month - %s%s', 'klarna'), $pclass->getDescription(), $monthly_cost, $this->klarna_currency, $pclass->getInterestRate(), '%');
-								} else {
-									// Sweden, Denmark, Finland, Germany & Netherlands - Don't show total cost
-									echo sprintf(__('%s - %s %s/month - %s%s - Start %s', 'klarna'), $pclass->getDescription(), $monthly_cost, $this->klarna_currency, $pclass->getInterestRate(), '%', $pclass->getStartFee() );
-								}
-							}
-			   				echo '</option>';
-			   			}
-					}
+    						
+    						// Check that Cart total is larger than min amount for current PClass				
+			   				if($sum > $pclass->getMinAmount()) {
+			   				
+			   					echo '<option value="' . $pclass->getId() . '">';
+			   					if ($this->klarna_country == 'NO') {
+									if ( $pclass->getType() == 1 ) {
+										//If Account - Do not show startfee. This is always 0.
+										echo sprintf(__('%s - %s %s/month - %s%s', 'klarna'), $pclass->getDescription(), $monthly_cost, $this->klarna_currency, $pclass->getInterestRate(), '%');
+										} else {
+											// Norway - Show total cost
+											echo sprintf(__('%s - %s %s/month - %s%s - Start %s - Tot %s %s', 'klarna'), $pclass->getDescription(), $monthly_cost, $this->klarna_currency, $pclass->getInterestRate(), '%', $pclass->getStartFee(), $total_credit_purchase_cost, $this->klarna_currency );
+										}
+									} else {
+										if ( $pclass->getType() == 1 ) {
+											//If Account - Do not show startfee. This is always 0.
+											echo sprintf(__('%s - %s %s/month - %s%s', 'klarna'), $pclass->getDescription(), $monthly_cost, $this->klarna_currency, $pclass->getInterestRate(), '%');
+										} else {
+											// Sweden, Denmark, Finland, Germany & Netherlands - Don't show total cost
+											echo sprintf(__('%s - %s %s/month - %s%s - Start %s', 'klarna'), $pclass->getDescription(), $monthly_cost, $this->klarna_currency, $pclass->getInterestRate(), '%', $pclass->getStartFee() );
+										}
+									}
+								echo '</option>';
+							
+							} // End if ($sum > $pclass->getMinAmount())
+							
+			   			} // End if $pclass->getType() == 0 or 1
+					
+					} // End foreach
 					?>
 						
 					</select>
@@ -938,7 +939,7 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 			$klarna_pno 			= isset($_POST['klarna_pno']) ? woocommerce_clean($_POST['klarna_pno']) : '';
 		endif;
 		
-		$klarna_pclass 				= isset($_POST['klarna_pclass']) ? woocommerce_clean($_POST['klarna_pclass']) : '';
+		$klarna_pclass 				= isset($_POST['klarna_account_pclass']) ? woocommerce_clean($_POST['klarna_account_pclass']) : '';
 		$klarna_gender 				= isset($_POST['klarna_account_gender']) ? woocommerce_clean($_POST['klarna_account_gender']) : '';
 		
 		$klarna_de_consent_terms	= isset($_POST['klarna_de_consent_terms']) ? woocommerce_clean($_POST['klarna_de_consent_terms']) : '';
@@ -1101,6 +1102,7 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
     		$houseExt = utf8_decode ($klarna_billing_house_extension) //Only required for NL.
 		);
 		
+		
 		// Shipping address
 		if ( $order->get_shipping_method() == '' ) {
 			
@@ -1141,7 +1143,7 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 		
 		}
 
-
+		
 		//Next we tell the Klarna instance to use the address in the next order.
 		$k->setAddress(KlarnaFlags::IS_BILLING, $addr_billing); //Billing / invoice address
 		$k->setAddress(KlarnaFlags::IS_SHIPPING, $addr_shipping); //Shipping / delivery address
@@ -1189,8 +1191,8 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
             case KlarnaFlags::PENDING:
                 $order->add_order_note( __('Order is PENDING APPROVAL by Klarna. Please visit Klarna Online for the latest status on this order. Klarna Invoice number: ', 'klarna') . $invno );
                 
-                // Payment on-hold
-				$order->update_status('on-hold', $message );
+                // Payment complete
+				$order->payment_complete();
 				
 				// Remove cart
 				$woocommerce->cart->empty_cart();

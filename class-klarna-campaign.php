@@ -271,14 +271,21 @@ class WC_Gateway_Klarna_Campaign extends WC_Gateway_Klarna {
 					
 				if($k->getPClasses()) {
 					
+					// PClasses exists. Check if they are valid for Special Campaigns 
+					$find_special_campaign = 0;
+					
 					// Loop through the available PClasses stored in the file srv/pclasses.json
 					foreach ($k->getPClasses() as $pclass) {
 						
 						// Check if there are any Special Campaign classes and that these classes is still active
 						if ( $pclass->getType() == 2 && $pclass->getExpire() >= time() )
-        	    			return true;
-    					return false;
+	       	    			$find_special_campaign++;
 					}
+				
+					// All PClasses have been checked
+					// If $find_special_campaign == 0 then we did not find any valid PClass for Special Campaign
+					if ( $find_special_campaign == 0)
+						return false;
 				
 				} else {
 				
@@ -412,26 +419,32 @@ class WC_Gateway_Klarna_Campaign extends WC_Gateway_Klarna {
 					foreach ($k->getPClasses() as $pclass) {
 						
 						if ( $pclass->getType() == 2 ) {
-						// Get monthly cost for current pclass
-						$monthly_cost = KlarnaCalc::calc_monthly_cost(
-    	    								$sum,
-    	    								$pclass,
-    	    								$flag
-    									);
+							// Get monthly cost for current pclass
+							$monthly_cost = KlarnaCalc::calc_monthly_cost(
+    	    									$sum,
+    	    									$pclass,
+    	    									$flag
+    	    								);
     									
-    					// Get total credit purchase cost for current pclass
-						$total_credit_purchase_cost = KlarnaCalc::total_credit_purchase_cost(
-    	    								$sum,
-    	    								$pclass,
-    	    								$flag
-    									);
-    									
-			   			echo '<option value="' . $pclass->getId() . '">';
-				   			echo sprintf(__('%s - Start %s', 'klarna'), $pclass->getDescription(), $pclass->getStartFee() );
-			   			echo '</option>';
+    	    				// Get total credit purchase cost for current pclass
+    	    				$total_credit_purchase_cost = KlarnaCalc::total_credit_purchase_cost(
+    	    									$sum,
+    	    									$pclass,
+    	    									$flag
+    	    								);
+    					
+    	    				// Check that Cart total is larger than min amount for current PClass				
+    	    				if($sum > $pclass->getMinAmount()) {				
+	    	    				
+			   					echo '<option value="' . $pclass->getId() . '">';
+				   					echo sprintf(__('%s - Start %s', 'klarna'), $pclass->getDescription(), $pclass->getStartFee() );
+			   					echo '</option>';
+				   		
+			   				} // End if ($sum > $pclass->getMinAmount())
 			   			
-			   			}
-					}
+			   			} // End if ( $pclass->getType() == 2 )
+					
+					} // End foreach
 					?>
 						
 					</select>
@@ -733,7 +746,7 @@ class WC_Gateway_Klarna_Campaign extends WC_Gateway_Klarna {
 			$klarna_pno 			= isset($_POST['klarna_campaign_pno']) ? woocommerce_clean($_POST['klarna_campaign_pno']) : '';
 		endif;
 		
-		$klarna_pclass 				= isset($_POST['klarna_campaign_pclass']) ? woocommerce_clean($_POST['klarna_pclass']) : '';
+		$klarna_pclass 				= isset($_POST['klarna_campaign_pclass']) ? woocommerce_clean($_POST['klarna_campaign_pclass']) : '';
 		$klarna_gender 				= isset($_POST['klarna_campaign_gender']) ? woocommerce_clean($_POST['klarna_campaign_gender']) : '';
 		$klarna_de_consent_terms	= isset($_POST['klarna_campaign_de_consent_terms']) ? woocommerce_clean($_POST['klarna_campaign_de_consent_terms']) : '';
 		
@@ -984,8 +997,8 @@ class WC_Gateway_Klarna_Campaign extends WC_Gateway_Klarna {
             case KlarnaFlags::PENDING:
                 $order->add_order_note( __('Order is PENDING APPROVAL by Klarna. Please visit Klarna Online for the latest status on this order. Klarna Invoice number: ', 'klarna') . $invno );
                 
-                // Payment on-hold
-				$order->update_status('on-hold', $message );
+                // Payment complete
+				$order->payment_complete();
 				
 				// Remove cart
 				$woocommerce->cart->empty_cart();
@@ -1040,7 +1053,7 @@ class WC_Gateway_Klarna_Campaign extends WC_Gateway_Klarna {
 	 **/
 	function klarna_special_terms_js() {
 		
-		if ( is_checkout() ) {
+		if ( is_checkout() && $this->enabled=="yes" ) {
 			?>
 			<script type="text/javascript">
 				var klarna_eid = "<?php echo $this->eid; ?>";
