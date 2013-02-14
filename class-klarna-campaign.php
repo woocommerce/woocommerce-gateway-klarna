@@ -105,9 +105,14 @@ class WC_Gateway_Klarna_Campaign extends WC_Gateway_Klarna {
 		
 		
 		// Actions
+		
+		/* 1.6.6 */
+		add_action( 'woocommerce_update_options_payment_gateways', array( &$this, 'process_admin_options' ) );
+ 
+		/* 2.0.0 */
+		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
+		
 		add_action('woocommerce_receipt_klarna_campaign', array(&$this, 'receipt_page'));
-
-		add_action('woocommerce_update_options_payment_gateways', array(&$this, 'process_admin_options'));
 		
 		add_action('woocommerce_checkout_process', array(&$this, 'klarna_campaign_checkout_field_process'));
 		
@@ -727,7 +732,7 @@ class WC_Gateway_Klarna_Campaign extends WC_Gateway_Klarna {
 	function process_payment( $order_id ) {
 		global $woocommerce;
 		
-		$order = &new woocommerce_order( $order_id );
+		$order = &new WC_order( $order_id );
 		
 		require_once(KLARNA_LIB . 'Klarna.php');
 		require_once(KLARNA_LIB . 'pclasses/storage.intf.php');
@@ -834,10 +839,16 @@ class WC_Gateway_Klarna_Campaign extends WC_Gateway_Klarna {
 				// apply_filters to item price so we can filter this if needed
 				$klarna_item_price_including_tax = $order->get_item_total( $item, true );
 				$item_price = apply_filters( 'klarna_item_price_including_tax', $klarna_item_price_including_tax );
-				
+					
+					if ( $_product->get_sku() ) {
+						$sku = $_product->get_sku();
+					} else {
+						$sku = $_product->id;
+					}
+
 					$k->addArticle(
 		    		$qty = $item['qty'], 					//Quantity
-		    		$artNo = $item['id'], 					//Article number
+		    		$artNo = $sku,		 					//Article number
 		    		$title = utf8_decode ($item['name']), 	//Article name/title
 		    		$price = $item_price, 					// Price including tax
 		    		$vat = $item_tax_percentage,			// Tax

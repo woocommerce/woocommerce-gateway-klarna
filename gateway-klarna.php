@@ -2,13 +2,13 @@
 /*
 Plugin Name: WooCommerce Klarna Gateway
 Plugin URI: http://woothemes.com/woocommerce
-Description: Extends WooCommerce. Provides a <a href="http://www.klarna.se" target="_blank">klarna</a> API gateway for WooCommerce.
-Version: 1.5.3
+Description: Extends WooCommerce. Provides a <a href="http://www.klarna.se" target="_blank">Klarna</a> gateway for WooCommerce.
+Version: 1.5.4
 Author: Niklas Högefjord
 Author URI: http://krokedil.com
 */
 
-/*  Copyright 2011-2012  Niklas Högefjord  (email : niklas@krokedil.se)
+/*  Copyright 2011-2013  Niklas Högefjord  (email : niklas@krokedil.se)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License, version 2, as 
@@ -42,7 +42,7 @@ add_action('plugins_loaded', 'init_klarna_gateway', 0);
 function init_klarna_gateway() {
 
 	// If the WooCommerce payment gateway class is not available, do nothing
-	if ( !class_exists( 'woocommerce_payment_gateway' ) ) return;
+	if ( !class_exists( 'WC_Payment_Gateway' ) ) return;
 	
 	
 	/**

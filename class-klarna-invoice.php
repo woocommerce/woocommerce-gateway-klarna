@@ -38,34 +38,14 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 		//if ( $this->handlingfee_tax == "") $this->handlingfee_tax = 0;
 		if ( $this->invoice_fee_id == "") $this->invoice_fee_id = 0;
 		
-		
-		// Actions
-		add_action('init', array(&$this, 'klarna_invoice_init'));
-		add_action('woocommerce_receipt_klarna', array(&$this, 'receipt_page'));
-		add_action('woocommerce_update_options_payment_gateways', array(&$this, 'process_admin_options'));
-		add_action('woocommerce_checkout_process', array(&$this, 'klarna_invoice_checkout_field_process'));
-		
-		add_action('wp_footer', array(&$this, 'klarna_invoice_terms_js'));
-		
-		
-		
-		// Add admin notice about updates, if user can manage options
-		// Not used at the moment
-		/*
-		if ( current_user_can( 'manage_options' )) :
-			add_action('admin_notices', array(&$this, 'klarna_invoice_fee_admin_notice'));
-			add_action('admin_init', array(&$this, 'klarna_invoice_fee_nag_ignore'));
-		endif;
-		*/
-	}
-	
-	
-	function klarna_invoice_init() {
-		// Get the invoice fee product if invoice fee is used
-		// We retreive it early because the fee will be added to the invoice terms
 		if ( $this->invoice_fee_id > 0 ) :
 			
-			$product = new WC_Product( $this->invoice_fee_id );
+			// Version check - 1.6.6 or 2.0
+			if ( function_exists( 'get_product' ) ) {
+				$product = get_product($this->invoice_fee_id);
+			} else {
+				$product = new WC_Product( $this->invoice_fee_id );
+			}
 		
 			if ( $product->exists() ) :
 			
@@ -87,7 +67,6 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 		$this->invoice_fee_price = 0;
 		
 		endif;
-		
 		
 		// Country and language
 		switch ( $this->shop_country )
@@ -155,42 +134,21 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 		$this->klarna_invoice_terms = apply_filters( 'klarna_invoice_terms', $klarna_invoice_terms );
 		$this->icon 				= apply_filters( 'klarna_invoice_icon', $klarna_invoice_icon );
 		
-	} // End klarna_invoice_init()
-	
-	
-	
-	/**
-	 *  Display a notice about the changes to the Invoice fee handling
-	 */
-	 
-	function klarna_invoice_fee_admin_notice() {
-	    global $current_user ;
-        $user_id = $current_user->ID;
-        /* Check that the user hasn't already clicked to ignore the message */
-    	if ( ! get_user_meta($user_id, 'klarna_invoice_fee_ignore_notice') ) {
-        	echo '<div class="updated fade"><p class="alignleft">';
-        	printf(__('The Klarna Invoice Fee handling has changed since version 1.1. Please visit <a href="%1$s"> the Klarna Invoice settings page</a> to make changes.', 'klarna'), 'admin.php?page=woocommerce&tab=payment_gateways&subtab=gateway-klarna');
-        	echo '</p><p class="alignright">';
-        	printf(__('<a class="submitdelete" href="%1$s"> Hide this message</a>', 'klarna'), '?klarna_invoice_fee_nag_ignore=0');
-        	echo '</p><br class="clear">';
-        	echo '</div>';
-    	}
-	}
-	
-	
+		
+		// Actions
 
-	/**
-	 * Hide the notice about the changes to the Invoice fee handling if ignore link has been clicked 
-	 */
-	
-	function klarna_invoice_fee_nag_ignore() {
-    	global $current_user;
-		$user_id = $current_user->ID;
-		/* If user clicks to ignore the notice, add that to their user meta */
-		if ( isset($_GET['klarna_invoice_fee_nag_ignore']) && '0' == $_GET['klarna_invoice_fee_nag_ignore'] ) {
-			add_user_meta($user_id, 'klarna_invoice_fee_ignore_notice', 'true', true);
-		}
+		/* 1.6.6 */
+		add_action( 'woocommerce_update_options_payment_gateways', array( &$this, 'process_admin_options' ) );
+ 
+		/* 2.0.0 */
+		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
+		
+		add_action('woocommerce_receipt_klarna', array(&$this, 'receipt_page'));
+		
+		add_action('wp_footer', array(&$this, 'klarna_invoice_terms_js'));
+		
 	}
+
 	
 	
 	
@@ -531,62 +489,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 	}
 	
 		
-	/**
- 	 * Process the gateway specific checkout form fields
- 	 **/
-	function klarna_invoice_checkout_field_process() {
-    	global $woocommerce;
- 		
- 		// Only run this if Klarna invoice is the choosen payment method
- 		if ($_POST['payment_method'] == 'klarna') {
- 			
- 			// SE, NO, DK & FI
-	 		if ( $this->shop_country == 'SE' || $this->shop_country == 'NO' || $this->shop_country == 'DK' || $this->shop_country == 'FI' ){
- 			
-    			// Check if set, if its not set add an error.
-    			if (!$_POST['klarna_invo_pno'])
-    	    	 	$woocommerce->add_error( __('<strong>Date of birth</strong> is a required field', 'klarna') );
 
-			}
-			// NL & DE
-	 		if ( $this->shop_country == 'NL' || $this->shop_country == 'DE' ){
-	    		// Check if set, if its not set add an error.
-	    		
-	    		// Gender
-	    		if (!isset($_POST['klarna_invo_gender']))
-	        	 	$woocommerce->add_error( __('<strong>Gender</strong> is a required field', 'klarna') );
-	         	
-	         	// Date of birth
-				if (!$_POST['klarna_invo_date_of_birth_day'] || !$_POST['klarna_invo_date_of_birth_month'] || !$_POST['klarna_invo_date_of_birth_year'])
-	         		$woocommerce->add_error( __('<strong>Date of birth</strong> is a required field', 'klarna') );
-	         	
-	         	// Shipping and billing address must be the same
-	         	$klarna_shiptobilling = ( isset( $_POST['shiptobilling'] ) ) ? $_POST['shiptobilling'] : '';
-	         	
-	         	if ($klarna_shiptobilling !=1 && isset($_POST['shipping_first_name']) && $_POST['shipping_first_name'] !== $_POST['billing_first_name'])
-	        	 	$woocommerce->add_error( __('Shipping and billing address must be the same when paying via Klarna.', 'klarna') );
-	        	 
-	        	 if ($klarna_shiptobilling !=1 && isset($_POST['shipping_last_name']) && $_POST['shipping_last_name'] !== $_POST['billing_last_name'])
-	        	 	$woocommerce->add_error( __('Shipping and billing address must be the same when paying via Klarna', 'klarna') );
-	        	 
-	        	 if ($klarna_shiptobilling !=1 && isset($_POST['shipping_address_1']) && $_POST['shipping_address_1'] !== $_POST['billing_address_1'])
-	        	 	$woocommerce->add_error( __('Shipping and billing address must be the same when paying via Klarna', 'klarna') );
-	        	 
-	        	 if ($klarna_shiptobilling !=1 && isset($_POST['shipping_postcode']) && $_POST['shipping_postcode'] !== $_POST['billing_postcode'])
-	        	 	$woocommerce->add_error( __('Shipping and billing address must be the same when paying via Klarna', 'klarna') );
-	        	 	
-	        	 if ($klarna_shiptobilling !=1 && isset($_POST['shipping_city']) && $_POST['shipping_city'] !== $_POST['billing_city'])
-	        	 	$woocommerce->add_error( __('Shipping and billing address must be the same when paying via Klarna', 'klarna') );
-			}
-			
-			// DE
-			if ( $this->shop_country == 'DE' && $this->de_consent_terms == 'yes'){
-	    		// Check if set, if its not set add an error.
-	    		if (!isset($_POST['klarna_invo_de_consent_terms']))
-	        	 	$woocommerce->add_error( __('You must accept the Klarna consent terms.', 'klarna') ); 	
-			}
-		}
-	}
 	
 	
 	/**
@@ -595,7 +498,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 	function process_payment( $order_id ) {
 		global $woocommerce;
 		
-		$order = &new woocommerce_order( $order_id );
+		$order = &new WC_order( $order_id );
 		
 		require_once(KLARNA_LIB . 'Klarna.php');
 		require_once(KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc.inc');
@@ -686,33 +589,57 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 		
 		// Cart Contents
 		if (sizeof($order->get_items())>0) : foreach ($order->get_items() as $item) :
-			$_product = $order->get_product_from_item( $item );
-			if ($_product->exists() && $item['qty']) :		
+			
+			if ( function_exists( 'get_product' ) ) {
 				
-				// We manually calculate the tax percentage here
-				if ($order->get_total_tax() >0) :
-					// Calculate tax percentage
-					$item_tax_percentage = number_format( ( $order->get_line_tax($item) / $order->get_line_total( $item, false ) )*100, 2, '.', '');
-				else :
-					$item_tax_percentage = 0.00;
-				endif;
+				// Version 2.0
+				$_product = $order->get_product_from_item($item);
+				
+				// Get SKU or product id
+					if ( $_product->get_sku() ) {
+						$sku = $_product->get_sku();
+					} else {
+						$sku = $_product->id;
+					}
+					
+			} else {
+				
+				// Version 1.6.6
+				$_product = new WC_Product( $item['id'] );
+				
+				// Get SKU or product id
+				if ( $_product->get_sku() ) {
+					$sku = $_product->get_sku();
+				} else {
+					$sku = $item['id'];
+				}
+					
+			}	
+				
+			// We manually calculate the tax percentage here
+			if ($order->get_total_tax() >0) :
+				// Calculate tax percentage
+				$item_tax_percentage = number_format( ( $order->get_line_tax($item) / $order->get_line_total( $item, false ) )*100, 2, '.', '');
+			else :
+				$item_tax_percentage = 0.00;
+			endif;
 				
 				
-				// apply_filters to item price so we can filter this if needed
-				$klarna_item_price_including_tax = $order->get_item_total( $item, true );
-				$item_price = apply_filters( 'klarna_item_price_including_tax', $klarna_item_price_including_tax );
+			// apply_filters to item price so we can filter this if needed
+			$klarna_item_price_including_tax = $order->get_item_total( $item, true );
+			$item_price = apply_filters( 'klarna_item_price_including_tax', $klarna_item_price_including_tax );
 				
-					$k->addArticle(
+				$k->addArticle(
 		    		$qty = $item['qty'], 					//Quantity
-		    		$artNo = $item['id'], 					//Article number
+		    		$artNo = $sku,		 					//Article number
 		    		$title = utf8_decode ($item['name']), 	//Article name/title
 		    		$price = $item_price, 					// Price including tax
 		    		$vat = $item_tax_percentage,			// Tax
 		    		$discount = 0, 
 		    		$flags = KlarnaFlags::INC_VAT 			//Price is including VAT.
-				);
+		    	);
 									
-			endif;
+		//endif;
 		endforeach; endif;
 		 
 		// Discount
@@ -759,60 +686,83 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 		// Invoice/handling fee
 		
 		// Get the invoice fee product if invoice fee is used
-		if ( $this->invoice_fee_price > 0 ) :
+		if ( $this->invoice_fee_price > 0 ) {
 
 			// We have already checked that the product exists in klarna_invoice_init()		
-			$product = new WC_Product( $this->invoice_fee_id );
-							
-			$k->addArticle(
-			    $qty = 1,
-			    $artNo = "",
-			    $title = __('Handling Fee', 'klarna'),
-			    $price = $this->invoice_fee_price,
-			    $vat = $this->invoice_fee_tax_percentage,
-			    $discount = 0,
-			    $flags = KlarnaFlags::INC_VAT + KlarnaFlags::IS_HANDLING //Price is including VAT and is handling/invoice fee
-			);
+			// Version check - 1.6.6 or 2.0
+			if ( function_exists( 'get_product' ) ) {
+				$product = get_product($this->invoice_fee_id);
+			} else {
+				$product = new WC_Product( $this->invoice_fee_id );
+			}
 			
-			// Add the invoice fee to the order
-			// Get all order items and unserialize the array
-			$originalarray = unserialize($order->order_custom_fields['_order_items'][0]);
+			if ( version_compare( WOOCOMMERCE_VERSION, '2.0', '<' ) ) {
+				
+				// Pre 2.0				
+				$k->addArticle(
+				    $qty = 1,
+				    $artNo = "",
+				    $title = __('Handling Fee', 'klarna'),
+				    $price = $this->invoice_fee_price,
+				    $vat = $this->invoice_fee_tax_percentage,
+				    $discount = 0,
+			    	$flags = KlarnaFlags::INC_VAT + KlarnaFlags::IS_HANDLING //Price is including VAT and is handling/invoice fee
+			    );
+			
+			    // Add the invoice fee to the order
+			    // Get all order items and unserialize the array
+			    $originalarray = unserialize($order->order_custom_fields['_order_items'][0]);
 			
 			
-			// TODO: check that Invoice fee can't be added multiple times to order?
-			$addfee[] = array (
-   				'id' => $this->invoice_fee_id,
-   				'variation_id' => '',
-    			'name' => $product->get_title(),
-    			'qty' => '1',
-    			'item_meta' => 
-    				array (
-    				),
-    			'line_subtotal' => $product->get_price_excluding_tax(),
-    			'line_subtotal_tax' => $product->get_price()-$product->get_price_excluding_tax(),
-    			'line_total' => $product->get_price_excluding_tax(),
-    			'line_tax' => $product->get_price()-$product->get_price_excluding_tax(),
-    			'tax_class' => $product->get_tax_class(),
-  			);
+			    // TODO: check that Invoice fee can't be added multiple times to order?
+			    $addfee[] = array (
+   					'id' => $this->invoice_fee_id,
+   					'variation_id' => '',
+   					'name' => $product->get_title(),
+   					'qty' => '1',
+   					'item_meta' => 
+    					array (
+    					),
+    				'line_subtotal' => $product->get_price_excluding_tax(),
+    				'line_subtotal_tax' => $product->get_price()-$product->get_price_excluding_tax(),
+    				'line_total' => $product->get_price_excluding_tax(),
+    				'line_tax' => $product->get_price()-$product->get_price_excluding_tax(),
+    				'tax_class' => $product->get_tax_class(),
+    			);
   				
-  			// Merge the invoice fee product to order items
-			$newarray = array_merge($originalarray, $addfee);
-			
-			// Update order items with the added invoice fee product
-			update_post_meta( $order->id, '_order_items', $newarray );
-			
-			// Update _order_total
-			$old_order_total = $order->order_custom_fields['_order_total'][0];
-			$new_order_total = $old_order_total+$product->get_price();
-			update_post_meta( $order->id, '_order_total', $new_order_total );
-			
-			// Update _order_tax	
-			$invoice_fee_tax = $product->get_price()-$product->get_price_excluding_tax();
-			$old_order_tax = $order->order_custom_fields['_order_tax'][0];
-			$new_order_tax = $old_order_tax+$invoice_fee_tax;
-			update_post_meta( $order->id, '_order_tax', $new_order_tax );
-		
-		endif;
+    			// Merge the invoice fee product to order items
+    			$newarray = array_merge($originalarray, $addfee);
+    			
+    			// Update order items with the added invoice fee product
+    			update_post_meta( $order->id, '_order_items', $newarray );
+    			
+    			// Update _order_total
+    			$old_order_total = $order->order_custom_fields['_order_total'][0];
+    			$new_order_total = $old_order_total+$product->get_price();
+    			update_post_meta( $order->id, '_order_total', $new_order_total );
+    			
+    			// Update _order_tax	
+    			$invoice_fee_tax = $product->get_price()-$product->get_price_excluding_tax();
+    			$old_order_tax = $order->order_custom_fields['_order_tax'][0];
+    			$new_order_tax = $old_order_tax+$invoice_fee_tax;
+    			update_post_meta( $order->id, '_order_tax', $new_order_tax );
+    		
+    		} else {
+	    		
+	    		// 2.0+				
+				$k->addArticle(
+				    $qty = 1,
+				    $artNo = "",
+				    $title = __('Handling Fee', 'klarna'),
+				    $price = $this->invoice_fee_price,
+				    $vat = $this->invoice_fee_tax_percentage,
+				    $discount = 0,
+			    	$flags = KlarnaFlags::INC_VAT + KlarnaFlags::IS_HANDLING //Price is including VAT and is handling/invoice fee
+			    );
+			    
+    		} // End version check
+    		
+		} // End invoice_fee_price > 0
 			
 		
 		//Create the address object and specify the values.
@@ -1025,5 +975,128 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 		
 		return $term_link_account;
 	} // end function get_account_terms_link_text()
+	
+	
+	// Helper function - get Invoice fee id
+	function get_klarna_invoice_fee_product() {
+		return $this->invoice_fee_id;
+	}
+	
+	// Helper function - get Shop Country
+	function get_klarna_shop_country() {
+		return $this->shop_country;
+	}
 
 } // End class WC_Gateway_Klarna_Invoice
+
+
+/**
+ * Class WC_Gateway_Klarna_Invoice_Extra
+ * Extra class for functions that needs to be executed outside the payment gateway class.
+ * Since version 1.5.4 (WooCommerce version 2.0)
+**/
+
+class WC_Gateway_Klarna_Invoice_Extra {
+
+	public function __construct() {
+		
+		// Add Invoice fee via the new Fees API
+		add_action( 'woocommerce_checkout_process', array($this, 'add_invoice_fee_process') );
+		
+		// Chcek Klarna specific fields on Checkout
+		add_action('woocommerce_checkout_process', array(&$this, 'klarna_invoice_checkout_field_process'));
+	}
+	
+	/**
+	 * Add the invoice fee to the cart if Payson Invoice is selected payment method, if this is WC 2.0 and if invoice fee is used.
+	 **/
+	 function add_invoice_fee_process() {
+		 global $woocommerce;
+		 	 
+		 // Only run this if Klarna invoice is the choosen payment method and this is WC +2.0
+		 if ($_POST['payment_method'] == 'klarna' && version_compare( WOOCOMMERCE_VERSION, '2.0', '>=' )) {
+		 	
+		 	$invoice_fee = new WC_Gateway_Klarna_Invoice;
+		 	$this->invoice_fee_id = $invoice_fee->get_klarna_invoice_fee_product();
+		 	
+		 	$product = get_product($this->invoice_fee_id);
+		 	
+		 	if ( $product->exists() ) :
+		 	
+		 		// Is this a taxable product?
+		 		if ( $product->is_taxable() ) {
+			 		$product_tax = true;
+		 		} else {
+			 		$product_tax = false;
+		 		}
+    	   	 	
+    	   	 	$woocommerce->cart->add_fee($product->get_title(),$product->get_price_excluding_tax(),$product_tax,$product->get_tax_class());
+    	    
+    	    endif;
+		
+		}
+	} // End function add_invoice_fee_process
+	
+	
+	
+	/**
+ 	 * Process the gateway specific checkout form fields
+ 	 **/
+	function klarna_invoice_checkout_field_process() {
+    	global $woocommerce;
+    	
+    	$data = new WC_Gateway_Klarna_Invoice;
+		$this->shop_country = $data->get_klarna_shop_country();
+ 		
+ 		// Only run this if Klarna invoice is the choosen payment method
+ 		if ($_POST['payment_method'] == 'klarna') {
+ 			
+ 			// SE, NO, DK & FI
+	 		if ( $this->shop_country == 'SE' || $this->shop_country == 'NO' || $this->shop_country == 'DK' || $this->shop_country == 'FI' ){
+ 			
+    			// Check if set, if its not set add an error.
+    			if (!$_POST['klarna_invo_pno'])
+    	    	 	$woocommerce->add_error( __('<strong>Date of birth</strong> is a required field', 'klarna') );
+
+			}
+			// NL & DE
+	 		if ( $this->shop_country == 'NL' || $this->shop_country == 'DE' ){
+	    		// Check if set, if its not set add an error.
+	    		
+	    		// Gender
+	    		if (!isset($_POST['klarna_invo_gender']))
+	        	 	$woocommerce->add_error( __('<strong>Gender</strong> is a required field', 'klarna') );
+	         	
+	         	// Date of birth
+				if (!$_POST['klarna_invo_date_of_birth_day'] || !$_POST['klarna_invo_date_of_birth_month'] || !$_POST['klarna_invo_date_of_birth_year'])
+	         		$woocommerce->add_error( __('<strong>Date of birth</strong> is a required field', 'klarna') );
+	         	
+	         	// Shipping and billing address must be the same
+	         	$klarna_shiptobilling = ( isset( $_POST['shiptobilling'] ) ) ? $_POST['shiptobilling'] : '';
+	         	
+	         	if ($klarna_shiptobilling !=1 && isset($_POST['shipping_first_name']) && $_POST['shipping_first_name'] !== $_POST['billing_first_name'])
+	        	 	$woocommerce->add_error( __('Shipping and billing address must be the same when paying via Klarna.', 'klarna') );
+	        	 
+	        	 if ($klarna_shiptobilling !=1 && isset($_POST['shipping_last_name']) && $_POST['shipping_last_name'] !== $_POST['billing_last_name'])
+	        	 	$woocommerce->add_error( __('Shipping and billing address must be the same when paying via Klarna', 'klarna') );
+	        	 
+	        	 if ($klarna_shiptobilling !=1 && isset($_POST['shipping_address_1']) && $_POST['shipping_address_1'] !== $_POST['billing_address_1'])
+	        	 	$woocommerce->add_error( __('Shipping and billing address must be the same when paying via Klarna', 'klarna') );
+	        	 
+	        	 if ($klarna_shiptobilling !=1 && isset($_POST['shipping_postcode']) && $_POST['shipping_postcode'] !== $_POST['billing_postcode'])
+	        	 	$woocommerce->add_error( __('Shipping and billing address must be the same when paying via Klarna', 'klarna') );
+	        	 	
+	        	 if ($klarna_shiptobilling !=1 && isset($_POST['shipping_city']) && $_POST['shipping_city'] !== $_POST['billing_city'])
+	        	 	$woocommerce->add_error( __('Shipping and billing address must be the same when paying via Klarna', 'klarna') );
+			}
+			
+			// DE
+			if ( $this->shop_country == 'DE' && $this->de_consent_terms == 'yes'){
+	    		// Check if set, if its not set add an error.
+	    		if (!isset($_POST['klarna_invo_de_consent_terms']))
+	        	 	$woocommerce->add_error( __('You must accept the Klarna consent terms.', 'klarna') ); 	
+			}
+		}
+	} // End function klarna_invoice_checkout_field_process
+}
+$wc_klarna_invoice_extra = new WC_Gateway_Klarna_Invoice_Extra;

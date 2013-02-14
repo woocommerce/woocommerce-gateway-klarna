@@ -134,24 +134,24 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 		
 				
 		// Actions
-		add_action('woocommerce_receipt_klarna_account', array(&$this, 'receipt_page'));
+		
+		/* 1.6.6 */
+		add_action( 'woocommerce_update_options_payment_gateways', array( &$this, 'process_admin_options' ) );
+ 
+		/* 2.0.0 */
+		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
 
-		add_action('woocommerce_update_options_payment_gateways', array(&$this, 'process_admin_options'));
+		add_action('woocommerce_receipt_klarna_account', array(&$this, 'receipt_page'));
 		
 		add_action('admin_init', array(&$this, 'update_pclasses_from_klarna'));
 		
 		add_action('woocommerce_single_product_summary', array(&$this, 'print_product_monthly_cost'), $this->show_monthly_cost_prio);
-		
-		add_action('woocommerce_after_shop_loop_item', array(&$this, 'print_product_monthly_cost_shop'), $this->show_monthly_cost_shop_prio);
 		
 		add_action('woocommerce_checkout_process', array(&$this, 'klarna_account_checkout_field_process'));
 		
 		add_action('wp_footer', array(&$this, 'klarna_account_terms_js'));
 		
 	}
-	
-	
-	
 	
 		
 	/**
@@ -316,7 +316,7 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 			}
 			?>
 			<p>
-		    <a class="button" href="<?php echo admin_url('admin.php?page=woocommerce_settings&klarnaPclassListener=1');?>">Update the PClass file pclasses.json</a>
+		    <a class="button" href="<?php echo admin_url('admin.php?page=woocommerce_settings&tab=payment_gateways&section=WC_Gateway_Klarna_Account&klarnaPclassListener=1');?>">Update the PClass file pclasses.json</a>
 		    
 		    </p>
     	<table class="form-table">
@@ -490,14 +490,14 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 			    $k->fetchPClasses($this->klarna_country); //You can specify country (and language, currency if you wish) if you don't want to use the configured country.
 			    /* PClasses successfully fetched, now you can use getPClasses() to load them locally or getPClass to load a specific PClass locally. */
 				// Redirect to settings page
-				wp_redirect(admin_url('admin.php?page=woocommerce_settings&tab=payment_gateways&subtab=gateway-klarna_account&klarna_error_status=0'));
+				wp_redirect(admin_url('admin.php?page=woocommerce_settings&tab=payment_gateways&section=WC_Gateway_Klarna_Account&klarna_error_status=0'));
 				}
 				catch(Exception $e) {
 				    //Something went wrong, print the message:
 				    // $woocommerce->add_error( sprintf(__('Klarna PClass problem: %s. Error code: ', 'klarna'), utf8_encode($e->getMessage()) ) . '"' . $e->getCode() . '"' );
 				    //$klarna_error_code = utf8_encode($e->getMessage()) . 'Error code: ' . $e->getCode();
 				    
-				    $redirect_url = 'admin.php?page=woocommerce_settings&tab=payment_gateways&subtab=gateway-klarna_account&klarna_error_status=1&klarna_error_code=' . $e->getCode();
+				    $redirect_url = 'admin.php?page=woocommerce_settings&tab=payment_gateways&section=WC_Gateway_Klarna_Account&klarna_error_status=1&klarna_error_code=' . $e->getCode();
 				    
 				    //wp_redirect(admin_url($redirect_url));
 				    wp_redirect(admin_url($redirect_url));
@@ -921,7 +921,7 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 	function process_payment( $order_id ) {
 		global $woocommerce;
 		
-		$order = &new woocommerce_order( $order_id );
+		$order = &new WC_order( $order_id );
 		require_once(KLARNA_LIB . 'Klarna.php');
 		require_once(KLARNA_LIB . 'pclasses/storage.intf.php');
 		require_once(KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc.inc');
@@ -1029,10 +1029,16 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 				// apply_filters to item price so we can filter this if needed
 				$klarna_item_price_including_tax = $order->get_item_total( $item, true );
 				$item_price = apply_filters( 'klarna_item_price_including_tax', $klarna_item_price_including_tax );
-				
+					
+					if ( $_product->get_sku() ) {
+						$sku = $_product->get_sku();
+					} else {
+						$sku = $_product->id;
+					}
+					
 					$k->addArticle(
 		    		$qty = $item['qty'], 					//Quantity
-		    		$artNo = $item['id'], 					//Article number
+		    		$artNo = $sku,		 					//Article number
 		    		$title = utf8_decode ($item['name']), 	//Article name/title
 		    		$price = $item_price, 					// Price including tax
 		    		$vat = $item_tax_percentage,			// Tax
@@ -1525,6 +1531,46 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 	} // end function get_account_terms_link_text()
 	
 	
+	// Get Monthly cost prio - product page
+	function get_monthly_cost_prio() {
+		return $this->show_monthly_cost_prio;
+	}
+	
+	// Get Monthly cost prio - shop base page (and archives)
+	function get_monthly_cost_shop_prio() {
+		return $this->show_monthly_cost_shop_prio;
+	}
+	
+	
 		
 			 
-} // End class WC_Gateway_Klarna_Invoice
+} // End class WC_Gateway_Klarna_Account
+
+
+
+/**
+ * Class 
+ * @class 		WC_Gateway_Klarna_Account_Extra
+ * @since		1.5.4 (WC 2.0)
+ *
+ **/
+ 
+class WC_Gateway_Klarna_Account_Extra {
+	
+	public function __construct() {
+		
+		$data = new WC_Gateway_Klarna_Account;
+		$this->show_monthly_cost_shop_prio = $data->get_monthly_cost_shop_prio();
+		$this->show_monthly_cost_prio = $data->get_monthly_cost_prio();
+		
+		// Actions
+		add_action('woocommerce_after_shop_loop_item', array(&$this, 'print_product_monthly_cost_shop'), $this->show_monthly_cost_shop_prio);
+	}
+	
+	function print_product_monthly_cost_shop() {
+		$data = new WC_Gateway_Klarna_Account;
+		$data->print_product_monthly_cost_shop();
+	}
+} // End class WC_Gateway_Klarna_Account_Extra
+
+$wc_gateway_klarna_account_extra = new WC_Gateway_Klarna_Account_Extra;

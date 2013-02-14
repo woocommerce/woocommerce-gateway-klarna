@@ -1,5 +1,9 @@
 *** Klarna Changelog ***
 
+2013.02.14 - version 1.5.4
+ * WC version 2.0 compat.
+ * Updated Norwegian and Swedish translation files.
+
 2012.12.12 - version 1.5.3
  * Bugfix - Better load of js in footer for Terms & Conditions popup (Invoice, Account, Special Campaign)
  * Bugfix - Lower and Upper Threshold (Account & Special Campaign) did not work properly.
