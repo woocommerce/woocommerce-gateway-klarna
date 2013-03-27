@@ -119,17 +119,30 @@ function init_klarna_gateway() {
 	
 	// Include our Klarna Special campaign class
 	require_once 'class-klarna-campaign.php';
-
+	
+	// Include our Klarna Checkout class - if Sweden is set as the base country
+	$klarna_shop_country = get_option('woocommerce_default_country');
+	if ($klarna_shop_country == 'SE') {
+		require_once 'class-klarna-checkout.php';
+	}
 
 } // End init_klarna_gateway
 
 /**
  * Add the gateway to WooCommerce
  **/
-function add_klarna_gateway( $methods ) { 
+function add_klarna_gateway( $methods ) {
+	
 	$methods[] = 'WC_Gateway_Klarna_Invoice';
 	$methods[] = 'WC_Gateway_Klarna_Account';
 	$methods[] = 'WC_Gateway_Klarna_Campaign';
+	
+	// Only add the Klarna Checkout method if Sweden is set as the base country
+	$klarna_shop_country = get_option('woocommerce_default_country');
+	if ( $klarna_shop_country == 'SE' ) {
+		$methods[] = 'WC_Gateway_Klarna_Checkout';
+	}
+	
 	return $methods;
 }
 

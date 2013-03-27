@@ -1,5 +1,10 @@
 *** Klarna Changelog ***
 
+2013.02.14 - version 1.6
+ * Added - Support for the Klarna Checkout payment method (Sweden only)
+ * Bugfix - Updated check if invoice fee is used in function add_invoice_fee_process() for Klarna invoice. Caused fatal error on some servers if no invoice fee where set.
+
+
 2013.02.14 - version 1.5.4
  * WC version 2.0 compat.
  * Updated Norwegian and Swedish translation files.

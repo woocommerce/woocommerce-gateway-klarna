@@ -1008,7 +1008,7 @@ class WC_Gateway_Klarna_Invoice_Extra {
 	}
 	
 	/**
-	 * Add the invoice fee to the cart if Payson Invoice is selected payment method, if this is WC 2.0 and if invoice fee is used.
+	 * Add the invoice fee to the cart if Klarna Invoice is selected payment method, if this is WC 2.0 and if invoice fee is used.
 	 **/
 	 function add_invoice_fee_process() {
 		 global $woocommerce;
@@ -1019,20 +1019,22 @@ class WC_Gateway_Klarna_Invoice_Extra {
 		 	$invoice_fee = new WC_Gateway_Klarna_Invoice;
 		 	$this->invoice_fee_id = $invoice_fee->get_klarna_invoice_fee_product();
 		 	
-		 	$product = get_product($this->invoice_fee_id);
+		 	if ( $this->invoice_fee_id > 0 ) {
+		 		$product = get_product($this->invoice_fee_id);
 		 	
-		 	if ( $product->exists() ) :
-		 	
-		 		// Is this a taxable product?
-		 		if ( $product->is_taxable() ) {
-			 		$product_tax = true;
-		 		} else {
-			 		$product_tax = false;
-		 		}
+		 		if ( $product->exists() ) :
+		 		
+		 			// Is this a taxable product?
+		 			if ( $product->is_taxable() ) {
+			 			$product_tax = true;
+			 		} else {
+				 		$product_tax = false;
+				 	}
     	   	 	
-    	   	 	$woocommerce->cart->add_fee($product->get_title(),$product->get_price_excluding_tax(),$product_tax,$product->get_tax_class());
+				 	$woocommerce->cart->add_fee($product->get_title(),$product->get_price_excluding_tax(),$product_tax,$product->get_tax_class());
     	    
-    	    endif;
+				endif;
+			} // End if invoice_fee_id > 0
 		
 		}
 	} // End function add_invoice_fee_process
