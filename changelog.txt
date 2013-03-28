@@ -1,6 +1,9 @@
 *** Klarna Changelog ***
 
-2013.02.14 - version 1.6
+2013.03.29 - version 1.6.1
+ * Bugfix - Modify Standard Checkout feature in Klarna Checkout could be executed even when the payment method was disabled.
+
+2013.03.29 - version 1.6
  * Added - Support for the Klarna Checkout payment method (Sweden only)
  * Bugfix - Updated check if invoice fee is used in function add_invoice_fee_process() for Klarna invoice. Caused fatal error on some servers if no invoice fee where set.
 

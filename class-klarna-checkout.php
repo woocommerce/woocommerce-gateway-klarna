@@ -735,7 +735,15 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		
 		
 		/**
-		 * Get function get_modify_standard_checkout_url
+		 * Helper function get_modify_standard_checkout_url
+		 */
+		 
+		function get_enabled() {
+			return $this->enabled;
+		}
+		
+		/**
+		 * Helper function get_modify_standard_checkout_url
 		 */
 		 
 		function get_modify_standard_checkout_url() {
@@ -743,7 +751,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		}
 	
 		/**
-		 * Get function get_klarna_checkout_page
+		 * Helper function get_klarna_checkout_page
 		 */
 		function get_klarna_checkout_url() {
 	 		return $this->klarna_checkout_url;
@@ -800,11 +808,12 @@ class WC_Gateway_Klarna_Checkout_Extra {
 		global $woocommerce;
 		
 		$data = new WC_Gateway_Klarna_Checkout;
+		$enabled = $data->get_enabled();
 		$klarna_checkout_url = $data->get_klarna_checkout_url();
 		$modify_standard_checkout_url = $data->get_modify_standard_checkout_url();
 		
 		// Change the Checkout URL if this is enabled in the settings
-		if( $modify_standard_checkout_url == 'yes' ) {
+		if( $modify_standard_checkout_url == 'yes' && $enabled == 'yes' ) {
 			$url = $klarna_checkout_url;
 		}
 		
