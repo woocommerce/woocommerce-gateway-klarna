@@ -1432,8 +1432,9 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 	    		//$klarna_account_product_monthly_cost_message = sprintf(__('<img src="%s" /> <br/><a href="%s" target="_blank">Part pay from %s %s/month</a>', 'klarna'), $this->icon, $this->klarna_account_info, $value, $this->klarna_currency );
 		    		
 	    		// Monthly cost threshold check. This is done after apply_filters to product price ($sum).
+	    		
 		    	if ( $this->lower_threshold_monthly_cost < $sum && $this->upper_threshold_monthly_cost > $sum ) {
-
+			 
 		    		echo '<div class="klarna-product-monthly-cost-shop-page">' . do_shortcode( $this->show_monthly_cost_shop_info );
 		    		
 		    		// Show klarna_warning_banner if NL

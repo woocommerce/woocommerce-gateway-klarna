@@ -1,5 +1,9 @@
 *** Klarna Changelog ***
 
+2013.04.09 - version 1.6.2
+ * Added - Possible to specify URL to custom Terms Page for Klarna Checkout.
+ * Bugfix - Completed Klarna Checkout form fields now stays completed if customer navigate away from checkout and then returns again.
+
 2013.03.29 - version 1.6.1
  * Bugfix - Modify Standard Checkout feature in Klarna Checkout could be executed even when the payment method was disabled.
 

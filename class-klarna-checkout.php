@@ -25,6 +25,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
        	$this->log 							= $woocommerce->logger();
        	$this->eid							= ( isset( $this->settings['eid'] ) ) ? $this->settings['eid'] : '';
        	$this->secret						= ( isset( $this->settings['secret'] ) ) ? $this->settings['secret'] : '';
+       	$this->terms_url					= ( isset( $this->settings['terms_url'] ) ) ? $this->settings['terms_url'] : '';
        	$this->testmode						= ( isset( $this->settings['testmode'] ) ) ? $this->settings['testmode'] : '';
        	$this->debug						= ( isset( $this->settings['debug'] ) ) ? $this->settings['debug'] : '';
        	$this->klarna_checkout_url			= ( isset( $this->settings['klarna_checkout_url'] ) ) ? $this->settings['klarna_checkout_url'] : '';
@@ -32,7 +33,8 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
        	$this->add_std_checkout_button		= ( isset( $this->settings['add_std_checkout_button'] ) ) ? $this->settings['add_std_checkout_button'] : '';
        	$this->std_checkout_button_label	= ( isset( $this->settings['std_checkout_button_label'] ) ) ? $this->settings['std_checkout_button_label'] : '';
        	
-       	
+		if ( empty($this->terms_url) ) 
+			$this->terms_url = esc_url( get_permalink(woocommerce_get_page_id('terms')) );
         	
        	// Check if this is test mode or not
 		if ( $this->testmode == 'yes' ):
@@ -109,6 +111,12 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 							'description' => __( 'Please enter the text for the button that links to the standard checkout page from the Klarna Checkout form.', 'klarna' ), 
 							'default' => ''
 						),
+			'terms_url' => array(
+							'title' => __( 'Terms Page', 'klarna' ), 
+							'type' => 'text', 
+							'description' => __( 'Please enter the URL to the page that acts as Terms Page for Klarna Checkout. Leave blank to use the defined WooCommerce Terms Page.', 'klarna' ), 
+							'default' => ''
+						),
 			'testmode' => array(
 							'title' => __( 'Test Mode', 'klarna' ), 
 							'type' => 'checkbox', 
@@ -143,8 +151,8 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	   	<?php
 	   	// If the WooCommerce terms page isn't set, do nothing.
 		$klarna_terms_page = get_option('woocommerce_terms_page_id');
-		if ( empty($klarna_terms_page) ) {
-			echo '<strong>' . __('You need to specify a terms page in WooCommerce settings in order to enable the Klarna Checkout payment method.', 'klarna') . '</strong>';
+		if ( empty($klarna_terms_page) && empty($this->terms_url) ) {
+			echo '<strong>' . __('You need to specify a Terms Page in the WooCommerce settings or in the Klarna Checkout settings in order to enable the Klarna Checkout payment method.', 'klarna') . '</strong>';
 		}
 		?>
 	    	
@@ -242,9 +250,8 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 				 	$klarna_checkout_layout = 'desktop';
 				 }
 		
-				// If the WooCommerce terms page isn't set, do nothing.
-				$klarna_terms_page = get_option('woocommerce_terms_page_id');
-				if ( empty($klarna_terms_page) ) return;
+				// If the WooCommerce terms page or the Klarna Checkout settings field Terms Page isn't set, do nothing.
+				if ( empty($this->terms_url) ) return;
 				
 				// Set $add_klarna_window_size_script to true so that Window size detection script can load in the footer
 				global $add_klarna_window_size_script;
@@ -386,7 +393,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
         					$update['merchant']['confirmation_uri'] = add_query_arg ( array('klarna_order' => '{checkout.order.uri}', 'sid' => $order_id ), $this->klarna_checkout_url);
         					$update['merchant']['push_uri'] = add_query_arg( array('sid' => $order_id, 'klarna_order' => '{checkout.order.uri}', 'wc-api' => 'WC_Gateway_Klarna_Checkout'), $this->klarna_checkout_url );
         					
-        					$update['gui']['layout'] = $klarna_checkout_layout;
+        					//$update['gui']['layout'] = $klarna_checkout_layout;
         					
         					$klarna_order->update($update);
         				} catch (Exception $e) {
@@ -403,7 +410,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	        			$create['purchase_currency'] = 'SEK';
 	        			$create['locale'] = 'sv-se';
 	        			$create['merchant']['id'] = $eid;
-	        			$create['merchant']['terms_uri'] = esc_url( get_permalink(woocommerce_get_page_id('terms')) );
+	        			$create['merchant']['terms_uri'] = $this->terms_url;
 	        			$create['merchant']['checkout_uri'] = add_query_arg( 'klarnaListener', 'checkout', $this->klarna_checkout_url );
 	        			$create['merchant']['confirmation_uri'] = add_query_arg ( array('klarna_order' => '{checkout.order.uri}', 'sid' => $order_id ), $this->klarna_checkout_url);
 	        			$create['merchant']['push_uri'] = add_query_arg( array('sid' => $order_id, 'klarna_order' => '{checkout.order.uri}', 'wc-api' => 'WC_Gateway_Klarna_Checkout'), $this->klarna_checkout_url );
