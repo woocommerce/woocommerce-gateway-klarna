@@ -199,7 +199,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			
 				// Display Order response/thank you page via iframe from Klarna
 				
-				@session_start();
+				//@session_start();
 				
 				// Shared secret
 				$sharedSecret = $this->secret;
@@ -237,8 +237,10 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 				$woocommerce->cart->empty_cart();
 			
 			} else {
-		
-		
+				
+				// Don't render the Klarna Checkout form if the payment gateway isn't enabled.
+				if ($this->enabled != 'yes') return;
+				
 				// Process order via Klarna Checkout page				
 
 				if ( !defined( 'WOOCOMMERCE_CHECKOUT' ) ) define( 'WOOCOMMERCE_CHECKOUT', true );
@@ -365,7 +367,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 					Klarna_Checkout_Order::$baseUri = $this->klarna_server;
 					Klarna_Checkout_Order::$contentType = 'application/vnd.klarna.checkout.aggregated-order-v2+json';
 					
-					@session_start();
+					//@session_start();
 					
 					$connector = Klarna_Checkout_Connector::create($sharedSecret);
     		
@@ -456,7 +458,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 				
 				require_once 'src/Klarna/Checkout.php';  
   
-				@session_start();  
+				//@session_start();  
 				
 				Klarna_Checkout_Order::$contentType = "application/vnd.klarna.checkout.aggregated-order-v2+json";  
 				
@@ -775,24 +777,28 @@ class WC_Gateway_Klarna_Checkout_Extra {
 	
 	public function __construct() {
 		
+		add_action('init', array( &$this, 'start_session' ), 1);
+		
 		add_shortcode( 'woocommerce_klarna_checkout', array(&$this, 'klarna_checkout_page') );
 		
 		//add_action( 'woocommerce_proceed_to_checkout', array( &$this, 'checkout_button' ), 12 );
 		
 		add_filter( 'woocommerce_get_checkout_url', array( &$this, 'change_checkout_url' ) );
 		
-		//add_action( 'init', array( &$this, 'register_window_size_script' ) );
-		//add_action( 'wp_head', array( &$this, 'print_window_size_script' ) );
-		
-		//add_action('wp_ajax_my_action', array( &$this, 'klarna_checkout_page') );
-		//add_action('wp_ajax_nopriv_my_action', array( &$this, 'klarna_checkout_page') );
-		
-		
 		
 		 
 	}
 	
-	
+	// Set session
+	function start_session() {		
+		
+		$data = new WC_Gateway_Klarna_Checkout;
+		$enabled = $data->get_enabled();
+		var_dump($enabled);
+    	if(!session_id() && $enabled == 'yes') {
+        	session_start();
+        }
+    }
 	
 	// Shortcode
 	function klarna_checkout_page() {
