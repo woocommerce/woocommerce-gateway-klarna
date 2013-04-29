@@ -794,7 +794,7 @@ class WC_Gateway_Klarna_Checkout_Extra {
 		
 		$data = new WC_Gateway_Klarna_Checkout;
 		$enabled = $data->get_enabled();
-		var_dump($enabled);
+		
     	if(!session_id() && $enabled == 'yes') {
         	session_start();
         }

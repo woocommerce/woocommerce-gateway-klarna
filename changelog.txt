@@ -1,5 +1,8 @@
 *** Klarna Changelog ***
 
+2013.04.29 - - version 1.6.4
+ * Bugfix - removed a var_dump() in Klarna Checkout (function start_session()).
+ 
 2013.04.25 - version 1.6.3
  * Bugfix - Klarna Checkout: Moved session_start() to init. Further improvment to the problem with completed Klarna Checkout form fields not stays completed if customer navigate away from checkout and then returns again.
  * Improved check for if Klarna Checkout is enabled.
