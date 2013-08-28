@@ -2,7 +2,7 @@
 
 By Niklas Högefjord - http://krokedil.com/
 
-Documentation can be found at http://wcdocs.woothemes.com/user-guide/extensions/klarna/.
+Documentation can be found at http://docs.woothemes.com/document/klarna/.
 
 
 == DESCRIPTION ==

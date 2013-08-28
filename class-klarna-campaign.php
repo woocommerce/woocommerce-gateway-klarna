@@ -69,6 +69,7 @@ class WC_Gateway_Klarna_Campaign extends WC_Gateway_Klarna {
 			$klarna_campaign_info = 'https://online.klarna.com/account_nl.yaws?eid=' . $this->eid;
 			break;
 		case 'NO' :
+		case 'NB' :
 			$klarna_country = 'NO';
 			$klarna_language = 'NB';
 			$klarna_currency = 'NOK';
@@ -81,6 +82,7 @@ class WC_Gateway_Klarna_Campaign extends WC_Gateway_Klarna {
 			$klarna_campaign_info = 'https://online.klarna.com/account_fi.yaws?eid=' . $this->eid;
 			break;
 		case 'SE' :
+		case 'SV' :
 			$klarna_country = 'SE';
 			$klarna_language = 'SV';
 			$klarna_currency = 'SEK';
@@ -732,7 +734,7 @@ class WC_Gateway_Klarna_Campaign extends WC_Gateway_Klarna {
 	function process_payment( $order_id ) {
 		global $woocommerce;
 		
-		$order = &new WC_order( $order_id );
+		$order = new WC_order( $order_id );
 		
 		require_once(KLARNA_LIB . 'Klarna.php');
 		require_once(KLARNA_LIB . 'pclasses/storage.intf.php');
@@ -848,10 +850,10 @@ class WC_Gateway_Klarna_Campaign extends WC_Gateway_Klarna {
 
 					$k->addArticle(
 		    		$qty = $item['qty'], 					//Quantity
-		    		$artNo = $sku,		 					//Article number
+		    		$artNo = strval($sku),		 					//Article number
 		    		$title = utf8_decode ($item['name']), 	//Article name/title
 		    		$price = $item_price, 					// Price including tax
-		    		$vat = $item_tax_percentage,			// Tax
+		    		$vat = round( $item_tax_percentage, 1),			// Tax
 		    		$discount = 0, 
 		    		$flags = KlarnaFlags::INC_VAT 			//Price is including VAT.
 				);
@@ -893,7 +895,7 @@ class WC_Gateway_Klarna_Campaign extends WC_Gateway_Klarna {
 			    $artNo = "",
 			    $title = __('Shipping cost', 'klarna'),
 			    $price = $shipping_price,
-			    $vat = $calculated_shipping_tax_percentage,
+			    $vat = round( $calculated_shipping_tax_percentage, 1),
 			    $discount = 0,
 			    $flags = KlarnaFlags::INC_VAT + KlarnaFlags::IS_SHIPMENT //Price is including VAT and is shipment fee
 			);
@@ -1067,10 +1069,10 @@ class WC_Gateway_Klarna_Campaign extends WC_Gateway_Klarna {
 		if ( is_checkout() && $this->enabled=="yes" ) {
 			?>
 			<script type="text/javascript">
-				var klarna_eid = "<?php echo $this->eid; ?>";
+				var klarna_special_eid = "<?php echo $this->eid; ?>";
 				var klarna_special_linktext = "<?php echo $this->get_terms_link_text($this->klarna_country); ?>";
 				var klarna_special_country = "<?php echo $this->get_terms_country(); ?>";
-				addKlarnaSpecialPaymentEvent(function(){InitKlarnaSpecialPaymentElements('klarna_specialpayment', klarna_eid, klarna_special_country, klarna_special_linktext, 0); });
+				addKlarnaSpecialPaymentEvent(function(){InitKlarnaSpecialPaymentElements('klarna_specialpayment', klarna_special_eid, klarna_special_country, klarna_special_linktext, 0); });
 			</script>
 			<?php
 		}

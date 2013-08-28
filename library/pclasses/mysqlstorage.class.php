@@ -1,44 +1,28 @@
 <?php
 /**
- *  Copyright 2010 KLARNA AB. All rights reserved.
+ * MySQL Storage
  *
- *  Redistribution and use in source and binary forms, with or without modification, are
- *  permitted provided that the following conditions are met:
+ * PHP Version 5.3
  *
- *     1. Redistributions of source code must retain the above copyright notice, this list of
- *        conditions and the following disclaimer.
- *
- *     2. Redistributions in binary form must reproduce the above copyright notice, this list
- *        of conditions and the following disclaimer in the documentation and/or other materials
- *        provided with the distribution.
- *
- *  THIS SOFTWARE IS PROVIDED BY KLARNA AB "AS IS" AND ANY EXPRESS OR IMPLIED
- *  WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
- *  FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL KLARNA AB OR
- *  CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- *  CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- *  SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
- *  ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
- *  NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
- *  ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
- *  The views and conclusions contained in the software and documentation are those of the
- *  authors and should not be interpreted as representing official policies, either expressed
- *  or implied, of KLARNA AB.
- *
- * @package KlarnaAPI
+ * @category  Payment
+ * @package   KlarnaAPI
+ * @author    MS Dev <ms.modules@klarna.com>
+ * @copyright 2012 Klarna AB (http://klarna.com)
+ * @license   http://opensource.org/licenses/BSD-2-Clause BSD-2
+ * @link      http://integration.klarna.com/
  */
 
 /**
  * Include the {@link PCStorage} interface.
  */
-require_once('storage.intf.php');
+require_once 'storage.intf.php';
 
 /**
  * MySQL storage class for KlarnaPClass
  *
  * This class is an MySQL implementation of the PCStorage interface.<br>
- * Config field pcURI needs to match format: user:passwd@addr:port/dbName.dbTable<br>
+ * Config field pcURI needs to match format:
+ * user:passwd@addr:port/dbName.dbTable<br>
  * Port can be omitted.<br>
  *
  * <b>Acceptable characters</b>:<br>
@@ -62,20 +46,19 @@ require_once('storage.intf.php');
  * );
  * </code>
  *
- * @package     KlarnaAPI
- * @deprecated  Deprecated since 2.1, better to use PDO based SQLStorage
- * @see         SQLStorage
- * @version     2.1.2
- * @since       2011-09-13
- * @link        http://integration.klarna.com/
- * @copyright   Copyright (c) 2010 Klarna AB (http://klarna.com)
+ * @category  Payment
+ * @package   KlarnaAPI
+ * @author    MS Dev <ms.modules@klarna.com>
+ * @copyright 2012 Klarna AB (http://klarna.com)
+ * @license   http://opensource.org/licenses/BSD-2-Clause BSD-2
+ * @link      http://integration.klarna.com/
  */
-class MySQLStorage extends PCStorage {
+class MySQLStorage extends PCStorage
+{
 
     /**
      * Database name.
      *
-     * @ignore Do not show in PHPDoc.
      * @var string
      */
     protected $dbName;
@@ -83,7 +66,6 @@ class MySQLStorage extends PCStorage {
     /**
      * Database table.
      *
-     * @ignore Do not show in PHPDoc.
      * @var string
      */
     protected $dbTable;
@@ -91,7 +73,6 @@ class MySQLStorage extends PCStorage {
     /**
      * Database address.
      *
-     * @ignore Do not show in PHPDoc.
      * @var string
      */
     protected $addr;
@@ -99,7 +80,6 @@ class MySQLStorage extends PCStorage {
     /**
      * Database username.
      *
-     * @ignore Do not show in PHPDoc.
      * @var string
      */
     protected $user;
@@ -107,7 +87,6 @@ class MySQLStorage extends PCStorage {
     /**
      * Database password.
      *
-     * @ignore Do not show in PHPDoc.
      * @var string
      */
     protected $passwd;
@@ -115,61 +94,66 @@ class MySQLStorage extends PCStorage {
     /**
      * MySQL DB link resource.
      *
-     * @ignore Do not show in PHPDoc.
      * @var resource
      */
     protected $link;
 
     /**
-     * Class constructor
-     * @ignore Does nothing.
+     * return the name of the storage type
+     *
+     * @return string
      */
-    public function __construct() {
-    }
-
-    /**
-     * Class destructor
-     * @ignore Does nothing.
-     */
-    public function __destruct() {
+    public function getName()
+    {
+        return "mysql";
     }
 
     /**
      * Connects to the DB and checks if DB and table exists.
      *
-     * @ignore Do not show in PHPDoc.
-     * @throws Exception
+     * @throws KlarnaException
      * @return void
      */
-    protected function connect() {
+    protected function connect()
+    {
         $this->link = mysql_connect($this->addr, $this->user, $this->passwd);
-        if($this->link === false) {
-            throw new Exception('Failed to connect to database! ('.mysql_error().')');
+        if ($this->link === false) {
+            throw new Klarna_DatabaseException(
+                'Failed to connect to database! ('.mysql_error().')'
+            );
         }
 
-        if(!mysql_query('CREATE DATABASE IF NOT EXISTS `'.$this->dbName.'`', $this->link)) {
-            throw new Exception('Database not existing, failed to create! ('.mysql_error().')');
+        if (!mysql_query(
+            "CREATE DATABASE IF NOT EXISTS `{$this->dbName}`",
+            $this->link
+        )
+        ) {
+            throw new Klarna_DatabaseException(
+                'Failed to create! ('.mysql_error().')'
+            );
         }
 
         $create = mysql_query(
-                "CREATE TABLE IF NOT EXISTS `".$this->dbName."`.`".$this->dbTable."` (
-                    `eid` int(10) unsigned NOT NULL,
-                    `id` int(10) unsigned NOT NULL,
-                    `type` tinyint(4) NOT NULL,
-                    `description` varchar(255) NOT NULL,
-                    `months` int(11) NOT NULL,
-                    `interestrate` decimal(11,2) NOT NULL,
-                    `invoicefee` decimal(11,2) NOT NULL,
-                    `startfee` decimal(11,2) NOT NULL,
-                    `minamount` decimal(11,2) NOT NULL,
-                    `country` int(11) NOT NULL,
-                    `expire` int(11) NOT NULL,
-                    KEY `id` (`id`)
-                )", $this->link
+            "CREATE TABLE IF NOT EXISTS `{$this->dbName}`.`{$this->dbTable}` (
+                `eid` int(10) unsigned NOT NULL,
+                `id` int(10) unsigned NOT NULL,
+                `type` tinyint(4) NOT NULL,
+                `description` varchar(255) NOT NULL,
+                `months` int(11) NOT NULL,
+                `interestrate` decimal(11,2) NOT NULL,
+                `invoicefee` decimal(11,2) NOT NULL,
+                `startfee` decimal(11,2) NOT NULL,
+                `minamount` decimal(11,2) NOT NULL,
+                `country` int(11) NOT NULL,
+                `expire` int(11) NOT NULL,
+                KEY `id` (`id`)
+            )", $this->link
         );
 
-        if(!$create) {
-            throw new Exception('Table not existing, failed to create! ('.mysql_error().')');
+        if (!$create) {
+            throw new Klarna_DatabaseException(
+                'Table not existing, failed to create! ('.mysql_error().')'
+            );
         }
     }
 
@@ -189,20 +173,25 @@ class MySQLStorage extends PCStorage {
      * );
      * </code>
      *
-     * @ignore Do not show in PHPDoc.
-     * @param  string|array $uri Specified URI to database and table.
-     * @throws Exception
+     * @param string|array $uri Specified URI to database and table.
+     *
+     * @throws KlarnaException
      * @return void
      */
-    protected function splitURI($uri) {
-        if(is_array($uri)) {
+    protected function splitURI($uri)
+    {
+        if (is_array($uri)) {
             $this->user = $uri['user'];
             $this->passwd = $uri['passwd'];
             $this->addr = $uri['dsn'];
             $this->dbName = $uri['db'];
             $this->dbTable = $uri['table'];
-        }
-        else if(preg_match('/^([\w-]+):([\w-]+)@([\w\.-]+|[\w\.-]+:[\d]+)\/([\w-]+).([\w-]+)$/', $uri, $arr) === 1) {
+        } else if (preg_match(
+            '/^([\w-]+):([\w-]+)@([\w\.-]+|[\w\.-]+:[\d]+)\/([\w-]+).([\w-]+)$/',
+            $uri,
+            $arr
+        ) === 1
+        ) {
             /*
               [0] => user:passwd@addr/dbName.dbTable
               [1] => user
@@ -211,8 +200,10 @@ class MySQLStorage extends PCStorage {
               [4] => dbName
               [5] => dbTable
             */
-            if(count($arr) != 6) {
-                throw new Exception('URI is invalid! Missing field or invalid characters used!');
+            if (count($arr) != 6) {
+                throw new Klarna_DatabaseException(
+                    'URI is invalid! Missing field or invalid characters used!'
+                );
             }
 
             $this->user = $arr[1];
@@ -220,89 +211,125 @@ class MySQLStorage extends PCStorage {
             $this->addr = $arr[3];
             $this->dbName = $arr[4];
             $this->dbTable = $arr[5];
-        }
-        else {
-            throw new Exception('URI to MySQL is not valid! ( user:passwd@addr/dbName.dbTable )');
-        }
-    }
-
-    /**
-     * @see PCStorage::load()
-     */
-    public function load($uri) {
-        try {
-            $this->splitURI($uri);
-            $this->connect();
-            if(($result = mysql_query('SELECT * FROM `'.$this->dbName.'`.`'.$this->dbTable.'`', $this->link)) === false) {
-                throw new Exception('SELECT query failed! ('.mysql_error().')');
-            }
-            while($row = mysql_fetch_assoc($result)) {
-                $this->addPClass(new KlarnaPClass($row));
-            }
-        }
-        catch(Exception $e) {
-            throw new KlarnaException("Error in " . __METHOD__ . ": " .$e->getMessage());
+        } else {
+            throw new Klarna_DatabaseException(
+                'URI to MySQL is not valid! ( user:passwd@addr/dbName.dbTable )'
+            );
         }
     }
 
     /**
-     * @see PCStorage::save()
+     * Load pclasses
+     *
+     * @param string $uri pclass uri
+     *
+     * @throws KlarnaException
+     * @return void
      */
-    public function save($uri) {
-        try {
-            $this->splitURI($uri);
+    public function load($uri)
+    {
+        $this->splitURI($uri);
+        $this->connect();
+        $result = mysql_query(
+            "SELECT * FROM `{$this->dbName}`.`{$this->dbTable}`",
+            $this->link
+        );
+        if ($result === false) {
+            throw new Klarna_DatabaseException(
+                'SELECT query failed! ('.mysql_error().')'
+            );
+        }
+        while ($row = mysql_fetch_assoc($result)) {
+            $this->addPClass(new KlarnaPClass($row));
+        }
+    }
 
-            $this->connect();
-            if(!is_array($this->pclasses) || count($this->pclasses) == 0) {
-                return;
-            }
+    /**
+     * Save pclasses to database
+     *
+     * @param string $uri pclass uri
+     *
+     * @throws KlarnaException
+     * @return void
+     */
+    public function save($uri)
+    {
+        $this->splitURI($uri);
 
-            foreach($this->pclasses as $pclasses) {
-                foreach($pclasses as $pclass) {
-                    //Remove the pclass if it exists.
-                    mysql_query("DELETE FROM `".$this->dbName.'`.`'.$this->dbTable."` WHERE `id` = '".$pclass->getId()."' AND `eid` = '".$pclass->getEid()."'");
+        $this->connect();
+        if (!is_array($this->pclasses) || count($this->pclasses) == 0) {
+            return;
+        }
 
-                    //Insert it again.
-                    $result = mysql_query(
-                        "INSERT INTO `".$this->dbName.'`.`'.$this->dbTable."`
-                           (`eid`, `id`, `type`, `description`, `months`, `interestrate`, `invoicefee`, `startfee`, `minamount`, `country`, `expire`)
-                         VALUES
-                           ('".$pclass->getEid()."',
-                            '".$pclass->getId()."',
-                            '".$pclass->getType()."',
-                            '".$pclass->getDescription()."',
-                            '".$pclass->getMonths()."',
-                            '".$pclass->getInterestRate()."',
-                            '".$pclass->getInvoiceFee()."',
-                            '".$pclass->getStartFee()."',
-                            '".$pclass->getMinAmount()."',
-                            '".$pclass->getCountry()."',
-                            '".$pclass->getExpire()."')", $this->link
+        foreach ($this->pclasses as $pclasses) {
+            foreach ($pclasses as $pclass) {
+                //Remove the pclass if it exists.
+                mysql_query(
+                    "DELETE FROM `{$this->dbName}`.`{$this->dbTable}`
+                     WHERE `id` = '{$pclass->getId()}'
+                     AND `eid` = '{$pclass->getEid()}'"
+                );
+
+                //Insert it again.
+                $result = mysql_query(
+                    "INSERT INTO `{$this->dbName}`.`{$this->dbTable}`
+                       (`eid`,
+                        `id`,
+                        `type`,
+                        `description`,
+                        `months`,
+                        `interestrate`,
+                        `invoicefee`,
+                        `startfee`,
+                        `minamount`,
+                        `country`,
+                        `expire`
+                        )
+                     VALUES
+                       ('{$pclass->getEid()}',
+                        '{$pclass->getId()}',
+                        '{$pclass->getType()}',
+                        '{$pclass->getDescription()}',
+                        '{$pclass->getMonths()}',
+                        '{$pclass->getInterestRate()}',
+                        '{$pclass->getInvoiceFee()}',
+                        '{$pclass->getStartFee()}',
+                        '{$pclass->getMinAmount()}',
+                        '{$pclass->getCountry()}',
+                        '{$pclass->getExpire()}')", $this->link
+                );
+                if ($result === false) {
+                    throw new Klarna_DatabaseException(
+                        'INSERT INTO query failed! ('.mysql_error().')'
                     );
-                    if($result === false) {
-                        throw new Exception('INSERT INTO query failed! ('.mysql_error().')');
-                    }
                 }
             }
         }
-        catch(Exception $e) {
-            throw new KlarnaException("Error in " . __METHOD__ . ": " . $e->getMessage());
-        }
     }
 
     /**
-     * @see PCStorage::clear()
+     * Clear the pclasses
+     *
+     * @param string $uri pclass uri
+     *
+     * @throws KlarnaException
+     * @return void
      */
-    public function clear($uri) {
+    public function clear($uri)
+    {
         try {
             $this->splitURI($uri);
             unset($this->pclasses);
             $this->connect();
 
-            mysql_query("DELETE FROM `".$this->dbName."`.`".$this->dbTable."`", $this->link);
-        }
-        catch(Exception $e) {
-            throw new KlarnaException("Error in " . __METHOD__ . ": " . $e->getMessage());
+            mysql_query(
+                "DELETE FROM `{$this->dbName}`.`{$this->dbTable}`",
+                $this->link
+            );
+        } catch(Exception $e) {
+            throw new Klarna_DatabaseException(
+                $e->getMessage(), $e->getCode()
+            );
         }
     }
 }

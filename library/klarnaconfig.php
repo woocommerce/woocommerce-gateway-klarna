@@ -1,39 +1,23 @@
 <?php
 /**
- *  Copyright 2010 KLARNA AB. All rights reserved.
+ * KlarnaConfig
  *
- *  Redistribution and use in source and binary forms, with or without modification, are
- *  permitted provided that the following conditions are met:
+ * PHP Version 5.3
  *
- *     1. Redistributions of source code must retain the above copyright notice, this list of
- *        conditions and the following disclaimer.
- *
- *     2. Redistributions in binary form must reproduce the above copyright notice, this list
- *        of conditions and the following disclaimer in the documentation and/or other materials
- *        provided with the distribution.
- *
- *  THIS SOFTWARE IS PROVIDED BY KLARNA AB "AS IS" AND ANY EXPRESS OR IMPLIED
- *  WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
- *  FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL KLARNA AB OR
- *  CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- *  CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- *  SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
- *  ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
- *  NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
- *  ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
- *  The views and conclusions contained in the software and documentation are those of the
- *  authors and should not be interpreted as representing official policies, either expressed
- *  or implied, of KLARNA AB.
- *
- * @package KlarnaAPI
+ * @category  Payment
+ * @package   KlarnaAPI
+ * @author    MS Dev <ms.modules@klarna.com>
+ * @copyright 2012 Klarna AB (http://klarna.com)
+ * @license   http://opensource.org/licenses/BSD-2-Clause BSD-2
+ * @link      http://integration.klarna.com/
  */
 
 /**
  * Configuration class for the Klarna instance.
  *
  * KlarnaConfig stores added fields in JSON, it also prepends.<br>
- * Loads/saves specified file, or default file, if {@link KlarnaConfig::$store} is set to true.<br>
+ * Loads/saves specified file, or default file, if {@link KlarnaConfig::$store}
+ * is set to true.<br>
  *
  * You add settings using the ArrayAccess:<br>
  * $arr['field'] = $val or $arr->offsetSet('field', $val);<br>
@@ -46,19 +30,23 @@
  * currency    - Currency constant or code (int|string)
  * mode        - Klarna::BETA or Klarna::LIVE
  * ssl         - Use HTTPS or HTTP. (bool)
- * candice     - Status reporting to Klarna, to detect erroneous integrations, etc. (bool)
+ * candice     - Status reporting to Klarna, to detect erroneous
+ *               integrations, etc. (bool)
  * pcStorage   - Storage module, e.g. 'json'
- * pcURI       - URI to where the PClasses are stored, e.g. '/srv/shop/pclasses.json'
+ * pcURI       - URI to where the PClasses are stored, e.g.
+ *               '/srv/shop/pclasses.json'
  * xmlrpcDebug - XMLRPC debugging (bool)
  * debug       - Normal debugging (bool)
  *
+ * @category  Payment
  * @package   KlarnaAPI
- * @version   2.1.2
- * @since     2011-09-13
+ * @author    MS Dev <ms.modules@klarna.com>
+ * @copyright 2012 Klarna AB (http://klarna.com)
+ * @license   http://opensource.org/licenses/BSD-2-Clause BSD-2
  * @link      http://integration.klarna.com/
- * @copyright Copyright (c) 2010 Klarna AB (http://klarna.com)
  */
-class KlarnaConfig implements ArrayAccess {
+class KlarnaConfig implements ArrayAccess
+{
 
     /**
      * An array containing all the options for this config.
@@ -86,16 +74,22 @@ class KlarnaConfig implements ArrayAccess {
     /**
      * Class constructor
      *
-     * Loads specified file, or default file, if {@link KlarnaConfig::$store} is set to true.
+     * Loads specified file, or default file,
+     * if {@link KlarnaConfig::$store} is set to true.
      *
-     * @param  string  $file  URI to config file, e.g. ./config.json
+     * @param string $file URI to config file, e.g. ./config.json
      */
-    public function __construct($file = null) {
+    public function __construct($file = null)
+    {
         $this->options = array();
-        if($file) {
+        if ($file) {
             $this->file = $file;
-            if(is_readable($this->file)) {
-                $this->options = json_decode(file_get_contents($this->file), true);
+            if (is_readable($this->file)) {
+                $this->options = json_decode(
+                    file_get_contents(
+                        $this->file
+                    ), true
+                );
             }
         }
     }
@@ -105,18 +99,24 @@ class KlarnaConfig implements ArrayAccess {
      *
      * @return void
      */
-    public function clear() {
+    public function clear()
+    {
         $this->options = array();
     }
 
     /**
      * Class destructor
      *
-     * Saves specified file, or default file, if {@link KlarnaConfig::$store} is set to true.
+     * Saves specified file, or default file,
+     * if {@link KlarnaConfig::$store} is set to true.
      */
-    public function __destruct() {
-        if(self::$store && $this->file) {
-            if((!file_exists($this->file) && is_writable(dirname($this->file))) || is_writable($this->file)) {
+    public function __destruct()
+    {
+        if (self::$store && $this->file) {
+            if ((!file_exists($this->file)
+                && is_writable(dirname($this->file)))
+                || is_writable($this->file)
+            ) {
                 file_put_contents($this->file, json_encode($this->options));
             }
         }
@@ -125,24 +125,25 @@ class KlarnaConfig implements ArrayAccess {
     /**
      * Returns true whether the field exists.
      *
-     * @param  mixed $offset
+     * @param mixed $offset field
+     *
      * @return bool
      */
-    public function offsetExists($offset) {
-        if(isset($this->options[$offset])) {
-            return true;
-        }
-        return false;
+    public function offsetExists($offset)
+    {
+        return isset($this->options[$offset]);
     }
 
     /**
      * Used to get the value of a field.
      *
-     * @param  mixed $offset
+     * @param mixed $offset field
+     *
      * @return mixed
      */
-    public function offsetGet($offset) {
-        if(!$this->offsetExists($offset)) {
+    public function offsetGet($offset)
+    {
+        if (!$this->offsetExists($offset)) {
             return null;
         }
         return $this->options[$offset];
@@ -151,21 +152,25 @@ class KlarnaConfig implements ArrayAccess {
     /**
      * Used to set a value to a field.
      *
-     * @param  mixed $field
-     * @param  mixed $value
+     * @param mixed $offset field
+     * @param mixed $value  value
+     *
      * @return void
      */
-    public function offsetSet($offset, $value) {
+    public function offsetSet($offset, $value)
+    {
         $this->options[$offset] = $value;
     }
 
     /**
      * Removes the specified field.
      *
-     * @param  mixed $offset
+     * @param mixed $offset field
+     *
      * @return void
      */
-    public function offsetUnset($offset) {
+    public function offsetUnset($offset)
+    {
         unset($this->options[$offset]);
     }
 }

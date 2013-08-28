@@ -53,7 +53,6 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 		$this->lower_threshold_monthly_cost		= ( isset( $this->settings['lower_threshold_monthly_cost'] ) ) ? $this->settings['lower_threshold_monthly_cost'] : '';
 		$this->upper_threshold_monthly_cost		= ( isset( $this->settings['upper_threshold_monthly_cost'] ) ) ? $this->settings['upper_threshold_monthly_cost'] : '';
 		
-		
 		if ($this->lower_threshold_monthly_cost == '') $this->lower_threshold_monthly_cost = 0;
 		if ($this->upper_threshold_monthly_cost == '') $this->upper_threshold_monthly_cost = 10000000;
 		
@@ -86,6 +85,7 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 			$klarna_basic_icon = 'https://cdn.klarna.com/public/images/NL/logos/v1/basic/NL_basic_logo_std_blue-black.png?width=60&eid=' . $this->eid;
 			break;
 		case 'NO' :
+		case 'NB' :
 			$klarna_country = 'NO';
 			$klarna_language = 'NB';
 			$klarna_currency = 'NOK';
@@ -102,6 +102,7 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 			$klarna_basic_icon = 'https://cdn.klarna.com/public/images/FI/logos/v1/basic/FI_basic_logo_std_blue-black.png?width=60&eid=' . $this->eid;
 			break;
 		case 'SE' :
+		case 'SV' :
 			$klarna_country = 'SE';
 			$klarna_language = 'SV';
 			$klarna_currency = 'SEK';
@@ -149,7 +150,7 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 		
 		add_action('woocommerce_checkout_process', array(&$this, 'klarna_account_checkout_field_process'));
 		
-		add_action('wp_footer', array(&$this, 'klarna_account_terms_js'));
+		add_action('wp_head', array(&$this, 'klarna_account_terms_js'));
 		
 	}
 	
@@ -484,8 +485,7 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
     			}
     			*/
     		}
-			
-							
+					
 			try {
 			    $k->fetchPClasses($this->klarna_country); //You can specify country (and language, currency if you wish) if you don't want to use the configured country.
 			    /* PClasses successfully fetched, now you can use getPClasses() to load them locally or getPClass to load a specific PClass locally. */
@@ -921,7 +921,7 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 	function process_payment( $order_id ) {
 		global $woocommerce;
 		
-		$order = &new WC_order( $order_id );
+		$order = new WC_order( $order_id );
 		require_once(KLARNA_LIB . 'Klarna.php');
 		require_once(KLARNA_LIB . 'pclasses/storage.intf.php');
 		require_once(KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc.inc');
@@ -1038,10 +1038,10 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 					
 					$k->addArticle(
 		    		$qty = $item['qty'], 					//Quantity
-		    		$artNo = $sku,		 					//Article number
+		    		$artNo = strval($sku),		 					//Article number
 		    		$title = utf8_decode ($item['name']), 	//Article name/title
 		    		$price = $item_price, 					// Price including tax
-		    		$vat = $item_tax_percentage,			// Tax
+		    		$vat = round( $item_tax_percentage, 1),			// Tax
 		    		$discount = 0, 
 		    		$flags = KlarnaFlags::INC_VAT 			//Price is including VAT.
 				);
@@ -1083,7 +1083,7 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 			    $artNo = "",
 			    $title = __('Shipping cost', 'klarna'),
 			    $price = $shipping_price,
-			    $vat = $calculated_shipping_tax_percentage,
+			    $vat = round( $calculated_shipping_tax_percentage, 1),
 			    $discount = 0,
 			    $flags = KlarnaFlags::INC_VAT + KlarnaFlags::IS_SHIPMENT //Price is including VAT and is shipment fee
 			);
@@ -1302,6 +1302,8 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 			// apply_filters to product price so we can filter this if needed
 			$klarna_product_total = $product->get_price();
 			$sum = apply_filters( 'klarna_product_total', $klarna_product_total ); // Product price.
+			$sum = trim($sum);
+			
 			$flag = KlarnaFlags::PRODUCT_PAGE; //or KlarnaFlags::PRODUCT_PAGE, if you want to do it for one item.
 			$pclass = $k->getCheapestPClass($sum, $flag);
 			
@@ -1407,6 +1409,7 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 			// apply_filters to product price so we can filter this if needed
 			$klarna_product_total = $product->get_price();
 			$sum = apply_filters( 'klarna_product_total', $klarna_product_total ); // Product price.
+			$sum = trim($sum);
 			$flag = KlarnaFlags::PRODUCT_PAGE; //or KlarnaFlags::PRODUCT_PAGE, if you want to do it for one item.
 			$pclass = $k->getCheapestPClass($sum, $flag);
 			
@@ -1457,16 +1460,19 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 	 **/
 	function klarna_account_terms_js() {
 		
-		if ( is_checkout() || is_product() || is_shop() || is_product_category() || is_product_tag() ) {
+		if ( $this->enabled=="yes" && ( is_checkout() || is_product() || is_shop() || is_product_category() || is_product_tag() ) ) {
+	
 			?>
 			<script type="text/javascript">
-				var klarna_eid = "<?php echo $this->eid; ?>";
+				var klarna_account_eid = "<?php echo $this->eid; ?>";
 				var klarna_account_linktext = "<?php echo $this->get_account_terms_link_text($this->klarna_country); ?>";
 				var klarna_account_country = "<?php echo $this->get_terms_country(); ?>";
-				addKlarnaPartPaymentEvent(function(){InitKlarnaPartPaymentElements('klarna_partpayment', klarna_eid, klarna_account_country, klarna_account_linktext, 0); });
+				addKlarnaPartPaymentEvent(function(){InitKlarnaPartPaymentElements('klarna_partpayment', klarna_account_eid, klarna_account_country, klarna_account_linktext, 0); });
 			</script>
 			<?php
+			
 		}
+
 	}
 	
 	
