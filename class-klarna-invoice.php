@@ -68,6 +68,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 		
 		endif;
 		
+		
 		// Country and language
 		switch ( $this->shop_country )
 		{
@@ -96,6 +97,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 			$klarna_invoice_icon = 'https://cdn.klarna.com/public/images/NL/badges/v1/invoice/NL_invoice_badge_std_blue.png?width=60&eid=' . $this->eid;
 			break;
 		case 'NO' :
+		case 'NB' :
 			$klarna_country = 'NO';
 			$klarna_language = 'NB';
 			$klarna_currency = 'NOK';
@@ -112,6 +114,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 			$klarna_invoice_icon = 'https://cdn.klarna.com/public/images/FI/badges/v1/invoice/FI_invoice_badge_std_blue.png?width=60&eid=' . $this->eid;
 			break;
 		case 'SE' :
+		case 'SV' :
 			$klarna_country = 'SE';
 			$klarna_language = 'SV';
 			$klarna_currency = 'SEK';
@@ -256,7 +259,6 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 		global $woocommerce;
 		
 		if ($this->enabled=="yes") :
-		
 			// if (!is_ssl()) return false;
 			
 			// Currency check
@@ -299,6 +301,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 	
 	function payment_fields() {
 	   	global $woocommerce;
+	   	
 	   	?>
 	   	
 	   	<?php if ($this->testmode=='yes') : ?><p><?php _e('TEST MODE ENABLED', 'klarna'); ?></p><?php endif; ?>
@@ -458,7 +461,9 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 				<?php endif; ?>
 			</p>
 			
-			<?php if ( $this->shop_country == 'NL' || $this->shop_country == 'DE' ) : ?>
+			<?php if ( $this->shop_country == 'NL' || $this->shop_country == 'DE' ) : 
+				
+			?>
 				<p class="form-row form-row-last">
 					<label for="klarna_invo_gender"><?php echo __("Gender", 'klarna') ?> <span class="required">*</span></label>
 					<select id="klarna_invo_gender" name="klarna_invo_gender" class="woocommerce-select" style="width:120px;">
@@ -498,7 +503,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 	function process_payment( $order_id ) {
 		global $woocommerce;
 		
-		$order = &new WC_order( $order_id );
+		$order = new WC_order( $order_id );
 		
 		require_once(KLARNA_LIB . 'Klarna.php');
 		require_once(KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc.inc');
@@ -631,10 +636,10 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 				
 				$k->addArticle(
 		    		$qty = $item['qty'], 					//Quantity
-		    		$artNo = $sku,		 					//Article number
+		    		$artNo = strval($sku),		 					//Article number
 		    		$title = utf8_decode ($item['name']), 	//Article name/title
 		    		$price = $item_price, 					// Price including tax
-		    		$vat = $item_tax_percentage,			// Tax
+		    		$vat = round( $item_tax_percentage, 1),			// Tax
 		    		$discount = 0, 
 		    		$flags = KlarnaFlags::INC_VAT 			//Price is including VAT.
 		    	);
@@ -676,7 +681,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 			    $artNo = "",
 			    $title = __('Shipping cost', 'klarna'),
 			    $price = $shipping_price,
-			    $vat = $calculated_shipping_tax_percentage,
+			    $vat = round( $calculated_shipping_tax_percentage, 1),
 			    $discount = 0,
 			    $flags = KlarnaFlags::INC_VAT + KlarnaFlags::IS_SHIPMENT //Price is including VAT and is shipment fee
 			);
@@ -704,7 +709,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 				    $artNo = "",
 				    $title = __('Handling Fee', 'klarna'),
 				    $price = $this->invoice_fee_price,
-				    $vat = $this->invoice_fee_tax_percentage,
+				    $vat = round( $this->invoice_fee_tax_percentage, 1),
 				    $discount = 0,
 			    	$flags = KlarnaFlags::INC_VAT + KlarnaFlags::IS_HANDLING //Price is including VAT and is handling/invoice fee
 			    );
@@ -755,7 +760,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 				    $artNo = "",
 				    $title = __('Handling Fee', 'klarna'),
 				    $price = $this->invoice_fee_price,
-				    $vat = $this->invoice_fee_tax_percentage,
+				    $vat = round( $this->invoice_fee_tax_percentage, 1),
 				    $discount = 0,
 			    	$flags = KlarnaFlags::INC_VAT + KlarnaFlags::IS_HANDLING //Price is including VAT and is handling/invoice fee
 			    );
@@ -843,6 +848,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 
 		//Normal shipment is defaulted, delays the start of invoice expiration/due-date.
 		// $k->setShipmentInfo('delay_adjust', KlarnaFlags::EXPRESS_SHIPMENT);
+		
 		try {
     		//Transmit all the specified data, from the steps above, to Klarna.
     		$result = $k->addTransaction(
@@ -930,10 +936,10 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 		if ( is_checkout() && $this->enabled=="yes" ) {
 			?>
 			<script type="text/javascript">
-				var klarna_eid = "<?php echo $this->eid; ?>";
-				var klarna_country = "<?php echo strtolower($this->klarna_country); ?>";
+				var klarna_invoice_eid = "<?php echo $this->eid; ?>";
+				var klarna_invoice_country = "<?php echo strtolower($this->klarna_country); ?>";
 				var klarna_invoice_fee_price = "<?php echo $this->invoice_fee_price; ?>";
-				addKlarnaInvoiceEvent(function(){InitKlarnaInvoiceElements('klarna_invoice', klarna_eid, klarna_country, klarna_invoice_fee_price); });
+				addKlarnaInvoiceEvent(function(){InitKlarnaInvoiceElements('klarna_invoice', klarna_invoice_eid, klarna_invoice_country, klarna_invoice_fee_price); });
 			</script>
 			<?php
 		}

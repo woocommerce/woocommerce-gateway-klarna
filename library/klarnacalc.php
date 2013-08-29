@@ -1,32 +1,15 @@
 <?php
 /**
- *  Copyright 2010 KLARNA AB. All rights reserved.
+ * KlarnaCalc
  *
- *  Redistribution and use in source and binary forms, with or without modification, are
- *  permitted provided that the following conditions are met:
+ * PHP Version 5.3
  *
- *     1. Redistributions of source code must retain the above copyright notice, this list of
- *        conditions and the following disclaimer.
- *
- *     2. Redistributions in binary form must reproduce the above copyright notice, this list
- *        of conditions and the following disclaimer in the documentation and/or other materials
- *        provided with the distribution.
- *
- *  THIS SOFTWARE IS PROVIDED BY KLARNA AB "AS IS" AND ANY EXPRESS OR IMPLIED
- *  WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
- *  FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL KLARNA AB OR
- *  CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- *  CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- *  SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
- *  ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
- *  NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
- *  ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
- *  The views and conclusions contained in the software and documentation are those of the
- *  authors and should not be interpreted as representing official policies, either expressed
- *  or implied, of KLARNA AB.
- *
- * @package KlarnaAPI
+ * @category  Payment
+ * @package   KlarnaAPI
+ * @author    MS Dev <ms.modules@klarna.com>
+ * @copyright 2012 Klarna AB (http://klarna.com)
+ * @license   http://opensource.org/licenses/BSD-2-Clause BSD-2
+ * @link      http://integration.klarna.com/
  */
 
 /**
@@ -50,13 +33,15 @@
  * class assume this time is exactly and that is ok since this will only
  * overestimate the APR and all examples in EU law uses whole months as well.
  *
+ * @category  Payment
  * @package   KlarnaAPI
- * @version   2.1.2
- * @since     2011-09-13
+ * @author    MS Dev <ms.modules@klarna.com>
+ * @copyright 2012 Klarna AB (http://klarna.com)
+ * @license   http://opensource.org/licenses/BSD-2-Clause BSD-2
  * @link      http://integration.klarna.com/
- * @copyright Copyright (c) 2010 Klarna AB (http://klarna.com)
  */
-class KlarnaCalc {
+class KlarnaCalc
+{
 
     /**
      * This constant tells the irr function when to stop.
@@ -69,11 +54,13 @@ class KlarnaCalc {
     /**
      * Calculates the midpoint between two points. Used by divide and conquer.
      *
-     * @param  float $a
-     * @param  float $b
+     * @param float $a point a
+     * @param float $b point b
+     *
      * @return float
      */
-    private static function midpoint($a, $b) {
+    private static function _midpoint($a, $b)
+    {
         return (($a+$b)/2);
     }
 
@@ -84,16 +71,18 @@ class KlarnaCalc {
      * rate. The variable we are searching for is $rate and if $pval,
      * $payarray and $rate is perfectly balanced this function returns 0.0.
      *
-     * @param  float        $pval       initial loan to customer (in any currency)
-     * @param  array        $payarray   array of monthly payments from the customer
-     * @param  float        $rate       interest rate per year in %
-     * @param  int          $fromdayone do we count interest from the first day yes(1)/no(0).
+     * @param float $pval       initial loan to customer (in any currency)
+     * @param array $payarray   array of monthly payments from the customer
+     * @param float $rate       interest rate per year in %
+     * @param int   $fromdayone count interest from the first day? yes(1)/no(0)
+     *
      * @return float
      */
-    private static function npv($pval, $payarray, $rate, $fromdayone) {
+    private static function _npv($pval, $payarray, $rate, $fromdayone)
+    {
         $month = $fromdayone;
-        foreach($payarray as $payment) {
-            $pval -= $payment / pow (1 + $rate/(12*100.0), $month++);
+        foreach ($payarray as $payment) {
+            $pval -= $payment / pow(1 + $rate/(12*100.0), $month++);
         }
 
         return ($pval);
@@ -116,44 +105,44 @@ class KlarnaCalc {
      * This algorithm works in logarithmic time no matter what inputs you give
      * and it will come to a good answer within ~30 steps.
      *
-     * @param  float        $pval       initial loan to customer (in any currency)
-     * @param  array        $payarray   array of monthly payments from the customer
-     * @param  int          $fromdayone do we count interest from the first day yes(1)/no(0).
+     * @param float $pval       initial loan to customer (in any currency)
+     * @param array $payarray   array of monthly payments from the customer
+     * @param int   $fromdayone count interest from the first day? yes(1)/no(0)
+     *
      * @return float
      */
-    private static function irr($pval, $payarray, $fromdayone) {
-        $low     = 0.0;
-        $high    = 100.0;
-        $lowval  = self::npv($pval, $payarray, $low, $fromdayone);
-        $highval = self::npv($pval, $payarray, $high, $fromdayone);
+    private static function  _irr($pval, $payarray, $fromdayone)
+    {
+        $low = 0.0;
+        $high = 100.0;
+        $lowval = self::_npv($pval, $payarray, $low, $fromdayone);
+        $highval = self::_npv($pval, $payarray, $high, $fromdayone);
 
         // The sum of $payarray is smaller than $pval, impossible!
-        if($lowval > 0.0) {
+        if ($lowval > 0.0) {
             return (-1);
         }
 
         // Standard divide and conquer.
         do {
-            $mid = self::midpoint($low, $high);
-            $midval  = self::npv($pval, $payarray, $mid, $fromdayone);
-            if(abs($midval) < self::$accuracy) {
+            $mid = self::_midpoint($low, $high);
+            $midval  = self::_npv($pval, $payarray, $mid, $fromdayone);
+            if (abs($midval) < self::$accuracy) {
                 //we are close enough
                 return ($mid);
             }
 
-            if($highval < 0.0) {
+            if ($highval < 0.0) {
                 // we are not in range, so double it
                 $low = $high;
                 $lowval = $highval;
                 $high *= 2;
-                $highval = self::npv($pval, $payarray, $high, $fromdayone);
-            }
-            else if($midval >= 0.0) {
+                $highval = self::_npv($pval, $payarray, $high, $fromdayone);
+            } else if ($midval >= 0.0) {
                 // irr is between low and mid
                 $high = $mid;
                 $highval = $midval;
-            }
-            else {
+            } else {
                 // irr is between mid and high
                 $low = $mid;
                 $lowval = $midval;
@@ -176,11 +165,13 @@ class KlarnaCalc {
      * That is the nature of this math and you can check the wiki
      * page for APR for more info.
      *
-     * @param  float $irr Internal Rate of Return, expressed yearly, in %
-     * @return float      Annual Percentage Rate, in %
+     * @param float $irr Internal Rate of Return, expressed yearly, in %
+     *
+     * @return float Annual Percentage Rate, in %
      */
-    private static function irr2apr($irr) {
-        return (100 * (pow (1 + $irr / (12 * 100.0), 12) - 1));
+    private static function  _irr2apr($irr)
+    {
+        return (100 * (pow(1 + $irr / (12 * 100.0), 12) - 1));
     }
 
     /**
@@ -205,29 +196,32 @@ class KlarnaCalc {
      * that amount is paid and the function returns since the client
      * no longer owes any money.
      *
-     * @param  float        $pval       initial loan to customer (in any currency)
-     * @param  float        $rate       interest rate per year in %
-     * @param  float        $fee        monthly invoice fee
-     * @param  float        $minpay     minimum monthly payment allowed for this country.
-     * @param  float        $payment    payment the client to pay each month
-     * @param  int          $months     amount of months to run (-1 => infinity)
-     * @param  boolean      $base       is it a base account?
+     * @param float   $pval    initial loan to customer (in any currency)
+     * @param float   $rate    interest rate per year in %
+     * @param float   $fee     monthly invoice fee
+     * @param float   $minpay  minimum monthly payment allowed for this country.
+     * @param float   $payment payment the client to pay each month
+     * @param int     $months  amount of months to run (-1 => infinity)
+     * @param boolean $base    is it a base account?
+     *
      * @return array  An array of monthly payments for the customer.
      */
-    private static function fulpacc($pval, $rate, $fee, $minpay, $payment, $months, $base) {
+    private static function _fulpacc(
+        $pval, $rate, $fee, $minpay, $payment, $months, $base
+    ) {
         $bal = $pval;
         $payarray = array();
-        while(($months != 0) && ($bal > self::$accuracy)) {
+        while (($months != 0) && ($bal > self::$accuracy)) {
             $interest = $bal * $rate / (100.0 * 12);
             $newbal = $bal + $interest + $fee;
 
-            if($minpay >= $newbal || $payment >= $newbal) {
+            if ($minpay >= $newbal || $payment >= $newbal) {
                 $payarray[] = $newbal;
                 return $payarray;
             }
 
             $newpay = max($payment, $minpay);
-            if($base) {
+            if ($base) {
                 $newpay = max($newpay, $bal/24.0 + $fee + $interest);
             }
 
@@ -248,17 +242,19 @@ class KlarnaCalc {
      *
      * Return value: monthly payment.
      *
-     * @param  float  $pval   principal value
-     * @param  int    $months months to pay of in
-     * @param  float  $rate   interest rate in % as before
+     * @param float $pval   principal value
+     * @param int   $months months to pay of in
+     * @param float $rate   interest rate in % as before
+     *
      * @return float monthly payment
      */
-    private static function annuity($pval, $months, $rate) {
-        if($months == 0) {
+    private static function _annuity($pval, $months, $rate)
+    {
+        if ($months == 0) {
             return $pval;
         }
 
-        if($rate == 0) {
+        if ($rate == 0) {
             return $pval/$months;
         }
 
@@ -267,136 +263,28 @@ class KlarnaCalc {
     }
 
     /**
-     * How many months does it take to pay off a loan if I pay
-     * exactly $monthly each month? It might actually go faster
-     * if you hit the minimum payments, but this function returns
-     * the longest amount of months.
-     *
-     * This function _does_ not include the fee, so remove the fee
-     * from the monthly before sending it into this function.
-     *
-     * Return values: float $months
-     *                int   -1      you are not paying more than
-     *                              the interest. infinity
-     *                int   -2      $fromdayone has to be 0 or 1
-     *
-     * $fromdayone should be 0 for pay_in_X_months since the interest
-     * won't be applied on the first invoice. In all other cases use 1.
-     *
-     * @param  float  $pval       principal value
-     * @param  float  $monthly    payment/month (-fee)
-     * @param  float  $rate       interest rate in %
-     * @param  int    $fromdayone do we count interest from day one? [0, 1]
-     * @return float  months it takes (round it up)
-     */
-    private static function fixed($pval, $monthly, $rate, $fromdayone) {
-        $p = $rate / (100.0*12);
-        $f = 1 + $p;
-        if($fromdayone == 0) {
-            if( $f < $pval * $p / $monthly ) {
-                return -1;
-            }
-            // this might be wrong. check it.
-            // it seems to give the right output.
-            return 1 - log($f - $pval * $p / $monthly) / log($f);
-        }
-        else if($fromdayone == 1) {
-            if(1.0 < $pval * $p / $monthly ) {
-                return -1;
-            }
-            return -log(1.0 - $pval * $p / $monthly) / log($f);
-        }
-        else {
-            return -2;
-        }
-    }
-
-    /**
      * Calculate the APR for an annuity given the following inputs.
      *
      * If you give it bad inputs, it will return negative values.
      *
-     * @param  float  $pval   principal value
-     * @param  int    $months months to pay off in
-     * @param  float  $rate   interest rate in % as before
-     * @param  float  $fee    monthly fee
-     * @param  float  $minpay minimum payment per month
-     * @return float  APR in %
+     * @param float $pval   principal value
+     * @param int   $months months to pay off in
+     * @param float $rate   interest rate in % as before
+     * @param float $fee    monthly fee
+     * @param float $minpay minimum payment per month
+     *
+     * @return float APR in %
      */
-    private static function apr_annuity($pval, $months, $rate, $fee, $minpay) {
-        $payment = self::annuity($pval, $months, $rate) + $fee;
-        if($payment < 0) {
+    private static function _aprAnnuity($pval, $months, $rate, $fee, $minpay)
+    {
+        $payment = self::_annuity($pval, $months, $rate) + $fee;
+        if ($payment < 0) {
             return $payment;
         }
-        $payarray = self::fulpacc($pval, $rate, $fee, $minpay, $payment, $months, false);
-        $apr = self::irr2apr(self::irr($pval, $payarray, 1));
-
-        return $apr;
-    }
-
-    /**
-     * Calculate the APR given a fixed payment each month.
-     *
-     * If you give it bad inputs, it will return negative values.
-     *
-     * @param  float  $pval    principal value
-     * @param  float  $payment monthly payment for client
-     * @param  float  $rate    interest rate in % as before
-     * @param  float  $fee     monthly fee
-     * @param  float  $minpay  minimum payment per month
-     * @return float  APR in %
-     */
-    private static function apr_fixed($pval, $payment, $rate, $fee, $minpay) {
-        $months = self::fixed($pval, $payment-$fee, $rate, 1);
-        if($months < 0) {
-            return $months;
-        }
-        $months = ceil($months);
-        $payarray = self::fulpacc($pval, $rate, $fee, $minpay, $payment, $months, false);
-        $apr = self::irr2apr(self::irr($pval, $payarray, 1));
-
-        return $apr;
-    }
-
-    /**
-     * Calculates APR for a campaign where you give $free months to
-     * the client and there is no interest on the first invoice.
-     * The only new input is $free, and if you give "Pay in Jan"
-     * in November, then $free = 2.
-     *
-     * The more free months you give, the lower the APR so it does
-     * matter.
-     *
-     * This function basically pads the $payarray with zeros in the
-     * beginning (but there is some more magic as well).
-     *
-     * @param  float  $pval    principal value
-     * @param  float  $payment monthly payment for client
-     * @param  float  $rate    interest rate in % as before
-     * @param  float  $fee     monthly fee
-     * @param  float  $minpay  minimum payment per month
-     * @param  int    $free    free months
-     * @return float  APR in %
-     */
-    private static function apr_payin_X_months($pval, $payment, $rate, $fee, $minpay, $free) {
-        $firstpay = $payment; //this used to be buggy. use this line.
-        $months = self::fixed($pval, $payment-$fee, $rate, 0);
-        if($months < 0) {
-            return $months;
-        }
-
-        $months = ceil($months);
-        $farray = array();
-        while($free--) {
-            $farray[] = 0.0;
-        }
-        $pval += $fee;
-
-        $farray[] = $firstpay;
-        $pval -= $firstpay;
-        $payarray = self::fulpacc($pval, $rate, $fee, $minpay, $payment, $months, false);
-        $newarray = array_merge($farray, $payarray);
-        $apr = self::irr2apr(self::irr($pval, $newarray, 1));
+        $payarray = self::_fulpacc(
+            $pval, $rate, $fee, $minpay, $payment, $months, false
+        );
+        $apr = self::_irr2apr(self::_irr($pval, $payarray, 1));
 
         return $apr;
     }
@@ -408,35 +296,54 @@ class KlarnaCalc {
      * {@link KlarnaFlags::CHECKOUT_PAGE}<br>
      * {@link KlarnaFlags::PRODUCT_PAGE}<br>
      *
-     * @param  float         $sum     The sum for the order/product.
-     * @param  KlarnaPClass  $pclass  {@link KlarnaPClass PClass} used to calculate the APR.
-     * @param  int           $flags   Indicates if it is the checkout or a product page.
+     * @param float        $sum    The sum for the order/product.
+     * @param KlarnaPClass $pclass KlarnaPClass used to calculate the APR.
+     * @param int          $flags  Checkout or Product page.
+     *
      * @throws KlarnaException
-     * @return array  An array of monthly payments.
+     * @return array An array of monthly payments.
      */
-    private static function get_payarr($sum, $pclass, $flags) {
-        $monthsfee = (($flags === KlarnaFlags::CHECKOUT_PAGE) ? $pclass->getInvoiceFee() : 0);
-        $startfee = (($flags === KlarnaFlags::CHECKOUT_PAGE) ? $pclass->getStartFee() : 0);
+    private static function _getPayArray($sum, $pclass, $flags)
+    {
+        $monthsfee = 0;
+        if ($flags === KlarnaFlags::CHECKOUT_PAGE) {
+            $monthsfee = $pclass->getInvoiceFee();
+        }
+        $startfee = 0;
+        if ($flags === KlarnaFlags::CHECKOUT_PAGE) {
+            $startfee = $pclass->getStartFee();
+        }
 
         //Include start fee in sum
         $sum += $startfee;
 
         $base = ($pclass->getType() === KlarnaPClass::ACCOUNT);
-
         $lowest = self::get_lowest_payment_for_account($pclass->getCountry());
-        if($flags == KlarnaFlags::CHECKOUT_PAGE) {
+
+        if ($flags == KlarnaFlags::CHECKOUT_PAGE) {
             $minpay = ($pclass->getType() === KlarnaPClass::ACCOUNT) ? $lowest : 0;
-        }
-        else {
+        } else {
             $minpay = 0;
         }
 
-        $payment = self::annuity($sum, $pclass->getMonths(), $pclass->getInterestRate());
+        $payment = self::_annuity(
+            $sum,
+            $pclass->getMonths(),
+            $pclass->getInterestRate()
+        );
 
         //Add monthly fee
         $payment += $monthsfee;
 
-        return  self::fulpacc($sum, $pclass->getInterestRate(), $monthsfee, $minpay, $payment, $pclass->getMonths(), $base);
+        return  self::_fulpacc(
+            $sum,
+            $pclass->getInterestRate(),
+            $monthsfee,
+            $minpay,
+            $payment,
+            $pclass->getMonths(),
+            $base
+        );
     }
 
     /**
@@ -447,77 +354,112 @@ class KlarnaCalc {
      * {@link KlarnaFlags::CHECKOUT_PAGE}<br>
      * {@link KlarnaFlags::PRODUCT_PAGE}<br>
      *
-     * @param  float         $sum     The sum for the order/product.
-     * @param  KlarnaPClass  $pclass  {@link KlarnaPClass PClass} used to calculate the APR.
-     * @param  int           $flags   Indicates if it is the checkout or a product page.
-     * @param  int           $free    Number of free months.
+     * @param float        $sum    The sum for the order/product.
+     * @param KlarnaPClass $pclass KlarnaPClass used to calculate the APR.
+     * @param int          $flags  Checkout or Product page.
+     * @param int          $free   Number of free months.
+     *
      * @throws KlarnaException
      * @return float  APR in %
      */
-    public static function calc_apr($sum, $pclass, $flags, $free = 0) {
-        if(!is_numeric($sum)) {
-            throw new KlarnaException('Error in ' . __METHOD__ . ': Argument sum is not numeric!');
+    public static function calc_apr($sum, $pclass, $flags, $free = 0)
+    {
+        if (!is_numeric($sum)) {
+            throw new Klarna_InvalidTypeException('sum', 'numeric');
         }
-        else if(is_numeric($sum) && (!is_int($sum) || !is_float($sum))) {
+        if (is_numeric($sum) && (!is_int($sum) || !is_float($sum))) {
             $sum = floatval($sum);
         }
 
-        if(!($pclass instanceof KlarnaPClass)) {
-            throw new KlarnaException('Error in ' . __METHOD__ . ': Supplied PClass is not a PClass object!');
+        if (!($pclass instanceof KlarnaPClass)) {
+            throw new Klarna_InvalidTypeException('pclass', 'KlarnaPClass');
         }
 
-        if(!is_numeric($free)) {
-            throw new KlarnaException('Error in ' . __METHOD__ . ': Argument free is not an integer!');
+        if (!is_numeric($free)) {
+            throw new Klarna_InvalidTypeException('free',  'integer');
         }
-        else if(is_numeric($free) && !is_int($free)) {
+
+        if (is_numeric($free) && !is_int($free)) {
             $free = intval($free);
         }
-        if($free < 0) {
-            throw new KlarnaException('Error in ' . __METHOD__ . ': Number of free months must be positive or zero!');
+
+        if ($free < 0) {
+            throw new KlarnaException(
+                'Error in ' . __METHOD__ .
+                ': Number of free months must be positive or zero!'
+            );
         }
 
-        if(is_numeric($flags) && !is_int($flags)) {
+        if (is_numeric($flags) && !is_int($flags)) {
             $flags = intval($flags);
         }
-        if(!is_numeric($flags) || !in_array($flags, array(KlarnaFlags::CHECKOUT_PAGE, KlarnaFlags::PRODUCT_PAGE))) {
-            throw new KlarnaException('Error in ' . __METHOD__ . ': Flags argument invalid!');
+
+        if (!is_numeric($flags)
+            || !in_array(
+                $flags, array(
+                    KlarnaFlags::CHECKOUT_PAGE, KlarnaFlags::PRODUCT_PAGE
+                )
+            )
+        ) {
+            throw new Klarna_InvalidTypeException(
+                'flags',
+                KlarnaFlags::CHECKOUT_PAGE . ' or ' . KlarnaFlags::PRODUCT_PAGE
+            );
         }
 
-        $monthsfee = (($flags === KlarnaFlags::CHECKOUT_PAGE) ? $pclass->getInvoiceFee() : 0);
-        $startfee = (($flags === KlarnaFlags::CHECKOUT_PAGE) ? $pclass->getStartFee() : 0);
+        $monthsfee = 0;
+        if ($flags === KlarnaFlags::CHECKOUT_PAGE) {
+            $monthsfee = $pclass->getInvoiceFee();
+        }
+        $startfee = 0;
+        if ($flags === KlarnaFlags::CHECKOUT_PAGE) {
+            $startfee = $pclass->getStartFee();
+        }
 
         //Include start fee in sum
         $sum += $startfee;
 
         $lowest = self::get_lowest_payment_for_account($pclass->getCountry());
-        if($flags == KlarnaFlags::CHECKOUT_PAGE) {
+
+        if ($flags == KlarnaFlags::CHECKOUT_PAGE) {
             $minpay = ($pclass->getType() === KlarnaPClass::ACCOUNT) ? $lowest : 0;
-        }
-        else {
+        } else {
             $minpay = 0;
         }
 
         //add monthly fee
-        $payment = self::annuity($sum, $pclass->getMonths(), $pclass->getInterestRate()) + $monthsfee;
-        //echo "annuity $payment, $sum " . $pclass->getMonths() . " " . $pclass->getInterestRate() . "\n";
+        $payment = self::_annuity(
+            $sum,
+            $pclass->getMonths(),
+            $pclass->getInterestRate()
+        ) + $monthsfee;
 
         $type = $pclass->getType();
         switch($type) {
-            case KlarnaPClass::CAMPAIGN:
-            case KlarnaPClass::ACCOUNT:
-                $apr = self::apr_annuity($sum, $pclass->getMonths(), $pclass->getInterestRate(), $pclass->getInvoiceFee(), $minpay);
-                break;
-            case KlarnaPClass::SPECIAL:
-                $apr = self::apr_payin_X_months($sum, $payment, $pclass->getInterestRate(), $pclass->getInvoiceFee(), $minpay, $free);
-                break;
-            case KlarnaPClass::FIXED:
-                $apr = self::apr_fixed($sum, $payment, $pclass->getInterestRate(), $pclass->getInvoiceFee(), $minpay);
-                break;
-            default:
-                throw new KlarnaException('Error in ' . __METHOD__ . ': Unknown PClass type! ('.$type.')');
+        case KlarnaPClass::CAMPAIGN:
+        case KlarnaPClass::ACCOUNT:
+            return round(
+                self::_aprAnnuity(
+                    $sum, $pclass->getMonths(),
+                    $pclass->getInterestRate(),
+                    $pclass->getInvoiceFee(),
+                    $minpay
+                ),
+                2
+            );
+        case KlarnaPClass::SPECIAL:
+            throw new Klarna_PClassException(
+                'Method is not available for SPECIAL pclasses'
+            );
+        case KlarnaPClass::FIXED:
+            throw new Klarna_PClassException(
+                'Method is not available for FIXED pclasses'
+            );
+        default:
+            throw new Klarna_PClassException(
+                'Unknown PClass type! ('.$type.')'
+            );
         }
-
-        return round($apr, 2);
     }
 
     /**
@@ -528,35 +470,49 @@ class KlarnaCalc {
      * {@link KlarnaFlags::CHECKOUT_PAGE}<br>
      * {@link KlarnaFlags::PRODUCT_PAGE}<br>
      *
-     * @param  float         $sum     The sum for the order/product.
-     * @param  KlarnaPClass  $pclass  {@link KlarnaPClass PClass} used to calculate total credit cost.
-     * @param  int           $flags   Indicates if it is the checkout or a product page.
+     * @param float        $sum    The sum for the order/product.
+     * @param KlarnaPClass $pclass PClass used to calculate total credit cost.
+     * @param int          $flags  Checkout or Product page.
+     *
      * @throws KlarnaException
      * @return float  Total credit purchase cost.
      */
-    public static function total_credit_purchase_cost($sum, $pclass, $flags) {
-        if(!is_numeric($sum)) {
-            throw new KlarnaException('Error in ' . __METHOD__ . ': Argument sum is not numeric!');
+    public static function total_credit_purchase_cost($sum, $pclass, $flags)
+    {
+        if (!is_numeric($sum)) {
+            throw new Klarna_InvalidTypeException('sum', 'numeric');
         }
-        else if(is_numeric($sum) && (!is_int($sum) || !is_float($sum))) {
+
+        if (is_numeric($sum) && (!is_int($sum) || !is_float($sum))) {
             $sum = floatval($sum);
         }
 
-        if(!($pclass instanceof KlarnaPClass)) {
-            throw new KlarnaException('Error in ' . __METHOD__ . ': Supplied PClass is not a PClass object!');
+        if (!($pclass instanceof KlarnaPClass)) {
+            throw new Klarna_InvalidTypeException('pclass', 'KlarnaPClass');
         }
 
-        if(is_numeric($flags) && !is_int($flags)) {
+        if (is_numeric($flags) && !is_int($flags)) {
             $flags = intval($flags);
         }
-        if(!is_numeric($flags) || !in_array($flags, array(KlarnaFlags::CHECKOUT_PAGE, KlarnaFlags::PRODUCT_PAGE))) {
-            throw new KlarnaException('Error in ' . __METHOD__ . ': Flags argument invalid!');
+
+        if (!is_numeric($flags)
+            || !in_array(
+                $flags,
+                array(
+                    KlarnaFlags::CHECKOUT_PAGE, KlarnaFlags::PRODUCT_PAGE
+                )
+            )
+        ) {
+            throw new Klarna_InvalidTypeException(
+                'flags',
+                KlarnaFlags::CHECKOUT_PAGE . ' or ' . KlarnaFlags::PRODUCT_PAGE
+            );
         }
 
-        $payarr = self::get_payarr($sum, $pclass, $flags);
+        $payarr = self::_getPayArray($sum, $pclass, $flags);
 
         $credit_cost = 0;
-        foreach($payarr as $pay) {
+        foreach ($payarr as $pay) {
             $credit_cost += $pay;
         }
 
@@ -564,12 +520,14 @@ class KlarnaCalc {
     }
 
     /**
-     * Calculates the monthly cost for the specified pclass.<br>
-     * The result is rounded up to the correct value depending on the pclass country.<br>
+     * Calculates the monthly cost for the specified pclass.
+     * The result is rounded up to the correct value depending on the
+     * pclass country.<br>
      *
      * Example:<br>
      * <ul>
-     *     <li>In product view, round monthly cost with max 0.5 or 0.1 depending on currency.<br>
+     *     <li>In product view, round monthly cost with max 0.5 or 0.1
+     *  depending on currency.<br>
      *     <ul>
      *         <li>10.50 SEK rounds to 11 SEK</li>
      *         <li>10.49 SEK rounds to 10 SEK</li>
@@ -578,7 +536,7 @@ class KlarnaCalc {
      *     </ul></li>
      *     <li>
      *         In checkout, round the monthly cost to have 2 decimals.<br>
-     *         For example 10.57 SEK/per m�nad
+     *         For example 10.57 SEK/per månad
      *     </li>
      * </ul>
      *
@@ -586,83 +544,107 @@ class KlarnaCalc {
      * {@link KlarnaFlags::CHECKOUT_PAGE}<br>
      * {@link KlarnaFlags::PRODUCT_PAGE}<br>
      *
-     * @param  int           $sum     The sum for the order/product.
-     * @param  KlarnaPClass  $pclass  {@link KlarnaPClass PClass} used to calculate monthly cost.
-     * @param  int           $flags   Indicates if it is the checkout or a product page.
+     * @param int          $sum    The sum for the order/product.
+     * @param KlarnaPClass $pclass PClass used to calculate monthly cost.
+     * @param int          $flags  Checkout or product page.
+     *
      * @throws KlarnaException
      * @return float  The monthly cost.
      */
-    public static function calc_monthly_cost($sum, $pclass, $flags) {
-        if(!is_numeric($sum)) {
-            throw new KlarnaException('Error in ' . __METHOD__ . ': Argument sum is not numeric!');
+    public static function calc_monthly_cost($sum, $pclass, $flags)
+    {
+        if (!is_numeric($sum)) {
+            throw new Klarna_InvalidTypeException('sum', 'numeric');
         }
-        else if(is_numeric($sum) && (!is_int($sum) || !is_float($sum))) {
+
+        if (is_numeric($sum) && (!is_int($sum) || !is_float($sum))) {
             $sum = floatval($sum);
         }
 
-        if(!($pclass instanceof KlarnaPClass)) {
-            throw new KlarnaException('Error in ' . __METHOD__ . ': Supplied PClass is not a PClass object!');
+        if (!($pclass instanceof KlarnaPClass)) {
+            throw new Klarna_InvalidTypeException('pclass', 'KlarnaPClass');
         }
 
-        if(is_numeric($flags) && !is_int($flags)) {
+        if (is_numeric($flags) && !is_int($flags)) {
             $flags = intval($flags);
         }
-        if(!is_numeric($flags) || !in_array($flags, array(KlarnaFlags::CHECKOUT_PAGE, KlarnaFlags::PRODUCT_PAGE))) {
-            throw new KlarnaException('Error in ' . __METHOD__ . ': Flags argument invalid!');
+
+        if (!is_numeric($flags)
+            || !in_array(
+                $flags,
+                array(
+                    KlarnaFlags::CHECKOUT_PAGE, KlarnaFlags::PRODUCT_PAGE
+                )
+            )
+        ) {
+            throw new Klarna_InvalidTypeException(
+                'flags',
+                KlarnaFlags::CHECKOUT_PAGE . ' or ' . KlarnaFlags::PRODUCT_PAGE
+            );
         }
 
-        $payarr = self::get_payarr($sum, $pclass, $flags);
-        $value = isset($payarr[0]) ? ($payarr[0]) : 0;
-        return (KlarnaFlags::CHECKOUT_PAGE == $flags) ? round($value, 2) : self::pRound($value, $pclass->getCountry());
+        $payarr = self::_getPayArray($sum, $pclass, $flags);
+        $value = 0;
+        if (isset($payarr[0])) {
+            $value = $payarr[0];
+        }
+
+        if (KlarnaFlags::CHECKOUT_PAGE == $flags) {
+            return round($value, 2);
+        }
+
+        return self::pRound($value, $pclass->getCountry());
     }
 
     /**
      * Returns the lowest monthly payment for Klarna Account.
      *
-     * @param  int  $country  {@link KlarnaCountry Country} constant.
+     * @param int $country KlarnaCountry constant.
+     *
      * @throws KlarnaException
      * @return int|float      Lowest monthly payment.
      */
-    public static function get_lowest_payment_for_account($country) {
-        switch ($country) {
-            case KlarnaCountry::SE:
-                $lowest_monthly_payment = 50.0;
-                break;
-            case KlarnaCountry::NO:
-                $lowest_monthly_payment = 95.0;
-                break;
-            case KlarnaCountry::FI:
-                $lowest_monthly_payment = 8.95;
-                break;
-            case KlarnaCountry::DK:
-                $lowest_monthly_payment = 89.0;
-                break;
-            case KlarnaCountry::DE:
-            case KlarnaCountry::NL:
-                $lowest_monthly_payment = 6.95;
-                break;
-            default:
-                throw new KlarnaException('Error in ' . __METHOD__ . ': Not allowed for this country!');
-        }
+    public static function get_lowest_payment_for_account($country)
+    {
+        $country = KlarnaCountry::getCode($country);
 
-        return $lowest_monthly_payment;
+        switch (strtoupper($country)) {
+        case "SE":
+            return 50.0;
+        case "NO":
+            return 95.0;
+        case "FI":
+            return 8.95;
+        case "DK":
+            return 89.0;
+        case "DE":
+        case "NL":
+        case "AT":
+            return 6.95;
+        default:
+            throw new KlarnaException("Invalid country {$country}");
+        }
     }
 
     /**
      * Rounds a value depending on the specified country.
      *
-     * @param int|float  $value    The value to be rounded.
-     * @param int        $country  {@link KlarnaCountry} constant.
+     * @param int|float $value   The value to be rounded.
+     * @param int       $country KlarnaCountry constant.
+     *
      * @return float|int
      */
-    public static function pRound($value, $country) {
+    public static function pRound($value, $country)
+    {
         $multiply = 1; //Round to closest integer
+        $country = KlarnaCountry::getCode($country);
         switch($country) {
-            case KlarnaCountry::FI:
-            case KlarnaCountry::DE:
-            case KlarnaCountry::NL:
-                $multiply = 10; //Round to closest decimal
-                break;
+        case "FI":
+        case "DE":
+        case "NL":
+        case "AT":
+            $multiply = 10; //Round to closest decimal
+            break;
         }
 
         return floor(($value*$multiply)+0.5)/$multiply;

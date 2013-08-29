@@ -3,7 +3,7 @@
 Plugin Name: WooCommerce Klarna Gateway
 Plugin URI: http://woothemes.com/woocommerce
 Description: Extends WooCommerce. Provides a <a href="http://www.klarna.se" target="_blank">Klarna</a> gateway for WooCommerce.
-Version: 1.6.4
+Version: 1.7
 Author: Niklas Högefjord
 Author URI: http://krokedil.com
 */
@@ -37,7 +37,7 @@ if ( ! function_exists( 'woothemes_queue_update' ) )
 woothemes_queue_update( plugin_basename( __FILE__ ), '4edd8b595d6d4b76f31b313ba4e4f3f6', '18624' );
 
 // Init Klarna Gateway after WooCommerce has loaded
-add_action('plugins_loaded', 'init_klarna_gateway', 0);
+add_action('plugins_loaded', 'init_klarna_gateway', 2);
 
 function init_klarna_gateway() {
 
@@ -73,6 +73,11 @@ function init_klarna_gateway() {
         		$this->shop_country = $this->shop_country;
         	endif;
         	
+        	// If WPML is used, set the customer selected language as the shop_country
+        	if ( class_exists( 'woocommerce_wpml' ) && defined('ICL_LANGUAGE_CODE') )
+				$this->shop_country	= strtoupper(ICL_LANGUAGE_CODE);	
+			
+			// Actions
         	add_action( 'wp_enqueue_scripts', array(&$this, 'klarna_load_scripts'), 5 );
         	
 	    }
@@ -82,7 +87,6 @@ function init_klarna_gateway() {
 	 	 * Register and Enqueue Klarna scripts
 	 	 */
 		function klarna_load_scripts() {
-			
 			wp_enqueue_script( 'jquery' );
 			
 			// Invoice terms popup
@@ -106,6 +110,9 @@ function init_klarna_gateway() {
 			}
 
 		}
+		
+		
+		
 	
 	
 	} // End class WC_Gateway_Klarna
@@ -122,9 +129,55 @@ function init_klarna_gateway() {
 	
 	// Include our Klarna Checkout class - if Sweden is set as the base country
 	$klarna_shop_country = get_option('woocommerce_default_country');
-	if ($klarna_shop_country == 'SE') {
+	$available_countries = array('SE', 'NO', 'FI');
+	if ( in_array( $klarna_shop_country, $available_countries ) ) {
 		require_once 'class-klarna-checkout.php';
 	}
+	
+	
+	
+	
+	
+	// WC 2.0 Update notice
+	class WC_Gateway_Klarna_Update_Notice {
+		
+		public function __construct() {
+			
+			// Add admin notice about the callback change
+			add_action('admin_notices', array($this, 'krokedil_admin_notice'));
+			add_action('admin_init', array($this, 'krokedil_nag_ignore'));
+		}
+	
+		/* Display a notice about the changes to the Invoice fee handling */
+		function krokedil_admin_notice() {
+			
+			global $current_user ;
+			$user_id = $current_user->ID;
+		
+			/* Check that the user hasn't already clicked to ignore the message */
+			if ( ! get_user_meta($user_id, 'klarna_callback_change_notice_17') && current_user_can( 'manage_options' ) ) {
+				echo '<div class="updated fade"><p class="alignleft">';
+				printf(__('The Klarna Checkout settings has changed. You will need to update and save the settings for Klarna checkout again before the payment method can be used. Please visit <a target="_blank" href="%1$s"> the payment gateway documentation</a> for more info.', 'klarna'), 'http://docs.woothemes.com/document/klarna/');
+				echo '</p><p class="alignright">';
+				printf(__('<a class="submitdelete" href="%1$s"> Hide this message</a>', 'klarna'), '?klarna_nag_ignore=0');
+				echo '</p><br class="clear">';
+				echo '</div>';
+			}
+		
+		}
+
+		/* Hide the notice about the changes to the Invoice fee handling if ignore link has been clicked */
+		function krokedil_nag_ignore() {
+			global $current_user;
+			$user_id = $current_user->ID;
+			/* If user clicks to ignore the notice, add that to their user meta */
+			if ( isset($_GET['klarna_nag_ignore']) && '0' == $_GET['klarna_nag_ignore'] ) {
+				add_user_meta($user_id, 'klarna_callback_change_notice_17', 'true', true);
+			}
+		}
+	} // End class
+	$wc_klarna_update_notice = new WC_Gateway_Klarna_Update_Notice;
+
 
 } // End init_klarna_gateway
 
@@ -137,9 +190,10 @@ function add_klarna_gateway( $methods ) {
 	$methods[] = 'WC_Gateway_Klarna_Account';
 	$methods[] = 'WC_Gateway_Klarna_Campaign';
 	
-	// Only add the Klarna Checkout method if Sweden is set as the base country
+	// Only add the Klarna Checkout method if Sweden, Norway or Finland is set as the base country
 	$klarna_shop_country = get_option('woocommerce_default_country');
-	if ( $klarna_shop_country == 'SE' ) {
+	$available_countries = array('SE', 'NO', 'FI');
+	if ( in_array( $klarna_shop_country, $available_countries ) ) {
 		$methods[] = 'WC_Gateway_Klarna_Checkout';
 	}
 	

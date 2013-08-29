@@ -1,51 +1,29 @@
 <?php
 /**
- *  Copyright 2010 KLARNA AB. All rights reserved.
+ * SQL Storage
  *
- *  Redistribution and use in source and binary forms, with or without modification, are
- *  permitted provided that the following conditions are met:
+ * PHP Version 5.3
  *
- *     1. Redistributions of source code must retain the above copyright notice, this list of
- *        conditions and the following disclaimer.
- *
- *     2. Redistributions in binary form must reproduce the above copyright notice, this list
- *        of conditions and the following disclaimer in the documentation and/or other materials
- *        provided with the distribution.
- *
- *  THIS SOFTWARE IS PROVIDED BY KLARNA AB "AS IS" AND ANY EXPRESS OR IMPLIED
- *  WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
- *  FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL KLARNA AB OR
- *  CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- *  CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- *  SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
- *  ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
- *  NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
- *  ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
- *  The views and conclusions contained in the software and documentation are those of the
- *  authors and should not be interpreted as representing official policies, either expressed
- *  or implied, of KLARNA AB.
- *
- * @package KlarnaAPI
+ * @category  Payment
+ * @package   KlarnaAPI
+ * @author    MS Dev <ms.modules@klarna.com>
+ * @copyright 2012 Klarna AB (http://klarna.com)
+ * @license   http://opensource.org/licenses/BSD-2-Clause BSD-2
+ * @link      http://integration.klarna.com/
  */
 
 /**
  * Include the {@link PCStorage} interface.
  */
-require_once('storage.intf.php');
+require_once 'storage.intf.php';
 
 /**
  * SQL storage class for KlarnaPClass
  *
- * This class is an PDO implementation of the PCStorage interface.<br>
- *
- * Config field pcURI needs to match:<br>
- * user:passwd@addr:port/dbName.dbTable (assumes MySQL)<br>
+ * This class is an MySQL implementation of the PCStorage interface.<br>
+ * Config field pcURI needs to match format:
+ * user:passwd@addr:port/dbName.dbTable<br>
  * Port can be omitted.<br>
- *
- * The {@link http://www.php.net/manual/en/ref.pdo-mysql.connection.php PDO DSN} format is also available:<br>
- * user:passwd@pdo:dsn/dbName.dbTable<br>
- * Where dsn can be: mysql:host=localhost;dbname=testdb
  *
  * <b>Acceptable characters</b>:<br>
  * Username: [A-Za-z0-9_]<br>
@@ -68,18 +46,19 @@ require_once('storage.intf.php');
  * );
  * </code>
  *
+ * @category  Payment
  * @package   KlarnaAPI
- * @version   2.1.2
- * @since     2011-09-13
+ * @author    MS Dev <ms.modules@klarna.com>
+ * @copyright 2012 Klarna AB (http://klarna.com)
+ * @license   http://opensource.org/licenses/BSD-2-Clause BSD-2
  * @link      http://integration.klarna.com/
- * @copyright Copyright (c) 2010 Klarna AB (http://klarna.com)
  */
-class SQLStorage extends PCStorage {
+class SQLStorage extends PCStorage
+{
 
     /**
      * Database name.
      *
-     * @ignore Do not show in PHPDoc.
      * @var string
      */
     protected $dbName;
@@ -87,7 +66,6 @@ class SQLStorage extends PCStorage {
     /**
      * Database table.
      *
-     * @ignore Do not show in PHPDoc.
      * @var string
      */
     protected $dbTable;
@@ -95,7 +73,6 @@ class SQLStorage extends PCStorage {
     /**
      * Database address.
      *
-     * @ignore Do not show in PHPDoc.
      * @var string
      */
     protected $addr;
@@ -103,7 +80,6 @@ class SQLStorage extends PCStorage {
     /**
      * PDO DSN notation.
      *
-     * @ignore Do not show in PHPDoc.
      * @var string
      */
     protected $dsn;
@@ -111,7 +87,6 @@ class SQLStorage extends PCStorage {
     /**
      * Database username.
      *
-     * @ignore Do not show in PHPDoc.
      * @var string
      */
     protected $user;
@@ -119,7 +94,6 @@ class SQLStorage extends PCStorage {
     /**
      * Database password.
      *
-     * @ignore Do not show in PHPDoc.
      * @var string
      */
     protected $passwd;
@@ -127,25 +101,19 @@ class SQLStorage extends PCStorage {
     /**
      * PDO DB link resource.
      *
-     * @ignore Do not show in PHPDoc.
      * @var PDO
      */
     protected $pdo;
 
     /**
-     * Class constructor
-     * @ignore Does nothing.
+     * return the name of the storage type
+     *
+     * @return string
      */
-    public function __construct() {
+    public function getName()
+    {
+        return "sql";
     }
-
-    /**
-     * Class destructor
-     * @ignore Does nothing.
-     */
-    public function __destruct() {
-    }
-
 
     /**
      * Splits the URI for the following formats:<br>
@@ -165,15 +133,16 @@ class SQLStorage extends PCStorage {
      * );
      * </code>
      *
-     * @ignore Do not show in PHPDoc.
-     * @param  string|array $uri Specified URI to database and table.
-     * @throws Exception
+     * @param string|array $uri Specified URI to database and table.
+     *
+     * @throws KlarnaException
      * @return void
      */
-    protected function splitURI($uri) {
+    protected function splitURI($uri)
+    {
         /* If you want to have some characters that would make the
             regexp too complex, you can use an array as input instead. */
-        if(is_array($uri)) {
+        if (is_array($uri)) {
             $this->user = $uri['user'];
             $this->passwd = $uri['passwd'];
             $this->dsn = $uri['dsn'];
@@ -189,9 +158,14 @@ class SQLStorage extends PCStorage {
                 $this->dbTable
             );
         }
-
+        $pdo_rex
+            = '/^([\w-]+):([\w-]+)@pdo:([\w.,:;\/ \\\t=\(\){}\*-]+)\/([\w-]+)'.
+            '.([\w-]+)$/';
+        $pcuri_rex
+            = '/^([\w-]+):([\w-]+)@([\w\.-]+|[\w\.-]+:[\d]+|[\w\.-]+:'.
+            '[\w\.\/-]+|:[\w\.\/-]+)\/([\w-]+).([\w-]+)$/';
         $arr = null;
-        if(preg_match('/^([\w-]+):([\w-]+)@pdo:([\w.,:;\/ \\\t=\(\){}\*-]+)\/([\w-]+).([\w-]+)$/', $uri, $arr) === 1) {
+        if (preg_match($pdo_rex, $uri, $arr) === 1) {
             /*
              * [0] => user:password@pdo:dsn/dbName.dbTable
              * [1] => user
@@ -200,8 +174,10 @@ class SQLStorage extends PCStorage {
              * [4] => dbName
              * [5] => dbTable
              */
-            if(count($arr) != 6) {
-                throw new Exception('URI is invalid! Missing field or invalid characters used!');
+            if (count($arr) != 6) {
+                throw new Klarna_DatabaseException(
+                    'URI is invalid! Missing field or invalid characters used!'
+                );
             }
 
             $this->user = $arr[1];
@@ -209,7 +185,7 @@ class SQLStorage extends PCStorage {
             $this->dsn = $arr[3];
             $this->dbName = $arr[4];
             $this->dbTable = $arr[5];
-        } else if(preg_match('/^([\w-]+):([\w-]+)@([\w\.-]+|[\w\.-]+:[\d]+|[\w\.-]+:[\w\.\/-]+|:[\w\.\/-]+)\/([\w-]+).([\w-]+)$/', $uri, $arr) === 1) {
+        } else if (preg_match($pcuri_rex, $uri, $arr) === 1) {
             //user:pass@127.0.0.1:3306/dbName.dbTable
             //user:pass@localhost:/tmp/mysql.sock/dbName.dbTable
             /*
@@ -220,24 +196,31 @@ class SQLStorage extends PCStorage {
              * [4] => dbName
              * [5] => dbTable
              */
-            if(count($arr) != 6) {
-                throw new Exception('URI is invalid! Missing field or invalid characters used!');
+            if (count($arr) != 6) {
+                throw new Klarna_DatabaseException(
+                    'URI is invalid! Missing field or invalid characters used!'
+                );
             }
 
             $this->user = $arr[1];
             $this->passwd = $arr[2];
             $this->addr = $arr[3];
             $this->port = 3306;
-            if(preg_match('/^([0-9.]+(:([0-9]+))?)$/', $this->addr, $tmp) === 1) {
-                if(isset($tmp[3])) {
+            if (preg_match(
+                '/^([0-9.]+(:([0-9]+))?)$/', $this->addr, $tmp
+            ) === 1
+            ) {
+                if (isset($tmp[3])) {
                     $this->port = $tmp[3];
                 }
             }
             $this->dbName = $arr[4];
             $this->dbTable = $arr[5];
-            $this->dsn = "mysql:host={$this->addr};port={$this->port};"; //dbname={$this->dbName}";
+            $this->dsn = "mysql:host={$this->addr};port={$this->port};";
         } else {
-            throw new Exception('URI to SQL is not valid! ( user:passwd@addr/dbName.dbTable )');
+            throw new Klarna_DatabaseException(
+                'URI to SQL is not valid! ( user:passwd@addr/dbName.dbTable )'
+            );
         }
 
         return $arr;
@@ -246,13 +229,14 @@ class SQLStorage extends PCStorage {
     /**
      * Grabs the PDO connection to the database, specified by the URI.
      *
-     * @ignore Do not show in PHPDoc.
-     * @param  string  $uri
+     * @param string $uri pclass uri
+     *
      * @return void
-     * @throws Exception
+     * @throws KlarnaException
      */
-    protected function getConnection($uri) {
-        if($this->pdo) {
+    protected function getConnection($uri)
+    {
+        if ($this->pdo) {
             return; //Already have a connection
         }
 
@@ -262,23 +246,25 @@ class SQLStorage extends PCStorage {
             $this->pdo = new PDO($this->dsn, $this->user, $this->passwd);
             $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         } catch (PDOException $e) {
-            throw new Exception('Failed to connect to database!');
+            throw new Klarna_DatabaseException('Failed to connect to database!');
         }
     }
 
     /**
      * Initializes the DB, if the database or table is missing.
      *
-     * @ignore Do not show in PHPDoc.
      * @return void
-     * @throws Exception
+     * @throws KlarnaException
      */
-    protected function initDB() {
+    protected function initDB()
+    {
         try {
             $this->pdo->exec("CREATE DATABASE `{$this->dbName}`");
         } catch (PDOException $e) {
             //SQLite does not support this...
-            //throw new Exception('Database non-existant, failed to create it!');
+            //throw new KlarnaException(
+            //  'Database non-existant, failed to create it!'
+            //);
         }
 
         $sql = <<<SQL
@@ -299,45 +285,48 @@ SQL;
         try {
             $this->pdo->exec($sql);
         } catch (PDOException $e) {
-            throw new Exception('Table non-existant, failed to create it!');
+            throw new Klarna_DatabaseException(
+                'Table non-existant, failed to create it!'
+            );
         }
     }
 
     /**
      * Connects to the DB and checks if DB and table exists.
      *
-     * @ignore Do not show in PHPDoc.
-     * @throws Exception
+     * @param string|array $uri pclass uri
+     *
+     * @throws KlarnaException
      * @return void
      */
-    protected function connect($uri) {
+    protected function connect($uri)
+    {
         $this->getConnection($uri);
-
         $this->initDB();
     }
 
     /**
-     * @see PCStorage::load()
+     * Loads the PClasses.
+     *
+     * @param string|array $uri pclass uri
+     *
+     * @return void
+     * @throws KlarnaException
      */
-    public function load($uri) {
-        try {
-            $this->connect($uri);
-
-            $this->loadPClasses();
-        }
-        catch(Exception $e) {
-            throw new KlarnaException("Error in " . __METHOD__ . ": " .$e->getMessage());
-        }
+    public function load($uri)
+    {
+        $this->connect($uri);
+        $this->loadPClasses();
     }
 
     /**
      * Loads the PClasses.
-	 *
-	 * @ignore Do not show in PHPDoc.
-	 * @return void
-     * @throws Exception
+     *
+     * @return void
+     * @throws KlarnaException
      */
-    protected function loadPClasses() {
+    protected function loadPClasses()
+    {
         try {
             $sth = $this->pdo->prepare(
                 "SELECT * FROM `{$this->dbName}`.`{$this->dbTable}`",
@@ -352,34 +341,41 @@ SQL;
             $sth->closeCursor();
             $sth = null;
         } catch (PDOException $e) {
-            throw new Exception('Could not fetch PClasses from database!');
-        }
-    }
-
-    /**
-     * @see PCStorage::save()
-     */
-    public function save($uri) {
-        try {
-            $this->connect($uri);
-
-            //Only attempt to savePClasses if there are any.
-            if(is_array($this->pclasses) && count($this->pclasses) > 0) {
-                $this->savePClasses();
-            }
-        } catch(Exception $e) {
-            throw new KlarnaException("Error in " . __METHOD__ . ": " . $e->getMessage());
+            throw new Klarna_DatabaseException(
+                'Could not fetch PClasses from database!'
+            );
         }
     }
 
     /**
      * Saves the PClasses.
      *
-     * @ignore Do not show in PHPDoc.
+     * @param string|array $uri pclass uri
+     *
      * @return void
-     * @throws Exception
+     * @throws KlarnaException
      */
-    protected function savePClasses() {
+    public function save($uri)
+    {
+        $this->connect($uri);
+        //Only attempt to savePClasses if there are any.
+        if (!is_array($this->pclasses)) {
+            return;
+        }
+        if (count($this->pclasses) == 0) {
+            return;
+        }
+        $this->savePClasses();
+    }
+
+    /**
+     * Saves the PClasses.
+     *
+     * @return void
+     * @throws KlarnaException
+     */
+    protected function savePClasses()
+    {
         //Insert PClass SQL statement.
         $sql = <<<SQL
             INSERT INTO `{$this->dbName}`.`{$this->dbTable}`
@@ -389,13 +385,18 @@ SQL;
                 (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 SQL;
 
-        foreach($this->pclasses as $pclasses) {
-            foreach($pclasses as $pclass) {
+        foreach ($this->pclasses as $pclasses) {
+            foreach ($pclasses as $pclass) {
                 try {
                     //Remove the pclass if it exists.
-                    $sth = $this->pdo->prepare("DELETE FROM `{$this->dbName}`.`{$this->dbTable}` WHERE `id` = ? AND `eid` = ?");
-                    $sth->execute(array(
-                        $pclass->getId(), $pclass->getEid())
+                    $sth = $this->pdo->prepare(
+                        "DELETE FROM `{$this->dbName}`.`{$this->dbTable}`
+                        WHERE `id` = ? AND `eid` = ?"
+                    );
+                    $sth->execute(
+                        array(
+                            $pclass->getId(), $pclass->getEid()
+                        )
                     );
 
                     $sth->closeCursor();
@@ -407,47 +408,66 @@ SQL;
                 try {
                     //Attempt to insert the PClass into the DB.
                     $sth = $this->pdo->prepare($sql);
-                    $sth->execute(array(
-                        $pclass->getEid(), $pclass->getId(), $pclass->getType(), $pclass->getDescription(),
-                        $pclass->getMonths(), $pclass->getInterestRate(), $pclass->getInvoiceFee(),
-                        $pclass->getStartFee(), $pclass->getMinAmount(), $pclass->getCountry(), $pclass->getExpire()
-                    ));
+                    $sth->execute(
+                        array(
+                            $pclass->getEid(),
+                            $pclass->getId(),
+                            $pclass->getType(),
+                            $pclass->getDescription(),
+                            $pclass->getMonths(),
+                            $pclass->getInterestRate(),
+                            $pclass->getInvoiceFee(),
+                            $pclass->getStartFee(),
+                            $pclass->getMinAmount(),
+                            $pclass->getCountry(),
+                            $pclass->getExpire()
+                        )
+                    );
 
                     $sth->closeCursor();
                     $sth = null;
                 } catch(PDOException $e) {
-                    throw new Exception('Failed to insert PClass into database!');
+                    throw new Klarna_DatabaseException(
+                        'Failed to insert PClass into database!'
+                    );
                 }
             }
         }
     }
 
     /**
-     * @see PCStorage::clear()
+     * Drops the database table, to clear the PClasses.
+     *
+     * @param string|array $uri pclass uri
+     *
+     * @return void
+     * @throws KlarnaException
      */
-    public function clear($uri) {
+    public function clear($uri)
+    {
         try {
             $this->connect($uri);
             unset($this->pclasses);
             $this->clearTable();
-        }
-        catch(Exception $e) {
-            throw new KlarnaException("Error in " . __METHOD__ . ": " . $e->getMessage());
+        } catch(Exception $e) {
+            throw new Klarna_DatabaseException(
+                $e->getMessage(), $e->getCode()
+            );
         }
     }
 
     /**
      * Drops the database table, to clear the PClasses.
      *
-     * @ignore Do not show in PHPDoc.
      * @return void
-     * @throws Exception
+     * @throws KlarnaException
      */
-    protected function clearTable() {
+    protected function clearTable()
+    {
         try {
             $this->pdo->exec("DELETE FROM `{$this->dbName}`.`{$this->dbTable}`");
         } catch (PDOException $e) {
-            throw new Exception('Could not clear the database!');
+            throw new Klarna_DatabaseException('Could not clear the database!');
         }
     }
 }
