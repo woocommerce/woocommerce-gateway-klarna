@@ -58,7 +58,16 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			$this->klarna_server = 'https://checkout.klarna.com/checkout/orders';
 		endif;
 		
-		
+		/*
+		// Analytics
+		$analytics 								= '';
+		$analytics 								= get_option( 'woocommerce_google_analytics_settings' );
+		$this->ga_id 							= $analytics['ga_id'];
+		$this->ga_set_domain_name               = $analytics['ga_set_domain_name'];
+		$this->ga_standard_tracking_enabled 	= $analytics['ga_standard_tracking_enabled'];
+		$this->ga_ecommerce_tracking_enabled 	= $analytics['ga_ecommerce_tracking_enabled'];
+		$this->ga_event_tracking_enabled		= $analytics['ga_event_tracking_enabled'];
+		*/
 		
 		// Country and language
 		switch ( $this->shop_country )
@@ -386,7 +395,12 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 					wp_redirect( $this->klarna_checkout_url );
 					exit;  
 				}
-
+				
+				// Analytics eCommerce tracking
+				//$this->ecommerce_tracking_code( $_GET['sid'] );
+				$data = new WC_Google_Analytics;
+				$data->ecommerce_tracking_code($_GET['sid']);
+				
 				$snippet = $klarna_order['gui']['snippet'];
 			
 				// DESKTOP: Width of containing block shall be at least 750px
@@ -399,8 +413,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 				// Remove cart
 				$woocommerce->cart->empty_cart();
 				
-				// Thankyou action for analytics
-				//do_action( 'woocommerce_thankyou', $_GET['sid'] );
+				
 			
 			} else {
 				
@@ -977,8 +990,8 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 		return $this->klarna_country;
 	 	}
 	 	
-	 	
-	 	
+		
+	
 	 	
 	 	
 	 /**
@@ -1091,7 +1104,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		    		$artNo = strval($sku),		 					//Article number
 		    		$title = utf8_decode ($item['name']), 	//Article name/title
 		    		$price = $item_price, 					// Price including tax
-		    		$vat = round( $item_tax_percentage, 1),			// Tax
+		    		$vat = round( $item_tax_percentage ),			// Tax
 		    		$discount = 0, 
 		    		$flags = KlarnaFlags::INC_VAT 			//Price is including VAT.
 				);
@@ -1133,7 +1146,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			    $artNo = "",
 			    $title = __('Shipping cost', 'klarna'),
 			    $price = $shipping_price,
-			    $vat = round( $calculated_shipping_tax_percentage, 1),
+			    $vat = round( $calculated_shipping_tax_percentage ),
 			    $discount = 0,
 			    $flags = KlarnaFlags::INC_VAT + KlarnaFlags::IS_SHIPMENT //Price is including VAT and is shipment fee
 			);

@@ -401,19 +401,23 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 			// Required fields check
 			if (!$this->eid || !$this->secret) return false;
 			
-			// Cart totals check - Lower threshold
-			if ( $this->lower_threshold !== '' ) {
-				if ( $woocommerce->cart->total < $this->lower_threshold ) return false;
-			}
+			// Checkout form check
+			if (isset($woocommerce->cart->total)) {
 			
-			// Cart totals check - Upper threshold
-			if ( $this->upper_threshold !== '' ) {
-				if ( $woocommerce->cart->total > $this->upper_threshold ) return false;
-			}
+				// Cart totals check - Lower threshold
+				if ( $this->lower_threshold !== '' ) {
+					if ( $woocommerce->cart->total < $this->lower_threshold ) return false;
+				}
 			
+				// Cart totals check - Upper threshold
+				if ( $this->upper_threshold !== '' ) {
+					if ( $woocommerce->cart->total > $this->upper_threshold ) return false;
+				}
 			
-			// Only activate the payment gateway if the customers country is the same as the filtered shop country ($this->klarna_country)
-	   		if ( $woocommerce->customer->get_country() == true && $woocommerce->customer->get_country() != $this->klarna_country ) return false;
+				// Only activate the payment gateway if the customers country is the same as the filtered shop country ($this->klarna_country)
+				if ( $woocommerce->customer->get_country() == true && $woocommerce->customer->get_country() != $this->klarna_country ) return false;
+			
+			} // End Checkout form check
 			
 			return true;
 					
@@ -1041,7 +1045,7 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 		    		$artNo = strval($sku),		 					//Article number
 		    		$title = utf8_decode ($item['name']), 	//Article name/title
 		    		$price = $item_price, 					// Price including tax
-		    		$vat = round( $item_tax_percentage, 1),			// Tax
+		    		$vat = round( $item_tax_percentage ),			// Tax
 		    		$discount = 0, 
 		    		$flags = KlarnaFlags::INC_VAT 			//Price is including VAT.
 				);
@@ -1083,7 +1087,7 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 			    $artNo = "",
 			    $title = __('Shipping cost', 'klarna'),
 			    $price = $shipping_price,
-			    $vat = round( $calculated_shipping_tax_percentage, 1),
+			    $vat = round( $calculated_shipping_tax_percentage ),
 			    $discount = 0,
 			    $flags = KlarnaFlags::INC_VAT + KlarnaFlags::IS_SHIPMENT //Price is including VAT and is shipment fee
 			);

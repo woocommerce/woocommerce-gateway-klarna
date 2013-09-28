@@ -1,4 +1,9 @@
 *** Klarna Changelog ***
+
+ * Fix     	- Improvment of is_available() for Klarna Invoice, Account & Campaign.
+ * Fix   	- Improved Round() handling of tax percentage sent to Klarna.
+ Fix     	- Added WooCommerce eCommerce tracking on Klarna Checkout Thankyou page.
+ 
 2013.08.28 	- version 1.7
  * Feature	- Klarna Checkout support for Norway and Finland.
  * Feature	- Possibility to use separate Thanks Page for Klarna Checkout.
