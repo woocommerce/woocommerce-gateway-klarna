@@ -1,4 +1,4 @@
-<?
+<?php
 class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			
 	public function __construct() { 
@@ -358,6 +358,9 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 */
 		function get_klarna_checkout_page() {
 			
+			// Debug
+			if ($this->debug=='yes') $this->log->add( 'klarna', 'KCO page about to render...' );
+			
 			global $woocommerce;
 			
 			ob_start();
@@ -627,14 +630,16 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		        			$create['cart']['items'][] = $item;
 		        		}
 		        		
+		        		
 		        		$klarna_order = new Klarna_Checkout_Order($connector);
 		        		$klarna_order->create($create);
 		        		$klarna_order->fetch();
 		        	}
-
+					
+					
+		        	
 		        	// Store location of checkout session
 		        	$_SESSION['klarna_checkout'] = $sessionId = $klarna_order->getLocation();
-		        	
 		        	
 		        	// Display checkout
 		        	$snippet = $klarna_order['gui']['snippet'];

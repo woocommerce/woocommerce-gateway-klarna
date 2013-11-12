@@ -23,16 +23,17 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 		$this->init_settings();
 		
 		// Define user set variables
-		$this->enabled				= ( isset( $this->settings['enabled'] ) ) ? $this->settings['enabled'] : '';
-		$this->title 				= ( isset( $this->settings['title'] ) ) ? $this->settings['title'] : '';
-		$this->description  		= ( isset( $this->settings['description'] ) ) ? $this->settings['description'] : '';
-		$this->eid					= ( isset( $this->settings['eid'] ) ) ? $this->settings['eid'] : '';
-		$this->secret				= ( isset( $this->settings['secret'] ) ) ? $this->settings['secret'] : '';
-		$this->lower_threshold		= ( isset( $this->settings['lower_threshold'] ) ) ? $this->settings['lower_threshold'] : '';
-		$this->upper_threshold		= ( isset( $this->settings['upper_threshold'] ) ) ? $this->settings['upper_threshold'] : '';
-		$this->invoice_fee_id		= ( isset( $this->settings['invoice_fee_id'] ) ) ? $this->settings['invoice_fee_id'] : '';
-		$this->testmode				= ( isset( $this->settings['testmode'] ) ) ? $this->settings['testmode'] : '';
-		$this->de_consent_terms		= ( isset( $this->settings['de_consent_terms'] ) ) ? $this->settings['de_consent_terms'] : '';
+		$this->enabled					= ( isset( $this->settings['enabled'] ) ) ? $this->settings['enabled'] : '';
+		$this->title 					= ( isset( $this->settings['title'] ) ) ? $this->settings['title'] : '';
+		$this->description  			= ( isset( $this->settings['description'] ) ) ? $this->settings['description'] : '';
+		$this->eid						= ( isset( $this->settings['eid'] ) ) ? $this->settings['eid'] : '';
+		$this->secret					= ( isset( $this->settings['secret'] ) ) ? $this->settings['secret'] : '';
+		$this->lower_threshold			= ( isset( $this->settings['lower_threshold'] ) ) ? $this->settings['lower_threshold'] : '';
+		$this->upper_threshold			= ( isset( $this->settings['upper_threshold'] ) ) ? $this->settings['upper_threshold'] : '';
+		$this->invoice_fee_id			= ( isset( $this->settings['invoice_fee_id'] ) ) ? $this->settings['invoice_fee_id'] : '';
+		$this->testmode					= ( isset( $this->settings['testmode'] ) ) ? $this->settings['testmode'] : '';
+		$this->de_consent_terms			= ( isset( $this->settings['de_consent_terms'] ) ) ? $this->settings['de_consent_terms'] : '';
+		$this->ship_to_billing_address	= ( isset( $this->settings['ship_to_billing_address'] ) ) ? $this->settings['ship_to_billing_address'] : '';
 		
 		//if ( $this->handlingfee == "") $this->handlingfee = 0;
 		//if ( $this->handlingfee_tax == "") $this->handlingfee_tax = 0;
@@ -165,7 +166,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 							'title' => __( 'Enable/Disable', 'klarna' ), 
 							'type' => 'checkbox', 
 							'label' => __( 'Enable Klarna Invoice', 'klarna' ), 
-							'default' => 'yes'
+							'default' => 'no'
 						), 
 			'title' => array(
 							'title' => __( 'Title', 'klarna' ), 
@@ -209,6 +210,12 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 								'description' => __( 'Create a hidden (simple) product that acts as the invoice fee. Enter the ID number in this textfield. Leave blank to disable. ', 'klarna' ), 
 								'default' => ''
 							),
+			'ship_to_billing_address' => array(
+							'title' => __( 'Send billing address as shipping address', 'klarna' ), 
+							'type' => 'checkbox', 
+							'label' => __( 'Send the entered billing address in WooCommerce checkout as shipping address to Klarna.', 'klarna' ), 
+							'default' => 'no'
+						),
 			'de_consent_terms' => array(
 							'title' => __( 'Klarna concent terms (DE only)', 'klarna' ), 
 							'type' => 'checkbox', 
@@ -301,9 +308,19 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 	   	
 	   	?>
 	   	
-	   	<?php if ($this->testmode=='yes') : ?><p><?php _e('TEST MODE ENABLED', 'klarna'); ?></p><?php endif; ?>
-		<?php if ($this->description) : ?><p><?php echo $this->description; ?></p><?php endif; ?>
-		<?php if ($this->invoice_fee_price>0) : ?><p><?php printf(__('An invoice fee of %1$s %2$s will be added to your order.', 'klarna'), $this->invoice_fee_price, $this->klarna_currency ); ?></p><?php endif; ?>
+	   	<?php if ($this->testmode=='yes') : ?><p><?php _e('TEST MODE ENABLED', 'klarna'); ?></p>
+	   	
+	   	<?php 
+	   	endif;
+		
+		// Description
+		if ($this->description) :
+			// apply_filters to the description so we can filter this if needed
+			$klarna_description = $this->description;
+			echo '<p>' . apply_filters( 'klarna_invoice_description', $klarna_description ) . '</p>';
+		endif; 
+		
+		if ($this->invoice_fee_price>0) : ?><p><?php printf(__('An invoice fee of %1$s %2$s will be added to your order.', 'klarna'), $this->invoice_fee_price, $this->klarna_currency ); ?></p><?php endif; ?>
 		
 		<fieldset>
 			<p class="form-row form-row-first">
@@ -791,7 +808,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 			$addr_billing->setCompanyName($order->billing_company);
 		
 		// Shipping address
-		if ( $order->get_shipping_method() == '' ) {
+		if ( $order->get_shipping_method() == '' || $this->ship_to_billing_address == 'yes') {
 			
 			// Use billing address if Shipping is disabled in Woocommerce
 			$addr_shipping = new KlarnaAddr(

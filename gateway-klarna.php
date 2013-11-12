@@ -3,7 +3,7 @@
 Plugin Name: WooCommerce Klarna Gateway
 Plugin URI: http://woothemes.com/woocommerce
 Description: Extends WooCommerce. Provides a <a href="http://www.klarna.se" target="_blank">Klarna</a> gateway for WooCommerce.
-Version: 1.7
+Version: 1.7.1
 Author: Niklas Högefjord
 Author URI: http://krokedil.com
 */
@@ -144,8 +144,8 @@ function init_klarna_gateway() {
 		public function __construct() {
 			
 			// Add admin notice about the callback change
-			add_action('admin_notices', array($this, 'krokedil_admin_notice'));
-			add_action('admin_init', array($this, 'krokedil_nag_ignore'));
+			//add_action('admin_notices', array($this, 'krokedil_admin_notice'));
+			//add_action('admin_init', array($this, 'krokedil_nag_ignore'));
 		}
 	
 		/* Display a notice about the changes to the Invoice fee handling */

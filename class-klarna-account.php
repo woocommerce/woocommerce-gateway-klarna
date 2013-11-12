@@ -52,6 +52,7 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 		$this->de_consent_terms					= ( isset( $this->settings['de_consent_terms'] ) ) ? $this->settings['de_consent_terms'] : '';
 		$this->lower_threshold_monthly_cost		= ( isset( $this->settings['lower_threshold_monthly_cost'] ) ) ? $this->settings['lower_threshold_monthly_cost'] : '';
 		$this->upper_threshold_monthly_cost		= ( isset( $this->settings['upper_threshold_monthly_cost'] ) ) ? $this->settings['upper_threshold_monthly_cost'] : '';
+		$this->ship_to_billing_address			= ( isset( $this->settings['ship_to_billing_address'] ) ) ? $this->settings['ship_to_billing_address'] : '';
 		
 		if ($this->lower_threshold_monthly_cost == '') $this->lower_threshold_monthly_cost = 0;
 		if ($this->upper_threshold_monthly_cost == '') $this->upper_threshold_monthly_cost = 10000000;
@@ -165,7 +166,7 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 							'title' => __( 'Enable/Disable', 'klarna' ), 
 							'type' => 'checkbox', 
 							'label' => __( 'Enable Klarna Account', 'klarna' ), 
-							'default' => 'yes'
+							'default' => 'no'
 						), 
 			'title' => array(
 							'title' => __( 'Title', 'klarna' ), 
@@ -252,6 +253,12 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 							'type' => 'text', 
 							'description' => __( 'Disable the monthly cost feature if <i>Product price</i> is higher than the specified value. Leave blank to disable.', 'klarna' ), 
 							'default' => ''
+						),
+			'ship_to_billing_address' => array(
+							'title' => __( 'Send billing address as shipping address', 'klarna' ), 
+							'type' => 'checkbox', 
+							'label' => __( 'Send the entered billing address in WooCommerce checkout as shipping address to Klarna.', 'klarna' ), 
+							'default' => 'no'
 						),
 			'de_consent_terms' => array(
 							'title' => __( 'Klarna concent terms (DE only)', 'klarna' ), 
@@ -1114,7 +1121,7 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 		
 		
 		// Shipping address
-		if ( $order->get_shipping_method() == '' ) {
+		if ( $order->get_shipping_method() == '' || $this->ship_to_billing_address == 'yes') {
 			
 			// Use billing address if Shipping is disabled in Woocommerce
 			$addr_shipping = new KlarnaAddr(
