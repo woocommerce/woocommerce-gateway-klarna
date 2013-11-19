@@ -147,6 +147,8 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 		/* 2.0.0 */
 		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
 		
+		
+		
 		add_action('woocommerce_receipt_klarna', array(&$this, 'receipt_page'));
 		
 		add_action('wp_footer', array(&$this, 'klarna_invoice_terms_js'));
@@ -702,6 +704,38 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 		endif;
 		
 		
+		// Fees
+		if ( sizeof( $order->get_fees() ) > 0 ) {
+			foreach ( $order->get_fees() as $item ) {
+			
+			// We manually calculate the tax percentage here
+			if ($order->get_total_tax() >0) :
+				// Calculate tax percentage
+				$item_tax_percentage = number_format( ( $item['line_tax'] / $item['line_total'] )*100, 2, '.', '');
+			else :
+				$item_tax_percentage = 0.00;
+			endif;
+			
+			// apply_filters to item price so we can filter this if needed
+			$klarna_item_price_including_tax = $item['line_total'];
+			$item_price = apply_filters( 'klarna_fee_price_including_tax', $klarna_item_price_including_tax );
+			
+				$item_loop++;
+				
+				$k->addArticle(
+				    $qty = 1,
+				    $artNo = "",
+				    $title = $item['name'],
+				    $price = $item['line_total'],
+				    $vat = round( $item_tax_percentage ),
+				    $discount = 0,
+			    	$flags = KlarnaFlags::INC_VAT + KlarnaFlags::IS_HANDLING //Price is including VAT and is handling/invoice fee
+			    );
+			    
+			}
+		}
+             
+        /*           
 		// Invoice/handling fee
 		
 		// Get the invoice fee product if invoice fee is used
@@ -783,7 +817,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
     		
 		} // End invoice_fee_price > 0
 			
-		
+		*/
 		//Create the address object and specify the values.
 		
 		// Billing address
@@ -957,7 +991,13 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 			</script>
 			<?php
 		}
-	}
+	} // End function
+	
+	
+	
+
+	
+	
 	
 	
 	/**
@@ -1021,11 +1061,94 @@ class WC_Gateway_Klarna_Invoice_Extra {
 	public function __construct() {
 		
 		// Add Invoice fee via the new Fees API
-		add_action( 'woocommerce_checkout_process', array($this, 'add_invoice_fee_process') );
+		//add_action( 'woocommerce_checkout_process', array($this, 'add_invoice_fee_process') );
+		
+		// Add Invoice fee via the new Fees API
+		add_action( 'woocommerce_before_calculate_totals', array( $this, 'calculate_totals' ), 10, 1 );
 		
 		// Chcek Klarna specific fields on Checkout
 		add_action('woocommerce_checkout_process', array(&$this, 'klarna_invoice_checkout_field_process'));
 	}
+	
+	
+	
+	
+	
+	
+		/**
+	 * Calculate totals on checkout form.
+	 **/
+	 
+	public function calculate_totals( $totals ) {
+    	global $woocommerce;
+		$available_gateways = $woocommerce->payment_gateways->get_available_payment_gateways();
+		
+		$current_gateway = '';
+		if ( ! empty( $available_gateways ) ) {
+			// Chosen Method
+			if ( isset( $woocommerce->session->chosen_payment_method ) && isset( $available_gateways[ $woocommerce->session->chosen_payment_method ] ) ) {
+				$current_gateway = $available_gateways[ $woocommerce->session->chosen_payment_method ];
+			} elseif ( isset( $available_gateways[ get_option( 'woocommerce_default_gateway' ) ] ) ) {
+            	$current_gateway = $available_gateways[ get_option( 'woocommerce_default_gateway' ) ];
+			} else {
+            	$current_gateway =  current( $available_gateways );
+
+			}
+			
+		}
+	
+		if($current_gateway->id=='klarna'){
+        	$current_gateway_id = $current_gateway -> id;
+			
+			$this->add_fee_to_cart();
+			//add_action( 'woocommerce_review_order_before_order_total',  array( $this, 'add_payment_gateway_extra_charges_row'));
+			//add_filter('woocommerce_cart_total', array( $this, 'add_fee_to_cart_total'));
+			
+			
+		}
+		
+		return $totals;
+	}
+	
+	
+	
+	/**
+	 * Add the fee to the cart if Klarna is selected payment method and if a fee is used.
+	 **/
+	 function add_fee_to_cart() {
+		 global $woocommerce;
+		 
+		 $invoice_fee = new WC_Gateway_Klarna_Invoice;
+		 $this->invoice_fee_id = $invoice_fee->get_klarna_invoice_fee_product();
+		 
+		 // Only run this if Klarna is the choosen payment method and this is WC +2.0
+		 //if ($_POST['payment_method'] == 'klarna' && version_compare( WOOCOMMERCE_VERSION, '2.0', '>=' )) {
+		 			 	
+		 	if ( $this->invoice_fee_id > 0 ) {
+		 		$product = get_product($this->invoice_fee_id);
+		 	
+		 		if ( $product->exists() ) :
+		 		
+		 			// Is this a taxable product?
+		 			if ( $product->is_taxable() ) {
+			 			$product_tax = true;
+			 		} else {
+				 		$product_tax = false;
+				 	}
+    	   	 	
+				 	$woocommerce->cart->add_fee($product->get_title(),$product->get_price_excluding_tax(),$product_tax,$product->get_tax_class());
+				 	
+    	    
+				endif;
+			} // End if invoice_fee_id > 0
+		
+		//}
+	} // End function add_invoice_fee_process
+	
+	
+	
+	
+	
 	
 	/**
 	 * Add the invoice fee to the cart if Klarna Invoice is selected payment method, if this is WC 2.0 and if invoice fee is used.

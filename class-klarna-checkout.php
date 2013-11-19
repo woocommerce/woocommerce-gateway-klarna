@@ -424,6 +424,13 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 				if ($this->enabled != 'yes' || $this->klarna_country == '' || $this->klarna_eid == '') return;
 				
 				
+				// If checkout registration is disabled and not logged in, the user cannot checkout
+				$checkout = $woocommerce->checkout();
+				if ( ! $checkout->enable_guest_checkout && ! is_user_logged_in() ) {
+					//do_action( 'woocommerce_login_form' );
+					echo apply_filters( 'woocommerce_checkout_must_be_logged_in_message', __( 'You must be logged in to checkout.', 'woocommerce' ) );
+					return;
+				}
 				
 				// Process order via Klarna Checkout page				
 

@@ -1,4 +1,7 @@
 *** Klarna Changelog ***
+* Tweak 	- Improved invoice fee view for Klarna invoice
+			- Added fees to totals
+			- Added check for disabled gusest checkout (Klarna Checkout).
 
 2013.11.12 	- version 1.7.1
  * Fix     	- Improvment of is_available() for Klarna Invoice, Account & Campaign.
