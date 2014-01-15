@@ -48,24 +48,27 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 				$product = new WC_Product( $this->invoice_fee_id );
 			}
 		
-			if ( $product->exists() ) :
+			if ( $product ) :
 			
 				// We manually calculate the tax percentage here
 				$this->invoice_fee_tax_percentage = number_format( (( $product->get_price() / $product->get_price_excluding_tax() )-1)*100, 2, '.', '');
 				
 				// apply_filters to invoice fee price so we can filter this if needed
 				$klarna_invoice_fee_price_including_tax = $product->get_price();
-				$this->invoice_fee_price = apply_filters( 'klarna_invoice_fee_price_including_tax', $klarna_invoice_fee_price_including_tax );
+				$this->invoice_fee_price 	= apply_filters( 'klarna_invoice_fee_price_including_tax', $klarna_invoice_fee_price_including_tax );
+				$this->invoice_fee_name 	= $product->get_title();
 				
 			else :
 			
-				$this->invoice_fee_price = 0;	
+				$this->invoice_fee_price 	= 0;
+				$this->invoice_fee_name 	= '';
 							
 			endif;
 		
 		else :
 		
-		$this->invoice_fee_price = 0;
+		$this->invoice_fee_price	= 0;
+		$this->invoice_fee_name 	= '';
 		
 		endif;
 		
@@ -137,6 +140,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 		$this->klarna_currency 		= apply_filters( 'klarna_currency', $klarna_currency );
 		$this->klarna_invoice_terms = apply_filters( 'klarna_invoice_terms', $klarna_invoice_terms );
 		$this->icon 				= apply_filters( 'klarna_invoice_icon', $klarna_invoice_icon );
+		$this->description			= apply_filters( 'klarna_invoice_description', $this->description );
 		
 		
 		// Actions
@@ -316,13 +320,11 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 	   	endif;
 		
 		// Description
-		if ($this->description) :
-			// apply_filters to the description so we can filter this if needed
-			$klarna_description = $this->description;
-			echo '<p>' . apply_filters( 'klarna_invoice_description', $klarna_description ) . '</p>';
+		if ($this->description) :	
+			echo '<p>' . $this->description . '</p>';
 		endif; 
 		
-		if ($this->invoice_fee_price>0) : ?><p><?php printf(__('An invoice fee of %1$s %2$s will be added to your order.', 'klarna'), $this->invoice_fee_price, $this->klarna_currency ); ?></p><?php endif; ?>
+		?>
 		
 		<fieldset>
 			<p class="form-row form-row-first">
@@ -517,6 +519,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 	 * Process the payment and return the result
 	 **/
 	function process_payment( $order_id ) {
+	
 		global $woocommerce;
 		
 		$order = new WC_order( $order_id );
@@ -681,6 +684,50 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 			);
 		endif;
 		
+		
+		
+		// Fees
+		if ( sizeof( $order->get_fees() ) > 0 ) {
+			foreach ( $order->get_fees() as $item ) {
+			
+			
+			// We manually calculate the tax percentage here
+			if ($order->get_total_tax() >0) :
+				// Calculate tax percentage
+				$item_tax_percentage = number_format( ( $item['line_tax'] / $item['line_total'] )*100, 2, '.', '');
+			else :
+				$item_tax_percentage = 0.00;
+			endif;
+			
+			
+			// Invoice fee or regular fee
+			if( $this->invoice_fee_name == $item['name'] ) {
+				$tmp_flags = KlarnaFlags::INC_VAT + KlarnaFlags::IS_HANDLING; //Price is including VAT and is handling/invoice fee
+			} else {
+				$tmp_flags = KlarnaFlags::INC_VAT; //Price is including VAT
+			}
+			
+			
+			// apply_filters to item price so we can filter this if needed
+			$klarna_item_price_including_tax = $item['line_total'] + $item['line_tax'];
+			$item_price = apply_filters( 'klarna_fee_price_including_tax', $klarna_item_price_including_tax );
+			
+				$item_loop++;
+				
+				$k->addArticle(
+				    $qty = 1,
+				    $artNo = "",
+				    $title = $item['name'],
+				    $price = $item_price,
+				    $vat = round( $item_tax_percentage ),
+				    $discount = 0,
+			    	$flags = $tmp_flags
+			    );
+			    
+			}
+		}
+		
+		
 		// Shipping
 		if ($order->order_shipping>0) :
 			
@@ -703,122 +750,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 			);
 		endif;
 		
-		
-		// Fees
-		if ( sizeof( $order->get_fees() ) > 0 ) {
-			foreach ( $order->get_fees() as $item ) {
-			
-			// We manually calculate the tax percentage here
-			if ($order->get_total_tax() >0) :
-				// Calculate tax percentage
-				$item_tax_percentage = number_format( ( $item['line_tax'] / $item['line_total'] )*100, 2, '.', '');
-			else :
-				$item_tax_percentage = 0.00;
-			endif;
-			
-			// apply_filters to item price so we can filter this if needed
-			$klarna_item_price_including_tax = $item['line_total'];
-			$item_price = apply_filters( 'klarna_fee_price_including_tax', $klarna_item_price_including_tax );
-			
-				$item_loop++;
-				
-				$k->addArticle(
-				    $qty = 1,
-				    $artNo = "",
-				    $title = $item['name'],
-				    $price = $item['line_total'],
-				    $vat = round( $item_tax_percentage ),
-				    $discount = 0,
-			    	$flags = KlarnaFlags::INC_VAT + KlarnaFlags::IS_HANDLING //Price is including VAT and is handling/invoice fee
-			    );
-			    
-			}
-		}
-             
-        /*           
-		// Invoice/handling fee
-		
-		// Get the invoice fee product if invoice fee is used
-		if ( $this->invoice_fee_price > 0 ) {
 
-			// We have already checked that the product exists in klarna_invoice_init()		
-			// Version check - 1.6.6 or 2.0
-			if ( function_exists( 'get_product' ) ) {
-				$product = get_product($this->invoice_fee_id);
-			} else {
-				$product = new WC_Product( $this->invoice_fee_id );
-			}
-			
-			if ( version_compare( WOOCOMMERCE_VERSION, '2.0', '<' ) ) {
-				
-				// Pre 2.0				
-				$k->addArticle(
-				    $qty = 1,
-				    $artNo = "",
-				    $title = __('Handling Fee', 'klarna'),
-				    $price = $this->invoice_fee_price,
-				    $vat = round( $this->invoice_fee_tax_percentage ),
-				    $discount = 0,
-			    	$flags = KlarnaFlags::INC_VAT + KlarnaFlags::IS_HANDLING //Price is including VAT and is handling/invoice fee
-			    );
-			
-			    // Add the invoice fee to the order
-			    // Get all order items and unserialize the array
-			    $originalarray = unserialize($order->order_custom_fields['_order_items'][0]);
-			
-			
-			    // TODO: check that Invoice fee can't be added multiple times to order?
-			    $addfee[] = array (
-   					'id' => $this->invoice_fee_id,
-   					'variation_id' => '',
-   					'name' => $product->get_title(),
-   					'qty' => '1',
-   					'item_meta' => 
-    					array (
-    					),
-    				'line_subtotal' => $product->get_price_excluding_tax(),
-    				'line_subtotal_tax' => $product->get_price()-$product->get_price_excluding_tax(),
-    				'line_total' => $product->get_price_excluding_tax(),
-    				'line_tax' => $product->get_price()-$product->get_price_excluding_tax(),
-    				'tax_class' => $product->get_tax_class(),
-    			);
-  				
-    			// Merge the invoice fee product to order items
-    			$newarray = array_merge($originalarray, $addfee);
-    			
-    			// Update order items with the added invoice fee product
-    			update_post_meta( $order->id, '_order_items', $newarray );
-    			
-    			// Update _order_total
-    			$old_order_total = $order->order_custom_fields['_order_total'][0];
-    			$new_order_total = $old_order_total+$product->get_price();
-    			update_post_meta( $order->id, '_order_total', $new_order_total );
-    			
-    			// Update _order_tax	
-    			$invoice_fee_tax = $product->get_price()-$product->get_price_excluding_tax();
-    			$old_order_tax = $order->order_custom_fields['_order_tax'][0];
-    			$new_order_tax = $old_order_tax+$invoice_fee_tax;
-    			update_post_meta( $order->id, '_order_tax', $new_order_tax );
-    		
-    		} else {
-	    		
-	    		// 2.0+				
-				$k->addArticle(
-				    $qty = 1,
-				    $artNo = "",
-				    $title = __('Handling Fee', 'klarna'),
-				    $price = $this->invoice_fee_price,
-				    $vat = round( $this->invoice_fee_tax_percentage ),
-				    $discount = 0,
-			    	$flags = KlarnaFlags::INC_VAT + KlarnaFlags::IS_HANDLING //Price is including VAT and is handling/invoice fee
-			    );
-			    
-    		} // End version check
-    		
-		} // End invoice_fee_price > 0
-			
-		*/
-		//Create the address object and specify the values.
 		
 		// Billing address
 		$addr_billing = new KlarnaAddr(
@@ -887,8 +819,8 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 
 		//Set store specific information so you can e.g. search and associate invoices with order numbers.
 		$k->setEstoreInfo(
-		    $orderid1 = $order_id, //Maybe the estore's order number/id.
-		    $orderid2 = $order->order_key, //Could an order number from another system?
+		    $orderid1 = ltrim( $order->get_order_number(), '#'),
+		    $orderid2 = $order_id,
 		    $user = '' //Username, email or identifier for the user?
 		);
 		
@@ -896,7 +828,6 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 
 		//Normal shipment is defaulted, delays the start of invoice expiration/due-date.
 		// $k->setShipmentInfo('delay_adjust', KlarnaFlags::EXPRESS_SHIPMENT);
-		
 		try {
     		//Transmit all the specified data, from the steps above, to Klarna.
     		$result = $k->addTransaction(
@@ -1096,8 +1027,8 @@ class WC_Gateway_Klarna_Invoice_Extra {
 			}
 			
 		}
-	
-		if($current_gateway->id=='klarna'){
+		
+		if(is_object($current_gateway) && $current_gateway->id=='klarna'){
         	$current_gateway_id = $current_gateway -> id;
 			
 			$this->add_fee_to_cart();

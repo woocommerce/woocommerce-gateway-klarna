@@ -48,6 +48,10 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
        	$this->add_std_checkout_button			= ( isset( $this->settings['add_std_checkout_button'] ) ) ? $this->settings['add_std_checkout_button'] : '';
        	$this->std_checkout_button_label		= ( isset( $this->settings['std_checkout_button_label'] ) ) ? $this->settings['std_checkout_button_label'] : '';
        	
+       	$this->create_customer_account			= ( isset( $this->settings['create_customer_account'] ) ) ? $this->settings['create_customer_account'] : '';
+       	$this->send_new_account_email			= ( isset( $this->settings['send_new_account_email'] ) ) ? $this->settings['send_new_account_email'] : '';
+       	
+       	
 		if ( empty($this->terms_url) ) 
 			$this->terms_url = esc_url( get_permalink(woocommerce_get_page_id('terms')) );
         	
@@ -58,17 +62,26 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			$this->klarna_server = 'https://checkout.klarna.com/checkout/orders';
 		endif;
 		
-		/*
-		// Analytics
-		$analytics 								= '';
-		$analytics 								= get_option( 'woocommerce_google_analytics_settings' );
-		$this->ga_id 							= $analytics['ga_id'];
-		$this->ga_set_domain_name               = $analytics['ga_set_domain_name'];
-		$this->ga_standard_tracking_enabled 	= $analytics['ga_standard_tracking_enabled'];
-		$this->ga_ecommerce_tracking_enabled 	= $analytics['ga_ecommerce_tracking_enabled'];
-		$this->ga_event_tracking_enabled		= $analytics['ga_event_tracking_enabled'];
-		*/
-		
+		// If currency is set by WPML
+		if ( $woocommerce->session->client_currency ) {
+					
+			switch ( strtoupper($woocommerce->session->client_currency) ) {
+			case 'NOK' :
+				$klarna_country = 'NO';
+				break;
+			case 'EUR' :
+				$klarna_country = 'FI';
+				break;
+			case 'SEK' :
+				$klarna_country = 'SE';
+				break;
+			default:
+				$klarna_country = $this->shop_country;
+			}
+
+			$this->shop_country	= $klarna_country;
+		}
+			
 		// Country and language
 		switch ( $this->shop_country )
 		{
@@ -91,6 +104,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		*/
 		case 'NO' :
 		case 'NB' :
+		//case 'NOK' :
 			$klarna_country 			= 'NO';
 			$klarna_language 			= 'nb-no';
 			$klarna_currency 			= 'NOK';
@@ -104,6 +118,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			}
 			break;
 		case 'FI' :
+		//case 'EUR' :
 			$klarna_country 			= 'FI';
 			$klarna_language 			= 'fi-fi';
 			$klarna_currency 			= 'EUR';
@@ -118,6 +133,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			break;
 		case 'SE' :
 		case 'SV' :
+		//case 'SEK' :
 			$klarna_country 			= 'SE';
 			$klarna_language 			= 'sv-se';
 			$klarna_currency 			= 'SEK';
@@ -288,6 +304,18 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 							'description' => __( 'Please enter the URL to the page that acts as Terms Page for Klarna Checkout. Leave blank to use the defined WooCommerce Terms Page.', 'klarna' ), 
 							'default' => ''
 						),
+			'create_customer_account' => array(
+							'title' => __( 'Create customer account', 'klarna' ), 
+							'type' => 'checkbox', 
+							'label' => __( 'Automatically create an account for new customers.', 'klarna' ), 
+							'default' => 'no'
+						),
+			'send_new_account_email' => array(
+							'title' => __( 'Send New account email when creating new accounts.', 'klarna' ), 
+							'type' => 'checkbox', 
+							'label' => __( 'Send New account email', 'klarna' ), 
+							'default' => 'no'
+						),
 			'testmode' => array(
 							'title' => __( 'Test Mode', 'klarna' ), 
 							'type' => 'checkbox', 
@@ -362,6 +390,8 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			if ($this->debug=='yes') $this->log->add( 'klarna', 'KCO page about to render...' );
 			
 			global $woocommerce;
+			global $current_user;
+			get_currentuserinfo();
 			
 			ob_start();
 			require_once 'src/Klarna/Checkout.php';
@@ -420,8 +450,18 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			
 			} else {
 				
+				// Display Checkout page
+				
 				// Don't render the Klarna Checkout form if the payment gateway isn't enabled.
-				if ($this->enabled != 'yes' || $this->klarna_country == '' || $this->klarna_eid == '') return;
+				if ($this->enabled != 'yes') return;
+				
+				
+				// If no Klarna country is set - return.
+				if ( empty($this->klarna_country) ) {
+					echo apply_filters( 'klarna_checkout_wrong_country_message', sprintf(__('Sorry, you can not buy via Klarna Checkout from your country or currency. Please <a href="%s">use another payment method</a>.', 'klarna'), get_permalink( get_option('woocommerce_checkout_page_id') )) );
+					return;
+				}
+				
 				
 				
 				// If checkout registration is disabled and not logged in, the user cannot checkout
@@ -471,6 +511,9 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	        			exit();
         			}
         			
+        			// Store Order ID in session so it can be re-used if customer navigates away from the checkout and then return again
+					$woocommerce->session->order_awaiting_payment = $order_id;
+					
         			
         			// Get an instance of the created order
         			$order = new WC_Order( $order_id );
@@ -517,7 +560,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 											'quantity' => (int)$item['qty'],
 											'unit_price' => (int)$item_price,
 											'discount_rate' => 0,
-											'tax_rate' => $item_tax_percentage
+											'tax_rate' => round($item_tax_percentage)
 										);
 									
 							} // End if qty
@@ -546,7 +589,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 						 	'name' => $woocommerce->cart->shipping_label,  
 						 	'quantity' => 1,  
 						 	'unit_price' => (int)$shipping_price,  
-						 	'tax_rate' => $shipping_tax_percentage  
+						 	'tax_rate' => round($shipping_tax_percentage)
 						 );
 					}
 				
@@ -564,7 +607,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 						);
 					}
 				
-			
+					
 					// Merchant ID
 					$eid = $this->klarna_eid;
     		
@@ -582,7 +625,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 					$klarna_order = null;
     			
 					if (array_key_exists('klarna_checkout', $_SESSION)) {
-				
+						
 						// Resume session
 						$klarna_order = new Klarna_Checkout_Order(
 							$connector,
@@ -607,10 +650,23 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 							$update['merchant']['checkout_uri'] = add_query_arg( 'klarnaListener', 'checkout', $this->klarna_checkout_url );
 	        			
         					$update['merchant']['confirmation_uri'] = add_query_arg ( array('klarna_order' => '{checkout.order.uri}', 'sid' => $order_id ), $this->klarna_checkout_thanks_url);
-        					$update['merchant']['push_uri'] = add_query_arg( array('sid' => $order_id, 'klarna_order' => '{checkout.order.uri}', 'wc-api' => 'WC_Gateway_Klarna_Checkout'), $this->klarna_checkout_url );
+        					$update['merchant']['push_uri'] = add_query_arg( array('sid' => $order_id, 'scountry' => $this->klarna_country, 'klarna_order' => '{checkout.order.uri}', 'wc-api' => 'WC_Gateway_Klarna_Checkout'), $this->klarna_checkout_url );
         					
-        					//$update['gui']['layout'] = $klarna_checkout_layout;
+
         					
+        					// Customer info if logged in
+        					/*
+							if( $this->testmode !== 'yes' ) {
+								if($current_user->user_email) {
+									$update['shipping_address']['email'] = $current_user->user_email;
+								}
+						
+								if($woocommerce->customer->get_shipping_postcode()) {
+									$update['shipping_address']['postal_code'] = $woocommerce->customer->get_shipping_postcode();
+								}
+							}
+							*/
+						
         					$klarna_order->update($update);
         				} catch (Exception $e) {
         					// Reset session
@@ -618,7 +674,8 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
         					unset($_SESSION['klarna_checkout']);
         				}
         			}
-        	
+					
+		        		
         			if ($klarna_order == null) {
 						
 	        			// Start new session
@@ -629,13 +686,27 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	        			$create['merchant']['terms_uri'] = $this->terms_url;
 	        			$create['merchant']['checkout_uri'] = add_query_arg( 'klarnaListener', 'checkout', $this->klarna_checkout_url );
 	        			$create['merchant']['confirmation_uri'] = add_query_arg ( array('klarna_order' => '{checkout.order.uri}', 'sid' => $order_id ), $this->klarna_checkout_thanks_url);
-	        			$create['merchant']['push_uri'] = add_query_arg( array('sid' => $order_id, 'klarna_order' => '{checkout.order.uri}', 'wc-api' => 'WC_Gateway_Klarna_Checkout'), $this->klarna_checkout_url );
+	        			$create['merchant']['push_uri'] = add_query_arg( array('sid' => $order_id, 'scountry' => $this->klarna_country, 'klarna_order' => '{checkout.order.uri}', 'wc-api' => 'WC_Gateway_Klarna_Checkout'), $this->klarna_checkout_url );
+	        			
+	        			// Customer info if logged in
+	        			/*
+	        			if( $this->testmode !== 'yes' ) {
+							if($current_user->user_email) {
+								$create['shipping_address']['email'] = $current_user->user_email;
+							}
+						
+							if($woocommerce->customer->get_shipping_postcode()) {
+								$create['shipping_address']['postal_code'] = $woocommerce->customer->get_shipping_postcode();
+							}
+						}
+						*/
 	        			
 	        			$create['gui']['layout'] = $klarna_checkout_layout;
 	        			
 	        			foreach ($cart as $item) {
 		        			$create['cart']['items'][] = $item;
 		        		}
+		        		
 		        		
 		        		
 		        		$klarna_order = new Klarna_Checkout_Order($connector);
@@ -671,6 +742,8 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 				global $woocommerce;
 				
 				if ($this->debug=='yes') $this->log->add( 'klarna', 'Response from Klarna...' );
+				if ($this->debug=='yes') $this->log->add( 'klarna', 'Klarna order: ' . $_GET['klarna_order'] );
+				if ($this->debug=='yes') $this->log->add( 'klarna', 'GET: ' . json_encode($_GET) );
 				
 				require_once 'src/Klarna/Checkout.php';  
   
@@ -678,7 +751,21 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 				
 				Klarna_Checkout_Order::$contentType = "application/vnd.klarna.checkout.aggregated-order-v2+json";  
 				
-				$connector = Klarna_Checkout_Connector::create($this->klarna_secret);  
+				switch ( $_GET['scountry'] ) {
+				case 'SE':
+					$klarna_secret = $this->secret_se;
+					break;
+				case 'FI' :
+					$klarna_secret = $this->secret_fi;
+					break;
+				case 'NO' :
+					$klarna_secret = $this->secret_no;
+					break;
+				default:
+					$klarna_secret = '';
+				}
+		
+				$connector = Klarna_Checkout_Connector::create($klarna_secret);  
 				
 				$checkoutId = $_GET['klarna_order'];  
 				$klarna_order = new Klarna_Checkout_Order($connector, $checkoutId);  
@@ -718,20 +805,50 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 					
 					// Store user id in order so the user can keep track of track it in My account
 					if( email_exists( $klarna_order['billing_address']['email'] )) {
+						
+						if ($this->debug=='yes') 
+							$this->log->add( 'klarna', 'Billing email: ' . $klarna_order['billing_address']['email']);
+					
 						$user = get_user_by('email', $klarna_order['billing_address']['email']);
+						
+						if ($this->debug=='yes') 
+							$this->log->add( 'klarna', 'Customer User ID: ' . $user->ID);
+							
 						$this->customer_id = $user->ID;
+						
+						update_post_meta( $order_id, '_customer_user', $this->customer_id );
+					
 					} else {
-						// $this->customer_id = get_current_user_id();
-						$this->customer_id = 0;
-					}		
-					update_post_meta( $order_id, '_customer_user', 			absint( $this->customer_id ) );
+						
+						// Create new user
+						if( $this->create_customer_account == 'yes' ) {
+							
+							$password = '';
+							$new_customer = $this->create_new_customer( $klarna_order['billing_address']['email'], $klarna_order['billing_address']['email'], $password );
+							
+							// Creation failed
+							if ( is_wp_error( $new_customer ) ) {
+								$order->add_order_note(sprintf(__('Customer creation failed. Error: %s.', 'klarna'), $new_customer->get_error_message(), $klarna_order['id']));
+								$this->customer_id = 0;
+							// Creation succeeded
+							} else {
+								$order->add_order_note(sprintf(__('New customer created (user ID %s).', 'klarna'), $new_customer, $klarna_order['id']));
+								$this->customer_id = $new_customer;
+								
+							}
+						
+							update_post_meta( $order_id, '_customer_user', $this->customer_id );
+						}
+
+	
+					}
 					
 					$order->add_order_note(sprintf(__('Klarna Checkout payment completed. Reservation number: %s.  Klarna order number: %s', 'klarna'), $klarna_order['reservation'], $klarna_order['id']));
 					
 					// Update the order in Klarnas system
 					$update['status'] = 'created';
 					$update['merchant_reference'] = array(  
-														'orderid1' => $order->get_order_number()
+														'orderid1' => ltrim( $order->get_order_number(), '#')
 													);  
 					$klarna_order->update($update);
 					
@@ -791,6 +908,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			// Insert or update the post data
 			$create_new_order = true;
 			
+				
 			if ( $woocommerce->session->order_awaiting_payment > 0 ) {
 
 				$order_id = absint( $woocommerce->session->order_awaiting_payment );
@@ -971,6 +1089,73 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		} // End function create_order()
 		
 		
+		
+		/**
+		 * Create a new customer
+		 *
+		 * @param  string $email
+		 * @param  string $username
+		 * @param  string $password
+		 * @return WP_Error on failure, Int (user ID) on success
+		*/
+		function create_new_customer( $email, $username = '', $password = '' ) {
+
+        	// Check the e-mail address
+			if ( empty( $email ) || ! is_email( $email ) )
+                return new WP_Error( "registration-error", __( "Please provide a valid email address.", "woocommerce" ) );
+
+			if ( email_exists( $email ) )
+                return new WP_Error( "registration-error", __( "An account is already registered with your email address. Please login.", "woocommerce" ) );
+
+
+			// Handle username creation
+			$username = sanitize_user( current( explode( '@', $email ) ) );
+
+			// Ensure username is unique
+			$append     = 1;
+			$o_username = $username;
+
+			while ( username_exists( $username ) ) {
+				$username = $o_username . $append;
+				$append ++;
+			}
+  
+			// Handle password creation
+			$password = wp_generate_password();
+			$password_generated = true;
+        
+
+			// WP Validation
+			$validation_errors = new WP_Error();
+
+			do_action( 'woocommerce_register_post', $username, $email, $validation_errors );
+
+			$validation_errors = apply_filters( 'woocommerce_registration_errors', $validation_errors, $username, $email );
+
+			if ( $validation_errors->get_error_code() )
+                return $validation_errors;
+
+			$new_customer_data = apply_filters( 'woocommerce_new_customer_data', array(
+            	'user_login' => $username,
+				'user_pass'  => $password,
+				'user_email' => $email,
+				'role'       => 'customer'
+			) );
+
+			$customer_id = wp_insert_user( $new_customer_data );
+
+			if ( is_wp_error( $customer_id ) )
+            	return new WP_Error( "registration-error", '<strong>' . __( 'ERROR', 'woocommerce' ) . '</strong>: ' . __( 'Couldn&#8217;t register you&hellip; please contact us if you continue to have problems.', 'woocommerce' ) );
+		
+			// Send New account creation email to customer?
+			if( $this->send_new_account_email == 'yes' ) {
+	        	do_action( 'woocommerce_created_customer', $customer_id, $new_customer_data, $password_generated );
+			}
+		
+			return $customer_id;
+		}
+
+
 		
 		/**
 		 * Helper function get_enabled

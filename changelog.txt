@@ -1,7 +1,17 @@
 *** Klarna Changelog ***
-* Tweak 	- Improved invoice fee view for Klarna invoice
-			- Added fees to totals
-			- Added check for disabled gusest checkout (Klarna Checkout).
+2014.01.15 	- version 1.7.2
+ * Feature	- Klarna Checkout - Integration support with  WooCommerce Currency Switcher (http://dev.pathtoenlightenment.net).
+ * Feature	- Klarna Checkout - Integration support with  WPML's new multiple currencies feature, independent of the site’s languages.
+ * Feature	- Added support for Sequential Order Numbers Pro (all 4 payment methods, earlier just supported for KCO).
+ * Feature	- Added option for WC customer creation upon completed purchase (Klarna Checkout).
+ * Tweak 	- Improved invoice fee display on checkout page for Klarna invoice.
+ * Tweak	- Improved multi currency support (Klarna Checkout). Added country code in push_uri sent to Klarna.
+ * Fix		- Added fees to totals
+ * Fix		- Added check for disabled guest checkout (Klarna Checkout).
+ * Fix		- Sets session order_awaiting_payment on order creation (Klarna Checkout) to avoid multiple orders when updating the checkout.
+ * Fix		- Removed # in orderid1 sent to Klarna (Klarna Checkout).
+ * Fix		- Improved Round() handling of tax percentage sent to Klarna (Klarna Checkout).
+
 
 2013.11.12 	- version 1.7.1
  * Fix     	- Improvment of is_available() for Klarna Invoice, Account & Campaign.

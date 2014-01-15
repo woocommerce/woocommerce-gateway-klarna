@@ -3,7 +3,7 @@
 Plugin Name: WooCommerce Klarna Gateway
 Plugin URI: http://woothemes.com/woocommerce
 Description: Extends WooCommerce. Provides a <a href="http://www.klarna.se" target="_blank">Klarna</a> gateway for WooCommerce.
-Version: 1.7.1
+Version: 1.7.2
 Author: Niklas Högefjord
 Author URI: http://krokedil.com
 */
@@ -63,7 +63,6 @@ function init_klarna_gateway() {
 		public function __construct() { 
 			global $woocommerce;
 			
-	        
 			$this->shop_country	= get_option('woocommerce_default_country');
 			
 			// Check if woocommerce_default_country includes state as well. If it does, remove state
@@ -74,8 +73,38 @@ function init_klarna_gateway() {
         	endif;
         	
         	// If WPML is used, set the customer selected language as the shop_country
+        	// This will be updated to support WPML's separated language and currency feature
+        	// This is done in the Klarna checkout file but will be added for the other payment methods in short.
         	if ( class_exists( 'woocommerce_wpml' ) && defined('ICL_LANGUAGE_CODE') )
-				$this->shop_country	= strtoupper(ICL_LANGUAGE_CODE);	
+				$this->shop_country	= strtoupper(ICL_LANGUAGE_CODE);
+				
+				
+			// If WooCommerce Currency Switcher is used (http://dev.pathtoenlightenment.net/shop), set the customer selected currency as the shop_country
+        	if ( class_exists( 'WC_Aelia_CurrencySwitcher' ) && defined('AELIA_CS_USER_CURRENCY') ) {
+				if(defined('AELIA_CS_USER_CURRENCY')) {
+					//echo AELIA_CS_USER_CURRENCY . constant('AELIA_CS_USER_CURRENCY');
+					$plugin_instance = WC_Aelia_CurrencySwitcher::instance();
+					$selected_currency = strtoupper($plugin_instance->get_selected_currency());
+					
+				}
+				
+				switch ( $selected_currency ) {
+				case 'NOK' :
+					$klarna_country = 'NO';
+					break;
+				case 'EUR' :
+					$klarna_country = 'FI';
+					break;
+				case 'SEK' :
+					$klarna_country = 'SE';
+					break;
+				default:
+					$klarna_country = $this->shop_country;
+				}
+
+				$this->shop_country	= $klarna_country;
+			}
+				
 			
 			// Actions
         	add_action( 'wp_enqueue_scripts', array(&$this, 'klarna_load_scripts'), 5 );

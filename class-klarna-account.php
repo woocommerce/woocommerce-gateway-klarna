@@ -1078,6 +1078,42 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 			);
 		endif;
 		
+		
+		
+		// Fees
+		if ( sizeof( $order->get_fees() ) > 0 ) {
+			foreach ( $order->get_fees() as $item ) {
+			
+			
+			// We manually calculate the tax percentage here
+			if ($order->get_total_tax() >0) :
+				// Calculate tax percentage
+				$item_tax_percentage = number_format( ( $item['line_tax'] / $item['line_total'] )*100, 2, '.', '');
+			else :
+				$item_tax_percentage = 0.00;
+			endif;
+			
+			
+			// apply_filters to item price so we can filter this if needed
+			$klarna_item_price_including_tax = $item['line_total'] + $item['line_tax'];
+			$item_price = apply_filters( 'klarna_fee_price_including_tax', $klarna_item_price_including_tax );
+			
+				$item_loop++;
+				
+				$k->addArticle(
+				    $qty = 1,
+				    $artNo = "",
+				    $title = $item['name'],
+				    $price = $item_price,
+				    $vat = round( $item_tax_percentage ),
+				    $discount = 0,
+			    	$flags = KlarnaFlags::INC_VAT
+			    );
+			    
+			}
+		}
+		
+		
 		// Shipping
 		if ($order->order_shipping>0) :
 			
@@ -1099,6 +1135,8 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 			    $flags = KlarnaFlags::INC_VAT + KlarnaFlags::IS_SHIPMENT //Price is including VAT and is shipment fee
 			);
 		endif;
+		
+		
 		
 		//Create the address object and specify the values.
 		
@@ -1167,8 +1205,8 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 
 		//Set store specific information so you can e.g. search and associate invoices with order numbers.
 		$k->setEstoreInfo(
-		    $orderid1 = $order_id, //Maybe the estore's order number/id.
-		    $orderid2 = $order->order_key, //Could an order number from another system?
+		    $orderid1 = ltrim( $order->get_order_number(), '#'),
+		    $orderid2 = $order_id,
 		    $user = '' //Username, email or identifier for the user?
 		);
 		
