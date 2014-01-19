@@ -22,7 +22,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
        	// Define user set variables
        	$this->enabled							= ( isset( $this->settings['enabled'] ) ) ? $this->settings['enabled'] : '';
        	$this->title 							= ( isset( $this->settings['title'] ) ) ? $this->settings['title'] : '';
-       	$this->log 								= $woocommerce->logger();
+       	$this->log 								= new WC_Logger();
        	
        	
        	$this->eid_se							= ( isset( $this->settings['eid_se'] ) ) ? $this->settings['eid_se'] : '';
@@ -63,7 +63,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		endif;
 		
 		// If currency is set by WPML
-		if ( $woocommerce->session->client_currency ) {
+		if ( isset($woocommerce->session->client_currency) ) {
 					
 			switch ( strtoupper($woocommerce->session->client_currency) ) {
 			case 'NOK' :

@@ -853,7 +853,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 				// Return thank you redirect
 				return array(
 						'result' 	=> 'success',
-						'redirect'	=> add_query_arg('key', $order->order_key, add_query_arg('order', $order_id, get_permalink(get_option('woocommerce_thanks_page_id'))))
+						'redirect'	=> $order->get_checkout_order_received_url()
 				);
 						
                 break;
@@ -869,7 +869,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 				// Return thank you redirect
 				return array(
 						'result' 	=> 'success',
-						'redirect'	=> add_query_arg('key', $order->order_key, add_query_arg('order', $order_id, get_permalink(get_option('woocommerce_thanks_page_id'))))
+						'redirect'	=> $order->get_checkout_order_received_url()
 				);
 				
                 break;
