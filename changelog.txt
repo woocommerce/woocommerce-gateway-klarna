@@ -1,4 +1,8 @@
 *** Klarna Changelog ***
+
+2014.01.15 	- version 1.7.3
+ * Fix		- WooCommerce 2.1 compatibility
+ 
 2014.01.15 	- version 1.7.2
  * Feature	- Klarna Checkout - Integration support with  WooCommerce Currency Switcher (http://dev.pathtoenlightenment.net).
  * Feature	- Klarna Checkout - Integration support with  WPML's new multiple currencies feature, independent of the site’s languages.
@@ -11,7 +15,6 @@
  * Fix		- Sets session order_awaiting_payment on order creation (Klarna Checkout) to avoid multiple orders when updating the checkout.
  * Fix		- Removed # in orderid1 sent to Klarna (Klarna Checkout).
  * Fix		- Improved Round() handling of tax percentage sent to Klarna (Klarna Checkout).
-
 
 2013.11.12 	- version 1.7.1
  * Fix     	- Improvment of is_available() for Klarna Invoice, Account & Campaign.

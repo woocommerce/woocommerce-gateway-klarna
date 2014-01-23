@@ -3,7 +3,7 @@
 Plugin Name: WooCommerce Klarna Gateway
 Plugin URI: http://woothemes.com/woocommerce
 Description: Extends WooCommerce. Provides a <a href="http://www.klarna.se" target="_blank">Klarna</a> gateway for WooCommerce.
-Version: 1.7.2
+Version: 1.7.3
 Author: Niklas Högefjord
 Author URI: http://krokedil.com
 */
@@ -146,6 +146,10 @@ function init_klarna_gateway() {
 	
 	} // End class WC_Gateway_Klarna
 	
+	// Include the WooCommerce Compatibility Utility class
+	// The purpose of this class is to provide a single point of compatibility functions for dealing with supporting multiple versions of WooCommerce (currently 2.0.x and 2.1)
+	require_once 'classes/class-wc-klarna-compatibility.php';
+	
 	
 	// Include our Klarna Invoice class
 	require_once 'class-klarna-invoice.php';
@@ -156,7 +160,7 @@ function init_klarna_gateway() {
 	// Include our Klarna Special campaign class
 	require_once 'class-klarna-campaign.php';
 	
-	// Include our Klarna Checkout class - if Sweden is set as the base country
+	// Include our Klarna Checkout class - if Sweden, Norway or Finland is set as the base country
 	$klarna_shop_country = get_option('woocommerce_default_country');
 	$available_countries = array('SE', 'NO', 'FI');
 	if ( in_array( $klarna_shop_country, $available_countries ) ) {

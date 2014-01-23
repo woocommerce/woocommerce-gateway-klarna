@@ -22,7 +22,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
        	// Define user set variables
        	$this->enabled							= ( isset( $this->settings['enabled'] ) ) ? $this->settings['enabled'] : '';
        	$this->title 							= ( isset( $this->settings['title'] ) ) ? $this->settings['title'] : '';
-       	$this->log 								= new WC_Logger();
+       	$this->log 								= WC_Klarna_Compatibility::new_wc_logger();
        	
        	
        	$this->eid_se							= ( isset( $this->settings['eid_se'] ) ) ? $this->settings['eid_se'] : '';
@@ -429,10 +429,11 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 					exit;  
 				}
 				
-				// Analytics eCommerce tracking
-				//$this->ecommerce_tracking_code( $_GET['sid'] );
-				$data = new WC_Google_Analytics;
-				$data->ecommerce_tracking_code($_GET['sid']);
+				// If WooCommerce Google Analytics Integration exist -  add eCommerce tracking
+				if (class_exists('WC_Google_Analytics')) {
+					$data = new WC_Google_Analytics;
+					$data->ecommerce_tracking_code($_GET['sid']);
+				}
 				
 				$snippet = $klarna_order['gui']['snippet'];
 			
@@ -881,7 +882,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			
 
 			if ( sizeof( $woocommerce->cart->get_cart() ) == 0 )
-				$woocommerce->add_error( sprintf( __( 'Sorry, your session has expired. <a href="%s">Return to homepage &rarr;</a>', 'klarna' ), home_url() ) );
+				WC_Klarna_Compatibility::wc_add_notice(sprintf( __( 'Sorry, your session has expired. <a href="%s">Return to homepage &rarr;</a>', 'klarna' ), home_url() ), 'error');
 				
 				
 			// Recheck cart items so that they are in stock
@@ -1064,13 +1065,13 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			update_post_meta( $order_id, '_payment_method', 		$this->id );
 			update_post_meta( $order_id, '_payment_method_title', 	$this->method_title );
 		
-			update_post_meta( $order_id, '_order_shipping', 		woocommerce_format_total( $woocommerce->cart->shipping_total ) );
-			update_post_meta( $order_id, '_order_discount', 		woocommerce_format_total( $woocommerce->cart->get_order_discount_total() ) );
-			update_post_meta( $order_id, '_cart_discount', 			woocommerce_format_total( $woocommerce->cart->get_cart_discount_total() ) );
-			update_post_meta( $order_id, '_order_tax', 				woocommerce_format_total( $woocommerce->cart->tax_total ) );
-			update_post_meta( $order_id, '_order_shipping_tax', 	woocommerce_format_total( $woocommerce->cart->shipping_tax_total ) );
-			update_post_meta( $order_id, '_order_total', 			woocommerce_format_total( $woocommerce->cart->total ) );
-			//update_post_meta( $order_id, '_order_total', 			woocommerce_format_total( $woocommerce->cart->subtotal ) );
+			update_post_meta( $order_id, '_order_shipping', 		WC_Klarna_Compatibility::wc_format_decimal( $woocommerce->cart->shipping_total ) );
+			update_post_meta( $order_id, '_order_discount', 		WC_Klarna_Compatibility::wc_format_decimal( $woocommerce->cart->get_order_discount_total() ) );
+			update_post_meta( $order_id, '_cart_discount', 			WC_Klarna_Compatibility::wc_format_decimal( $woocommerce->cart->get_cart_discount_total() ) );
+			update_post_meta( $order_id, '_order_tax', 				WC_Klarna_Compatibility::wc_format_decimal( $woocommerce->cart->tax_total ) );
+			update_post_meta( $order_id, '_order_shipping_tax', 	WC_Klarna_Compatibility::wc_format_decimal( $woocommerce->cart->shipping_tax_total ) );
+			update_post_meta( $order_id, '_order_total', 			WC_Klarna_Compatibility::wc_format_decimal( $woocommerce->cart->total ) );
+			//update_post_meta( $order_id, '_order_total', 			WC_Klarna_Compatibility::wc_format_decimal( $woocommerce->cart->subtotal ) );
 			update_post_meta( $order_id, '_order_key', 				apply_filters('woocommerce_generate_order_key', uniqid('order_') ) );
 			//update_post_meta( $order_id, '_customer_user', 			absint( $this->customer_id ) );
 			update_post_meta( $order_id, '_order_currency', 		get_woocommerce_currency() );

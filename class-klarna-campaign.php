@@ -687,7 +687,7 @@ class WC_Gateway_Klarna_Campaign extends WC_Gateway_Klarna {
  			
     			// Check if set, if its not set add an error.
     			if (!$_POST['klarna_campaign_pno'])
-        		 	$woocommerce->add_error( __('<strong>Date of birth</strong> is a required field', 'klarna') );
+        		 	WC_Klarna_Compatibility::wc_add_notice(__('<strong>Date of birth</strong> is a required field.', 'klarna'), 'error');
         	 	
 			}
 			
@@ -697,36 +697,36 @@ class WC_Gateway_Klarna_Campaign extends WC_Gateway_Klarna {
 	    		
 	    		// Gender
 	    		if (!isset($_POST['klarna_campaign_gender']))
-	        	 	$woocommerce->add_error( __('<strong>Gender</strong> is a required field', 'klarna') );
+	        	 	WC_Klarna_Compatibility::wc_add_notice(__('<strong>Gender</strong> is a required field.', 'klarna'), 'error');
 	         	
 	         	// Date of birth
 				if (!$_POST['date_of_birth_day'] || !$_POST['date_of_birth_month'] || !$_POST['date_of_birth_year'])
-	         		$woocommerce->add_error( __('<strong>Date of birth</strong> is a required field', 'klarna') );
+	         		WC_Klarna_Compatibility::wc_add_notice(__('<strong>Date of birth</strong> is a required field.', 'klarna'), 'error');
 	         	
 	         	// Shipping and billing address must be the same
 	         	$klarna_shiptobilling = ( isset( $_POST['shiptobilling'] ) ) ? $_POST['shiptobilling'] : '';
 	         	
 	         	if ($klarna_shiptobilling !=1 && isset($_POST['shipping_first_name']) && $_POST['shipping_first_name'] !== $_POST['billing_first_name'])
-	        	 	$woocommerce->add_error( __('Shipping and billing address must be the same when paying via Klarna.', 'klarna') );
+	        	 	WC_Klarna_Compatibility::wc_add_notice(__('Shipping and billing address must be the same when paying via Klarna.', 'klarna'), 'error');
 	        	 
 	        	 if ($klarna_shiptobilling !=1 && isset($_POST['shipping_last_name']) && $_POST['shipping_last_name'] !== $_POST['billing_last_name'])
-	        	 	$woocommerce->add_error( __('Shipping and billing address must be the same when paying via Klarna', 'klarna') );
+	        	 	WC_Klarna_Compatibility::wc_add_notice(__('Shipping and billing address must be the same when paying via Klarna.', 'klarna'), 'error');
 	        	 
 	        	 if ($klarna_shiptobilling !=1 && isset($_POST['shipping_address_1']) && $_POST['shipping_address_1'] !== $_POST['billing_address_1'])
-	        	 	$woocommerce->add_error( __('Shipping and billing address must be the same when paying via Klarna', 'klarna') );
+	        	 	WC_Klarna_Compatibility::wc_add_notice(__('Shipping and billing address must be the same when paying via Klarna.', 'klarna'), 'error');
 	        	 
 	        	 if ($klarna_shiptobilling !=1 && isset($_POST['shipping_postcode']) && $_POST['shipping_postcode'] !== $_POST['billing_postcode'])
-	        	 	$woocommerce->add_error( __('Shipping and billing address must be the same when paying via Klarna', 'klarna') );
+	        	 	WC_Klarna_Compatibility::wc_add_notice(__('Shipping and billing address must be the same when paying via Klarna.', 'klarna'), 'error');
 	        	 	
 	        	 if ($klarna_shiptobilling !=1 && isset($_POST['shipping_city']) && $_POST['shipping_city'] !== $_POST['billing_city'])
-	        	 	$woocommerce->add_error( __('Shipping and billing address must be the same when paying via Klarna', 'klarna') );
+	        	 	WC_Klarna_Compatibility::wc_add_notice(__('Shipping and billing address must be the same when paying via Klarna.', 'klarna'), 'error');
 			}
 			
 			// DE
 			if ( $this->shop_country == 'DE' && $this->de_consent_terms == 'yes'){
 	    		// Check if set, if its not set add an error.
 	    		if (!isset($_POST['klarna_de_consent_terms']))
-	        	 	$woocommerce->add_error( __('You must accept the Klarna consent terms.', 'klarna') ); 	
+	        	 	WC_Klarna_Compatibility::wc_add_notice(__('You must accept the Klarna consent terms.', 'klarna'), 'error');
 			}
 		}
 	}
@@ -1028,6 +1028,13 @@ class WC_Gateway_Klarna_Campaign extends WC_Gateway_Klarna {
     		    $pclass = $klarna_pclass // Get the pclass object that the customer has choosen.
     		);
     		
+    		// Prepare redirect url
+    		if( WC_Klarna_Compatibility::is_wc_version_gte_2_1() ) {
+	    		$redirect_url = WC_Klarna_Compatibility::get_checkout_order_received_url($order);
+    		} else {
+	    		$redirect_url = add_query_arg('key', $order->order_key, add_query_arg('order', $order_id, get_permalink(get_option('woocommerce_thanks_page_id'))));
+    		}
+    		
     		// Retreive response
     		$invno = $result[0];
     		switch($result[1]) {
@@ -1043,7 +1050,7 @@ class WC_Gateway_Klarna_Campaign extends WC_Gateway_Klarna {
 				// Return thank you redirect
 				return array(
 						'result' 	=> 'success',
-						'redirect'	=> $order->get_checkout_order_received_url()
+						'redirect'	=> $redirect_url
 				);
 						
                 break;
@@ -1059,20 +1066,21 @@ class WC_Gateway_Klarna_Campaign extends WC_Gateway_Klarna {
 				// Return thank you redirect
 				return array(
 						'result' 	=> 'success',
-						'redirect'	=> $order->get_checkout_order_received_url()
+						'redirect'	=> $redirect_url
 				);
 				
                 break;
             case KlarnaFlags::DENIED:
                 //Order is denied, store it in a database.
 				$order->add_order_note( __('Klarna payment denied.', 'klarna') );
-				$woocommerce->add_error( __('Klarna payment denied.', 'klarna') );
+				WC_Klarna_Compatibility::wc_add_notice(__('Klarna payment denied.', 'klarna'), 'error');
+				
                 return;
                 break;
             default:
             	//Unknown response, store it in a database.
 				$order->add_order_note( __('Unknown response from Klarna.', 'klarna') );
-				$woocommerce->add_error( __('Unknown response from Klarna.', 'klarna') );
+				WC_Klarna_Compatibility::wc_add_notice(__('Unknown response from Klarna.', 'klarna'), 'error');
                 return;
                 break;
         	}
@@ -1082,7 +1090,7 @@ class WC_Gateway_Klarna_Campaign extends WC_Gateway_Klarna {
 		
 		catch(Exception $e) {
     		//The purchase was denied or something went wrong, print the message:
-			$woocommerce->add_error( sprintf(__('%s (Error code: %s)', 'klarna'), utf8_encode($e->getMessage()), $e->getCode() ) );
+			WC_Klarna_Compatibility::wc_add_notice(sprintf(__('%s (Error code: %s)', 'klarna'), utf8_encode($e->getMessage()), $e->getCode() ), 'error');
 			return;
 		}
 
