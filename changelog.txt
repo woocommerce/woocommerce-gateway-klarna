@@ -1,5 +1,8 @@
 *** Klarna Changelog ***
 
+2014.01.30 	- version 1.7.4
+ * Fix		- Invoice fee display fix on checkout page (Klarna Invoice).
+ 
 2014.01.15 	- version 1.7.3
  * Fix		- WooCommerce 2.1 compatibility
  
