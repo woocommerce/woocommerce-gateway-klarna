@@ -550,10 +550,11 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 								$reference = '';
 								if ( $_product->get_sku() ) {
 									$reference = $_product->get_sku();
+								} elseif ( $_product->variation_id ) {
+									$reference = $_product->variation_id;
 								} else {
 									$reference = $_product->id;
 								}
-								
 								$item_price = number_format( $order->get_item_total( $item, true )*100, 0, '', '');
 								$cart[] = array(
 											'reference' => strval($reference),
@@ -1080,7 +1081,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			update_post_meta( $order_id, '_customer_user_agent', 	isset( $_SERVER['HTTP_USER_AGENT'] ) ? $_SERVER['HTTP_USER_AGENT'] : '' );
 
 			// Let plugins add meta
-			// do_action( 'woocommerce_checkout_update_order_meta', $order_id, $this->posted );
+			do_action( 'woocommerce_checkout_update_order_meta', $order_id, array() );
 			
 			// Order status
 			wp_set_object_terms( $order_id, 'pending', 'shop_order_status' );
@@ -1329,14 +1330,14 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		endif;
 		
 		// Shipping
-		if ($order->order_shipping>0) :
+		if (WC_Klarna_Compatibility::get_total_shipping($order)>0) :
 			
 			// We manually calculate the shipping tax percentage here
-			$calculated_shipping_tax_percentage = ($order->order_shipping_tax/$order->order_shipping)*100; //25.00
-			$calculated_shipping_tax_decimal = ($order->order_shipping_tax/$order->order_shipping)+1; //0.25
+			$calculated_shipping_tax_percentage = ($order->order_shipping_tax/WC_Klarna_Compatibility::get_total_shipping($order))*100; //25.00
+			$calculated_shipping_tax_decimal = ($order->order_shipping_tax/WC_Klarna_Compatibility::get_total_shipping($order))+1; //0.25
 			
 			// apply_filters to Shipping so we can filter this if needed
-			$klarna_shipping_price_including_tax = $order->order_shipping*$calculated_shipping_tax_decimal;
+			$klarna_shipping_price_including_tax = WC_Klarna_Compatibility::get_total_shipping($order)*$calculated_shipping_tax_decimal;
 			$shipping_price = apply_filters( 'klarna_shipping_price_including_tax', $klarna_shipping_price_including_tax );
 			
 			$k->addArticle(

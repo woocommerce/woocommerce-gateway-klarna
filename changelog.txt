@@ -1,5 +1,10 @@
 *** Klarna Changelog ***
 
+2014.02.04 	- version 1.7.5
+ * Fix		- Invoice fee fix in calculate_totals().
+ * Fix		- Improved Product ID sent to Klarna for product variations (when SKU not used).
+ * Fix		- Shipping total fix for compatibility (2.0.x - 2.1)
+
 2014.01.30 	- version 1.7.4
  * Fix		- Invoice fee display fix on checkout page (Klarna Invoice).
  

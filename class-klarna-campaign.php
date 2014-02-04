@@ -846,15 +846,19 @@ class WC_Gateway_Klarna_Campaign extends WC_Gateway_Klarna {
 				$klarna_item_price_including_tax = $order->get_item_total( $item, true );
 				$item_price = apply_filters( 'klarna_item_price_including_tax', $klarna_item_price_including_tax );
 					
+					// Get SKU or product id
+					$reference = '';
 					if ( $_product->get_sku() ) {
-						$sku = $_product->get_sku();
+						$reference = $_product->get_sku();
+					} elseif ( $_product->variation_id ) {
+						$reference = $_product->variation_id;
 					} else {
-						$sku = $_product->id;
+						$reference = $_product->id;
 					}
 
 					$k->addArticle(
 		    		$qty = $item['qty'], 					//Quantity
-		    		$artNo = strval($sku),		 					//Article number
+		    		$artNo = strval($reference),		 	//Article number
 		    		$title = utf8_decode ($item['name']), 	//Article name/title
 		    		$price = $item_price, 					// Price including tax
 		    		$vat = round( $item_tax_percentage ),			// Tax
@@ -920,14 +924,14 @@ class WC_Gateway_Klarna_Campaign extends WC_Gateway_Klarna {
 		
 		
 		// Shipping
-		if ($order->order_shipping>0) :
+		if (WC_Klarna_Compatibility::get_total_shipping($order)>0) :
 			
 			// We manually calculate the shipping tax percentage here
-			$calculated_shipping_tax_percentage = ($order->order_shipping_tax/$order->order_shipping)*100; //25.00
-			$calculated_shipping_tax_decimal = ($order->order_shipping_tax/$order->order_shipping)+1; //0.25
+			$calculated_shipping_tax_percentage = ($order->order_shipping_tax/WC_Klarna_Compatibility::get_total_shipping($order))*100; //25.00
+			$calculated_shipping_tax_decimal = ($order->order_shipping_tax/WC_Klarna_Compatibility::get_total_shipping($order))+1; //0.25
 			
 			// apply_filters to Shipping so we can filter this if needed
-			$klarna_shipping_price_including_tax = $order->order_shipping*$calculated_shipping_tax_decimal;
+			$klarna_shipping_price_including_tax = WC_Klarna_Compatibility::get_total_shipping($order)*$calculated_shipping_tax_decimal;
 			$shipping_price = apply_filters( 'klarna_shipping_price_including_tax', $klarna_shipping_price_including_tax );
 			
 			$k->addArticle(

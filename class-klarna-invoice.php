@@ -621,11 +621,14 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 				$_product = $order->get_product_from_item($item);
 				
 				// Get SKU or product id
-					if ( $_product->get_sku() ) {
-						$sku = $_product->get_sku();
-					} else {
-						$sku = $_product->id;
-					}
+				$reference = '';
+				if ( $_product->get_sku() ) {
+					$reference = $_product->get_sku();
+				} elseif ( $_product->variation_id ) {
+					$reference = $_product->variation_id;
+				} else {
+					$reference = $_product->id;
+				}
 					
 			} else {
 				
@@ -634,9 +637,9 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 				
 				// Get SKU or product id
 				if ( $_product->get_sku() ) {
-					$sku = $_product->get_sku();
+					$reference = $_product->get_sku();
 				} else {
-					$sku = $item['id'];
+					$reference = $item['id'];
 				}
 					
 			}	
@@ -656,7 +659,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 				
 				$k->addArticle(
 		    		$qty = $item['qty'], 					//Quantity
-		    		$artNo = strval($sku),		 					//Article number
+		    		$artNo = strval($reference),		 	//Article number
 		    		$title = utf8_decode ($item['name']), 	//Article name/title
 		    		$price = $item_price, 					// Price including tax
 		    		$vat = round( $item_tax_percentage ),			// Tax
@@ -730,14 +733,14 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 		
 		
 		// Shipping
-		if ($order->order_shipping>0) :
+		if (WC_Klarna_Compatibility::get_total_shipping($order)>0) :
 			
 			// We manually calculate the shipping tax percentage here
-			$calculated_shipping_tax_percentage = ($order->order_shipping_tax/$order->order_shipping)*100; //25.00
-			$calculated_shipping_tax_decimal = ($order->order_shipping_tax/$order->order_shipping)+1; //0.25
+			$calculated_shipping_tax_percentage = ($order->order_shipping_tax/WC_Klarna_Compatibility::get_total_shipping($order))*100; //25.00
+			$calculated_shipping_tax_decimal = ($order->order_shipping_tax/WC_Klarna_Compatibility::get_total_shipping($order))+1; //0.25
 			
 			// apply_filters to Shipping so we can filter this if needed
-			$klarna_shipping_price_including_tax = $order->order_shipping*$calculated_shipping_tax_decimal;
+			$klarna_shipping_price_including_tax = WC_Klarna_Compatibility::get_total_shipping($order)*$calculated_shipping_tax_decimal;
 			$shipping_price = apply_filters( 'klarna_shipping_price_including_tax', $klarna_shipping_price_including_tax );
 			
 			$k->addArticle(
@@ -1024,7 +1027,8 @@ class WC_Gateway_Klarna_Invoice_Extra {
 	public function __construct() {
 		
 		// Add Invoice fee via the new Fees API
-		add_action( 'woocommerce_before_calculate_totals', array( $this, 'calculate_totals' ), 10, 1 );
+		//add_action( 'woocommerce_before_calculate_totals', array( $this, 'calculate_totals' ), 10, 1 );
+		add_action( 'woocommerce_cart_calculate_fees', array( $this, 'calculate_totals' ));
 		
 		// Chcek Klarna specific fields on Checkout
 		add_action('woocommerce_checkout_process', array( $this, 'klarna_invoice_checkout_field_process'));
@@ -1039,34 +1043,35 @@ class WC_Gateway_Klarna_Invoice_Extra {
 	 **/
 	 
 	public function calculate_totals( $totals ) {
-	
-	
+		
     	global $woocommerce;
-		$available_gateways = $woocommerce->payment_gateways->get_available_payment_gateways();
-		$current_gateway = '';
-		if ( ! empty( $available_gateways ) ) {
-			// Chosen Method
-			if ( isset( $woocommerce->session->chosen_payment_method ) && isset( $available_gateways[ $woocommerce->session->chosen_payment_method ] ) ) {
-				$current_gateway = $available_gateways[ $woocommerce->session->chosen_payment_method ];
-			} elseif ( isset( $available_gateways[ get_option( 'woocommerce_default_gateway' ) ] ) ) {
-            	$current_gateway = $available_gateways[ get_option( 'woocommerce_default_gateway' ) ];
-			} else {
-            	$current_gateway =  current( $available_gateways );
-
+    	if(is_checkout() || defined('WOOCOMMERCE_CHECKOUT') ) {
+    		$available_gateways = $woocommerce->payment_gateways->get_available_payment_gateways();
+		
+			$current_gateway = '';
+			if ( ! empty( $available_gateways ) ) {
+				// Chosen Method
+				if ( isset( $woocommerce->session->chosen_payment_method ) && isset( $available_gateways[ $woocommerce->session->chosen_payment_method ] ) ) {
+					$current_gateway = $available_gateways[ $woocommerce->session->chosen_payment_method ];
+				} elseif ( isset( $available_gateways[ get_option( 'woocommerce_default_gateway' ) ] ) ) {
+            		$current_gateway = $available_gateways[ get_option( 'woocommerce_default_gateway' ) ];
+				} else {
+            		$current_gateway =  current( $available_gateways );
+				}
+			
+			}
+		
+			if(is_object($current_gateway) && $current_gateway->id=='klarna'){
+        		$current_gateway_id = $current_gateway -> id;
+				$this->add_fee_to_cart();
+			
 			}
 			
-		}
-		
-		if(is_object($current_gateway) && $current_gateway->id=='klarna'){
-        	$current_gateway_id = $current_gateway -> id;
-			
-			$this->add_fee_to_cart();
-			
-		}
+		} // End if is checkout
 		
 		return $totals;
-	}
-	
+		
+	} // calculate_totals	
 	
 	
 	/**
@@ -1089,9 +1094,9 @@ class WC_Gateway_Klarna_Invoice_Extra {
 		 		} else {
 			 		$product_tax = false;
 			 	}
-    	  	 	
+			 	
 			 	$woocommerce->cart->add_fee($product->get_title(),$product->get_price_excluding_tax(),$product_tax,$product->get_tax_class());
-		   
+			 	
 			endif;
 		} // End if invoice_fee_id > 0
 
