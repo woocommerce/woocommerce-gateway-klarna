@@ -1,5 +1,8 @@
 *** Klarna Changelog ***
 
+2014.02.17 	- version 1.7.6
+ * Fix		- Missing Shipping label name caused error in rendering of KCO checkout page (WC v2.1+).
+
 2014.02.04 	- version 1.7.5
  * Fix		- Invoice fee fix in calculate_totals().
  * Fix		- Improved Product ID sent to Klarna for product variations (when SKU not used).

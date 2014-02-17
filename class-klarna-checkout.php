@@ -588,7 +588,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 						$cart[] = array(  
 						 	'type' => 'shipping_fee',  
 						 	'reference' => 'SHIPPING',  
-						 	'name' => $woocommerce->cart->shipping_label,  
+						 	'name' => __('Shipping', 'klarna'),  
 						 	'quantity' => 1,  
 						 	'unit_price' => (int)$shipping_price,  
 						 	'tax_rate' => round($shipping_tax_percentage)
