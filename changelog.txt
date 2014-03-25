@@ -1,5 +1,9 @@
 *** Klarna Changelog ***
 
+2014.03.25 	- version 1.7.7
+ * Fix		- 2.1 compatibility bugfix in check - Shipping and Billing address must be the same (for DE & NL).
+ * Fix		- Added specific create_order() function for WC v2.1+ (Klarna Checkout). Improvment of bugfix in version 1.7.6.
+
 2014.02.17 	- version 1.7.6
  * Fix		- Missing Shipping label name caused error in rendering of KCO checkout page (WC v2.1+).
 

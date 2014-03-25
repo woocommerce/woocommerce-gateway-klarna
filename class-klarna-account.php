@@ -894,22 +894,40 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 				if (!$_POST['date_of_birth_day'] || !$_POST['date_of_birth_month'] || !$_POST['date_of_birth_year'])
 	         		WC_Klarna_Compatibility::wc_add_notice(__('<strong>Date of birth</strong> is a required field', 'klarna'), 'error');
 	         	
-	         	// Shipping and billing address must be the same
-	         	$klarna_shiptobilling = ( isset( $_POST['shiptobilling'] ) ) ? $_POST['shiptobilling'] : '';
 	         	
-	         	if ($klarna_shiptobilling !=1 && isset($_POST['shipping_first_name']) && $_POST['shipping_first_name'] !== $_POST['billing_first_name'])
+	         	// Shipping and billing address must be the same
+	         	$compare_billing_and_shipping = 0;
+	         	
+	         	if( WC_Klarna_Compatibility::is_wc_version_gte_2_1() ) {
+	         		
+	         		// WC 2.1+
+	         		if( isset( $_POST['ship_to_different_address'] ) && $_POST['ship_to_different_address']=1 ) {
+		         		$compare_billing_and_shipping = 1;	
+				 	}
+	         	
+	         	} else {
+				
+				 	// Pre WC 2.1
+					if( isset( $_POST['shiptobilling'] ) && $_POST['shiptobilling'] != 1 ) {
+		         		$compare_billing_and_shipping = 1;
+	         		}
+			
+				}
+				
+	         	
+	         	if ($compare_billing_and_shipping==1 && isset($_POST['shipping_first_name']) && $_POST['shipping_first_name'] !== $_POST['billing_first_name'])
 	        	 	WC_Klarna_Compatibility::wc_add_notice(__('Shipping and billing address must be the same when paying via Klarna.', 'klarna'), 'error');
 	        	 
-	        	 if ($klarna_shiptobilling !=1 && isset($_POST['shipping_last_name']) && $_POST['shipping_last_name'] !== $_POST['billing_last_name'])
+	        	 if ($compare_billing_and_shipping==1 && isset($_POST['shipping_last_name']) && $_POST['shipping_last_name'] !== $_POST['billing_last_name'])
 	        	 	WC_Klarna_Compatibility::wc_add_notice(__('Shipping and billing address must be the same when paying via Klarna.', 'klarna'), 'error');
 	        	 
-	        	 if ($klarna_shiptobilling !=1 && isset($_POST['shipping_address_1']) && $_POST['shipping_address_1'] !== $_POST['billing_address_1'])
+	        	 if ($compare_billing_and_shipping==1 && isset($_POST['shipping_address_1']) && $_POST['shipping_address_1'] !== $_POST['billing_address_1'])
 	        	 	WC_Klarna_Compatibility::wc_add_notice(__('Shipping and billing address must be the same when paying via Klarna.', 'klarna'), 'error');
 	        	 
-	        	 if ($klarna_shiptobilling !=1 && isset($_POST['shipping_postcode']) && $_POST['shipping_postcode'] !== $_POST['billing_postcode'])
+	        	 if ($compare_billing_and_shipping==1 && isset($_POST['shipping_postcode']) && $_POST['shipping_postcode'] !== $_POST['billing_postcode'])
 	        	 	WC_Klarna_Compatibility::wc_add_notice(__('Shipping and billing address must be the same when paying via Klarna.', 'klarna'), 'error');
 	        	 	
-	        	 if ($klarna_shiptobilling !=1 && isset($_POST['shipping_city']) && $_POST['shipping_city'] !== $_POST['billing_city'])
+	        	 if ($compare_billing_and_shipping==1 && isset($_POST['shipping_city']) && $_POST['shipping_city'] !== $_POST['billing_city'])
 	        	 	WC_Klarna_Compatibility::wc_add_notice(__('Shipping and billing address must be the same when paying via Klarna.', 'klarna'), 'error');
 			}
 			
