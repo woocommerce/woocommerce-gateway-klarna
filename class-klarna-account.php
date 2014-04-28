@@ -1255,6 +1255,7 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
     		switch($result[1]) {
             case KlarnaFlags::ACCEPTED:
                 $order->add_order_note( __('Klarna payment completed. Klarna Invoice number: ', 'klarna') . $invno );
+                update_post_meta( $order_id, 'klarna_order_reservation', $invno );
                 
                 // Payment complete
 				$order->payment_complete();		
@@ -1331,6 +1332,11 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 		//global $woocommerce, $product, $klarna_account_shortcode_currency, $klarna_account_shortcode_price, $klarna_account_shortcode_img, $klarna_account_shortcode_info_link;
 		global $woocommerce, $product, $klarna_account_shortcode_currency, $klarna_account_shortcode_price, $klarna_shortcode_img, $klarna_account_country;
 		
+		
+		// Product with no price - do nothing
+		$klarna_product_total = $product->get_price();
+		if ( empty($klarna_product_total) ) return;
+		
 		$klarna_filename = KLARNA_DIR . 'srv/pclasses.json';
 		
 	 	// Only execute this if the feature is activated in the gateway settings
@@ -1375,7 +1381,6 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 			Klarna::$debug = false;
 			
 			// apply_filters to product price so we can filter this if needed
-			$klarna_product_total = $product->get_price();
 			$sum = apply_filters( 'klarna_product_total', $klarna_product_total ); // Product price.
 			$sum = trim($sum);
 			
@@ -1437,6 +1442,10 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
  		//global $woocommerce, $product, $klarna_account_shortcode_currency, $klarna_account_shortcode_price, $klarna_account_shortcode_img, $klarna_account_shortcode_info_link;
  		global $woocommerce, $product, $klarna_account_shortcode_currency, $klarna_account_shortcode_price, $klarna_shortcode_img, $klarna_account_country;
 	 	
+	 	// Product with no price - do nothing
+		$klarna_product_total = $product->get_price();
+		if ( empty($klarna_product_total) ) return;
+		
 	 	$klarna_filename = KLARNA_DIR . 'srv/pclasses.json';
 
 	 	// Only execute this if the feature is activated in the gateway settings		
@@ -1482,7 +1491,6 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 			Klarna::$debug = false;
 			
 			// apply_filters to product price so we can filter this if needed
-			$klarna_product_total = $product->get_price();
 			$sum = apply_filters( 'klarna_product_total', $klarna_product_total ); // Product price.
 			$sum = trim($sum);
 			$flag = KlarnaFlags::PRODUCT_PAGE; //or KlarnaFlags::PRODUCT_PAGE, if you want to do it for one item.

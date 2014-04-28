@@ -81,7 +81,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 
 			$this->shop_country	= $klarna_country;
 		}
-			
+		
 		// Country and language
 		switch ( $this->shop_country )
 		{
@@ -120,7 +120,16 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		case 'FI' :
 		//case 'EUR' :
 			$klarna_country 			= 'FI';
-			$klarna_language 			= 'fi-fi';
+			
+			// Check if WPML is used and determine if Finnish or Swedish is used as language
+			if ( class_exists( 'woocommerce_wpml' ) && defined('ICL_LANGUAGE_CODE') && strtoupper(ICL_LANGUAGE_CODE) == 'SV') {
+				// Swedish
+				$klarna_language 			= 'sv-fi';
+			} else {
+				// Finnish
+				$klarna_language 			= 'fi-fi';
+			}
+			
 			$klarna_currency 			= 'EUR';
 			$klarna_eid 				= $this->eid_fi;
 			$klarna_secret 				= $this->secret_fi;
@@ -179,7 +188,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
        	
     }
 	    
-	    		
+	 	
     /**
 	 * Initialise Gateway Settings Form Fields
 	 */
@@ -440,7 +449,12 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 				// DESKTOP: Width of containing block shall be at least 750px
 				// MOBILE: Width of containing block shall be 100% of browser window (No
 				// padding or margin)
+				
+				do_action( 'klarna_before_kco_confirmation', $_GET['sid'] );
+				
 				echo '<div>' . $snippet . '</div>';	
+				
+				do_action( 'klarna_after_kco_confirmation', $_GET['sid'] );
 				
 				unset($_SESSION['klarna_checkout']);
 				
@@ -529,11 +543,11 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 								// We manually calculate the tax percentage here
 								if ( $_product->is_taxable() && $order->get_line_tax($item)>0 ) {
 									// Calculate tax percentage
-									$item_tax_percentage = (int)number_format( ( $order->get_line_tax($item) / $order->get_line_total( $item, false ) )*100, 2, '', '');
+									$item_tax_percentage = round($order->get_line_tax($item) / $order->get_line_total( $item, false ), 2)*100;
 								} else {
 									$item_tax_percentage = 00;
 								}
-				
+
 								$item_name 	= $item['name'];
 								
 								$item_meta = new WC_Order_Item_Meta( $item['item_meta'] );
@@ -561,7 +575,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 											'quantity' => (int)$item['qty'],
 											'unit_price' => (int)$item_price,
 											'discount_rate' => 0,
-											'tax_rate' => round($item_tax_percentage)
+											'tax_rate' => intval($item_tax_percentage . '00')
 										);
 									
 							} // End if qty
@@ -569,7 +583,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 						} // End foreach
 					
 					} // End if sizeof get_items()
-				
+					
 				
 					// Shipping
 					if( $woocommerce->cart->shipping_total > 0 ) {
@@ -577,7 +591,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 						// We manually calculate the tax percentage here
 						if ($woocommerce->cart->shipping_tax_total > 0) {
 							// Calculate tax percentage
-							$shipping_tax_percentage = (int)number_format( ( $woocommerce->session->shipping_tax_total / $woocommerce->session->shipping_total )*100, 2, '', '');
+							$shipping_tax_percentage = round($woocommerce->session->shipping_tax_total / $woocommerce->session->shipping_total, 2)*100;
 						} else {
 							$shipping_tax_percentage = 00;
 						}
@@ -600,7 +614,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 						 	'name' => $chosen_shipping_method,  
 						 	'quantity' => 1,  
 						 	'unit_price' => (int)$shipping_price,  
-						 	'tax_rate' => round($shipping_tax_percentage)
+						 	'tax_rate' => intval($shipping_tax_percentage . '00')
 						 );
 					}
 				
@@ -617,8 +631,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 						 	'tax_rate' => 0  
 						);
 					}
-				
-					
+									
 					// Merchant ID
 					$eid = $this->klarna_eid;
     		
@@ -634,7 +647,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
     		
 
 					$klarna_order = null;
-    			
+					
 					if (array_key_exists('klarna_checkout', $_SESSION)) {
 						
 						// Resume session
@@ -666,7 +679,6 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 
         					
         					// Customer info if logged in
-        					/*
 							if( $this->testmode !== 'yes' ) {
 								if($current_user->user_email) {
 									$update['shipping_address']['email'] = $current_user->user_email;
@@ -676,9 +688,9 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 									$update['shipping_address']['postal_code'] = $woocommerce->customer->get_shipping_postcode();
 								}
 							}
-							*/
+							
 						
-        					$klarna_order->update($update);
+        					$klarna_order->update( apply_filters( 'kco_update_order', $update ) );
         				} catch (Exception $e) {
         					// Reset session
         					$klarna_order = null;
@@ -699,8 +711,8 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	        			$create['merchant']['confirmation_uri'] = add_query_arg ( array('klarna_order' => '{checkout.order.uri}', 'sid' => $order_id ), $this->klarna_checkout_thanks_url);
 	        			$create['merchant']['push_uri'] = add_query_arg( array('sid' => $order_id, 'scountry' => $this->klarna_country, 'klarna_order' => '{checkout.order.uri}', 'wc-api' => 'WC_Gateway_Klarna_Checkout'), $this->klarna_checkout_url );
 	        			
+	        			
 	        			// Customer info if logged in
-	        			/*
 	        			if( $this->testmode !== 'yes' ) {
 							if($current_user->user_email) {
 								$create['shipping_address']['email'] = $current_user->user_email;
@@ -710,7 +722,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 								$create['shipping_address']['postal_code'] = $woocommerce->customer->get_shipping_postcode();
 							}
 						}
-						*/
+						
 	        			
 	        			$create['gui']['layout'] = $klarna_checkout_layout;
 	        			
@@ -721,10 +733,9 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		        		
 		        		
 		        		$klarna_order = new Klarna_Checkout_Order($connector);
-		        		$klarna_order->create($create);
+		        		$klarna_order->create( apply_filters( 'kco_create_order', $create ) );
 		        		$klarna_order->fetch();
 		        	}
-					
 					
 		        	
 		        	// Store location of checkout session
@@ -732,7 +743,12 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		        	
 		        	// Display checkout
 		        	$snippet = $klarna_order['gui']['snippet'];
+		        	
+		        	do_action( 'klarna_before_kco_checkout', $order_id );
+		        	
 		        	echo '<div>' . $snippet . '</div>';
+		        	
+		        	do_action( 'klarna_after_kco_checkout', $order_id );
 		        	
 		        	
     		    		
@@ -789,7 +805,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 					$this->log->add( 'klarna', 'Reference: ' . $klarna_order['reservation']);
 				endif;
 				
-				if ($klarna_order['status'] == "checkout_complete") {  
+				if ($klarna_order['status'] == "checkout_complete") { 
 							
 					$order_id = $_GET['sid'];
 					$order = new WC_Order( $_GET['sid'] );
@@ -806,13 +822,29 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 					update_post_meta( $order_id, '_billing_phone', $klarna_order['billing_address']['phone'] );
 					
 					// Add customer shipping address - retrieved from callback from Klarna
-					update_post_meta( $order_id, '_shipping_first_name', $klarna_order['billing_address']['given_name'] );
-					update_post_meta( $order_id, '_shipping_last_name', $klarna_order['billing_address']['family_name'] );
-					update_post_meta( $order_id, '_shipping_address_1', $klarna_order['billing_address']['street_address'] );
-					update_post_meta( $order_id, '_shipping_address_2', $klarna_order['billing_address']['care_of'] );
-					update_post_meta( $order_id, '_shipping_postcode', $klarna_order['billing_address']['postal_code'] );
-					update_post_meta( $order_id, '_shipping_city', $klarna_order['billing_address']['city'] );
-					update_post_meta( $order_id, '_shipping_country', $klarna_order['billing_address']['country'] );
+					$allow_separate_shipping = ( isset( $klarna_order['options']['allow_separate_shipping_address'] ) ) ? $klarna_order['options']['allow_separate_shipping_address'] : '';
+					
+					if( $allow_separate_shipping == 'true' ) {
+						
+						update_post_meta( $order_id, '_shipping_first_name', $klarna_order['shipping_address']['given_name'] );
+						update_post_meta( $order_id, '_shipping_last_name', $klarna_order['shipping_address']['family_name'] );
+						update_post_meta( $order_id, '_shipping_address_1', $klarna_order['shipping_address']['street_address'] );
+						update_post_meta( $order_id, '_shipping_address_2', $klarna_order['shipping_address']['care_of'] );
+						update_post_meta( $order_id, '_shipping_postcode', $klarna_order['shipping_address']['postal_code'] );
+						update_post_meta( $order_id, '_shipping_city', $klarna_order['shipping_address']['city'] );
+						update_post_meta( $order_id, '_shipping_country', $klarna_order['shipping_address']['country'] );
+					
+					} else {
+						
+						update_post_meta( $order_id, '_shipping_first_name', $klarna_order['billing_address']['given_name'] );
+						update_post_meta( $order_id, '_shipping_last_name', $klarna_order['billing_address']['family_name'] );
+						update_post_meta( $order_id, '_shipping_address_1', $klarna_order['billing_address']['street_address'] );
+						update_post_meta( $order_id, '_shipping_address_2', $klarna_order['billing_address']['care_of'] );
+						update_post_meta( $order_id, '_shipping_postcode', $klarna_order['billing_address']['postal_code'] );
+						update_post_meta( $order_id, '_shipping_city', $klarna_order['billing_address']['city'] );
+						update_post_meta( $order_id, '_shipping_country', $klarna_order['billing_address']['country'] );
+					}
+					
 					
 					// Store user id in order so the user can keep track of track it in My account
 					if( email_exists( $klarna_order['billing_address']['email'] )) {
@@ -872,6 +904,9 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 					
 					// Remove cart
 					$woocommerce->cart->empty_cart();
+					
+					// Other plugins and themes can hook into here
+					do_action( 'klarna_after_kco_push_notification', $order_id );
 					
 					
 				}
@@ -1002,7 +1037,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 	
 	 	
 	 /**
-	 * Activate the order/reservation in Klarnas system and return the result
+	  * Activate the order/reservation in Klarnas system and return the result
 	 **/
 	function activate_reservation() {
 		global $woocommerce;
@@ -1383,6 +1418,7 @@ class WC_Gateway_Klarna_Checkout_Extra {
 		$modify_standard_checkout_url = $data->get_modify_standard_checkout_url();
 		$klarna_country = $data->get_klarna_country();
 		$available_countries = array('NO', 'FI', 'SE');
+
 		// Change the Checkout URL if this is enabled in the settings
 		if( $modify_standard_checkout_url == 'yes' && $enabled == 'yes' && in_array($klarna_country, $available_countries)) {
 			$url = $klarna_checkout_url;

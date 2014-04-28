@@ -1,5 +1,17 @@
 *** Klarna Changelog ***
 
+2014.04.28 	- version 1.7.8
+ * Feature	- Possible to display Klarna Checkout in both Finnish (fi-fi) and Swedish (sv-fi) for Finnish stores (together with WPML).
+ * Feature	- Pre-population of the Email and Postal code form fields in Klarna Checkout for logged in users.
+ * Tweak	- Added apply_filters kco_create_order & kco_update_order so order information sent to Klarna can be added by merchants (Klarna Checkout).
+ * Tweak	- Added apply_filters klarna_shop_country.
+ * Tweak	- Added do_action() klarna_before_kco_checkout, klarna_after_kco_checkout, klarna_before_kco_confirmation, klarna_after_kco_confirmation, klarna_after_kco_push_notification
+ * Tweak	- Added Klarna reservation number as post meta to Klarna Invoice, Account & Special account on payment complete.
+ * Tweak	- Added check for separate shipping address in push notification if allow_separate_shipping_address is used.
+ * Fix		- Improved Round() handling of tax percentage sent to Klarna (Klarna Checkout).
+ * Fix		- No calculation of monthly fee (Klarna Account) for products with no price.
+ 
+ 
 2014.03.25 	- version 1.7.7
  * Fix		- 2.1 compatibility bugfix in check - Shipping and Billing address must be the same (for DE & NL).
  * Fix		- Added specific create_order() function for WC v2.1+ (Klarna Checkout). Improvment of bugfix in version 1.7.6.
