@@ -543,7 +543,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 								// We manually calculate the tax percentage here
 								if ( $_product->is_taxable() && $order->get_line_tax($item)>0 ) {
 									// Calculate tax percentage
-									$item_tax_percentage = round($order->get_line_tax($item) / $order->get_line_total( $item, false ), 2)*100;
+									$item_tax_percentage = round($order->get_item_tax( $item, false) / $order->get_item_total( $item, false, false ), 2)*100;
 								} else {
 									$item_tax_percentage = 00;
 								}

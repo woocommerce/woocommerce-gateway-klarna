@@ -1,5 +1,8 @@
 *** Klarna Changelog ***
 
+2014.05.08 	- version 1.7.9
+* Fix		- Improved tax percentage calculation on order items sent to Klarna (Klarna Checkout).
+
 2014.04.28 	- version 1.7.8
  * Feature	- Possible to display Klarna Checkout in both Finnish (fi-fi) and Swedish (sv-fi) for Finnish stores (together with WPML).
  * Feature	- Pre-population of the Email and Postal code form fields in Klarna Checkout for logged in users.
