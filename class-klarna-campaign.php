@@ -89,6 +89,12 @@ class WC_Gateway_Klarna_Campaign extends WC_Gateway_Klarna {
 			$klarna_currency = 'SEK';
 			$klarna_campaign_info = 'https://online.klarna.com/account_se.yaws?eid=' . $this->eid;
 			break;
+		case 'AT' :
+			$klarna_country = 'AT';
+			$klarna_language = 'DE';
+			$klarna_currency = 'EUR';
+			$klarna_campaign_info = 'https://online.klarna.com/account_at.yaws?eid=' . $this->eid;
+			break;
 		default:
 			$klarna_country = '';
 			$klarna_language = '';

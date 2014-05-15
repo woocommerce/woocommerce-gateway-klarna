@@ -111,6 +111,13 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 			$klarna_account_icon = 'https://cdn.klarna.com/public/images/SE/badges/v1/account/SE_account_badge_std_blue.png?width=60&eid=' . $this->eid;
 			$klarna_basic_icon = 'https://cdn.klarna.com/public/images/SE/logos/v1/basic/SE_basic_logo_std_blue-black.png?width=60&eid=' . $this->eid;
 			break;
+		case 'AT' :
+			$klarna_country = 'AT';
+			$klarna_language = 'DE';
+			$klarna_currency = 'EUR';
+			$klarna_account_icon = 'https://cdn.klarna.com/public/images/AT/badges/v1/account/AT_account_badge_std_blue.png?width=60&eid=' . $this->eid;
+			$klarna_basic_icon = 'https://cdn.klarna.com/public/images/AT/logos/v1/basic/AT_basic_logo_std_blue-black.png?width=60&eid=' . $this->eid;
+			break;
 		default:
 			$klarna_country = '';
 			$klarna_language = '';

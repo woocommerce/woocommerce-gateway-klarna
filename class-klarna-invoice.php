@@ -80,7 +80,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 			$klarna_country = 'DK';
 			$klarna_language = 'DA';
 			$klarna_currency = 'DKK';
-			$klarna_invoice_terms = 'https://online.klarna.com/villkor_dk.yaws?eid=' . $this->eid . '&charge=' . $this->invoice_fee_price;
+			//$klarna_invoice_terms = 'https://online.klarna.com/villkor_dk.yaws?eid=' . $this->eid . '&charge=' . $this->invoice_fee_price;
 			//$klarna_invoice_icon = plugins_url(basename(dirname(__FILE__))."/images/klarna_invoice_dk.png");
 			$klarna_invoice_icon = 'https://cdn.klarna.com/public/images/DK/badges/v1/invoice/DK_invoice_badge_std_blue.png?width=60&eid=' . $this->eid;
 			break;
@@ -88,7 +88,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 			$klarna_country = 'DE';
 			$klarna_language = 'DE';
 			$klarna_currency = 'EUR';
-			$klarna_invoice_terms = 'https://online.klarna.com/villkor_de.yaws?eid=' . $this->eid . '&charge=' . $this->invoice_fee_price;
+			//$klarna_invoice_terms = 'https://online.klarna.com/villkor_de.yaws?eid=' . $this->eid . '&charge=' . $this->invoice_fee_price;
 			//$klarna_invoice_icon = plugins_url(basename(dirname(__FILE__))."/images/klarna_invoice_de.png");
 			$klarna_invoice_icon = 'https://cdn.klarna.com/public/images/DE/badges/v1/invoice/DE_invoice_badge_std_blue.png?width=60&eid=' . $this->eid;
 			break;
@@ -96,7 +96,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 			$klarna_country = 'NL';
 			$klarna_language = 'NL';
 			$klarna_currency = 'EUR';
-			$klarna_invoice_terms = 'https://online.klarna.com/villkor_nl.yaws?eid=' . $this->eid . '&charge=' . $this->invoice_fee_price;
+			//$klarna_invoice_terms = 'https://online.klarna.com/villkor_nl.yaws?eid=' . $this->eid . '&charge=' . $this->invoice_fee_price;
 			//$klarna_invoice_icon = plugins_url(basename(dirname(__FILE__))."/images/klarna_invoice_nl.png");
 			$klarna_invoice_icon = 'https://cdn.klarna.com/public/images/NL/badges/v1/invoice/NL_invoice_badge_std_blue.png?width=60&eid=' . $this->eid;
 			break;
@@ -105,7 +105,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 			$klarna_country = 'NO';
 			$klarna_language = 'NB';
 			$klarna_currency = 'NOK';
-			$klarna_invoice_terms = 'https://online.klarna.com/villkor_no.yaws?eid=' . $this->eid . '&charge=' . $this->invoice_fee_price;
+			//$klarna_invoice_terms = 'https://online.klarna.com/villkor_no.yaws?eid=' . $this->eid . '&charge=' . $this->invoice_fee_price;
 			//$klarna_invoice_icon = plugins_url(basename(dirname(__FILE__))."/images/klarna_invoice_no.png");
 			$klarna_invoice_icon = 'https://cdn.klarna.com/public/images/NO/badges/v1/invoice/NO_invoice_badge_std_blue.png?width=60&eid=' . $this->eid;
 			break;
@@ -113,7 +113,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 			$klarna_country = 'FI';
 			$klarna_language = 'FI';
 			$klarna_currency = 'EUR';
-			$klarna_invoice_terms = 'https://online.klarna.com/villkor_fi.yaws?eid=' . $this->eid . '&charge=' . $this->invoice_fee_price;
+			//$klarna_invoice_terms = 'https://online.klarna.com/villkor_fi.yaws?eid=' . $this->eid . '&charge=' . $this->invoice_fee_price;
 			//$klarna_invoice_icon = plugins_url(basename(dirname(__FILE__))."/images/klarna_invoice_fi.png");
 			$klarna_invoice_icon = 'https://cdn.klarna.com/public/images/FI/badges/v1/invoice/FI_invoice_badge_std_blue.png?width=60&eid=' . $this->eid;
 			break;
@@ -122,15 +122,21 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 			$klarna_country = 'SE';
 			$klarna_language = 'SV';
 			$klarna_currency = 'SEK';
-			$klarna_invoice_terms = 'https://online.klarna.com/villkor.yaws?eid=' . $this->eid . '&charge=' . $this->invoice_fee_price;
+			//$klarna_invoice_terms = 'https://online.klarna.com/villkor.yaws?eid=' . $this->eid . '&charge=' . $this->invoice_fee_price;
 			//$klarna_invoice_icon = plugins_url(basename(dirname(__FILE__))."/images/klarna_invoice_se.png");
 			$klarna_invoice_icon = 'https://cdn.klarna.com/public/images/SE/badges/v1/invoice/SE_invoice_badge_std_blue.png?width=60&eid=' . $this->eid;
+			break;
+		case 'AT' :
+			$klarna_country = 'AT';
+			$klarna_language = 'DE';
+			$klarna_currency = 'EUR';
+			$klarna_invoice_icon = 'https://cdn.klarna.com/public/images/AT/badges/v1/invoice/AT_invoice_badge_std_blue.png?width=60&eid=' . $this->eid;
 			break;
 		default:
 			$klarna_country = '';
 			$klarna_language = '';
 			$klarna_currency = '';
-			$klarna_invoice_terms = '';
+			//$klarna_invoice_terms = '';
 			$klarna_invoice_icon = '';
 		}
 		
@@ -138,7 +144,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 		$this->klarna_country 		= apply_filters( 'klarna_country', $klarna_country );
 		$this->klarna_language 		= apply_filters( 'klarna_language', $klarna_language );
 		$this->klarna_currency 		= apply_filters( 'klarna_currency', $klarna_currency );
-		$this->klarna_invoice_terms = apply_filters( 'klarna_invoice_terms', $klarna_invoice_terms );
+		//$this->klarna_invoice_terms = apply_filters( 'klarna_invoice_terms', $klarna_invoice_terms );
 		$this->icon 				= apply_filters( 'klarna_invoice_icon', $klarna_invoice_icon );
 		$this->description			= apply_filters( 'klarna_invoice_description', $this->description );
 		
@@ -146,16 +152,16 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 		// Actions
 
 		/* 1.6.6 */
-		add_action( 'woocommerce_update_options_payment_gateways', array( &$this, 'process_admin_options' ) );
+		add_action( 'woocommerce_update_options_payment_gateways', array( $this, 'process_admin_options' ) );
  
 		/* 2.0.0 */
 		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
 		
 		
 		
-		add_action('woocommerce_receipt_klarna', array(&$this, 'receipt_page'));
+		add_action('woocommerce_receipt_klarna', array( $this, 'receipt_page' ));
 		
-		add_action('wp_footer', array(&$this, 'klarna_invoice_terms_js'));
+		//add_action('wp_footer', array(&$this, 'klarna_invoice_terms_js'));
 		add_action('wp_print_footer_scripts', array( $this, 'print_invoice_fee_updater'));
 		
 	}
@@ -329,7 +335,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 		
 		<fieldset>
 			<p class="form-row form-row-first">
-				<?php if ( $this->shop_country == 'NL' || $this->shop_country == 'DE' ) : ?>
+				<?php if ( $this->shop_country == 'NL' || $this->shop_country == 'DE' || $this->shop_country == 'AT' ) : ?>
 				
 				<label for="klarna_pno"><?php echo __("Date of Birth", 'klarna') ?> <span class="required">*</span></label>
 				<span class="dob">
@@ -480,7 +486,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 				<?php endif; ?>
 			</p>
 			
-			<?php if ( $this->shop_country == 'NL' || $this->shop_country == 'DE' ) : 
+			<?php if ( $this->shop_country == 'NL' || $this->shop_country == 'DE' || $this->shop_country == 'AT' ) : 
 				
 			?>
 				<p class="form-row form-row-last">
@@ -494,8 +500,28 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 			<?php endif; ?>
 						
 			<div class="clear"></div>
-		
-			<p><a id="klarna_invoice" onclick="ShowKlarnaInvoicePopup();return false;" href="#"><?php echo $this->get_invoice_terms_link_text($this->klarna_country); ?></a></p>
+			
+			<?php
+			// Mobile or desktop browser
+			if (wp_is_mobile() ) {
+				$klarna_layout = 'mobile';
+			 } else {
+			 	$klarna_layout = 'desktop';
+			 }
+			
+			// Script for displaying the terms link
+			?>
+			
+			<script type="text/javascript">
+				new Klarna.Terms.Invoice({
+				    el: 'specialxx',
+				    eid: '<?php echo $this->eid; ?>',
+				    locale: '<?php echo get_locale();?>',
+				    charge: '<?php echo $this->invoice_fee_price;?>',
+				    type: '<?php echo $klarna_layout;?>',
+				});
+			</script>
+			<span id="specialxx"></span>
         	
 			<div class="clear"></div>
 		
@@ -520,7 +546,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 	 * Process the payment and return the result
 	 **/
 	function process_payment( $order_id ) {
-	
+		
 		global $woocommerce;
 		
 		$order = new WC_order( $order_id );
@@ -532,7 +558,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 		// Get values from klarna form on checkout page
 		
 		// Collect the dob different depending on country
-		if ( $this->shop_country == 'NL' || $this->shop_country == 'DE' ) :
+		if ( $this->shop_country == 'NL' || $this->shop_country == 'DE' || $this->shop_country == 'AT' ) :
 			$klarna_pno_day 			= isset($_POST['klarna_invo_date_of_birth_day']) ? woocommerce_clean($_POST['klarna_invo_date_of_birth_day']) : '';
 			$klarna_pno_month 			= isset($_POST['klarna_invo_date_of_birth_month']) ? woocommerce_clean($_POST['klarna_invo_date_of_birth_month']) : '';
 			$klarna_pno_year 			= isset($_POST['klarna_invo_date_of_birth_year']) ? woocommerce_clean($_POST['klarna_invo_date_of_birth_year']) : '';
@@ -546,7 +572,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 		
 
 		// Split address into House number and House extension for NL & DE customers
-		if ( $this->shop_country == 'NL' || $this->shop_country == 'DE' ) :
+		if ( $this->shop_country == 'NL' || $this->shop_country == 'DE' || $this->shop_country == 'AT' ) :
 		
 			require_once('split-address.php');
 			
@@ -596,21 +622,18 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 			
 		$k = new Klarna();
 		
+	
 		$k->config(
-		    $eid = $this->settings['eid'],
-		    $secret = $this->settings['secret'],
-		    $country = $this->klarna_country,
-		    $language = $this->klarna_language,
-		    $currency = $this->klarna_currency,
-		    $mode = $klarna_mode,
-		    $pcStorage = 'json',
-		    $pcURI = '/srv/pclasses.json',
-		    $ssl = $klarna_ssl,
-		    $candice = false
+		    $this->settings['eid'], 		// EID
+		    $this->settings['secret'], 		// Secret
+		    $this->klarna_country, 			// Country
+		    $this->klarna_language, 		// Language
+		    $this->klarna_currency, 		// Currency
+		    $klarna_mode, 					// Live or test
+		    $pcStorage = 'json', 			// PClass storage
+		    $pcURI = '/srv/pclasses.json'	// PClass storage URI path
 		);
 		
-		Klarna::$xmlrpcDebug = false;
-		Klarna::$debug = false;
 		
 		// Cart Contents
 		if (sizeof($order->get_items())>0) : foreach ($order->get_items() as $item) :
@@ -658,14 +681,14 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 			$item_price = apply_filters( 'klarna_item_price_including_tax', $klarna_item_price_including_tax );
 				
 				$k->addArticle(
-		    		$qty = $item['qty'], 					//Quantity
-		    		$artNo = strval($reference),		 	//Article number
-		    		$title = utf8_decode ($item['name']), 	//Article name/title
-		    		$price = $item_price, 					// Price including tax
-		    		$vat = round( $item_tax_percentage ),			// Tax
-		    		$discount = 0, 
-		    		$flags = KlarnaFlags::INC_VAT 			//Price is including VAT.
-		    	);
+		    			$item['qty'], 					// Quantity
+						strval($reference),		 		// Article number
+			    		utf8_decode ($item['name']), 	// Article name/title
+			    		$item_price, 					// Price including tax
+						round( $item_tax_percentage ),	// Tax
+		    			0, 								// Discount
+		    			KlarnaFlags::INC_VAT 			// Price is including VAT.
+					);
 									
 		//endif;
 		endforeach; endif;
@@ -678,13 +701,13 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 			$order_discount = apply_filters( 'klarna_order_discount', $klarna_order_discount );
 		
 			$k->addArticle(
-			    $qty = 1,
-			    $artNo = "",
-			    $title = __('Discount', 'klarna'),
-			    $price = -$order_discount,
-			    $vat = 0,
-			    $discount = 0,
-			    $flags = KlarnaFlags::INC_VAT //Price is including VAT
+			    $qty = 1, 								// Quantity
+			    $artNo = "",							// Article number
+			    $title = __('Discount', 'klarna'),		// Article name/title
+			    $price = -$order_discount,				// Price
+			    $vat = 0,								// Tax
+			    $discount = 0,							// Discount
+			    $flags = KlarnaFlags::INC_VAT 			// Price is including VAT
 			);
 		endif;
 		
@@ -719,13 +742,13 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 				$item_loop++;
 				
 				$k->addArticle(
-				    $qty = 1,
-				    $artNo = "",
-				    $title = $item['name'],
-				    $price = $item_price,
-				    $vat = round( $item_tax_percentage ),
-				    $discount = 0,
-			    	$flags = $tmp_flags
+				    $qty = 1,								// Quantity
+				    $artNo = "",							// Article number
+				    $title = $item['name'],					// Article name
+				    $price = $item_price,					// Price
+				    $vat = round( $item_tax_percentage ),	// Tax
+				    $discount = 0,							// Discount
+			    	$flags = $tmp_flags						// Flags
 			    );
 			    
 			}
@@ -744,12 +767,12 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 			$shipping_price = apply_filters( 'klarna_shipping_price_including_tax', $klarna_shipping_price_including_tax );
 			
 			$k->addArticle(
-			    $qty = 1,
-			    $artNo = "",
-			    $title = __('Shipping cost', 'klarna'),
-			    $price = $shipping_price,
-			    $vat = round( $calculated_shipping_tax_percentage ),
-			    $discount = 0,
+			    $qty = 1,												// Quantity
+			    $artNo = "",											// Article number
+			    $title = __('Shipping cost', 'klarna'),					// Article name
+			    $price = $shipping_price,								// Price
+			    $vat = round( $calculated_shipping_tax_percentage ),	// Tax
+			    $discount = 0,											// Discount
 			    $flags = KlarnaFlags::INC_VAT + KlarnaFlags::IS_SHIPMENT //Price is including VAT and is shipment fee
 			);
 		endif;
@@ -758,19 +781,18 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 		
 		// Billing address
 		$addr_billing = new KlarnaAddr(
-    		$email = $order->billing_email,
-    		$telno = '', //We skip the normal land line phone, only one is needed.
-    		$cellno = $order->billing_phone,
-    		//$company = utf8_decode ($order->billing_company),
-    		$fname = utf8_decode ($order->billing_first_name),
-    		$lname = utf8_decode ($order->billing_last_name),
-    		$careof = utf8_decode ($order->billing_address_2),  //No care of, C/O.
-    		$street = utf8_decode ($klarna_billing_address), //For DE and NL specify street number in houseNo.
-    		$zip = utf8_decode ($order->billing_postcode),
-    		$city = utf8_decode ($order->billing_city),
-    		$country = utf8_decode ($order->billing_country),
-    		$houseNo = utf8_decode ($klarna_billing_house_number), //For DE and NL we need to specify houseNo.
-    		$houseExt = utf8_decode ($klarna_billing_house_extension) //Only required for NL.
+    		$order->billing_email, 							// Email
+    		'', 											// We skip the normal land line phone, only one is needed.
+    		$order->billing_phone,							// Cellno
+    		utf8_decode ($order->billing_first_name),		// First name
+    		utf8_decode ($order->billing_last_name),		// Last name
+    		utf8_decode ($order->billing_address_2),  		// No care of, C/O.
+    		utf8_decode ($klarna_billing_address), 			// For DE and NL specify street number in houseNo.
+    		utf8_decode ($order->billing_postcode),			// Post code
+    		utf8_decode ($order->billing_city),				// City
+    		utf8_decode ($order->billing_country),			// Country (SE)
+    		utf8_decode ($klarna_billing_house_number), 	//For DE and NL we need to specify houseNo.
+    		utf8_decode ($klarna_billing_house_extension)	//Only required for NL.
 		);
 		
 		// Add Company if one is set
@@ -782,37 +804,35 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 			
 			// Use billing address if Shipping is disabled in Woocommerce
 			$addr_shipping = new KlarnaAddr(
-    			$email = $order->billing_email,
-    			$telno = '', //We skip the normal land line phone, only one is needed.
-    			$cellno = $order->billing_phone,
-    			//$company = utf8_decode ($order->billing_company),
-    			$fname = utf8_decode ($order->billing_first_name),
-    			$lname = utf8_decode ($order->billing_last_name),
-    			$careof = utf8_decode ($order->billing_address_2),  //No care of, C/O.
-    			$street = utf8_decode ($klarna_billing_address), //For DE and NL specify street number in houseNo.
-    			$zip = utf8_decode ($order->billing_postcode),
-    			$city = utf8_decode ($order->billing_city),
-    			$country = utf8_decode ($order->billing_country),
-    			$houseNo = utf8_decode ($klarna_billing_house_number), //For DE and NL we need to specify houseNo.
-    			$houseExt = utf8_decode ($klarna_billing_house_extension) //Only required for NL.
+    			$order->billing_email,
+    			'', //We skip the normal land line phone, only one is needed.
+    			$order->billing_phone,
+    			utf8_decode ($order->billing_first_name),
+    			utf8_decode ($order->billing_last_name),
+    			utf8_decode ($order->billing_address_2),  //No care of, C/O.
+    			utf8_decode ($klarna_billing_address), //For DE and NL specify street number in houseNo.
+    			utf8_decode ($order->billing_postcode),
+    			utf8_decode ($order->billing_city),
+    			utf8_decode ($order->billing_country),
+    			utf8_decode ($klarna_billing_house_number), //For DE and NL we need to specify houseNo.
+    			utf8_decode ($klarna_billing_house_extension) //Only required for NL.
 			);
 		
 		} else {
 		
 			$addr_shipping = new KlarnaAddr(
-    			$email = $order->billing_email,
-    			$telno = '', //We skip the normal land line phone, only one is needed.
-    			$cellno = $order->billing_phone,
-    			//$company = utf8_decode ($order->shipping_company),
-    			$fname = utf8_decode ($order->shipping_first_name),
-    			$lname = utf8_decode ($order->shipping_last_name),
-    			$careof = utf8_decode ($order->shipping_address_2),  //No care of, C/O.
-    			$street = utf8_decode ($klarna_shipping_address), //For DE and NL specify street number in houseNo.
-    			$zip = utf8_decode ($order->shipping_postcode),
-    			$city = utf8_decode ($order->shipping_city),
-    			$country = utf8_decode ($order->shipping_country),
-    			$houseNo = utf8_decode ($klarna_shipping_house_number), //For DE and NL we need to specify houseNo.
-    			$houseExt = utf8_decode ($klarna_shipping_house_extension) //Only required for NL.
+    			$order->billing_email,
+    			'', //We skip the normal land line phone, only one is needed.
+    			$order->billing_phone,
+    			utf8_decode ($order->shipping_first_name),
+    			utf8_decode ($order->shipping_last_name),
+    			utf8_decode ($order->shipping_address_2),  //No care of, C/O.
+    			utf8_decode ($klarna_shipping_address), //For DE and NL specify street number in houseNo.
+    			utf8_decode ($order->shipping_postcode),
+    			utf8_decode ($order->shipping_city),
+    			utf8_decode ($order->shipping_country),
+    			utf8_decode ($klarna_shipping_house_number), //For DE and NL we need to specify houseNo.
+    			utf8_decode ($klarna_shipping_house_extension) //Only required for NL.
 			);
 		
 		}
@@ -828,18 +848,25 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 		    $user = '' //Username, email or identifier for the user?
 		);
 		
+		/*
+		echo '<pre>';
+		print_r($k);
+		echo '</pre>';
+		die();
+		*/
 		/** Shipment type? **/
 
 		//Normal shipment is defaulted, delays the start of invoice expiration/due-date.
 		// $k->setShipmentInfo('delay_adjust', KlarnaFlags::EXPRESS_SHIPMENT);
 		try {
+		
     		//Transmit all the specified data, from the steps above, to Klarna.
-    		$result = $k->addTransaction(
-    		    $pno = $klarna_pno, //Date of birth.
-    		    
-    		    $gender = intval($klarna_gender),//Gender.
-    		    $flags = KlarnaFlags::NO_FLAG, //No specific behaviour like RETURN_OCR or TEST_MODE.
-    		    $pclass = KlarnaPClass::INVOICE //-1, notes that this is an invoice purchase, for part payment purchase you will have a pclass object which you use getId() from.
+    		$result = $k->reserveAmount(
+				$klarna_pno, 				// Date of birth. 
+				intval($klarna_gender),		// Gender.
+				-1, // Automatically calculate and reserve the cart total amount
+    		    KlarnaFlags::NO_FLAG, 		// No specific behaviour like RETURN_OCR or TEST_MODE.
+				KlarnaPClass::INVOICE 		//-1, notes that this is an invoice purchase, for part payment purchase you will have a pclass object which you use getId() from.
     		);
     		
     		// Prepare redirect url
@@ -852,8 +879,8 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
     		// Retreive response
     		$invno = $result[0];
     		switch($result[1]) {
-            case KlarnaFlags::ACCEPTED:
-                $order->add_order_note( __('Klarna payment completed. Klarna Invoice number: ', 'klarna') . $invno );
+            case '1':
+                $order->add_order_note( __('Klarna payment completed. Klarna reservation number: ', 'klarna') . $invno );
                 update_post_meta( $order_id, 'klarna_order_reservation', $invno );
                 
                 // Payment complete
@@ -869,8 +896,8 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 				);
 						
                 break;
-            case KlarnaFlags::PENDING:
-                $order->add_order_note( __('Order is PENDING APPROVAL by Klarna. Please visit Klarna Online for the latest status on this order. Klarna Invoice number: ', 'klarna') . $invno );
+            case '2':
+                $order->add_order_note( __('Order is PENDING APPROVAL by Klarna. Please visit Klarna Online for the latest status on this order. Klarna reservarion number: ', 'klarna') . $invno );
                 
                 // Payment complete
 				$order->payment_complete();
@@ -1034,9 +1061,19 @@ class WC_Gateway_Klarna_Invoice_Extra {
 		// Chcek Klarna specific fields on Checkout
 		add_action('woocommerce_checkout_process', array( $this, 'klarna_invoice_checkout_field_process'));
 		
+		// Test
+		//add_action('init', array( $this, 'test_country'));
 		
 	}
 	
+	function test_country() {
+		global $woocommerce;
+		$data = new WC_Gateway_Klarna_Invoice;
+		var_dump($data->get_klarna_shop_country());
+		echo '<br/>';
+		var_dump(get_option('woocommerce_default_country'));
+		
+	}
 
 	
 	/**

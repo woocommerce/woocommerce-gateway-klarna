@@ -109,7 +109,7 @@ function init_klarna_gateway() {
 			$this->shop_country 		= apply_filters( 'klarna_shop_country', $this->shop_country );
 			
 			// Actions
-        	add_action( 'wp_enqueue_scripts', array(&$this, 'klarna_load_scripts'), 5 );
+        	add_action( 'wp_enqueue_scripts', array( $this, 'klarna_load_scripts'), 5 );
         	
 	    }
 	    
@@ -122,8 +122,10 @@ function init_klarna_gateway() {
 			
 			// Invoice terms popup
 			if ( is_checkout() ) {
-				wp_register_script( 'klarna-invoice-js', 'https://static.klarna.com:444/external/js/klarnainvoice.js', array('jquery'), '1.0', false );
-				wp_enqueue_script( 'klarna-invoice-js' );
+				wp_register_script( 'klarna-base-js', 'https://cdn.klarna.com/public/kitt/core/v1.0/js/klarna.min.js', array('jquery'), '1.0', false );
+				wp_register_script( 'klarna-terms-js', 'https://cdn.klarna.com/public/kitt/toc/v1.1/js/klarna.terms.min.js', array('klarna-base-js'), '1.0', false );
+				wp_enqueue_script( 'klarna-base-js' );
+				wp_enqueue_script( 'klarna-terms-js' );
 			}
 			
 			// Account terms popup
@@ -220,13 +222,16 @@ function init_klarna_gateway() {
  * Add the gateway to WooCommerce
  **/
 function add_klarna_gateway( $methods ) {
+	$available_countries = '';
 	
 	$methods[] = 'WC_Gateway_Klarna_Invoice';
 	$methods[] = 'WC_Gateway_Klarna_Account';
 	$methods[] = 'WC_Gateway_Klarna_Campaign';
 	
-	// Only add the Klarna Checkout method if Sweden, Norway or Finland is set as the base country
+	
 	$klarna_shop_country = get_option('woocommerce_default_country');
+	
+	// Only add the Klarna Checkout method if Sweden, Norway or Finland is set as the base country
 	$available_countries = array('SE', 'NO', 'FI');
 	if ( in_array( $klarna_shop_country, $available_countries ) ) {
 		$methods[] = 'WC_Gateway_Klarna_Checkout';
