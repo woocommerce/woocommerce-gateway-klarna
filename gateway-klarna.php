@@ -63,7 +63,7 @@ function init_klarna_gateway() {
 		public function __construct() { 
 			global $woocommerce;
 			
-			$this->shop_country	= get_option('woocommerce_default_country');
+			$this->shop_country		= get_option('woocommerce_default_country');
 			
 			// Check if woocommerce_default_country includes state as well. If it does, remove state
         	if (strstr($this->shop_country, ':')) :
@@ -72,9 +72,14 @@ function init_klarna_gateway() {
         		$this->shop_country = $this->shop_country;
         	endif;
         	
+        	// Get current customers selected language if this is a multi lanuage site
+			$iso_code 				= explode('_', get_locale());
+			$this->shop_language 	= $iso_code[1];      // Country ISO code (SE)
+   
         	// If WPML is used, set the customer selected language as the shop_country
         	// This will be updated to support WPML's separated language and currency feature
         	// This is done in the Klarna checkout file but will be added for the other payment methods in short.
+        	/*
         	if ( class_exists( 'woocommerce_wpml' ) && defined('ICL_LANGUAGE_CODE') )
 				$this->shop_country	= strtoupper(ICL_LANGUAGE_CODE);
 				
@@ -104,7 +109,7 @@ function init_klarna_gateway() {
 
 				$this->shop_country	= $klarna_country;
 			}
-				
+			*/
 			// Apply filters to shop_country
 			$this->shop_country 		= apply_filters( 'klarna_shop_country', $this->shop_country );
 			
@@ -156,19 +161,19 @@ function init_klarna_gateway() {
 	
 	
 	// Include our Klarna Invoice class
-	require_once 'class-klarna-invoice.php';
+	require_once 'classes/class-klarna-invoice.php';
 	
 	// Include our Klarna Account class
-	require_once 'class-klarna-account.php';
+	require_once 'classes/class-klarna-account.php';
 	
 	// Include our Klarna Special campaign class
-	require_once 'class-klarna-campaign.php';
+	require_once 'classes/class-klarna-campaign.php';
 	
 	// Include our Klarna Checkout class - if Sweden, Norway or Finland is set as the base country
 	$klarna_shop_country = get_option('woocommerce_default_country');
-	$available_countries = array('SE', 'NO', 'FI');
+	$available_countries = array('SE', 'NO', 'FI', 'DE');
 	if ( in_array( $klarna_shop_country, $available_countries ) ) {
-		require_once 'class-klarna-checkout.php';
+		require_once 'classes/class-klarna-checkout.php';
 	}
 	
 	
