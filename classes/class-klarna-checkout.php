@@ -746,7 +746,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		        	
 		        	do_action( 'klarna_before_kco_checkout', $order_id );
 		        	
-		        	echo '<div>' . $snippet . '</div>';
+		        	echo '<div>' . apply_filters( 'klarna_kco_checkout', $snippet ) . '</div>';
 		        	
 		        	do_action( 'klarna_after_kco_checkout', $order_id );
 		        	
