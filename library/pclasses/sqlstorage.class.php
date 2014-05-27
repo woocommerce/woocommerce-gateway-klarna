@@ -9,7 +9,7 @@
  * @author    MS Dev <ms.modules@klarna.com>
  * @copyright 2012 Klarna AB (http://klarna.com)
  * @license   http://opensource.org/licenses/BSD-2-Clause BSD-2
- * @link      http://integration.klarna.com/
+ * @link      https://developers.klarna.com/
  */
 
 /**
@@ -51,7 +51,7 @@ require_once 'storage.intf.php';
  * @author    MS Dev <ms.modules@klarna.com>
  * @copyright 2012 Klarna AB (http://klarna.com)
  * @license   http://opensource.org/licenses/BSD-2-Clause BSD-2
- * @link      http://integration.klarna.com/
+ * @link      https://developers.klarna.com/
  */
 class SQLStorage extends PCStorage
 {
@@ -227,12 +227,15 @@ class SQLStorage extends PCStorage
     }
 
     /**
-     * Grabs the PDO connection to the database, specified by the URI.
+     * Connects to the DB.
      *
-     * @param string $uri pclass uri
+     * @param string|array $uri pclass uri
+     *
+     * @throws Klarna_DatabaseException If connection could not be established.
+     *
+     * @deprecated Use the connect method instead.
      *
      * @return void
-     * @throws KlarnaException
      */
     protected function getConnection($uri)
     {
@@ -251,20 +254,46 @@ class SQLStorage extends PCStorage
     }
 
     /**
-     * Initializes the DB, if the database or table is missing.
+     * Attempt to create the database and tables needed to store pclasses.
+     *
+     * @throws Klarna_DatabaseException If the table could not be created.
+     *
+     * @deprecated Use the create method instead
      *
      * @return void
-     * @throws KlarnaException
      */
     protected function initDB()
+    {
+        $this->create();
+    }
+
+    /**
+     * Connects to the DB.
+     *
+     * @param string|array $uri pclass uri
+     *
+     * @throws Klarna_DatabaseException If connection could not be established.
+     *
+     * @return void
+     */
+    public function connect($uri)
+    {
+        $this->getConnection($uri);
+    }
+
+    /**
+     * Attempt to create the database and tables needed to store pclasses.
+     *
+     * @throws Klarna_DatabaseException If the table could not be created.
+     *
+     * @return void
+     */
+    public function create()
     {
         try {
             $this->pdo->exec("CREATE DATABASE `{$this->dbName}`");
         } catch (PDOException $e) {
             //SQLite does not support this...
-            //throw new KlarnaException(
-            //  'Database non-existant, failed to create it!'
-            //);
         }
 
         $sql = <<<SQL
@@ -289,20 +318,6 @@ SQL;
                 'Table non-existant, failed to create it!'
             );
         }
-    }
-
-    /**
-     * Connects to the DB and checks if DB and table exists.
-     *
-     * @param string|array $uri pclass uri
-     *
-     * @throws KlarnaException
-     * @return void
-     */
-    protected function connect($uri)
-    {
-        $this->getConnection($uri);
-        $this->initDB();
     }
 
     /**

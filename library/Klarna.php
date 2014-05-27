@@ -9,7 +9,7 @@
  * @author    MS Dev <ms.modules@klarna.com>
  * @copyright 2012 Klarna AB (http://klarna.com)
  * @license   http://opensource.org/licenses/BSD-2-Clause BSD-2
- * @link      http://integration.klarna.com/
+ * @link      https://developers.klarna.com/
  */
 
 /**
@@ -20,7 +20,6 @@
  * In addition you need to decode HTML entities, if they exist.<br>
  *
  * For more information see our
- * {@link http://integration.klarna.com/en/api/step-by-step step by step} guide.
  *
  * Dependencies:
  *
@@ -35,7 +34,7 @@
  * @author    MS Dev <ms.modules@klarna.com>
  * @copyright 2012 Klarna AB (http://klarna.com)
  * @license   http://opensource.org/licenses/BSD-2-Clause BSD-2
- * @link      http://integration.klarna.com/
+ * @link      https://developers.klarna.com/
  */
 class Klarna
 {
@@ -44,7 +43,7 @@ class Klarna
      *
      * @var string
      */
-    protected $VERSION = 'php:api:2.4.0';
+    protected $VERSION = 'php:api:2.5.0';
 
     /**
      * Klarna protocol identifier.
@@ -1394,8 +1393,6 @@ class Klarna
      * @param int    $encoding {@link KlarnaEncoding PNO Encoding} constant.
      * @param int    $type     Specifies returned information.
      *
-     * @link http://integration.klarna.com/en/api/standard-integration/functions
-     *       /getaddresses
      * @throws KlarnaException
      * @return array   An array of {@link KlarnaAddr} objects.
      */
@@ -1617,9 +1614,6 @@ class Klarna
      * @param bool   $clear    Whether customer info should be cleared after
      *                         this call or not.
      *
-     * @link http://integration.klarna.com/en/api/standard-integration/functions/
-     *       addtransaction
-     *
      * @throws KlarnaException
      * @return array An array with invoice number and order status. [string, int]
      */
@@ -1761,8 +1755,6 @@ class Klarna
      *                       call.
      *
      * @see Klarna::setShipmentInfo()
-     * @link http://integration.klarna.com/en/api/standard-integration/functions
-     *       /activateinvoice
      *
      * @throws KlarnaException
      * @return string  An URL to the PDF invoice.
@@ -1905,9 +1897,6 @@ class Klarna
      * @param bool   $clear    Whether customer info should be cleared after
      *                         this call.
      *
-     * @link http://integration.klarna.com/en/api/advanced-integration
-     *       /functions/reserveamount
-     *
      * @throws KlarnaException
      * @return array An array with reservation number and order
      *               status. [string, int]
@@ -1958,7 +1947,7 @@ class Klarna
         } else {
             $billing = $this->assembleAddr($this->billing);
             $shipping = $this->assembleAddr($this->shipping);
-
+		
             if (strlen($shipping['country']) > 0
                 && ($shipping['country'] !== $this->_country)
             ) {
@@ -2005,7 +1994,7 @@ class Klarna
             $this->sid,
             $this->extraInfo
         );
-
+		
         self::printDebug('reserve_amount', $paramList);
 
         $result = $this->xmlrpc_call('reserve_amount', $paramList);
@@ -2029,8 +2018,6 @@ class Klarna
      *
      * @param string $rno Reservation number.
      *
-     * @link http://integration.klarna.com/en/api/advanced-integration/functions
-     *       /cancelreservation
      *
      * @throws KlarnaException
      * @return bool True, if the cancellation was successful.
@@ -2066,8 +2053,6 @@ class Klarna
      * @param int    $amount Amount including VAT.
      * @param int    $flags  Options which affect the behaviour.
      *
-     * @link http://integration.klarna.com/en/api/advanced-integration/functions
-     *       /changereservation
      *
      * @throws KlarnaException
      * @return bool    True, if the change was successful.
@@ -2149,8 +2134,11 @@ class Klarna
         }
         $digestArray[] = $this->_secret;
 
-        $digestSecret = $this->digest(implode(':', array_filter($digestArray)));
-
+        $digestSecret = $this->digest(
+            call_user_func_array(
+                array('self', 'colon'), $digestArray
+            )
+        );
 
         $shipping = array();
         $billing = array();
@@ -2302,7 +2290,11 @@ class Klarna
         }
 
         $digestArray[] = $this->_secret;
-        $digestSecret = self::digest(implode(':', array_filter($digestArray)));
+        $digestSecret = self::digest(
+            call_user_func_array(
+                array('self', 'colon'), $digestArray
+            )
+        );
 
         // Create the parameter list.
         $paramList = array(
@@ -2367,8 +2359,6 @@ class Klarna
      * @param bool   $clear    Whether customer info should be cleared after
      *                         this call.
      *
-     * @link http://integration.klarna.com/en/api/advanced-integration/functions
-     *       /activatereservation
      * @see Klarna::reserveAmount()
      *
      * @throws KlarnaException
@@ -2480,8 +2470,6 @@ class Klarna
      * @param int    $amount The amount to be subtracted from the reservation.
      * @param int    $flags  Options which affect the behaviour.
      *
-     * @link http://integration.klarna.com/en/api/advanced-integration/functions
-     *       /splitreservation
      *
      * @throws KlarnaException
      * @return string A new reservation number.
@@ -2526,8 +2514,6 @@ class Klarna
      * @param int $no      The number of OCR numbers to reserve.
      * @param int $country {@link KlarnaCountry} constant.
      *
-     * @link http://integration.klarna.com/en/api/advanced-integration/functions
-     *       /reserveocrnums
      *
      * @throws KlarnaException
      * @return array An array of OCR numbers.
@@ -2606,8 +2592,6 @@ class Klarna
      * @param string $pno      Social security number, Personal number, ...
      * @param int    $encoding {@link KlarnaEncoding PNO Encoding} constant.
      *
-     * @link http://integration.klarna.com/en/api/standard-integration/functions
-     *       /hasaccount
      *
      * @throws KlarnaException
      * @return bool    True, if customer has an account.
@@ -2646,9 +2630,6 @@ class Klarna
      *
      * @param int    $qty   Quantity of specified article.
      * @param string $artNo Article number.
-     *
-     * @link http://integration.klarna.com/en/api/invoice-handling-functions/
-     *       functions/mkartno
      *
      * @throws KlarnaException
      * @return void
@@ -2689,8 +2670,6 @@ class Klarna
      *
      * @see Klarna::addArtNo()
      * @see Klarna::activateInvoice()
-     * @link http://integration.klarna.com/en/api/standard-integration/functions
-     *       /activatepart
      *
      * @throws KlarnaException
      * @return array An array with invoice URL and invoice number.
@@ -2739,8 +2718,6 @@ class Klarna
      *
      * @param string $invNo Invoice number.
      *
-     * @link http://integration.klarna.com/en/api/other-functions/functions
-     *       /invoiceamount
      *
      * @throws KlarnaException
      * @return float The total amount.
@@ -2774,8 +2751,6 @@ class Klarna
      * @param string $invNo   Invoice number.
      * @param string $orderid Estores order number.
      *
-     * @link http://integration.klarna.com/en/api/other-functions/functions
-     *       /updateorderno
      *
      * @throws KlarnaException
      * @return string  Invoice number.
@@ -2814,9 +2789,6 @@ class Klarna
      *
      * @param string $invNo Invoice number.
      *
-     * @link http://integration.klarna.com/en/api/invoice-handling-functions
-     *       /functions/emailinvoice
-     *
      * @throws KlarnaException
      * @return string  Invoice number.
      */
@@ -2843,9 +2815,6 @@ class Klarna
      * Klarna (charges may apply).
      *
      * @param string $invNo Invoice number.
-     *
-     * @link http://integration.klarna.com/en/api/invoice-handling-functions
-     *       /functions/sendinvoice
      *
      * @throws KlarnaException
      * @return string  Invoice number.
@@ -2887,9 +2856,6 @@ class Klarna
      * @param string $description Optional custom text to present as discount
      *                            in the invoice.
      *
-     * @link http://integration.klarna.com/en/api/invoice-handling-functions
-     *       /functions/returnamount
-     *
      * @throws KlarnaException
      * @return string  Invoice number.
      */
@@ -2930,9 +2896,6 @@ class Klarna
      * @param string $invNo  Invoice number.
      * @param string $credNo Credit number.
      *
-     * @link http://integration.klarna.com/en/api/invoice-handling-functions
-     *       /functions/creditinvoice
-     *
      * @throws KlarnaException
      * @return string  Invoice number.
      */
@@ -2966,8 +2929,6 @@ class Klarna
      * @param string $credNo Credit number.
      *
      * @see  Klarna::addArtNo()
-     * @link http://integration.klarna.com/en/api/invoice-handling-functions
-     *       /functions/creditpart
      *
      * @throws KlarnaException
      * @return string  Invoice number.
@@ -3020,8 +2981,6 @@ class Klarna
      * @param string $artNo Article number.
      * @param int    $qty   Quantity of specified article.
      *
-     * @link http://integration.klarna.com/en/api/other-functions/functions
-     *       /updategoodsqty
      *
      * @throws KlarnaException
      * @return string  Invoice number.
@@ -3060,8 +3019,6 @@ class Klarna
      * @param int    $type      Charge type.
      * @param int    $newAmount The new amount for the charge.
      *
-     * @link http://integration.klarna.com/en/api/other-functions/functions
-     *       /updatechargeamount
      *
      * @throws KlarnaException
      * @return string  Invoice number.
@@ -3100,9 +3057,6 @@ class Klarna
      * purchase.
      *
      * @param string $invNo Invoice number.
-     *
-     * @link http://integration.klarna.com/en/api/other-functions/functions
-     *       /invoiceaddress
      *
      * @throws KlarnaException
      * @return KlarnaAddr
@@ -3149,8 +3103,6 @@ class Klarna
      *
      * @param string $invNo Invoice number.
      *
-     * @link http://integration.klarna.com/en/api/other-functions/functions
-     *       /invoicepartamount
      * @see  Klarna::addArtNo()
      *
      * @throws KlarnaException
@@ -3198,8 +3150,6 @@ class Klarna
      * @param string $id   Reservation number or invoice number.
      * @param int    $type 0 if $id is an invoice or reservation, 1 for order id
      *
-     * @link http://integration.klarna.com/en/api/other-functions/functions
-     *       /checkorderstatus
      *
      * @throws KlarnaException
      * @return string  The order status.
@@ -3912,7 +3862,13 @@ class Klarna
     public static function colon(/* variable parameters */)
     {
         $args = func_get_args();
-        return implode(':', array_filter($args));
+        return implode(
+            ':',
+            array_filter(
+                $args,
+                array('self', 'filterDigest')
+            )
+        );
     }
 
     /**
@@ -3924,6 +3880,18 @@ class Klarna
     {
         $args = func_get_args();
         return implode('|', $args);
+    }
+
+    /**
+     * Check if the value has a string length larger than 0
+     *
+     * @param mixed $value The value to check.
+     *
+     * @return boolean True if string length is larger than 0
+     */
+    public static function filterDigest($value)
+    {
+        return strlen(strval($value)) > 0;
     }
 
     /**
@@ -3985,7 +3953,7 @@ class Klarna
         return str_replace(
             array_keys(
                 self::$htmlentities
-            ), self::$htmlentities, htmlentities($str)
+            ), self::$htmlentities, htmlentities($str, ENT_COMPAT | ENT_HTML401, 'ISO-8859-1')
         );
     }
 

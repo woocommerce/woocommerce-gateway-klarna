@@ -9,7 +9,7 @@
  * @author    MS Dev <ms.modules@klarna.com>
  * @copyright 2012 Klarna AB (http://klarna.com)
  * @license   http://opensource.org/licenses/BSD-2-Clause BSD-2
- * @link      http://integration.klarna.com/
+ * @link      https://developers.klarna.com/
  */
 
 /**
@@ -38,7 +38,7 @@
  * @author    MS Dev <ms.modules@klarna.com>
  * @copyright 2012 Klarna AB (http://klarna.com)
  * @license   http://opensource.org/licenses/BSD-2-Clause BSD-2
- * @link      http://integration.klarna.com/
+ * @link      https://developers.klarna.com/
  */
 class KlarnaCalc
 {
@@ -111,7 +111,7 @@ class KlarnaCalc
      *
      * @return float
      */
-    private static function  _irr($pval, $payarray, $fromdayone)
+    private static function _irr($pval, $payarray, $fromdayone)
     {
         $low = 0.0;
         $high = 100.0;
@@ -169,7 +169,7 @@ class KlarnaCalc
      *
      * @return float Annual Percentage Rate, in %
      */
-    private static function  _irr2apr($irr)
+    private static function _irr2apr($irr)
     {
         return (100 * (pow(1 + $irr / (12 * 100.0), 12) - 1));
     }
@@ -618,9 +618,10 @@ class KlarnaCalc
         case "DK":
             return 89.0;
         case "DE":
-        case "NL":
         case "AT":
             return 6.95;
+        case "NL":
+            return 5.0;
         default:
             throw new KlarnaException("Invalid country {$country}");
         }

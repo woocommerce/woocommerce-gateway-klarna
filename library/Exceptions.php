@@ -9,7 +9,7 @@
  * @author    MS Dev <ms.modules@klarna.com>
  * @copyright 2012 Klarna AB (http://klarna.com)
  * @license   http://opensource.org/licenses/BSD-2-Clause BSD-2
- * @link      http://integration.klarna.com/
+ * @link      https://developers.klarna.com/
  */
 
 require_once 'Country.php';
@@ -23,7 +23,7 @@ require_once 'Country.php';
  * @author    MS Dev <ms.modules@klarna.com>
  * @copyright 2012 Klarna AB (http://klarna.com)
  * @license   http://opensource.org/licenses/BSD-2-Clause BSD-2
- * @link      http://integration.klarna.com/
+ * @link      https://developers.klarna.com/
  */
 class KlarnaException extends Exception
 {
@@ -46,7 +46,7 @@ class KlarnaException extends Exception
  * @author    MS Dev <ms.modules@klarna.com>
  * @copyright 2012 Klarna AB (http://klarna.com)
  * @license   http://opensource.org/licenses/BSD-2-Clause BSD-2
- * @link      http://integration.klarna.com/
+ * @link      https://developers.klarna.com/
  */
 class Klarna_InvalidConfigurationException extends KlarnaException
 {
@@ -69,7 +69,7 @@ class Klarna_InvalidConfigurationException extends KlarnaException
  * @author    MS Dev <ms.modules@klarna.com>
  * @copyright 2012 Klarna AB (http://klarna.com)
  * @license   http://opensource.org/licenses/BSD-2-Clause BSD-2
- * @link      http://integration.klarna.com/
+ * @link      https://developers.klarna.com/
  */
 class Klarna_IncompleteConfigurationException extends KlarnaException
 {
@@ -90,7 +90,7 @@ class Klarna_IncompleteConfigurationException extends KlarnaException
  * @author    MS Dev <ms.modules@klarna.com>
  * @copyright 2012 Klarna AB (http://klarna.com)
  * @license   http://opensource.org/licenses/BSD-2-Clause BSD-2
- * @link      http://integration.klarna.com/
+ * @link      https://developers.klarna.com/
  */
 class Klarna_InvalidKlarnaAddrException extends KlarnaException
 {
@@ -114,7 +114,7 @@ class Klarna_InvalidKlarnaAddrException extends KlarnaException
  * @author    MS Dev <ms.modules@klarna.com>
  * @copyright 2012 Klarna AB (http://klarna.com)
  * @license   http://opensource.org/licenses/BSD-2-Clause BSD-2
- * @link      http://integration.klarna.com/
+ * @link      https://developers.klarna.com/
  */
 class Klarna_MissingAddressException extends KlarnaException
 {
@@ -135,7 +135,7 @@ class Klarna_MissingAddressException extends KlarnaException
  * @author    MS Dev <ms.modules@klarna.com>
  * @copyright 2012 Klarna AB (http://klarna.com)
  * @license   http://opensource.org/licenses/BSD-2-Clause BSD-2
- * @link      http://integration.klarna.com/
+ * @link      https://developers.klarna.com/
  */
 class Klarna_ConfigFieldMissingException extends KlarnaException
 {
@@ -159,7 +159,7 @@ class Klarna_ConfigFieldMissingException extends KlarnaException
  * @author    MS Dev <ms.modules@klarna.com>
  * @copyright 2012 Klarna AB (http://klarna.com)
  * @license   http://opensource.org/licenses/BSD-2-Clause BSD-2
- * @link      http://integration.klarna.com/
+ * @link      https://developers.klarna.com/
  */
 class Klarna_UnknownEncodingException extends KlarnaException
 {
@@ -184,7 +184,7 @@ class Klarna_UnknownEncodingException extends KlarnaException
  * @author    MS Dev <ms.modules@klarna.com>
  * @copyright 2012 Klarna AB (http://klarna.com)
  * @license   http://opensource.org/licenses/BSD-2-Clause BSD-2
- * @link      http://integration.klarna.com/
+ * @link      https://developers.klarna.com/
  */
 class Klarna_UnknownAddressTypeException extends KlarnaException
 {
@@ -207,7 +207,7 @@ class Klarna_UnknownAddressTypeException extends KlarnaException
  * @author    MS Dev <ms.modules@klarna.com>
  * @copyright 2012 Klarna AB (http://klarna.com)
  * @license   http://opensource.org/licenses/BSD-2-Clause BSD-2
- * @link      http://integration.klarna.com/
+ * @link      https://developers.klarna.com/
  */
 class Klarna_MissingCountryException extends KlarnaException
 {
@@ -228,7 +228,7 @@ class Klarna_MissingCountryException extends KlarnaException
  * @author    MS Dev <ms.modules@klarna.com>
  * @copyright 2012 Klarna AB (http://klarna.com)
  * @license   http://opensource.org/licenses/BSD-2-Clause BSD-2
- * @link      http://integration.klarna.com/
+ * @link      https://developers.klarna.com/
  */
 class Klarna_UnknownCountryException extends KlarnaException
 {
@@ -251,7 +251,7 @@ class Klarna_UnknownCountryException extends KlarnaException
  * @author    MS Dev <ms.modules@klarna.com>
  * @copyright 2012 Klarna AB (http://klarna.com)
  * @license   http://opensource.org/licenses/BSD-2-Clause BSD-2
- * @link      http://integration.klarna.com/
+ * @link      https://developers.klarna.com/
  */
 class Klarna_UnknownLanguageException extends KlarnaException
 {
@@ -274,7 +274,7 @@ class Klarna_UnknownLanguageException extends KlarnaException
  * @author    MS Dev <ms.modules@klarna.com>
  * @copyright 2012 Klarna AB (http://klarna.com)
  * @license   http://opensource.org/licenses/BSD-2-Clause BSD-2
- * @link      http://integration.klarna.com/
+ * @link      https://developers.klarna.com/
  */
 class Klarna_UnknownCurrencyException extends KlarnaException
 {
@@ -297,7 +297,7 @@ class Klarna_UnknownCurrencyException extends KlarnaException
  * @author    MS Dev <ms.modules@klarna.com>
  * @copyright 2012 Klarna AB (http://klarna.com)
  * @license   http://opensource.org/licenses/BSD-2-Clause BSD-2
- * @link      http://integration.klarna.com/
+ * @link      https://developers.klarna.com/
  */
 class Klarna_ArgumentNotSetException extends KlarnaException
 {
@@ -320,7 +320,7 @@ class Klarna_ArgumentNotSetException extends KlarnaException
  * @author    MS Dev <ms.modules@klarna.com>
  * @copyright 2012 Klarna AB (http://klarna.com)
  * @license   http://opensource.org/licenses/BSD-2-Clause BSD-2
- * @link      http://integration.klarna.com/
+ * @link      https://developers.klarna.com/
  */
 class Klarna_CountryCurrencyMismatchException extends KlarnaException
 {
@@ -349,7 +349,7 @@ class Klarna_CountryCurrencyMismatchException extends KlarnaException
  * @author    MS Dev <ms.modules@klarna.com>
  * @copyright 2012 Klarna AB (http://klarna.com)
  * @license   http://opensource.org/licenses/BSD-2-Clause BSD-2
- * @link      http://integration.klarna.com/
+ * @link      https://developers.klarna.com/
  */
 class Klarna_CountryLanguageMismatchException extends KlarnaException
 {
@@ -378,7 +378,7 @@ class Klarna_CountryLanguageMismatchException extends KlarnaException
  * @author    MS Dev <ms.modules@klarna.com>
  * @copyright 2012 Klarna AB (http://klarna.com)
  * @license   http://opensource.org/licenses/BSD-2-Clause BSD-2
- * @link      http://integration.klarna.com/
+ * @link      https://developers.klarna.com/
  */
 class Klarna_ShippingCountryException extends KlarnaException
 {
@@ -401,7 +401,7 @@ class Klarna_ShippingCountryException extends KlarnaException
  * @author    MS Dev <ms.modules@klarna.com>
  * @copyright 2012 Klarna AB (http://klarna.com)
  * @license   http://opensource.org/licenses/BSD-2-Clause BSD-2
- * @link      http://integration.klarna.com/
+ * @link      https://developers.klarna.com/
  */
 class Klarna_MissingGoodslistException extends KlarnaException
 {
@@ -422,7 +422,7 @@ class Klarna_MissingGoodslistException extends KlarnaException
  * @author    MS Dev <ms.modules@klarna.com>
  * @copyright 2012 Klarna AB (http://klarna.com)
  * @license   http://opensource.org/licenses/BSD-2-Clause BSD-2
- * @link      http://integration.klarna.com/
+ * @link      https://developers.klarna.com/
  */
 class Klarna_InvalidPriceException extends KlarnaException
 {
@@ -449,7 +449,7 @@ class Klarna_InvalidPriceException extends KlarnaException
  * @author    MS Dev <ms.modules@klarna.com>
  * @copyright 2012 Klarna AB (http://klarna.com)
  * @license   http://opensource.org/licenses/BSD-2-Clause BSD-2
- * @link      http://integration.klarna.com/
+ * @link      https://developers.klarna.com/
  */
 class Klarna_PCStorageInvalidException extends KlarnaException
 {
@@ -476,7 +476,7 @@ class Klarna_PCStorageInvalidException extends KlarnaException
  * @author    MS Dev <ms.modules@klarna.com>
  * @copyright 2012 Klarna AB (http://klarna.com)
  * @license   http://opensource.org/licenses/BSD-2-Clause BSD-2
- * @link      http://integration.klarna.com/
+ * @link      https://developers.klarna.com/
  */
 class Klarna_InvalidTypeException extends KlarnaException
 {
@@ -503,7 +503,7 @@ class Klarna_InvalidTypeException extends KlarnaException
  * @author    MS Dev <ms.modules@klarna.com>
  * @copyright 2012 Klarna AB (http://klarna.com)
  * @license   http://opensource.org/licenses/BSD-2-Clause BSD-2
- * @link      http://integration.klarna.com/
+ * @link      https://developers.klarna.com/
  */
 class Klarna_InvalidPNOException extends KlarnaException
 {
@@ -525,7 +525,7 @@ class Klarna_InvalidPNOException extends KlarnaException
  * @author    MS Dev <ms.modules@klarna.com>
  * @copyright 2012 Klarna AB (http://klarna.com)
  * @license   http://opensource.org/licenses/BSD-2-Clause BSD-2
- * @link      http://integration.klarna.com/
+ * @link      https://developers.klarna.com/
  */
 class Klarna_InvalidEmailException extends KlarnaException
 {
@@ -546,7 +546,7 @@ class Klarna_InvalidEmailException extends KlarnaException
  * @author    MS Dev <ms.modules@klarna.com>
  * @copyright 2012 Klarna AB (http://klarna.com)
  * @license   http://opensource.org/licenses/BSD-2-Clause BSD-2
- * @link      http://integration.klarna.com/
+ * @link      https://developers.klarna.com/
  */
 class Klarna_UnsupportedMarketException extends KlarnaException
 {
@@ -574,7 +574,7 @@ class Klarna_UnsupportedMarketException extends KlarnaException
  * @author    MS Dev <ms.modules@klarna.com>
  * @copyright 2012 Klarna AB (http://klarna.com)
  * @license   http://opensource.org/licenses/BSD-2-Clause BSD-2
- * @link      http://integration.klarna.com/
+ * @link      https://developers.klarna.com/
  */
 class Klarna_InvalidLocaleException extends KlarnaException
 {
@@ -598,7 +598,7 @@ class Klarna_InvalidLocaleException extends KlarnaException
  * @author    MS Dev <ms.modules@klarna.com>
  * @copyright 2012 Klarna AB (http://klarna.com)
  * @license   http://opensource.org/licenses/BSD-2-Clause BSD-2
- * @link      http://integration.klarna.com/
+ * @link      https://developers.klarna.com/
  */
 class Klarna_AddressFieldMissingException extends KlarnaException
 {
@@ -621,7 +621,7 @@ class Klarna_AddressFieldMissingException extends KlarnaException
  * @author    MS Dev <ms.modules@klarna.com>
  * @copyright 2012 Klarna AB (http://klarna.com)
  * @license   http://opensource.org/licenses/BSD-2-Clause BSD-2
- * @link      http://integration.klarna.com/
+ * @link      https://developers.klarna.com/
  */
 class Klarna_FileNotWritableException extends KlarnaException
 {
@@ -644,7 +644,7 @@ class Klarna_FileNotWritableException extends KlarnaException
  * @author    MS Dev <ms.modules@klarna.com>
  * @copyright 2012 Klarna AB (http://klarna.com)
  * @license   http://opensource.org/licenses/BSD-2-Clause BSD-2
- * @link      http://integration.klarna.com/
+ * @link      https://developers.klarna.com/
  */
 class Klarna_FileNotReadableException extends KlarnaException
 {
@@ -667,7 +667,7 @@ class Klarna_FileNotReadableException extends KlarnaException
  * @author    MS Dev <ms.modules@klarna.com>
  * @copyright 2012 Klarna AB (http://klarna.com)
  * @license   http://opensource.org/licenses/BSD-2-Clause BSD-2
- * @link      http://integration.klarna.com/
+ * @link      https://developers.klarna.com/
  */
 class Klarna_FileNotFoundException extends KlarnaException
 {
@@ -690,7 +690,7 @@ class Klarna_FileNotFoundException extends KlarnaException
  * @author    MS Dev <ms.modules@klarna.com>
  * @copyright 2012 Klarna AB (http://klarna.com)
  * @license   http://opensource.org/licenses/BSD-2-Clause BSD-2
- * @link      http://integration.klarna.com/
+ * @link      https://developers.klarna.com/
  */
 
 class Klarna_DatabaseException extends KlarnaException
@@ -705,7 +705,7 @@ class Klarna_DatabaseException extends KlarnaException
  * @author    MS Dev <ms.modules@klarna.com>
  * @copyright 2012 Klarna AB (http://klarna.com)
  * @license   http://opensource.org/licenses/BSD-2-Clause BSD-2
- * @link      http://integration.klarna.com/
+ * @link      https://developers.klarna.com/
  */
 class Klarna_PClassException extends KlarnaException
 {
@@ -719,7 +719,7 @@ class Klarna_PClassException extends KlarnaException
  * @author    MS Dev <ms.modules@klarna.com>
  * @copyright 2012 Klarna AB (http://klarna.com)
  * @license   http://opensource.org/licenses/BSD-2-Clause BSD-2
- * @link      http://integration.klarna.com/
+ * @link      https://developers.klarna.com/
  */
 class Klarna_XMLParseException extends KlarnaException
 {

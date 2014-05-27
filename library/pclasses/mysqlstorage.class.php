@@ -9,7 +9,7 @@
  * @author    MS Dev <ms.modules@klarna.com>
  * @copyright 2012 Klarna AB (http://klarna.com)
  * @license   http://opensource.org/licenses/BSD-2-Clause BSD-2
- * @link      http://integration.klarna.com/
+ * @link      https://developers.klarna.com/
  */
 
 /**
@@ -51,7 +51,7 @@ require_once 'storage.intf.php';
  * @author    MS Dev <ms.modules@klarna.com>
  * @copyright 2012 Klarna AB (http://klarna.com)
  * @license   http://opensource.org/licenses/BSD-2-Clause BSD-2
- * @link      http://integration.klarna.com/
+ * @link      https://developers.klarna.com/
  */
 class MySQLStorage extends PCStorage
 {
@@ -109,12 +109,13 @@ class MySQLStorage extends PCStorage
     }
 
     /**
-     * Connects to the DB and checks if DB and table exists.
+     * Establish a connection to the DB
      *
-     * @throws KlarnaException
+     * @throws Klarna_DatabaseException If a connection could not be made
+     *
      * @return void
      */
-    protected function connect()
+    public function connect()
     {
         $this->link = mysql_connect($this->addr, $this->user, $this->passwd);
         if ($this->link === false) {
@@ -122,7 +123,17 @@ class MySQLStorage extends PCStorage
                 'Failed to connect to database! ('.mysql_error().')'
             );
         }
+    }
 
+    /**
+     * Initialize the DB by creating the necessary database tables.
+     *
+     * @throws Klarna_DatabaseException If tables could not be created
+     *
+     * @return void
+     */
+    public function create()
+    {
         if (!mysql_query(
             "CREATE DATABASE IF NOT EXISTS `{$this->dbName}`",
             $this->link
