@@ -787,7 +787,7 @@ class WC_Gateway_Klarna_Campaign extends WC_Gateway_Klarna {
 		// Split address into House number and House extension for NL & DE customers
 		if ( $this->shop_country == 'NL' || $this->shop_country == 'DE' ) :
 		
-			require_once('split-address.php');
+			require_once(KLARNA_DIR . 'split-address.php');
 			
 			$klarna_billing_address				= $order->billing_address_1;
 			$splitted_address 					= splitAddress($klarna_billing_address);

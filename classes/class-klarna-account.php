@@ -30,7 +30,7 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 		
 		// Load shortcodes. 
 		// This is used so that the merchant easily can modify the displayed monthly cost text (on single product and shop page) via the settings page.
-		require_once('shortcodes.php');
+		require_once( KLARNA_DIR . 'shortcodes.php');
 		
 		
 
@@ -981,7 +981,7 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 		// Split address into House number and House extension for NL & DE customers
 		if ( $this->shop_country == 'NL' || $this->shop_country == 'DE' ) :
 		
-			require_once('split-address.php');
+			require_once(KLARNA_DIR . 'split-address.php');
 			
 			$klarna_billing_address				= $order->billing_address_1;
 			$splitted_address 					= splitAddress($klarna_billing_address);
@@ -1256,6 +1256,9 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
     		} else {
 	    		$redirect_url = add_query_arg('key', $order->order_key, add_query_arg('order', $order_id, get_permalink(get_option('woocommerce_thanks_page_id'))));
     		}
+    		
+    		// Store the selected pclass in the order
+    		update_post_meta( $order_id, '_klarna_order_pclass', $klarna_pclass );
     		
     		// Retreive response
     		$invno = $result[0];

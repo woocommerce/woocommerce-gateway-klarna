@@ -403,7 +403,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			get_currentuserinfo();
 			
 			ob_start();
-			require_once 'src/Klarna/Checkout.php';
+			require_once(KLARNA_DIR . '/src/Klarna/Checkout.php');
 			ob_end_clean();
 			
 			if (isset($_GET['klarna_order'])) {
@@ -772,7 +772,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 				if ($this->debug=='yes') $this->log->add( 'klarna', 'Klarna order: ' . $_GET['klarna_order'] );
 				if ($this->debug=='yes') $this->log->add( 'klarna', 'GET: ' . json_encode($_GET) );
 				
-				require_once 'src/Klarna/Checkout.php';  
+				require_once(KLARNA_DIR . '/src/Klarna/Checkout.php');  
   
 				//@session_start();  
 				
@@ -923,10 +923,10 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			
 			if( WC_Klarna_Compatibility::is_wc_version_gte_2_1() ) {
 	    		// Version 2.1
-				require_once 'kco-create-order-2.1.php';
+				require_once(KLARNA_DIR . 'kco-create-order-2.1.php');
 			} else {
 	    		// Version 2.0 or earlier
-	    		require_once 'kco-create-order-2.0.php';
+	    		require_once(KLARNA_DIR . 'kco-create-order-2.0.php');
 			}
 		
 			return $order_id;
