@@ -112,91 +112,14 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 		endif;
 		
 		
-		// Country and language
-		switch ( $this->shop_country )
-		{
-		case 'DK':
-			$klarna_country = 'DK';
-			$klarna_language = 'DA';
-			$klarna_currency = 'DKK';
-			//$klarna_invoice_terms = 'https://online.klarna.com/villkor_dk.yaws?eid=' . $this->eid . '&charge=' . $this->invoice_fee_price;
-			//$klarna_invoice_icon = plugins_url(basename(dirname(__FILE__))."/images/klarna_invoice_dk.png");
-			//$klarna_invoice_icon = 'https://cdn.klarna.com/public/images/DK/badges/v1/invoice/DK_invoice_badge_std_blue.png?width=60&eid=' . $this->get_eid();
-			break;
-		case 'DE' :
-			$klarna_country = 'DE';
-			$klarna_language = 'DE';
-			$klarna_currency = 'EUR';
-			//$klarna_invoice_terms = 'https://online.klarna.com/villkor_de.yaws?eid=' . $this->eid . '&charge=' . $this->invoice_fee_price;
-			//$klarna_invoice_icon = plugins_url(basename(dirname(__FILE__))."/images/klarna_invoice_de.png");
-			//$klarna_invoice_icon = 'https://cdn.klarna.com/public/images/DE/badges/v1/invoice/DE_invoice_badge_std_blue.png?width=60&eid=' . $this->get_eid();
-			break;
-		case 'NL' :
-			$klarna_country = 'NL';
-			$klarna_language = 'NL';
-			$klarna_currency = 'EUR';
-			//$klarna_invoice_terms = 'https://online.klarna.com/villkor_nl.yaws?eid=' . $this->eid . '&charge=' . $this->invoice_fee_price;
-			//$klarna_invoice_icon = plugins_url(basename(dirname(__FILE__))."/images/klarna_invoice_nl.png");
-			//$klarna_invoice_icon = 'https://cdn.klarna.com/public/images/NL/badges/v1/invoice/NL_invoice_badge_std_blue.png?width=60&eid=' . $this->get_eid();
-			break;
-		case 'NO' :
-		case 'NB' :
-			$klarna_country = 'NO';
-			$klarna_language = 'NB';
-			$klarna_currency = 'NOK';
-			//$klarna_invoice_terms = 'https://online.klarna.com/villkor_no.yaws?eid=' . $this->eid . '&charge=' . $this->invoice_fee_price;
-			//$klarna_invoice_icon = plugins_url(basename(dirname(__FILE__))."/images/klarna_invoice_no.png");
-			//$klarna_invoice_icon = 'https://cdn.klarna.com/public/images/NO/badges/v1/invoice/NO_invoice_badge_std_blue.png?width=60&eid=' . $this->get_eid();
-			break;
-		case 'FI' :
-			$klarna_country = 'FI';
-			$klarna_language = 'FI';
-			$klarna_currency = 'EUR';
-			//$klarna_invoice_terms = 'https://online.klarna.com/villkor_fi.yaws?eid=' . $this->eid . '&charge=' . $this->invoice_fee_price;
-			//$klarna_invoice_icon = plugins_url(basename(dirname(__FILE__))."/images/klarna_invoice_fi.png");
-			//$klarna_invoice_icon = 'https://cdn.klarna.com/public/images/FI/badges/v1/invoice/FI_invoice_badge_std_blue.png?width=60&eid=' . $this->get_eid();
-			break;
-		case 'SE' :
-		case 'SV' :
-			$klarna_country = 'SE';
-			$klarna_language = 'SV';
-			$klarna_currency = 'SEK';
-			//$klarna_invoice_terms = 'https://online.klarna.com/villkor.yaws?eid=' . $this->eid . '&charge=' . $this->invoice_fee_price;
-			//$klarna_invoice_icon = plugins_url(basename(dirname(__FILE__))."/images/klarna_invoice_se.png");
-			//$klarna_invoice_icon = 'https://cdn.klarna.com/public/images/SE/badges/v1/invoice/SE_invoice_badge_std_blue.png?width=60&eid=' . $this->get_eid();
-			break;
-		case 'AT' :
-			$klarna_country = 'AT';
-			$klarna_language = 'DE';
-			$klarna_currency = 'EUR';
-			//$klarna_invoice_icon = 'https://cdn.klarna.com/public/images/AT/badges/v1/invoice/AT_invoice_badge_std_blue.png?width=60&eid=' . $this->get_eid();
-			break;
-		default:
-			$klarna_country = '';
-			$klarna_language = '';
-			$klarna_currency = '';
-			//$klarna_invoice_terms = '';
-			$klarna_invoice_icon = '';
-		}
 		
-		// Apply filters to Country and language
-		$this->klarna_country 		= apply_filters( 'klarna_country', $klarna_country );
-		$this->klarna_language 		= apply_filters( 'klarna_language', $klarna_language );
-		//$this->klarna_currency 		= apply_filters( 'klarna_currency', $klarna_currency );
-		//$this->klarna_invoice_terms = apply_filters( 'klarna_invoice_terms', $klarna_invoice_terms );
+		// Apply filters
 		$this->icon 				= apply_filters( 'klarna_invoice_icon', $this->get_invoice_icon() );
 		$this->description			= apply_filters( 'klarna_invoice_description', $this->description );
 		
 		
 		// Actions
-
-		/* 1.6.6 */
-		add_action( 'woocommerce_update_options_payment_gateways', array( $this, 'process_admin_options' ) );
- 
-		/* 2.0.0 */
 		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
-		
-		
 		
 		add_action('woocommerce_receipt_klarna', array( $this, 'receipt_page' ));
 		
@@ -1108,23 +1031,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 	}
 	
 	
-	/**
-	 * Javascript for Invoice terms popup on checkout page
-	 **/
-	function klarna_invoice_terms_js() {
-		if ( is_checkout() && $this->enabled=="yes" ) {
-			?>
-			<script type="text/javascript">
-				var klarna_invoice_eid = "<?php echo $this->get_eid(); ?>";
-				var klarna_invoice_country = "<?php echo strtolower($this->klarna_country); ?>";
-				var klarna_invoice_fee_price = "<?php echo $this->invoice_fee_price; ?>";
-				addKlarnaInvoiceEvent(function(){InitKlarnaInvoiceElements('klarna_invoice', klarna_invoice_eid, klarna_invoice_country, klarna_invoice_fee_price); });
-			</script>
-			<?php
-		}
-	} // End function
-	
-	
+
 	
 	/**
 	 * print_invoice_fee_updater()
