@@ -375,60 +375,10 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 		global $woocommerce;
 		
 		if ($this->enabled=="yes") :
-		/*
-			// PClass check
-			
-			// Check if the pclasses.json file exist
-		    $klarna_filename = KLARNA_DIR . 'srv/pclasses.json';
-
-			if (file_exists($klarna_filename)) {
-		  	
-		  		require_once(KLARNA_LIB . 'Klarna.php');
-				require_once(KLARNA_LIB . 'pclasses/storage.intf.php');
-				require_once(KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc.inc');
-				require_once(KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc_wrappers.inc');
-				
-				// Test mode or Live mode		
-				if ( $this->testmode == 'yes' ):
-					// Disable SSL if in testmode
-					$klarna_ssl = 'false';
-					$klarna_mode = Klarna::BETA;
-				else :
-					// Set SSL if used in webshop
-					if (is_ssl()) {
-						$klarna_ssl = 'true';
-					} else {
-						$klarna_ssl = 'false';
-					}
-					$klarna_mode = Klarna::LIVE;
-				endif;
-		   		
-	  			$k = new Klarna();
-				
-				$k->config(
-				    $this->get_eid(), 														// EID
-				    $this->get_secret(), 													// Secret
-				    $this->get_klarna_country(), 											// Country
-				    $this->get_klarna_language($this->get_klarna_country()), 				// Language
-				    $this->selected_currency, 												// Currency
-				    $klarna_mode, 															// Live or test
-				    $pcStorage = 'json', 														// PClass storage
-				    $pcURI = KLARNA_DIR . 'pclasses.php?country=' . $this->get_klarna_country()	// PClass storage URI path
-				);
 		
-				
-				if (!$k->getPClasses()) {
-				
-					// No PClasses available for Klarna Account
-					return false;
-				}
-				
-			} else {
-				
-				// pclasses.json does not exist
-				return false;
-				
-			} // End file_exists
+			// PClass check
+			$pclasses = $this->fetch_pclasses( $this->get_klarna_country() );
+			if( empty( $pclasses ) ) return false;
 			
 			// Required fields check
 			if (!$this->get_eid() || !$this->get_secret()) return false;
@@ -453,82 +403,13 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 				if( $this->get_currency_for_country($woocommerce->customer->get_country()) !== $this->selected_currency ) return false;
 			
 			} // End Checkout form check
-			*/
+			
 			return true;
 					
 		endif;	
 	
 		return false;
 	}
-	
-
-		/**
- 		* Retrieve the PClasses from Klarna and store it in a transient
- 		*/
- 		function fetch_pclasses( $country ) {
- 			
- 			global $woocommerce;
-
- 			// Get PClasses so that the customer can chose between different payment plans.
-	  		require_once(KLARNA_LIB . 'Klarna.php');
-			require_once(KLARNA_LIB . 'pclasses/storage.intf.php');
-			require_once(KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc.inc');
-			require_once(KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc_wrappers.inc');
-			
-			// Test mode or Live mode		
-			if ( $this->testmode == 'yes' ):
-				// Disable SSL if in testmode
-				$klarna_ssl = 'false';
-				$klarna_mode = Klarna::BETA;
-			else :
-				// Set SSL if used in webshop
-				if (is_ssl()) {
-					$klarna_ssl = 'true';
-				} else {
-					$klarna_ssl = 'false';
-				}
-				$klarna_mode = Klarna::LIVE;
-			endif;
-	   		
-  			$k = new Klarna();
-			
-			$k->config(
-			    $this->get_eid(), 														// EID
-			    $this->get_secret(), 													// Secret
-			    $country, 											// Country
-			    $this->get_klarna_language($country), 				// Language
-			    $this->selected_currency, 												// Currency
-			    $klarna_mode, 															// Live or test
-			    $pcStorage = 'jsondb', 														// PClass storage
-			    $pcURI = 'klarna_pclasses'	// PClass storage URI path
-			);
-			
-			if( $k->getPClasses() ) {
-			
-				return $k->getPClasses();
-			
-			} else {
-					
-				try {
-				    $k->fetchPClasses($country); //You can specify country (and language, currency if you wish) if you don't want to use the configured country.
-				    /* PClasses successfully fetched, now you can use getPClasses() to load them locally or getPClass to load a specific PClass locally. */
-					// Redirect to settings page
-					//wp_redirect(WC_Klarna_Compatibility::get_payment_gateway_configuration_url('WC_Gateway_Klarna_Account&klarna_error_status=0'));
-					return $k->getPClasses();
-				}
-				catch(Exception $e) {
-				    //Something went wrong, print the message: 
-				    //$redirect_url = 'WC_Gateway_Klarna_Account&klarna_error_status=1&klarna_error_code=' . $e->getCode();
-					    
-				   //wp_redirect(admin_url($redirect_url));
-				   //wp_redirect(WC_Klarna_Compatibility::get_payment_gateway_configuration_url($redirect_url));
-				    return false;
-				}
-				
-				//return file_get_contents($klarna_pclass_file);
-			} // End if $k->getPClasses
-		} // End function
-
 	
 	
 	
@@ -1333,6 +1214,75 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 		
 	}
 	
+	
+	
+		/**
+		 * Retrieve the PClasses from Klarna and store it in a transient
+		 */
+		function fetch_pclasses( $country ) {
+			
+			global $woocommerce;
+
+			// Get PClasses so that the customer can chose between different payment plans.
+  		require_once(KLARNA_LIB . 'Klarna.php');
+		require_once(KLARNA_LIB . 'pclasses/storage.intf.php');
+		require_once(KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc.inc');
+		require_once(KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc_wrappers.inc');
+		
+		// Test mode or Live mode		
+		if ( $this->testmode == 'yes' ):
+			// Disable SSL if in testmode
+			$klarna_ssl = 'false';
+			$klarna_mode = Klarna::BETA;
+		else :
+			// Set SSL if used in webshop
+			if (is_ssl()) {
+				$klarna_ssl = 'true';
+			} else {
+				$klarna_ssl = 'false';
+			}
+			$klarna_mode = Klarna::LIVE;
+		endif;
+   		
+			$k = new Klarna();
+		
+		$k->config(
+		    $this->get_eid(), 														// EID
+		    $this->get_secret(), 													// Secret
+		    $country, 											// Country
+		    $this->get_klarna_language($country), 				// Language
+		    $this->selected_currency, 												// Currency
+		    $klarna_mode, 															// Live or test
+		    $pcStorage = 'jsondb', 														// PClass storage
+		    $pcURI = 'klarna_pclasses'	// PClass storage URI path
+		);
+		
+		if( $k->getPClasses() ) {
+		
+			return $k->getPClasses();
+		
+		} else {
+				
+			try {
+			    $k->fetchPClasses($country); //You can specify country (and language, currency if you wish) if you don't want to use the configured country.
+			    /* PClasses successfully fetched, now you can use getPClasses() to load them locally or getPClass to load a specific PClass locally. */
+				// Redirect to settings page
+				//wp_redirect(WC_Klarna_Compatibility::get_payment_gateway_configuration_url('WC_Gateway_Klarna_Account&klarna_error_status=0'));
+				return $k->getPClasses();
+			}
+			catch(Exception $e) {
+			    //Something went wrong, print the message: 
+			    //$redirect_url = 'WC_Gateway_Klarna_Account&klarna_error_status=1&klarna_error_code=' . $e->getCode();
+				    
+			   //wp_redirect(admin_url($redirect_url));
+			   //wp_redirect(WC_Klarna_Compatibility::get_payment_gateway_configuration_url($redirect_url));
+			    return false;
+			}
+			
+		} // End if $k->getPClasses
+	} // End function
+
+
 	/**
 	 * Calc monthly cost on single Product page and print it out
 	 **/
