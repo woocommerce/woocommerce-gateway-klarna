@@ -78,7 +78,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 		//if ( $this->handlingfee_tax == "") $this->handlingfee_tax = 0;
 		if ( $this->invoice_fee_id == "") $this->invoice_fee_id = 0;
 		
-		if ( $this->invoice_fee_id > 0 ) :
+		if ( $this->invoice_fee_id > 0 ) {
 			
 			// Version check - 1.6.6 or 2.0
 			if ( function_exists( 'get_product' ) ) {
@@ -87,7 +87,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 				$product = new WC_Product( $this->invoice_fee_id );
 			}
 		
-			if ( $product ) :
+			if ( $product ) {
 			
 				// We manually calculate the tax percentage here
 				$this->invoice_fee_tax_percentage = number_format( (( $product->get_price() / $product->get_price_excluding_tax() )-1)*100, 2, '.', '');
@@ -97,19 +97,19 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 				$this->invoice_fee_price 	= apply_filters( 'klarna_invoice_fee_price_including_tax', $klarna_invoice_fee_price_including_tax );
 				$this->invoice_fee_name 	= $product->get_title();
 				
-			else :
+			} else {
 			
 				$this->invoice_fee_price 	= 0;
 				$this->invoice_fee_name 	= '';
 							
-			endif;
+			}
 		
-		else :
+		} else {
 		
-		$this->invoice_fee_price	= 0;
-		$this->invoice_fee_name 	= '';
+			$this->invoice_fee_price	= 0;
+			$this->invoice_fee_name 	= '';
 		
-		endif;
+		}
 		
 		
 		
@@ -347,7 +347,6 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 	
 		return false;
 	}
-	
 	
 	
 	
@@ -963,6 +962,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
     		// Retreive response
     		$invno = $result[0];
     		switch($result[1]) {
+            
             case '1':
                 $order->add_order_note( __('Klarna payment completed. Klarna reservation number: ', 'klarna') . $invno );
                 update_post_meta( $order_id, 'klarna_order_reservation', $invno );
@@ -980,6 +980,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 				);
 						
                 break;
+           
             case '2':
                 $order->add_order_note( __('Order is PENDING APPROVAL by Klarna. Please visit Klarna Online for the latest status on this order. Klarna reservarion number: ', 'klarna') . $invno );
                 
@@ -996,12 +997,14 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 				);
 				
                 break;
+            
             case KlarnaFlags::DENIED:
                 //Order is denied, store it in a database.
 				$order->add_order_note( __('Klarna payment denied.', 'klarna') );
 				WC_Klarna_Compatibility::wc_add_notice(__('Klarna payment denied.', 'klarna'), 'error');
                 return;
                 break;
+            
             default:
             	//Unknown response, store it in a database.
 				$order->add_order_note( __('Unknown response from Klarna.', 'klarna') );
