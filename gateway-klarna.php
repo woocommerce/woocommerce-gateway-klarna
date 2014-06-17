@@ -110,11 +110,43 @@ function init_klarna_gateway() {
 				$this->shop_country	= $klarna_country;
 			}
 			*/
+			
+			
+			// Currency
+			$this->selected_currency	= '';
+			$wpml_currency				= '';
+			
+			if ( class_exists( 'WCML_Multi_Currency_Support' ) ) {
+				
+				// If currency is set by WPML
+				$wpml_currency = WCML_Multi_Currency_Support::get_client_currency();
+				
+				if ( !empty($wpml_currency) ) {
+					$this->selected_currency = WCML_Multi_Currency_Support::get_client_currency();
+				} else {
+					// WooCommerce selected currency
+					$this->selected_currency = get_option('woocommerce_currency');
+				}
+				
+			} elseif ( class_exists( 'WC_Aelia_CurrencySwitcher' ) && defined('AELIA_CS_USER_CURRENCY') ) {
+				
+				// If currency is set by WooCommerce Currency Switcher (http://dev.pathtoenlightenment.net/shop)
+				$plugin_instance = WC_Aelia_CurrencySwitcher::instance();
+				$this->selected_currency = strtoupper($plugin_instance->get_selected_currency());
+
+			} else {
+		
+				// WooCommerce selected currency
+				$this->selected_currency = get_option('woocommerce_currency');
+		
+			}
+			
+			
 			// Apply filters to shop_country
 			$this->shop_country 		= apply_filters( 'klarna_shop_country', $this->shop_country );
 			
 			// Actions
-        	add_action( 'wp_enqueue_scripts', array( $this, 'klarna_load_scripts'), 5 );
+        	add_action( 'wp_enqueue_scripts', array( $this, 'klarna_load_scripts') );
         	
 	    }
 	    
@@ -132,25 +164,12 @@ function init_klarna_gateway() {
 				wp_enqueue_script( 'klarna-base-js' );
 				wp_enqueue_script( 'klarna-terms-js' );
 			}
-			
-			// Account terms popup
-			if ( is_checkout() || is_product() || is_shop() || is_product_category() || is_product_tag() ) {	
-				// Original file: https://static.klarna.com:444/external/js/klarnapart.js
-				wp_register_script( 'klarna-part-js', plugins_url( '/js/klarnapart.js', __FILE__ ), array('jquery'), '1.0', false );
-				wp_enqueue_script( 'klarna-part-js' );
-			}
-			
-			// Special Campaign terms popup
-			if ( is_checkout() ) {
-				// Original file: https://static.klarna.com:444/external/js/klarnaspecial.js
-				wp_register_script( 'klarna-special-js', plugins_url( '/js/klarnaspecial.js', __FILE__ ), array('jquery'), '1.0', false );
-				wp_enqueue_script( 'klarna-special-js' );
-			}
 
-		}
+		} // End function
 		
 		
 		
+			
 	
 	
 	} // End class WC_Gateway_Klarna
@@ -168,6 +187,7 @@ function init_klarna_gateway() {
 	
 	// Include our Klarna Special campaign class
 	require_once 'classes/class-klarna-campaign.php';
+	
 	
 	// Include our Klarna Checkout class - if Sweden, Norway or Finland is set as the base country
 	$klarna_shop_country = get_option('woocommerce_default_country');
@@ -237,7 +257,7 @@ function add_klarna_gateway( $methods ) {
 	$klarna_shop_country = get_option('woocommerce_default_country');
 	
 	// Only add the Klarna Checkout method if Sweden, Norway or Finland is set as the base country
-	$available_countries = array('SE', 'NO', 'FI');
+	$available_countries = array('SE', 'NO', 'FI', 'DE');
 	if ( in_array( $klarna_shop_country, $available_countries ) ) {
 		$methods[] = 'WC_Gateway_Klarna_Checkout';
 	}

@@ -31,7 +31,7 @@ function return_klarna_account_info_link() {
 	//return '<a id="klarna_partpayment" onclick="ShowKlarnaPartPaymentPopup();return false;" href="#">' . __('Read more', 'klarna') . '</a>';
 	
 	ob_start();
-	echo '<a id="klarna_partpayment" onclick="ShowKlarnaPartPaymentPopup();return false;" href="#">' . WC_Gateway_Klarna_Account::get_account_terms_link_text($klarna_account_country) . '</a>';
+	echo '<a id="klarna_partpayment" onclick="ShowKlarnaPartPaymentPopup();return false;" href="#">' . /*WC_Gateway_Klarna_Account::get_account_terms_link_text($klarna_account_country) .*/ 'hh</a>';
 	echo '';
 	$output_string = ob_get_clean();
 	return $output_string;

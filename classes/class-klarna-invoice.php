@@ -292,7 +292,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
     	?>
     	<h3><?php _e('Klarna Invoice', 'klarna'); ?></h3>
 	    	
-	    	<p><?php printf(__('With Klarna your customers can pay by invoice. Klarna works by adding extra personal information fields and then sending the details to Klarna for verification. Documentation <a href="%s" target="_blank">can be found here</a>.', 'klarna'), 'http://wcdocs.woothemes.com/user-guide/extensions/klarna/' ); ?></p>
+	    	<p><?php printf(__('With Klarna your customers can pay by invoice. Klarna works by adding extra personal information fields and then sending the details to Klarna for verification. Documentation <a href="%s" target="_blank">can be found here</a>.', 'klarna'), 'http://docs.woothemes.com/document/klarna/' ); ?></p>
 	    	
 	    	
     	<table class="form-table">
@@ -316,8 +316,6 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 	
 			// Required fields check
 			if (!$this->get_eid() || !$this->get_secret()) return false;
-			
-			
 			
 			// Checkout form check
 			if (isset($woocommerce->cart->total)) {
@@ -641,7 +639,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 		// Get values from klarna form on checkout page
 		
 		// Collect the dob different depending on country
-		if ( $this->shop_country == 'NL' || $this->shop_country == 'DE' || $this->shop_country == 'AT' ) :
+		if ( $_POST['billing_country'] == 'NL' || $_POST['billing_country'] == 'DE' || $_POST['billing_country'] == 'AT' ) :
 			$klarna_pno_day 			= isset($_POST['klarna_invo_date_of_birth_day']) ? woocommerce_clean($_POST['klarna_invo_date_of_birth_day']) : '';
 			$klarna_pno_month 			= isset($_POST['klarna_invo_date_of_birth_month']) ? woocommerce_clean($_POST['klarna_invo_date_of_birth_month']) : '';
 			$klarna_pno_year 			= isset($_POST['klarna_invo_date_of_birth_year']) ? woocommerce_clean($_POST['klarna_invo_date_of_birth_year']) : '';
@@ -655,7 +653,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 		
 
 		// Split address into House number and House extension for NL & DE customers
-		if ( $this->shop_country == 'NL' || $this->shop_country == 'DE' || $this->shop_country == 'AT' ) :
+		if ( $_POST['billing_country'] == 'NL' || $_POST['billing_country'] == 'DE' || $_POST['billing_country'] == 'AT' ) :
 		
 			require_once(KLARNA_DIR . 'split-address.php');
 			
@@ -1064,6 +1062,11 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 		return $this->invoice_fee_id;
 	}
 	
+	// Helper function - get Invoice fee price
+	function get_klarna_invoice_fee_price() {
+		return $this->invoice_fee_price;
+	}
+	
 	// Helper function - get Shop Country
 	function get_klarna_shop_country() {
 		return $this->shop_country;
@@ -1396,7 +1399,7 @@ class WC_Gateway_Klarna_Invoice_Extra {
  		if ($_POST['payment_method'] == 'klarna') {
  			
  			// SE, NO, DK & FI
-	 		if ( $this->shop_country == 'SE' || $this->shop_country == 'NO' || $this->shop_country == 'DK' || $this->shop_country == 'FI' ){
+	 		if ( $_POST['billing_country'] == 'SE' || $_POST['billing_country'] == 'NO' || $_POST['billing_country'] == 'DK' || $_POST['billing_country'] == 'FI' ){
  			
     			// Check if set, if its not set add an error.
 				if (!$_POST['klarna_invo_pno'])
@@ -1404,7 +1407,7 @@ class WC_Gateway_Klarna_Invoice_Extra {
 
 			}
 			// NL & DE
-	 		if ( $this->shop_country == 'NL' || $this->shop_country == 'DE' ){
+	 		if ( $_POST['billing_country'] == 'NL' || $_POST['billing_country'] == 'DE' ){
 	    		// Check if set, if its not set add an error.
 	    		
 	    		// Gender
@@ -1456,7 +1459,7 @@ class WC_Gateway_Klarna_Invoice_Extra {
 			}
 			
 			// DE
-			if ( $this->shop_country == 'DE' && $this->de_consent_terms == 'yes'){
+			if ( $_POST['billing_country'] == 'DE' && $this->de_consent_terms == 'yes'){
 	    		// Check if set, if its not set add an error.
 	    		if (!isset($_POST['klarna_invo_de_consent_terms']))
 	        	 	WC_Klarna_Compatibility::wc_add_notice(__('You must accept the Klarna consent terms.', 'klarna'), 'error');

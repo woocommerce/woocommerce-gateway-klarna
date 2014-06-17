@@ -51,8 +51,7 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
        	$this->secret_de						= ( isset( $this->settings['secret_de'] ) ) ? $this->settings['secret_de'] : '';
        	$this->eid_nl							= ( isset( $this->settings['eid_nl'] ) ) ? $this->settings['eid_nl'] : '';
        	$this->secret_nl						= ( isset( $this->settings['secret_nl'] ) ) ? $this->settings['secret_nl'] : '';
-       	$this->eid_at							= ( isset( $this->settings['eid_at'] ) ) ? $this->settings['eid_at'] : '';
-       	$this->secret_at						= ( isset( $this->settings['secret_at'] ) ) ? $this->settings['secret_at'] : '';
+       	
        	
 		$this->lower_threshold					= ( isset( $this->settings['lower_threshold'] ) ) ? $this->settings['lower_threshold'] : '';
 		$this->upper_threshold					= ( isset( $this->settings['upper_threshold'] ) ) ? $this->settings['upper_threshold'] : '';
@@ -99,7 +98,9 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 		//$this->klarna_language 					= apply_filters( 'klarna_language', $klarna_language );
 		//$this->klarna_currency 					= apply_filters( 'klarna_currency', $klarna_currency );
 		$this->klarna_account_info 				= apply_filters( 'klarna_account_info', $klarna_account_info );
-		$this->icon 							= apply_filters( 'klarna_account_icon', $klarna_account_icon );
+		$this->icon 							= apply_filters( 'klarna_account_icon', $this->get_account_icon() );
+		
+		
 		$this->icon_basic						= apply_filters( 'klarna_basic_icon', $klarna_basic_icon );
 		$this->klarna_wb_img_checkout			= apply_filters( 'klarna_wb_img_checkout', $klarna_wb_img_checkout );
 		$this->klarna_wb_img_single_product		= apply_filters( 'klarna_wb_img_single_product', $klarna_wb_img_single_product );
@@ -112,19 +113,21 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 		/* 2.0.0 */
 		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
 
-		add_action('woocommerce_receipt_klarna_account', array(&$this, 'receipt_page'));
+		add_action('woocommerce_receipt_klarna_account', array( $this, 'receipt_page'));
 		
 		//add_action('admin_init', array(&$this, 'update_pclasses_from_klarna'));
 		
-		add_action('woocommerce_single_product_summary', array(&$this, 'print_product_monthly_cost'), $this->show_monthly_cost_prio);
+		add_action('woocommerce_single_product_summary', array( $this, 'print_product_monthly_cost'), $this->show_monthly_cost_prio);
 		
-		add_action('woocommerce_checkout_process', array(&$this, 'klarna_account_checkout_field_process'));
+		add_action('woocommerce_checkout_process', array( $this, 'klarna_account_checkout_field_process'));
 		
 		//add_action('wp_head', array(&$this, 'klarna_account_terms_js'));
+		add_action( 'wp_enqueue_scripts', array( $this, 'load_scripts') );
 		
 	}
 	
-		
+	
+	
 	/**
 	 * Initialise Gateway Settings Form Fields
 	 */
@@ -316,46 +319,9 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 
     	?>
     	<h3><?php _e('Klarna Account', 'klarna'); ?></h3>
-	    	<p><?php printf(__('With Klarna your customers can pay by invoice. Klarna works by adding extra personal information fields and then sending the details to Klarna for verification. Documentation <a href="%s" target="_blank">can be found here</a>.', 'klarna'), 'http://wcdocs.woothemes.com/user-guide/extensions/klarna/' ); ?></p>
+	    	<p><?php printf(__('With Klarna your customers can pay by invoice. Klarna works by adding extra personal information fields and then sending the details to Klarna for verification. Documentation <a href="%s" target="_blank">can be found here</a>.', 'klarna'), 'http://docs.woothemes.com/document/klarna/' ); ?></p>
 	    	
 		    
-		    <?php
-		    // Check if the pclasses.json file exist
-		    $klarna_filename = KLARNA_DIR . 'srv/pclasses.json';
-		    $klarna_filename_path = KLARNA_DIR . 'srv/';
-
-			if (file_exists($klarna_filename)) {
-    			echo '<p>';
-    			echo sprintf(__('The file pclasses.json does exist on your web server. You can update the file by clicking the button below or create the file manually and upload it to <i>%s</i>. Note that read and write permissions for the directory <i>srv</i> and the containing file <i>pclasses.json</i> must be set to 777 in order to fetch the available PClasses from Klarna. This does not apply if you manually upload your pclasses.json file via ftp.', 'klarna'),$klarna_filename_path);
-				echo '</p>';
-    			/*
-    			if (is_writable ( $klarna_filename )) {
-    				echo __("Writable.", 'klarna');
-    			} else {
-	    			echo __("NOT Writable.", 'klarna');
-    			}
-    			*/
-			} else {
-				
-				echo '<div class="error inline">';
-    			echo sprintf(__('The file pclasses.json does not exist on your web server. This is needed to store your Klarna PClasses. Either create and update the file by clicking the button below or manually upload a previous created file to <i>%s</i>. Note that read and write permissions for the directory <i>srv</i> and the containing file <i>pclasses.json</i> must be set to 777 in order to fetch the available PClasses from Klarna. This does not apply if you manually upload your pclasses.json file via ftp.', 'klarna'),$klarna_filename_path);
-    			echo '</div>';
-			}
-			
-			if (isset($_GET['klarna_error_status']) && $_GET['klarna_error_status'] == '0') {
-				// pclasses.json file saved sucessfully
-				echo '<div class="updated">The file pclasses.json was sucessfully updated.</div>';
-			}
-			
-			if (isset($_GET['klarna_error_status']) && $_GET['klarna_error_status'] == '1') {
-				// pclasses.json file could not be updated
-				echo '<div class="error">The file pclasses.json could not be updated. Klarna error code: ' . $_GET['klarna_error_code'] . '</div>';
-			}
-			?>
-			<p>
-		    <a class="button" href="<?php echo WC_Klarna_Compatibility::get_payment_gateway_configuration_url('WC_Gateway_Klarna_Account&klarna_pclass_listener=1');?>">Update the PClass file pclasses.json</a>
-		    
-		    </p>
     	<table class="form-table">
     	<?php
     		// Generate the HTML For the settings form.
@@ -365,6 +331,7 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 		
     	<?php
     } // End admin_options()
+	
 	
 	
 	/**
@@ -417,7 +384,7 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 	 * Payment form on checkout page
 	 */
 	
-	function payment_fields( ) {
+	function payment_fields() {
 	   	global $woocommerce;
 	   		   	
 	   	// Get PClasses so that the customer can chose between different payment plans.
@@ -444,14 +411,14 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
   		$k = new Klarna();
 		
 		$k->config(
-		    $this->get_eid(), 														// EID
-		    $this->get_secret(), 													// Secret
-		    $this->get_klarna_country(), 											// Country
-		    $this->get_klarna_language($this->get_klarna_country()), 				// Language
-		    $this->selected_currency, 												// Currency
-		    $klarna_mode, 															// Live or test
-		    $pcStorage = 'jsondb', 														// PClass storage
-		    $pcURI = 'klarna_pclasses'	// PClass storage URI path
+		    $this->get_eid(), 												// EID
+		    $this->get_secret(), 											// Secret
+		    $this->get_klarna_country(), 									// Country
+		    $this->get_klarna_language($this->get_klarna_country()), 		// Language
+		    $this->selected_currency, 										// Currency
+		    $klarna_mode, 													// Live or test
+		    $pcStorage = 'jsondb', 											// PClass storage
+		    $pcURI = 'klarna_pclasses_' . $this->get_klarna_country()		// PClass storage URI path
 		);
 		
 		
@@ -476,7 +443,7 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 		endif; 
 		
 		// Show klarna_warning_banner if NL
-		if ( $this->shop_country == 'NL' ) {
+		if ( $this->get_klarna_country() == 'NL' ) {
 			echo '<p><img src="' . $this->klarna_wb_img_checkout . '" class="klarna-wb" style="max-width: 100%;"/></p>';	
 		}
 		?>
@@ -489,6 +456,7 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 				// TODO Deactivate this gateway if the file pclasses.json doesn't exist
 				$pclasses = $this->fetch_pclasses( $this->get_klarna_country() );
 				if($pclasses) {
+				
 				?>
 					<label for="klarna_account_pclass"><?php echo __("Payment plan", 'klarna') ?> <span class="required">*</span></label><br/>
 					<select id="klarna_account_pclass" name="klarna_account_pclass" class="woocommerce-select">
@@ -521,18 +489,18 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 			   					if ($this->klarna_country == 'NO') {
 									if ( $pclass->getType() == 1 ) {
 										//If Account - Do not show startfee. This is always 0.
-										echo sprintf(__('%s - %s %s/month - %s%s', 'klarna'), $pclass->getDescription(), $monthly_cost, $this->klarna_currency, $pclass->getInterestRate(), '%');
+										echo sprintf(__('%s - %s %s/month - %s%s', 'klarna'), $pclass->getDescription(), $monthly_cost, $this->selected_currency, $pclass->getInterestRate(), '%');
 										} else {
 											// Norway - Show total cost
-											echo sprintf(__('%s - %s %s/month - %s%s - Start %s - Tot %s %s', 'klarna'), $pclass->getDescription(), $monthly_cost, $this->klarna_currency, $pclass->getInterestRate(), '%', $pclass->getStartFee(), $total_credit_purchase_cost, $this->klarna_currency );
+											echo sprintf(__('%s - %s %s/month - %s%s - Start %s - Tot %s %s', 'klarna'), $pclass->getDescription(), $monthly_cost, $this->selected_currency, $pclass->getInterestRate(), '%', $pclass->getStartFee(), $total_credit_purchase_cost, $this->klarna_currency );
 										}
 									} else {
 										if ( $pclass->getType() == 1 ) {
 											//If Account - Do not show startfee. This is always 0.
-											echo sprintf(__('%s - %s %s/month - %s%s', 'klarna'), $pclass->getDescription(), $monthly_cost, $this->klarna_currency, $pclass->getInterestRate(), '%');
+											echo sprintf(__('%s - %s %s/month - %s%s', 'klarna'), $pclass->getDescription(), $monthly_cost, $this->selected_currency, $pclass->getInterestRate(), '%');
 										} else {
 											// Sweden, Denmark, Finland, Germany & Netherlands - Don't show total cost
-											echo sprintf(__('%s - %s %s/month - %s%s - Start %s', 'klarna'), $pclass->getDescription(), $monthly_cost, $this->klarna_currency, $pclass->getInterestRate(), '%', $pclass->getStartFee() );
+											echo sprintf(__('%s - %s %s/month - %s%s - Start %s', 'klarna'), $pclass->getDescription(), $monthly_cost, $this->selected_currency, $pclass->getInterestRate(), '%', $pclass->getStartFee() );
 										}
 									}
 								echo '</option>';
@@ -579,7 +547,7 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 			<div class="clear"></div>
 			
 			<p class="form-row form-row-first">
-				<?php if ( $this->shop_country == 'NL' || $this->shop_country == 'DE' ) : ?>
+				<?php if ( $this->get_klarna_country() == 'NL' || $this->get_klarna_country() == 'DE' ) : ?>
 				
 				<label for="klarna_pno"><?php echo __("Date of Birth", 'klarna') ?> <span class="required">*</span></label>
                     <select class="dob_select dob_day" name="date_of_birth_day" style="width:60px;">
@@ -728,7 +696,7 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 				<?php endif; ?>
 			</p>
 			
-			<?php if ( $this->shop_country == 'NL' || $this->shop_country == 'DE' ) : ?>
+			<?php if ( $this->get_klarna_country() == 'NL' || $this->get_klarna_country() == 'DE' ) : ?>
 				<p class="form-row form-row-last">
 					<label for="klarna_account_gender"><?php echo __("Gender", 'klarna') ?> <span class="required">*</span></label>
 					<select id="klarna_account_gender" name="klarna_account_gender" class="woocommerce-select" style="width:120px;">
@@ -741,9 +709,72 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 						
 			<div class="clear"></div>
 		
-			<p><a id="klarna_partpayment" onclick="ShowKlarnaPartPaymentPopup();return false;" href="#"><?php echo $this->get_account_terms_link_text($this->klarna_country); ?></a></p>
+			<?php
+			// Mobile or desktop browser
+			if (wp_is_mobile() ) {
+				$klarna_layout = 'mobile';
+			 } else {
+			 	$klarna_layout = 'desktop';
+			 }
+			
+			// Script for displaying the terms link
+			?>
+			
+			<script type="text/javascript">
+			
+				// Document ready
+				jQuery(document).ready(function($) {
+					
+					
+					
+					var klarna_account_selected_country = $( "#billing_country" ).val();
+					
+					if( klarna_account_selected_country == 'SE' ) {
+					
+						var klarna_account_current_locale = 'sv_SE';
+					
+					} else if( klarna_account_selected_country == 'NO' ) {
+
+						var klarna_account_current_locale = 'nb_NO';
+					
+					} else if( klarna_account_selected_country == 'DK' ) {
+
+						var klarna_account_current_locale = 'da_DK';
+					
+					} else if( klarna_account_selected_country == 'FI' ) {
+
+						var klarna_account_current_locale = 'fi_FI';
+						
+					} else if( klarna_account_selected_country == 'DE' ) {
+
+						var klarna_account_current_locale = 'de_DE';
+					
+					}  else if( klarna_account_selected_country == 'NL' ) {
+
+						var klarna_account_current_locale = 'nl_NL';
+					
+					} else if( klarna_account_selected_country == 'AT' ) {
+
+						var klarna_account_current_locale = 'de_AT';
+					} else {
+						
+					}
+					
+					new Klarna.Terms.Account({
+					    el: 'klarna-account-terms',
+					    eid: '<?php echo $this->get_eid(); ?>',
+					    locale: klarna_account_current_locale,
+					    type: '<?php echo $klarna_layout;?>',
+					});
+					
+				});
+				
+			</script>
+			<span id="klarna-account-terms"></span>
+			
+			<div class="clear"></div>
 							
-			<?php if ( $this->shop_country == 'DE' && $this->de_consent_terms == 'yes' ) : ?>
+			<?php if ( $this->get_klarna_country() == 'DE' && $this->de_consent_terms == 'yes' ) : ?>
 				<p class="form-row">
 					<label for="klarna_de_terms"></label>
 					<input type="checkbox" class="input-checkbox" value="yes" name="klarna_de_consent_terms" />
@@ -769,7 +800,7 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
  		if ($_POST['payment_method'] == 'klarna_account') {
  		
  			// SE, NO, DK & FI
- 			if ( $this->shop_country == 'SE' || $this->shop_country == 'NO' || $this->shop_country == 'DK' || $this->shop_country == 'FI' ){
+ 			if ( $_POST['billing_country'] == 'SE' || $_POST['billing_country'] == 'NO' || $_POST['billing_country'] == 'DK' || $_POST['billing_country'] == 'FI' ){
  			
     			// Check if set, if its not set add an error.
     			if (!$_POST['klarna_pno'])
@@ -778,7 +809,7 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 			}
 			
 			// NL & DE
-	 		if ( $this->shop_country == 'NL' || $this->shop_country == 'DE' ){
+	 		if ( $_POST['billing_country'] == 'NL' || $_POST['billing_country'] == 'DE' ){
 	    		// Check if set, if its not set add an error.
 	    		
 	    		// Gender
@@ -843,6 +874,7 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 		global $woocommerce;
 		
 		$order = new WC_order( $order_id );
+		
 		require_once(KLARNA_LIB . 'Klarna.php');
 		require_once(KLARNA_LIB . 'pclasses/storage.intf.php');
 		require_once(KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc.inc');
@@ -851,7 +883,7 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 		// Get values from klarna form on checkout page
 		
 		// Collect the dob different depending on country
-		if ( $this->shop_country == 'NL' || $this->shop_country == 'DE' ) :
+		if ( $_POST['billing_country'] == 'NL' || $_POST['billing_country'] == 'DE' ) :
 			$klarna_pno_day 			= isset($_POST['date_of_birth_day']) ? woocommerce_clean($_POST['date_of_birth_day']) : '';
 			$klarna_pno_month 			= isset($_POST['date_of_birth_month']) ? woocommerce_clean($_POST['date_of_birth_month']) : '';
 			$klarna_pno_year 			= isset($_POST['date_of_birth_year']) ? woocommerce_clean($_POST['date_of_birth_year']) : '';
@@ -867,7 +899,7 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 		
 		
 		// Split address into House number and House extension for NL & DE customers
-		if ( $this->shop_country == 'NL' || $this->shop_country == 'DE' ) :
+		if ( $_POST['billing_country'] == 'NL' || $_POST['billing_country'] == 'DE' ) :
 		
 			require_once(KLARNA_DIR . 'split-address.php');
 			
@@ -919,14 +951,14 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 		$k = new Klarna();
 		
 		$k->config(
-		    $this->get_eid(), 														// EID
-		    $this->get_secret(), 													// Secret
-		    $this->get_klarna_country(), 											// Country
-		    $this->get_klarna_language($this->get_klarna_country()), 				// Language
-		    $this->selected_currency, 												// Currency
-		    $klarna_mode, 															// Live or test
-		    $pcStorage = 'jsondb', 														// PClass storage
-		    $pcURI = 'klarna_pclasses'	// PClass storage URI path
+		    $this->get_eid(), 												// EID
+		    $this->get_secret(), 											// Secret
+		    $this->get_klarna_country(), 									// Country
+		    $this->get_klarna_language($this->get_klarna_country()), 		// Language
+		    $this->selected_currency, 										// Currency
+		    $klarna_mode, 													// Live or test
+		    $pcStorage = 'jsondb', 											// PClass storage
+		    $pcURI = 'klarna_pclasses_' . $this->get_klarna_country()		// PClass storage URI path
 		);
 
 		
@@ -1254,7 +1286,7 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 		    $this->selected_currency, 												// Currency
 		    $klarna_mode, 															// Live or test
 		    $pcStorage = 'jsondb', 														// PClass storage
-		    $pcURI = 'klarna_pclasses'	// PClass storage URI path
+		    $pcURI = 'klarna_pclasses_' . $country		// PClass storage URI path
 		);
 		
 		if( $k->getPClasses() ) {
@@ -1291,104 +1323,47 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 		
 		if ( $this->enabled!="yes" ) return;
 			
-		//global $woocommerce, $product, $klarna_account_shortcode_currency, $klarna_account_shortcode_price, $klarna_account_shortcode_img, $klarna_account_shortcode_info_link;
 		global $woocommerce, $product, $klarna_account_shortcode_currency, $klarna_account_shortcode_price, $klarna_shortcode_img, $klarna_account_country;
 		
+		$klarna_product_total = $product->get_price();
 		
 		// Product with no price - do nothing
-		$klarna_product_total = $product->get_price();
 		if ( empty($klarna_product_total) ) return;
 		
-		$klarna_filename = KLARNA_DIR . 'srv/pclasses.json';
+		$sum = apply_filters( 'klarna_product_total', $klarna_product_total ); // Product price.
+		$sum = trim($sum);
 		
 	 	// Only execute this if the feature is activated in the gateway settings
-		if ( $this->show_monthly_cost == 'yes' && file_exists($klarna_filename) ) {
-	 		// Get the lib files and set up a new Klarna() instance.
-	  		require_once(KLARNA_LIB . 'Klarna.php');
-			require_once(KLARNA_LIB . 'pclasses/storage.intf.php');
-			require_once(KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc.inc');
-			require_once(KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc_wrappers.inc');
-			
-			// Test mode or Live mode		
-			if ( $this->testmode == 'yes' ):
-				// Disable SSL if in testmode
-				$klarna_ssl = 'false';
-				$klarna_mode = Klarna::BETA;
-			else :
-				// Set SSL if used in webshop
-				if (is_ssl()) {
-					$klarna_ssl = 'true';
-				} else {
-					$klarna_ssl = 'false';
+		if ( $this->show_monthly_cost == 'yes' ) {
+
+	    		
+    		// Monthly cost threshold check. This is done after apply_filters to product price ($sum).
+	    	if ( $this->lower_threshold_monthly_cost < $sum && $this->upper_threshold_monthly_cost > $sum ) {
+	    		$data = new WC_Gateway_Klarna_Invoice;
+	    		$invoice_fee = $data->get_klarna_invoice_fee_price();
+	    		
+	    		?>
+				<div style="width:210px; height:70px" 
+				     class="klarna-widget klarna-part-payment"
+				     data-eid="<?php echo $this->get_eid();?>" 
+				     data-locale="<?php echo get_locale();?>"
+				     data-price="<?php echo $sum;?>"
+				     data-layout="pale"
+				     data-invoice-fee="<?php echo $invoice_fee;?>">
+				</div>
+		
+				<?php
+	    		
+	    		// Show klarna_warning_banner if NL
+				if ( $this->get_klarna_country() == 'NL' ) {
+					echo '<img src="' . $this->klarna_wb_img_single_product . '" class="klarna-wb" style="max-width: 100%;"/>';	
 				}
-				$klarna_mode = Klarna::LIVE;
-			endif;
-	   		
-			$k = new Klarna();
-			
-			$k->config(
-			    $this->get_eid(), 														// EID
-			    $this->get_secret(), 													// Secret
-			    $this->get_klarna_country(), 											// Country
-			    $this->get_klarna_language($this->get_klarna_country()), 				// Language
-			    $this->selected_currency, 												// Currency
-			    $klarna_mode, 															// Live or test
-			    $pcStorage = 'jsondb', 														// PClass storage
-			    $pcURI = 'klarna_pclasses'	// PClass storage URI path
-			);
-	
-			Klarna::$xmlrpcDebug = false;
-			Klarna::$debug = false;
-			
-			// apply_filters to product price so we can filter this if needed
-			$sum = apply_filters( 'klarna_product_total', $klarna_product_total ); // Product price.
-			$sum = trim($sum);
-			
-			$flag = KlarnaFlags::PRODUCT_PAGE; //or KlarnaFlags::PRODUCT_PAGE, if you want to do it for one item.
-			$pclass = $k->getCheapestPClass($sum, $flag);
-			
-			
-			//Did we get a PClass? (it is false if we didn't)
-			if($pclass) {
-	    		//Here we reuse the same values as above:
-   				$value = KlarnaCalc::calc_monthly_cost(
-   		    	$sum,
-   		    	$pclass,
-   		    	$flag
-   				);
-				
-	    		// Asign values to variables used for shortcodes.
-	    		$klarna_account_shortcode_currency = $this->klarna_currency;
-	    		$klarna_account_shortcode_price = $value;
-	    		$klarna_shortcode_img = $this->icon_basic;
-	    		$klarna_account_country = $this->klarna_country;
-	    		//$klarna_account_shortcode_info_link = $this->klarna_account_info;
-	    		
-	    		
-	    		
-	    		/* $value is now a rounded monthly cost amount to be displayed to the customer. */
-	    		// apply_filters to the monthly cost message so we can filter this if needed
-	    		
-	    		//$klarna_account_product_monthly_cost_message = sprintf(__('<img src="%s" /> <br/><a href="%s" target="_blank">Part pay from %s %s/month</a>', 'klarna'), $this->icon, $this->klarna_account_info, $value, $this->klarna_currency );
-	    		
-	    		// Monthly cost threshold check. This is done after apply_filters to product price ($sum).
-		    	if ( $this->lower_threshold_monthly_cost < $sum && $this->upper_threshold_monthly_cost > $sum ) {
-		    		
-		    		echo '<div class="klarna-product-monthly-cost">' . do_shortcode( $this->show_monthly_cost_info );
-		    		
-		    		// Show klarna_warning_banner if NL
-					if ( $this->shop_country == 'NL' ) {
-						echo '<img src="' . $this->klarna_wb_img_single_product . '" class="klarna-wb" style="max-width: 100%;"/>';	
-					}
-		    		echo '</div>';
-		    				    	
-		    	}
-	    		
-			} // End pclass check
+	    				    	
+	    	} // End threshold check
 		
 		} // End show_monthly_cost check
 		
-	}
+	} // End function
 	
 	
 	/**
@@ -1406,10 +1381,8 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 		$klarna_product_total = $product->get_price();
 		if ( empty($klarna_product_total) ) return;
 		
-	 	$klarna_filename = KLARNA_DIR . 'srv/pclasses.json';
-
 	 	// Only execute this if the feature is activated in the gateway settings		
-		if ( $this->show_monthly_cost_shop == 'yes' && file_exists($klarna_filename) ) {
+		if ( $this->show_monthly_cost_shop == 'yes' ) {
 			
 	 		// Get the lib files and set up a new Klarna() instance.
 	  		require_once(KLARNA_LIB . 'Klarna.php');
@@ -1442,7 +1415,7 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 			    $this->selected_currency, 												// Currency
 			    $klarna_mode, 															// Live or test
 			    $pcStorage = 'jsondb', 														// PClass storage
-			    $pcURI = 'klarna_pclasses'	// PClass storage URI path
+			    $pcURI = 'klarna_pclasses_' . $this->get_klarna_country()	// PClass storage URI path
 			);
 	
 			Klarna::$xmlrpcDebug = false;
@@ -1468,7 +1441,7 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 	    		// Asign values to variables used for shortcodes.
 	    		$klarna_account_shortcode_currency = $this->klarna_currency;
 	    		$klarna_account_shortcode_price = $value;
-	    		$klarna_shortcode_img = $this->icon_basic;
+	    		$klarna_shortcode_img = $this->get_account_icon();
 	    		$klarna_account_country = $this->klarna_country;
 	    		//$klarna_account_shortcode_info_link = $this->klarna_account_info;
 				
@@ -1482,7 +1455,7 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 		    		echo '<div class="klarna-product-monthly-cost-shop-page">' . do_shortcode( $this->show_monthly_cost_shop_info );
 		    		
 		    		// Show klarna_warning_banner if NL
-					if ( $this->shop_country == 'NL' ) {
+					if ( $this->get_klarna_country() == 'NL' ) {
 						echo '<img src="' . $this->klarna_wb_img_product_list . '" class="klarna-wb" style="max-width: 100%;"/>';	
 					}
 		    		
@@ -1495,88 +1468,6 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 		} // End show_monthly_cost_shop check
 	}
 	
-	
-	/**
-	 * Javascript for Account info/terms popup on checkout page
-	 **/
-	function klarna_account_terms_js() {
-		
-		if ( $this->enabled=="yes" && ( is_checkout() || is_product() || is_shop() || is_product_category() || is_product_tag() ) ) {
-	
-			?>
-			<script type="text/javascript">
-				var klarna_account_eid = "<?php echo $this->eid; ?>";
-				var klarna_account_linktext = "<?php echo $this->get_account_terms_link_text($this->klarna_country); ?>";
-				var klarna_account_country = "<?php echo $this->get_terms_country(); ?>";
-				addKlarnaPartPaymentEvent(function(){InitKlarnaPartPaymentElements('klarna_partpayment', klarna_account_eid, klarna_account_country, klarna_account_linktext, 0); });
-			</script>
-			<?php
-			
-		}
-
-	}
-	
-	
-	
-	/**
-	* get_terms_country function.
- 	* Helperfunction - Get Terms Country based on selected Billing Country in the Ceckout form
- 	* Defaults to $this->klarna_country
- 	* At the moment $this->klarna_country is allways returned. This will change in the next update.
- 	**/
-	
-	function get_terms_country() {
-		global $woocommerce;
-			
-		if ( $woocommerce->customer->get_country() == true && in_array( $woocommerce->customer->get_country(), array('SE', 'NO', 'DK', 'DE', 'FI', 'NL') ) ) {
-			
-			// 
-			//return strtolower($woocommerce->customer->get_country());
-			return strtolower($this->klarna_country);
-			
-		} else {
-		
-			return strtolower($this->klarna_country);
-		
-		}
-	} // End function get_terms_country()
-	
-	
-	/**
-	 * get_account_terms_link_text function.
-	 * Helperfunction - Get Terms link text based on selected Billing Country in the Ceckout form
-	 * Defaults to $this->klarna_country
-	 * At the moment $this->klarna_country is allways returned. This will change in the next update.
-	 **/
-	 
-	function get_account_terms_link_text($country) {
-				
-		switch ( $country )
-		{
-		case 'SE':
-			$term_link = 'Läs mer';
-			break;
-		case 'NO':
-			$term_link = 'Les mer';
-			break;
-		case 'DK':
-			$term_link = 'L&aelig;s mere';
-			break;
-		case 'DE':
-			$term_link = 'Lesen Sie mehr!';
-			break;
-		case 'FI':
-			$term_link = 'Lue lis&auml;&auml;';
-			break;
-		case 'NL':
-			$term_link = 'Lees meer!';
-			break;
-		default:
-			$term_link = __('Read more', 'klarna');
-		}
-		
-		return $term_link;
-	} // end function get_account_terms_link_text()
 	
 	
 	// Get Monthly cost prio - product page
@@ -1591,7 +1482,7 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 	
 	
 	
-		// Helper function - get eid
+	// Helper function - get eid
 	function get_eid() {
 		
 		$current_eid = '';
@@ -1763,7 +1654,55 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 	} // End function
 	
 	
+	// Helper function - invoice icon
+	function get_account_icon() {
 		
+		$current_secret = '';
+		
+		switch ( $this->shop_country )
+		{
+		case 'DK':
+			$klarna_account_icon = 'https://cdn.klarna.com/public/images/DK/badges/v1/account/DK_account_badge_std_blue.png?width=60&eid=' . $this->get_eid();
+			break;
+		case 'DE' :
+			$klarna_account_icon = 'https://cdn.klarna.com/public/images/DE/badges/v1/account/DE_account_badge_std_blue.png?width=60&eid=' . $this->get_eid();
+			break;
+		case 'NL' :
+			$klarna_account_icon = 'https://cdn.klarna.com/public/images/NL/badges/v1/account/NL_account_badge_std_blue.png?width=60&eid=' . $this->get_eid();
+			break;
+		case 'NO' :
+			$klarna_account_icon = 'https://cdn.klarna.com/public/images/NO/badges/v1/account/NO_account_badge_std_blue.png?width=60&eid=' . $this->get_eid();
+			break;
+		case 'FI' :
+			$klarna_account_icon = 'https://cdn.klarna.com/public/images/FI/badges/v1/account/FI_account_badge_std_blue.png?width=60&eid=' . $this->get_eid();
+			break;
+		case 'SE' :
+			$klarna_account_icon = 'https://cdn.klarna.com/public/images/SE/badges/v1/account/SE_account_badge_std_blue.png?width=60&eid=' . $this->get_eid();
+			break;
+		case 'AT' :
+			$klarna_account_icon = 'https://cdn.klarna.com/public/images/AT/badges/v1/account/AT_account_badge_std_blue.png?width=60&eid=' . $this->get_eid();
+			break;
+		default:
+			$klarna_account_icon = '';
+		}
+		
+		return $klarna_account_icon;
+	} // End function
+	
+	
+	/**
+ 	 * Register and Enqueue Klarna scripts
+ 	 */
+	function load_scripts() {
+		
+		// Invoice terms popup
+		if ( is_product() &&  $this->show_monthly_cost == 'yes' && $this->enabled == 'yes' ) {
+			wp_register_script( 'klarna-part-payment-widget-js', 'https://cdn.klarna.com/1.0/code/client/all.js', array('jquery'), '1.0', true );
+			wp_enqueue_script( 'klarna-part-payment-widget-js' );
+		}
+
+	} // End function
+	
 			 
 } // End class WC_Gateway_Klarna_Account
 
@@ -1785,7 +1724,7 @@ class WC_Gateway_Klarna_Account_Extra {
 		$this->show_monthly_cost_prio = $data->get_monthly_cost_prio();
 		
 		// Actions
-		add_action('woocommerce_after_shop_loop_item', array(&$this, 'print_product_monthly_cost_shop'), $this->show_monthly_cost_shop_prio);
+		add_action('woocommerce_after_shop_loop_item', array( $this, 'print_product_monthly_cost_shop'), $this->show_monthly_cost_shop_prio);
 	}
 	
 	function print_product_monthly_cost_shop() {
