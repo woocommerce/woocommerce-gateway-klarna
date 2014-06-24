@@ -97,7 +97,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 				$this->invoice_fee_price 	= apply_filters( 'klarna_invoice_fee_price_including_tax', $klarna_invoice_fee_price_including_tax );
 				$this->invoice_fee_name 	= $product->get_title();
 				
-			} else {
+			else :
 			
 				$this->invoice_fee_price 	= 0;
 				$this->invoice_fee_name 	= '';
@@ -606,7 +606,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
         	
 			<div class="clear"></div>
 		
-			<?php if ( $this->get_klarna_country() == 'DE' && $this->de_consent_terms == 'yes' ) : ?>
+			<?php if ( $this->shop_country == 'DE' && $this->de_consent_terms == 'yes' ) : ?>
 				<p class="form-row">
 					<label for="klarna_invo_de_consent_terms"></label>
 					<input type="checkbox" class="input-checkbox" value="yes" name="klarna_invo_de_consent_terms" />
@@ -627,7 +627,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 	 * Process the payment and return the result
 	 **/
 	function process_payment( $order_id ) {
-		
+	
 		global $woocommerce;
 		
 		$order = new WC_order( $order_id );
@@ -1284,91 +1284,58 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 } // End class WC_Gateway_Klarna_Invoice
 
 
-
-
 /**
  * Class WC_Gateway_Klarna_Invoice_Extra
  * Extra class for functions that needs to be executed outside the payment gateway class.
  * Since version 1.5.4 (WooCommerce version 2.0)
-**/
-
+ */
 class WC_Gateway_Klarna_Invoice_Extra {
 
 	public function __construct() {
-		
 		// Add Invoice fee via the new Fees API
-		//add_action( 'woocommerce_before_calculate_totals', array( $this, 'calculate_totals' ), 10, 1 );
-		add_action( 'woocommerce_cart_calculate_fees', array( $this, 'calculate_totals' ));
+		add_action( 'woocommerce_cart_calculate_fees', array( $this, 'calculate_fees' ));
 		
 		// Chcek Klarna specific fields on Checkout
 		add_action('woocommerce_checkout_process', array( $this, 'klarna_invoice_checkout_field_process'));
-		
-		// Test
-		//add_action('init', array( $this, 'test_country'));
-		
 	}
-	
-	function test_country() {
-		/*global $woocommerce;
-		$data = new WC_Gateway_Klarna_Invoice;
-		var_dump($data->get_klarna_shop_country());
-		echo '<br/>';
-		var_dump(get_option('woocommerce_default_country'));
-		*/
-		
-	}
-
 	
 	/**
-	 * Calculate totals on checkout form.
-	 **/
-	 
-	public function calculate_totals( $totals ) {
-		
-    	global $woocommerce;
-    	if(is_checkout() || defined('WOOCOMMERCE_CHECKOUT') ) {
+	 * Calculate fees on checkout form.
+	 */
+	public function calculate_fees( $cart ) {
+		global $woocommerce;
+
+    	if ( is_checkout() || defined( 'WOOCOMMERCE_CHECKOUT' ) ) {
     		$available_gateways = $woocommerce->payment_gateways->get_available_payment_gateways();
-		
-			$current_gateway = '';
-			if ( ! empty( $available_gateways ) ) {
+
+    		if ( ! empty( $available_gateways ) ) {
 				// Chosen Method
-				if ( isset( $woocommerce->session->chosen_payment_method ) && isset( $available_gateways[ $woocommerce->session->chosen_payment_method ] ) ) {
-					$current_gateway = $available_gateways[ $woocommerce->session->chosen_payment_method ];
+				if ( $woocommerce->session->get( 'chosen_payment_method' ) && isset( $available_gateways[ $woocommerce->session->get( 'chosen_payment_method' ) ] ) ) {
+					$current_gateway = $available_gateways[ $woocommerce->session->get( 'chosen_payment_method' ) ];
 				} elseif ( isset( $available_gateways[ get_option( 'woocommerce_default_gateway' ) ] ) ) {
             		$current_gateway = $available_gateways[ get_option( 'woocommerce_default_gateway' ) ];
 				} else {
-            		$current_gateway =  current( $available_gateways );
+            		$current_gateway = current( $available_gateways );
 				}
-			
 			}
-		
-			if(is_object($current_gateway) && $current_gateway->id=='klarna'){
-        		$current_gateway_id = $current_gateway -> id;
-				$this->add_fee_to_cart();
-			
+
+			if ( is_object( $current_gateway ) ) {
+				if ( 'klarna' === $current_gateway->id ) {
+	        		$this->add_fee_to_cart( $cart );
+				}
 			}
-			
-		} // End if is checkout
-		
-		return $totals;
-		
-	} // calculate_totals	
-	
+		}
+	}
 	
 	/**
 	 * Add the fee to the cart if Klarna is selected payment method and if a fee is used.
-	 **/
-	 function add_fee_to_cart() {
-		 global $woocommerce;
-		 
-		 $invoice_fee = new WC_Gateway_Klarna_Invoice;
-		 $this->invoice_fee_id = $invoice_fee->get_klarna_invoice_fee_product();
-		 			 	
-		 if ( $this->invoice_fee_id > 0 ) {
-		 	$product = get_product($this->invoice_fee_id);
-		 	
-		 	if ( $product ) :
-		 	
+	 */
+	public function add_fee_to_cart( $cart ) {
+		$invoice_fee          = new WC_Gateway_Klarna_Invoice;
+		$this->invoice_fee_id = $invoice_fee->get_klarna_invoice_fee_product();
+
+		if ( $this->invoice_fee_id > 0 ) {		 	
+		 	if ( $product = get_product( $this->invoice_fee_id ) ) {
 		 		// Is this a taxable product?
 		 		if ( $product->is_taxable() ) {
 		 			$product_tax = true;
@@ -1376,15 +1343,10 @@ class WC_Gateway_Klarna_Invoice_Extra {
 			 		$product_tax = false;
 			 	}
 			 	
-			 	$woocommerce->cart->add_fee($product->get_title(),$product->get_price_excluding_tax(),$product_tax,$product->get_tax_class());
-			 	
-			endif;
-		} // End if invoice_fee_id > 0
-
-	} // End function add_fee_to_cart
-	
-	
-		
+			 	$cart->add_fee( $product->get_title(), $product->get_price_excluding_tax(), $product_tax,$product->get_tax_class() );
+			}
+		}
+	}
 	
 	/**
  	 * Process the gateway specific checkout form fields
