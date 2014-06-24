@@ -1,5 +1,12 @@
 *** Klarna Changelog ***
 
+			- Advanced integration.
+*			- Support for Austria (Klarna Invoice)
+			- Support for Klarna Checkout in Germany
+			- Added apply_filters klarna_kco_checkout. Possibility for other plugins to filter the rendered checkout.
+			- Improved the woocommerce_klarna_checkout shortcode so that info can be displayed both above and below the KCO checkout form.
+			- Added Klarnas new price widget on single product pages. Removed the old "Display cost per month" on shop page and single product page.
+
 2014.05.08 	- version 1.7.9
 * Fix		- Improved tax percentage calculation on order items sent to Klarna (Klarna Checkout).
 
