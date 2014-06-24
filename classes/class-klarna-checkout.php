@@ -48,7 +48,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
        	$this->terms_url						= ( isset( $this->settings['terms_url'] ) ) ? $this->settings['terms_url'] : '';
        	$this->testmode							= ( isset( $this->settings['testmode'] ) ) ? $this->settings['testmode'] : '';
        	$this->debug							= ( isset( $this->settings['debug'] ) ) ? $this->settings['debug'] : '';
-       	//$this->klarna_checkout_url			= ( isset( $this->settings['klarna_checkout_url'] ) ) ? $this->settings['klarna_checkout_url'] : '';
+       	
        	$this->modify_standard_checkout_url		= ( isset( $this->settings['modify_standard_checkout_url'] ) ) ? $this->settings['modify_standard_checkout_url'] : '';
        	$this->add_std_checkout_button			= ( isset( $this->settings['add_std_checkout_button'] ) ) ? $this->settings['add_std_checkout_button'] : '';
        	$this->std_checkout_button_label		= ( isset( $this->settings['std_checkout_button_label'] ) ) ? $this->settings['std_checkout_button_label'] : '';
@@ -56,6 +56,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
        	$this->create_customer_account			= ( isset( $this->settings['create_customer_account'] ) ) ? $this->settings['create_customer_account'] : '';
        	$this->send_new_account_email			= ( isset( $this->settings['send_new_account_email'] ) ) ? $this->settings['send_new_account_email'] : '';
        	
+		
        	
 		if ( empty($this->terms_url) ) 
 			$this->terms_url = esc_url( get_permalink(woocommerce_get_page_id('terms')) );
@@ -67,11 +68,8 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			$this->klarna_server = 'https://checkout.klarna.com/checkout/orders';
 		endif;
 		
-		// If currency is set by WPML
-		//if ( isset($woocommerce->session->client_currency) ) {
-				
-			//switch ( strtoupper($woocommerce->session->client_currency) ) {
-			switch ( get_woocommerce_currency() ) {
+		// Set current country based on used currency
+		switch ( get_woocommerce_currency() ) {
 			
 			case 'NOK' :
 				$klarna_country = 'NO';
@@ -88,109 +86,90 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 				break;
 			default:
 				$klarna_country = $this->shop_country;
-			}
+		}
 
-			$this->shop_country	= $klarna_country;
-		//}
+		$this->shop_country	= $klarna_country;
 		
 		// Country and language
-		switch ( $this->shop_country )
-		{
-		/*
-		case 'DK':
-			$klarna_country = 'DK';
-			$klarna_language = 'DA';
-			$klarna_currency = 'DKK';
-			break;
-		case 'DE' :
-			$klarna_country = 'DE';
-			$klarna_language = 'DE';
-			$klarna_currency = 'EUR';
-			break;
-		case 'NL' :
-			$klarna_country = 'NL';
-			$klarna_language = 'NL';
-			$klarna_currency = 'EUR';
-			break;
-		*/
-		case 'NO' :
-		case 'NB' :
-		//case 'NOK' :
-			$klarna_country 			= 'NO';
-			$klarna_language 			= 'nb-no';
-			$klarna_currency 			= 'NOK';
-			$klarna_eid 				= $this->eid_no;
-			$klarna_secret 				= $this->secret_no;
-			$klarna_checkout_url 		= $this->klarna_checkout_url_no;
-			if ($this->klarna_checkout_thanks_url_no == '' ) {
-				$klarna_checkout_thanks_url 	= $this->klarna_checkout_url_no;
-			} else {
-				$klarna_checkout_thanks_url 	= $this->klarna_checkout_thanks_url_no;
-			}
-			break;
-		case 'FI' :
-		//case 'EUR' :
-			$klarna_country 			= 'FI';
-			
-			// Check if WPML is used and determine if Finnish or Swedish is used as language
-			if ( class_exists( 'woocommerce_wpml' ) && defined('ICL_LANGUAGE_CODE') && strtoupper(ICL_LANGUAGE_CODE) == 'SV') {
-				// Swedish
-				$klarna_language 			= 'sv-fi';
-			} else {
-				// Finnish
-				$klarna_language 			= 'fi-fi';
-			}
-			
-			$klarna_currency 			= 'EUR';
-			$klarna_eid 				= $this->eid_fi;
-			$klarna_secret 				= $this->secret_fi;
-			$klarna_checkout_url 		= $this->klarna_checkout_url_fi;
-			if ($this->klarna_checkout_thanks_url_fi == '' ) {
-				$klarna_checkout_thanks_url 	= $this->klarna_checkout_url_fi;
-			} else {
-				$klarna_checkout_thanks_url 	= $this->klarna_checkout_thanks_url_fi;
-			}
-			break;
-		case 'SE' :
-		case 'SV' :
-		//case 'SEK' :
-			$klarna_country 			= 'SE';
-			
-			
-			$klarna_language 			= 'sv-se';
-			$klarna_currency 			= 'SEK';
-			$klarna_eid 				= $this->eid_se;
-			$klarna_secret 				= $this->secret_se;
-			$klarna_checkout_url 		= $this->klarna_checkout_url_se;
-			if ($this->klarna_checkout_thanks_url_se == '' ) {
-				$klarna_checkout_thanks_url 	= $this->klarna_checkout_url_se;
-			} else {
-				$klarna_checkout_thanks_url 	= $this->klarna_checkout_thanks_url_se;
-			}
-			break;
-		case 'DE' :
-			$klarna_country 			= 'DE';
-			$klarna_language 			= 'de-de';
-			$klarna_currency 			= 'EUR';
-			$klarna_eid 				= $this->eid_de;
-			$klarna_secret 				= $this->secret_de;
-			$klarna_checkout_url 		= $this->klarna_checkout_url_de;
-			if ($this->klarna_checkout_thanks_url_de == '' ) {
-				$klarna_checkout_thanks_url 	= $this->klarna_checkout_url_de;
-			} else {
-				$klarna_checkout_thanks_url 	= $this->klarna_checkout_thanks_url_de;
-			}
-			break;
-		default:
-			$klarna_country = '';
-			$klarna_language = '';
-			$klarna_currency = '';
-			$klarna_eid = '';
-			$klarna_secret = '';
-			$klarna_checkout_url = '';
-			$klarna_invoice_terms = '';
-			$klarna_invoice_icon = '';
-			$klarna_checkout_thanks_url = '';
+		switch ( $this->shop_country ) {
+			case 'NO' :
+			case 'NB' :
+			//case 'NOK' :
+				$klarna_country 			= 'NO';
+				$klarna_language 			= 'nb-no';
+				$klarna_currency 			= 'NOK';
+				$klarna_eid 				= $this->eid_no;
+				$klarna_secret 				= $this->secret_no;
+				$klarna_checkout_url 		= $this->klarna_checkout_url_no;
+				if ($this->klarna_checkout_thanks_url_no == '' ) {
+					$klarna_checkout_thanks_url 	= $this->klarna_checkout_url_no;
+				} else {
+					$klarna_checkout_thanks_url 	= $this->klarna_checkout_thanks_url_no;
+				}
+				break;
+			case 'FI' :
+			//case 'EUR' :
+				$klarna_country 			= 'FI';
+				
+				// Check if WPML is used and determine if Finnish or Swedish is used as language
+				if ( class_exists( 'woocommerce_wpml' ) && defined('ICL_LANGUAGE_CODE') && strtoupper(ICL_LANGUAGE_CODE) == 'SV') {
+					// Swedish
+					$klarna_language 			= 'sv-fi';
+				} else {
+					// Finnish
+					$klarna_language 			= 'fi-fi';
+				}
+				
+				$klarna_currency 			= 'EUR';
+				$klarna_eid 				= $this->eid_fi;
+				$klarna_secret 				= $this->secret_fi;
+				$klarna_checkout_url 		= $this->klarna_checkout_url_fi;
+				if ($this->klarna_checkout_thanks_url_fi == '' ) {
+					$klarna_checkout_thanks_url 	= $this->klarna_checkout_url_fi;
+				} else {
+					$klarna_checkout_thanks_url 	= $this->klarna_checkout_thanks_url_fi;
+				}
+				break;
+			case 'SE' :
+			case 'SV' :
+			//case 'SEK' :
+				$klarna_country 			= 'SE';
+				
+				
+				$klarna_language 			= 'sv-se';
+				$klarna_currency 			= 'SEK';
+				$klarna_eid 				= $this->eid_se;
+				$klarna_secret 				= $this->secret_se;
+				$klarna_checkout_url 		= $this->klarna_checkout_url_se;
+				if ($this->klarna_checkout_thanks_url_se == '' ) {
+					$klarna_checkout_thanks_url 	= $this->klarna_checkout_url_se;
+				} else {
+					$klarna_checkout_thanks_url 	= $this->klarna_checkout_thanks_url_se;
+				}
+				break;
+			case 'DE' :
+				$klarna_country 			= 'DE';
+				$klarna_language 			= 'de-de';
+				$klarna_currency 			= 'EUR';
+				$klarna_eid 				= $this->eid_de;
+				$klarna_secret 				= $this->secret_de;
+				$klarna_checkout_url 		= $this->klarna_checkout_url_de;
+				if ($this->klarna_checkout_thanks_url_de == '' ) {
+					$klarna_checkout_thanks_url 	= $this->klarna_checkout_url_de;
+				} else {
+					$klarna_checkout_thanks_url 	= $this->klarna_checkout_thanks_url_de;
+				}
+				break;
+			default:
+				$klarna_country = '';
+				$klarna_language = '';
+				$klarna_currency = '';
+				$klarna_eid = '';
+				$klarna_secret = '';
+				$klarna_checkout_url = '';
+				$klarna_invoice_terms = '';
+				$klarna_invoice_icon = '';
+				$klarna_checkout_thanks_url = '';
 		}
 		
 		// Apply filters to Country and language
@@ -730,6 +709,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 								if($woocommerce->customer->get_shipping_postcode()) {
 									$update['shipping_address']['postal_code'] = $woocommerce->customer->get_shipping_postcode();
 								}
+								
 							}
 						
         					$klarna_order->update( apply_filters( 'kco_update_order', $update ) );
@@ -1074,13 +1054,53 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 		return $this->klarna_checkout_url;
 	 	}
 	 	
+	 	
 	 	/**
 		 * Helper function get_klarna_country
 		 */
 		function get_klarna_country() {
-	 		return $this->klarna_country;
-	 	}
+			global $woocommerce;
+			$klarna_country = $this->shop_language;
+	
+			switch ( $klarna_country ) {
+				case 'NB' :
+					$klarna_country = 'NO';
+					break;
+				case 'SV' :
+					$klarna_country = 'SE';
+					break;
+				case 'EN' :
+					$klarna_country = $this->shop_country;
+					break;
+			}
+				
+			return $klarna_country;
+				
+		} // End function
 	 	
+		
+
+		/**
+		 * Helper function - get authorized countries
+		 */
+		function get_authorized_countries() {
+			$this->authorized_countries		= array();
+			if(!empty($this->eid_se)) {
+				$this->authorized_countries[] = 'SE';
+			}
+			if(!empty($this->eid_no)) {
+				$this->authorized_countries[] = 'NO';
+			}
+			if(!empty($this->eid_fi)) {
+				$this->authorized_countries[] = 'FI';
+			}
+			if(!empty($this->eid_de)) {
+				$this->authorized_countries[] = 'DE';
+			}
+			
+			return $this->authorized_countries;
+		}
+		
 		
 		/**
 		 * Helper function - get correct currency for selected country
@@ -1458,11 +1478,12 @@ class WC_Gateway_Klarna_Checkout_Extra {
 		
 		//add_action( 'woocommerce_proceed_to_checkout', array( &$this, 'checkout_button' ), 12 );
 		
-		add_filter( 'woocommerce_get_checkout_url', array( &$this, 'change_checkout_url' ), 20 );
+		add_filter( 'woocommerce_get_checkout_url', array( $this, 'change_checkout_url' ), 20 );
 		
 		
 		 
 	}
+	
 	
 	// Set session
 	function start_session() {		
@@ -1500,12 +1521,13 @@ class WC_Gateway_Klarna_Checkout_Extra {
 		$klarna_checkout_url = $data->get_klarna_checkout_url();
 		$modify_standard_checkout_url = $data->get_modify_standard_checkout_url();
 		$klarna_country = $data->get_klarna_country();
-		$available_countries = array('NO', 'FI', 'SE');
+		$available_countries = $data->get_authorized_countries();
 
 		// Change the Checkout URL if this is enabled in the settings
 		if( $modify_standard_checkout_url == 'yes' && $enabled == 'yes' && in_array($klarna_country, $available_countries)) {
 			$url = $klarna_checkout_url;
 		}
+		
 		return $url;
 	}
 		
