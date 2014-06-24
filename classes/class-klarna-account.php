@@ -58,9 +58,9 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 		$this->show_monthly_cost				= ( isset( $this->settings['show_monthly_cost'] ) ) ? $this->settings['show_monthly_cost'] : '';
 		$this->show_monthly_cost_info			= ( isset( $this->settings['show_monthly_cost_info'] ) ) ? $this->settings['show_monthly_cost_info'] : '';
 		$this->show_monthly_cost_prio			= ( isset( $this->settings['show_monthly_cost_prio'] ) ) ? $this->settings['show_monthly_cost_prio'] : '15';
-		$this->show_monthly_cost_shop			= ( isset( $this->settings['show_monthly_cost_shop'] ) ) ? $this->settings['show_monthly_cost_shop'] : '';
-		$this->show_monthly_cost_shop_info		= ( isset( $this->settings['show_monthly_cost_shop_info'] ) ) ? $this->settings['show_monthly_cost_shop_info'] : '';
-		$this->show_monthly_cost_shop_prio		= ( isset( $this->settings['show_monthly_cost_shop_prio'] ) ) ? $this->settings['show_monthly_cost_shop_prio'] : '15';
+		//$this->show_monthly_cost_shop			= ( isset( $this->settings['show_monthly_cost_shop'] ) ) ? $this->settings['show_monthly_cost_shop'] : '';
+		//$this->show_monthly_cost_shop_info		= ( isset( $this->settings['show_monthly_cost_shop_info'] ) ) ? $this->settings['show_monthly_cost_shop_info'] : '';
+		//$this->show_monthly_cost_shop_prio		= ( isset( $this->settings['show_monthly_cost_shop_prio'] ) ) ? $this->settings['show_monthly_cost_shop_prio'] : '15';
 		$this->testmode							= ( isset( $this->settings['testmode'] ) ) ? $this->settings['testmode'] : '';
 		$this->de_consent_terms					= ( isset( $this->settings['de_consent_terms'] ) ) ? $this->settings['de_consent_terms'] : '';
 		$this->lower_threshold_monthly_cost		= ( isset( $this->settings['lower_threshold_monthly_cost'] ) ) ? $this->settings['lower_threshold_monthly_cost'] : '';
@@ -255,6 +255,7 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 								'description' => __( 'Select where on the products page the Monthly cost information should be displayed.', 'klarna' ), 
 								'default' => '15'
 							),
+			/*
 			'show_monthly_cost_shop' => array(
 							'title' => __( 'Display monthly cost - shop page', 'klarna' ), 
 							'type' => 'checkbox',
@@ -274,6 +275,7 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 								'description' => __( 'Select where on the shop page the Monthly cost information should be displayed.', 'klarna' ), 
 								'default' => '15'
 							),
+			*/
 			'lower_threshold_monthly_cost' => array(
 							'title' => __( 'Lower threshold for monthly cost', 'klarna' ), 
 							'type' => 'text', 
@@ -523,7 +525,7 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 			</p>
 			<?php
 			// Calculate lowest monthly cost and display it
-			
+			/*
 			$pclass = $k->getCheapestPClass($sum, $flag);
 	
 			//Did we get a PClass? (it is false if we didn't)
@@ -534,15 +536,15 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
     	    	$pclass,
     	    	$flag
     			);
-	
+	*/
 	    		/* $value is now a rounded monthly cost amount to be displayed to the customer. */
 	    		// apply_filters to the monthly cost message so we can filter this if needed
-	    		
+	  /*  		
 	    		$klarna_account_monthly_cost_message = sprintf(__('From %s %s/month', 'klarna'), $value, $this->klarna_currency );
 	    		echo '<p class="form-row form-row-last klarna-monthly-cost">' . apply_filters( 'klarna_account_monthly_cost_message', $klarna_account_monthly_cost_message ) . '</p>';
 	    		
 			
-			}
+			}*/
 			?>
 			<div class="clear"></div>
 			
@@ -1346,7 +1348,7 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 				<div style="width:210px; height:70px" 
 				     class="klarna-widget klarna-part-payment"
 				     data-eid="<?php echo $this->get_eid();?>" 
-				     data-locale="<?php echo get_locale();?>"
+				     data-locale="<?php echo $this->get_klarna_locale(get_locale());?>"
 				     data-price="<?php echo $sum;?>"
 				     data-layout="pale"
 				     data-invoice-fee="<?php echo $invoice_fee;?>">
@@ -1355,7 +1357,7 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 				<?php
 	    		
 	    		// Show klarna_warning_banner if NL
-				if ( $this->get_klarna_country() == 'NL' ) {
+				if ( $this->shop_country == 'NL' ) {
 					echo '<img src="' . $this->klarna_wb_img_single_product . '" class="klarna-wb" style="max-width: 100%;"/>';	
 				}
 	    				    	
@@ -1366,107 +1368,6 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 	} // End function
 	
 	
-	/**
-	 * Calc monthly cost on Shop page and print it out
-	 **/
-	 
- 	function print_product_monthly_cost_shop() {
- 		
- 		if ( $this->enabled!="yes" ) return;
- 		
- 		//global $woocommerce, $product, $klarna_account_shortcode_currency, $klarna_account_shortcode_price, $klarna_account_shortcode_img, $klarna_account_shortcode_info_link;
- 		global $woocommerce, $product, $klarna_account_shortcode_currency, $klarna_account_shortcode_price, $klarna_shortcode_img, $klarna_account_country;
-	 	
-	 	// Product with no price - do nothing
-		$klarna_product_total = $product->get_price();
-		if ( empty($klarna_product_total) ) return;
-		
-	 	// Only execute this if the feature is activated in the gateway settings		
-		if ( $this->show_monthly_cost_shop == 'yes' ) {
-			
-	 		// Get the lib files and set up a new Klarna() instance.
-	  		require_once(KLARNA_LIB . 'Klarna.php');
-			require_once(KLARNA_LIB . 'pclasses/storage.intf.php');
-			require_once(KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc.inc');
-			require_once(KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc_wrappers.inc');
-			
-			// Test mode or Live mode		
-			if ( $this->testmode == 'yes' ):
-				// Disable SSL if in testmode
-				$klarna_ssl = 'false';
-				$klarna_mode = Klarna::BETA;
-			else :
-				// Set SSL if used in webshop
-				if (is_ssl()) {
-					$klarna_ssl = 'true';
-				} else {
-					$klarna_ssl = 'false';
-				}
-				$klarna_mode = Klarna::LIVE;
-			endif;
-	   		
-  			$k = new Klarna();
-			
-			$k->config(
-			    $this->get_eid(), 														// EID
-			    $this->get_secret(), 													// Secret
-			    $this->get_klarna_country(), 											// Country
-			    $this->get_klarna_language($this->get_klarna_country()), 				// Language
-			    $this->selected_currency, 												// Currency
-			    $klarna_mode, 															// Live or test
-			    $pcStorage = 'jsondb', 														// PClass storage
-			    $pcURI = 'klarna_pclasses_' . $this->get_klarna_country()	// PClass storage URI path
-			);
-	
-			Klarna::$xmlrpcDebug = false;
-			Klarna::$debug = false;
-			
-			// apply_filters to product price so we can filter this if needed
-			$sum = apply_filters( 'klarna_product_total', $klarna_product_total ); // Product price.
-			$sum = trim($sum);
-			$flag = KlarnaFlags::PRODUCT_PAGE; //or KlarnaFlags::PRODUCT_PAGE, if you want to do it for one item.
-			$pclass = $k->getCheapestPClass($sum, $flag);
-			
-			
-			//Did we get a PClass? (it is false if we didn't)
-			if($pclass) {
-	    		//Here we reuse the same values as above:
-   				$value = KlarnaCalc::calc_monthly_cost(
-   		    	$sum,
-   		    	$pclass,
-   		    	$flag
-   				);
-	
-	    		
-	    		// Asign values to variables used for shortcodes.
-	    		$klarna_account_shortcode_currency = $this->klarna_currency;
-	    		$klarna_account_shortcode_price = $value;
-	    		$klarna_shortcode_img = $this->get_account_icon();
-	    		$klarna_account_country = $this->klarna_country;
-	    		//$klarna_account_shortcode_info_link = $this->klarna_account_info;
-				
-	    		
-	    		//$klarna_account_product_monthly_cost_message = sprintf(__('<img src="%s" /> <br/><a href="%s" target="_blank">Part pay from %s %s/month</a>', 'klarna'), $this->icon, $this->klarna_account_info, $value, $this->klarna_currency );
-		    		
-	    		// Monthly cost threshold check. This is done after apply_filters to product price ($sum).
-	    		
-		    	if ( $this->lower_threshold_monthly_cost < $sum && $this->upper_threshold_monthly_cost > $sum ) {
-			 
-		    		echo '<div class="klarna-product-monthly-cost-shop-page">' . do_shortcode( $this->show_monthly_cost_shop_info );
-		    		
-		    		// Show klarna_warning_banner if NL
-					if ( $this->get_klarna_country() == 'NL' ) {
-						echo '<img src="' . $this->klarna_wb_img_product_list . '" class="klarna-wb" style="max-width: 100%;"/>';	
-					}
-		    		
-		    		echo '</div>';
-		    		
-	    		}
-	    		
-			} // End pclass check
-		
-		} // End show_monthly_cost_shop check
-	}
 	
 	
 	
@@ -1480,6 +1381,44 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 		return $this->show_monthly_cost_shop_prio;
 	}
 	
+	
+	// Helper function - get Klarna locale based on current locale
+	function get_klarna_locale($locale) {
+		switch ( $locale )
+		{
+		case 'da_DK':
+			$klarna_locale = 'da_dk';
+			break;
+		case 'de_DE' :
+			$klarna_locale = 'de_de';
+			break;
+		case 'no_NO' :
+		case 'nb_NO' :
+		case 'nn_NO' :
+			$klarna_locale = 'nb_no';
+			break;
+		case 'nl_NL' :
+			$klarna_locale = 'nl_nl';
+			break;
+		case 'fi_FI' :
+			$klarna_locale = 'fi_fi';
+			break;
+		case 'sv_SE' :
+			$klarna_locale = 'sv_se';
+			break;
+		case 'de_AT' :
+			$klarna_locale = 'de_at';
+			break;
+		case 'en_US' :
+		case 'en_GB' :
+			$klarna_locale = 'en_se';
+			break;
+		default:
+			$klarna_locale = '';
+		}
+		
+		return $klarna_locale;
+	} // End function
 	
 	
 	// Helper function - get eid
@@ -1705,32 +1644,3 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 	
 			 
 } // End class WC_Gateway_Klarna_Account
-
-
-
-/**
- * Class 
- * @class 		WC_Gateway_Klarna_Account_Extra
- * @since		1.5.4 (WC 2.0)
- *
- **/
- 
-class WC_Gateway_Klarna_Account_Extra {
-	
-	public function __construct() {
-		
-		$data = new WC_Gateway_Klarna_Account;
-		$this->show_monthly_cost_shop_prio = $data->get_monthly_cost_shop_prio();
-		$this->show_monthly_cost_prio = $data->get_monthly_cost_prio();
-		
-		// Actions
-		add_action('woocommerce_after_shop_loop_item', array( $this, 'print_product_monthly_cost_shop'), $this->show_monthly_cost_shop_prio);
-	}
-	
-	function print_product_monthly_cost_shop() {
-		$data = new WC_Gateway_Klarna_Account;
-		$data->print_product_monthly_cost_shop();
-	}
-} // End class WC_Gateway_Klarna_Account_Extra
-
-$wc_gateway_klarna_account_extra = new WC_Gateway_Klarna_Account_Extra;
