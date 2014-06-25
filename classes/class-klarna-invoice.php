@@ -97,7 +97,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 				$this->invoice_fee_price 	= apply_filters( 'klarna_invoice_fee_price_including_tax', $klarna_invoice_fee_price_including_tax );
 				$this->invoice_fee_name 	= $product->get_title();
 				
-			else :
+			} else {
 			
 				$this->invoice_fee_price 	= 0;
 				$this->invoice_fee_name 	= '';
