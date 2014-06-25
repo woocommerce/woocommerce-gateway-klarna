@@ -74,7 +74,16 @@ function init_klarna_gateway() {
         	
         	// Get current customers selected language if this is a multi lanuage site
 			$iso_code 				= explode('_', get_locale());
-			$this->shop_language 	= $iso_code[1];      // Country ISO code (SE)
+			$this->shop_language 	= strtoupper($iso_code[0]);      // Country ISO code (SE)
+			
+			switch ( $this->shop_language ) {
+				case 'NB' :
+					$this->shop_language = 'NO';
+					break;
+				case 'SV' :
+					$this->shop_language = 'SE';
+					break;
+			}
    
         	// If WPML is used, set the customer selected language as the shop_country
         	// This will be updated to support WPML's separated language and currency feature
