@@ -1124,7 +1124,7 @@ class WC_Gateway_Klarna_Campaign extends WC_Gateway_Klarna {
     		switch($result[1]) {
             case KlarnaFlags::ACCEPTED:
                 $order->add_order_note( __('Klarna payment completed. Klarna Invoice number: ', 'klarna') . $invno );
-                update_post_meta( $order_id, 'klarna_order_reservation', $invno );
+                update_post_meta( $order_id, '_klarna_order_reservation', $invno );
                 
                 // Payment complete
 				$order->payment_complete();		

@@ -963,7 +963,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
             
             case '1':
                 $order->add_order_note( __('Klarna payment completed. Klarna reservation number: ', 'klarna') . $invno );
-                update_post_meta( $order_id, 'klarna_order_reservation', $invno );
+                update_post_meta( $order_id, '_klarna_order_reservation', $invno );
                 
                 // Payment complete
 				$order->payment_complete();		
