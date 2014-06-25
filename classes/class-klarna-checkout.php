@@ -928,7 +928,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 					
 					// Payment complete
 					update_post_meta( $order_id, 'klarna_order_status', 'created' );
-					update_post_meta( $order_id, 'klarna_order_reservation', $klarna_order['reservation'] );
+					update_post_meta( $order_id, '_klarna_order_reservation', $klarna_order['reservation'] );
 					$order->payment_complete();
 					
 					// Remove cart
