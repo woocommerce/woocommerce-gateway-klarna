@@ -1524,7 +1524,7 @@ class WC_Gateway_Klarna_Checkout_Extra {
 		$available_countries = $data->get_authorized_countries();
 
 		// Change the Checkout URL if this is enabled in the settings
-		if( $modify_standard_checkout_url == 'yes' && $enabled == 'yes' && in_array($klarna_country, $available_countries)) {
+		if( $modify_standard_checkout_url == 'yes' && $enabled == 'yes' && !empty($klarna_checkout_url) && in_array($klarna_country, $available_countries)) {
 			$url = $klarna_checkout_url;
 		}
 		
