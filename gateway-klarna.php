@@ -85,70 +85,10 @@ function init_klarna_gateway() {
 					break;
 			}
    
-        	// If WPML is used, set the customer selected language as the shop_country
-        	// This will be updated to support WPML's separated language and currency feature
-        	// This is done in the Klarna checkout file but will be added for the other payment methods in short.
-        	/*
-        	if ( class_exists( 'woocommerce_wpml' ) && defined('ICL_LANGUAGE_CODE') )
-				$this->shop_country	= strtoupper(ICL_LANGUAGE_CODE);
-				
-				
-			// If WooCommerce Currency Switcher is used (http://dev.pathtoenlightenment.net/shop), set the customer selected currency as the shop_country
-        	if ( class_exists( 'WC_Aelia_CurrencySwitcher' ) && defined('AELIA_CS_USER_CURRENCY') ) {
-				if(defined('AELIA_CS_USER_CURRENCY')) {
-					//echo AELIA_CS_USER_CURRENCY . constant('AELIA_CS_USER_CURRENCY');
-					$plugin_instance = WC_Aelia_CurrencySwitcher::instance();
-					$selected_currency = strtoupper($plugin_instance->get_selected_currency());
-					
-				}
-				
-				switch ( $selected_currency ) {
-				case 'NOK' :
-					$klarna_country = 'NO';
-					break;
-				case 'EUR' :
-					$klarna_country = 'FI';
-					break;
-				case 'SEK' :
-					$klarna_country = 'SE';
-					break;
-				default:
-					$klarna_country = $this->shop_country;
-				}
-
-				$this->shop_country	= $klarna_country;
-			}
-			*/
-			
+        				
 			
 			// Currency
-			$this->selected_currency	= '';
-			$wpml_currency				= '';
-			
-			if ( class_exists( 'WCML_Multi_Currency_Support' ) ) {
-				
-				// If currency is set by WPML
-				$wpml_currency = WCML_Multi_Currency_Support::get_client_currency();
-				
-				if ( !empty($wpml_currency) ) {
-					$this->selected_currency = WCML_Multi_Currency_Support::get_client_currency();
-				} else {
-					// WooCommerce selected currency
-					$this->selected_currency = get_option('woocommerce_currency');
-				}
-				
-			} elseif ( class_exists( 'WC_Aelia_CurrencySwitcher' ) && defined('AELIA_CS_USER_CURRENCY') ) {
-				
-				// If currency is set by WooCommerce Currency Switcher (http://dev.pathtoenlightenment.net/shop)
-				$plugin_instance = WC_Aelia_CurrencySwitcher::instance();
-				$this->selected_currency = strtoupper($plugin_instance->get_selected_currency());
-
-			} else {
-		
-				// WooCommerce selected currency
-				$this->selected_currency = get_option('woocommerce_currency');
-		
-			}
+			$this->selected_currency	= get_woocommerce_currency();
 			
 			
 			// Apply filters to shop_country
