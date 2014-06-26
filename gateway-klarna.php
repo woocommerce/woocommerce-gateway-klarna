@@ -3,7 +3,7 @@
 Plugin Name: WooCommerce Klarna Gateway
 Plugin URI: http://woothemes.com/woocommerce
 Description: Extends WooCommerce. Provides a <a href="http://www.klarna.se" target="_blank">Klarna</a> gateway for WooCommerce.
-Version: 1.7.9
+Version: 1.8
 Author: Krokedil
 Author URI: http://krokedil.com
 */
@@ -155,8 +155,8 @@ function init_klarna_gateway() {
 		public function __construct() {
 			
 			// Add admin notice about the callback change
-			//add_action('admin_notices', array($this, 'krokedil_admin_notice'));
-			//add_action('admin_init', array($this, 'krokedil_nag_ignore'));
+			add_action('admin_notices', array($this, 'krokedil_admin_notice'));
+			add_action('admin_init', array($this, 'krokedil_nag_ignore'));
 		}
 	
 		/* Display a notice about the changes to the Invoice fee handling */
@@ -166,9 +166,9 @@ function init_klarna_gateway() {
 			$user_id = $current_user->ID;
 		
 			/* Check that the user hasn't already clicked to ignore the message */
-			if ( ! get_user_meta($user_id, 'klarna_callback_change_notice_17') && current_user_can( 'manage_options' ) ) {
+			if ( ! get_user_meta($user_id, 'klarna_callback_change_notice_18') && current_user_can( 'manage_options' ) ) {
 				echo '<div class="updated fade"><p class="alignleft">';
-				printf(__('The Klarna Checkout settings has changed. You will need to update and save the settings for Klarna checkout again before the payment method can be used. Please visit <a target="_blank" href="%1$s"> the payment gateway documentation</a> for more info.', 'klarna'), 'http://docs.woothemes.com/document/klarna/');
+				printf(__('Version 1.8 of the Klarna payment gateway is a major release. The plugin now uses Klarnas Advanced integration for all payment methods. You will need to update and save the settings for Klarna Invoice, Account & Campaign before these payment methods can be used. Please visit <a target="_blank" href="%1$s"> the payment gateway documentation</a> for more info.', 'klarna'), 'http://docs.woothemes.com/document/klarna/');
 				echo '</p><p class="alignright">';
 				printf(__('<a class="submitdelete" href="%1$s"> Hide this message</a>', 'klarna'), '?klarna_nag_ignore=0');
 				echo '</p><br class="clear">';
@@ -183,7 +183,7 @@ function init_klarna_gateway() {
 			$user_id = $current_user->ID;
 			/* If user clicks to ignore the notice, add that to their user meta */
 			if ( isset($_GET['klarna_nag_ignore']) && '0' == $_GET['klarna_nag_ignore'] ) {
-				add_user_meta($user_id, 'klarna_callback_change_notice_17', 'true', true);
+				add_user_meta($user_id, 'klarna_callback_change_notice_18', 'true', true);
 			}
 		}
 	} // End class
