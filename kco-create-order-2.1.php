@@ -198,9 +198,16 @@ if ( $applied_coupons = WC()->cart->get_coupons() ) {
 update_post_meta( $order_id, '_payment_method', 		$this->id );
 update_post_meta( $order_id, '_payment_method_title', 	$this->method_title );
 
+
 if ( empty( $this->posted['billing_email'] ) && is_user_logged_in() ) {
 	$current_user = wp_get_current_user();
 	update_post_meta( $order_id, '_billing_email', $current_user->user_email );
+}
+
+// Customer ID
+if ( is_user_logged_in() ) {
+	$current_user = wp_get_current_user();
+	update_post_meta( $order_id, '_customer_user', 			absint( $current_user->ID ) );
 }
 
 update_post_meta( $order_id, '_order_shipping', 		wc_format_decimal( WC()->cart->shipping_total ) );
@@ -211,7 +218,6 @@ update_post_meta( $order_id, '_order_shipping_tax', 	wc_format_decimal( WC()->ca
 update_post_meta( $order_id, '_order_total', 			wc_format_decimal( WC()->cart->total, get_option( 'woocommerce_price_num_decimals' ) ) );
 
 update_post_meta( $order_id, '_order_key', 				'wc_' . apply_filters('woocommerce_generate_order_key', uniqid('order_') ) );
-update_post_meta( $order_id, '_customer_user', 			absint( $this->customer_id ) );
 update_post_meta( $order_id, '_order_currency', 		get_woocommerce_currency() );
 update_post_meta( $order_id, '_prices_include_tax', 	get_option( 'woocommerce_prices_include_tax' ) );
 update_post_meta( $order_id, '_customer_ip_address',	isset( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ? $_SERVER['HTTP_X_FORWARDED_FOR'] : $_SERVER['REMOTE_ADDR'] );
