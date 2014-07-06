@@ -1,4 +1,7 @@
 *** Klarna Changelog ***
+* Fix		- Thanks page url update (klarna_checkout_thanks_url_de) for Germany (Klarna Checkout). Was missing in 1.8.
+* Fix		- Part Payment Widget update. Moved to separate class.
+
 2014.06.26 	- version 1.8
 * Feature	- Support for Austria (Klarna Invoice).
 * Feature	- Support for Klarna Checkout in Germany.

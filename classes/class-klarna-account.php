@@ -117,12 +117,7 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 		
 		//add_action('admin_init', array(&$this, 'update_pclasses_from_klarna'));
 		
-		add_action('woocommerce_single_product_summary', array( $this, 'print_product_monthly_cost'), $this->show_monthly_cost_prio);
-		
 		add_action('woocommerce_checkout_process', array( $this, 'klarna_account_checkout_field_process'));
-		
-		//add_action('wp_head', array(&$this, 'klarna_account_terms_js'));
-		add_action( 'wp_enqueue_scripts', array( $this, 'load_scripts') );
 		
 	}
 	
@@ -1345,7 +1340,7 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 	    		$invoice_fee = $data->get_klarna_invoice_fee_price();
 	    		
 	    		?>
-				<div style="width:210px; height:70px" 
+				<div style="width:220px; height:70px" 
 				     class="klarna-widget klarna-part-payment"
 				     data-eid="<?php echo $this->get_eid();?>" 
 				     data-locale="<?php echo $this->get_klarna_locale(get_locale());?>"
@@ -1626,21 +1621,6 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 		}
 		
 		return $klarna_account_icon;
-	} // End function
-	
-	
-	/**
- 	 * Register and Enqueue Klarna scripts
- 	 */
-	function load_scripts() {
-		
-		// Invoice terms popup
-		if ( is_product() &&  $this->show_monthly_cost == 'yes' && $this->enabled == 'yes' ) {
-			wp_register_script( 'klarna-part-payment-widget-js', 'https://cdn.klarna.com/1.0/code/client/all.js', array('jquery'), '1.0', true );
-			wp_enqueue_script( 'klarna-part-payment-widget-js' );
-		}
-
-	} // End function
-	
+	} // End function	
 			 
 } // End class WC_Gateway_Klarna_Account
