@@ -1105,6 +1105,7 @@ class WC_Gateway_Klarna_Campaign extends WC_Gateway_Klarna {
     		$result = $k->reserveAmount(
 				$klarna_pno, //Date of birth.
 				intval($klarna_gender),//Gender.
+				-1, // Automatically calculate and reserve the cart total amount
 				KlarnaFlags::NO_FLAG, //No specific behaviour like RETURN_OCR or TEST_MODE.
 				$klarna_pclass // Get the pclass object that the customer has choosen.
     		);

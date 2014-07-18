@@ -1,4 +1,9 @@
 *** Klarna Changelog ***
+
+2014.07.18 	- version 1.8.2
+* Fix		- Flag for automatically calculate and reserve the cart total amount in the reserveAmount call (Account & Special Campaign)
+
+2014.07.07 	- version 1.8.1
 * Fix		- Thanks page url update (klarna_checkout_thanks_url_de) for Germany (Klarna Checkout). Was missing in 1.8.
 * Fix		- Part Payment Widget update. Moved to separate class.
 
