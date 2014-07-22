@@ -224,7 +224,7 @@ update_post_meta( $order_id, '_customer_ip_address',	isset( $_SERVER['HTTP_X_FOR
 update_post_meta( $order_id, '_customer_user_agent', 	isset( $_SERVER['HTTP_USER_AGENT'] ) ? $_SERVER['HTTP_USER_AGENT'] : '' );
 
 // Let plugins add meta
-do_action( 'woocommerce_checkout_update_order_meta', $order_id, $this->posted );
+do_action( 'woocommerce_checkout_update_order_meta', $order_id, '' );
 
 // Order status
 wp_set_object_terms( $order_id, 'pending', 'shop_order_status' );
