@@ -84,9 +84,12 @@ class WC_Gateway_Klarna_Campaign extends WC_Gateway_Klarna {
 		
 			
 		// Apply filters to Country and language
-		$this->klarna_country 				= apply_filters( 'klarna_country', $klarna_country );
-		$this->klarna_language 				= apply_filters( 'klarna_language', $klarna_language );
-		$this->klarna_currency 				= apply_filters( 'klarna_currency', $klarna_currency );
+		$klarna_campaign_info = '';
+		$klarna_wb_img_checkout = '';
+		
+		//$this->klarna_country 				= apply_filters( 'klarna_country', $klarna_country );
+		//$this->klarna_language 				= apply_filters( 'klarna_language', $klarna_language );
+		//$this->klarna_currency 				= apply_filters( 'klarna_currency', $klarna_currency );
 		$this->klarna_campaign_info 		= apply_filters( 'klarna_campaign_info', $klarna_campaign_info );
 		$this->klarna_wb_img_checkout		= apply_filters( 'klarna_wb_img_checkout', $klarna_wb_img_checkout );
 		
@@ -473,7 +476,7 @@ class WC_Gateway_Klarna_Campaign extends WC_Gateway_Klarna {
 			</p>
 			<?php
 			// Calculate lowest monthly cost and display it
-			
+			/*
 			$pclass = $k->getCheapestPClass($sum, $flag);
 	
 			//Did we get a PClass? (it is false if we didn't)
@@ -484,15 +487,15 @@ class WC_Gateway_Klarna_Campaign extends WC_Gateway_Klarna {
     	    	$pclass,
     	    	$flag
     			);
-	
+		*/
 	    		/* $value is now a rounded monthly cost amount to be displayed to the customer. */
 	    		// apply_filters to the monthly cost message so we can filter this if needed
-	    		
+	  /*  		
 	    		$klarna_campaign_monthly_cost_message = sprintf(__('From %s %s/month', 'klarna'), $value, $this->klarna_currency );
 	    		echo '<p class="form-row form-row-last klarna-monthly-cost">' . apply_filters( 'klarna_campaign_monthly_cost_message', $klarna_campaign_monthly_cost_message ) . '</p>';
 	    		
 			
-			}
+			}*/
 			?>
 			<div class="clear"></div>
 			

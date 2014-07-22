@@ -93,6 +93,9 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 			$this->authorized_countries[] = 'NL';
 		}
 		
+		$klarna_basic_icon = '';
+		$klarna_account_info = '';
+
 		// Apply filters to Country and language
 		//$this->klarna_country 					= apply_filters( 'klarna_country', $klarna_country );
 		//$this->klarna_language 					= apply_filters( 'klarna_language', $klarna_language );
