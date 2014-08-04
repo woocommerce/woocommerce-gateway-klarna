@@ -1,5 +1,9 @@
 *** Klarna Changelog ***
 
+2014.08.04 	- version 1.8.3
+* Fix		- Removed included files kco-create-order-2.0.php & kco-create-order-2.1.php and added the code as functions in class-klarna-checkout instead. Caused error on some LiteSpeed stacks.
+* Fix		- Php notices fix. 
+
 2014.07.18 	- version 1.8.2
 * Fix		- Flag for automatically calculate and reserve the cart total amount in the reserveAmount call (Account & Special Campaign)
 
