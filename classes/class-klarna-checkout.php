@@ -1556,6 +1556,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	
 			switch ( $klarna_country ) {
 				case 'NB' :
+				case 'NN' :
 					$klarna_country = 'NO';
 					break;
 				case 'SV' :
@@ -2007,7 +2008,6 @@ class WC_Gateway_Klarna_Checkout_Extra {
 	 
 	function change_checkout_url( $url ) {
 		global $woocommerce;
-		
 		$data = new WC_Gateway_Klarna_Checkout;
 		$enabled = $data->get_enabled();
 		$klarna_checkout_url = $data->get_klarna_checkout_url();
