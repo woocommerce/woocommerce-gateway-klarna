@@ -33,18 +33,20 @@ class WC_Gateway_Klarna_Campaign extends WC_Gateway_Klarna {
 		$this->description  						= ( isset( $this->settings['description'] ) ) ? $this->settings['description'] : '';
 		$this->icon_url  							= ( isset( $this->settings['icon_url'] ) ) ? $this->settings['icon_url'] : '';
 		
-		$this->eid_se							= ( isset( $this->settings['eid_se'] ) ) ? $this->settings['eid_se'] : '';
-       	$this->secret_se						= ( isset( $this->settings['secret_se'] ) ) ? $this->settings['secret_se'] : '';
-       	$this->eid_no							= ( isset( $this->settings['eid_no'] ) ) ? $this->settings['eid_no'] : '';
-       	$this->secret_no						= ( isset( $this->settings['secret_no'] ) ) ? $this->settings['secret_no'] : '';
-		$this->eid_fi							= ( isset( $this->settings['eid_fi'] ) ) ? $this->settings['eid_fi'] : '';
-       	$this->secret_fi						= ( isset( $this->settings['secret_fi'] ) ) ? $this->settings['secret_fi'] : '';
-       	$this->eid_dk							= ( isset( $this->settings['eid_dk'] ) ) ? $this->settings['eid_dk'] : '';
-       	$this->secret_dk						= ( isset( $this->settings['secret_dk'] ) ) ? $this->settings['secret_dk'] : '';
-       	$this->eid_de							= ( isset( $this->settings['eid_de'] ) ) ? $this->settings['eid_de'] : '';
-       	$this->secret_de						= ( isset( $this->settings['secret_de'] ) ) ? $this->settings['secret_de'] : '';
-       	$this->eid_nl							= ( isset( $this->settings['eid_nl'] ) ) ? $this->settings['eid_nl'] : '';
-       	$this->secret_nl						= ( isset( $this->settings['secret_nl'] ) ) ? $this->settings['secret_nl'] : '';
+		$this->eid_se								= ( isset( $this->settings['eid_se'] ) ) ? $this->settings['eid_se'] : '';
+       	$this->secret_se							= ( isset( $this->settings['secret_se'] ) ) ? $this->settings['secret_se'] : '';
+       	$this->eid_no								= ( isset( $this->settings['eid_no'] ) ) ? $this->settings['eid_no'] : '';
+       	$this->secret_no							= ( isset( $this->settings['secret_no'] ) ) ? $this->settings['secret_no'] : '';
+		$this->eid_fi								= ( isset( $this->settings['eid_fi'] ) ) ? $this->settings['eid_fi'] : '';
+       	$this->secret_fi							= ( isset( $this->settings['secret_fi'] ) ) ? $this->settings['secret_fi'] : '';
+       	$this->eid_dk								= ( isset( $this->settings['eid_dk'] ) ) ? $this->settings['eid_dk'] : '';
+       	$this->secret_dk							= ( isset( $this->settings['secret_dk'] ) ) ? $this->settings['secret_dk'] : '';
+       	$this->eid_de								= ( isset( $this->settings['eid_de'] ) ) ? $this->settings['eid_de'] : '';
+       	$this->secret_de							= ( isset( $this->settings['secret_de'] ) ) ? $this->settings['secret_de'] : '';
+       	$this->eid_nl								= ( isset( $this->settings['eid_nl'] ) ) ? $this->settings['eid_nl'] : '';
+       	$this->secret_nl							= ( isset( $this->settings['secret_nl'] ) ) ? $this->settings['secret_nl'] : '';
+       	$this->eid_at								= ( isset( $this->settings['eid_at'] ) ) ? $this->settings['eid_at'] : '';
+       	$this->secret_at							= ( isset( $this->settings['secret_at'] ) ) ? $this->settings['secret_at'] : '';
        	
 		$this->lower_threshold						= ( isset( $this->settings['lower_threshold'] ) ) ? $this->settings['lower_threshold'] : '';
 		$this->upper_threshold						= ( isset( $this->settings['upper_threshold'] ) ) ? $this->settings['upper_threshold'] : '';
@@ -235,9 +237,9 @@ class WC_Gateway_Klarna_Campaign extends WC_Gateway_Klarna {
 							'default' => 'no'
 						),
 			'de_consent_terms' => array(
-							'title' => __( 'Klarna concent terms (DE only)', 'klarna' ), 
+							'title' => __( 'Klarna consent terms (DE & AT only)', 'klarna' ), 
 							'type' => 'checkbox', 
-							'label' => __( 'Enable Klarna concent terms checkbox in checkout. This only apply to German merchants.', 'klarna' ), 
+							'label' => __( 'Enable Klarna consent terms checkbox in checkout. This only apply to German & Austrian merchants.', 'klarna' ), 
 							'default' => 'no'
 						),
 			'testmode' => array(
@@ -341,7 +343,8 @@ class WC_Gateway_Klarna_Campaign extends WC_Gateway_Klarna {
 				if ( $woocommerce->customer->get_country() == true && !in_array($woocommerce->customer->get_country(), $this->authorized_countries) ) return false;
 				
 				// Currency check
-				if( $this->get_currency_for_country($woocommerce->customer->get_country()) !== $this->selected_currency ) return false;
+				$currency_for_country = $this->get_currency_for_country($woocommerce->customer->get_country());
+				if( !empty($currency_for_country) && $currency_for_country !== $this->selected_currency ) return false;
 
 			
 			} // End Checkout form check
@@ -680,6 +683,11 @@ class WC_Gateway_Klarna_Campaign extends WC_Gateway_Klarna {
 					
 					var klarna_campaign_selected_country = $( "#billing_country" ).val();
 					
+					// If no Billing Country is set in the checkout form, use the default shop country
+					if( !klarna_invo_selected_country ) {
+						var klarna_invo_current_locale == '<?php echo $this->shop_country;?>';
+					}
+					
 					if( klarna_campaign_selected_country == 'SE' ) {
 					
 						var klarna_campaign_current_locale = 'sv_SE';
@@ -725,10 +733,12 @@ class WC_Gateway_Klarna_Campaign extends WC_Gateway_Klarna {
 			
 			<div class="clear"></div>
 			
-			<?php if ( $this->shop_country == 'DE' && $this->de_consent_terms == 'yes' ) : ?>
+			<?php 
+			// Consent terms for German & Austrian shops
+			if ( ( $this->shop_country == 'DE' || $this->shop_country == 'AT' ) && $this->de_consent_terms == 'yes' ) : ?>
 				<p class="form-row">
 					<label for="klarna_de_terms"></label>
-					<input type="checkbox" class="input-checkbox" value="yes" name="klarna_de_consent_terms" />
+					<input type="checkbox" class="input-checkbox" value="yes" name="klarna_campaign_de_consent_terms" />
 					<?php echo sprintf(__('Mit der Übermittlung der für die Abwicklungdes Rechnungskaufes und einer Identitäts-und Bonitätsprüfung erforderlichen Daten an Klarna bin ich einverstanden. Meine <a href="%s" target="_blank">Einwilligung</a> kann ich jederzeit mit Wirkung für die Zukunft widerrufen. Es gelten die AGB des Händlers.', 'klarna'), 'https://online.klarna.com/consent_de.yaws') ?>
 					
 				</p>
@@ -762,7 +772,7 @@ class WC_Gateway_Klarna_Campaign extends WC_Gateway_Klarna {
 	    		// Check if set, if its not set add an error.
 	    		
 	    		// Gender
-	    		if (!isset($_POST['klarna_campaign_gender']))
+	    		if (empty($_POST['klarna_campaign_gender']))
 	        	 	WC_Klarna_Compatibility::wc_add_notice(__('<strong>Gender</strong> is a required field.', 'klarna'), 'error');
 	         	
 	         	// Date of birth
@@ -805,10 +815,10 @@ class WC_Gateway_Klarna_Campaign extends WC_Gateway_Klarna {
 	        	 	WC_Klarna_Compatibility::wc_add_notice(__('Shipping and billing address must be the same when paying via Klarna.', 'klarna'), 'error');
 			}
 			
-			// DE
-			if ( $_POST['billing_country'] == 'DE' && $this->de_consent_terms == 'yes'){
+			// DE & AT
+			if ( ( $this->shop_country == 'DE' || $this->shop_country == 'AT' ) && $this->de_consent_terms == 'yes') {
 	    		// Check if set, if its not set add an error.
-	    		if (!isset($_POST['klarna_de_consent_terms']))
+	    		if (!isset($_POST['klarna_campaign_de_consent_terms']))
 	        	 	WC_Klarna_Compatibility::wc_add_notice(__('You must accept the Klarna consent terms.', 'klarna'), 'error');
 			}
 		}
