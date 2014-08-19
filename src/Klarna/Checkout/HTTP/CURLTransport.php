@@ -59,7 +59,7 @@ class Klarna_Checkout_HTTP_CURLTransport
     public function __construct(Klarna_Checkout_HTTP_CURLFactory $curl)
     {
         $this->curl = $curl;
-        $this->timeout = 5; // default to 5 seconds
+        $this->timeout = 15; // default to 5 seconds
     }
 
     /**
