@@ -832,6 +832,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 					$this->log->add( 'klarna', 'Billing: ' . $klarna_order['billing_address']['given_name'] . '\r\n');
 					$this->log->add( 'klarna', 'Order ID: ' . $_GET['sid']);
 					$this->log->add( 'klarna', 'Reference: ' . $klarna_order['reservation']);
+					$this->log->add( 'klarna', '$received__shipping_address_1: ' . $received__shipping_address_1);
 				endif;
 				
 				if ($klarna_order['status'] == "checkout_complete") { 
@@ -839,10 +840,29 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 					$order_id = $_GET['sid'];
 					$order = new WC_Order( $_GET['sid'] );
 					
+					
+					// Different names on the returned street address if it's a German purchase or not
+					$received__billing_address_1 	= '';
+					$received__shipping_address_1 	= '';
+					
+					if( $_GET['scountry'] == 'DE' ) {
+						
+						$received__billing_address_1 = $klarna_order['billing_address']['street_name'] . ' ' . $klarna_order['billing_address']['street_number'];
+						$received__shipping_address_1 = $klarna_order['shipping_address']['street_name'] . ' ' . $klarna_order['shipping_address']['street_number'];
+						
+					} else {
+					
+						$received__billing_address_1 	= $klarna_order['billing_address']['street_address'];
+						$received__shipping_address_1 	= $klarna_order['shipping_address']['street_address'];
+					
+					}
+					
+					
+					
 					// Add customer billing address - retrieved from callback from Klarna
 					update_post_meta( $order_id, '_billing_first_name', $klarna_order['billing_address']['given_name'] );
 					update_post_meta( $order_id, '_billing_last_name', $klarna_order['billing_address']['family_name'] );
-					update_post_meta( $order_id, '_billing_address_1', $klarna_order['billing_address']['street_address'] );
+					update_post_meta( $order_id, '_billing_address_1', $received__billing_address_1 );
 					update_post_meta( $order_id, '_billing_address_2', $klarna_order['billing_address']['care_of'] );
 					update_post_meta( $order_id, '_billing_postcode', $klarna_order['billing_address']['postal_code'] );
 					update_post_meta( $order_id, '_billing_city', $klarna_order['billing_address']['city'] );
@@ -857,7 +877,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 						
 						update_post_meta( $order_id, '_shipping_first_name', $klarna_order['shipping_address']['given_name'] );
 						update_post_meta( $order_id, '_shipping_last_name', $klarna_order['shipping_address']['family_name'] );
-						update_post_meta( $order_id, '_shipping_address_1', $klarna_order['shipping_address']['street_address'] );
+						update_post_meta( $order_id, '_shipping_address_1', $received__shipping_address_1 );
 						update_post_meta( $order_id, '_shipping_address_2', $klarna_order['shipping_address']['care_of'] );
 						update_post_meta( $order_id, '_shipping_postcode', $klarna_order['shipping_address']['postal_code'] );
 						update_post_meta( $order_id, '_shipping_city', $klarna_order['shipping_address']['city'] );
@@ -867,7 +887,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 						
 						update_post_meta( $order_id, '_shipping_first_name', $klarna_order['billing_address']['given_name'] );
 						update_post_meta( $order_id, '_shipping_last_name', $klarna_order['billing_address']['family_name'] );
-						update_post_meta( $order_id, '_shipping_address_1', $klarna_order['billing_address']['street_address'] );
+						update_post_meta( $order_id, '_shipping_address_1', $received__billing_address_1 );
 						update_post_meta( $order_id, '_shipping_address_2', $klarna_order['billing_address']['care_of'] );
 						update_post_meta( $order_id, '_shipping_postcode', $klarna_order['billing_address']['postal_code'] );
 						update_post_meta( $order_id, '_shipping_city', $klarna_order['billing_address']['city'] );
