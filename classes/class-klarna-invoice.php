@@ -1287,6 +1287,12 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 	} // End function
 	
 	
+	
+	// Helper function - get consent terms
+	function get_consent_terms() {
+		return $this->de_consent_terms;
+	}
+
 
 } // End class WC_Gateway_Klarna_Invoice
 
@@ -1299,6 +1305,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 class WC_Gateway_Klarna_Invoice_Extra {
 
 	public function __construct() {
+		
 		// Add Invoice fee via the new Fees API
 		add_action( 'woocommerce_cart_calculate_fees', array( $this, 'calculate_fees' ));
 		
@@ -1363,6 +1370,7 @@ class WC_Gateway_Klarna_Invoice_Extra {
     	
     	$data = new WC_Gateway_Klarna_Invoice;
 		$this->shop_country = $data->get_klarna_shop_country();
+		$this->de_consent_terms = $data->get_consent_terms();
  		
  		// Only run this if Klarna invoice is the choosen payment method
  		if ($_POST['payment_method'] == 'klarna') {
