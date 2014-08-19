@@ -1,5 +1,12 @@
 *** Klarna Changelog ***
 
+2014.08.19 	- version 1.8.4
+* Tweak		- Increased CURL setTimeout to 15 seconds (KCO)
+* Tweak		- Added consent terms checkbox for Austrian stores (KPM)
+* Fix		- Sorted Klarna terms js and is_available() issue when default country was empty on checkout (KPM).
+* Fix		- Error when Austrian stores had Klarna Account activated
+* Fix		- Gender check for Austrian stores (KPM)
+
 2014.08.04 	- version 1.8.3
 * Fix		- Removed included files kco-create-order-2.0.php & kco-create-order-2.1.php and added the code as functions in class-klarna-checkout instead. Caused error on some LiteSpeed stacks.
 * Fix		- Php notices fix. 
