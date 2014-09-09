@@ -189,11 +189,14 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
        	
        	add_action( 'woocommerce_api_wc_gateway_klarna_checkout', array( $this, 'check_checkout_listener' ) );
        	
+       	// We execute the woocommerce_thankyou hook when the KCO Thanks page is rendered because other plugins uses this, 
+       	// but we don't want to display the actual WC Order details table. Remove this action here.
+       	remove_action( 'woocommerce_thankyou', 'woocommerce_order_details_table', 10 );
        	//add_action( 'add_meta_boxes', array( $this, 'add_klarna_meta_box' ) );
        	
     }
 
-	    
+	 
     /**
 	 * Initialise Gateway Settings Form Fields
 	 */
@@ -479,6 +482,8 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 				
 				do_action( 'klarna_after_kco_confirmation', $_GET['sid'] );
 				
+				do_action( 'woocommerce_thankyou', $_GET['sid'] );
+				
 				unset($_SESSION['klarna_checkout']);
 				
 				// Remove cart
@@ -499,7 +504,6 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 					echo apply_filters( 'klarna_checkout_wrong_country_message', sprintf(__('Sorry, you can not buy via Klarna Checkout from your country or currency. Please <a href="%s">use another payment method</a>.', 'klarna'), get_permalink( get_option('woocommerce_checkout_page_id') )) );
 					return;
 				}
-				
 				
 				
 				// If checkout registration is disabled and not logged in, the user cannot checkout
@@ -536,7 +540,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 					echo '<div class="woocommerce"><a href="' . get_permalink( get_option('woocommerce_checkout_page_id') ) . '" class="button std-checkout-button">' . $this->std_checkout_button_label . '</a></div>';
 				}
 				
-	
+				
 				if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 					
         			// Create a new order
@@ -551,7 +555,6 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
         			
         			// Store Order ID in session so it can be re-used if customer navigates away from the checkout and then return again
 					$woocommerce->session->order_awaiting_payment = $order_id;
-					
         			
         			// Get an instance of the created order
         			$order = new WC_Order( $order_id );			
@@ -654,7 +657,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 						 	'tax_rate' => 0  
 						);
 					}
-									
+								
 					// Merchant ID
 					$eid = $this->klarna_eid;
     		
@@ -983,7 +986,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		} // End function create_order()
 		
 		
-				/**
+		/**
 		 * Create new order for WooCommerce version 2.1+
 		 * @return int|WP_ERROR 
 		 */
@@ -1215,7 +1218,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			update_post_meta( $order_id, '_customer_user_agent', 	isset( $_SERVER['HTTP_USER_AGENT'] ) ? $_SERVER['HTTP_USER_AGENT'] : '' );
 			
 			// Let plugins add meta
-			do_action( 'woocommerce_checkout_update_order_meta', $order_id, '' );
+			do_action( 'woocommerce_checkout_update_order_meta', $order_id, array() );
 			
 			// Order status
 			wp_set_object_terms( $order_id, 'pending', 'shop_order_status' );

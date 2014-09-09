@@ -657,8 +657,8 @@ class WC_Gateway_Klarna_Campaign extends WC_Gateway_Klarna {
 					<label for="klarna_campaign_gender"><?php echo __("Gender", 'klarna') ?> <span class="required">*</span></label>
 					<select id="klarna_campaign_gender" name="klarna_campaign_gender" class="woocommerce-select" style="width:120px;">
 						<option value=""><?php echo __("Select gender", 'klarna') ?></options>
-						<option value="0"><?php echo __("Female", 'klarna') ?></options>
-						<option value="1"><?php echo __("Male", 'klarna') ?></options>
+						<option value="f"><?php echo __("Female", 'klarna') ?></options>
+						<option value="m"><?php echo __("Male", 'klarna') ?></options>
 					</select>
 				</p>
 			<?php endif; ?>
@@ -684,8 +684,8 @@ class WC_Gateway_Klarna_Campaign extends WC_Gateway_Klarna {
 					var klarna_campaign_selected_country = $( "#billing_country" ).val();
 					
 					// If no Billing Country is set in the checkout form, use the default shop country
-					if( !klarna_invo_selected_country ) {
-						var klarna_invo_current_locale == '<?php echo $this->shop_country;?>';
+					if( !klarna_campaign_selected_country ) {
+						var klarna_account_selected_country = '<?php echo $this->shop_country;?>';
 					}
 					
 					if( klarna_campaign_selected_country == 'SE' ) {
@@ -1116,11 +1116,11 @@ class WC_Gateway_Klarna_Campaign extends WC_Gateway_Klarna {
 		try {
     		//Transmit all the specified data, from the steps above, to Klarna.
     		$result = $k->reserveAmount(
-				$klarna_pno, //Date of birth.
-				intval($klarna_gender),//Gender.
-				-1, // Automatically calculate and reserve the cart total amount
-				KlarnaFlags::NO_FLAG, //No specific behaviour like RETURN_OCR or TEST_MODE.
-				$klarna_pclass // Get the pclass object that the customer has choosen.
+				$klarna_pno, 			//Date of birth.
+				$klarna_gender,			//Gender.
+				-1, 					// Automatically calculate and reserve the cart total amount
+				KlarnaFlags::NO_FLAG, 	//No specific behaviour like RETURN_OCR or TEST_MODE.
+				$klarna_pclass 			// Get the pclass object that the customer has choosen.
     		);
     		
     		// Prepare redirect url

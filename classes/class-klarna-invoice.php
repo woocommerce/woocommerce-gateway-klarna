@@ -530,8 +530,8 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 					<label for="klarna_invo_gender"><?php echo __("Gender", 'klarna') ?> <span class="required">*</span></label>
 					<select id="klarna_invo_gender" name="klarna_invo_gender" class="woocommerce-select" style="width:120px;">
 						<option value=""><?php echo __("Select gender", 'klarna') ?></options>
-						<option value="0"><?php echo __("Female", 'klarna') ?></options>
-						<option value="1"><?php echo __("Male", 'klarna') ?></options>
+						<option value="f"><?php echo __("Female", 'klarna') ?></options>
+						<option value="m"><?php echo __("Male", 'klarna') ?></options>
 					</select>
 				</p>
 			<?php endif; ?>
@@ -552,15 +552,13 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 			<script type="text/javascript">
 			
 				// Document ready
-				jQuery(document).ready(function($) {
-					
-					
+				jQuery(document).ready(function($) {		
 					
 					var klarna_invo_selected_country = $( "#billing_country" ).val();
 					
 					// If no Billing Country is set in the checkout form, use the default shop country
 					if( !klarna_invo_selected_country ) {
-						var klarna_invo_current_locale == '<?php echo $this->shop_country;?>';
+						var klarna_invo_selected_country = '<?php echo $this->shop_country;?>';
 					}
 					
 					if( klarna_invo_selected_country == 'SE' ) {
@@ -636,6 +634,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 	function process_payment( $order_id ) {
 	
 		global $woocommerce;
+		$klarna_gender = null;
 		
 		$order = new WC_order( $order_id );
 		
@@ -660,7 +659,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 		
 
 		// Split address into House number and House extension for NL & DE customers
-		if ( $_POST['billing_country'] == 'NL' || $_POST['billing_country'] == 'DE' || $_POST['billing_country'] == 'AT' ) :
+		if ( $_POST['billing_country'] == 'NL' || $_POST['billing_country'] == 'DE' ) :
 		
 			require_once(KLARNA_DIR . 'split-address.php');
 			
@@ -884,8 +883,9 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 		);
 		
 		// Add Company if one is set
-		if($order->billing_company)
+		if($order->billing_company) {
 			$addr_billing->setCompanyName($order->billing_company);
+		}
 		
 		// Shipping address
 		if ( $order->get_shipping_method() == '' || $this->ship_to_billing_address == 'yes') {
@@ -905,6 +905,11 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
     			utf8_decode ($klarna_billing_house_number), //For DE and NL we need to specify houseNo.
     			utf8_decode ($klarna_billing_house_extension) //Only required for NL.
 			);
+			
+			// Add Company if one is set
+			if($order->billing_company) {
+				$addr_shipping->setCompanyName($order->billing_company);
+			}
 		
 		} else {
 		
@@ -922,6 +927,11 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
     			utf8_decode ($klarna_shipping_house_number), //For DE and NL we need to specify houseNo.
     			utf8_decode ($klarna_shipping_house_extension) //Only required for NL.
 			);
+			
+			// Add Company if one is set
+			if($order->shipping_company) {
+				$addr_shipping->setCompanyName($order->shipping_company);
+			}
 		
 		}
 		
@@ -951,8 +961,8 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
     		//Transmit all the specified data, from the steps above, to Klarna.
     		$result = $k->reserveAmount(
 				$klarna_pno, 				// Date of birth. 
-				intval($klarna_gender),		// Gender.
-				-1, // Automatically calculate and reserve the cart total amount
+				$klarna_gender,				// Gender.
+				-1, 						// Automatically calculate and reserve the cart total amount
     		    KlarnaFlags::NO_FLAG, 		// No specific behaviour like RETURN_OCR or TEST_MODE.
 				KlarnaPClass::INVOICE 		//-1, notes that this is an invoice purchase, for part payment purchase you will have a pclass object which you use getId() from.
     		);
@@ -1046,6 +1056,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 	 * Adds inline javascript in the footer that updates the totals on the checkout form when a payment method is selected.
 	 **/
 	function print_invoice_fee_updater () {
+		global $woocommerce;
 		if ( is_checkout() && $this->enabled=="yes" && $this->invoice_fee_id > 0 ) {
 			?>
 			<script type="text/javascript">
@@ -1059,6 +1070,42 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 			</script>
 			<?php
 		}
+		
+		// Klarna invoice not available for Companies in Germany and Austria
+		// Disable the radio button for the Invoice payment method if Company name is entered
+		if ( is_checkout() && $this->enabled=="yes" ) {
+			?>
+			<script type="text/javascript">
+				//<![CDATA[
+				jQuery(document).ajaxComplete(function(){
+		
+				    if (jQuery.trim(jQuery('input[name=billing_company]').val()) && (jQuery( "#billing_country" ).val()=='DE' || jQuery( "#billing_country" ).val()=='AT')) {
+				    	
+				        jQuery('#payment_method_klarna').prop('disabled', true);
+				        
+				    } else jQuery('#payment_method_klarna').prop('disabled', false);
+						    
+				});
+				
+				jQuery(document).ready(function($){
+											    
+					$(window).load(function(){
+						
+						$('input[name=billing_company]').keyup(function() {
+						    if ($.trim(this.value).length && ($( "#billing_country" ).val()=='DE' || $( "#billing_country" ).val()=='AT')) {
+						    	
+						        $('#payment_method_klarna').prop('disabled', true);
+						        
+						    } else $('#payment_method_klarna').prop('disabled', false);
+						});
+						
+					});	
+				});
+				//]]>
+			</script>
+			<?php
+		}
+	
 	} // end print_invoice_fee_updater
 	
 	

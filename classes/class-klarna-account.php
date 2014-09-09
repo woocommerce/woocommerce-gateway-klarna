@@ -58,11 +58,7 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 		$this->lower_threshold					= ( isset( $this->settings['lower_threshold'] ) ) ? $this->settings['lower_threshold'] : '';
 		$this->upper_threshold					= ( isset( $this->settings['upper_threshold'] ) ) ? $this->settings['upper_threshold'] : '';
 		$this->show_monthly_cost				= ( isset( $this->settings['show_monthly_cost'] ) ) ? $this->settings['show_monthly_cost'] : '';
-		$this->show_monthly_cost_info			= ( isset( $this->settings['show_monthly_cost_info'] ) ) ? $this->settings['show_monthly_cost_info'] : '';
 		$this->show_monthly_cost_prio			= ( isset( $this->settings['show_monthly_cost_prio'] ) ) ? $this->settings['show_monthly_cost_prio'] : '15';
-		//$this->show_monthly_cost_shop			= ( isset( $this->settings['show_monthly_cost_shop'] ) ) ? $this->settings['show_monthly_cost_shop'] : '';
-		//$this->show_monthly_cost_shop_info		= ( isset( $this->settings['show_monthly_cost_shop_info'] ) ) ? $this->settings['show_monthly_cost_shop_info'] : '';
-		//$this->show_monthly_cost_shop_prio		= ( isset( $this->settings['show_monthly_cost_shop_prio'] ) ) ? $this->settings['show_monthly_cost_shop_prio'] : '15';
 		$this->testmode							= ( isset( $this->settings['testmode'] ) ) ? $this->settings['testmode'] : '';
 		$this->de_consent_terms					= ( isset( $this->settings['de_consent_terms'] ) ) ? $this->settings['de_consent_terms'] : '';
 		$this->lower_threshold_monthly_cost		= ( isset( $this->settings['lower_threshold_monthly_cost'] ) ) ? $this->settings['lower_threshold_monthly_cost'] : '';
@@ -123,6 +119,7 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 		//add_action('admin_init', array(&$this, 'update_pclasses_from_klarna'));
 		
 		add_action('woocommerce_checkout_process', array( $this, 'klarna_account_checkout_field_process'));
+		add_action('wp_print_footer_scripts', array( $this, 'footer_scripts'));
 		
 	}
 	
@@ -242,12 +239,6 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 							'label' => __( 'Display monthly cost on single products page.', 'klarna' ), 
 							'default' => 'yes'
 						),
-			'show_monthly_cost_info' => array(
-							'title' => __( 'Text for Monthly cost - product page', 'klarna' ), 
-							'type' => 'textarea', 
-							'description' => __( 'This controls the Monthly cost text displayed on the single product page. You can use the following shortcodes: [klarna_img] [klarna_price] [klarna_currency] & [klarna_account_info_link].', 'klarna' ), 
-							'default' => __('[klarna_img]<br/>Part pay from [klarna_price] [klarna_currency]/month.<br/>[klarna_account_info_link]', 'klarna')
-						),
 			'show_monthly_cost_prio' => array(
 								'title' => __( 'Placement of monthly cost - product page', 'klarna' ), 
 								'type' => 'select',
@@ -255,27 +246,6 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 								'description' => __( 'Select where on the products page the Monthly cost information should be displayed.', 'klarna' ), 
 								'default' => '15'
 							),
-			/*
-			'show_monthly_cost_shop' => array(
-							'title' => __( 'Display monthly cost - shop page', 'klarna' ), 
-							'type' => 'checkbox',
-							'label' => __( 'Display monthly cost next to each product on shop page.', 'klarna' ), 
-							'default' => 'no'
-						),
-			'show_monthly_cost_shop_info' => array(
-							'title' => __( 'Text for Monthly cost - shop page', 'klarna' ), 
-							'type' => 'textarea', 
-							'description' => __( 'This controls the text displayed next to each product on shop page. You can use the following shortcodes: [klarna_img] [klarna_price] [klarna_currency] & [klarna_account_info_link].', 'klarna' ), 
-							'default' => __('From [klarna_price] [klarna_currency]/month', 'klarna')
-						),
-			'show_monthly_cost_shop_prio' => array(
-								'title' => __( 'Placement of monthly cost - shop page', 'klarna' ), 
-								'type' => 'select',
-								'options' => array('0'=>__( 'Above Add to cart button', 'klarna' ), '15'=>__( 'Below Add to cart button', 'klarna')),
-								'description' => __( 'Select where on the shop page the Monthly cost information should be displayed.', 'klarna' ), 
-								'default' => '15'
-							),
-			*/
 			'lower_threshold_monthly_cost' => array(
 							'title' => __( 'Lower threshold for monthly cost', 'klarna' ), 
 							'type' => 'text', 
@@ -704,8 +674,8 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 					<label for="klarna_account_gender"><?php echo __("Gender", 'klarna') ?> <span class="required">*</span></label>
 					<select id="klarna_account_gender" name="klarna_account_gender" class="woocommerce-select" style="width:120px;">
 						<option value=""><?php echo __("Select gender", 'klarna') ?></options>
-						<option value="0"><?php echo __("Female", 'klarna') ?></options>
-						<option value="1"><?php echo __("Male", 'klarna') ?></options>
+						<option value="f"><?php echo __("Female", 'klarna') ?></options>
+						<option value="m"><?php echo __("Male", 'klarna') ?></options>
 					</select>
 				</p>
 			<?php endif; ?>
@@ -731,8 +701,8 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 					var klarna_account_selected_country = $( "#billing_country" ).val();
 					
 					// If no Billing Country is set in the checkout form, use the default shop country
-					if( !klarna_invo_selected_country ) {
-						var klarna_invo_current_locale == '<?php echo $this->shop_country;?>';
+					if( !klarna_account_selected_country ) {
+						var klarna_account_selected_country = '<?php echo $this->shop_country;?>';
 					}
 					
 					if( klarna_account_selected_country == 'SE' ) {
@@ -1168,11 +1138,11 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 		try {
     		//Transmit all the specified data, from the steps above, to Klarna.
 			$result = $k->reserveAmount(
-				$klarna_pno, //Date of birth.
-				intval($klarna_gender),//Gender.
-				-1, // Automatically calculate and reserve the cart total amount
-				KlarnaFlags::NO_FLAG, //No specific behaviour like RETURN_OCR or TEST_MODE.
-				$klarna_pclass // Get the pclass object that the customer has choosen.
+				$klarna_pno, 			//Date of birth.
+				$klarna_gender,			//Gender.
+				-1, 					// Automatically calculate and reserve the cart total amount
+				KlarnaFlags::NO_FLAG, 	//No specific behaviour like RETURN_OCR or TEST_MODE.
+				$klarna_pclass 			// Get the pclass object that the customer has choosen.
     		);
     		
     		// Prepare redirect url
@@ -1377,6 +1347,46 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 	
 	
 	
+	/**
+	 * footer_scripts()
+	 * Disable the radio button for the Klarna Account payment method if Company name is entered and the customer is from Germany or Austria
+	 **/
+	function footer_scripts () {
+			
+		if ( is_checkout() && $this->enabled=="yes" ) {
+			?>
+			<script type="text/javascript">
+				//<![CDATA[
+				jQuery(document).ajaxComplete(function(){
+		
+				    if (jQuery.trim(jQuery('input[name=billing_company]').val()) && (jQuery( "#billing_country" ).val()=='DE' || jQuery( "#billing_country" ).val()=='AT')) {
+				    	
+				        jQuery('#payment_method_klarna_account').prop('disabled', true);
+				        
+				    } else jQuery('#payment_method_klarna_account').prop('disabled', false);
+						    
+				});
+				
+				jQuery(document).ready(function($){
+											    
+					$(window).load(function(){
+						
+						$('input[name=billing_company]').keyup(function() {
+						    if ($.trim(this.value).length && ($( "#billing_country" ).val()=='DE' || $( "#billing_country" ).val()=='AT')) {
+						    	
+						        $('#payment_method_klarna_account').prop('disabled', true);
+						        
+						    } else $('#payment_method_klarna_account').prop('disabled', false);
+						});
+						
+					});	
+				});
+				//]]>
+			</script>
+			<?php
+		}
+	
+	} // end footer_scripts
 	
 	
 	// Get Monthly cost prio - product page

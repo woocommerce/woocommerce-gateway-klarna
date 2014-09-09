@@ -1,5 +1,15 @@
 *** Klarna Changelog ***
 
+2014.09.09 	- version 1.8.5
+* Tweak		- Klarna invoice not available to companies in DE & AT.
+* Tweak		- Added do_action('woocommerce_thankyou') after KCO Thank you page has rendered, other plugins rely on this hook. 
+* Tweak 	- Removed the hook woocommerce_order_details_table (executed via woocommerce_thankyou) so the WC order detail table doesn't get displayed under the KCO Thank you page.
+* Fix		- Moved housenumber for Austria so that it is sent to Klarna together with the address field (KMP).
+* Fix		- Gender issue fix (KPM) for DE, NL & AT.
+* Fix		- Sequential order numbers pro compatibility fix for KCO.
+* Fix		- Shipping Company name issue fixed (KPM).
+* Fix		- JS issue with variable klarna_invo_selected_country for displaying Klarnas terms in payment method description field on checkout (KPM).
+
 2014.08.19 	- version 1.8.4
 * Tweak		- Increased CURL setTimeout to 15 seconds (KCO).
 * Tweak		- Added consent terms checkbox for Austrian stores (KPM).
