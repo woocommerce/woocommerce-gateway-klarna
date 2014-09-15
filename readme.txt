@@ -1,9 +1,10 @@
 === WooCommerce Klarna Gateway ===
 Contributors: krokedil, niklashogefjord
 Tags: ecommerce, e-commerce, woocommerce, klarna
-Requires at least: 3.5
-Tested up to: 3.9.1
-Stable tag: 1.8
+Requires at least: 3.8
+Tested up to: 4.0
+Requires WooCommerce at least: 2.1
+Tested WooCommerce up to: 2.2
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 

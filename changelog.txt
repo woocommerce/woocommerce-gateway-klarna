@@ -1,5 +1,9 @@
 *** Klarna Changelog ***
 
+2014.09.15	- version 1.8.6
+* Misc		- WooCommerce 2.2 Compatibility
+* Misc		- Dropped support for 2.0.x
+
 2014.09.09 	- version 1.8.5
 * Tweak		- Klarna invoice not available to companies in DE & AT.
 * Tweak		- Added do_action('woocommerce_thankyou') after KCO Thank you page has rendered, other plugins rely on this hook. 

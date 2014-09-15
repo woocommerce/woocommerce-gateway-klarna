@@ -17,7 +17,7 @@
  * needs please refer to http://www.skyverge.com
  *
  * @author    SkyVerge
- * @copyright Copyright (c) 2013, SkyVerge, Inc.
+ * @copyright Copyright (c) 2013-2014, SkyVerge, Inc.
  * @license   http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
@@ -37,765 +37,293 @@ if ( ! class_exists( 'WC_Klarna_Compatibility' ) ) :
  * Over time we expect to remove methods from this class, using the current
  * ones directly, as support for older versions of WooCommerce is dropped.
  *
- * Current Compatibility: 2.0.x - 2.1
+ * Current Compatibility: 2.1.x - 2.2
  *
- * @version 1.1
+ * @version 2.0
  */
 class WC_Klarna_Compatibility {
 
 
 	/**
-	 * Compatibility function for outputting a woocommerce attribute label
+	 * Get the WC Order instance for a given order ID or order post
 	 *
-	 * @since 1.0
-	 * @param string $label the label to display
-	 * @return string the label to display
+	 * Introduced in WC 2.2 as part of the Order Factory so the 2.1 version is
+	 * not an exact replacement.
+	 *
+	 * If no param is passed, it will use the global post. Otherwise pass an
+	 * the order post ID or post object.
+	 *
+	 * @since 2.0.0
+	 * @param bool|int|string|\WP_Post $the_order
+	 * @return bool|\WC_Order
 	 */
-	public static function wc_attribute_label( $label ) {
+	public static function wc_get_order( $the_order = false ) {
 
-		if ( self::is_wc_version_gte_2_1() ) {
-			return wc_attribute_label( $label );
+		if ( self::is_wc_version_gte_2_2() ) {
+
+			return wc_get_order( $the_order );
+
 		} else {
-			global $woocommerce;
-			return $woocommerce->attribute_label( $label );
-		}
-	}
 
+			global $post;
 
-	/**
-	 * Compatibility function to add and store a notice
-	 *
-	 * @since 1.0
-	 * @param string $message The text to display in the notice.
-	 * @param string $notice_type The singular name of the notice type - either error, success or notice. [optional]
-	 */
-	public static function wc_add_notice( $message, $notice_type = 'success' ) {
+			if ( false === $the_order ) {
 
-		if ( self::is_wc_version_gte_2_1() ) {
-			wc_add_notice( $message, $notice_type );
-		} else {
-			global $woocommerce;
+				$order_id = $post->ID;
 
-			if ( 'error' == $notice_type ) {
-				$woocommerce->add_error( $message );
-			} else {
-				$woocommerce->add_message( $message );
-			}
-		}
-	}
+			} elseif ( $the_order instanceof WP_Post ) {
 
+				$order_id = $the_order->ID;
 
-	/**
-	 * Prints messages and errors which are stored in the session, then clears them.
-	 *
-	 * @since 1.0
-	 */
-	public static function wc_print_notices() {
+			} elseif ( is_numeric( $the_order ) ) {
 
-		if ( self::is_wc_version_gte_2_1() ) {
-			wc_print_notices();
-		} else {
-			global $woocommerce;
-			$woocommerce->show_messages();
-		}
-	}
-
-
-	/**
-	 * Compatibility function to queue some JavaScript code to be output in the footer.
-	 *
-	 * @since 1.0
-	 * @param string $code javascript
-	 */
-	public static function wc_enqueue_js( $code ) {
-
-		if ( self::is_wc_version_gte_2_1() ) {
-			wc_enqueue_js( $code );
-		} else {
-			global $woocommerce;
-			$woocommerce->add_inline_js( $code );
-		}
-	}
-
-
-	/**
-	 * Forces the provided $content url to https protocol
-	 *
-	 * @since 1.0
-	 * @param string $content the url
-	 * @return string the url with https protocol
-	 */
-	public static function force_https_url( $content ) {
-
-		if ( self::is_wc_version_gte_2_1() ) {
-			return WC_HTTPS::force_https_url( $content );
-		} else {
-			global $woocommerce;
-			return $woocommerce->force_ssl( $content );
-		}
-	}
-
-
-	/**
-	 * Returns true if on the pay page, false otherwise
-	 *
-	 * @since 1.0
-	 * @return boolean true if on the pay page, false otherwise
-	 */
-	public static function is_checkout_pay_page() {
-
-		if ( self::is_wc_version_gte_2_1() ) {
-			return is_checkout_pay_page();
-		} else {
-			return is_page( woocommerce_get_page_id( 'pay' ) );
-		}
-	}
-
-
-	/**
-	 * Returns the order_id if on the checkout pay page
-	 *
-	 * @since 1.0
-	 * @return int order identifier
-	 */
-	public static function get_checkout_pay_page_order_id() {
-
-		if ( self::is_wc_version_gte_2_1() ) {
-			global $wp;
-			return isset( $wp->query_vars['order-pay'] ) ? absint( $wp->query_vars['order-pay'] ) : 0;
-		} else {
-			return isset( $_GET['order'] ) ? absint( $_GET['order'] ) : 0;
-		}
-	}
-
-
-	/**
-	 * Returns the total shipping cost for the given order
-	 *
-	 * @since 1.0
-	 * @param WC_Order $order
-	 * @return float the shipping total
-	 */
-	public static function get_total_shipping( $order ) {
-
-		if ( self::is_wc_version_gte_2_1() ) {
-			return $order->get_total_shipping();
-		} else {
-			return $order->get_shipping();
-		}
-	}
-
-
-	/**
-	 * Returns the value of the custom field named $name, if any.  $name should
-	 * not have a leading underscore
-	 *
-	 * @since 1.0
-	 * @param WC_Order $order WC Order object
-	 * @param string $name meta key name without a leading underscore
-	 * @return string|mixed order custom field value for field named $name
-	 */
-	public static function get_order_custom_field( $order, $name ) {
-
-		if ( self::is_wc_version_gte_2_1() ) {
-			return isset( $order->$name ) ? $order->$name : '';
-		} else {
-			return isset( $order->order_custom_fields[ '_' . $name ][0] ) ? $order->order_custom_fields[ '_' . $name ][0] : '';
-		}
-	}
-
-
-	/**
-	 * Sets WooCommerce messages
-	 *
-	 * @since 1.0
-	 */
-	public static function set_messages() {
-
-		if ( self::is_wc_version_gte_2_1() ) {
-			// no-op in WC 2.1+
-		} else {
-			global $woocommerce;
-			$woocommerce->set_messages();
-		}
-	}
-
-
-	/**
-	 * Returns a new instance of the woocommerce logger
-	 *
-	 * @since 1.0
-	 * @return object logger
-	 */
-	public static function new_wc_logger() {
-
-		if ( self::is_wc_version_gte_2_1() ) {
-			return new WC_Logger();
-		} else {
-			global $woocommerce;
-			return $woocommerce->logger();
-		}
-	}
-
-
-	/**
-	 * Returns the admin configuration url for the gateway with class name
-	 * $gateway_class_name
-	 *
-	 * @since 1.0
-	 * @param string $gateway_class_name the gateway class name
-	 * @return string admin configuration url for the gateway
-	 */
-	public static function get_payment_gateway_configuration_url( $gateway_class_name ) {
-
-		if ( self::is_wc_version_gte_2_1() ) {
-			return admin_url( 'admin.php?page=wc-settings&tab=checkout&section=' . strtolower( $gateway_class_name ) );
-		} else {
-			return admin_url( 'admin.php?page=woocommerce_settings&tab=payment_gateways&section=' . $gateway_class_name );
-		}
-	}
-
-
-	/**
-	 * Returns true if the current page is the admin configuration page for the
-	 * gateway with class name $gateway_class_name
-	 *
-	 * @since 1.0
-	 * @param string $gateway_class_name the gateway class name
-	 * @return boolean true if the current page is the admin configuration page for the gateway
-	 */
-	public static function is_payment_gateway_configuration_page( $gateway_class_name ) {
-
-		if ( self::is_wc_version_gte_2_1() ) {
-			return isset( $_GET['page'] ) && 'wc-settings' == $_GET['page'] &&
-				isset( $_GET['tab'] ) && 'checkout' == $_GET['tab'] &&
-				isset( $_GET['section'] ) && strtolower( $gateway_class_name ) == $_GET['section'];
-		} else {
-			return isset( $_GET['page'] ) && 'woocommerce_settings' == $_GET['page'] &&
-				isset( $_GET['tab'] ) && 'payment_gateways' == $_GET['tab'] &&
-				isset( $_GET['section'] ) && $gateway_class_name == $_GET['section'];
-		}
-	}
-
-
-	/**
-	 * Returns the admin configuration url for the shipping method with class name
-	 * $gateway_class_name
-	 *
-	 * @since 1.0
-	 * @param string $shipping_method_class_name the shipping method class name
-	 * @return string admin configuration url for the shipping method
-	 */
-	public static function get_shipping_method_configuration_url( $shipping_method_class_name ) {
-
-		if ( self::is_wc_version_gte_2_1() ) {
-			return admin_url( 'admin.php?page=wc-settings&tab=shipping&section=' . strtolower( $shipping_method_class_name ) );
-		} else {
-			return admin_url( 'admin.php?page=woocommerce_settings&tab=shipping&section=' . $shipping_method_class_name );
-		}
-	}
-
-
-	/**
-	 * Returns true if the current page is the admin configuration page for the
-	 * shipping method with class name $shipping_method_class_name
-	 *
-	 * @since 1.0
-	 * @param string $shipping_method_class_name the shipping method class name
-	 * @return boolean true if the current page is the admin configuration page for the shipping method
-	 */
-	public static function is_shipping_method_configuration_page( $shipping_method_class_name ) {
-
-		if ( self::is_wc_version_gte_2_1() ) {
-			return isset( $_GET['page'] ) && 'wc-settings' == $_GET['page'] &&
-				isset( $_GET['tab'] ) && 'shipping' == $_GET['tab'] &&
-				isset( $_GET['section'] ) && strtolower( $shipping_method_class_name ) == $_GET['section'];
-		} else {
-			return isset( $_GET['page'] ) && 'woocommerce_settings' == $_GET['page'] &&
-				isset( $_GET['tab'] ) && 'shipping' == $_GET['tab'] &&
-				isset( $_GET['section'] ) && $shipping_method_class_name == $_GET['section'];
-		}
-	}
-
-
-	/**
-	 * Format decimal numbers ready for DB storage
-	 *
-	 * Sanitize, remove locale formatting, and optionally round + trim off zeros
-	 *
-	 * @since 1.0
-	 * @param  float|string $number Expects either a float or a string with a decimal separator only (no thousands)
-	 * @param  mixed $dp number of decimal points to use, blank to use woocommerce_price_num_decimals, or false to avoid all rounding.
-	 * @param  boolean $trim_zeros from end of string
-	 * @return string
-	 */
-	public static function wc_format_decimal( $number, $dp = false, $trim_zeros = false ) {
-
-		if ( self::is_wc_version_gte_2_1() ) {
-			return wc_format_decimal( $number, $dp, $trim_zeros );
-		} else {
-			return woocommerce_format_total( $number );
-		}
-	}
-
-
-	/**
-	 * Get the count of notices added, either for all notices (default) or for one particular notice type specified
-	 * by $notice_type.
-	 *
-	 * @since 1.0
-	 * @param string $notice_type The name of the notice type - either error, success or notice. [optional]
-	 * @return int the notice count
-	 */
-	public static function wc_notice_count( $notice_type = '' ) {
-
-		if ( self::is_wc_version_gte_2_1() ) {
-			return wc_notice_count( $notice_type );
-		} else {
-			global $woocommerce;
-
-			if ( 'error' == $notice_type ) {
-				return $woocommerce->error_count();
-			} else {
-				return $woocommerce->message_count();
-			}
-		}
-	}
-
-
-	/**
-	 * Returns the array of shipping methods chosen during checkout
-	 *
-	 * @since 1.0
-	 * @return array of chosen shipping method ids
-	 */
-	public static function get_chosen_shipping_methods() {
-
-		if ( self::is_wc_version_gte_2_1() ) {
-			$chosen_shipping_methods = self::WC()->session->get( 'chosen_shipping_methods' );
-			return $chosen_shipping_methods ? $chosen_shipping_methods : array();
-		} else {
-			return array( self::WC()->session->get( 'chosen_shipping_method' ) );
-		}
-	}
-
-
-	/**
-	 * Returns an array of shipping methods used for the order.  This is analogous
-	 * to but not a precise replacement for WC_Order::get_shipping_methods(), just
-	 * because there can't be a direct equivalent for pre WC 2.1
-	 *
-	 * @since 1.0
-	 * @return array of shipping method ids for $order
-	 */
-	public static function get_shipping_method_ids( $order ) {
-
-		if ( self::get_order_custom_field( $order, 'shipping_method' ) ) {
-
-			// pre WC 2.1 data
-			return array( self::get_order_custom_field( $order, 'shipping_method' ) );
-
-		} elseif ( self::is_wc_version_gte_2_1() ) {
-
-			$shipping_method_ids = array();
-
-			foreach ( $order->get_shipping_methods() as $shipping_method ) {
-				$shipping_method_ids[] = $shipping_method['method_id'];
+				$order_id = $the_order;
 			}
 
-			return $shipping_method_ids;
+			return new WC_Order( $order_id );
 		}
-
-		return array();
 	}
 
 
 	/**
-	 * Returns true if the order has the given shipping method
+	 * Transparently backport the `post_status` WP Query arg used by WC 2.2
+	 * for order statuses to the `shop_order_status` taxonomy query arg used by
+	 * WC 2.1
 	 *
-	 * @since 1.0
-	 * @param WC_Order $order
-	 * @param string $method_id
-	 * @return boolean true if $order is shipped by $method_id
+	 * @since 2.0.0
+	 * @param array $args WP_Query args
+	 * @return array
 	 */
-	public static function has_shipping_method( $order, $method_id ) {
+	public static function backport_order_status_query_args( $args ) {
 
-		if ( self::get_order_custom_field( $order, 'shipping_method' ) ) {
-			// pre WC 2.1 data
-			return $method_id == self::get_order_custom_field( $order, 'shipping_method' );
-		} elseif ( self::is_wc_version_gte_2_1() ) {
-			return $order->has_shipping_method( $method_id );
+		if ( ! self::is_wc_version_gte_2_2() ) {
+
+			// convert post status arg to taxonomy query compatible with WC 2.1
+			if ( ! empty( $args['post_status'] ) ) {
+
+				$order_statuses = array();
+
+				foreach ( (array) $args['post_status'] as $order_status ) {
+
+					$order_statuses[] = str_replace( 'wc-', '', $order_status );
+				}
+
+				$args['post_status'] = 'publish';
+
+				$tax_query = array(
+					'taxonomy' => 'shop_order_status',
+					'field'    => 'slug',
+					'terms'    => $order_statuses,
+					'operator' => 'IN',
+				);
+
+				$args['tax_query'] = array_merge( isset( $args['tax_query'] ) ? $args['tax_query'] : array(), $tax_query );
+			}
 		}
 
-		// default
-		return false;
+		return $args;
 	}
 
 
 	/**
-	 * Compatibility function to use the new WC_Admin_Meta_Boxes class for the save_errors() function
+	 * Get the user ID for an order
 	 *
-	 * @since 1.0
+	 * @since 2.0.0
+	 * @param \WC_Order $order
+	 * @return int
 	 */
-	public static function save_errors() {
+	public static function get_order_user_id( WC_Order $order ) {
 
-		if ( self::is_wc_version_gte_2_1() ) {
-				WC_Admin_Meta_Boxes::save_errors();
+		if ( self::is_wc_version_gte_2_2() ) {
+
+			return $order->get_user_id();
+
 		} else {
-				woocommerce_meta_boxes_save_errors();
+
+			return $order->customer_user ? $order->customer_user : 0;
 		}
 	}
 
 
 	/**
-	 * Get coupon types.
+	 * Get the user for an order
 	 *
-	 * @since 1.0
-	 * @return array of coupon types
+	 * @since 2.0.0
+	 * @param \WC_Order $order
+	 * @return bool|WP_User
 	 */
-	public static function wc_get_coupon_types() {
+	public static function get_order_user( WC_Order $order ) {
 
-		if ( self::is_wc_version_gte_2_1() ) {
-			return wc_get_coupon_types();
+		if ( self::is_wc_version_gte_2_2() ) {
+
+			return $order->get_user();
+
 		} else {
-			global $woocommerce;
-			return $woocommerce->get_coupon_discount_types();
+
+			return self::get_order_user_id( $order ) ? get_user_by( 'id', self::get_order_user_id( $order ) ) : false;
 		}
 	}
 
 
 	/**
-	 * Gets a product meta field value, regardless of product type
+	 * Get the WC Product instance for a given product ID or post
 	 *
-	 * @since 1.0
-	 * @param WC_Product $product the product
-	 * @param string $field_name the field name
-	 * @return mixed meta value
-	 */
-	public static function get_product_meta( $product, $field_name ) {
-
-		// even in WC >= 2.0 product variations still use the product_custom_fields array apparently
-		if ( $product->variation_id && isset( $product->product_custom_fields[ '_' . $field_name ][0] ) && '' !== $product->product_custom_fields[ '_' . $field_name ][0] ) {
-			return $product->product_custom_fields[ '_' . $field_name ][0];
-		}
-
-		// use magic __get
-		return $product->$field_name;
-	}
-
-
-	/**
-	 * Format the price with a currency symbol.
+	 * get_product() is soft-deprecated in WC 2.2
 	 *
-	 * @since 1.0
-	 * @param float $price the price
-	 * @param array $args (default: array())
-	 * @return string formatted price
-	 */
-	public static function wc_price( $price, $args = array() ) {
-
-		if ( self::is_wc_version_gte_2_1() ) {
-			return wc_price( $price, $args );
-		} else {
-			return woocommerce_price( $price, $args );
-		}
-	}
-
-
-	/**
-	 * WooCommerce Shortcode wrapper
-	 *
-	 * @since 1.0
-	 * @param mixed $function shortcode callback
-	 * @param array $atts (default: array())
-	 * @param array $wrapper array of wrapper options (class, before, after)
-	 * @return string
-	 */
-	public static function shortcode_wrapper(
-		$function,
-		$atts = array(),
-		$wrapper = array(
-			'class' => 'woocommerce',
-			'before' => null,
-			'after' => null
-		) ) {
-
-		if ( self::is_wc_version_gte_2_1() ) {
-			return WC_Shortcodes::shortcode_wrapper( $function, $atts, $wrapper );
-		} else {
-			global $woocommerce;
-			return $woocommerce->shortcode_wrapper( $function, $atts, $wrapper );
-		}
-	}
-
-
-	/**
-	 * Compatibility for the woocommerce_get_template() function which is soft-deprecated in 2.1+
-	 *
-	 * @since 1.1
-	 * @param string $template_name
+	 * @since 2.0.0
+	 * @param bool|int|string|\WP_Post $the_product
 	 * @param array $args
-	 * @param string $template_path
-	 * @param string $default_path
+	 * @return WC_Product
 	 */
-	public static function wc_get_template( $template_name, $args, $template_path, $default_path ) {
+	public static function wc_get_product( $the_product = false, $args = array() ) {
 
-		if ( self::is_wc_version_gte_2_1() ) {
+		if ( self::is_wc_version_gte_2_2() ) {
 
-			wc_get_template( $template_name, $args, $template_path, $default_path );
+			return wc_get_product( $the_product, $args );
 
 		} else {
 
-			woocommerce_get_template( $template_name, $args, $template_path, $default_path );
+			return get_product( $the_product, $args );
 		}
 	}
 
 
 	/**
-	 * Compatibility for the woocommerce_date_format() function which is soft-deprecated in 2.1+
+	 * Return an array of formatted item meta in format:
 	 *
-	 * @since 1.1
-	 * @return string date format
-	 */
-	public static function wc_date_format() {
-
-		return self::is_wc_version_gte_2_1() ? wc_date_format() : woocommerce_date_format();
-	}
-
-
-	/**
-	 * Compatibility for the woocommerce_time_format() function which is soft-deprecated in 2.1+
+	 * array(
+	 *   $meta_key => array(
+	 *     'label' => $label,
+	 *     'value' => $value
+	 *   )
+	 * )
 	 *
-	 * @since 1.1
-	 * @return string time format
-	 */
-	public static function wc_time_format() {
-
-		return self::is_wc_version_gte_2_1() ? wc_time_format() : woocommerce_time_format();
-	}
-
-
-	/**
-	 * Compatibility for the wc_timezone_string() function, which only
-	 * exists in 2.1+
+	 * e.g.
 	 *
-	 * @since 1.1
-	 * @return string a valid PHP timezone string for the site
+	 * array(
+	 *   'pa_size' => array(
+	 *     'label' => 'Size',
+	 *     'value' => 'Medium',
+	 *   )
+	 * )
+	 *
+	 * Backports the get_formatted() method to WC 2.1
+	 *
+	 * @since 2.0.0
+	 * @see WC_Order_Item_Meta::get_formatted()
+	 * @param \WC_Order_Item_Meta $item_meta order item meta class instance
+	 * @param string $hide_prefix exclude meta when key is prefixed with this, defaults to `_`
+	 * @return array
 	 */
-	public static function wc_timezone_string() {
+	public static function get_formatted_item_meta( WC_Order_Item_Meta $item_meta, $hide_prefix = '_' ) {
 
-		if ( self::is_wc_version_gte_2_1() ) {
+		if ( self::is_wc_version_gte_2_2() ) {
 
-			return wc_timezone_string();
+			return $item_meta->get_formatted( $hide_prefix );
 
 		} else {
 
-			// if site timezone string exists, return it
-			if ( $timezone = get_option( 'timezone_string' ) ) {
-				return $timezone;
+			if ( empty( $item_meta->meta ) ) {
+				return array();
 			}
 
-			// get UTC offset, if it isn't set then return UTC
-			if ( 0 === ( $utc_offset = get_option( 'gmt_offset', 0 ) ) ) {
-				return 'UTC';
-			}
+			$formatted_meta = array();
 
-			// adjust UTC offset from hours to seconds
-			$utc_offset *= 3600;
+			foreach ( (array) $item_meta->meta as $meta_key => $meta_values ) {
 
-			// attempt to guess the timezone string from the UTC offset
-			$timezone = timezone_name_from_abbr( '', $utc_offset );
+				if ( empty( $meta_values ) || ! is_array( $meta_values ) || ( ! empty( $hide_prefix ) && substr( $meta_key, 0, 1 ) == $hide_prefix ) ) {
+					continue;
+				}
 
-			// last try, guess timezone string manually
-			if ( false === $timezone ) {
+				foreach ( $meta_values as $meta_value ) {
 
-				$is_dst = date( 'I' );
+					// Skip serialised meta
+					if ( is_serialized( $meta_value ) ) {
+						continue;
+					}
 
-				foreach ( timezone_abbreviations_list() as $abbr ) {
-					foreach ( $abbr as $city ) {
+					$attribute_key = urldecode( str_replace( 'attribute_', '', $meta_key ) );
 
-						if ( $city['dst'] == $is_dst && $city['offset'] == $utc_offset ) {
-							return $city['timezone_id'];
+					// If this is a term slug, get the term's nice name
+					if ( taxonomy_exists( $attribute_key ) ) {
+						$term = get_term_by( 'slug', $meta_value, $attribute_key );
+
+						if ( ! is_wp_error( $term ) && is_object( $term ) && $term->name ) {
+							$meta_value = $term->name;
+						}
+
+						// If we have a product, and its not a term, try to find its non-sanitized name
+					} elseif ( $item_meta->product ) {
+						$product_attributes = $item_meta->product->get_attributes();
+
+						if ( isset( $product_attributes[ $attribute_key ] ) ) {
+							$meta_key = wc_attribute_label( $product_attributes[ $attribute_key ]['name'] );
 						}
 					}
+
+					$formatted_meta[ $meta_key ] = array(
+						'label'     => wc_attribute_label( $attribute_key ),
+						'value'     => apply_filters( 'woocommerce_order_item_display_meta_value', $meta_value ),
+					);
 				}
 			}
 
-			// fallback to UTC
-			return 'UTC';
+			return $formatted_meta;
 		}
 	}
 
 
 	/**
-	 * Compatibility function to load WooCommerec admin functions in the admin,
-	 * primarily needed for woocommerce_admin_fields() and woocommerce_update_options()
+	 * Get the full path to the log file for a given $handle
 	 *
-	 * Note these functions have been refactored in the WC_Admin_Settings class in 2.1+,
-	 * so plugins targeting those versions can safely use WC_Admin_Settings::output_fields()
-	 * and WC_Admin_Settings::save_fields instead
-	 *
-	 * @since 1.0
+	 * @since 2.0.0
+	 * @param string $handle log handle
+	 * @return string
 	 */
-	public static function load_wc_admin_functions() {
+	public static function wc_get_log_file_path( $handle ) {
 
-		if ( ! self::is_wc_version_gte_2_1() ) {
+		if ( self::is_wc_version_gte_2_2() ) {
 
-			// woocommerce_admin_fields()
-			require_once( self::WC()->plugin_path() . '/admin/woocommerce-admin-settings.php' );
-
-			// woocommerce_update_options()
-			require_once( self::WC()->plugin_path() . '/admin/settings/settings-save.php' );
+			return wc_get_log_file_path( $handle );
 
 		} else {
 
-			// in 2.1+, wc-admin-functions.php lazy loads the admin settings functions
+			return sprintf( '%s/plugins/woocommerce/logs/%s-%s.txt', WP_CONTENT_DIR, $handle, sanitize_file_name( wp_hash( $handle ) ) );
 		}
 	}
 
 
 	/**
-	 * Returns true if the current page is the admin general configuration page
+	 * Helper method to get the version of the currently installed WooCommerce
 	 *
-	 * @since 1.1
-	 * @return boolean true if the current page is the admin general configuration page
-	 */
-	public static function is_general_configuration_page() {
-
-		if ( self::is_wc_version_gte_2_1() ) {
-			return isset( $_GET['page'] ) && 'wc-settings' == $_GET['page'] &&
-				( ! isset( $_GET['tab'] ) || 'general' == $_GET['tab'] );
-		} else {
-			return isset( $_GET['page'] ) && 'woocommerce_settings' == $_GET['page'] &&
-				( ! isset( $_GET['tab'] ) || 'general' == $_GET['tab'] );
-		}
-	}
-
-
-	/**
-	 * Returns the admin configuration url for the admin general configuration page
-	 *
-	 * @since 1.1
-	 * @return string admin configuration url for the admin general configuration page
-	 */
-	public static function get_general_configuration_url() {
-
-		if ( self::is_wc_version_gte_2_1() ) {
-			return admin_url( 'admin.php?page=wc-settings&tab=general' );
-		} else {
-			return admin_url( 'admin.php?page=woocommerce_settings&tab=general' );
-		}
-	}
-
-
-	/**
-	 * Returns the order_id if on the checkout order received page
-	 *
-	 * Note this must be used in the `wp` or later action, as earlier
-	 * actions do not yet have access to the query vars
-	 *
-	 * @since 1.1
-	 * @return int order identifier
-	 */
-	public static function get_checkout_order_received_order_id() {
-
-		if ( self::is_wc_version_gte_2_1() ) {
-			global $wp;
-			return isset( $wp->query_vars['order-received'] ) ? absint( $wp->query_vars['order-received'] ) : 0;
-		} else {
-			return isset( $_GET['order'] ) ? absint( $_GET['order'] ) : 0;
-		}
-	}
-
-
-	/**
-	 * Generates a URL for the thanks page (order received)
-	 *
-	 * @since 1.1
-	 * @param WC_Order $order
-	 * @return string url to thanks page
-	 */
-	public static function get_checkout_order_received_url( $order ) {
-
-		if ( self::is_wc_version_gte_2_1() ) {
-			return $order->get_checkout_order_received_url();
-		} else {
-			return get_permalink( woocommerce_get_page_id( 'thanks' ) );
-		}
-	}
-
-
-	/**
-	 * Compatibility function to get the version of the currently installed WooCommerce
-	 *
-	 * @since 1.0
+	 * @since 1.0.0
 	 * @return string woocommerce version number or null
 	 */
-	public static function get_wc_version() {
+	private static function get_wc_version() {
 
-		// WOOCOMMERCE_VERSION is now WC_VERSION, though WOOCOMMERCE_VERSION is still available for backwards compatibility, we'll disregard it on 2.1+
-		if ( defined( 'WC_VERSION' )          && WC_VERSION )          return WC_VERSION;
-		if ( defined( 'WOOCOMMERCE_VERSION' ) && WOOCOMMERCE_VERSION ) return WOOCOMMERCE_VERSION;
-
-		return null;
+		return defined( 'WC_VERSION' ) && WC_VERSION ? WC_VERSION : null;
 	}
 
 
 	/**
-	 * Returns the WooCommerce instance
+	 * Returns true if the installed version of WooCommerce is 2.2 or greater
 	 *
-	 * @since 1.0
-	 * @return WooCommerce woocommerce instance
+	 * @since 2.0.0
+	 * @return boolean true if the installed version of WooCommerce is 2.2 or greater
 	 */
-	public static function WC() {
-
-		if ( self::is_wc_version_gte_2_1() ) {
-			return WC();
-		} else {
-			global $woocommerce;
-			return $woocommerce;
-		}
-	}
-
-
-	/**
-	 * Returns true if the WooCommerce plugin is loaded
-	 *
-	 * @since 1.0
-	 * @return boolean true if WooCommerce is loaded
-	 */
-	public static function is_wc_loaded() {
-
-		if ( self::is_wc_version_gte_2_1() ) {
-			return class_exists( 'WooCommerce' );
-		} else {
-			return class_exists( 'Woocommerce' );
-		}
-	}
-
-
-	/**
-	 * Returns true if the installed version of WooCommerce is 2.1 or greater
-	 *
-	 * @since 1.0
-	 * @return boolean true if the installed version of WooCommerce is 2.1 or greater
-	 */
-	public static function is_wc_version_gte_2_1() {
-
-		// can't use gte 2.1 at the moment because 2.1-BETA < 2.1
-		return self::is_wc_version_gt( '2.0.20' );
+	public static function is_wc_version_gte_2_2() {
+		return self::get_wc_version() && version_compare( self::get_wc_version(), '2.2', '>=' );
 	}
 
 
 	/**
 	 * Returns true if the installed version of WooCommerce is greater than $version
 	 *
-	 * @since 1.0
+	 * @since 1.0.0
 	 * @param string $version the version to compare
 	 * @return boolean true if the installed version of WooCommerce is > $version
 	 */
 	public static function is_wc_version_gt( $version ) {
-
 		return self::get_wc_version() && version_compare( self::get_wc_version(), $version, '>' );
 	}
 

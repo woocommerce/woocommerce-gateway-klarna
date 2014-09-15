@@ -110,8 +110,6 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 		
 				
 		// Actions
- 
-		/* 2.0.0 */
 		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
 
 		add_action('woocommerce_receipt_klarna_account', array( $this, 'receipt_page'));
@@ -782,7 +780,7 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
  			
     			// Check if set, if its not set add an error.
     			if (!$_POST['klarna_pno'])
-        		 	WC_Klarna_Compatibility::wc_add_notice(__('<strong>Date of birth</strong> is a required field', 'klarna'), 'error');
+        		 	wc_add_notice(__('<strong>Date of birth</strong> is a required field', 'klarna'), 'error');
         	 	
 			}
 			
@@ -792,54 +790,42 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 	    		
 	    		// Gender
 	    		if (empty($_POST['klarna_account_gender']))
-	        	 	WC_Klarna_Compatibility::wc_add_notice(__('<strong>Gender</strong> is a required field', 'klarna'), 'error');
+	        	 	wc_add_notice(__('<strong>Gender</strong> is a required field', 'klarna'), 'error');
 	         	
 	         	// Date of birth
 				if (!$_POST['date_of_birth_day'] || !$_POST['date_of_birth_month'] || !$_POST['date_of_birth_year'])
-	         		WC_Klarna_Compatibility::wc_add_notice(__('<strong>Date of birth</strong> is a required field', 'klarna'), 'error');
+	         		wc_add_notice(__('<strong>Date of birth</strong> is a required field', 'klarna'), 'error');
 	         	
 	         	
 	         	// Shipping and billing address must be the same
 	         	$compare_billing_and_shipping = 0;
 	         	
-	         	if( WC_Klarna_Compatibility::is_wc_version_gte_2_1() ) {
-	         		
-	         		// WC 2.1+
-	         		if( isset( $_POST['ship_to_different_address'] ) && $_POST['ship_to_different_address']=1 ) {
-		         		$compare_billing_and_shipping = 1;	
-				 	}
-	         	
-	         	} else {
-				
-				 	// Pre WC 2.1
-					if( isset( $_POST['shiptobilling'] ) && $_POST['shiptobilling'] != 1 ) {
-		         		$compare_billing_and_shipping = 1;
-	         		}
-			
-				}
+	         	if( isset( $_POST['ship_to_different_address'] ) && $_POST['ship_to_different_address']=1 ) {
+	         		$compare_billing_and_shipping = 1;	
+			 	}
 				
 	         	
 	         	if ($compare_billing_and_shipping==1 && isset($_POST['shipping_first_name']) && $_POST['shipping_first_name'] !== $_POST['billing_first_name'])
-	        	 	WC_Klarna_Compatibility::wc_add_notice(__('Shipping and billing address must be the same when paying via Klarna.', 'klarna'), 'error');
+	        	 	wc_add_notice(__('Shipping and billing address must be the same when paying via Klarna.', 'klarna'), 'error');
 	        	 
 	        	 if ($compare_billing_and_shipping==1 && isset($_POST['shipping_last_name']) && $_POST['shipping_last_name'] !== $_POST['billing_last_name'])
-	        	 	WC_Klarna_Compatibility::wc_add_notice(__('Shipping and billing address must be the same when paying via Klarna.', 'klarna'), 'error');
+	        	 	wc_add_notice(__('Shipping and billing address must be the same when paying via Klarna.', 'klarna'), 'error');
 	        	 
 	        	 if ($compare_billing_and_shipping==1 && isset($_POST['shipping_address_1']) && $_POST['shipping_address_1'] !== $_POST['billing_address_1'])
-	        	 	WC_Klarna_Compatibility::wc_add_notice(__('Shipping and billing address must be the same when paying via Klarna.', 'klarna'), 'error');
+	        	 	wc_add_notice(__('Shipping and billing address must be the same when paying via Klarna.', 'klarna'), 'error');
 	        	 
 	        	 if ($compare_billing_and_shipping==1 && isset($_POST['shipping_postcode']) && $_POST['shipping_postcode'] !== $_POST['billing_postcode'])
-	        	 	WC_Klarna_Compatibility::wc_add_notice(__('Shipping and billing address must be the same when paying via Klarna.', 'klarna'), 'error');
+	        	 	wc_add_notice(__('Shipping and billing address must be the same when paying via Klarna.', 'klarna'), 'error');
 	        	 	
 	        	 if ($compare_billing_and_shipping==1 && isset($_POST['shipping_city']) && $_POST['shipping_city'] !== $_POST['billing_city'])
-	        	 	WC_Klarna_Compatibility::wc_add_notice(__('Shipping and billing address must be the same when paying via Klarna.', 'klarna'), 'error');
+	        	 	wc_add_notice(__('Shipping and billing address must be the same when paying via Klarna.', 'klarna'), 'error');
 			}
 			
 			// DE & AT
 			if ( ( $this->shop_country == 'DE' || $this->shop_country == 'AT' ) && $this->de_consent_terms == 'yes') {
 	    		// Check if set, if its not set add an error.
 	    		if (!isset($_POST['klarna_de_consent_terms']))
-	        	 	WC_Klarna_Compatibility::wc_add_notice(__('You must accept the Klarna consent terms.', 'klarna'), 'error');
+	        	 	wc_add_notice(__('You must accept the Klarna consent terms.', 'klarna'), 'error');
 			}
 		}
 	}
@@ -851,7 +837,7 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 	function process_payment( $order_id ) {
 		global $woocommerce;
 		
-		$order = new WC_order( $order_id );
+		$order = WC_Klarna_Compatibility::wc_get_order( $order_id );
 		
 		require_once(KLARNA_LIB . 'Klarna.php');
 		require_once(KLARNA_LIB . 'pclasses/storage.intf.php');
@@ -1035,14 +1021,14 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 		
 		
 		// Shipping
-		if (WC_Klarna_Compatibility::get_total_shipping($order)>0) :
+		if ($order->get_total_shipping()>0) :
 			
 			// We manually calculate the shipping tax percentage here
-			$calculated_shipping_tax_percentage = ($order->order_shipping_tax/WC_Klarna_Compatibility::get_total_shipping($order))*100; //25.00
-			$calculated_shipping_tax_decimal = ($order->order_shipping_tax/WC_Klarna_Compatibility::get_total_shipping($order))+1; //0.25
+			$calculated_shipping_tax_percentage = ($order->order_shipping_tax/$order->get_total_shipping())*100; //25.00
+			$calculated_shipping_tax_decimal = ($order->order_shipping_tax/$order->get_total_shipping())+1; //0.25
 			
 			// apply_filters to Shipping so we can filter this if needed
-			$klarna_shipping_price_including_tax = WC_Klarna_Compatibility::get_total_shipping($order)*$calculated_shipping_tax_decimal;
+			$klarna_shipping_price_including_tax = $order->get_total_shipping()*$calculated_shipping_tax_decimal;
 			$shipping_price = apply_filters( 'klarna_shipping_price_including_tax', $klarna_shipping_price_including_tax );
 			
 			$k->addArticle(
@@ -1146,11 +1132,7 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
     		);
     		
     		// Prepare redirect url
-    		if( WC_Klarna_Compatibility::is_wc_version_gte_2_1() ) {
-	    		$redirect_url = WC_Klarna_Compatibility::get_checkout_order_received_url($order);
-    		} else {
-	    		$redirect_url = add_query_arg('key', $order->order_key, add_query_arg('order', $order_id, get_permalink(get_option('woocommerce_thanks_page_id'))));
-    		}
+    		$redirect_url = $order->get_checkout_order_received_url();
     		
     		// Store the selected pclass in the order
     		update_post_meta( $order_id, '_klarna_order_pclass', $klarna_pclass );
@@ -1194,13 +1176,13 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
             case KlarnaFlags::DENIED:
                 //Order is denied, store it in a database.
 				$order->add_order_note( __('Klarna payment denied.', 'klarna') );
-				WC_Klarna_Compatibility::wc_add_notice(__('Klarna payment denied.', 'klarna'), 'error');
+				wc_add_notice(__('Klarna payment denied.', 'klarna'), 'error');
                 return;
                 break;
             default:
             	//Unknown response, store it in a database.
 				$order->add_order_note( __('Unknown response from Klarna.', 'klarna') );
-				WC_Klarna_Compatibility::wc_add_notice(__('Unknown response from Klarna.', 'klarna'), 'error');
+				wc_add_notice(__('Unknown response from Klarna.', 'klarna'), 'error');
                 return;
                 break;
         	}
@@ -1210,7 +1192,7 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 		
 		catch(Exception $e) {
     		//The purchase was denied or something went wrong, print the message:
-			WC_Klarna_Compatibility::wc_add_notice(sprintf(__('%s (Error code: %s)', 'klarna'), utf8_encode($e->getMessage()), $e->getCode() ), 'error');
+			wc_add_notice(sprintf(__('%s (Error code: %s)', 'klarna'), utf8_encode($e->getMessage()), $e->getCode() ), 'error');
 			return;
 		}
 
@@ -1279,7 +1261,7 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 			    $k->fetchPClasses($country); //You can specify country (and language, currency if you wish) if you don't want to use the configured country.
 			    /* PClasses successfully fetched, now you can use getPClasses() to load them locally or getPClass to load a specific PClass locally. */
 				// Redirect to settings page
-				//wp_redirect(WC_Klarna_Compatibility::get_payment_gateway_configuration_url('WC_Gateway_Klarna_Account&klarna_error_status=0'));
+				//wp_redirect(get_payment_gateway_configuration_url('WC_Gateway_Klarna_Account&klarna_error_status=0'));
 				return $k->getPClasses();
 			}
 			catch(Exception $e) {
@@ -1287,7 +1269,7 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 			    //$redirect_url = 'WC_Gateway_Klarna_Account&klarna_error_status=1&klarna_error_code=' . $e->getCode();
 				    
 			   //wp_redirect(admin_url($redirect_url));
-			   //wp_redirect(WC_Klarna_Compatibility::get_payment_gateway_configuration_url($redirect_url));
+			   //wp_redirect(get_payment_gateway_configuration_url($redirect_url));
 			    return false;
 			}
 			
@@ -1399,6 +1381,10 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 		return $this->show_monthly_cost_shop_prio;
 	}
 	
+	// Helper function - get Enabled
+	function get_enabled() {
+		return $this->enabled;
+	}
 	
 	// Helper function - get Klarna locale based on current locale
 	function get_klarna_locale($locale) {
