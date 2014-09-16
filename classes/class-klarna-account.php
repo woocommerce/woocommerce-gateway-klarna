@@ -312,7 +312,7 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 		global $woocommerce;
 		
 		if ($this->enabled=="yes") :
-			
+		
 			// Required fields check
 			if (!$this->get_eid() || !$this->get_secret()) return false;
 			
@@ -1241,13 +1241,13 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 			$k = new Klarna();
 		
 		$k->config(
-		    $this->get_eid(), 														// EID
-		    $this->get_secret(), 													// Secret
-		    $country, 											// Country
-		    $this->get_klarna_language($country), 				// Language
-		    $this->selected_currency, 												// Currency
-		    $klarna_mode, 															// Live or test
-		    $pcStorage = 'jsondb', 														// PClass storage
+		    $this->get_eid(), 							// EID
+		    $this->get_secret(), 						// Secret
+		    $country, 									// Country
+		    $this->get_klarna_language($country), 		// Language
+		    $this->selected_currency, 					// Currency
+		    $klarna_mode, 								// Live or test
+		    $pcStorage = 'jsondb', 						// PClass storage
 		    $pcURI = 'klarna_pclasses_' . $country		// PClass storage URI path
 		);
 		
@@ -1346,7 +1346,8 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 				        jQuery('#payment_method_klarna_account').prop('disabled', true);
 				        
 				    } else jQuery('#payment_method_klarna_account').prop('disabled', false);
-						    
+				    
+					
 				});
 				
 				jQuery(document).ready(function($){
@@ -1427,10 +1428,16 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 	
 	// Helper function - get eid
 	function get_eid() {
+		global $woocommerce;
+		$country = $woocommerce->customer->country;
+	
+		if( empty($country) ) {
+			$country = $this->shop_country;
+		}
 		
 		$current_eid = '';
 		
-		switch ( $this->shop_country )
+		switch ( $country )
 		{
 		case 'DK':
 			$current_eid = $this->eid_dk;
@@ -1464,9 +1471,16 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 	// Helper function - get secret
 	function get_secret() {
 		
+		global $woocommerce;
+		$country = $woocommerce->customer->country;
+	
+		if( empty($country) ) {
+			$country = $this->shop_country;
+		}
+		
 		$current_secret = '';
 		
-		switch ( $this->shop_country )
+		switch ( $country )
 		{
 		case 'DK':
 			$current_secret = $this->secret_dk;
@@ -1600,9 +1614,16 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 	// Helper function - invoice icon
 	function get_account_icon() {
 		
+		global $woocommerce;
+		$country = $woocommerce->customer->country;
+	
+		if( empty($country) ) {
+			$country = $this->shop_country;
+		}
+		
 		$current_secret = '';
 		
-		switch ( $this->shop_country )
+		switch ( $country )
 		{
 		case 'DK':
 			$klarna_account_icon = 'https://cdn.klarna.com/public/images/DK/badges/v1/account/DK_account_badge_std_blue.png?width=60&eid=' . $this->get_eid();

@@ -1131,9 +1131,16 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 	// Helper function - get eid
 	function get_eid() {
 		
+		global $woocommerce;
+		$country = $woocommerce->customer->country;
+	
+		if( empty($country) ) {
+			$country = $this->shop_country;
+		}
+		
 		$current_eid = '';
 		
-		switch ( $this->shop_country )
+		switch ( $country )
 		{
 		case 'DK':
 			$current_eid = $this->eid_dk;
@@ -1167,9 +1174,16 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 	// Helper function - get secret
 	function get_secret() {
 		
+		global $woocommerce;
+		$country = $woocommerce->customer->country;
+	
+		if( empty($country) ) {
+			$country = $this->shop_country;
+		}
+
 		$current_secret = '';
 		
-		switch ( $this->shop_country )
+		switch ( $country )
 		{
 		case 'DK':
 			$current_secret = $this->secret_dk;
@@ -1271,9 +1285,16 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 	// Helper function - invoice icon
 	function get_invoice_icon() {
 		
+		global $woocommerce;
+		$country = $woocommerce->customer->country;
+	
+		if( empty($country) ) {
+			$country = $this->shop_country;
+		}
+		
 		$current_secret = '';
 		
-		switch ( $this->shop_country )
+		switch ( $country )
 		{
 		case 'DK':
 			$klarna_invoice_icon = 'https://cdn.klarna.com/public/images/DK/badges/v1/invoice/DK_invoice_badge_std_blue.png?width=60&eid=' . $this->get_eid();
