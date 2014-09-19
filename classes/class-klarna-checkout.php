@@ -85,7 +85,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 				$klarna_country = 'SE';
 				break;
 			default:
-				$klarna_country = $this->shop_country;
+				$klarna_country = '';
 		}
 
 		$this->shop_country	= $klarna_country;
@@ -181,7 +181,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
        	$this->klarna_checkout_url			= apply_filters( 'klarna_checkout_url', $klarna_checkout_url );
        	$this->klarna_checkout_thanks_url	= apply_filters( 'klarna_checkout_thanks_url', $klarna_checkout_thanks_url );
 		
-       	 add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
+	   	add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
        	
        	add_action( 'woocommerce_api_wc_gateway_klarna_checkout', array( $this, 'check_checkout_listener' ) );
        	
@@ -1737,24 +1737,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		 * Helper function get_klarna_country
 		 */
 		function get_klarna_country() {
-			global $woocommerce;
-			$klarna_country = $this->shop_language;
-	
-			switch ( $klarna_country ) {
-				case 'NB' :
-				case 'NN' :
-					$klarna_country = 'NO';
-					break;
-				case 'SV' :
-					$klarna_country = 'SE';
-					break;
-				case 'EN' :
-					$klarna_country = $this->shop_country;
-					break;
-			}
-				
-			return $klarna_country;
-				
+			return $this->klarna_country;
 		} // End function
 	 	
 		

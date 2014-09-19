@@ -1,5 +1,16 @@
 *** Klarna Changelog ***
 
+2014.09.19	- version 1.8.7
+* Tweak		- Improvments to $this->klarna_country for better multi country support for KCO.
+* Tweak		- Disable Klarna Account for Dutch customers if order is larger than €250.
+* Tweak		- Moved authorized_countries, invoice_fee_price, and invoice_fee_name from constructor to getter functions (Klarna Invoice).
+* Tweak		- Changed name on getter function get_klarna_invoice_fee_product() to get_klarna_invoice_fee_id() (Klarna Invoice).
+* Tweak		- Changed name on getter function get_klarna_invoice_fee_price() to get_invoice_fee_price() (KPM).
+* Fix		- Added utf8_decode() on billing and shipping company sent to Klarna (KPM).
+* Fix		- Klarna logotype for selecting payment method now displays in correct language accordingly to customer selected billing country.
+* Fix		- Display correct language on Part payment widget for Finnish stores (Klarna Acoount).
+* Fix		- Remove display of Part payment if Netherlands is selected locale (Klarna Acoount).
+
 2014.09.15	- version 1.8.6
 * Misc		- WooCommerce 2.2 Compatibility
 * Misc		- Dropped support for 2.0.x

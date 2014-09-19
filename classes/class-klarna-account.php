@@ -332,6 +332,10 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 				if ( $this->upper_threshold !== '' ) {
 					if ( $woocommerce->cart->total > $this->upper_threshold ) return false;
 				}
+				
+				// Don't allow orders over the amount of €250 for Dutch customers
+				if ( ($woocommerce->customer->get_country() == true && $woocommerce->customer->get_country() == 'NL') && $woocommerce->cart->total >= 251 ) return false;
+				
 			
 				// Only activate the payment gateway if the customers country is the same as the filtered shop country ($this->klarna_country)
 				if ( $woocommerce->customer->get_country() == true && !in_array($woocommerce->customer->get_country(), $this->authorized_countries) ) return false;
@@ -457,7 +461,7 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 			   				if($sum > $pclass->getMinAmount()) {
 			   				
 			   					echo '<option value="' . $pclass->getId() . '">';
-			   					if ($this->klarna_country == 'NO') {
+			   					if ($this->get_klarna_country() == 'NO') {
 									if ( $pclass->getType() == 1 ) {
 										//If Account - Do not show startfee. This is always 0.
 										echo sprintf(__('%s - %s %s/month - %s%s', 'klarna'), $pclass->getDescription(), $monthly_cost, $this->selected_currency, $pclass->getInterestRate(), '%');
@@ -1283,7 +1287,7 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 	 
 	function print_product_monthly_cost() {
 		
-		if ( $this->enabled!="yes" ) return;
+		if ( $this->enabled!="yes" || $this->get_klarna_locale(get_locale()) == 'nl_nl' ) return;
 			
 		global $woocommerce, $product, $klarna_account_shortcode_currency, $klarna_account_shortcode_price, $klarna_shortcode_img, $klarna_account_country;
 		
@@ -1302,7 +1306,7 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
     		// Monthly cost threshold check. This is done after apply_filters to product price ($sum).
 	    	if ( $this->lower_threshold_monthly_cost < $sum && $this->upper_threshold_monthly_cost > $sum ) {
 	    		$data = new WC_Gateway_Klarna_Invoice;
-	    		$invoice_fee = $data->get_klarna_invoice_fee_price();
+	    		$invoice_fee = $data->get_invoice_fee_price();
 	    		
 	    		?>
 				<div style="width:220px; height:70px" 
@@ -1406,6 +1410,7 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 			$klarna_locale = 'nl_nl';
 			break;
 		case 'fi_FI' :
+		case 'fi' :
 			$klarna_locale = 'fi_fi';
 			break;
 		case 'sv_SE' :
@@ -1429,7 +1434,7 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 	// Helper function - get eid
 	function get_eid() {
 		global $woocommerce;
-		$country = $woocommerce->customer->country;
+		$country = ( isset( $woocommerce->customer->country ) ) ? $woocommerce->customer->country : '';
 	
 		if( empty($country) ) {
 			$country = $this->shop_country;
@@ -1472,7 +1477,7 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 	function get_secret() {
 		
 		global $woocommerce;
-		$country = $woocommerce->customer->country;
+		$country = ( isset( $woocommerce->customer->country ) ) ? $woocommerce->customer->country : '';
 	
 		if( empty($country) ) {
 			$country = $this->shop_country;
@@ -1615,7 +1620,7 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 	function get_account_icon() {
 		
 		global $woocommerce;
-		$country = $woocommerce->customer->country;
+		$country = ( isset( $woocommerce->customer->country ) ) ? $woocommerce->customer->country : '';
 	
 		if( empty($country) ) {
 			$country = $this->shop_country;

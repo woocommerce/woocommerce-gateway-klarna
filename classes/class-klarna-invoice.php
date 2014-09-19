@@ -50,66 +50,9 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 		$this->ship_to_billing_address	= ( isset( $this->settings['ship_to_billing_address'] ) ) ? $this->settings['ship_to_billing_address'] : '';
 		
 		
-		// authorized countries
-		$this->authorized_countries		= array();
-		if(!empty($this->eid_se)) {
-			$this->authorized_countries[] = 'SE';
-		}
-		if(!empty($this->eid_no)) {
-			$this->authorized_countries[] = 'NO';
-		}
-		if(!empty($this->eid_fi)) {
-			$this->authorized_countries[] = 'FI';
-		}
-		if(!empty($this->eid_dk)) {
-			$this->authorized_countries[] = 'DK';
-		}
-		if(!empty($this->eid_de)) {
-			$this->authorized_countries[] = 'DE';
-		}
-		if(!empty($this->eid_nl)) {
-			$this->authorized_countries[] = 'NL';
-		}
-		if(!empty($this->eid_at)) {
-			$this->authorized_countries[] = 'AT';
-		}
-		
 		//if ( $this->handlingfee == "") $this->handlingfee = 0;
 		//if ( $this->handlingfee_tax == "") $this->handlingfee_tax = 0;
 		if ( $this->invoice_fee_id == "") $this->invoice_fee_id = 0;
-		
-		if ( $this->invoice_fee_id > 0 ) {
-			
-			// Version check - 1.6.6 or 2.0
-			if ( function_exists( 'get_product' ) ) {
-				$product = get_product($this->invoice_fee_id);
-			} else {
-				$product = new WC_Product( $this->invoice_fee_id );
-			}
-		
-			if ( $product ) {
-			
-				// We manually calculate the tax percentage here
-				$this->invoice_fee_tax_percentage = number_format( (( $product->get_price() / $product->get_price_excluding_tax() )-1)*100, 2, '.', '');
-				
-				// apply_filters to invoice fee price so we can filter this if needed
-				$klarna_invoice_fee_price_including_tax = $product->get_price();
-				$this->invoice_fee_price 	= apply_filters( 'klarna_invoice_fee_price_including_tax', $klarna_invoice_fee_price_including_tax );
-				$this->invoice_fee_name 	= $product->get_title();
-				
-			} else {
-			
-				$this->invoice_fee_price 	= 0;
-				$this->invoice_fee_name 	= '';
-							
-			}
-		
-		} else {
-		
-			$this->invoice_fee_price	= 0;
-			$this->invoice_fee_name 	= '';
-		
-		}
 
 		
 		// Apply filters
@@ -328,7 +271,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 				}
 			
 				// Only activate the payment gateway if the customers country is the same as the filtered shop country ($this->klarna_country)
-				if ( $woocommerce->customer->get_country() == true && !in_array($woocommerce->customer->get_country(), $this->authorized_countries) ) return false;
+				if ( $woocommerce->customer->get_country() == true && !in_array($woocommerce->customer->get_country(), $this->get_authorized_countries()) ) return false;
 				
 				// Currency check
 				$currency_for_country = $this->get_currency_for_country($woocommerce->customer->get_country());
@@ -593,7 +536,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 					    el: 'klarna-invoice-terms',
 					    eid: '<?php echo $this->get_eid(); ?>',
 					    locale: klarna_invo_current_locale,
-					    charge: '<?php echo $this->invoice_fee_price;?>',
+					    charge: '<?php echo $this->get_invoice_fee_price();?>',
 					    type: '<?php echo $klarna_layout;?>',
 					});
 					
@@ -812,7 +755,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 			
 			
 			// Invoice fee or regular fee
-			if( $this->invoice_fee_name == $item['name'] ) {
+			if( $this->get_invoice_fee_name() == $item['name'] ) {
 				$tmp_flags = KlarnaFlags::INC_VAT + KlarnaFlags::IS_HANDLING; //Price is including VAT and is handling/invoice fee
 			} else {
 				$tmp_flags = KlarnaFlags::INC_VAT; //Price is including VAT
@@ -881,7 +824,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 		
 		// Add Company if one is set
 		if($order->billing_company) {
-			$addr_billing->setCompanyName($order->billing_company);
+			$addr_billing->setCompanyName(utf8_decode($order->billing_company));
 		}
 		
 		// Shipping address
@@ -905,7 +848,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 			
 			// Add Company if one is set
 			if($order->billing_company) {
-				$addr_shipping->setCompanyName($order->billing_company);
+				$addr_shipping->setCompanyName(utf8_decode($order->billing_company));
 			}
 		
 		} else {
@@ -927,7 +870,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 			
 			// Add Company if one is set
 			if($order->shipping_company) {
-				$addr_shipping->setCompanyName($order->shipping_company);
+				$addr_shipping->setCompanyName(utf8_decode($order->shipping_company));
 			}
 		
 		}
@@ -1102,16 +1045,62 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 	
 	
 	
-	
 	// Helper function - get Invoice fee id
-	function get_klarna_invoice_fee_product() {
+	function get_invoice_fee_id() {
 		return $this->invoice_fee_id;
 	}
 	
-	// Helper function - get Invoice fee price
-	function get_klarna_invoice_fee_price() {
-		return $this->invoice_fee_price;
+	// Helper function - get Invoice fee name
+	function get_invoice_fee_name() {
+
+		if ( $this->invoice_fee_id > 0 ) {
+			
+			$product = WC_Klarna_Compatibility::wc_get_product( $this->invoice_fee_id );
+			
+			if ( $product ) {
+			
+				return $product->get_title();
+				
+			} else {
+			
+				return '';
+							
+			}
+		
+		} else {
+		
+			return '';
+		
+		}
+		
 	}
+	
+	
+	// Helper function - get Invoice fee price
+	function get_invoice_fee_price() {
+
+		if ( $this->invoice_fee_id > 0 ) {
+			
+			$product = WC_Klarna_Compatibility::wc_get_product( $this->invoice_fee_id );
+			
+			if ( $product ) {
+			
+				return $product->get_price();
+				
+			} else {
+			
+				return '';
+							
+			}
+		
+		} else {
+		
+			return '';
+		
+		}
+		
+	}
+	
 	
 	// Helper function - get Shop Country
 	function get_klarna_shop_country() {
@@ -1132,7 +1121,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 	function get_eid() {
 		
 		global $woocommerce;
-		$country = $woocommerce->customer->country;
+		$country = ( isset( $woocommerce->customer->country ) ) ? $woocommerce->customer->country : '';
 	
 		if( empty($country) ) {
 			$country = $this->shop_country;
@@ -1175,7 +1164,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 	function get_secret() {
 		
 		global $woocommerce;
-		$country = $woocommerce->customer->country;
+		$country = ( isset( $woocommerce->customer->country ) ) ? $woocommerce->customer->country : '';
 	
 		if( empty($country) ) {
 			$country = $this->shop_country;
@@ -1286,7 +1275,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 	function get_invoice_icon() {
 		
 		global $woocommerce;
-		$country = $woocommerce->customer->country;
+		$country = ( isset( $woocommerce->customer->country ) ) ? $woocommerce->customer->country : '';
 	
 		if( empty($country) ) {
 			$country = $this->shop_country;
@@ -1349,7 +1338,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 		}
 		
 		// Check if $klarna_country exist among the authorized countries
-		if(!in_array($klarna_country, $this->authorized_countries)) {
+		if(!in_array($klarna_country, $this->get_authorized_countries())) {
 			return $this->shop_country;
 		} else {
 			return $klarna_country;
@@ -1362,6 +1351,36 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 	function get_consent_terms() {
 		return $this->de_consent_terms;
 	}
+	
+	// Helper function - get authorized countries
+	public function get_authorized_countries() {
+		$this->authorized_countries		= array();
+		if(!empty($this->eid_se)) {
+			$this->authorized_countries[] = 'SE';
+		}
+		if(!empty($this->eid_no)) {
+			$this->authorized_countries[] = 'NO';
+		}
+		if(!empty($this->eid_fi)) {
+			$this->authorized_countries[] = 'FI';
+		}
+		if(!empty($this->eid_dk)) {
+			$this->authorized_countries[] = 'DK';
+		}
+		if(!empty($this->eid_de)) {
+			$this->authorized_countries[] = 'DE';
+		}
+		if(!empty($this->eid_nl)) {
+			$this->authorized_countries[] = 'NL';
+		}
+		if(!empty($this->eid_at)) {
+			$this->authorized_countries[] = 'AT';
+		}
+		
+		return $this->authorized_countries;
+	}
+	
+	
 
 
 } // End class WC_Gateway_Klarna_Invoice
@@ -1416,10 +1435,12 @@ class WC_Gateway_Klarna_Invoice_Extra {
 	 */
 	public function add_fee_to_cart( $cart ) {
 		$invoice_fee          = new WC_Gateway_Klarna_Invoice;
-		$this->invoice_fee_id = $invoice_fee->get_klarna_invoice_fee_product();
+		$this->invoice_fee_id = $invoice_fee->get_invoice_fee_id();
 
-		if ( $this->invoice_fee_id > 0 ) {		 	
-		 	if ( $product = get_product( $this->invoice_fee_id ) ) {
+		if ( $this->invoice_fee_id > 0 ) {
+			$product = WC_Klarna_Compatibility::wc_get_product( $this->invoice_fee_id );
+				 	
+		 	if ( $product ) {
 		 		// Is this a taxable product?
 		 		if ( $product->is_taxable() ) {
 		 			$product_tax = true;
