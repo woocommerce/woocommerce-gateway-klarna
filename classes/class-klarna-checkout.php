@@ -514,6 +514,9 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 
 				if ( !defined( 'WOOCOMMERCE_CHECKOUT' ) ) define( 'WOOCOMMERCE_CHECKOUT', true );
 				
+				// Set Klarna Checkout as the choosen payment method in the WC session
+				WC()->session->set( 'chosen_payment_method', 'klarna_checkout' );
+				
 				// Debug
 				if ($this->debug=='yes') $this->log->add( 'klarna', 'Rendering Checkout page...' );
 				
@@ -608,17 +611,17 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 					
 				
 					// Shipping
-					if( $woocommerce->cart->shipping_total > 0 ) {
+					if( $order->get_total_shipping() > 0 ) {
 						
 						// We manually calculate the tax percentage here
-						if ($woocommerce->cart->shipping_tax_total > 0) {
+						if ($order->get_total_shipping() > 0) {
 							// Calculate tax percentage
-							$shipping_tax_percentage = round($woocommerce->session->shipping_tax_total / $woocommerce->session->shipping_total, 2)*100;
+							$shipping_tax_percentage = round($order->get_shipping_tax() / $order->get_total_shipping(), 2)*100;
 						} else {
 							$shipping_tax_percentage = 00;
 						}
-					
-						$shipping_price = number_format( ($woocommerce->cart->shipping_total+$woocommerce->cart->shipping_tax_total)*100, 0, '', '');
+						
+						$shipping_price = number_format( ($order->get_total_shipping()+$order->get_shipping_tax())*100, 0, '', '');
 						
 						
 						$cart[] = array(  
@@ -978,6 +981,8 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		 */
 		public function create_order_2_2() {
 			global $woocommerce, $wpdb;
+			
+			$this->shipping_methods = WC()->session->get( 'chosen_shipping_methods' );
 			
 			if ( sizeof( $woocommerce->cart->get_cart() ) == 0 )
 				wc_add_notice(sprintf( __( 'Sorry, your session has expired. <a href="%s">Return to homepage &rarr;</a>', 'klarna' ), home_url() ), 'error');

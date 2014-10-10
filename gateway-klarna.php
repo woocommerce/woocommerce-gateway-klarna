@@ -3,7 +3,7 @@
 Plugin Name: WooCommerce Klarna Gateway
 Plugin URI: http://woothemes.com/woocommerce
 Description: Extends WooCommerce. Provides a <a href="http://www.klarna.se" target="_blank">Klarna</a> gateway for WooCommerce.
-Version: 1.8.7
+Version: 1.8.8
 Author: Krokedil
 Author URI: http://krokedil.com
 */
@@ -56,6 +56,9 @@ function init_klarna_gateway() {
 	
 	// Define Klarna lib
 	define('KLARNA_LIB', dirname(__FILE__) . '/library/');
+	
+	// Define Klarna Plugin Folder URL
+	define( 'KLARNA_URL', plugin_dir_url( __FILE__ ) );
 	
 	
 	class WC_Gateway_Klarna extends WC_Payment_Gateway {
@@ -148,7 +151,6 @@ function init_klarna_gateway() {
 	
 	// Include the Klarna Part Payment Widget class
 	require_once 'classes/class-klarna-partpayment-widget.php';
-	
 	
 	// WC 2.0 Update notice
 	class WC_Gateway_Klarna_Update_Notice {

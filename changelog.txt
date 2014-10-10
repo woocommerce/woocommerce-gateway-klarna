@@ -1,5 +1,10 @@
 *** Klarna Changelog ***
 
+2014.10.10	- version 1.8.8
+* Fix		- Shipping method name not sent to Klarna (KCO).
+* Tweak		- Shipping price calcultation improvements/changes (KCO).
+* Tweak		- Update WC session chosen_payment_method to klarna_checkout when KCO page is displayed.
+
 2014.09.19	- version 1.8.7
 * Tweak		- Improvments to $this->klarna_country for better multi country support for KCO.
 * Tweak		- Disable Klarna Account for Dutch customers if order is larger than €250.

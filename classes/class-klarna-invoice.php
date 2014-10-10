@@ -308,8 +308,73 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 			echo '<p>' . $this->description . '</p>';
 		endif; 
 		
+		
+		// Mobile or desktop browser
+		if (wp_is_mobile() ) {
+			$klarna_layout = 'mobile';
+		 } else {
+		 	$klarna_layout = 'desktop';
+		 }
+		
+		// Script for displaying the terms link
 		?>
 		
+		<script type="text/javascript">
+		
+			// Document ready
+			jQuery(document).ready(function($) {		
+				
+				var klarna_invo_selected_country = $( "#billing_country" ).val();
+				
+				// If no Billing Country is set in the checkout form, use the default shop country
+				if( !klarna_invo_selected_country ) {
+					var klarna_invo_selected_country = '<?php echo $this->shop_country;?>';
+				}
+				
+				if( klarna_invo_selected_country == 'SE' ) {
+				
+					var klarna_invo_current_locale = 'sv_SE';
+				
+				} else if( klarna_invo_selected_country == 'NO' ) {
+
+					var klarna_invo_current_locale = 'nb_NO';
+				
+				} else if( klarna_invo_selected_country == 'DK' ) {
+
+					var klarna_invo_current_locale = 'da_DK';
+				
+				} else if( klarna_invo_selected_country == 'FI' ) {
+
+					var klarna_invo_current_locale = 'fi_FI';
+					
+				} else if( klarna_invo_selected_country == 'DE' ) {
+
+					var klarna_invo_current_locale = 'de_DE';
+				
+				}  else if( klarna_invo_selected_country == 'NL' ) {
+
+					var klarna_invo_current_locale = 'nl_NL';
+				
+				} else if( klarna_invo_selected_country == 'AT' ) {
+
+					var klarna_invo_current_locale = 'de_AT';
+				} else {
+					
+				}
+				
+				new Klarna.Terms.Invoice({
+				    el: 'klarna-invoice-terms',
+				    eid: '<?php echo $this->get_eid(); ?>',
+				    locale: klarna_invo_current_locale,
+				    charge: '<?php echo $this->get_invoice_fee_price();?>',
+				    type: '<?php echo $klarna_layout;?>',
+				});
+				
+			});
+			
+		</script>
+		<span id="klarna-invoice-terms"></span>
+			
 		<fieldset>
 			<p class="form-row form-row-first">
 				<?php if ( $this->get_klarna_country() == 'NL' || $this->get_klarna_country() == 'DE' || $this->get_klarna_country() == 'AT' ) : ?>
@@ -459,7 +524,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 					
 				<?php else : ?>
 					<label for="klarna_invo_pno"><?php echo __("Date of Birth", 'klarna') ?> <span class="required">*</span></label>
-					<input type="text" class="input-text" name="klarna_invo_pno" />
+					<input type="text" class="input-text" name="klarna_invo_pno" id="klarna_invo_pno" />
 				<?php endif; ?>
 			</p>
 			
@@ -475,77 +540,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 					</select>
 				</p>
 			<?php endif; ?>
-						
-			<div class="clear"></div>
-			
-			<?php
-			// Mobile or desktop browser
-			if (wp_is_mobile() ) {
-				$klarna_layout = 'mobile';
-			 } else {
-			 	$klarna_layout = 'desktop';
-			 }
-			
-			// Script for displaying the terms link
-			?>
-			
-			<script type="text/javascript">
-			
-				// Document ready
-				jQuery(document).ready(function($) {		
-					
-					var klarna_invo_selected_country = $( "#billing_country" ).val();
-					
-					// If no Billing Country is set in the checkout form, use the default shop country
-					if( !klarna_invo_selected_country ) {
-						var klarna_invo_selected_country = '<?php echo $this->shop_country;?>';
-					}
-					
-					if( klarna_invo_selected_country == 'SE' ) {
-					
-						var klarna_invo_current_locale = 'sv_SE';
-					
-					} else if( klarna_invo_selected_country == 'NO' ) {
 
-						var klarna_invo_current_locale = 'nb_NO';
-					
-					} else if( klarna_invo_selected_country == 'DK' ) {
-
-						var klarna_invo_current_locale = 'da_DK';
-					
-					} else if( klarna_invo_selected_country == 'FI' ) {
-
-						var klarna_invo_current_locale = 'fi_FI';
-						
-					} else if( klarna_invo_selected_country == 'DE' ) {
-
-						var klarna_invo_current_locale = 'de_DE';
-					
-					}  else if( klarna_invo_selected_country == 'NL' ) {
-
-						var klarna_invo_current_locale = 'nl_NL';
-					
-					} else if( klarna_invo_selected_country == 'AT' ) {
-
-						var klarna_invo_current_locale = 'de_AT';
-					} else {
-						
-					}
-					
-					new Klarna.Terms.Invoice({
-					    el: 'klarna-invoice-terms',
-					    eid: '<?php echo $this->get_eid(); ?>',
-					    locale: klarna_invo_current_locale,
-					    charge: '<?php echo $this->get_invoice_fee_price();?>',
-					    type: '<?php echo $klarna_layout;?>',
-					});
-					
-				});
-				
-				
-					
-			</script>
-			<span id="klarna-invoice-terms"></span>
         	
 			<div class="clear"></div>
 		
@@ -1409,8 +1404,9 @@ class WC_Gateway_Klarna_Invoice_Extra {
 		global $woocommerce;
 
     	if ( is_checkout() || defined( 'WOOCOMMERCE_CHECKOUT' ) ) {
+    		
     		$available_gateways = $woocommerce->payment_gateways->get_available_payment_gateways();
-
+			
     		if ( ! empty( $available_gateways ) ) {
 				// Chosen Method
 				if ( $woocommerce->session->get( 'chosen_payment_method' ) && isset( $available_gateways[ $woocommerce->session->get( 'chosen_payment_method' ) ] ) ) {
