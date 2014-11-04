@@ -120,6 +120,17 @@ function init_klarna_gateway() {
 		} // End function
 		
 		
+		/**
+	 	 * Helper function to check if curl exist or not on the server
+	 	 */
+		public function curl_exist(){
+			if( function_exists('curl_version') ) {
+				return true;
+			} else {
+				return false;
+			}
+		}
+		
 		
 			
 	
@@ -151,6 +162,9 @@ function init_klarna_gateway() {
 	
 	// Include the Klarna Part Payment Widget class
 	require_once 'classes/class-klarna-partpayment-widget.php';
+	
+	// Include the Get Address class
+	require_once 'classes/class-klarna-get-address.php';
 	
 	// WC 2.0 Update notice
 	class WC_Gateway_Klarna_Update_Notice {
