@@ -1,5 +1,16 @@
 *** Klarna Changelog ***
 
+2014.11.	- version 
+* Feature	- Added Get Address feature for Swedish stores (KPM).
+* Feature	- Added setting for Default Checkout Country if both Finland and Germany is enabled countries for KCO.
+* Feature	- Added feature for displaying text (populated via the plugin settings) above Registration & Login form on account page.
+* Feature	- Added setting for Mandatory phone field in KCO for German stores.
+* Feature	- Added DHL Packstation feature in KCO for German stores.
+* Tweak		- Reset the Klarna Checkout session if country changes on an order update (when the KCO checkout is loaded/displayed).
+* Tweak		- Added order_button_text in settings & apply_filters() klarna_order_button_text so users can filter the Place order button.
+* Fix		- Added check for separate shipping address in push notification from Klarna for KCO Germany.
+* Fix		- Consent terms displayed to all German and Austrian customers if selected in the settings (KPM). Previously only displayed on German and Austrian stores.
+
 2014.10.10	- version 1.8.8
 * Fix		- Shipping method name not sent to Klarna (KCO).
 * Tweak		- Shipping price calcultation improvements/changes (KCO).
