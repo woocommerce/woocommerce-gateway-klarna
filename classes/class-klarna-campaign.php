@@ -12,14 +12,15 @@ class WC_Gateway_Klarna_Campaign extends WC_Gateway_Klarna {
 		
 		parent::__construct();
 		
-		$this->id						= 'klarna_special_campaign';
-		$this->method_title 			= __('Klarna Special Campaign', 'klarna');
-		$this->has_fields 				= true;
+		$this->id									= 'klarna_special_campaign';
+		$this->method_title 						= __('Klarna Special Campaign', 'klarna');
+		$this->has_fields 							= true;
+		$this->order_button_text 					= apply_filters( 'klarna_order_button_text', __( 'Place order', 'woocommerce' ) );
 		
 		// Klarna warning banner - used for NL only
-		$klarna_wb_img_checkout 		= '';
-		$klarna_wb_img_checkout 		= 'http://www.afm.nl/~/media/Images/wetten-regels/kredietwaarschuwing/balk_afm1-jpg.ashx';
-		$this->klarna_wb_img_checkout	= apply_filters( 'klarna_wb_img_checkout', $klarna_wb_img_checkout );
+		$klarna_wb_img_checkout 					= '';
+		$klarna_wb_img_checkout 					= 'http://www.afm.nl/~/media/Images/wetten-regels/kredietwaarschuwing/balk_afm1-jpg.ashx';
+		$this->klarna_wb_img_checkout				= apply_filters( 'klarna_wb_img_checkout', $klarna_wb_img_checkout );
 		
 		// Load the form fields.
 		$this->init_form_fields();
@@ -267,14 +268,11 @@ class WC_Gateway_Klarna_Campaign extends WC_Gateway_Klarna {
 		global $woocommerce;
 		
 		if ($this->enabled=="yes") :
-		
-			require_once(KLARNA_LIB . 'Klarna.php');
-			require_once(KLARNA_LIB . 'pclasses/storage.intf.php');
-			require_once(KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc.inc');
-
+			
+			// Required fields check
+			if (!$this->get_eid() || !$this->get_secret()) return false;
 		
 			// PClass check
-			
 			$pclasses = WC_Gateway_Klarna_Account::fetch_pclasses( $this->get_klarna_country() );
 						
 			if($pclasses) {
@@ -304,8 +302,7 @@ class WC_Gateway_Klarna_Campaign extends WC_Gateway_Klarna {
 			}
 				
 		
-			// Required fields check
-			if (!$this->get_eid() || !$this->get_secret()) return false;
+			
 			
 			// Checkout form check
 			if (isset($woocommerce->cart->total)) {
@@ -403,8 +400,75 @@ class WC_Gateway_Klarna_Campaign extends WC_Gateway_Klarna {
 		if ( $this->shop_country == 'NL' ) {
 			echo '<p><img src="' . $this->klarna_wb_img_checkout . '" class="klarna-wb"/></p>';	
 		}
+		
+		
+		// Mobile or desktop browser
+		if (wp_is_mobile() ) {
+			$klarna_layout = 'mobile';
+		 } else {
+		 	$klarna_layout = 'desktop';
+		 }
+		
+		// Script for displaying the terms link
 		?>
 		
+		<script type="text/javascript">
+		
+			// Document ready
+			jQuery(document).ready(function($) {
+				
+				var klarna_campaign_selected_country = $( "#billing_country" ).val();
+				
+				// If no Billing Country is set in the checkout form, use the default shop country
+				if( !klarna_campaign_selected_country ) {
+					var klarna_account_selected_country = '<?php echo $this->shop_country;?>';
+				}
+				
+				if( klarna_campaign_selected_country == 'SE' ) {
+				
+					var klarna_campaign_current_locale = 'sv_SE';
+				
+				} else if( klarna_campaign_selected_country == 'NO' ) {
+
+					var klarna_campaign_current_locale = 'nb_NO';
+				
+				} else if( klarna_campaign_selected_country == 'DK' ) {
+
+					var klarna_campaign_current_locale = 'da_DK';
+				
+				} else if( klarna_campaign_selected_country == 'FI' ) {
+
+					var klarna_campaign_current_locale = 'fi_FI';
+					
+				} else if( klarna_campaign_selected_country == 'DE' ) {
+
+					var klarna_campaign_current_locale = 'de_DE';
+				
+				}  else if( klarna_campaign_selected_country == 'NL' ) {
+
+					var klarna_campaign_current_locale = 'nl_NL';
+				
+				} else if( klarna_campaign_selected_country == 'AT' ) {
+
+					var klarna_campaign_current_locale = 'de_AT';
+				} else {
+					
+				}
+				
+				new Klarna.Terms.Account({
+				    el: 'klarna-campaign-terms',
+				    eid: '<?php echo $this->get_eid(); ?>',
+				    locale: klarna_campaign_current_locale,
+				    type: '<?php echo $klarna_layout;?>',
+				});
+				
+			});
+			
+		</script>
+		<span id="klarna-campaign-terms"></span>
+		
+		<div class="clear"></div>
+			
 		<fieldset>
 			<p class="form-row form-row-first">
 			
@@ -629,11 +693,16 @@ class WC_Gateway_Klarna_Campaign extends WC_Gateway_Klarna {
 					
 				<?php else : ?>
 					<label for="klarna_campaign_pno"><?php echo __("Date of Birth", 'klarna') ?> <span class="required">*</span></label>
-					<input type="text" class="input-text" name="klarna_campaign_pno" />
-				<?php endif; ?>
+					<input type="text" class="input-text" id="klarna_campaign_pno" name="klarna_campaign_pno" />
+				<?php endif; 
+					
+					// Button/form for getAddress
+					$data = new WC_Klarna_Get_Address;
+					echo $data->get_address_button();
+				?>
 			</p>
 			
-			<?php if ( $this->shop_country == 'NL' || $this->shop_country == 'DE' ) : ?>
+			<?php if ( $this->get_klarna_country() == 'NL' || $this->get_klarna_country() == 'DE' ) : ?>
 				<p class="form-row form-row-last">
 					<label for="klarna_campaign_gender"><?php echo __("Gender", 'klarna') ?> <span class="required">*</span></label>
 					<select id="klarna_campaign_gender" name="klarna_campaign_gender" class="woocommerce-select" style="width:120px;">
@@ -645,78 +714,10 @@ class WC_Gateway_Klarna_Campaign extends WC_Gateway_Klarna {
 			<?php endif; ?>
 			
 			<div class="clear"></div>
-		
-			<?php
-			// Mobile or desktop browser
-			if (wp_is_mobile() ) {
-				$klarna_layout = 'mobile';
-			 } else {
-			 	$klarna_layout = 'desktop';
-			 }
-			
-			// Script for displaying the terms link
-			?>
-			
-			<script type="text/javascript">
-			
-				// Document ready
-				jQuery(document).ready(function($) {
-					
-					var klarna_campaign_selected_country = $( "#billing_country" ).val();
-					
-					// If no Billing Country is set in the checkout form, use the default shop country
-					if( !klarna_campaign_selected_country ) {
-						var klarna_account_selected_country = '<?php echo $this->shop_country;?>';
-					}
-					
-					if( klarna_campaign_selected_country == 'SE' ) {
-					
-						var klarna_campaign_current_locale = 'sv_SE';
-					
-					} else if( klarna_campaign_selected_country == 'NO' ) {
-
-						var klarna_campaign_current_locale = 'nb_NO';
-					
-					} else if( klarna_campaign_selected_country == 'DK' ) {
-
-						var klarna_campaign_current_locale = 'da_DK';
-					
-					} else if( klarna_campaign_selected_country == 'FI' ) {
-
-						var klarna_campaign_current_locale = 'fi_FI';
-						
-					} else if( klarna_campaign_selected_country == 'DE' ) {
-
-						var klarna_campaign_current_locale = 'de_DE';
-					
-					}  else if( klarna_campaign_selected_country == 'NL' ) {
-
-						var klarna_campaign_current_locale = 'nl_NL';
-					
-					} else if( klarna_campaign_selected_country == 'AT' ) {
-
-						var klarna_campaign_current_locale = 'de_AT';
-					} else {
-						
-					}
-					
-					new Klarna.Terms.Account({
-					    el: 'klarna-campaign-terms',
-					    eid: '<?php echo $this->get_eid(); ?>',
-					    locale: klarna_campaign_current_locale,
-					    type: '<?php echo $klarna_layout;?>',
-					});
-					
-				});
-				
-			</script>
-			<span id="klarna-campaign-terms"></span>
-			
-			<div class="clear"></div>
 			
 			<?php 
 			// Consent terms for German & Austrian shops
-			if ( ( $this->shop_country == 'DE' || $this->shop_country == 'AT' ) && $this->de_consent_terms == 'yes' ) : ?>
+			if ( ( $this->get_klarna_country() == 'DE' || $this->get_klarna_country() == 'AT' ) && $this->de_consent_terms == 'yes' ) : ?>
 				<p class="form-row">
 					<label for="klarna_de_terms"></label>
 					<input type="checkbox" class="input-checkbox" value="yes" name="klarna_campaign_de_consent_terms" />
