@@ -43,7 +43,12 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
        	$this->eid_de							= ( isset( $this->settings['eid_de'] ) ) ? $this->settings['eid_de'] : '';
        	$this->secret_de						= ( isset( $this->settings['secret_de'] ) ) ? $this->settings['secret_de'] : '';
        	$this->klarna_checkout_url_de			= ( isset( $this->settings['klarna_checkout_url_de'] ) ) ? $this->settings['klarna_checkout_url_de'] : '';
-       	$this->klarna_checkout_thanks_url_de			= ( isset( $this->settings['klarna_checkout_thanks_url_de'] ) ) ? $this->settings['klarna_checkout_thanks_url_de'] : '';
+       	$this->klarna_checkout_thanks_url_de	= ( isset( $this->settings['klarna_checkout_thanks_url_de'] ) ) ? $this->settings['klarna_checkout_thanks_url_de'] : '';
+       	$this->phone_mandatory_de				= ( isset( $this->settings['phone_mandatory_de'] ) ) ? $this->settings['phone_mandatory_de'] : '';
+       	$this->dhl_packstation_de				= ( isset( $this->settings['dhl_packstation_de'] ) ) ? $this->settings['dhl_packstation_de'] : '';
+       	
+       	
+       	$this->default_eur_contry				= ( isset( $this->settings['default_eur_contry'] ) ) ? $this->settings['default_eur_contry'] : '';
        	
        	$this->terms_url						= ( isset( $this->settings['terms_url'] ) ) ? $this->settings['terms_url'] : '';
        	$this->testmode							= ( isset( $this->settings['testmode'] ) ) ? $this->settings['testmode'] : '';
@@ -56,6 +61,11 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
        	$this->create_customer_account			= ( isset( $this->settings['create_customer_account'] ) ) ? $this->settings['create_customer_account'] : '';
        	$this->send_new_account_email			= ( isset( $this->settings['send_new_account_email'] ) ) ? $this->settings['send_new_account_email'] : '';
        	
+       	$this->account_signup_text				= ( isset( $this->settings['account_signup_text'] ) ) ? $this->settings['account_signup_text'] : '';
+       	$this->account_login_text				= ( isset( $this->settings['account_login_text'] ) ) ? $this->settings['account_login_text'] : '';
+       	
+       	
+       	
 		
        	
 		if ( empty($this->terms_url) ) 
@@ -67,7 +77,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		else :
 			$this->klarna_server = 'https://checkout.klarna.com/checkout/orders';
 		endif;
-		
+
 		// Set current country based on used currency
 		switch ( get_woocommerce_currency() ) {
 			
@@ -77,8 +87,10 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			case 'EUR' :
 				if( get_locale() == 'de_DE' ) {
 					$klarna_country = 'DE';
-				} else {
+				} elseif( get_locale() == 'fi' ) {
 					$klarna_country = 'FI';
+				} else {
+					$klarna_country = $this->default_eur_contry;
 				}
 				break;
 			case 'SEK' :
@@ -309,6 +321,25 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 							'description' => __( 'Enter the URL to the page that acts as Thanks Page for Klarna Checkout Germany. This page must contain the shortcode [woocommerce_klarna_checkout]. Leave blank to use the Custom Checkout Page as Thanks Page.', 'klarna' ), 
 							'default' => ''
 						),
+			'phone_mandatory_de' => array(
+							'title' => __( 'Phone Number Mandatory - Germany', 'klarna' ), 
+							'type' => 'checkbox', 
+							'label' => __( 'Phone number is not mandatory for Klarna Checkout in Germany by default. Check this box to make it mandatory.', 'klarna' ), 
+							'default' => 'no'
+						),
+			'dhl_packstation_de' => array(
+							'title' => __( 'DHL Packstation Functionality - Germany', 'klarna' ), 
+							'type' => 'checkbox', 
+							'label' => __( 'Enable DHL packstation functionality for German customers.', 'klarna' ),
+							'default' => 'no'
+						),
+			'default_eur_contry' => array(
+								'title' => __( 'Default Checkout Country', 'klarna' ),
+								'type' => 'select',
+								'options' => array('DE'=>__( 'Germany', 'klarna' ), 'FI'=>__( 'Finland', 'klarna' )),
+								'description' => __( 'Used by the payment gateway to determine which country should be the default Checkout country if Euro is the selected currency, you as a merchant has an agreement with multiple countries that use Euro and the selected language cant be of help for this decision.', 'klarna' ),
+								'default' => 'DE'
+							),
 			'modify_standard_checkout_url' => array(
 							'title' => __( 'Modify Standard Checkout', 'klarna' ), 
 							'type' => 'checkbox', 
@@ -344,6 +375,18 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 							'type' => 'checkbox', 
 							'label' => __( 'Send New account email', 'klarna' ), 
 							'default' => 'no'
+						),
+			'account_signup_text' => array(
+							'title' => __( 'Account Signup Text', 'klarna' ), 
+							'type' => 'textarea', 
+							'description' => __( 'Add text above the Account Registration Form. Useful for legal text for German stores. See documentation for more information. Leave blank to disable.', 'klarna' ), 
+							'default' => ''
+						),
+			'account_login_text' => array(
+							'title' => __( 'Account Login Text', 'klarna' ), 
+							'type' => 'textarea', 
+							'description' => __( 'Add text above the Account Login Form. Useful for legal text for German stores. See documentation for more information. Leave blank to disable.', 'klarna' ), 
+							'default' => ''
 						),
 			'testmode' => array(
 							'title' => __( 'Test Mode', 'klarna' ), 
@@ -381,6 +424,13 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		$klarna_terms_page = get_option('woocommerce_terms_page_id');
 		if ( empty($klarna_terms_page) && empty($this->terms_url) ) {
 			echo '<strong>' . __('You need to specify a Terms Page in the WooCommerce settings or in the Klarna Checkout settings in order to enable the Klarna Checkout payment method.', 'klarna') . '</strong>';
+		}
+		
+		// Check if Curl is installed. If not - display message to the merchant about this.
+		if( function_exists('curl_version') ) {
+			// Do nothing
+		} else {
+			echo '<div id="message" class="error"><p>' . __('The PHP library cURL does not seem to be installed on your server. Klarna Checkout will not work without it.', 'klarna') . '</p></div>';
 		}
 		?>
 	    	
@@ -672,40 +722,55 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 							$_SESSION['klarna_checkout']
 						);
 					
-		
+						
 						try {
        						$klarna_order->fetch();
+       						$klarna_order_as_array = $klarna_order->marshal();
        						
-       						// Reset cart
-       						$update['cart']['items'] = array();
-       						foreach ($cart as $item) {
-        					    $update['cart']['items'][] = $item;
-        					}
-        					// Update the order WC id
-        					$update['purchase_country'] = $this->klarna_country;
-							$update['purchase_currency'] = $this->klarna_currency;
-							$update['locale'] = $this->klarna_language;
-							$update['merchant']['id'] = $eid;
-							$update['merchant']['terms_uri'] = $this->terms_url;
-							$update['merchant']['checkout_uri'] = add_query_arg( 'klarnaListener', 'checkout', $this->klarna_checkout_url );
-	        			
-        					$update['merchant']['confirmation_uri'] = add_query_arg ( array('klarna_order' => '{checkout.order.uri}', 'sid' => $order_id ), $this->klarna_checkout_thanks_url);
-        					$update['merchant']['push_uri'] = add_query_arg( array('sid' => $order_id, 'scountry' => $this->klarna_country, 'klarna_order' => '{checkout.order.uri}', 'wc-api' => 'WC_Gateway_Klarna_Checkout'), $this->klarna_checkout_url );
+       						
+       						// Reset session if the country in the store has changed since last time the checkout was loaded
+       						if( $this->klarna_country != $klarna_order_as_array['purchase_country'] ) {
+	       						
+	       						// Reset session
+		   						$klarna_order = null;
+		   						unset($_SESSION['klarna_checkout']);
+		   						
+       						} else {
+       						
+       							// Update order
+       							
+	       						// Reset cart
+	       						$update['cart']['items'] = array();
+	       						foreach ($cart as $item) {
+	        					    $update['cart']['items'][] = $item;
+	        					}
+	        					// Update the order WC id
+	        					$update['purchase_country'] = $this->klarna_country;
+								$update['purchase_currency'] = $this->klarna_currency;
+								$update['locale'] = $this->klarna_language;
+								$update['merchant']['id'] = $eid;
+								$update['merchant']['terms_uri'] = $this->terms_url;
+								$update['merchant']['checkout_uri'] = add_query_arg( 'klarnaListener', 'checkout', $this->klarna_checkout_url );
+		        			
+	        					$update['merchant']['confirmation_uri'] = add_query_arg ( array('klarna_order' => '{checkout.order.uri}', 'sid' => $order_id ), $this->klarna_checkout_thanks_url);
+	        					$update['merchant']['push_uri'] = add_query_arg( array('sid' => $order_id, 'scountry' => $this->klarna_country, 'klarna_order' => '{checkout.order.uri}', 'wc-api' => 'WC_Gateway_Klarna_Checkout'), $this->klarna_checkout_url );
+	        					
+		
+	        					// Customer info if logged in
+								if( $this->testmode !== 'yes' ) {
+									if($current_user->user_email) {
+										$update['shipping_address']['email'] = $current_user->user_email;
+									}
+							
+									if($woocommerce->customer->get_shipping_postcode()) {
+										$update['shipping_address']['postal_code'] = $woocommerce->customer->get_shipping_postcode();
+									}
+									
+								}
+							
+	        					$klarna_order->update( apply_filters( 'kco_update_order', $update ) );
         					
-	
-        					// Customer info if logged in
-							if( $this->testmode !== 'yes' ) {
-								if($current_user->user_email) {
-									$update['shipping_address']['email'] = $current_user->user_email;
-								}
-						
-								if($woocommerce->customer->get_shipping_postcode()) {
-									$update['shipping_address']['postal_code'] = $woocommerce->customer->get_shipping_postcode();
-								}
-								
-							}
-						
-        					$klarna_order->update( apply_filters( 'kco_update_order', $update ) );
+        					} // End if country change
         				
         				} catch (Exception $e) {
         					// Reset session
@@ -726,6 +791,16 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	        			$create['merchant']['checkout_uri'] = add_query_arg( 'klarnaListener', 'checkout', $this->klarna_checkout_url );
 	        			$create['merchant']['confirmation_uri'] = add_query_arg ( array('klarna_order' => '{checkout.order.uri}', 'sid' => $order_id ), $this->klarna_checkout_thanks_url);
 	        			$create['merchant']['push_uri'] = add_query_arg( array('sid' => $order_id, 'scountry' => $this->klarna_country, 'klarna_order' => '{checkout.order.uri}', 'wc-api' => 'WC_Gateway_Klarna_Checkout'), $this->klarna_checkout_url );
+	        			
+	        			// Make phone a mandatory field for German stores?
+	        			if( $this->phone_mandatory_de == 'yes' ) {
+		        			$create['options']['phone_mandatory'] = true;	
+	        			}
+	        			
+	        			// Enable DHL packstation feature for German stores?
+	        			if( $this->dhl_packstation_de == 'yes' ) {
+		        			$create['options']['packstation_enabled'] = true;	
+	        			}
 	        			
 	        			
 	        			// Customer info if logged in
@@ -787,7 +862,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			if (isset($_GET['klarna_order'])) {
 				global $woocommerce;
 				
-				if ($this->debug=='yes') $this->log->add( 'klarna', 'Response from Klarna...' );
+				if ($this->debug=='yes') $this->log->add( 'klarna', 'IPN callback from Klarna' );
 				if ($this->debug=='yes') $this->log->add( 'klarna', 'Klarna order: ' . $_GET['klarna_order'] );
 				if ($this->debug=='yes') $this->log->add( 'klarna', 'GET: ' . json_encode($_GET) );
 				
@@ -864,7 +939,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 					// Add customer shipping address - retrieved from callback from Klarna
 					$allow_separate_shipping = ( isset( $klarna_order['options']['allow_separate_shipping_address'] ) ) ? $klarna_order['options']['allow_separate_shipping_address'] : '';
 					
-					if( $allow_separate_shipping == 'true' ) {
+					if( $allow_separate_shipping == 'true' ||  $_GET['scountry'] == 'DE' ) {
 						
 						update_post_meta( $order_id, '_shipping_first_name', $klarna_order['shipping_address']['given_name'] );
 						update_post_meta( $order_id, '_shipping_last_name', $klarna_order['shipping_address']['family_name'] );
@@ -936,14 +1011,29 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 					$klarna_order->update($update);
 					
 					
+					// Check order not already completed or processing
+					// To avoid triggering of multiple payment_complete() callbacks
+					if ( $order->status == 'completed' || $order->status == 'processing' ) {
+		        
+						if ( $this->debug == 'yes' ) {
+							$this->log->add( 'klarna', 'Aborting, Order #' . $order_id . ' is already complete.' );
+						}
+				        
+				    } else {
+				    
+				    	// Payment complete
+				    	// Update order meta
+				    	update_post_meta( $order_id, 'klarna_order_status', 'created' );
+						update_post_meta( $order_id, '_klarna_order_reservation', $klarna_order['reservation'] );
+						
+						$order->payment_complete();
+						// Debug
+						if ($this->debug=='yes') $this->log->add( 'klarna', 'Payment complete action triggered' );
+						
+						// Remove cart
+						$woocommerce->cart->empty_cart();
 					
-					// Payment complete
-					update_post_meta( $order_id, 'klarna_order_status', 'created' );
-					update_post_meta( $order_id, '_klarna_order_reservation', $klarna_order['reservation'] );
-					$order->payment_complete();
-					
-					// Remove cart
-					$woocommerce->cart->empty_cart();
+					}
 					
 					// Other plugins and themes can hook into here
 					do_action( 'klarna_after_kco_push_notification', $order_id );
@@ -1803,7 +1893,21 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			
 			return $currency;
 		} // End function
-	
+		
+		
+		/**
+		 * Helper function - get Account Signup Text
+		 */
+	 	public function get_account_signup_text() {
+		 	return $this->account_signup_text;
+	 	}
+	 	
+	 	/**
+		 * Helper function - get Account Login Text
+		 */
+	 	public function get_account_login_text() {
+		 	return $this->account_login_text;
+	 	}
 	 	
 	 	
 	 /**
@@ -2139,13 +2243,16 @@ class WC_Gateway_Klarna_Checkout_Extra {
 	
 	public function __construct() {
 		
-		add_action('init', array( $this, 'start_session' ), 1);
+		add_action( 'init', array( $this, 'start_session' ),1 );
 		
 		add_shortcode( 'woocommerce_klarna_checkout', array( $this, 'klarna_checkout_page') );
 		
 		//add_action( 'woocommerce_proceed_to_checkout', array( &$this, 'checkout_button' ), 12 );
 		
 		add_filter( 'woocommerce_get_checkout_url', array( $this, 'change_checkout_url' ), 20 );
+		
+		add_action( 'woocommerce_register_form_start', array( $this, 'add_account_signup_text' ) );
+		add_action( 'woocommerce_login_form_start', array( $this, 'add_account_login_text' ) );
 		
 		
 		 
@@ -2195,6 +2302,54 @@ class WC_Gateway_Klarna_Checkout_Extra {
 		}
 		
 		return $url;
+	}
+	
+	/**
+	 *  Function Add Account signup text
+	 *
+	 *  @since version 1.8.9
+	 * 	Add text above the Account Registration Form. 
+	 *  Useful for legal text for German stores. See documentation for more information. Leave blank to disable.
+	 *
+	 **/
+	 
+	public function add_account_signup_text() {
+		global $woocommerce;
+		$data = new WC_Gateway_Klarna_Checkout;
+		$account_signup_text = '';
+		$account_signup_text = $data->get_account_signup_text();
+		
+
+		// Change the Checkout URL if this is enabled in the settings
+		if( !empty($account_signup_text) ) {
+			echo $account_signup_text;
+		}
+
+	}
+	
+	
+	/**
+	 *  Function Add Account login text
+	 *
+	 *  @since version 1.8.9
+	 * 	Add text above the Account Login Form. 
+	 *  Useful for legal text for German stores. See documentation for more information. Leave blank to disable.
+	 *
+	 **/
+
+	 
+	public function add_account_login_text() {
+		global $woocommerce;
+		$data = new WC_Gateway_Klarna_Checkout;
+		$account_login_text = '';
+		$account_login_text = $data->get_account_login_text();
+		
+
+		// Change the Checkout URL if this is enabled in the settings
+		if( !empty($account_login_text) ) {
+			echo $account_login_text;
+		}
+
 	}
 		
 
