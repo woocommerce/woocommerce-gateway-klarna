@@ -1,5 +1,8 @@
 *** Klarna Changelog ***
 
+2014.11.05	- version 1.8.9
+* Fix		- Wrapping class xmlrpc_client in a class_exists check to prevent plugin conflicts.
+
 2014.10.10	- version 1.8.8
 * Fix		- Shipping method name not sent to Klarna (KCO).
 * Tweak		- Shipping price calcultation improvements/changes (KCO).
