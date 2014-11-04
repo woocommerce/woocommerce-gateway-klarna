@@ -12,9 +12,10 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 		
 		parent::__construct();
 		
-		$this->id			= 'klarna';
-		$this->method_title = __('Klarna Invoice', 'klarna');
-		$this->has_fields 	= true;
+		$this->id						= 'klarna';
+		$this->method_title 			= __('Klarna Invoice', 'klarna');
+		$this->has_fields 				= true;
+		$this->order_button_text 		= apply_filters( 'klarna_order_button_text', __( 'Place order', 'woocommerce' ) );
 		
 		// Load the form fields.
 		$this->init_form_fields();
@@ -374,7 +375,9 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 			
 		</script>
 		<span id="klarna-invoice-terms"></span>
-			
+		
+		
+
 		<fieldset>
 			<p class="form-row form-row-first">
 				<?php if ( $this->get_klarna_country() == 'NL' || $this->get_klarna_country() == 'DE' || $this->get_klarna_country() == 'AT' ) : ?>
@@ -525,7 +528,13 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 				<?php else : ?>
 					<label for="klarna_invo_pno"><?php echo __("Date of Birth", 'klarna') ?> <span class="required">*</span></label>
 					<input type="text" class="input-text" name="klarna_invo_pno" id="klarna_invo_pno" />
-				<?php endif; ?>
+				<?php endif; 
+				
+				// Button/form for getAddress
+				$data = new WC_Klarna_Get_Address;
+				echo $data->get_address_button();
+					
+				?>
 			</p>
 			
 			<?php if ( $this->get_klarna_country() == 'NL' || $this->get_klarna_country() == 'DE' || $this->get_klarna_country() == 'AT' ) : 
@@ -546,7 +555,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 		
 			<?php 
 			// Consent terms for German & Austrian shops
-			if ( ( $this->shop_country == 'DE' || $this->shop_country == 'AT' ) && $this->de_consent_terms == 'yes' ) : ?>
+			if ( ( $this->get_klarna_country() == 'DE' || $this->get_klarna_country() == 'AT' ) && $this->de_consent_terms == 'yes' ) : ?>
 				<p class="form-row">
 					<label for="klarna_invo_de_consent_terms"></label>
 					<input type="checkbox" class="input-checkbox" value="yes" name="klarna_invo_de_consent_terms" />
