@@ -12,9 +12,10 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 		
 		parent::__construct();
 		
-		$this->id			= 'klarna_account';
-		$this->method_title = __('Klarna Account', 'klarna');
-		$this->has_fields 	= true;
+		$this->id								= 'klarna_account';
+		$this->method_title 					= __('Klarna Account', 'klarna');
+		$this->has_fields 						= true;
+		$this->order_button_text 				= apply_filters( 'klarna_order_button_text', __( 'Place order', 'woocommerce' ) );
 		
 		
 		// Klarna warning banner - used for NL only
@@ -291,7 +292,30 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
     	<h3><?php _e('Klarna Account', 'klarna'); ?></h3>
 	    	<p><?php printf(__('With Klarna your customers can pay by invoice. Klarna works by adding extra personal information fields and then sending the details to Klarna for verification. Documentation <a href="%s" target="_blank">can be found here</a>.', 'klarna'), 'http://docs.woothemes.com/document/klarna/' ); ?></p>
 	    	
-		    
+		    <?php
+		    // Get PClasses so that the we can see what classes are active for the merchant.
+			require_once(KLARNA_LIB . 'Klarna.php');
+			require_once(KLARNA_LIB . 'pclasses/storage.intf.php');
+			require_once(KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc.inc');
+			require_once(KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc_wrappers.inc');
+			
+			if( !empty($this->authorized_countries) ) {
+				echo '<h4>' . __('Active PClasses', 'klarna') . '</h4>';
+			    foreach($this->authorized_countries as $key=>$country) {
+				    $pclasses = $this->fetch_pclasses( $country );
+				    if( $pclasses ) {
+				    	echo '<p>' . $country . '</p>';
+					    foreach( $pclasses as $pclass ) {
+					    	if ( $pclass->getType() == 0 || $pclass->getType() == 1 ) {
+						    	echo $pclass->getDescription() . ', ';
+						    }
+					    }
+					    
+					    echo '<br/>';
+				    }   
+			    }
+			} 
+		    ?>
     	<table class="form-table">
     	<?php
     		// Generate the HTML For the settings form.
@@ -421,8 +445,75 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 		if ( $this->get_klarna_country() == 'NL' ) {
 			echo '<p><img src="' . $this->klarna_wb_img_checkout . '" class="klarna-wb" style="max-width: 100%;"/></p>';	
 		}
+		
+		// Mobile or desktop browser
+		if (wp_is_mobile() ) {
+			$klarna_layout = 'mobile';
+		 } else {
+		 	$klarna_layout = 'desktop';
+		 }
+		
+		// Script for displaying the terms link
 		?>
 		
+		<script type="text/javascript">
+		
+			// Document ready
+			jQuery(document).ready(function($) {
+				
+				var klarna_account_selected_country = $( "#billing_country" ).val();
+				
+				// If no Billing Country is set in the checkout form, use the default shop country
+				if( !klarna_account_selected_country ) {
+					var klarna_account_selected_country = '<?php echo $this->shop_country;?>';
+				}
+				
+				if( klarna_account_selected_country == 'SE' ) {
+				
+					var klarna_account_current_locale = 'sv_SE';
+				
+				} else if( klarna_account_selected_country == 'NO' ) {
+
+					var klarna_account_current_locale = 'nb_NO';
+				
+				} else if( klarna_account_selected_country == 'DK' ) {
+
+					var klarna_account_current_locale = 'da_DK';
+				
+				} else if( klarna_account_selected_country == 'FI' ) {
+
+					var klarna_account_current_locale = 'fi_FI';
+					
+				} else if( klarna_account_selected_country == 'DE' ) {
+
+					var klarna_account_current_locale = 'de_DE';
+				
+				}  else if( klarna_account_selected_country == 'NL' ) {
+
+					var klarna_account_current_locale = 'nl_NL';
+				
+				} else if( klarna_account_selected_country == 'AT' ) {
+
+					var klarna_account_current_locale = 'de_AT';
+				} else {
+					
+				}
+				
+				new Klarna.Terms.Account({
+				    el: 'klarna-account-terms',
+				    eid: '<?php echo $this->get_eid(); ?>',
+				    locale: klarna_account_current_locale,
+				    type: '<?php echo $klarna_layout;?>',
+				});
+				
+			});
+			
+		</script>
+		<span id="klarna-account-terms"></span>
+		
+		<div class="clear"></div>
+			
+			
 		<fieldset>
 			<p class="form-row form-row-first">
 			
@@ -433,7 +524,7 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 				if($pclasses) {
 				
 				?>
-					<label for="klarna_account_pclass"><?php echo __("Payment plan", 'klarna') ?> <span class="required">*</span></label><br/>
+					<label for="klarna_account_pclass"><?php echo __("Payment plan", 'klarna') ?> <span class="required">*</span></label>
 					<select id="klarna_account_pclass" name="klarna_account_pclass" class="woocommerce-select">
 						
 					<?php
@@ -667,8 +758,13 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 					
 				<?php else : ?>
 					<label for="klarna_pno"><?php echo __("Date of Birth", 'klarna') ?> <span class="required">*</span></label>
-					<input type="text" class="input-text" name="klarna_pno" />
-				<?php endif; ?>
+					<input type="text" class="input-text" id="klarna_pno" name="klarna_pno" />
+				<?php endif; 
+					
+				// Button/form for getAddress
+				$data = new WC_Klarna_Get_Address;
+				echo $data->get_address_button();
+				?>
 			</p>
 			
 			<?php if ( $this->get_klarna_country() == 'NL' || $this->get_klarna_country() == 'DE' ) : ?>
@@ -684,77 +780,11 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 						
 			<div class="clear"></div>
 		
-			<?php
-			// Mobile or desktop browser
-			if (wp_is_mobile() ) {
-				$klarna_layout = 'mobile';
-			 } else {
-			 	$klarna_layout = 'desktop';
-			 }
 			
-			// Script for displaying the terms link
-			?>
-			
-			<script type="text/javascript">
-			
-				// Document ready
-				jQuery(document).ready(function($) {
-					
-					var klarna_account_selected_country = $( "#billing_country" ).val();
-					
-					// If no Billing Country is set in the checkout form, use the default shop country
-					if( !klarna_account_selected_country ) {
-						var klarna_account_selected_country = '<?php echo $this->shop_country;?>';
-					}
-					
-					if( klarna_account_selected_country == 'SE' ) {
-					
-						var klarna_account_current_locale = 'sv_SE';
-					
-					} else if( klarna_account_selected_country == 'NO' ) {
-
-						var klarna_account_current_locale = 'nb_NO';
-					
-					} else if( klarna_account_selected_country == 'DK' ) {
-
-						var klarna_account_current_locale = 'da_DK';
-					
-					} else if( klarna_account_selected_country == 'FI' ) {
-
-						var klarna_account_current_locale = 'fi_FI';
-						
-					} else if( klarna_account_selected_country == 'DE' ) {
-
-						var klarna_account_current_locale = 'de_DE';
-					
-					}  else if( klarna_account_selected_country == 'NL' ) {
-
-						var klarna_account_current_locale = 'nl_NL';
-					
-					} else if( klarna_account_selected_country == 'AT' ) {
-
-						var klarna_account_current_locale = 'de_AT';
-					} else {
-						
-					}
-					
-					new Klarna.Terms.Account({
-					    el: 'klarna-account-terms',
-					    eid: '<?php echo $this->get_eid(); ?>',
-					    locale: klarna_account_current_locale,
-					    type: '<?php echo $klarna_layout;?>',
-					});
-					
-				});
-				
-			</script>
-			<span id="klarna-account-terms"></span>
-			
-			<div class="clear"></div>
 							
 			<?php 
 			// Consent terms for German & Austrian shops
-			if ( ( $this->shop_country == 'DE' || $this->shop_country == 'AT' ) && $this->de_consent_terms == 'yes' ) : ?>
+			if ( ( $this->get_klarna_country() == 'DE' || $this->get_klarna_country() == 'AT' ) && $this->de_consent_terms == 'yes' ) : ?>
 				<p class="form-row">
 					<label for="klarna_de_terms"></label>
 					<input type="checkbox" class="input-checkbox" value="yes" name="klarna_de_consent_terms" />
@@ -1222,10 +1252,10 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 			global $woocommerce;
 
 			// Get PClasses so that the customer can chose between different payment plans.
-  		require_once(KLARNA_LIB . 'Klarna.php');
-		require_once(KLARNA_LIB . 'pclasses/storage.intf.php');
-		require_once(KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc.inc');
-		require_once(KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc_wrappers.inc');
+			require_once(KLARNA_LIB . 'Klarna.php');
+			require_once(KLARNA_LIB . 'pclasses/storage.intf.php');
+			require_once(KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc.inc');
+			require_once(KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc_wrappers.inc');
 		
 		// Test mode or Live mode		
 		if ( $this->testmode == 'yes' ):
