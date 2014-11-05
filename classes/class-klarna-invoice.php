@@ -1411,7 +1411,8 @@ class WC_Gateway_Klarna_Invoice_Extra {
 	 */
 	public function calculate_fees( $cart ) {
 		global $woocommerce;
-
+		$current_gateway = '';
+		
     	if ( is_checkout() || defined( 'WOOCOMMERCE_CHECKOUT' ) ) {
     		
     		$available_gateways = $woocommerce->payment_gateways->get_available_payment_gateways();
