@@ -164,7 +164,9 @@ function init_klarna_gateway() {
 	require_once 'classes/class-klarna-partpayment-widget.php';
 	
 	// Include the Get Address class
-	require_once 'classes/class-klarna-get-address.php';
+	if ( is_checkout() ) {
+		require_once 'classes/class-klarna-get-address.php';
+	}
 	
 	// WC 2.0 Update notice
 	class WC_Gateway_Klarna_Update_Notice {
