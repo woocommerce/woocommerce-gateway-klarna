@@ -49,8 +49,8 @@ class WC_Klarna_Get_Address {
 		// Register and enqueue scripts and styles
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_scripts') );
 		
-		// GetAddresses form above the checkout billing form
-		//add_action( 'woocommerce_before_checkout_billing_form', array( $this, 'get_address_button2' ) );
+		// GetAddresses response above the checkout billing form
+		add_action( 'woocommerce_before_checkout_form', array( $this, 'get_address_response' ) );
         
        
 	} // End constructor
@@ -109,6 +109,8 @@ class WC_Klarna_Get_Address {
 				jQuery('input[name="payment_method"]').on('change', function(){
 					var selected_paytype = jQuery('input[name=payment_method]:checked').val();
 					if( selected_paytype !== 'klarna' && selected_paytype !== 'klarna_account' && selected_paytype !== 'klarna_campaign'){
+						
+						jQuery(".klarna-response").hide();
 						
 						// Replace fetched customer values from Klarna with the original customer values
 						jQuery("#billing_first_name").val('<?php echo $original_billing_first_name;?>');
@@ -253,14 +255,19 @@ class WC_Klarna_Get_Address {
 									var res = "";
 									//console.log(adresses[0].length);
 									
-									if(adresses[0].length < 2 ){
+									if(adresses[0].length < 2 ) {
 										
+										// One address found
+										$(".klarna-response").show();
+										res += '<ul class="woocommerce-message klarna-get-address-found"><li><?php _e('Address found and added to the checkout form.', 'woocommerce-gateway-klarna');?></li></ul>';
 										klarnainfo('private', adresses, 0);
-									}
-									else{
+										
+									} else {
+										
+										// Multiple addresses found
 										$(".klarna-response").show();
 										
-										res += '<h4 class="klarna-select-address-title"><?php _e('Select Address', 'woocommerce-gateway-klarna');?></h4>';
+										res += '<ul class="woocommerce-message klarna-get-address-found multiple"><li><?php _e('Multiple addresses found. Select one address to add it to the checkout form.', 'woocommerce-gateway-klarna');?></li><li>';
 										for(var a = 0; a <= adresses.length; a++) {
 										
 											res += '<div id="adress' + a + '" class="adressescompanies">' +  
@@ -268,14 +275,28 @@ class WC_Klarna_Get_Address {
 											if (adresses[0][a]['street']!=null) {
 												res += ', ' + adresses[0][a]['street'];
 											}
-											res += ' ' + adresses[0][a]['careof'] + 
-														', ' + adresses[0][a]['zip'] + ' ' + adresses[0][a]['city'] + '</label>';
-												 res += "<input type='hidden' id='h" + a + "' value='" + JSON.stringify(adresses) + "' />";
+											
+											if (adresses[0][a]['careof']!='') {
+												res += ', ' + adresses[0][a]['careof'];
+											}
+											
+											res += ', ' + adresses[0][a]['zip'] + ' ' + adresses[0][a]['city'] + '</label>';
+											res += "<input type='hidden' id='h" + a + "' value='" + JSON.stringify(adresses) + "' />";
 											res +=	'</div>';
+											
 										}
+										
+										res +=	'</li></ul>';
+										
 									}
 									
 									jQuery(".klarna-response").html(res);
+									
+									// Scroll to .klarna-response
+									$("html, body").animate({
+										scrollTop: $(".klarna-response").offset().top},
+										'slow');
+									
 								/*}
 								else{
 									klarnainfo(klarna_client_type, response, 0);
@@ -316,7 +337,6 @@ class WC_Klarna_Get_Address {
 				if($this->get_country() == 'SE') { ?>
 					<span class="klarna-push-pno get-address-button button"><?php _e('Fetch', 'klarna'); ?></span>
 					<p class="form-row">
-						<div class="klarna-response"></div>
 						<div class="klarna-get-address-message"></div>
 					</p>
 				<?php 
@@ -325,34 +345,21 @@ class WC_Klarna_Get_Address {
 			return ob_get_clean();
 		}
 	} // End function
+	
+	
 
 
 /**
- 	 * Display the GetAddress fields
+ 	 * Display the GetAddress response above the billing form on checkout
  	 *
  	**/
 
-	public function get_address_button2() {
+	public function get_address_response() {
 		
 		if( ($this->invo_enabled && $this->invo_dob_display == 'description_box') || ($this->partpay_enabled && $this->partpay_dob_display == 'description_box') ) {
 			
 			?>
-			<div class="get-address-box">
-  
-				<span id="klarna-client-type-box-private" class="desc">
-                	<input type="text" class="input-text" name="klarna_pno" id="klarna_pno" placeholder="<?php _e('Enter personal identity number/company registration number', 'klarna'); ?>" value=""/>
-            	</span>
-					
-				<?php 
-				// Don't display GetAddress button for Finland
-				if($this->get_country() != 'FI') { ?>
-					<span class="klarna-push-pno get-address-button button"><?php _e('Get address', 'klarna'); ?></span>
-				<?php } ?>
-			
-				<div id="klarna-response"></div>
-				<div class="klarna-get-address-message"></div>
-            
-			</div>
+				<div class="klarna-response"></div>
 			
 			<?php
 			
