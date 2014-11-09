@@ -8,6 +8,7 @@
 * Feature	- Added DHL Packstation feature in KCO for German stores.
 * Tweak		- Reset the Klarna Checkout session if country changes on an order update (when the KCO checkout is loaded/displayed).
 * Tweak		- Added order_button_text in settings & apply_filters() klarna_order_button_text so users can filter the Place order button.
+* Tweak		- Added do_action('woocommerce_checkout_order_processed') after order has been created (KCO), other plugins rely on this hook.
 * Fix		- Added check for separate shipping address in push notification from Klarna for KCO Germany.
 * Fix		- Consent terms displayed to all German and Austrian customers if selected in the settings (KPM). Previously only displayed on German and Austrian stores.
 
