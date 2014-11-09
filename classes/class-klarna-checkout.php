@@ -602,6 +602,8 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	        			exit();
         			}
         			
+        			do_action( 'woocommerce_checkout_order_processed', $order_id, false );
+        			
         			// Store Order ID in session so it can be re-used if customer navigates away from the checkout and then return again
 					$woocommerce->session->order_awaiting_payment = $order_id;
         			
