@@ -202,6 +202,12 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
        	remove_action( 'woocommerce_thankyou', 'woocommerce_order_details_table', 10 );
        	//add_action( 'add_meta_boxes', array( $this, 'add_klarna_meta_box' ) );
        	
+       	// Ajax
+       	add_action( 'wp_ajax_customer_update_kco_order_note', array($this, 'customer_update_kco_order_note') );
+		add_action( 'wp_ajax_nopriv_customer_update_kco_order_note', array($this, 'customer_update_kco_order_note') );
+		add_action( 'wp_footer', array( $this, 'js_order_note' ) );
+		add_action( 'wp_footer', array( $this, 'ajaxurl'));
+       	
     }
 
 	 
@@ -1585,6 +1591,99 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		}
 
 		
+		/**
+		 * Add ajaxurl var to head
+		 */
+		function ajaxurl() {
+			global $post;
+			if( has_shortcode( $post->post_content, 'woocommerce_klarna_checkout_order_note') ) {
+				?>
+				<script type="text/javascript">
+						var ajaxurl = '<?php echo admin_url('admin-ajax.php'); ?>';
+				</script>
+				<?php
+			}
+		}
+	
+		/**
+	 	 * JS for update the Order note field (via ajax) if displayed on KCO checkout 
+	 	 *
+	 	**/
+		function js_order_note() {
+			global $post;
+			if( has_shortcode( $post->post_content, 'woocommerce_klarna_checkout_order_note') ) {
+			
+				?>
+				<script type="text/javascript">
+				jQuery(document).ready(function($){
+					
+					jQuery('#kco_order_note').blur(function () {
+						var kco_order_note = '';
+						
+						if( jQuery('#kco_order_note').val() != '' ) {
+							var kco_order_note = jQuery('#kco_order_note').val();
+						}
+						
+						if(kco_order_note == '') {
+						
+						} else {
+								
+							jQuery.post(
+								'<?php echo get_option('siteurl') . '/wp-admin/admin-ajax.php' ?>',
+								{
+									action			: 'customer_update_kco_order_note',
+									kco_order_note	: kco_order_note,
+									kco_order_id	: '<?php; echo WC()->session->order_awaiting_payment;?>',
+									_wpnonce		: '<?php echo wp_create_nonce('update-kco-checkout-order-note'); ?>',
+								},
+								function(response) {
+									console.log(response);
+								}
+							);
+							
+						}				
+					});
+				});
+				</script>
+				<?php
+				
+			} // End if has_shortcode()
+			
+		} // End function
+		
+		
+		/**
+	     * Function customer_update_kco_order_note
+	     * Ajax request callback function
+	     * 
+	     */
+		function customer_update_kco_order_note() {
+			
+			// The $_REQUEST contains all the data sent via ajax
+			if ( isset($_REQUEST) && wp_verify_nonce( $_POST['_wpnonce'], 'update-kco-checkout-order-note' ) ) {
+			
+				$kco_order_note = sanitize_text_field($_REQUEST['kco_order_note']);
+				$kco_order_id = sanitize_text_field($_REQUEST['kco_order_id']);
+		
+				// Update Order Excerpt (Customer note)
+				$my_post = array(
+					'ID'           => $kco_order_id,
+					'post_excerpt' => $kco_order_note
+				);
+				
+				$response = wp_update_post( $my_post );
+				
+				echo $response;
+			
+			} else {
+			
+				echo '';
+			
+			}
+			
+			die(); // this is required to terminate immediately and return a proper response
+		} // End function
+	
 		
 		/**
 		 * Helper function get_enabled
@@ -2028,6 +2127,7 @@ class WC_Gateway_Klarna_Checkout_Extra {
 		add_action( 'init', array( $this, 'start_session' ),1 );
 		
 		add_shortcode( 'woocommerce_klarna_checkout', array( $this, 'klarna_checkout_page') );
+		add_shortcode( 'woocommerce_klarna_checkout_order_note', array( $this, 'klarna_checkout_order_note') );
 		
 		//add_action( 'woocommerce_proceed_to_checkout', array( &$this, 'checkout_button' ), 12 );
 		
@@ -2051,13 +2151,35 @@ class WC_Gateway_Klarna_Checkout_Extra {
         	session_start();
         }
     }
-	
-	// Shortcode
+    
+	// Shortcode KCO page
 	function klarna_checkout_page() {
-		
+		 
+    	echo '<div class="klarna_checkout">';
+    	
 		$data = new WC_Gateway_Klarna_Checkout;
 		return $data->get_klarna_checkout_page();
+		echo '</div>';
+	}
+	
+	// Shortcode Order note
+	function klarna_checkout_order_note() {
+		global $woocommerce;
+    	$field = array(
+			'type'              => 'textarea',
+			'label'             => __( 'Order Notes', 'woocommerce' ),
+			'placeholder'       => _x('Notes about your order, e.g. special notes for delivery.', 'placeholder', 'woocommerce'),
+			'class'             => array('notes'),
+		);
 		
+		ob_start();
+		
+		echo '<div class="woocommerce"><form>';
+    	woocommerce_form_field( 'kco_order_note', $field );
+		echo '</form></div>';
+
+		return ob_get_clean();
+    	
 	}
 	
 	
