@@ -254,135 +254,145 @@
 	* @todo do a bit of basic benchmarking (strtr vs. str_replace)
 	* @todo	make usage of iconv() or recode_string() or mb_string() where available
 	*/
-	function xmlrpc_encode_entitites($data, $src_encoding='', $dest_encoding='')
-	{
-		if ($src_encoding == '')
-		{
-			// lame, but we know no better...
-			$src_encoding = $GLOBALS['xmlrpc_internalencoding'];
-		}
+	if ( ! function_exists( 'xmlrpc_encode_entitites' ) ) {
+		function xmlrpc_encode_entitites( $data, $src_encoding = '', $dest_encoding = '' ) {
+			if ( $src_encoding == '' ) {
+				// lame, but we know no better...
+				$src_encoding = $GLOBALS['xmlrpc_internalencoding'];
+			}
 
-		switch(strtoupper($src_encoding.'_'.$dest_encoding))
-		{
-			case 'ISO-8859-1_':
-			case 'ISO-8859-1_US-ASCII':
-				$escaped_data = str_replace(array('&', '"', "'", '<', '>'), array('&amp;', '&quot;', '&apos;', '&lt;', '&gt;'), $data);
-				$escaped_data = str_replace($GLOBALS['xml_iso88591_Entities']['in'], $GLOBALS['xml_iso88591_Entities']['out'], $escaped_data);
-				break;
-			case 'ISO-8859-1_UTF-8':
-				$escaped_data = str_replace(array('&', '"', "'", '<', '>'), array('&amp;', '&quot;', '&apos;', '&lt;', '&gt;'), $data);
-				$escaped_data = utf8_encode($escaped_data);
-				break;
-			case 'ISO-8859-1_ISO-8859-1':
-			case 'US-ASCII_US-ASCII':
-			case 'US-ASCII_UTF-8':
-			case 'US-ASCII_':
-			case 'US-ASCII_ISO-8859-1':
-			case 'UTF-8_UTF-8':
-			//case 'CP1252_CP1252':
-				$escaped_data = str_replace(array('&', '"', "'", '<', '>'), array('&amp;', '&quot;', '&apos;', '&lt;', '&gt;'), $data);
-				break;
-			case 'UTF-8_':
-			case 'UTF-8_US-ASCII':
-			case 'UTF-8_ISO-8859-1':
-	// NB: this will choke on invalid UTF-8, going most likely beyond EOF
-	$escaped_data = '';
-	// be kind to users creating string xmlrpcvals out of different php types
-	$data = (string) $data;
-	$ns = strlen ($data);
-	for ($nn = 0; $nn < $ns; $nn++)
-	{
-		$ch = $data[$nn];
-		$ii = ord($ch);
-		//1 7 0bbbbbbb (127)
-		if ($ii < 128)
-		{
-			/// @todo shall we replace this with a (supposedly) faster str_replace?
-			switch($ii){
-				case 34:
-					$escaped_data .= '&quot;';
+			switch ( strtoupper( $src_encoding . '_' . $dest_encoding ) ) {
+				case 'ISO-8859-1_':
+				case 'ISO-8859-1_US-ASCII':
+					$escaped_data = str_replace( array( '&', '"', "'", '<', '>' ), array(
+							'&amp;',
+							'&quot;',
+							'&apos;',
+							'&lt;',
+							'&gt;'
+						), $data );
+					$escaped_data = str_replace( $GLOBALS['xml_iso88591_Entities']['in'], $GLOBALS['xml_iso88591_Entities']['out'], $escaped_data );
 					break;
-				case 38:
-					$escaped_data .= '&amp;';
+				case 'ISO-8859-1_UTF-8':
+					$escaped_data = str_replace( array( '&', '"', "'", '<', '>' ), array(
+							'&amp;',
+							'&quot;',
+							'&apos;',
+							'&lt;',
+							'&gt;'
+						), $data );
+					$escaped_data = utf8_encode( $escaped_data );
 					break;
-				case 39:
-					$escaped_data .= '&apos;';
+				case 'ISO-8859-1_ISO-8859-1':
+				case 'US-ASCII_US-ASCII':
+				case 'US-ASCII_UTF-8':
+				case 'US-ASCII_':
+				case 'US-ASCII_ISO-8859-1':
+				case 'UTF-8_UTF-8':
+					//case 'CP1252_CP1252':
+					$escaped_data = str_replace( array( '&', '"', "'", '<', '>' ), array(
+							'&amp;',
+							'&quot;',
+							'&apos;',
+							'&lt;',
+							'&gt;'
+						), $data );
 					break;
-				case 60:
-					$escaped_data .= '&lt;';
+				case 'UTF-8_':
+				case 'UTF-8_US-ASCII':
+				case 'UTF-8_ISO-8859-1':
+					// NB: this will choke on invalid UTF-8, going most likely beyond EOF
+					$escaped_data = '';
+					// be kind to users creating string xmlrpcvals out of different php types
+					$data = (string) $data;
+					$ns   = strlen( $data );
+					for ( $nn = 0; $nn < $ns; $nn ++ ) {
+						$ch = $data[ $nn ];
+						$ii = ord( $ch );
+						//1 7 0bbbbbbb (127)
+						if ( $ii < 128 ) {
+							/// @todo shall we replace this with a (supposedly) faster str_replace?
+							switch ( $ii ) {
+								case 34:
+									$escaped_data .= '&quot;';
+									break;
+								case 38:
+									$escaped_data .= '&amp;';
+									break;
+								case 39:
+									$escaped_data .= '&apos;';
+									break;
+								case 60:
+									$escaped_data .= '&lt;';
+									break;
+								case 62:
+									$escaped_data .= '&gt;';
+									break;
+								default:
+									$escaped_data .= $ch;
+							} // switch
+						} //2 11 110bbbbb 10bbbbbb (2047)
+						else if ( $ii >> 5 == 6 ) {
+							$b1  = ( $ii & 31 );
+							$ii  = ord( $data[ $nn + 1 ] );
+							$b2  = ( $ii & 63 );
+							$ii  = ( $b1 * 64 ) + $b2;
+							$ent = sprintf( '&#%d;', $ii );
+							$escaped_data .= $ent;
+							$nn += 1;
+						} //3 16 1110bbbb 10bbbbbb 10bbbbbb
+						else if ( $ii >> 4 == 14 ) {
+							$b1  = ( $ii & 15 );
+							$ii  = ord( $data[ $nn + 1 ] );
+							$b2  = ( $ii & 63 );
+							$ii  = ord( $data[ $nn + 2 ] );
+							$b3  = ( $ii & 63 );
+							$ii  = ( ( ( $b1 * 64 ) + $b2 ) * 64 ) + $b3;
+							$ent = sprintf( '&#%d;', $ii );
+							$escaped_data .= $ent;
+							$nn += 2;
+						} //4 21 11110bbb 10bbbbbb 10bbbbbb 10bbbbbb
+						else if ( $ii >> 3 == 30 ) {
+							$b1  = ( $ii & 7 );
+							$ii  = ord( $data[ $nn + 1 ] );
+							$b2  = ( $ii & 63 );
+							$ii  = ord( $data[ $nn + 2 ] );
+							$b3  = ( $ii & 63 );
+							$ii  = ord( $data[ $nn + 3 ] );
+							$b4  = ( $ii & 63 );
+							$ii  = ( ( ( ( ( $b1 * 64 ) + $b2 ) * 64 ) + $b3 ) * 64 ) + $b4;
+							$ent = sprintf( '&#%d;', $ii );
+							$escaped_data .= $ent;
+							$nn += 3;
+						}
+					}
 					break;
-				case 62:
-					$escaped_data .= '&gt;';
-					break;
+				/*
+							case 'CP1252_':
+							case 'CP1252_US-ASCII':
+								$escaped_data = str_replace(array('&', '"', "'", '<', '>'), array('&amp;', '&quot;', '&apos;', '&lt;', '&gt;'), $data);
+								$escaped_data = str_replace($GLOBALS['xml_iso88591_Entities']['in'], $GLOBALS['xml_iso88591_Entities']['out'], $escaped_data);
+								$escaped_data = str_replace($GLOBALS['xml_cp1252_Entities']['in'], $GLOBALS['xml_cp1252_Entities']['out'], $escaped_data);
+								break;
+							case 'CP1252_UTF-8':
+								$escaped_data = str_replace(array('&', '"', "'", '<', '>'), array('&amp;', '&quot;', '&apos;', '&lt;', '&gt;'), $data);
+								/// @todo we could use real UTF8 chars here instead of xml entities... (note that utf_8 encode all allone will NOT convert them)
+								$escaped_data = str_replace($GLOBALS['xml_cp1252_Entities']['in'], $GLOBALS['xml_cp1252_Entities']['out'], $escaped_data);
+								$escaped_data = utf8_encode($escaped_data);
+								break;
+							case 'CP1252_ISO-8859-1':
+								$escaped_data = str_replace(array('&', '"', "'", '<', '>'), array('&amp;', '&quot;', '&apos;', '&lt;', '&gt;'), $data);
+								// we might as well replave all funky chars with a '?' here, but we are kind and leave it to the receiving application layer to decide what to do with these weird entities...
+								$escaped_data = str_replace($GLOBALS['xml_cp1252_Entities']['in'], $GLOBALS['xml_cp1252_Entities']['out'], $escaped_data);
+								break;
+				*/
 				default:
-					$escaped_data .= $ch;
-			} // switch
+					$escaped_data = '';
+					error_log( "Converting from $src_encoding to $dest_encoding: not supported..." );
+			}
+
+			return $escaped_data;
 		}
-		//2 11 110bbbbb 10bbbbbb (2047)
-		else if ($ii>>5 == 6)
-		{
-			$b1 = ($ii & 31);
-			$ii = ord($data[$nn+1]);
-			$b2 = ($ii & 63);
-			$ii = ($b1 * 64) + $b2;
-			$ent = sprintf ('&#%d;', $ii);
-			$escaped_data .= $ent;
-			$nn += 1;
-		}
-		//3 16 1110bbbb 10bbbbbb 10bbbbbb
-		else if ($ii>>4 == 14)
-		{
-			$b1 = ($ii & 15);
-			$ii = ord($data[$nn+1]);
-			$b2 = ($ii & 63);
-			$ii = ord($data[$nn+2]);
-			$b3 = ($ii & 63);
-			$ii = ((($b1 * 64) + $b2) * 64) + $b3;
-			$ent = sprintf ('&#%d;', $ii);
-			$escaped_data .= $ent;
-			$nn += 2;
-		}
-		//4 21 11110bbb 10bbbbbb 10bbbbbb 10bbbbbb
-		else if ($ii>>3 == 30)
-		{
-			$b1 = ($ii & 7);
-			$ii = ord($data[$nn+1]);
-			$b2 = ($ii & 63);
-			$ii = ord($data[$nn+2]);
-			$b3 = ($ii & 63);
-			$ii = ord($data[$nn+3]);
-			$b4 = ($ii & 63);
-			$ii = ((((($b1 * 64) + $b2) * 64) + $b3) * 64) + $b4;
-			$ent = sprintf ('&#%d;', $ii);
-			$escaped_data .= $ent;
-			$nn += 3;
-		}
-	}
-				break;
-/*
-			case 'CP1252_':
-			case 'CP1252_US-ASCII':
-				$escaped_data = str_replace(array('&', '"', "'", '<', '>'), array('&amp;', '&quot;', '&apos;', '&lt;', '&gt;'), $data);
-				$escaped_data = str_replace($GLOBALS['xml_iso88591_Entities']['in'], $GLOBALS['xml_iso88591_Entities']['out'], $escaped_data);
-				$escaped_data = str_replace($GLOBALS['xml_cp1252_Entities']['in'], $GLOBALS['xml_cp1252_Entities']['out'], $escaped_data);
-				break;
-			case 'CP1252_UTF-8':
-				$escaped_data = str_replace(array('&', '"', "'", '<', '>'), array('&amp;', '&quot;', '&apos;', '&lt;', '&gt;'), $data);
-				/// @todo we could use real UTF8 chars here instead of xml entities... (note that utf_8 encode all allone will NOT convert them)
-				$escaped_data = str_replace($GLOBALS['xml_cp1252_Entities']['in'], $GLOBALS['xml_cp1252_Entities']['out'], $escaped_data);
-				$escaped_data = utf8_encode($escaped_data);
-				break;
-			case 'CP1252_ISO-8859-1':
-				$escaped_data = str_replace(array('&', '"', "'", '<', '>'), array('&amp;', '&quot;', '&apos;', '&lt;', '&gt;'), $data);
-				// we might as well replave all funky chars with a '?' here, but we are kind and leave it to the receiving application layer to decide what to do with these weird entities...
-				$escaped_data = str_replace($GLOBALS['xml_cp1252_Entities']['in'], $GLOBALS['xml_cp1252_Entities']['out'], $escaped_data);
-				break;
-*/
-			default:
-				$escaped_data = '';
-				error_log("Converting from $src_encoding to $dest_encoding: not supported...");
-		}
-		return $escaped_data;
 	}
 
 	/// xml parser handler function for opening element tags
