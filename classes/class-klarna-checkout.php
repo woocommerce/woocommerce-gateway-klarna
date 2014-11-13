@@ -1800,9 +1800,11 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		$order = WC_Klarna_Compatibility::wc_get_order( $order_id );
 		require_once(KLARNA_LIB . 'Klarna.php');
 //		require_once(KLARNA_LIB . 'pclasses/storage.intf.php');
-		require_once(KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc.inc');
-		require_once(KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc_wrappers.inc');
-		
+
+		if(!function_exists('xmlrpc_encode_entitites') && !class_exists('xmlrpcresp')) {
+			require_once(KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc.inc');
+			require_once(KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc_wrappers.inc');
+		}
 		
 		
 		

@@ -392,8 +392,11 @@ class WC_Klarna_Get_Address {
 		
 			// Klarna settings
 			require_once(KLARNA_LIB . 'Klarna.php');
-			require_once(KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc.inc');
-			require_once(KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc_wrappers.inc');
+			
+			if(!function_exists('xmlrpc_encode_entitites') && !class_exists('xmlrpcresp')) {
+				require_once(KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc.inc');
+				require_once(KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc_wrappers.inc');
+			}
 			
 			// Test mode or Live mode		
 			if ( $this->testmode == 'yes' ) {

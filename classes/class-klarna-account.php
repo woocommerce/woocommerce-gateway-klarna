@@ -296,8 +296,11 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 		    // Get PClasses so that the we can see what classes are active for the merchant.
 			require_once(KLARNA_LIB . 'Klarna.php');
 			require_once(KLARNA_LIB . 'pclasses/storage.intf.php');
-			require_once(KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc.inc');
-			require_once(KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc_wrappers.inc');
+			
+			if(!function_exists('xmlrpc_encode_entitites') && !class_exists('xmlrpcresp')) {
+				require_once(KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc.inc');
+				require_once(KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc_wrappers.inc');
+			}
 			
 			if( !empty($this->authorized_countries) ) {
 				echo '<h4>' . __('Active PClasses', 'klarna') . '</h4>';
@@ -389,8 +392,11 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 	   	// Get PClasses so that the customer can chose between different payment plans.
 	  	require_once(KLARNA_LIB . 'Klarna.php');
 		require_once(KLARNA_LIB . 'pclasses/storage.intf.php');
-		require_once(KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc.inc');
-		require_once(KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc_wrappers.inc');
+		
+		if(!function_exists('xmlrpc_encode_entitites') && !class_exists('xmlrpcresp')) {
+			require_once(KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc.inc');
+			require_once(KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc_wrappers.inc');
+		}
 		
 		// Test mode or Live mode		
 		if ( $this->testmode == 'yes' ):
@@ -875,8 +881,11 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 		
 		require_once(KLARNA_LIB . 'Klarna.php');
 		require_once(KLARNA_LIB . 'pclasses/storage.intf.php');
-		require_once(KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc.inc');
-		require_once(KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc_wrappers.inc');
+		
+		if(!function_exists('xmlrpc_encode_entitites') && !class_exists('xmlrpcresp')) {
+			require_once(KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc.inc');
+			require_once(KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc_wrappers.inc');
+		}
 		
 		// Get values from klarna form on checkout page
 		
@@ -1254,9 +1263,12 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 			// Get PClasses so that the customer can chose between different payment plans.
 			require_once(KLARNA_LIB . 'Klarna.php');
 			require_once(KLARNA_LIB . 'pclasses/storage.intf.php');
-			require_once(KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc.inc');
-			require_once(KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc_wrappers.inc');
-		
+			
+			if(!function_exists('xmlrpc_encode_entitites') && !class_exists('xmlrpcresp')) {
+				require_once(KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc.inc');
+				require_once(KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc_wrappers.inc');
+			}
+			
 		// Test mode or Live mode		
 		if ( $this->testmode == 'yes' ):
 			// Disable SSL if in testmode
