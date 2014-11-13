@@ -14,6 +14,11 @@
 * Fix		- Consent terms displayed to all German and Austrian customers if selected in the settings (KPM). Previously only displayed on German and Austrian stores.
 * Fix		- Wrapped including of files xmlrpc.inc & xmlrpc_wrappers.inc in function_exists/class_exists wrapper to prevent pugin conflicts.
 
+2014.11.05	- version 1.8.9
+* Fix		- Wrapping class xmlrpc_client in a class_exists check to prevent plugin conflicts.
+
+2014.10.10	- version 1.8.8
+
 2014.10.10	- version 1.8.8
 * Fix		- Shipping method name not sent to Klarna (KCO).
 * Tweak		- Shipping price calcultation improvements/changes (KCO).
