@@ -1596,7 +1596,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		 */
 		function ajaxurl() {
 			global $post;
-			if( has_shortcode( $post->post_content, 'woocommerce_klarna_checkout_order_note') ) {
+			if( has_shortcode( $post->post_content, 'woocommerce_klarna_checkout_order_note') || defined( 'WOOCOMMERCE_KLARNA_CHECKOUT' ) ) {
 				?>
 				<script type="text/javascript">
 						var ajaxurl = '<?php echo admin_url('admin-ajax.php'); ?>';
@@ -1611,7 +1611,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 	**/
 		function js_order_note() {
 			global $post;
-			if( has_shortcode( $post->post_content, 'woocommerce_klarna_checkout_order_note') ) {
+			if( has_shortcode( $post->post_content, 'woocommerce_klarna_checkout_order_note') || defined( 'WOOCOMMERCE_KLARNA_CHECKOUT' ) ) {
 			
 				?>
 				<script type="text/javascript">
