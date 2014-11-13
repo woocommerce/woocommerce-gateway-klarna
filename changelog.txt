@@ -1,6 +1,6 @@
 *** Klarna Changelog ***
 
-2014.11.	- version 
+2014.11.13	- version 
 * Feature	- Added Get Address feature for Swedish stores (KPM).
 * Feature	- Added Customer order comment shortcode (KCO).
 * Feature	- Added setting for Default Checkout Country if both Finland and Germany are available countries for KCO.
@@ -12,6 +12,7 @@
 * Tweak		- Added do_action('woocommerce_checkout_order_processed') after order has been created (KCO), other plugins rely on this hook.
 * Fix		- Added check for separate shipping address in push notification from Klarna for KCO Germany.
 * Fix		- Consent terms displayed to all German and Austrian customers if selected in the settings (KPM). Previously only displayed on German and Austrian stores.
+* Fix		- Wrapped including of files xmlrpc.inc & xmlrpc_wrappers.inc in function_exists/class_exists wrapper to prevent pugin conflicts.
 
 2014.10.10	- version 1.8.8
 * Fix		- Shipping method name not sent to Klarna (KCO).
