@@ -37,14 +37,23 @@ class WC_Gateway_Klarna_Campaign extends WC_Gateway_Klarna {
 		
 		$this->eid_se								= ( isset( $this->settings['eid_se'] ) ) ? $this->settings['eid_se'] : '';
        	$this->secret_se							= ( isset( $this->settings['secret_se'] ) ) ? $this->settings['secret_se'] : '';
+       	$this->terms_se								= ( isset( $this->settings['terms_se'] ) ) ? $this->settings['terms_se'] : '';
+       	
        	$this->eid_no								= ( isset( $this->settings['eid_no'] ) ) ? $this->settings['eid_no'] : '';
        	$this->secret_no							= ( isset( $this->settings['secret_no'] ) ) ? $this->settings['secret_no'] : '';
+		$this->terms_no								= ( isset( $this->settings['terms_no'] ) ) ? $this->settings['terms_no'] : '';
+		
 		$this->eid_fi								= ( isset( $this->settings['eid_fi'] ) ) ? $this->settings['eid_fi'] : '';
        	$this->secret_fi							= ( isset( $this->settings['secret_fi'] ) ) ? $this->settings['secret_fi'] : '';
+       	$this->terms_fi								= ( isset( $this->settings['terms_fi'] ) ) ? $this->settings['terms_fi'] : '';
+       	
        	$this->eid_dk								= ( isset( $this->settings['eid_dk'] ) ) ? $this->settings['eid_dk'] : '';
        	$this->secret_dk							= ( isset( $this->settings['secret_dk'] ) ) ? $this->settings['secret_dk'] : '';
+       	$this->terms_se								= ( isset( $this->settings['terms_se'] ) ) ? $this->settings['terms_se'] : '';
+       	
        	$this->eid_de								= ( isset( $this->settings['eid_de'] ) ) ? $this->settings['eid_de'] : '';
        	$this->secret_de							= ( isset( $this->settings['secret_de'] ) ) ? $this->settings['secret_de'] : '';
+       	$this->terms_se								= ( isset( $this->settings['terms_se'] ) ) ? $this->settings['terms_se'] : '';
        	$this->eid_nl								= ( isset( $this->settings['eid_nl'] ) ) ? $this->settings['eid_nl'] : '';
        	$this->secret_nl							= ( isset( $this->settings['secret_nl'] ) ) ? $this->settings['secret_nl'] : '';
        	$this->eid_at								= ( isset( $this->settings['eid_at'] ) ) ? $this->settings['eid_at'] : '';
@@ -140,6 +149,12 @@ class WC_Gateway_Klarna_Campaign extends WC_Gateway_Klarna {
 							'description' => __( 'Please enter your Klarna Shared Secret for Sweden.', 'klarna' ), 
 							'default' => ''
 						),
+			'terms_se' => array(
+							'title' => __( 'Terms URL - Sweden', 'klarna' ), 
+							'type' => 'text', 
+							'description' => __( 'Please enter the URL to the Terms page for Sweden (for specific campaigns). Leave blank to use Klarna Account standard terms.', 'klarna' ), 
+							'default' => ''
+						),
 			'eid_no' => array(
 							'title' => __( 'Eid - Norway', 'klarna' ), 
 							'type' => 'text', 
@@ -152,6 +167,12 @@ class WC_Gateway_Klarna_Campaign extends WC_Gateway_Klarna {
 							'description' => __( 'Please enter your Klarna Shared Secret for Norway.', 'klarna' ), 
 							'default' => ''
 						),
+			'terms_no' => array(
+							'title' => __( 'Terms URL - Norway', 'klarna' ), 
+							'type' => 'text', 
+							'description' => __( 'Please enter the URL to the Terms page for Norway (for specific campaigns). Leave blank to use Klarna Account standard terms.', 'klarna' ), 
+							'default' => ''
+						),
 			'eid_fi' => array(
 							'title' => __( 'Eid - Finland', 'klarna' ), 
 							'type' => 'text', 
@@ -162,6 +183,12 @@ class WC_Gateway_Klarna_Campaign extends WC_Gateway_Klarna {
 							'title' => __( 'Shared Secret - Finland', 'klarna' ), 
 							'type' => 'text', 
 							'description' => __( 'Please enter your Klarna Shared Secret for Finland.', 'klarna' ), 
+							'default' => ''
+						),
+			'terms_fi' => array(
+							'title' => __( 'Terms URL - Finland', 'klarna' ), 
+							'type' => 'text', 
+							'description' => __( 'Please enter the URL to the Terms page for Finland (for specific campaigns). Leave blank to use Klarna Account standard terms.', 'klarna' ), 
 							'default' => ''
 						),
 			'eid_dk' => array(
@@ -247,7 +274,33 @@ class WC_Gateway_Klarna_Campaign extends WC_Gateway_Klarna {
     	<h3><?php _e('Klarna Special Campaign', 'klarna'); ?></h3>
 	    	<p><?php printf(__('With Klarna your customers can pay by invoice. Klarna works by adding extra personal information fields and then sending the details to Klarna for verification. Documentation <a href="%s" target="_blank">can be found here</a>.', 'klarna'), 'http://docs.woothemes.com/document/klarna/' ); ?></p>
 	    	
-		    
+		   <?php
+	    // Get PClasses so that the we can see what classes are active for the merchant.
+		require_once(KLARNA_LIB . 'Klarna.php');
+		require_once(KLARNA_LIB . 'pclasses/storage.intf.php');
+		
+		if(!function_exists('xmlrpc_encode_entitites') && !class_exists('xmlrpcresp')) {
+			require_once(KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc.inc');
+			require_once(KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc_wrappers.inc');
+		}
+		
+		if( !empty($this->authorized_countries) ) {
+			echo '<h4>' . __('Active PClasses', 'klarna') . '</h4>';
+		    foreach($this->authorized_countries as $key=>$country) {
+			    $pclasses = WC_Gateway_Klarna_Account::fetch_pclasses( $country );
+			    if( $pclasses ) {
+			    	echo '<p>' . $country . '</p>';
+				    foreach( $pclasses as $pclass ) {
+				    	if ( $pclass->getType() == 2 && $pclass->getExpire() >= time() ) {
+					    	echo $pclass->getDescription() . ', ';
+					    }
+				    }
+				    
+				    echo '<br/>';
+			    }   
+		    }
+		} 
+	    ?>
 		    
     	<table class="form-table">
     	<?php
@@ -404,71 +457,91 @@ class WC_Gateway_Klarna_Campaign extends WC_Gateway_Klarna {
 			echo '<p><img src="' . $this->klarna_wb_img_checkout . '" class="klarna-wb"/></p>';	
 		}
 		
+		// Terms
+		if( $this->get_klarna_country() ==  'SE' && $this->terms_se != '' ) {
+			
+			// Swedish custom terms
+			echo '<span id="klarna-campaign-terms"><a href="' . $this->terms_se . '" target="_blank">Läs mer</a></span>';
 		
-		// Mobile or desktop browser
-		if (wp_is_mobile() ) {
-			$klarna_layout = 'mobile';
-		 } else {
-		 	$klarna_layout = 'desktop';
-		 }
-		
-		// Script for displaying the terms link
-		?>
-		
-		<script type="text/javascript">
-		
-			// Document ready
-			jQuery(document).ready(function($) {
-				
-				var klarna_campaign_selected_country = $( "#billing_country" ).val();
-				
-				// If no Billing Country is set in the checkout form, use the default shop country
-				if( !klarna_campaign_selected_country ) {
-					var klarna_account_selected_country = '<?php echo $this->shop_country;?>';
-				}
-				
-				if( klarna_campaign_selected_country == 'SE' ) {
-				
-					var klarna_campaign_current_locale = 'sv_SE';
-				
-				} else if( klarna_campaign_selected_country == 'NO' ) {
+		} elseif( $this->get_klarna_country() ==  'NO' && $this->terms_no != '' ) {
+			
+			// Norwegian custom terms
+			echo '<span id="klarna-campaign-terms"><a href="' . $this->terms_no . '" target="_blank">Les mer</a></span>';
+			
+		} elseif( $this->get_klarna_country() ==  'FI' && $this->terms_fi != '' ) {
+			
+			// Finnish custom terms
+			echo '<span id="klarna-campaign-terms"><a href="' . $this->terms_fi . '" target="_blank">Lue lisää</a></span>';
+			
+		} else {
+			
+			// Script for displaying the terms link
+			
+			// Mobile or desktop browser
+			if (wp_is_mobile() ) {
+				$klarna_layout = 'mobile';
+			 } else {
+			 	$klarna_layout = 'desktop';
+			 }
 
-					var klarna_campaign_current_locale = 'nb_NO';
-				
-				} else if( klarna_campaign_selected_country == 'DK' ) {
-
-					var klarna_campaign_current_locale = 'da_DK';
-				
-				} else if( klarna_campaign_selected_country == 'FI' ) {
-
-					var klarna_campaign_current_locale = 'fi_FI';
+			?>
+			
+			<script type="text/javascript">
+			
+				// Document ready
+				jQuery(document).ready(function($) {
 					
-				} else if( klarna_campaign_selected_country == 'DE' ) {
-
-					var klarna_campaign_current_locale = 'de_DE';
-				
-				}  else if( klarna_campaign_selected_country == 'NL' ) {
-
-					var klarna_campaign_current_locale = 'nl_NL';
-				
-				} else if( klarna_campaign_selected_country == 'AT' ) {
-
-					var klarna_campaign_current_locale = 'de_AT';
-				} else {
+					var klarna_campaign_selected_country = $( "#billing_country" ).val();
 					
-				}
-				
-				new Klarna.Terms.Account({
-				    el: 'klarna-campaign-terms',
-				    eid: '<?php echo $this->get_eid(); ?>',
-				    locale: klarna_campaign_current_locale,
-				    type: '<?php echo $klarna_layout;?>',
+					// If no Billing Country is set in the checkout form, use the default shop country
+					if( !klarna_campaign_selected_country ) {
+						var klarna_account_selected_country = '<?php echo $this->shop_country;?>';
+					}
+					
+					if( klarna_campaign_selected_country == 'SE' ) {
+					
+						var klarna_campaign_current_locale = 'sv_SE';
+					
+					} else if( klarna_campaign_selected_country == 'NO' ) {
+	
+						var klarna_campaign_current_locale = 'nb_NO';
+					
+					} else if( klarna_campaign_selected_country == 'DK' ) {
+	
+						var klarna_campaign_current_locale = 'da_DK';
+					
+					} else if( klarna_campaign_selected_country == 'FI' ) {
+	
+						var klarna_campaign_current_locale = 'fi_FI';
+						
+					} else if( klarna_campaign_selected_country == 'DE' ) {
+	
+						var klarna_campaign_current_locale = 'de_DE';
+					
+					}  else if( klarna_campaign_selected_country == 'NL' ) {
+	
+						var klarna_campaign_current_locale = 'nl_NL';
+					
+					} else if( klarna_campaign_selected_country == 'AT' ) {
+	
+						var klarna_campaign_current_locale = 'de_AT';
+					} else {
+						
+					}
+					
+					new Klarna.Terms.Account({
+					    el: 'klarna-campaign-terms',
+					    eid: '<?php echo $this->get_eid(); ?>',
+					    locale: klarna_campaign_current_locale,
+					    type: '<?php echo $klarna_layout;?>',
+					});
+					
 				});
 				
-			});
-			
-		</script>
-		<span id="klarna-campaign-terms"></span>
+			</script>
+			<span id="klarna-campaign-terms"></span>
+		
+		<?php } // End if terms check ?>
 		
 		<div class="clear"></div>
 			
