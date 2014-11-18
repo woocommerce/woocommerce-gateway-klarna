@@ -1,5 +1,10 @@
 *** Klarna Changelog ***
 
+2014.11.18	- version 1.9.1
+* Feature	- Changed icon logos and payment method title in Checkout (Invoice & Account) to reflect Klarnas new policy.
+* Feature	- Added display of available PClasses in Klarna Campaign settings.
+* Feature	- Added Terms URL settings field (SE, NO & FI) for Klarna Special Campaign.
+
 2014.11.13	- version 1.9.0
 * Feature	- Added Get Address feature for Swedish stores (KPM).
 * Feature	- Added Customer order comment shortcode (KCO).
