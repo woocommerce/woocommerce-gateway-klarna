@@ -88,7 +88,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 							'title' => __( 'Title', 'klarna' ), 
 							'type' => 'text', 
 							'description' => __( 'This controls the title which the user sees during checkout.', 'klarna' ), 
-							'default' => __( 'Klarna Invoice - pay within 14 days', 'klarna' )
+							'default' => __( 'Invoice', 'klarna' )
 						),
 			'description' => array(
 							'title' => __( 'Description', 'klarna' ), 
@@ -1293,25 +1293,25 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 		switch ( $country )
 		{
 		case 'DK':
-			$klarna_invoice_icon = 'https://cdn.klarna.com/public/images/DK/badges/v1/invoice/DK_invoice_badge_std_blue.png?width=60&eid=' . $this->get_eid();
+			$klarna_invoice_icon = 'https://cdn.klarna.com/1.0/shared/image/generic/logo/da_dk/basic/blue-black.png?width=100&eid=' . $this->get_eid();
 			break;
 		case 'DE' :
-			$klarna_invoice_icon = 'https://cdn.klarna.com/public/images/DE/badges/v1/invoice/DE_invoice_badge_std_blue.png?width=60&eid=' . $this->get_eid();
+			$klarna_invoice_icon = 'https://cdn.klarna.com/1.0/shared/image/generic/logo/de_de/basic/blue-black.png?width=100&eid=' . $this->get_eid();
 			break;
 		case 'NL' :
-			$klarna_invoice_icon = 'https://cdn.klarna.com/public/images/NL/badges/v1/invoice/NL_invoice_badge_std_blue.png?width=60&eid=' . $this->get_eid();
+			$klarna_invoice_icon = 'https://cdn.klarna.com/1.0/shared/image/generic/logo/nl_nl/basic/blue-black.png?width=100&eid=' . $this->get_eid();
 			break;
 		case 'NO' :
-			$klarna_invoice_icon = 'https://cdn.klarna.com/public/images/NO/badges/v1/invoice/NO_invoice_badge_std_blue.png?width=60&eid=' . $this->get_eid();
+			$klarna_invoice_icon = 'https://cdn.klarna.com/1.0/shared/image/generic/logo/nb_no/basic/blue-black.png?width=100&eid=' . $this->get_eid();
 			break;
 		case 'FI' :
-			$klarna_invoice_icon = 'https://cdn.klarna.com/public/images/FI/badges/v1/invoice/FI_invoice_badge_std_blue.png?width=60&eid=' . $this->get_eid();
+			$klarna_invoice_icon = 'https://cdn.klarna.com/1.0/shared/image/generic/logo/fi_fi/basic/blue-black.png?width=100&eid=' . $this->get_eid();
 			break;
 		case 'SE' :
-			$klarna_invoice_icon = 'https://cdn.klarna.com/public/images/SE/badges/v1/invoice/SE_invoice_badge_std_blue.png?width=60&eid=' . $this->get_eid();
+			$klarna_invoice_icon = 'https://cdn.klarna.com/1.0/shared/image/generic/logo/sv_se/basic/blue-black.png?width=100&eid=' . $this->get_eid();
 			break;
 		case 'AT' :
-			$klarna_invoice_icon = 'https://cdn.klarna.com/public/images/AT/badges/v1/invoice/AT_invoice_badge_std_blue.png?width=60&eid=' . $this->get_eid();
+			$klarna_invoice_icon = 'https://cdn.klarna.com/1.0/shared/image/generic/logo/de_at/basic/blue-black.png?width=100&eid=' . $this->get_eid();
 			break;
 		default:
 			$klarna_invoice_icon = '';

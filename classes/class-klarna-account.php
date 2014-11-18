@@ -140,7 +140,7 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 							'title' => __( 'Title', 'klarna' ), 
 							'type' => 'text', 
 							'description' => __( 'This controls the title which the user sees during checkout.', 'klarna' ), 
-							'default' => __( 'Klarna - Part Payment', 'klarna' )
+							'default' => __( 'Part payments', 'klarna' )
 						),
 			'description' => array(
 							'title' => __( 'Description', 'klarna' ), 
@@ -1673,28 +1673,28 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 		switch ( $country )
 		{
 		case 'DK':
-			$klarna_account_icon = 'https://cdn.klarna.com/public/images/DK/badges/v1/account/DK_account_badge_std_blue.png?width=60&eid=' . $this->get_eid();
+			$klarna_account_icon = 'https://cdn.klarna.com/1.0/shared/image/generic/logo/da_dk/basic/blue-black.png?width=100&eid=' . $this->get_eid();
 			break;
 		case 'DE' :
-			$klarna_account_icon = 'https://cdn.klarna.com/public/images/DE/badges/v1/account/DE_account_badge_std_blue.png?width=60&eid=' . $this->get_eid();
+			$$klarna_account_icon = 'https://cdn.klarna.com/1.0/shared/image/generic/logo/de_de/basic/blue-black.png?width=100&eid=' . $this->get_eid();
 			break;
 		case 'NL' :
-			$klarna_account_icon = 'https://cdn.klarna.com/public/images/NL/badges/v1/account/NL_account_badge_std_blue.png?width=60&eid=' . $this->get_eid();
+			$klarna_account_icon = 'https://cdn.klarna.com/1.0/shared/image/generic/logo/nl_nl/basic/blue-black.png?width=100&eid=' . $this->get_eid();
 			break;
 		case 'NO' :
-			$klarna_account_icon = 'https://cdn.klarna.com/public/images/NO/badges/v1/account/NO_account_badge_std_blue.png?width=60&eid=' . $this->get_eid();
+			$klarna_account_icon = 'https://cdn.klarna.com/1.0/shared/image/generic/logo/nb_no/basic/blue-black.png?width=100&eid=' . $this->get_eid();
 			break;
 		case 'FI' :
-			$klarna_account_icon = 'https://cdn.klarna.com/public/images/FI/badges/v1/account/FI_account_badge_std_blue.png?width=60&eid=' . $this->get_eid();
+			$klarna_account_icon = 'https://cdn.klarna.com/1.0/shared/image/generic/logo/fi_fi/basic/blue-black.png?width=100&eid=' . $this->get_eid();
 			break;
 		case 'SE' :
-			$klarna_account_icon = 'https://cdn.klarna.com/public/images/SE/badges/v1/account/SE_account_badge_std_blue.png?width=60&eid=' . $this->get_eid();
+			$klarna_account_icon = 'https://cdn.klarna.com/1.0/shared/image/generic/logo/sv_se/basic/blue-black.png?width=100&eid=' . $this->get_eid();
 			break;
 		case 'AT' :
-			$klarna_account_icon = 'https://cdn.klarna.com/public/images/AT/badges/v1/account/AT_account_badge_std_blue.png?width=60&eid=' . $this->get_eid();
+			$klarna_account_icon = 'https://cdn.klarna.com/1.0/shared/image/generic/logo/de_at/basic/blue-black.png?width=100&eid=' . $this->get_eid();
 			break;
 		default:
-			$klarna_account_icon = '';
+			$klarna_invoice_icon = '';
 		}
 		
 		return $klarna_account_icon;
