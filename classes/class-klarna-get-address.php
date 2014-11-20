@@ -29,7 +29,7 @@ class WC_Klarna_Get_Address {
 		$data 									= new WC_Gateway_Klarna_Account;
 		$this->partpay_enabled 					= $data->get_enabled();
 		$this->partpay_dob_display				= 'description_box'; //$data->get_dob_display();
-		
+
 		// If Invoice payment isn't activated by the merchant, use Part payment credentials for getAddresses instead
 		if( empty($this->eid) ) {
 			$this->eid		 					= $data->get_eid();
@@ -37,12 +37,14 @@ class WC_Klarna_Get_Address {
 			$this->order_type_partpayment 		= 'yes';
 		}
 		
+		$data 									= new WC_Gateway_Klarna_Campaign;
+		$this->campaign_enabled 				= $data->get_enabled();
+		
+		
 		add_action( 'wp_ajax_ajax_request', array($this, 'ajax_request') );
 		add_action( 'wp_ajax_nopriv_ajax_request', array($this, 'ajax_request') );
 		
-		//add_action( 'wp_footer', array($this, 'print_checkout_script') );
-		add_action('wp_head', array( $this, 'ajaxurl'));
-		add_action( 'wp_head', array( $this, 'js' ) );
+		add_action( 'wp_footer', array( $this, 'js' ) );
 		add_action( 'wp_footer', array( $this, 'checkout_restore_customer_defaults' ) );
 		
 		
@@ -64,7 +66,7 @@ class WC_Klarna_Get_Address {
  	 *
  	**/
 	function enqueue_scripts() {
-		if( is_checkout() && ($this->partpay_enabled || $this->invo_enabled ) ) {
+		if( is_checkout() && ($this->partpay_enabled || $this->invo_enabled || $this->campaign_enabled ) ) {
 			wp_enqueue_style('klarna-style', KLARNA_URL . 'assets/css/style.css');
 		}
 	}
@@ -80,7 +82,7 @@ class WC_Klarna_Get_Address {
 	
 	public function checkout_restore_customer_defaults() {
 		
-		if( is_checkout() && ($this->partpay_enabled || $this->invo_enabled ) ) {
+		if( is_checkout() &&  $this->get_shop_country() == 'SE' && ($this->partpay_enabled || $this->invo_enabled || $this->campaign_enabled) ) {
 		
 			global $woocommerce, $current_user;
 		
@@ -108,7 +110,7 @@ class WC_Klarna_Get_Address {
 				// On switch of payment method
 				jQuery('input[name="payment_method"]').on('change', function(){
 					var selected_paytype = jQuery('input[name=payment_method]:checked').val();
-					if( selected_paytype !== 'klarna' && selected_paytype !== 'klarna_account' && selected_paytype !== 'klarna_campaign'){
+					if( selected_paytype !== 'klarna' && selected_paytype !== 'klarna_account' && selected_paytype !== 'klarna_special_campaign'){
 						
 						jQuery(".klarna-response").hide();
 						
@@ -144,183 +146,186 @@ class WC_Klarna_Get_Address {
  	 *
  	**/
 	function js() {
-		?>
-		<script type="text/javascript">
-		jQuery(document).ready(function($){
-
-			$(document).on('click','.compadress',function(){
-				var value = $(this).attr("id");
-					
-				var json = $("#h" + value).val();
-				var info = JSON.parse(json);
-				
-				klarnainfo("company", info, value);
-			});
-			
-			function klarnainfo(type, info, value){
-				
-				if(type == 'company'){
-					var adress = info[0][value];
-					var orgno_getadress = "";
-					/*
-					if(jQuery('#klarna_pno').val() != ''){
-						orgno_getadress = jQuery('#klarna_pno').val();
-					}
-					*/
-					jQuery("#billing_first_name").val(adress['fname']);
-					jQuery("#billing_last_name").val(adress['lname']);
-					jQuery("#billing_company").val(adress['company']); //.prop( "readonly", true );
-					jQuery("#billing_address_1").val(adress['street']); //.prop( "readonly", true );
-					jQuery("#billing_address_2").val(adress['careof']); //.prop( "readonly", true );
-					jQuery("#billing_postcode").val(adress['zip']); //.prop( "readonly", true );
-					jQuery("#billing_city").val(adress['city']); //.prop( "readonly", true );
-					
-					jQuery("#shipping_first_name").val(adress['fname']);
-					jQuery("#shipping_last_name").val(adress['lname']);
-					jQuery("#shipping_company").val(adress['company']); //.prop( "readonly", true );
-					jQuery("#shipping_address_1").val(adress['street']); //.prop( "readonly", true );
-					jQuery("#shipping_address_2").val(adress['careof']); //.prop( "readonly", true );
-					jQuery("#shipping_postcode").val(adress['zip']); //.prop( "readonly", true );
-					jQuery("#shipping_city").val(adress['city']); //.prop( "readonly", true );
-					
-					jQuery("#phone_number").val(adress['cellno']);
-					//jQuery("#klarna_pno").val(orgno_getadress);
-				}
-				
-				if(type == 'private'){
-					if(value == 0){
+		
+		if( is_checkout() && $this->get_shop_country() == 'SE' && ($this->partpay_enabled || $this->invo_enabled || $this->campaign_enabled) ) {
+			?>
+			<script type="text/javascript">
+			jQuery(document).ready(function($){
+	
+				$(document).on('click','.compadress',function(){
+					var value = $(this).attr("id");
 						
+					var json = $("#h" + value).val();
+					var info = JSON.parse(json);
+					
+					klarnainfo("company", info, value);
+				});
+				
+				function klarnainfo(type, info, value){
+					
+					if(type == 'company'){
 						var adress = info[0][value];
-						var pno_getadress = "";
-						
+						var orgno_getadress = "";
 						/*
 						if(jQuery('#klarna_pno').val() != ''){
-							pno_getadress = jQuery('#klarna_pno').val();
+							orgno_getadress = jQuery('#klarna_pno').val();
 						}
 						*/
-						jQuery("#billing_first_name").val(adress['fname']); //.prop( "readonly", true );
-						jQuery("#billing_last_name").val(adress['lname']); //.prop( "readonly", true );
+						jQuery("#billing_first_name").val(adress['fname']);
+						jQuery("#billing_last_name").val(adress['lname']);
+						jQuery("#billing_company").val(adress['company']); //.prop( "readonly", true );
 						jQuery("#billing_address_1").val(adress['street']); //.prop( "readonly", true );
-						jQuery("#billing_address_2").val(adress['careof']);
+						jQuery("#billing_address_2").val(adress['careof']); //.prop( "readonly", true );
 						jQuery("#billing_postcode").val(adress['zip']); //.prop( "readonly", true );
 						jQuery("#billing_city").val(adress['city']); //.prop( "readonly", true );
 						
-						jQuery("#shipping_first_name").val(adress['fname']); //.prop( "readonly", true );
-						jQuery("#shipping_last_name").val(adress['lname']); //.prop( "readonly", true );
+						jQuery("#shipping_first_name").val(adress['fname']);
+						jQuery("#shipping_last_name").val(adress['lname']);
+						jQuery("#shipping_company").val(adress['company']); //.prop( "readonly", true );
 						jQuery("#shipping_address_1").val(adress['street']); //.prop( "readonly", true );
-						jQuery("#shipping_address_2").val(adress['careof']);
+						jQuery("#shipping_address_2").val(adress['careof']); //.prop( "readonly", true );
 						jQuery("#shipping_postcode").val(adress['zip']); //.prop( "readonly", true );
 						jQuery("#shipping_city").val(adress['city']); //.prop( "readonly", true );
 						
 						jQuery("#phone_number").val(adress['cellno']);
-						//jQuery("#klarna_pno").val(pno_getadress);
+						//jQuery("#klarna_pno").val(orgno_getadress);
+					}
+					
+					if(type == 'private'){
+						if(value == 0){
+							
+							var adress = info[0][value];
+							var pno_getadress = "";
+							
+							/*
+							if(jQuery('#klarna_pno').val() != ''){
+								pno_getadress = jQuery('#klarna_pno').val();
+							}
+							*/
+							jQuery("#billing_first_name").val(adress['fname']); //.prop( "readonly", true );
+							jQuery("#billing_last_name").val(adress['lname']); //.prop( "readonly", true );
+							jQuery("#billing_address_1").val(adress['street']); //.prop( "readonly", true );
+							jQuery("#billing_address_2").val(adress['careof']);
+							jQuery("#billing_postcode").val(adress['zip']); //.prop( "readonly", true );
+							jQuery("#billing_city").val(adress['city']); //.prop( "readonly", true );
+							
+							jQuery("#shipping_first_name").val(adress['fname']); //.prop( "readonly", true );
+							jQuery("#shipping_last_name").val(adress['lname']); //.prop( "readonly", true );
+							jQuery("#shipping_address_1").val(adress['street']); //.prop( "readonly", true );
+							jQuery("#shipping_address_2").val(adress['careof']);
+							jQuery("#shipping_postcode").val(adress['zip']); //.prop( "readonly", true );
+							jQuery("#shipping_city").val(adress['city']); //.prop( "readonly", true );
+							
+							jQuery("#phone_number").val(adress['cellno']);
+							//jQuery("#klarna_pno").val(pno_getadress);
+						}
 					}
 				}
-			}
-			
-			
-			jQuery(document).on('click','.klarna-push-pno',function() {
-				if( jQuery('#klarna_invo_pno').val() != '' ) {
-					var pno_getadress = jQuery('#klarna_invo_pno').val();
-				} else if( jQuery('#klarna_pno').val() != '' ) {
-					var pno_getadress = jQuery('#klarna_pno').val();
-				} else if( jQuery('#klarna_campaign_pno').val() != '' ) {
-					var pno_getadress = jQuery('#klarna_campaign_pno').val();
-				}
 				
-				if(pno_getadress == '') {
 				
-					$(".klarna-get-address-message").show();
-					$(".klarna-get-address-message").html('<span style="clear:both; margin: 5px 2px; padding: 4px 8px; background:#ffecec"><?php _e('Be kind and enter a date of birth!', 'klarna');?></span>');
-				
-				} else {
-										
-					jQuery.post(
-						'<?php echo get_option('siteurl') . '/wp-admin/admin-ajax.php' ?>',
-						{
-							action			: 'ajax_request',
-							pno_getadress	: pno_getadress,
-							_wpnonce		: '<?php echo wp_create_nonce('nonce-register_like'); ?>',
-						},
-						function(response){
-							console.log(response);
-							
-							if(response.get_address_message == "" || (typeof response.get_address_message === 'undefined')){
-								$(".klarna-get-address-message").hide();
+				jQuery(document).on('click','.klarna-push-pno',function() {
+					if( jQuery('#klarna_invo_pno').val() != '' ) {
+						var pno_getadress = jQuery('#klarna_invo_pno').val();
+					} else if( jQuery('#klarna_pno').val() != '' ) {
+						var pno_getadress = jQuery('#klarna_pno').val();
+					} else if( jQuery('#klarna_campaign_pno').val() != '' ) {
+						var pno_getadress = jQuery('#klarna_campaign_pno').val();
+					}
+					
+					if(pno_getadress == '') {
+					
+						$(".klarna-get-address-message").show();
+						$(".klarna-get-address-message").html('<span style="clear:both; margin: 5px 2px; padding: 4px 8px; background:#ffecec"><?php _e('Be kind and enter a date of birth!', 'klarna');?></span>');
+					
+					} else {
+											
+						jQuery.post(
+							'<?php echo get_option('siteurl') . '/wp-admin/admin-ajax.php' ?>',
+							{
+								action			: 'ajax_request',
+								pno_getadress	: pno_getadress,
+								_wpnonce		: '<?php echo wp_create_nonce('nonce-register_like'); ?>',
+							},
+							function(response){
+								console.log(response);
 								
-								//if(klarna_client_type == "company"){
-									var adresses = new Array();
-									adresses.push(response);
+								if(response.get_address_message == "" || (typeof response.get_address_message === 'undefined')){
+									$(".klarna-get-address-message").hide();
 									
-									var res = "";
-									//console.log(adresses[0].length);
-									
-									if(adresses[0].length < 2 ) {
+									//if(klarna_client_type == "company"){
+										var adresses = new Array();
+										adresses.push(response);
 										
-										// One address found
-										$(".klarna-response").show();
-										res += '<ul class="woocommerce-message klarna-get-address-found"><li><?php _e('Address found and added to the checkout form.', 'woocommerce-gateway-klarna');?></li></ul>';
-										klarnainfo('private', adresses, 0);
+										var res = "";
+										//console.log(adresses[0].length);
 										
-									} else {
-										
-										// Multiple addresses found
-										$(".klarna-response").show();
-										
-										res += '<ul class="woocommerce-message klarna-get-address-found multiple"><li><?php _e('Multiple addresses found. Select one address to add it to the checkout form.', 'woocommerce-gateway-klarna');?></li><li>';
-										for(var a = 0; a <= adresses.length; a++) {
-										
-											res += '<div id="adress' + a + '" class="adressescompanies">' +  
-														'<input type="radio" id="' + a + '" name="klarna-selected-company" value="klarna-selected-company' + a + '" class="compadress"  /><label for="klarna-selected-company' + a + '">' +  adresses[0][a]['company'];
-											if (adresses[0][a]['street']!=null) {
-												res += ', ' + adresses[0][a]['street'];
+										if(adresses[0].length < 2 ) {
+											
+											// One address found
+											$(".klarna-response").show();
+											res += '<ul class="woocommerce-message klarna-get-address-found"><li><?php _e('Address found and added to the checkout form.', 'woocommerce-gateway-klarna');?></li></ul>';
+											klarnainfo('private', adresses, 0);
+											
+										} else {
+											
+											// Multiple addresses found
+											$(".klarna-response").show();
+											
+											res += '<ul class="woocommerce-message klarna-get-address-found multiple"><li><?php _e('Multiple addresses found. Select one address to add it to the checkout form.', 'woocommerce-gateway-klarna');?></li><li>';
+											for(var a = 0; a <= adresses.length; a++) {
+											
+												res += '<div id="adress' + a + '" class="adressescompanies">' +  
+															'<input type="radio" id="' + a + '" name="klarna-selected-company" value="klarna-selected-company' + a + '" class="compadress"  /><label for="klarna-selected-company' + a + '">' +  adresses[0][a]['company'];
+												if (adresses[0][a]['street']!=null) {
+													res += ', ' + adresses[0][a]['street'];
+												}
+												
+												if (adresses[0][a]['careof']!='') {
+													res += ', ' + adresses[0][a]['careof'];
+												}
+												
+												res += ', ' + adresses[0][a]['zip'] + ' ' + adresses[0][a]['city'] + '</label>';
+												res += "<input type='hidden' id='h" + a + "' value='" + JSON.stringify(adresses) + "' />";
+												res +=	'</div>';
+												
 											}
 											
-											if (adresses[0][a]['careof']!='') {
-												res += ', ' + adresses[0][a]['careof'];
-											}
-											
-											res += ', ' + adresses[0][a]['zip'] + ' ' + adresses[0][a]['city'] + '</label>';
-											res += "<input type='hidden' id='h" + a + "' value='" + JSON.stringify(adresses) + "' />";
-											res +=	'</div>';
+											res +=	'</li></ul>';
 											
 										}
 										
-										res +=	'</li></ul>';
+										jQuery(".klarna-response").html(res);
 										
-									}
-									
-									jQuery(".klarna-response").html(res);
-									
-									// Scroll to .klarna-response
-									$("html, body").animate({
-										scrollTop: $(".klarna-response").offset().top},
-										'slow');
-									
-								/*}
+										// Scroll to .klarna-response
+										$("html, body").animate({
+											scrollTop: $(".klarna-response").offset().top},
+											'slow');
+										
+									/*}
+									else{
+										klarnainfo(klarna_client_type, response, 0);
+									}*/
+								}
 								else{
-									klarnainfo(klarna_client_type, response, 0);
-								}*/
+									$(".klarna-get-address-message").show();
+									$(".klarna-response").hide();
+									
+									jQuery(".klarna-get-address-message").html('<span style="clear:both;margin:5px 2px;padding:4px 8px;background:#ffecec">' + response.get_address_message + '</span>');
+									
+									$(".checkout .input-text").each(function( index ) {
+										$(this).val("");
+										$(this).prop("readonly", false);
+									});
+								}
 							}
-							else{
-								$(".klarna-get-address-message").show();
-								$(".klarna-response").hide();
-								
-								jQuery(".klarna-get-address-message").html('<span style="clear:both;margin:5px 2px;padding:4px 8px;background:#ffecec">' + response.get_address_message + '</span>');
-								
-								$(".checkout .input-text").each(function( index ) {
-									$(this).val("");
-									$(this).prop("readonly", false);
-								});
-							}
-						}
-					);
-				}				
+						);
+					}				
+				});
 			});
-		});
-		</script>
-		<?php
-	}
+			</script>
+			<?php
+		}
+	} // End function
 	
 	
 	/**
@@ -332,9 +337,9 @@ class WC_Klarna_Get_Address {
 		
 		if( ($this->invo_enabled && $this->invo_dob_display == 'description_box') || ($this->partpay_enabled && $this->partpay_dob_display == 'description_box') ) {
 			ob_start();
-			
+
 				// Only display GetAddress button for Sweden
-				if($this->get_country() == 'SE') { ?>
+				if($this->get_shop_country() == 'SE') { ?>
 					<span class="klarna-push-pno get-address-button button"><?php _e('Fetch', 'klarna'); ?></span>
 					<p class="form-row">
 						<div class="klarna-get-address-message"></div>
@@ -349,7 +354,7 @@ class WC_Klarna_Get_Address {
 	
 
 
-/**
+	/**
  	 * Display the GetAddress response above the billing form on checkout
  	 *
  	**/
@@ -367,20 +372,7 @@ class WC_Klarna_Get_Address {
 	} // End function
 
 
-	
-	
-	
-	/**
-	 * Add ajaxurl var to head
-	 */
-	function ajaxurl() {
-		?>
-		<script type="text/javascript">
-				var ajaxurl = '<?php echo admin_url('admin-ajax.php'); ?>';
-		</script>
-		<?php
-	}
-	
+
 	
 	/**
 	 * Ajax request callback function
@@ -478,6 +470,12 @@ class WC_Klarna_Get_Address {
 	public function get_country() {
 		$data = new WC_Gateway_Klarna_Invoice;
 		return $data->get_klarna_country();
+	}
+	
+	// Helper function - get_shop_country
+	public function get_shop_country() {
+	$data = new WC_Gateway_Klarna_Invoice;
+		return $data->get_klarna_shop_country();
 	}
 	
 	// Helper function - get_klarna_language

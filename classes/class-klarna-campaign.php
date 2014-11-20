@@ -1253,6 +1253,11 @@ class WC_Gateway_Klarna_Campaign extends WC_Gateway_Klarna {
 	
 	
 	
+	// Helper function - get Enabled
+	function get_enabled() {
+		return $this->enabled;
+	}
+	
 	// Helper function - get eid
 	function get_eid() {
 		
