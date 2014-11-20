@@ -287,7 +287,8 @@ class WC_Gateway_Klarna_Campaign extends WC_Gateway_Klarna {
 		if( !empty($this->authorized_countries) ) {
 			echo '<h4>' . __('Active PClasses', 'klarna') . '</h4>';
 		    foreach($this->authorized_countries as $key=>$country) {
-			    $pclasses = WC_Gateway_Klarna_Account::fetch_pclasses( $country );
+		    	$data = new WC_Gateway_Klarna_Account;
+			    $pclasses = $data->fetch_pclasses( $country );
 			    if( $pclasses ) {
 			    	echo '<p>' . $country . '</p>';
 				    foreach( $pclasses as $pclass ) {
