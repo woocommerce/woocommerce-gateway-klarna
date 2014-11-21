@@ -1,7 +1,7 @@
 *** Klarna Changelog ***
 
 2014.11.20	- version 1.9.2
-* Fix		- Removed WC Google Analytics tracking code in KCO due to conflicts with version 1.3 of the WooCommerce Google Analytics Integration plugin.
+* Fix		- Removed WC Google Analytics tracking code in KCO due to conflicts with version 1.3 of the WooCommerce Google Analytics Integration plugin. Still compatible WooCommerce Google Analytics Integration 1.2.1 or below.
 * Fix		- Strict standards notice on Klarna Checkout page and standard Checkout page.
 * Fix		- GetAddress improvements - feature should only be available in checkout for Swedish stores.
 
