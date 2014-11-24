@@ -519,7 +519,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 					$data = new WC_Google_Analytics;
 					
 					// Compatible with WC Google Analytics up to v1.2.1
-					if ( method_exists( $data, 'get_ecommerce_tracking_code' ) ) {
+					if ( method_exists( $data, 'ecommerce_tracking_code' ) ) {
 						$data->ecommerce_tracking_code($_GET['sid']);
 					}
 				}
