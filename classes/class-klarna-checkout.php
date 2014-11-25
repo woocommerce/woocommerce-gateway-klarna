@@ -200,7 +200,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
        	// We execute the woocommerce_thankyou hook when the KCO Thanks page is rendered because other plugins uses this, 
        	// but we don't want to display the actual WC Order details table. Remove this action here.
        	remove_action( 'woocommerce_thankyou', 'woocommerce_order_details_table', 10 );
-       	//add_action( 'add_meta_boxes', array( $this, 'add_klarna_meta_box' ) );
+       	// add_action( 'add_meta_boxes', array( $this, 'add_klarna_meta_box' ) );
        	
        	// Ajax
        	add_action( 'wp_ajax_customer_update_kco_order_note', array($this, 'customer_update_kco_order_note') );
@@ -513,16 +513,6 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 					wp_redirect( $this->klarna_checkout_url );
 					exit;  
 				}
-				
-				// If WooCommerce Google Analytics Integration exist -  add eCommerce tracking
-				if ( class_exists( 'WC_Google_Analytics' ) ) {
-					$data = new WC_Google_Analytics;
-					
-					// Compatible with WC Google Analytics up to v1.2.1
-					if ( method_exists( $data, 'ecommerce_tracking_code' ) ) {
-						$data->ecommerce_tracking_code($_GET['sid']);
-					}
-				}
 
 				$snippet = $klarna_order['gui']['snippet'];
 			
@@ -764,7 +754,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 								$update['merchant']['terms_uri'] = $this->terms_url;
 								$update['merchant']['checkout_uri'] = add_query_arg( 'klarnaListener', 'checkout', $this->klarna_checkout_url );
 		        			
-	        					$update['merchant']['confirmation_uri'] = add_query_arg ( array('klarna_order' => '{checkout.order.uri}', 'sid' => $order_id ), $this->klarna_checkout_thanks_url);
+	        					$update['merchant']['confirmation_uri'] = add_query_arg ( array('klarna_order' => '{checkout.order.uri}', 'sid' => $order_id, 'order-received' => $order_id ), $this->klarna_checkout_thanks_url);
 	        					$update['merchant']['push_uri'] = add_query_arg( array('sid' => $order_id, 'scountry' => $this->klarna_country, 'klarna_order' => '{checkout.order.uri}', 'wc-api' => 'WC_Gateway_Klarna_Checkout'), $this->klarna_checkout_url );
 	        					
 		
@@ -801,7 +791,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	        			$create['merchant']['id'] = $eid;
 	        			$create['merchant']['terms_uri'] = $this->terms_url;
 	        			$create['merchant']['checkout_uri'] = add_query_arg( 'klarnaListener', 'checkout', $this->klarna_checkout_url );
-	        			$create['merchant']['confirmation_uri'] = add_query_arg ( array('klarna_order' => '{checkout.order.uri}', 'sid' => $order_id ), $this->klarna_checkout_thanks_url);
+	        			$create['merchant']['confirmation_uri'] = add_query_arg ( array('klarna_order' => '{checkout.order.uri}', 'sid' => $order_id, 'order-received' => $order_id ), $this->klarna_checkout_thanks_url);
 	        			$create['merchant']['push_uri'] = add_query_arg( array('sid' => $order_id, 'scountry' => $this->klarna_country, 'klarna_order' => '{checkout.order.uri}', 'wc-api' => 'WC_Gateway_Klarna_Checkout'), $this->klarna_checkout_url );
 	        			
 	        			// Make phone a mandatory field for German stores?
@@ -2119,8 +2109,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
     	}
 
     
-    } // End function render_meta_box_content()
-    
+    } // End function render_meta_box_content()    
     
 } // End class WC_Gateway_Klarna_Checkout
 
@@ -2142,10 +2131,11 @@ class WC_Gateway_Klarna_Checkout_Extra {
 		add_action( 'woocommerce_register_form_start', array( $this, 'add_account_signup_text' ) );
 		add_action( 'woocommerce_login_form_start', array( $this, 'add_account_login_text' ) );
 		
-		
-		 
+		// Filter Checkout page ID, so WooCommerce Google Analytics integration can
+		// output Ecommerce tracking code on Klarna Thank You page
+		add_filter( 'woocommerce_get_checkout_page_id', array( $this, 'change_checkout_page_id' ) );
+
 	}
-	
 	
 	// Set session
 	function start_session() {		
@@ -2260,6 +2250,26 @@ class WC_Gateway_Klarna_Checkout_Extra {
 			echo $account_login_text;
 		}
 
+	}
+
+	/**
+	 * Change checkout page ID to Klarna Thank You page, when in Klarna Thank You page only
+	 */
+	public function change_checkout_page_id( $checkout_page_id ) {
+		global $post;
+
+		$data = new WC_Gateway_Klarna_Checkout;
+		$klarna_checkout_page_url = $data->klarna_checkout_thanks_url;
+
+		if ( is_page() ) {
+			$current_page_url = get_permalink( $post->ID );
+			// Compare Klarna Thank You page URL to current page URL
+			if ( esc_url( trailingslashit( $klarna_checkout_page_url ) ) == esc_url( trailingslashit( $current_page_url ) ) ) {
+				$checkout_page_id = $post->ID;
+			}
+		}
+
+		return $checkout_page_id;
 	}
 		
 
