@@ -327,7 +327,8 @@ class WC_Gateway_Klarna_Campaign extends WC_Gateway_Klarna {
 			if (!$this->get_eid() || !$this->get_secret()) return false;
 		
 			// PClass check
-			$pclasses = WC_Gateway_Klarna_Account::fetch_pclasses( $this->get_klarna_country() );
+			$data = new WC_Gateway_Klarna_Account();
+			$pclasses = $data->fetch_pclasses( $this->get_klarna_country() );
 						
 			if($pclasses) {
 				
