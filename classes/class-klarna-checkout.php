@@ -201,10 +201,12 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		// because other plugins use this, but we don't want to display the actual WC Order
 		// details table in KCO Thank You page. This action is removed here, but only when
 		// in Klarna Thank You page.
-		global $post;
-		$klarna_checkout_page_id = url_to_postid ( $this->klarna_checkout_thanks_url );
-		if ( $post->ID == $klarna_checkout_page_id ) {
-			remove_action( 'woocommerce_thankyou', 'woocommerce_order_details_table', 10 );
+		if ( is_page() ) {
+			global $post;
+			$klarna_checkout_page_id = url_to_postid ( $this->klarna_checkout_thanks_url );
+			if ( $post->ID == $klarna_checkout_page_id ) {
+				remove_action( 'woocommerce_thankyou', 'woocommerce_order_details_table', 10 );
+			}
 		}
 
 		// add_action( 'add_meta_boxes', array( $this, 'add_klarna_meta_box' ) );
