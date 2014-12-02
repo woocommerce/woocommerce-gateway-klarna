@@ -197,10 +197,19 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
        	
        	add_action( 'woocommerce_api_wc_gateway_klarna_checkout', array( $this, 'check_checkout_listener' ) );
        	
-       	// We execute the woocommerce_thankyou hook when the KCO Thanks page is rendered because other plugins uses this, 
-       	// but we don't want to display the actual WC Order details table. Remove this action here.
-       	remove_action( 'woocommerce_thankyou', 'woocommerce_order_details_table', 10 );
-       	// add_action( 'add_meta_boxes', array( $this, 'add_klarna_meta_box' ) );
+		// We execute the woocommerce_thankyou hook when the KCO Thank You page is rendered,
+		// because other plugins use this, but we don't want to display the actual WC Order
+		// details table in KCO Thank You page. This action is removed here, but only when
+		// in Klarna Thank You page.
+		if ( is_page() ) {
+			global $post;
+			$klarna_checkout_page_id = url_to_postid ( $this->klarna_checkout_thanks_url );
+			if ( $post->ID == $klarna_checkout_page_id ) {
+				remove_action( 'woocommerce_thankyou', 'woocommerce_order_details_table', 10 );
+			}
+		}
+
+		// add_action( 'add_meta_boxes', array( $this, 'add_klarna_meta_box' ) );
        	
        	// Ajax
        	add_action( 'wp_ajax_customer_update_kco_order_note', array($this, 'customer_update_kco_order_note') );
@@ -902,6 +911,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 					$this->log->add( 'klarna', 'Billing: ' . $klarna_order['billing_address']['given_name']);
 					$this->log->add( 'klarna', 'Order ID: ' . $_GET['sid']);
 					$this->log->add( 'klarna', 'Reference: ' . $klarna_order['reservation']);
+					$this->log->add( 'klarna', 'Fetched order from Klarna: ' . var_export($klarna_order, true));
 				}
 				
 				if ($klarna_order['status'] == "checkout_complete") { 
@@ -1627,7 +1637,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 								{
 									action			: 'customer_update_kco_order_note',
 									kco_order_note	: kco_order_note,
-									kco_order_id	: '<?php; echo WC()->session->order_awaiting_payment;?>',
+									kco_order_id	: '<?php echo WC()->session->order_awaiting_payment;?>',
 									_wpnonce		: '<?php echo wp_create_nonce('update-kco-checkout-order-note'); ?>',
 								},
 								function(response) {

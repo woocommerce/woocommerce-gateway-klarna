@@ -302,7 +302,7 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 				require_once(KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc_wrappers.inc');
 			}
 			
-			if( !empty($this->authorized_countries) ) {
+			if( !empty($this->authorized_countries) && $this->enabled == 'yes' ) {
 				echo '<h4>' . __('Active PClasses', 'klarna') . '</h4>';
 			    foreach($this->authorized_countries as $key=>$country) {
 				    $pclasses = $this->fetch_pclasses( $country );
@@ -1291,7 +1291,7 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 		    $this->get_secret(), 						// Secret
 		    $country, 									// Country
 		    $this->get_klarna_language($country), 		// Language
-		    $this->selected_currency, 					// Currency
+		    $this->get_currency_for_country($country), 	// Currency
 		    $klarna_mode, 								// Live or test
 		    $pcStorage = 'jsondb', 						// PClass storage
 		    $pcURI = 'klarna_pclasses_' . $country		// PClass storage URI path

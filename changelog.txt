@@ -1,5 +1,11 @@
 *** Klarna Changelog ***
 
+2014.12.01	- version 1.9.4
+* Fix		- Fixes a bug that removed woocommerce_order_details_table from woocommerce_thankyou in standard thank you page.
+* Fix		- Added check if payment method is enabled before trigger fetch_pclasses() in settings page (Klarna Account & Special campaign).
+* Fix		- Better logging. Save entire order info in callback from Klarna (in KCO push).
+* Fix 		- Small js bugg in js_order_note()
+
 2014.11.25	- version 1.9.3
 * Fix		- Fixes a bug with handling Google Analytics ecommerce tracking code, makes plugin compatible with Woo Commerce Google Analytics Integration 1.3.0.
 

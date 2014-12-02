@@ -284,7 +284,7 @@ class WC_Gateway_Klarna_Campaign extends WC_Gateway_Klarna {
 			require_once(KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc_wrappers.inc');
 		}
 		
-		if( !empty($this->authorized_countries) ) {
+		if( !empty($this->authorized_countries) && $this->enabled == 'yes' ) {
 			echo '<h4>' . __('Active PClasses', 'klarna') . '</h4>';
 		    foreach($this->authorized_countries as $key=>$country) {
 		    	$data = new WC_Gateway_Klarna_Account;
@@ -327,7 +327,8 @@ class WC_Gateway_Klarna_Campaign extends WC_Gateway_Klarna {
 			if (!$this->get_eid() || !$this->get_secret()) return false;
 		
 			// PClass check
-			$pclasses = WC_Gateway_Klarna_Account::fetch_pclasses( $this->get_klarna_country() );
+			$data = new WC_Gateway_Klarna_Account();
+			$pclasses = $data->fetch_pclasses( $this->get_klarna_country() );
 						
 			if($pclasses) {
 				
