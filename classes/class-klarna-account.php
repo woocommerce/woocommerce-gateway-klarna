@@ -777,9 +777,9 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 				<p class="form-row form-row-last">
 					<label for="klarna_account_gender"><?php echo __("Gender", 'klarna') ?> <span class="required">*</span></label>
 					<select id="klarna_account_gender" name="klarna_account_gender" class="woocommerce-select" style="width:120px;">
-						<option value=""><?php echo __("Select gender", 'klarna') ?></options>
-						<option value="f"><?php echo __("Female", 'klarna') ?></options>
-						<option value="m"><?php echo __("Male", 'klarna') ?></options>
+						<option value=""><?php echo __("Select gender", 'klarna') ?></option>
+						<option value="f"><?php echo __("Female", 'klarna') ?></option>
+						<option value="m"><?php echo __("Male", 'klarna') ?></option>
 					</select>
 				</p>
 			<?php endif; ?>
@@ -1676,7 +1676,7 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 			$klarna_account_icon = 'https://cdn.klarna.com/1.0/shared/image/generic/logo/da_dk/basic/blue-black.png?width=100&eid=' . $this->get_eid();
 			break;
 		case 'DE' :
-			$$klarna_account_icon = 'https://cdn.klarna.com/1.0/shared/image/generic/logo/de_de/basic/blue-black.png?width=100&eid=' . $this->get_eid();
+			$klarna_account_icon = 'https://cdn.klarna.com/1.0/shared/image/generic/logo/de_de/basic/blue-black.png?width=100&eid=' . $this->get_eid();
 			break;
 		case 'NL' :
 			$klarna_account_icon = 'https://cdn.klarna.com/1.0/shared/image/generic/logo/nl_nl/basic/blue-black.png?width=100&eid=' . $this->get_eid();
@@ -1694,7 +1694,7 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 			$klarna_account_icon = 'https://cdn.klarna.com/1.0/shared/image/generic/logo/de_at/basic/blue-black.png?width=100&eid=' . $this->get_eid();
 			break;
 		default:
-			$klarna_invoice_icon = '';
+			$klarna_account_icon = '';
 		}
 		
 		return $klarna_account_icon;
