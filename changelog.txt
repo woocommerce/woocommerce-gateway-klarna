@@ -1,5 +1,8 @@
 *** Klarna Changelog ***
 
+201x.xx.xx	- version 1.9.5
+* Update    - Updated Klarna invoice and part payment client library to v3.2.0
+
 2014.12.01	- version 1.9.4
 * Fix		- Fixes a bug that removed woocommerce_order_details_table from woocommerce_thankyou in standard thank you page.
 * Fix		- Added check if payment method is enabled before trigger fetch_pclasses() in settings page (Klarna Account & Special campaign).

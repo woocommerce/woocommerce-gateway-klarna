@@ -397,7 +397,44 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 			require_once(KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc.inc');
 			require_once(KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc_wrappers.inc');
 		}
-		
+
+$klarna = new Klarna();
+$config = new KlarnaConfig();
+
+// Default required options
+$config['mode'] = Klarna::BETA;
+$config['pcStorage'] = 'json';
+$config['pcURI'] = './pclasses.json';
+
+// Configuration needed for the checkout service
+$config['eid'] = $this->get_eid();
+$config['secret'] = $this->get_secret();
+
+$klarna->setConfig($config);
+
+try {
+    $response = $klarna->checkoutService(
+        $woocommerce->cart->total, // Total price of the checkout including VAT
+        'SEK', // Currency used by the checkout
+        'sv_SE' // Locale used by the checkout
+    );
+} catch (KlarnaException $e) {
+    // cURL exception
+    throw $e;
+}
+
+$data = $response->getData();
+
+if ($response->getStatus() >= 400) {
+    // server responded with error
+    echo '<pre>';
+    throw new Exception(print_r($data, true));
+    echo '</pre>';
+}
+echo '<pre>';
+print_r($data);
+echo '</pre>';		
+
 		// Test mode or Live mode		
 		if ( $this->testmode == 'yes' ):
 			// Disable SSL if in testmode

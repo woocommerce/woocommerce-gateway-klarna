@@ -30,8 +30,6 @@
  * currency    - Currency constant or code (int|string)
  * mode        - Klarna::BETA or Klarna::LIVE
  * ssl         - Use HTTPS or HTTP. (bool)
- * candice     - Status reporting to Klarna, to detect erroneous
- *               integrations, etc. (bool)
  * pcStorage   - Storage module, e.g. 'json'
  * pcURI       - URI to where the PClasses are stored, e.g.
  *               '/srv/shop/pclasses.json'
