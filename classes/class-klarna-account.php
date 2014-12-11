@@ -431,9 +431,31 @@ if ($response->getStatus() >= 400) {
     throw new Exception(print_r($data, true));
     echo '</pre>';
 }
+
+/*
 echo '<pre>';
 print_r($data);
-echo '</pre>';		
+echo '</pre>';
+*/
+
+$payment_methods = $data['payment_methods'];
+foreach ( $payment_methods as $payment_method ) {
+	// echo '<pre>';
+	// print_r( $payment_method );
+	// echo '</pre>';
+
+	echo '<div style="padding:10px;margin:10px 0;border:1px solid #ccc;">';
+	echo '<h3>' . $payment_method['title'] . '</h3>';
+	echo '<h4>' . $payment_method['group']['title'] . '</h4>';
+	echo 'Interest rate: ' . $payment_method['details']['interest_rate']['label'] . ' - ' . $payment_method['details']['interest_rate']['value'] . ' ' . $payment_method['details']['interest_rate']['symbol'] . '<br />';
+	echo 'Monthly invoice fee: ' . $payment_method['details']['monthly_invoice_fee']['label'] . ' - ' . $payment_method['details']['monthly_invoice_fee']['value'] . ' ' . $payment_method['details']['monthly_invoice_fee']['symbol'] . '<br />';
+	echo 'Start fee: ' . $payment_method['details']['start_fee']['label'] . ' - ' . $payment_method['details']['start_fee']['value'] . ' ' . $payment_method['details']['start_fee']['symbol'] . '<br />';
+	echo 'Extra info: ' . $payment_method['extra_info'] . '<br />';
+	echo 'Example: ' . $payment_method['use_case'] . '<br />';
+	echo 'Terms and conditions: ' . $payment_method['terms']['uri'] . '<br />';
+	echo '</div>';
+}
+
 
 		// Test mode or Live mode		
 		if ( $this->testmode == 'yes' ):
