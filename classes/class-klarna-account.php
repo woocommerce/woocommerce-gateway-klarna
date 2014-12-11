@@ -445,8 +445,8 @@ foreach ( $payment_methods as $payment_method ) {
 	// echo '</pre>';
 
 	echo '<div style="padding:10px;margin:10px 0;border:1px solid #ccc;">';
-	echo '<h3>' . $payment_method['title'] . '</h3>';
-	echo '<h4>' . $payment_method['group']['title'] . '</h4>';
+	echo '<h3>Title: ' . $payment_method['title'] . '</h3>';
+	echo '<h4>Group: ' . $payment_method['group']['title'] . '</h4>';
 	echo 'Interest rate: ' . $payment_method['details']['interest_rate']['label'] . ' - ' . $payment_method['details']['interest_rate']['value'] . ' ' . $payment_method['details']['interest_rate']['symbol'] . '<br />';
 	echo 'Monthly invoice fee: ' . $payment_method['details']['monthly_invoice_fee']['label'] . ' - ' . $payment_method['details']['monthly_invoice_fee']['value'] . ' ' . $payment_method['details']['monthly_invoice_fee']['symbol'] . '<br />';
 	echo 'Start fee: ' . $payment_method['details']['start_fee']['label'] . ' - ' . $payment_method['details']['start_fee']['value'] . ' ' . $payment_method['details']['start_fee']['symbol'] . '<br />';
