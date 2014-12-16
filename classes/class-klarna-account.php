@@ -398,64 +398,6 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 			require_once(KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc_wrappers.inc');
 		}
 
-$klarna = new Klarna();
-$config = new KlarnaConfig();
-
-// Default required options
-$config['mode'] = Klarna::BETA;
-$config['pcStorage'] = 'json';
-$config['pcURI'] = './pclasses.json';
-
-// Configuration needed for the checkout service
-$config['eid'] = $this->get_eid();
-$config['secret'] = $this->get_secret();
-
-$klarna->setConfig($config);
-
-try {
-    $response = $klarna->checkoutService(
-        $woocommerce->cart->total, // Total price of the checkout including VAT
-        'SEK', // Currency used by the checkout
-        'sv_SE' // Locale used by the checkout
-    );
-} catch (KlarnaException $e) {
-    // cURL exception
-    throw $e;
-}
-
-$data = $response->getData();
-
-if ($response->getStatus() >= 400) {
-    // server responded with error
-    echo '<pre>';
-    throw new Exception(print_r($data, true));
-    echo '</pre>';
-}
-
-/*
-echo '<pre>';
-print_r($data);
-echo '</pre>';
-*/
-
-$payment_methods = $data['payment_methods'];
-foreach ( $payment_methods as $payment_method ) {
-	// echo '<pre>';
-	// print_r( $payment_method );
-	// echo '</pre>';
-
-	echo '<div style="padding:10px;margin:10px 0;border:1px solid #ccc;">';
-	echo '<h3>Title: ' . $payment_method['title'] . '</h3>';
-	echo '<h4>Group: ' . $payment_method['group']['title'] . '</h4>';
-	echo 'Interest rate: ' . $payment_method['details']['interest_rate']['label'] . ' - ' . $payment_method['details']['interest_rate']['value'] . ' ' . $payment_method['details']['interest_rate']['symbol'] . '<br />';
-	echo 'Monthly invoice fee: ' . $payment_method['details']['monthly_invoice_fee']['label'] . ' - ' . $payment_method['details']['monthly_invoice_fee']['value'] . ' ' . $payment_method['details']['monthly_invoice_fee']['symbol'] . '<br />';
-	echo 'Start fee: ' . $payment_method['details']['start_fee']['label'] . ' - ' . $payment_method['details']['start_fee']['value'] . ' ' . $payment_method['details']['start_fee']['symbol'] . '<br />';
-	echo 'Extra info: ' . $payment_method['extra_info'] . '<br />';
-	echo 'Example: ' . $payment_method['use_case'] . '<br />';
-	echo 'Terms and conditions: ' . $payment_method['terms']['uri'] . '<br />';
-	echo '</div>';
-}
-
 
 		// Test mode or Live mode		
 		if ( $this->testmode == 'yes' ):
@@ -581,75 +523,84 @@ foreach ( $payment_methods as $payment_method ) {
 			
 		<fieldset>
 			<p class="form-row form-row-first">
+
+<?php			
+/**
+ * Begin Klarna PMS
+ */
+$klarna = new Klarna();
+$config = new KlarnaConfig();
+
+// Default required options
+$config['mode'] = Klarna::BETA;
+$config['pcStorage'] = 'json';
+$config['pcURI'] = './pclasses.json';
+
+// Configuration needed for the checkout service
+$config['eid'] = $this->get_eid();
+$config['secret'] = $this->get_secret();
+
+$klarna->setConfig($config);
+
+try {
+    $response = $klarna->checkoutService(
+        $woocommerce->cart->total, // Total price of the checkout including VAT
+        'SEK', // Currency used by the checkout
+        'sv_SE' // Locale used by the checkout
+    );
+} catch (KlarnaException $e) {
+    // cURL exception
+    throw $e;
+}
+
+$data = $response->getData();
+
+if ($response->getStatus() >= 400) {
+    // server responded with error
+    echo '<pre>';
+    throw new Exception(print_r($data, true));
+    echo '</pre>';
+}
+
+$payment_methods = $data['payment_methods'];
+echo '<select id="klarna_account_pclass" name="klarna_account_pclass" class="woocommerce-select">';
+foreach ( $payment_methods as $payment_method ) {
+	// echo '<pre>';
+	// print_r( $payment_method );
+	// echo '</pre>';
+
+	if ( 'part_payment' == $payment_method['group']['code'] ) {
+
+		$payment_data_attr = array();
+
+		foreach ( $payment_method['details'] as $pd_k => $pd_v ) {
+			$payment_data_attr[] = 'data-' . $pd_k . '="' . implode( ' ', $pd_v ) . '"';
+		}
+
+		echo '<option value="' . $payment_method['pclass_id'] . '"' . implode( ' ', $payment_data_attr ) . '>';
+		echo $payment_method['title'];
+		echo '</option>';
+	}
+
+	/*
+	echo '<div style="padding:10px;margin:10px 0;border:1px solid #ccc;">';
+	echo '<h3>Title: ' . $payment_method['title'] . '</h3>';
+	echo '<h4>Group: ' . $payment_method['group']['title'] . '</h4>';
+	echo '<strong>Interest rate:</strong> ' . $payment_method['details']['interest_rate']['label'] . ' - ' . $payment_method['details']['interest_rate']['value'] . ' ' . $payment_method['details']['interest_rate']['symbol'] . '<br />';
+	echo '<strong>Monthly invoice fee:</strong> ' . $payment_method['details']['monthly_invoice_fee']['label'] . ' - ' . $payment_method['details']['monthly_invoice_fee']['value'] . ' ' . $payment_method['details']['monthly_invoice_fee']['symbol'] . '<br />';
+	echo '<strong>Start fee:</strong> ' . $payment_method['details']['start_fee']['label'] . ' - ' . $payment_method['details']['start_fee']['value'] . ' ' . $payment_method['details']['start_fee']['symbol'] . '<br />';
+	echo '<strong>Extra info:</strong> ' . $payment_method['extra_info'] . '<br />';
+	echo '<strong>Example:</strong> ' . $payment_method['use_case'] . '<br />';
+	echo '<strong>Terms and conditions:</strong> ' . $payment_method['terms']['uri'] . '<br />';
+	echo '</div>';
+	*/
+}
+echo '</select>';
+/**
+ * End Klarna PMS
+ */
+?>
 			
-				<?php
-				// Check if we have any PClasses
-				// TODO Deactivate this gateway if the file pclasses.json doesn't exist
-				$pclasses = $this->fetch_pclasses( $this->get_klarna_country() );
-				if($pclasses) {
-				
-				?>
-					<label for="klarna_account_pclass"><?php echo __("Payment plan", 'klarna') ?> <span class="required">*</span></label>
-					<select id="klarna_account_pclass" name="klarna_account_pclass" class="woocommerce-select">
-						
-					<?php
-				   	// Loop through the available PClasses stored in the file srv/pclasses.json
-					foreach ($pclasses as $pclass) {
-						
-						if ( $pclass->getType() == 0 || $pclass->getType() == 1 ) {
-						
-							// Get monthly cost for current pclass
-							$monthly_cost = KlarnaCalc::calc_monthly_cost(
-    	    									$sum,
-    	    									$pclass,
-    	    									$flag
-    										);
-    										
-    						// Get total credit purchase cost for current pclass
-    						// Only required in Norway
-							$total_credit_purchase_cost = KlarnaCalc::total_credit_purchase_cost(
-    	    									$sum,
-    	    									$pclass,
-    	    									$flag
-    										);
-    						
-    						// Check that Cart total is larger than min amount for current PClass				
-			   				if($sum > $pclass->getMinAmount()) {
-			   				
-			   					echo '<option value="' . $pclass->getId() . '">';
-			   					if ($this->get_klarna_country() == 'NO') {
-									if ( $pclass->getType() == 1 ) {
-										//If Account - Do not show startfee. This is always 0.
-										echo sprintf(__('%s - %s %s/month - %s%s', 'klarna'), $pclass->getDescription(), $monthly_cost, $this->selected_currency, $pclass->getInterestRate(), '%');
-										} else {
-											// Norway - Show total cost
-											echo sprintf(__('%s - %s %s/month - %s%s - Start %s - Tot %s %s', 'klarna'), $pclass->getDescription(), $monthly_cost, $this->selected_currency, $pclass->getInterestRate(), '%', $pclass->getStartFee(), $total_credit_purchase_cost, $this->klarna_currency );
-										}
-									} else {
-										if ( $pclass->getType() == 1 ) {
-											//If Account - Do not show startfee. This is always 0.
-											echo sprintf(__('%s - %s %s/month - %s%s', 'klarna'), $pclass->getDescription(), $monthly_cost, $this->selected_currency, $pclass->getInterestRate(), '%');
-										} else {
-											// Sweden, Denmark, Finland, Germany & Netherlands - Don't show total cost
-											echo sprintf(__('%s - %s %s/month - %s%s - Start %s', 'klarna'), $pclass->getDescription(), $monthly_cost, $this->selected_currency, $pclass->getInterestRate(), '%', $pclass->getStartFee() );
-										}
-									}
-								echo '</option>';
-							
-							} // End if ($sum > $pclass->getMinAmount())
-							
-			   			} // End if $pclass->getType() == 0 or 1
-					
-					} // End foreach
-					?>
-						
-					</select>
-				
-					<?php
-				} else {
-					echo __('Klarna PClasses seem to be missing. Klarna Account does not work.', 'klarna');
-				}
-				?>				
 				
 			</p>
 			<?php
