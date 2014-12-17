@@ -563,46 +563,50 @@ if ($response->getStatus() >= 400) {
 }
 
 $payment_methods = $data['payment_methods'];
+echo '<pre>';
+print_r( $payment_methods );
+echo '</pre>';
+
 echo '<select id="klarna_account_pclass" name="klarna_account_pclass" class="woocommerce-select">';
+echo '<option disabled="disabled" selected="true">---</option>';
 foreach ( $payment_methods as $payment_method ) {
-	// echo '<pre>';
-	// print_r( $payment_method );
-	// echo '</pre>';
 
 	if ( 'part_payment' == $payment_method['group']['code'] ) {
 
 		$payment_data_attr = array();
 
 		foreach ( $payment_method['details'] as $pd_k => $pd_v ) {
-			$payment_data_attr[] = 'data-' . $pd_k . '="' . implode( ' ', $pd_v ) . '"';
+			$payment_data_attr[] = 'data-details_' . $pd_k . '="' . implode( ' ', $pd_v ) . '"';
 		}
+
+		if ( isset( $payment_method['use_case'] ) && '' != $payment_method['use_case'] ) {
+			$payment_data_attr[] = 'data-use_case="' . $payment_method['use_case'] . '"';
+		}
+
+		if ( isset( $payment_method['terms']['uri'] ) && '' != $payment_method['terms']['uri'] ) {
+			$payment_data_attr[] = 'data-terms_uri="' . $payment_method['terms']['uri'] . '"';
+		}
+
+		if ( isset( $payment_method['logo']['uri'] ) && '' != $payment_method['logo']['uri'] ) {
+			$payment_data_attr[] = 'data-logo_uri="' . $payment_method['logo']['uri'] . '"';
+		}
+
+		$payment_data_attr = array_reverse( $payment_data_attr );
 
 		echo '<option value="' . $payment_method['pclass_id'] . '"' . implode( ' ', $payment_data_attr ) . '>';
 		echo $payment_method['title'];
 		echo '</option>';
 	}
 
-	/*
-	echo '<div style="padding:10px;margin:10px 0;border:1px solid #ccc;">';
-	echo '<h3>Title: ' . $payment_method['title'] . '</h3>';
-	echo '<h4>Group: ' . $payment_method['group']['title'] . '</h4>';
-	echo '<strong>Interest rate:</strong> ' . $payment_method['details']['interest_rate']['label'] . ' - ' . $payment_method['details']['interest_rate']['value'] . ' ' . $payment_method['details']['interest_rate']['symbol'] . '<br />';
-	echo '<strong>Monthly invoice fee:</strong> ' . $payment_method['details']['monthly_invoice_fee']['label'] . ' - ' . $payment_method['details']['monthly_invoice_fee']['value'] . ' ' . $payment_method['details']['monthly_invoice_fee']['symbol'] . '<br />';
-	echo '<strong>Start fee:</strong> ' . $payment_method['details']['start_fee']['label'] . ' - ' . $payment_method['details']['start_fee']['value'] . ' ' . $payment_method['details']['start_fee']['symbol'] . '<br />';
-	echo '<strong>Extra info:</strong> ' . $payment_method['extra_info'] . '<br />';
-	echo '<strong>Example:</strong> ' . $payment_method['use_case'] . '<br />';
-	echo '<strong>Terms and conditions:</strong> ' . $payment_method['terms']['uri'] . '<br />';
-	echo '</div>';
-	*/
 }
 echo '</select>';
+echo '<div id="klarna-pms-details" style="clear:both;font-size:11px;"></div>';
 /**
  * End Klarna PMS
  */
 ?>
 			
 				
-			</p>
 			<?php
 			// Calculate lowest monthly cost and display it
 			/*
