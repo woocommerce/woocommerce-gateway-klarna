@@ -30,8 +30,10 @@ class WC_Klarna_PMS {
  	 */
 	function load_scripts() {
 		
+		if ( is_checkout() ) {
 		wp_register_script( 'klarna-pms-js', plugins_url( '/js/klarnapms.js' , __FILE__ ), array('jquery'), '1.0', false );
 		wp_enqueue_script( 'klarna-pms-js' );
+		}
 
 	} // End function
 
