@@ -113,10 +113,8 @@ function init_klarna_gateway() {
 			if ( is_checkout() ) {
 				wp_register_script( 'klarna-base-js', 'https://cdn.klarna.com/public/kitt/core/v1.0/js/klarna.min.js', array('jquery'), '1.0', false );
 				wp_register_script( 'klarna-terms-js', 'https://cdn.klarna.com/public/kitt/toc/v1.1/js/klarna.terms.min.js', array('klarna-base-js'), '1.0', false );
-				wp_register_script( 'klarna-pms-js', plugins_url( '/js/klarnapms.js' , __FILE__ ), array('jquery'), '1.0', false );
 				wp_enqueue_script( 'klarna-base-js' );
 				wp_enqueue_script( 'klarna-terms-js' );
-				wp_enqueue_script( 'klarna-pms-js' );
 			}
 
 		} // End function
