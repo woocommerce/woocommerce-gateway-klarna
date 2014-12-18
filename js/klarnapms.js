@@ -22,7 +22,7 @@
 		}
 
 		if ( $( selectedOption ).data( 'terms_uri' ) ) {
-			klarnaDetails += '<p>' + $( selectedOption ).data( 'terms_uri' ) + '</p>';
+			klarnaDetails += '<p><a class="klarna-link" href="' + $( selectedOption ).data( 'terms_uri' ) + '">Read more</a></p>';
 		}
 		
 		if ( $( selectedOption ).data( 'logo_uri' ) ) {

@@ -456,11 +456,9 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 		// Mobile or desktop browser
 		if (wp_is_mobile() ) {
 			$klarna_layout = 'mobile';
-		 } else {
-		 	$klarna_layout = 'desktop';
-		 }
-		
-		// Script for displaying the terms link
+		} else {
+			$klarna_layout = 'desktop';
+		}
 		?>
 		
 		<script type="text/javascript">
@@ -563,9 +561,9 @@ if ($response->getStatus() >= 400) {
 }
 
 $payment_methods = $data['payment_methods'];
-echo '<pre>';
-print_r( $payment_methods );
-echo '</pre>';
+// echo '<pre>';
+// print_r( $payment_methods );
+// echo '</pre>';
 
 echo '<select id="klarna_account_pclass" name="klarna_account_pclass" class="woocommerce-select">';
 echo '<option disabled="disabled" selected="true">---</option>';
