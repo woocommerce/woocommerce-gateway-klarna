@@ -36,24 +36,24 @@ class WC_Klarna_PMS {
 	} // End function
 
 
-	function get_data( $eid, $secret, $shop_currency, $shop_country ) {
+	function get_data( $eid, $secret, $selected_currency, $shop_country, $cart_total, $payment_method_group ) {
 
 		$klarna = new Klarna();
 		$config = new KlarnaConfig();
 
 		// Default required options
-		$config['mode'] = Klarna::BETA;
+		$config['mode']      = Klarna::BETA;
 		$config['pcStorage'] = 'json';
-		$config['pcURI'] = './pclasses.json';
+		$config['pcURI']     = './pclasses.json';
 
 		// Configuration needed for the checkout service
-		$config['eid'] = $this->get_eid();
-		$config['secret'] = $this->get_secret();
+		$config['eid']       = $eid;
+		$config['secret']    = $secret;
 
-		$klarna->setConfig($config);
+		$klarna->setConfig( $config );
 
 		// Get Klarna locale based on shop country
-		switch ( $this->shop_country ) {
+		switch ( $shop_country ) {
 			case 'SE' :
 				$klarna_pms_locale = 'sv_SE';
 				break;
@@ -78,19 +78,60 @@ class WC_Klarna_PMS {
 		}
 
 		try {
-		    $response = $klarna->checkoutService(
-		        $woocommerce->cart->total, // Total price of the checkout including VAT
-		        $this->selected_currency, // Currency used by the checkout
-		        $klarna_pms_locale // Locale used by the checkout
-		    );
+			$response = $klarna->checkoutService(
+				$cart_total,        // Total price of the checkout including VAT
+				$selected_currency, // Currency used by the checkout
+				$klarna_pms_locale  // Locale used by the checkout
+			);
 		} catch (KlarnaException $e) {
-		    // cURL exception
-		    throw $e;
+			// cURL exception
+			throw $e;
 		}
 
 		$data = $response->getData();
 
-		return $data;
+		if ($response->getStatus() >= 400) {
+			// server responded with error
+			echo '<pre>';
+			throw new Exception(print_r($data, true));
+			echo '</pre>';
+		}
+
+		$payment_methods = $data['payment_methods'];
+
+		$payment_methods_output = '';
+		foreach ( $payment_methods as $payment_method ) {
+
+			if ( $payment_method_group == $payment_method['group']['code'] ) {
+
+				$payment_data_attr = array();
+
+				foreach ( $payment_method['details'] as $pd_k => $pd_v ) {
+					$payment_data_attr[] = 'data-details_' . $pd_k . '="' . implode( ' ', $pd_v ) . '"';
+				}
+
+				if ( isset( $payment_method['use_case'] ) && '' != $payment_method['use_case'] ) {
+					$payment_data_attr[] = 'data-use_case="' . $payment_method['use_case'] . '"';
+				}
+
+				if ( isset( $payment_method['terms']['uri'] ) && '' != $payment_method['terms']['uri'] ) {
+					$payment_data_attr[] = 'data-terms_uri="' . $payment_method['terms']['uri'] . '"';
+				}
+
+				if ( isset( $payment_method['logo']['uri'] ) && '' != $payment_method['logo']['uri'] ) {
+					$payment_data_attr[] = 'data-logo_uri="' . $payment_method['logo']['uri'] . '"';
+				}
+
+				$payment_data_attr = array_reverse( $payment_data_attr );
+
+				$payment_methods_output .= '<option value="' . $payment_method['pclass_id'] . '"' . implode( ' ', $payment_data_attr ) . '>';
+				$payment_methods_output .= $payment_method['title'];
+				$payment_methods_output .= '</option>';
+			}
+
+		}
+
+		return $payment_methods_output;
 
 	}
 
@@ -127,108 +168,3 @@ class WC_Klarna_PMS {
 }
 
 $wc_klarna_pms = new WC_Klarna_PMS;
-
-/**
- * Begin Klarna PMS
- */
-$klarna = new Klarna();
-$config = new KlarnaConfig();
-
-// Default required options
-$config['mode'] = Klarna::BETA;
-$config['pcStorage'] = 'json';
-$config['pcURI'] = './pclasses.json';
-
-// Configuration needed for the checkout service
-$config['eid'] = $this->get_eid();
-$config['secret'] = $this->get_secret();
-
-$klarna->setConfig($config);
-
-// Get Klarna locale based on shop country
-switch ( $this->shop_country ) {
-	case 'SE' :
-		$klarna_pms_locale = 'sv_SE';
-		break;
-	case 'NO' :
-		$klarna_pms_locale = 'nb_NO';
-		break;
-	case 'DK' :
-		$klarna_pms_locale = 'da_DK';
-		break;
-	case 'FI' :
-		$klarna_pms_locale = 'fi_FI';
-		break;
-	case 'DE' :
-		$klarna_pms_locale = 'de_DE';
-		break;
-	case 'NL' :
-		$klarna_pms_locale = 'nl_NL';
-		break;
-	case 'AT' :
-		$klarna_pms_locale = 'de_AT';
-		break;
-}
-
-try {
-    $response = $klarna->checkoutService(
-        $woocommerce->cart->total, // Total price of the checkout including VAT
-        $this->selected_currency, // Currency used by the checkout
-        $klarna_pms_locale // Locale used by the checkout
-    );
-} catch (KlarnaException $e) {
-    // cURL exception
-    throw $e;
-}
-
-$data = $response->getData();
-
-if ($response->getStatus() >= 400) {
-    // server responded with error
-    echo '<pre>';
-    throw new Exception(print_r($data, true));
-    echo '</pre>';
-}
-
-$payment_methods = $data['payment_methods'];
-// echo '<pre>';
-// print_r( $payment_methods );
-// echo '</pre>';
-
-echo '<select id="klarna_account_pclass" name="klarna_account_pclass" class="woocommerce-select">';
-echo '<option disabled="disabled" selected="true">---</option>';
-foreach ( $payment_methods as $payment_method ) {
-
-	if ( 'part_payment' == $payment_method['group']['code'] ) {
-
-		$payment_data_attr = array();
-
-		foreach ( $payment_method['details'] as $pd_k => $pd_v ) {
-			$payment_data_attr[] = 'data-details_' . $pd_k . '="' . implode( ' ', $pd_v ) . '"';
-		}
-
-		if ( isset( $payment_method['use_case'] ) && '' != $payment_method['use_case'] ) {
-			$payment_data_attr[] = 'data-use_case="' . $payment_method['use_case'] . '"';
-		}
-
-		if ( isset( $payment_method['terms']['uri'] ) && '' != $payment_method['terms']['uri'] ) {
-			$payment_data_attr[] = 'data-terms_uri="' . $payment_method['terms']['uri'] . '"';
-		}
-
-		if ( isset( $payment_method['logo']['uri'] ) && '' != $payment_method['logo']['uri'] ) {
-			$payment_data_attr[] = 'data-logo_uri="' . $payment_method['logo']['uri'] . '"';
-		}
-
-		$payment_data_attr = array_reverse( $payment_data_attr );
-
-		echo '<option value="' . $payment_method['pclass_id'] . '"' . implode( ' ', $payment_data_attr ) . '>';
-		echo $payment_method['title'];
-		echo '</option>';
-	}
-
-}
-echo '</select>';
-echo '<div id="klarna-pms-details" style="clear:both;font-size:11px;"></div>';
-/**
- * End Klarna PMS
- */

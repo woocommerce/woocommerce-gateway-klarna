@@ -166,6 +166,9 @@ function init_klarna_gateway() {
 	// Include the Get Address class
 	require_once 'classes/class-klarna-get-address.php';
 
+	// Include the Klarna PMS class
+	require_once 'classes/class-klarna-pms.php';
+
 	// WC 2.0 Update notice
 	class WC_Gateway_Klarna_Update_Notice {
 		
