@@ -1,36 +1,14 @@
 (function($) {
 
-	// console.log( 'change' );
+	$(document).on('change','.klarna_pms_select', function() {
 
-	$('#klarna_account_pclass').live('change', function() {
-
-		// console.log( 'change' );
 		var selectedOption = $(this).find('option:selected');
-		// console.log( $(selectedOption).data());
-				
-		var klarnaDetails = '<ul style="list-style:none">';
-		$.each($( selectedOption ).data(), function(i, v) {
-			console.log( i + ': ' + v );
-			if ( i.match('^details') ) {
-				klarnaDetails += '<li>' + v + '</li>';
-			}
-		});
-		klarnaDetails += '</ul>';
+		// console.log( $(selectedOption).val());
+		var pclass = $(selectedOption).val();
 
-		if ( $( selectedOption ).data( 'use_case' ) ) {
-			klarnaDetails += '<p>' + $( selectedOption ).data( 'use_case' ) + '</p>';
-		}
+		$('div.klarna-pms-details').hide();
 
-		if ( $( selectedOption ).data( 'terms_uri' ) ) {
-			klarnaDetails += '<p><a class="klarna-link" href="' + $( selectedOption ).data( 'terms_uri' ) + '">Read more</a></p>';
-		}
-		
-		if ( $( selectedOption ).data( 'logo_uri' ) ) {
-			klarnaDetails += '<div><img src="' + $( selectedOption ).data( 'logo_uri' ) + '" width="100" /></div>';
-		}
-		// console.log(klarnaDetails);
-
-		$('#klarna-pms-details').html(klarnaDetails);
+		$('div.klarna-pms-details[data-pclass=' + pclass + ']').show();
 
 	});
 

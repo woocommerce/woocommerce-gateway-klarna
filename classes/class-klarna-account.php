@@ -521,34 +521,39 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 			
 			
 		<fieldset>
-			<p class="form-row form-row-first">
-			
-				<?php
-				// Check if we have any PClasses
-				// TODO Deactivate this gateway if the file pclasses.json doesn't exist
-				$pclasses = $this->fetch_pclasses( $this->get_klarna_country() );
-				if($pclasses) {
-				
-				?>
-					<label for="klarna_account_pclass"><?php echo __("Payment plan", 'klarna') ?> <span class="required">*</span></label>
-					<select id="klarna_account_pclass" name="klarna_account_pclass" class="woocommerce-select">
-						
-					<?php
-					// Use Klarna PMS for Norway
-					if ( 'NO' == $this->shop_country || 'SE' == $this->shop_country ) {
-						$klarna_pms = new WC_Klarna_PMS;
-						$klarna_data = $klarna_pms->get_data(
-							$this->get_eid(),
-							$this->get_secret(),
-							$this->selected_currency,
-							$this->shop_country,
-							$woocommerce->cart->total,
-							'part_payment'
-						);
-						
-						echo $klarna_data;
-					} else {
+									
+			<?php
+			// Use Klarna PMS for Norway
+			if ( 'NO' == $this->get_klarna_country() || 'SE' == $this->get_klarna_country() ) {
 
+				$klarna_pms = new WC_Klarna_PMS;
+				$klarna_pms_data = $klarna_pms->get_data(
+					$this->get_eid(),
+					$this->get_secret(),
+					$this->selected_currency,
+					$this->shop_country,
+					$woocommerce->cart->total,
+					'part_payment'
+				);
+				
+				echo $klarna_pms_data;
+
+			// For countries other than NO do the old thing
+			} else { ?>
+
+				<p class="form-row form-row-first">
+				
+					<?php
+					// Check if we have any PClasses
+					// TODO Deactivate this gateway if the file pclasses.json doesn't exist
+					$pclasses = $this->fetch_pclasses( $this->get_klarna_country() );
+					if($pclasses) {
+					
+					?>
+						<label for="klarna_account_pclass"><?php echo __("Payment plan", 'klarna') ?> <span class="required">*</span></label>
+						<select id="klarna_account_pclass" name="klarna_account_pclass" class="woocommerce-select">
+
+						<?php
 					   	// Loop through the available PClasses stored in the file srv/pclasses.json
 						foreach ($pclasses as $pclass) {
 							
@@ -597,19 +602,21 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 				   			} // End if $pclass->getType() == 0 or 1
 						
 						} // End foreach
+						?>
+							
+						</select>
+					
+						<?php
+					} else {
+						echo __('Klarna PClasses seem to be missing. Klarna Account does not work.', 'klarna');
+					}
+					?>				
 
-					} // end if not NO
-					?>
-						
-					</select>
-				
-					<?php
-				} else {
-					echo __('Klarna PClasses seem to be missing. Klarna Account does not work.', 'klarna');
-				}
-				?>				
-				
-			</p>
+				</p>
+
+			<?php } // end if NO check ?>
+
+
 			<?php
 			// Calculate lowest monthly cost and display it
 			/*
