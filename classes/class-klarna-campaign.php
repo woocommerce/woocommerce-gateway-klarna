@@ -901,7 +901,7 @@ class WC_Gateway_Klarna_Campaign extends WC_Gateway_Klarna {
 			$klarna_pno 			= isset($_POST['klarna_campaign_pno']) ? woocommerce_clean($_POST['klarna_campaign_pno']) : '';
 		endif;
 		
-		$klarna_pclass 				= isset($_POST['klarna_campaign_pclass']) ? woocommerce_clean($_POST['klarna_campaign_pclass']) : '';
+		$klarna_pclass 				= isset($_POST['klarna_invo_pclass']) ? woocommerce_clean($_POST['klarna_invo_pclass']) : '';
 		$klarna_gender 				= isset($_POST['klarna_campaign_gender']) ? woocommerce_clean($_POST['klarna_campaign_gender']) : '';
 		$klarna_de_consent_terms	= isset($_POST['klarna_campaign_de_consent_terms']) ? woocommerce_clean($_POST['klarna_campaign_de_consent_terms']) : '';
 		

@@ -533,7 +533,8 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 					$this->selected_currency,
 					$this->shop_country,
 					$woocommerce->cart->total,
-					'part_payment'
+					'part_payment',
+					'klarna_account_pclass'
 				);
 				
 				echo $klarna_pms_data;

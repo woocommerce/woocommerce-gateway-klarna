@@ -6,7 +6,7 @@
 		// console.log( $(selectedOption).val());
 		var pclass = $(selectedOption).val();
 
-		$('div.klarna-pms-details').hide();
+		$(this).closest('fieldset').find('div.klarna-pms-details').hide();
 
 		$('div.klarna-pms-details[data-pclass=' + pclass + ']').show();
 

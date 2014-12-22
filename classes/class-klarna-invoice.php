@@ -379,6 +379,26 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 		
 
 		<fieldset>
+			<?php
+			// Use Klarna PMS for Norway
+			if ( 'NO' == $this->get_klarna_country() || 'SE' == $this->get_klarna_country() ) {
+
+				$klarna_pms = new WC_Klarna_PMS;
+				$klarna_pms_data = $klarna_pms->get_data(
+					$this->get_eid(),
+					$this->get_secret(),
+					$this->selected_currency,
+					$this->shop_country,
+					$woocommerce->cart->total,
+					'invoice',
+					'klarna_invo_pclass'
+				);
+				
+				echo $klarna_pms_data;
+
+			// For countries other than NO do the old thing
+			} ?>
+
 			<p class="form-row form-row-first">
 				<?php if ( $this->get_klarna_country() == 'NL' || $this->get_klarna_country() == 'DE' || $this->get_klarna_country() == 'AT' ) : ?>
 				
@@ -550,7 +570,6 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 				</p>
 			<?php endif; ?>
 
-        	
 			<div class="clear"></div>
 		
 			<?php 
@@ -590,6 +609,8 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 		}
 		
 		// Get values from klarna form on checkout page
+
+		$klarna_pclass = isset($_POST['klarna_invoice_pclass']) ? woocommerce_clean($_POST['klarna_invoice_pclass']) : KlarnaPClass::INVOICE;
 		
 		// Collect the dob different depending on country
 		if ( $_POST['billing_country'] == 'NL' || $_POST['billing_country'] == 'DE' || $_POST['billing_country'] == 'AT' ) :
@@ -911,7 +932,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 				$klarna_gender,				// Gender.
 				-1, 						// Automatically calculate and reserve the cart total amount
     		    KlarnaFlags::NO_FLAG, 		// No specific behaviour like RETURN_OCR or TEST_MODE.
-				KlarnaPClass::INVOICE 		//-1, notes that this is an invoice purchase, for part payment purchase you will have a pclass object which you use getId() from.
+				$klarna_pclass 		//-1, notes that this is an invoice purchase, for part payment purchase you will have a pclass object which you use getId() from.
     		);
     		
     		$redirect_url = $order->get_checkout_order_received_url();
