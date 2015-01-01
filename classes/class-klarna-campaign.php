@@ -326,6 +326,19 @@ class WC_Gateway_Klarna_Campaign extends WC_Gateway_Klarna {
 			// Required fields check
 			if (!$this->get_eid() || !$this->get_secret()) return false;
 		
+			// Klarna PMS check
+			$klarna_payment_methods = WC()->session->get( 'krokedil_test' );
+			foreach ( $klarna_payment_methods as $klarna_payment_method ) {
+				if ( 'special_campaigns' == $klarna_payment_method['group']['code'] ) {
+					$klarna_pms_flag = true;
+				}
+			}
+			if ( isset( $klarna_pms_flag ) ) {
+				return true;
+			} else {
+				return false;
+			}
+
 			// PClass check
 			$data = new WC_Gateway_Klarna_Account();
 			$pclasses = $data->fetch_pclasses( $this->get_klarna_country() );

@@ -279,6 +279,19 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 				if( !empty($currency_for_country) && $currency_for_country !== $this->selected_currency ) return false;
 			
 			} // End Checkout form check
+
+			// Klarna PMS check
+			$klarna_payment_methods = WC()->session->get( 'krokedil_test' );
+			foreach ( $klarna_payment_methods as $klarna_payment_method ) {
+				if ( 'invoice' == $klarna_payment_method['group']['code'] ) {
+					$klarna_pms_flag = true;
+				}
+			}
+			if ( isset( $klarna_pms_flag ) ) {
+				return true;
+			} else {
+				return false;
+			}
 								
 			return true;
 					

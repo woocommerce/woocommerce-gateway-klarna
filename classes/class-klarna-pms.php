@@ -162,7 +162,10 @@ class WC_Klarna_PMS {
 		 * 0. Which EID should be used???
 		 * 1. Get all values for PMS
 		 * 2. Set session variable with full PMS return
+		 * Uses a several helper functions from Klarna Invoice class
 		 */
+
+		global $woocommerce;
 
 		$klarna = new Klarna();
 		$config = new KlarnaConfig();
@@ -173,18 +176,18 @@ class WC_Klarna_PMS {
 		$config['pcURI']     = './pclasses.json';
 
 		// Configuration needed for the checkout service
-		$config['eid']       = $eid;
-		$config['secret']    = $secret;
+		$config['eid']       = $this->get_eid();
+		$config['secret']    = $this->get_secret();
 
 		$klarna->setConfig( $config );
 
-		$klarna_pms_locale = $this->get_locale( $shop_country );
+		$klarna_pms_locale = $this->get_locale( $this->get_shop_country() );
 
 		try {
 			$response = $klarna->checkoutService(
-				$cart_total,        // Total price of the checkout including VAT
-				$selected_currency, // Currency used by the checkout
-				$klarna_pms_locale  // Locale used by the checkout
+				$woocommerce->cart->total,    // Total price of the checkout including VAT
+				$this->get_currency(),        // Currency used by the checkout
+				$klarna_pms_locale            // Locale used by the checkout
 			);
 		} catch ( KlarnaException $e ) {
 			// cURL exception
@@ -202,10 +205,16 @@ class WC_Klarna_PMS {
 			return false;
 		}
 
-		WC()->session->set( 'krokedil_test', '123' );
-		echo '<pre>';
-		print_r( WC()->session );
-		echo '</pre>';
+		WC()->session->set( 'krokedil_test', $data['payment_methods'] );
+
+		/*
+		foreach ( WC()->session->get( 'krokedil_test' ) as $klarna_payment_method ) {
+			echo '<pre>';
+			print_r( $klarna_payment_method['group']['code'] );
+			echo '</pre>';
+		}
+		*/
+
 	}
 
 
@@ -236,6 +245,46 @@ class WC_Klarna_PMS {
 		}
 
 		return $klarna_pms_locale;
+
+	}
+
+	// Helper function - gets eid
+	// Not finalized, uses Klarna Invoice EID
+	function get_eid() {
+
+		$klarna_invoice = new WC_Gateway_Klarna_Invoice();
+		
+		return $klarna_invoice->get_eid();
+
+	}
+
+	// Helper function - get secret
+	// Not finalized, uses Klarna Invoice secret
+	function get_secret() {
+		
+		$klarna_invoice = new WC_Gateway_Klarna_Invoice();
+		
+		return $klarna_invoice->get_secret();
+
+	}
+
+	// Helper function - get secret
+	// Not finalized, uses Klarna Invoice shop country
+	function get_shop_country() {
+		
+		$klarna_invoice = new WC_Gateway_Klarna_Invoice();
+		
+		return $klarna_invoice->get_klarna_shop_country();
+
+	}
+
+	// Helper function - get secret
+	// Not finalized, uses Klarna Invoice  currency
+	function get_currency() {
+		
+		$klarna_invoice = new WC_Gateway_Klarna_Invoice();
+		
+		return $klarna_invoice->get_currency_for_country( $this->get_shop_country() );
 
 	}
 
