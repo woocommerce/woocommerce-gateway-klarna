@@ -251,8 +251,8 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 	 */
 		
 	function is_available() {
-		global $woocommerce;
-		
+		global $woocommerce; 
+
 		if ($this->enabled=="yes") {
 	
 			// Required fields check
@@ -276,24 +276,11 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 				
 				// Currency check
 				$currency_for_country = $this->get_currency_for_country($woocommerce->customer->get_country());
-				if( !empty($currency_for_country) && $currency_for_country !== $this->selected_currency ) return false;
+				if ( ! empty( $currency_for_country ) && $currency_for_country !== $this->selected_currency ) return false;
 			
 			} // End Checkout form check
 
-			// Klarna PMS check
-			if ( class_exists( 'WC_Klarna_PMS') && ( $this->get_klarna_country() == 'SE' || $this->get_klarna_country() == 'NO' ) ) {
-				$klarna_payment_methods = WC()->session->get( 'klarna_pms' );
-				foreach ( $klarna_payment_methods as $klarna_payment_method ) {
-					if ( 'invoice' == $klarna_payment_method['group']['code'] ) {
-						$klarna_pms_flag = true;
-					}
-				}
-				if ( isset( $klarna_pms_flag ) ) {
-					return true;
-				} else {
-					return false;
-				}
-			}
+
 								
 			return true;
 					
@@ -399,14 +386,20 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 			if ( 'NO' == $this->get_klarna_country() || 'SE' == $this->get_klarna_country() ) {
 
 				$klarna_pms = new WC_Klarna_PMS;
+				if ( $this->testmode == 'yes' ) {
+					$klarna_mode = 'test';
+				} else {
+					$klarna_mode = 'live';
+				}
 				$klarna_pms_data = $klarna_pms->get_data(
-					$this->get_eid(),
-					$this->get_secret(),
-					$this->selected_currency,
-					$this->shop_country,
-					$woocommerce->cart->total,
-					'invoice',
-					'klarna_invo_pclass'
+					$this->get_eid(),            // $eid
+					$this->get_secret(),         // $secret
+					$this->selected_currency,    // $selected_currency
+					$this->shop_country,         // $shop_country
+					$woocommerce->cart->total,   // $cart_total
+					'invoice',                   // $payment_method_group
+					'klarna_invoice_pclass',     // $select_id,
+					$klarna_mode                 // $klarna_mode
 				);
 				
 				echo $klarna_pms_data;

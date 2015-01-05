@@ -22,7 +22,7 @@ class WC_Klarna_PMS {
 	public function __construct() {
 	
 		add_action( 'wp_enqueue_scripts', array( $this, 'load_scripts') );
-		add_action( 'woocommerce_checkout_init', array( $this, 'set_session_var' ) );
+		// add_action( 'woocommerce_checkout_init', array( $this, 'set_session_var' ) );
 
 	}
 
@@ -42,13 +42,17 @@ class WC_Klarna_PMS {
 	/**
  	 * Gets response from Klarna
  	 */
-	function get_data( $eid, $secret, $selected_currency, $shop_country, $cart_total, $payment_method_group, $select_id ) {
+	function get_data( $eid, $secret, $selected_currency, $shop_country, $cart_total, $payment_method_group, $select_id, $klarna_mode ) {
 
 		$klarna = new Klarna();
 		$config = new KlarnaConfig();
 
 		// Default required options
-		$config['mode']      = Klarna::BETA;
+		if ( 'test' == $klarna_mode ) {
+			$config['mode']  = Klarna::BETA;
+		} else {
+			$config['mode']  = Klarna::LIVE;
+		}
 		$config['pcStorage'] = 'json';
 		$config['pcURI']     = './pclasses.json';
 
@@ -149,7 +153,7 @@ class WC_Klarna_PMS {
 			}
 
 		} else {
-			$payment_methods_output = __( 'Klarna PClasses seem to be missing. Klarna Account does not work.', 'klarna' );
+			$payment_methods_output = false;
 		}
 
 		return $payment_methods_output;
@@ -157,6 +161,7 @@ class WC_Klarna_PMS {
 	}
 
 
+	// Not in use
 	function set_session_var() {
 		/**
 		 * 0. Which EID should be used???

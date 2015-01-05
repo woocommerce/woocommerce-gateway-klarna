@@ -325,21 +325,6 @@ class WC_Gateway_Klarna_Campaign extends WC_Gateway_Klarna {
 			
 			// Required fields check
 			if (!$this->get_eid() || !$this->get_secret()) return false;
-		
-			// Klarna PMS check
-			if ( class_exists( 'WC_Klarna_PMS') && ( $this->get_klarna_country() == 'SE' || $this->get_klarna_country() == 'NO' ) ) {
-				$klarna_payment_methods = WC()->session->get( 'klarna_pms' );
-				foreach ( $klarna_payment_methods as $klarna_payment_method ) {
-					if ( 'special_campaigns' == $klarna_payment_method['group']['code'] ) {
-						$klarna_pms_flag = true;
-					}
-				}
-				if ( isset( $klarna_pms_flag ) ) {
-					return true;
-				} else {
-					return false;
-				}
-			}
 
 			// PClass check
 			$data = new WC_Gateway_Klarna_Account();
@@ -566,53 +551,76 @@ class WC_Gateway_Klarna_Campaign extends WC_Gateway_Klarna {
 			<p class="form-row form-row-first">
 			
 				<?php
-				// Check if we have any PClasses
-				// TODO Deactivate this gateway if the file pclasses.json doesn't exist 
-				if($k->getPClasses()) {
-				?>
-					<label for="klarna_campaign_pclass"><?php echo __("Payment plan", 'klarna') ?> <span class="required">*</span></label><br/>
-					<select id="klarna_campaign_pclass" name="klarna_campaign_pclass" class="woocommerce-select">
-						
-					<?php
-				   	// Loop through the available PClasses stored in the file srv/pclasses.json
-					foreach ($k->getPClasses() as $pclass) {
-						
-						if ( $pclass->getType() == 2 ) {
-							// Get monthly cost for current pclass
-							$monthly_cost = KlarnaCalc::calc_monthly_cost(
-    	    									$sum,
-    	    									$pclass,
-    	    									$flag
-    	    								);
-    									
-    	    				// Get total credit purchase cost for current pclass
-    	    				$total_credit_purchase_cost = KlarnaCalc::total_credit_purchase_cost(
-    	    									$sum,
-    	    									$pclass,
-    	    									$flag
-    	    								);
-    					
-    	    				// Check that Cart total is larger than min amount for current PClass				
-    	    				if($sum > $pclass->getMinAmount()) {				
-	    	    				
-			   					echo '<option value="' . $pclass->getId() . '">';
-				   					echo sprintf(__('%s - Start %s', 'klarna'), $pclass->getDescription(), $pclass->getStartFee() );
-			   					echo '</option>';
-				   		
-			   				} // End if ($sum > $pclass->getMinAmount())
-			   			
-			   			} // End if ( $pclass->getType() == 2 )
+				// Use Klarna PMS for Norway
+				if ( 'NO' == $this->get_klarna_country() || 'SE' == $this->get_klarna_country() ) {
+
+					$klarna_pms = new WC_Klarna_PMS;
+					$klarna_pms_data = $klarna_pms->get_data(
+						$this->get_eid(),            // $eid
+						$this->get_secret(),         // $secret
+						$this->selected_currency,    // $selected_currency
+						$this->shop_country,         // $shop_country
+						$woocommerce->cart->total,   // $cart_total
+						'special_campaigns',         // $payment_method_group
+						'klarna_special_pclass',     // $select_id,
+						$klarna_mode                 // $klarna_mode
+					);
 					
-					} // End foreach
-					?>
-						
-					</select>
-				
+					echo $klarna_pms_data;
+
+				// For countries other than NO do the old thing
+				} else { ?>
+
 					<?php
-				} else {
-					echo __('Klarna PClasses seem to be missing. Klarna Campaign does not work.', 'klarna');
-				}
-				?>				
+					// Check if we have any PClasses
+					// TODO Deactivate this gateway if the file pclasses.json doesn't exist 
+					if($k->getPClasses()) {
+					?>
+						<label for="klarna_campaign_pclass"><?php echo __("Payment plan", 'klarna') ?> <span class="required">*</span></label><br/>
+						<select id="klarna_campaign_pclass" name="klarna_campaign_pclass" class="woocommerce-select">
+							
+						<?php
+					   	// Loop through the available PClasses stored in the file srv/pclasses.json
+						foreach ($k->getPClasses() as $pclass) {
+							
+							if ( $pclass->getType() == 2 ) {
+								// Get monthly cost for current pclass
+								$monthly_cost = KlarnaCalc::calc_monthly_cost(
+	    	    									$sum,
+	    	    									$pclass,
+	    	    									$flag
+	    	    								);
+	    									
+	    	    				// Get total credit purchase cost for current pclass
+	    	    				$total_credit_purchase_cost = KlarnaCalc::total_credit_purchase_cost(
+	    	    									$sum,
+	    	    									$pclass,
+	    	    									$flag
+	    	    								);
+	    					
+	    	    				// Check that Cart total is larger than min amount for current PClass				
+	    	    				if($sum > $pclass->getMinAmount()) {				
+		    	    				
+				   					echo '<option value="' . $pclass->getId() . '">';
+					   					echo sprintf(__('%s - Start %s', 'klarna'), $pclass->getDescription(), $pclass->getStartFee() );
+				   					echo '</option>';
+					   		
+				   				} // End if ($sum > $pclass->getMinAmount())
+				   			
+				   			} // End if ( $pclass->getType() == 2 )
+						
+						} // End foreach
+						?>
+							
+						</select>
+					
+						<?php
+					} else {
+						echo __('Klarna PClasses seem to be missing. Klarna Campaign does not work.', 'klarna');
+					}
+					?>
+
+				<?php } ?>			
 				
 			</p>
 			<?php

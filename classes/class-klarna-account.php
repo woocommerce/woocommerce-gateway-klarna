@@ -373,21 +373,6 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 			
 			} // End Checkout form check
 
-			// Klarna PMS check
-			if ( class_exists( 'WC_Klarna_PMS') && ( $this->get_klarna_country() == 'SE' || $this->get_klarna_country() == 'NO' ) ) {
-				$klarna_payment_methods = WC()->session->get( 'klarna_pms' );
-				foreach ( $klarna_payment_methods as $klarna_payment_method ) {
-					if ( 'part_payment' == $klarna_payment_method['group']['code'] ) {
-						$klarna_pms_flag = true;
-					}
-				}
-				if ( isset( $klarna_pms_flag ) ) {
-					return true;
-				} else {
-					return false;
-				}
-			}
-
 			return true;
 					
 		endif;	
@@ -543,13 +528,14 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 
 				$klarna_pms = new WC_Klarna_PMS;
 				$klarna_pms_data = $klarna_pms->get_data(
-					$this->get_eid(),
-					$this->get_secret(),
-					$this->selected_currency,
-					$this->shop_country,
-					$woocommerce->cart->total,
-					'part_payment',
-					'klarna_account_pclass'
+					$this->get_eid(),            // $eid
+					$this->get_secret(),         // $secret
+					$this->selected_currency,    // $selected_currency
+					$this->shop_country,         // $shop_country
+					$woocommerce->cart->total,   // $cart_total
+					'part_payment',              // $payment_method_group
+					'klarna_account_pclass',     // $select_id,
+					$klarna_mode                 // $klarna_mode
 				);
 				
 				echo $klarna_pms_data;
