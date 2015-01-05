@@ -162,10 +162,12 @@ class WC_Klarna_PMS {
 		 * 0. Which EID should be used???
 		 * 1. Get all values for PMS
 		 * 2. Set session variable with full PMS return
-		 * Uses a several helper functions from Klarna Invoice class
+		 * -- Uses several helper functions from Klarna Invoice class
 		 */
 
 		global $woocommerce;
+
+		require_once( KLARNA_LIB . 'Klarna.php' );
 
 		$klarna = new Klarna();
 		$config = new KlarnaConfig();
@@ -205,15 +207,13 @@ class WC_Klarna_PMS {
 			return false;
 		}
 
-		WC()->session->set( 'krokedil_test', $data['payment_methods'] );
+		WC()->session->set( 'klarna_pms', $data['payment_methods'] );
 
-		/*
-		foreach ( WC()->session->get( 'krokedil_test' ) as $klarna_payment_method ) {
+		foreach ( WC()->session->get( 'klarna_pms' ) as $klarna_payment_method ) {
 			echo '<pre>';
-			print_r( $klarna_payment_method['group']['code'] );
+			print_r( $klarna_payment_method );
 			echo '</pre>';
 		}
-		*/
 
 	}
 
@@ -274,7 +274,7 @@ class WC_Klarna_PMS {
 		
 		$klarna_invoice = new WC_Gateway_Klarna_Invoice();
 		
-		return $klarna_invoice->get_klarna_shop_country();
+		return $klarna_invoice->get_klarna_country();
 
 	}
 
