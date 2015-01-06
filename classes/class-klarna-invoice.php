@@ -251,13 +251,8 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 	 */
 		
 	function is_available() {
-		global $woocommerce; 
-				// echo $klarna_pms_data;
-				echo '<pre>';
-				print_r ( WC()->cart );
-				echo '</pre>';
-
-
+		global $woocommerce;
+		
 		if ($this->enabled=="yes") {
 	
 			// Required fields check
@@ -281,40 +276,10 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 				
 				// Currency check
 				$currency_for_country = $this->get_currency_for_country($woocommerce->customer->get_country());
-				if ( ! empty( $currency_for_country ) && $currency_for_country !== $this->selected_currency ) return false;
+				if( !empty($currency_for_country) && $currency_for_country !== $this->selected_currency ) return false;
 			
 			} // End Checkout form check
-
-			// Use Klarna PMS for Norway
-			/*
-			if ( 'NO' == $this->get_klarna_country() || 'SE' == $this->get_klarna_country() ) {
-
-				$klarna_pms = new WC_Klarna_PMS;
-				if ( $this->testmode == 'yes' ) {
-					$klarna_mode = 'test';
-				} else {
-					$klarna_mode = 'live';
-				}
-				$klarna_pms_data = $klarna_pms->get_data(
-					$this->get_eid(),            // $eid
-					$this->get_secret(),         // $secret
-					$this->selected_currency,    // $selected_currency
-					$this->shop_country,         // $shop_country
-					$woocommerce->cart->total,   // $cart_total
-					'invoice',                   // $payment_method_group
-					$klarna_mode                 // $klarna_mode
-				);
-				
-				if ( $klarna_pms_data ) {
-					WC()->session->set( 'klarna_pms_invoice', $klarna_pms_data );
-					return true;
-				} else {
-					return false;
-				}
-
-			}
-			*/
-
+								
 			return true;
 					
 		} // End if enabled
@@ -414,31 +379,6 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 		
 
 		<fieldset>
-			<?php
-			// Use Klarna PMS for Norway
-			/*
-			if ( 'NO' == $this->get_klarna_country() || 'SE' == $this->get_klarna_country() ) {
-
-				$klarna_pms = new WC_Klarna_PMS;
-				if ( $this->testmode == 'yes' ) {
-					$klarna_mode = 'test';
-				} else {
-					$klarna_mode = 'live';
-				}
-				$klarna_pms_data = $klarna_pms->get_data(
-					$this->get_eid(),            // $eid
-					$this->get_secret(),         // $secret
-					$this->selected_currency,    // $selected_currency
-					$this->shop_country,         // $shop_country
-					$woocommerce->cart->total,   // $cart_total
-					'invoice',                   // $payment_method_group
-					'klarna_invoice_pclass',     // $select_id,
-					$klarna_mode                 // $klarna_mode
-				);
-				
-			// For countries other than NO do the old thing
-			} */ ?>
-
 			<p class="form-row form-row-first">
 				<?php if ( $this->get_klarna_country() == 'NL' || $this->get_klarna_country() == 'DE' || $this->get_klarna_country() == 'AT' ) : ?>
 				
@@ -610,6 +550,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 				</p>
 			<?php endif; ?>
 
+        	
 			<div class="clear"></div>
 		
 			<?php 
@@ -649,8 +590,6 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 		}
 		
 		// Get values from klarna form on checkout page
-
-		$klarna_pclass = isset($_POST['klarna_invoice_pclass']) ? woocommerce_clean($_POST['klarna_invoice_pclass']) : KlarnaPClass::INVOICE;
 		
 		// Collect the dob different depending on country
 		if ( $_POST['billing_country'] == 'NL' || $_POST['billing_country'] == 'DE' || $_POST['billing_country'] == 'AT' ) :
@@ -972,7 +911,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 				$klarna_gender,				// Gender.
 				-1, 						// Automatically calculate and reserve the cart total amount
     		    KlarnaFlags::NO_FLAG, 		// No specific behaviour like RETURN_OCR or TEST_MODE.
-				$klarna_pclass 		//-1, notes that this is an invoice purchase, for part payment purchase you will have a pclass object which you use getId() from.
+				KlarnaPClass::INVOICE 		//-1, notes that this is an invoice purchase, for part payment purchase you will have a pclass object which you use getId() from.
     		);
     		
     		$redirect_url = $order->get_checkout_order_received_url();

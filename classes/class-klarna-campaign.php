@@ -325,37 +325,7 @@ class WC_Gateway_Klarna_Campaign extends WC_Gateway_Klarna {
 			
 			// Required fields check
 			if (!$this->get_eid() || !$this->get_secret()) return false;
-
-			// Use Klarna PMS for Norway
-			/*
-			if ( 'NO' == $this->get_klarna_country() || 'SE' == $this->get_klarna_country() ) {
-
-				$klarna_pms = new WC_Klarna_PMS;
-				if ( $this->testmode == 'yes' ) {
-					$klarna_mode = 'test';
-				} else {
-					$klarna_mode = 'live';
-				}
-				$klarna_pms_data = $klarna_pms->get_data(
-					$this->get_eid(),            // $eid
-					$this->get_secret(),         // $secret
-					$this->selected_currency,    // $selected_currency
-					$this->shop_country,         // $shop_country
-					$woocommerce->cart->total,   // $cart_total
-					'special_campaigns',         // $payment_method_group
-					$klarna_mode                 // $klarna_mode
-				);
-				
-				if ( $klarna_pms_data ) {
-					WC()->session->set( 'klarna_pms_invoice', $klarna_pms_data );
-					return true;
-				} else {
-					return false;
-				}
-
-			}
-			*/
-
+		
 			// PClass check
 			$data = new WC_Gateway_Klarna_Account();
 			$pclasses = $data->fetch_pclasses( $this->get_klarna_country() );
@@ -581,76 +551,53 @@ class WC_Gateway_Klarna_Campaign extends WC_Gateway_Klarna {
 			<p class="form-row form-row-first">
 			
 				<?php
-				// Use Klarna PMS for Norway
-				if ( 'NO' == $this->get_klarna_country() || 'SE' == $this->get_klarna_country() ) {
-
-					$klarna_pms = new WC_Klarna_PMS;
-					$klarna_pms_data = $klarna_pms->get_data(
-						$this->get_eid(),            // $eid
-						$this->get_secret(),         // $secret
-						$this->selected_currency,    // $selected_currency
-						$this->shop_country,         // $shop_country
-						$woocommerce->cart->total,   // $cart_total
-						'special_campaigns',         // $payment_method_group
-						'klarna_special_pclass',     // $select_id,
-						$klarna_mode                 // $klarna_mode
-					);
-					
-					// echo $klarna_pms_data;
-
-				// For countries other than NO do the old thing
-				} else { ?>
-
-					<?php
-					// Check if we have any PClasses
-					// TODO Deactivate this gateway if the file pclasses.json doesn't exist 
-					if($k->getPClasses()) {
-					?>
-						<label for="klarna_campaign_pclass"><?php echo __("Payment plan", 'klarna') ?> <span class="required">*</span></label><br/>
-						<select id="klarna_campaign_pclass" name="klarna_campaign_pclass" class="woocommerce-select">
-							
-						<?php
-					   	// Loop through the available PClasses stored in the file srv/pclasses.json
-						foreach ($k->getPClasses() as $pclass) {
-							
-							if ( $pclass->getType() == 2 ) {
-								// Get monthly cost for current pclass
-								$monthly_cost = KlarnaCalc::calc_monthly_cost(
-	    	    									$sum,
-	    	    									$pclass,
-	    	    									$flag
-	    	    								);
-	    									
-	    	    				// Get total credit purchase cost for current pclass
-	    	    				$total_credit_purchase_cost = KlarnaCalc::total_credit_purchase_cost(
-	    	    									$sum,
-	    	    									$pclass,
-	    	    									$flag
-	    	    								);
-	    					
-	    	    				// Check that Cart total is larger than min amount for current PClass				
-	    	    				if($sum > $pclass->getMinAmount()) {				
-		    	    				
-				   					echo '<option value="' . $pclass->getId() . '">';
-					   					echo sprintf(__('%s - Start %s', 'klarna'), $pclass->getDescription(), $pclass->getStartFee() );
-				   					echo '</option>';
-					   		
-				   				} // End if ($sum > $pclass->getMinAmount())
-				   			
-				   			} // End if ( $pclass->getType() == 2 )
+				// Check if we have any PClasses
+				// TODO Deactivate this gateway if the file pclasses.json doesn't exist 
+				if($k->getPClasses()) {
+				?>
+					<label for="klarna_campaign_pclass"><?php echo __("Payment plan", 'klarna') ?> <span class="required">*</span></label><br/>
+					<select id="klarna_campaign_pclass" name="klarna_campaign_pclass" class="woocommerce-select">
 						
-						} // End foreach
-						?>
-							
-						</select>
+					<?php
+				   	// Loop through the available PClasses stored in the file srv/pclasses.json
+					foreach ($k->getPClasses() as $pclass) {
+						
+						if ( $pclass->getType() == 2 ) {
+							// Get monthly cost for current pclass
+							$monthly_cost = KlarnaCalc::calc_monthly_cost(
+    	    									$sum,
+    	    									$pclass,
+    	    									$flag
+    	    								);
+    									
+    	    				// Get total credit purchase cost for current pclass
+    	    				$total_credit_purchase_cost = KlarnaCalc::total_credit_purchase_cost(
+    	    									$sum,
+    	    									$pclass,
+    	    									$flag
+    	    								);
+    					
+    	    				// Check that Cart total is larger than min amount for current PClass				
+    	    				if($sum > $pclass->getMinAmount()) {				
+	    	    				
+			   					echo '<option value="' . $pclass->getId() . '">';
+				   					echo sprintf(__('%s - Start %s', 'klarna'), $pclass->getDescription(), $pclass->getStartFee() );
+			   					echo '</option>';
+				   		
+			   				} // End if ($sum > $pclass->getMinAmount())
+			   			
+			   			} // End if ( $pclass->getType() == 2 )
 					
-						<?php
-					} else {
-						echo __('Klarna PClasses seem to be missing. Klarna Campaign does not work.', 'klarna');
-					}
+					} // End foreach
 					?>
-
-				<?php } ?>			
+						
+					</select>
+				
+					<?php
+				} else {
+					echo __('Klarna PClasses seem to be missing. Klarna Campaign does not work.', 'klarna');
+				}
+				?>				
 				
 			</p>
 			<?php
@@ -954,7 +901,7 @@ class WC_Gateway_Klarna_Campaign extends WC_Gateway_Klarna {
 			$klarna_pno 			= isset($_POST['klarna_campaign_pno']) ? woocommerce_clean($_POST['klarna_campaign_pno']) : '';
 		endif;
 		
-		$klarna_pclass 				= isset($_POST['klarna_invo_pclass']) ? woocommerce_clean($_POST['klarna_invo_pclass']) : '';
+		$klarna_pclass 				= isset($_POST['klarna_campaign_pclass']) ? woocommerce_clean($_POST['klarna_campaign_pclass']) : '';
 		$klarna_gender 				= isset($_POST['klarna_campaign_gender']) ? woocommerce_clean($_POST['klarna_campaign_gender']) : '';
 		$klarna_de_consent_terms	= isset($_POST['klarna_campaign_de_consent_terms']) ? woocommerce_clean($_POST['klarna_campaign_de_consent_terms']) : '';
 		

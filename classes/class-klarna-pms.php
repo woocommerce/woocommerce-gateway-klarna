@@ -22,7 +22,6 @@ class WC_Klarna_PMS {
 	public function __construct() {
 	
 		add_action( 'wp_enqueue_scripts', array( $this, 'load_scripts') );
-		// add_action( 'woocommerce_checkout_init', array( $this, 'set_session_var' ) );
 
 	}
 
@@ -42,17 +41,13 @@ class WC_Klarna_PMS {
 	/**
  	 * Gets response from Klarna
  	 */
-	function get_data( $eid, $secret, $selected_currency, $shop_country, $cart_total, $payment_method_group, $klarna_mode ) {
+	function get_data( $eid, $secret, $selected_currency, $shop_country, $cart_total, $payment_method_group, $select_id ) {
 
 		$klarna = new Klarna();
 		$config = new KlarnaConfig();
 
 		// Default required options
-		if ( 'test' == $klarna_mode ) {
-			$config['mode']  = Klarna::BETA;
-		} else {
-			$config['mode']  = Klarna::LIVE;
-		}
+		$config['mode']      = Klarna::BETA;
 		$config['pcStorage'] = 'json';
 		$config['pcURI']     = './pclasses.json';
 
@@ -89,31 +84,6 @@ class WC_Klarna_PMS {
 		// return options and their descriptions
 
 		$payment_methods = $data['payment_methods'];
-
-		if ( is_array( $payment_methods ) ) {
-			$filtered_payment_methods = array();
-			foreach ( $payment_methods as $payment_method ) {
-				if ( $payment_method_group == $payment_method['group']['code'] ) {
-					$filtered_payment_methods[] = $payment_method;
-				}
-			}
-
-			if ( ! empty( $filtered_payment_methods ) ) {
-				return $filtered_payment_methods;
-			}
-		}
-
-		return false;
-
-	}
-
-	/**
-	 * Formats data return by Klarna PMS API call
-	 */
-	function format_data( $payment_methods ) {
-		if ( ! is_array( $payment_methods ) ) {
-			return false;
-		}
 
 		$payment_options = array();
 		$payment_options_details = array();
@@ -178,74 +148,12 @@ class WC_Klarna_PMS {
 			}
 
 		} else {
-			$payment_methods_output = false;
+			$payment_methods_output = __( 'Klarna PClasses seem to be missing. Klarna Account does not work.', 'klarna' );
 		}
 
 		return $payment_methods_output;
 
 	}
-
-	// Not in use
-	function set_session_var() {
-		/**
-		 * 0. Which EID should be used???
-		 * 1. Get all values for PMS
-		 * 2. Set session variable with full PMS return
-		 * -- Uses several helper functions from Klarna Invoice class
-		 */
-
-		global $woocommerce;
-
-		require_once( KLARNA_LIB . 'Klarna.php' );
-
-		$klarna = new Klarna();
-		$config = new KlarnaConfig();
-
-		// Default required options
-		$config['mode']      = Klarna::BETA;
-		$config['pcStorage'] = 'json';
-		$config['pcURI']     = './pclasses.json';
-
-		// Configuration needed for the checkout service
-		$config['eid']       = $this->get_eid();
-		$config['secret']    = $this->get_secret();
-
-		$klarna->setConfig( $config );
-
-		$klarna_pms_locale = $this->get_locale( $this->get_shop_country() );
-
-		try {
-			$response = $klarna->checkoutService(
-				$woocommerce->cart->total,    // Total price of the checkout including VAT
-				$this->get_currency(),        // Currency used by the checkout
-				$klarna_pms_locale            // Locale used by the checkout
-			);
-		} catch ( KlarnaException $e ) {
-			// cURL exception
-			throw $e;
-		}
-
-		$data = $response->getData();
-
-		if ( $response->getStatus() >= 400 ) {
-			// server responded with error
-			echo '<pre>';
-			throw new Exception( print_r( $data, true ) );
-			echo '</pre>';
-
-			return false;
-		}
-
-		WC()->session->set( 'klarna_pms', $data['payment_methods'] );
-
-		foreach ( WC()->session->get( 'klarna_pms' ) as $klarna_payment_method ) {
-			echo '<pre>';
-			print_r( $klarna_payment_method );
-			echo '</pre>';
-		}
-
-	}
-
 
 	function get_locale( $shop_country ) {
 
@@ -276,47 +184,7 @@ class WC_Klarna_PMS {
 		return $klarna_pms_locale;
 
 	}
-
-	// Helper function - gets eid
-	// Not finalized, uses Klarna Invoice EID
-	function get_eid() {
-
-		$klarna_invoice = new WC_Gateway_Klarna_Invoice();
-		
-		return $klarna_invoice->get_eid();
-
-	}
-
-	// Helper function - get secret
-	// Not finalized, uses Klarna Invoice secret
-	function get_secret() {
-		
-		$klarna_invoice = new WC_Gateway_Klarna_Invoice();
-		
-		return $klarna_invoice->get_secret();
-
-	}
-
-	// Helper function - get secret
-	// Not finalized, uses Klarna Invoice shop country
-	function get_shop_country() {
-		
-		$klarna_invoice = new WC_Gateway_Klarna_Invoice();
-		
-		return $klarna_invoice->get_klarna_country();
-
-	}
-
-	// Helper function - get secret
-	// Not finalized, uses Klarna Invoice  currency
-	function get_currency() {
-		
-		$klarna_invoice = new WC_Gateway_Klarna_Invoice();
-		
-		return $klarna_invoice->get_currency_for_country( $this->get_shop_country() );
-
-	}
-
+	
 }
 
 $wc_klarna_pms = new WC_Klarna_PMS;
