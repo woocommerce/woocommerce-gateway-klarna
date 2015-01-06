@@ -334,7 +334,6 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 	/**
 	 * Check if this gateway is enabled and available in the user's country
 	 */
-		
 	function is_available() {
 		global $woocommerce;
 		
@@ -372,6 +371,38 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 				if( !empty($currency_for_country) && $currency_for_country !== $this->selected_currency ) return false;
 			
 			} // End Checkout form check
+
+			// Use Klarna PMS for Norway
+			/*
+			if ( 'NO' == $this->get_klarna_country() || 'SE' == $this->get_klarna_country() ) {
+
+				$klarna_pms = new WC_Klarna_PMS;
+				if ( $this->testmode == 'yes' ) {
+					$klarna_mode = 'test';
+				} else {
+					$klarna_mode = 'live';
+				}
+				echo '<pre>'; var_dump( $woocommerce->cart ); echo '</pre>';
+
+				$klarna_pms_data = $klarna_pms->get_data(
+					$this->get_eid(),            // $eid
+					$this->get_secret(),         // $secret
+					$this->selected_currency,    // $selected_currency
+					$this->shop_country,         // $shop_country
+					$woocommerce->cart->total,   // $cart_total
+					'part_payment',              // $payment_method_group
+					$klarna_mode                 // $klarna_mode
+				);
+				
+				if ( $klarna_pms_data ) {
+					WC()->session->set( 'klarna_pms_account', $klarna_pms_data );
+					return true;
+				} else {
+					return false;
+				}
+
+			}
+			*/
 
 			return true;
 					
@@ -538,7 +569,7 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 					$klarna_mode                 // $klarna_mode
 				);
 				
-				echo $klarna_pms_data;
+				// echo $klarna_pms_data;
 
 			// For countries other than NO do the old thing
 			} else { ?>

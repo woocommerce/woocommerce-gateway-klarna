@@ -42,7 +42,7 @@ class WC_Klarna_PMS {
 	/**
  	 * Gets response from Klarna
  	 */
-	function get_data( $eid, $secret, $selected_currency, $shop_country, $cart_total, $payment_method_group, $select_id, $klarna_mode ) {
+	function get_data( $eid, $secret, $selected_currency, $shop_country, $cart_total, $payment_method_group, $klarna_mode ) {
 
 		$klarna = new Klarna();
 		$config = new KlarnaConfig();
@@ -89,6 +89,31 @@ class WC_Klarna_PMS {
 		// return options and their descriptions
 
 		$payment_methods = $data['payment_methods'];
+
+		if ( is_array( $payment_methods ) ) {
+			$filtered_payment_methods = array();
+			foreach ( $payment_methods as $payment_method ) {
+				if ( $payment_method_group == $payment_method['group']['code'] ) {
+					$filtered_payment_methods[] = $payment_method;
+				}
+			}
+
+			if ( ! empty( $filtered_payment_methods ) ) {
+				return $filtered_payment_methods;
+			}
+		}
+
+		return false;
+
+	}
+
+	/**
+	 * Formats data return by Klarna PMS API call
+	 */
+	function format_data( $payment_methods ) {
+		if ( ! is_array( $payment_methods ) ) {
+			return false;
+		}
 
 		$payment_options = array();
 		$payment_options_details = array();
@@ -159,7 +184,6 @@ class WC_Klarna_PMS {
 		return $payment_methods_output;
 
 	}
-
 
 	// Not in use
 	function set_session_var() {
