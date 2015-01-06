@@ -397,7 +397,9 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 			require_once(KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc.inc');
 			require_once(KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc_wrappers.inc');
 		}
-		
+
+	   	if ($this->testmode=='yes') : ?><p><?php _e('TEST MODE ENABLED', 'klarna'); ?></p><?php endif;
+
 		// Test mode or Live mode		
 		if ( $this->testmode == 'yes' ):
 			// Disable SSL if in testmode
@@ -437,7 +439,6 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 	   	
 	   	?>
 	   	
-	   	<?php if ($this->testmode=='yes') : ?><p><?php _e('TEST MODE ENABLED', 'klarna'); ?></p><?php endif; ?>
 		<?php
 		
 		// Description
@@ -521,78 +522,108 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 			
 			
 		<fieldset>
-			<p class="form-row form-row-first">
 			
-				<?php
-				// Check if we have any PClasses
-				// TODO Deactivate this gateway if the file pclasses.json doesn't exist
-				$pclasses = $this->fetch_pclasses( $this->get_klarna_country() );
-				if($pclasses) {
+			<?php
+			// Use Klarna PMS for Norway
+			if ( 'NO' == $this->get_klarna_country() || 'SE' == $this->get_klarna_country() ) {
+
+				$klarna_pms = new WC_Klarna_PMS;
+				if ( $this->testmode == 'yes' ) {
+					$klarna_mode = 'test';
+				} else {
+					$klarna_mode = 'live';
+				}
+				$klarna_pms_data = $klarna_pms->get_data(
+					$this->get_eid(),            // $eid
+					$this->get_secret(),         // $secret
+					$this->selected_currency,    // $selected_currency
+					$this->shop_country,         // $shop_country
+					$woocommerce->cart->total,   // $cart_total
+					'part_payment',              // $payment_method_group
+					'klarna_account_pclass',     // $select_id,
+					$klarna_mode                 // $klarna_mode
+				);
+
+				echo $klarna_pms_data;
 				
-				?>
-					<label for="klarna_account_pclass"><?php echo __("Payment plan", 'klarna') ?> <span class="required">*</span></label>
-					<select id="klarna_account_pclass" name="klarna_account_pclass" class="woocommerce-select">
-						
+			// For countries other than NO do the old thing
+			} else { ?>
+
+				<p class="form-row form-row-first">
+			
 					<?php
-				   	// Loop through the available PClasses stored in the file srv/pclasses.json
-					foreach ($pclasses as $pclass) {
-						
-						if ( $pclass->getType() == 0 || $pclass->getType() == 1 ) {
-						
-							// Get monthly cost for current pclass
-							$monthly_cost = KlarnaCalc::calc_monthly_cost(
-    	    									$sum,
-    	    									$pclass,
-    	    									$flag
-    										);
-    										
-    						// Get total credit purchase cost for current pclass
-    						// Only required in Norway
-							$total_credit_purchase_cost = KlarnaCalc::total_credit_purchase_cost(
-    	    									$sum,
-    	    									$pclass,
-    	    									$flag
-    										);
-    						
-    						// Check that Cart total is larger than min amount for current PClass				
-			   				if($sum > $pclass->getMinAmount()) {
-			   				
-			   					echo '<option value="' . $pclass->getId() . '">';
-			   					if ($this->get_klarna_country() == 'NO') {
-									if ( $pclass->getType() == 1 ) {
-										//If Account - Do not show startfee. This is always 0.
-										echo sprintf(__('%s - %s %s/month - %s%s', 'klarna'), $pclass->getDescription(), $monthly_cost, $this->selected_currency, $pclass->getInterestRate(), '%');
-										} else {
-											// Norway - Show total cost
-											echo sprintf(__('%s - %s %s/month - %s%s - Start %s - Tot %s %s', 'klarna'), $pclass->getDescription(), $monthly_cost, $this->selected_currency, $pclass->getInterestRate(), '%', $pclass->getStartFee(), $total_credit_purchase_cost, $this->klarna_currency );
-										}
-									} else {
+					// Check if we have any PClasses
+					// TODO Deactivate this gateway if the file pclasses.json doesn't exist
+					$pclasses = $this->fetch_pclasses( $this->get_klarna_country() );
+					if($pclasses) {
+					
+					?>
+						<label for="klarna_account_pclass"><?php echo __("Payment plan", 'klarna') ?> <span class="required">*</span></label>
+						<select id="klarna_account_pclass" name="klarna_account_pclass" class="woocommerce-select">
+							
+						<?php
+					   	// Loop through the available PClasses stored in the file srv/pclasses.json
+						foreach ($pclasses as $pclass) {
+							
+							if ( $pclass->getType() == 0 || $pclass->getType() == 1 ) {
+							
+								// Get monthly cost for current pclass
+								$monthly_cost = KlarnaCalc::calc_monthly_cost(
+	    	    									$sum,
+	    	    									$pclass,
+	    	    									$flag
+	    										);
+	    										
+	    						// Get total credit purchase cost for current pclass
+	    						// Only required in Norway
+								$total_credit_purchase_cost = KlarnaCalc::total_credit_purchase_cost(
+	    	    									$sum,
+	    	    									$pclass,
+	    	    									$flag
+	    										);
+	    						
+	    						// Check that Cart total is larger than min amount for current PClass				
+				   				if($sum > $pclass->getMinAmount()) {
+				   				
+				   					echo '<option value="' . $pclass->getId() . '">';
+				   					if ($this->get_klarna_country() == 'NO') {
 										if ( $pclass->getType() == 1 ) {
 											//If Account - Do not show startfee. This is always 0.
 											echo sprintf(__('%s - %s %s/month - %s%s', 'klarna'), $pclass->getDescription(), $monthly_cost, $this->selected_currency, $pclass->getInterestRate(), '%');
+											} else {
+												// Norway - Show total cost
+												echo sprintf(__('%s - %s %s/month - %s%s - Start %s - Tot %s %s', 'klarna'), $pclass->getDescription(), $monthly_cost, $this->selected_currency, $pclass->getInterestRate(), '%', $pclass->getStartFee(), $total_credit_purchase_cost, $this->klarna_currency );
+											}
 										} else {
-											// Sweden, Denmark, Finland, Germany & Netherlands - Don't show total cost
-											echo sprintf(__('%s - %s %s/month - %s%s - Start %s', 'klarna'), $pclass->getDescription(), $monthly_cost, $this->selected_currency, $pclass->getInterestRate(), '%', $pclass->getStartFee() );
+											if ( $pclass->getType() == 1 ) {
+												//If Account - Do not show startfee. This is always 0.
+												echo sprintf(__('%s - %s %s/month - %s%s', 'klarna'), $pclass->getDescription(), $monthly_cost, $this->selected_currency, $pclass->getInterestRate(), '%');
+											} else {
+												// Sweden, Denmark, Finland, Germany & Netherlands - Don't show total cost
+												echo sprintf(__('%s - %s %s/month - %s%s - Start %s', 'klarna'), $pclass->getDescription(), $monthly_cost, $this->selected_currency, $pclass->getInterestRate(), '%', $pclass->getStartFee() );
+											}
 										}
-									}
-								echo '</option>';
-							
-							} // End if ($sum > $pclass->getMinAmount())
-							
-			   			} // End if $pclass->getType() == 0 or 1
-					
-					} // End foreach
-					?>
+									echo '</option>';
+								
+								} // End if ($sum > $pclass->getMinAmount())
+								
+				   			} // End if $pclass->getType() == 0 or 1
 						
-					</select>
-				
-					<?php
-				} else {
-					echo __('Klarna PClasses seem to be missing. Klarna Account does not work.', 'klarna');
-				}
-				?>				
-				
-			</p>
+						} // End foreach
+						?>
+							
+						</select>
+					
+						<?php
+					} else {
+						echo __('Klarna PClasses seem to be missing. Klarna Account does not work.', 'klarna');
+					}
+					?>		
+					
+				</p>
+
+			<?php } ?>		
+
 			<?php
 			// Calculate lowest monthly cost and display it
 			/*

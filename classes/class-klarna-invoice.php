@@ -308,8 +308,9 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 		if ($this->description) :	
 			echo '<p>' . $this->description . '</p>';
 		endif; 
-		
-		
+		?>
+
+		<?php
 		// Mobile or desktop browser
 		if (wp_is_mobile() ) {
 			$klarna_layout = 'mobile';
@@ -565,6 +566,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 			<?php endif; ?>
 			
 		</fieldset>
+
 		<?php	
 	}
 	

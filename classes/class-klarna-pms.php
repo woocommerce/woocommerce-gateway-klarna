@@ -43,6 +43,13 @@ class WC_Klarna_PMS {
  	 */
 	function get_data( $eid, $secret, $selected_currency, $shop_country, $cart_total, $payment_method_group, $select_id ) {
 
+		require_once( KLARNA_LIB . 'Klarna.php' );
+		
+		if ( ! function_exists( 'xmlrpc_encode_entitites' ) && !class_exists('xmlrpcresp' ) ) {
+			require_once( KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc.inc' );
+			require_once( KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc_wrappers.inc' );
+		}
+
 		$klarna = new Klarna();
 		$config = new KlarnaConfig();
 
@@ -148,7 +155,7 @@ class WC_Klarna_PMS {
 			}
 
 		} else {
-			$payment_methods_output = __( 'Klarna PClasses seem to be missing. Klarna Account does not work.', 'klarna' );
+			$payment_methods_output = __( 'Klarna PClasses seem to be missing.', 'klarna' );
 		}
 
 		return $payment_methods_output;
