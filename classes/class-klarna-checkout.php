@@ -2143,7 +2143,7 @@ class WC_Gateway_Klarna_Checkout_Extra {
 		
 		// Filter Checkout page ID, so WooCommerce Google Analytics integration can
 		// output Ecommerce tracking code on Klarna Thank You page
-		add_filter( 'woocommerce_get_checkout_page_id', array( $this, 'change_checkout_page_id' ) );
+		// add_filter( 'woocommerce_get_checkout_page_id', array( $this, 'change_checkout_page_id' ) );
 
 	}
 	
