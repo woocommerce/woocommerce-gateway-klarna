@@ -478,8 +478,8 @@ class WC_Gateway_Klarna_Campaign extends WC_Gateway_Klarna {
 					echo $klarna_pms_data; ?>
 
 					<p class="form-row form-row-first">
-						<label for="klarna_pno"><?php echo __("Date of Birth", 'klarna') ?> <span class="required">*</span></label>
-						<input type="text" class="input-text" id="klarna_pno" name="klarna_pno" />
+						<label for="klarna_campaign_pno"><?php echo __("Date of Birth", 'klarna') ?> <span class="required">*</span></label>
+						<input type="text" class="input-text" id="klarna_campaign_pno" name="klarna_campaign_pno" />
 
 						<?php
 						// Button/form for getAddress
