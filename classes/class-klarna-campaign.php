@@ -484,7 +484,7 @@ class WC_Gateway_Klarna_Campaign extends WC_Gateway_Klarna {
 						<?php
 						// Button/form for getAddress
 						$data = new WC_Klarna_Get_Address;
-						echo $data->get_address_button();
+						echo $data->get_address_button( $this->get_klarna_country() );
 						?>
 					</p>
 				<?php } else { ?>
@@ -820,7 +820,7 @@ class WC_Gateway_Klarna_Campaign extends WC_Gateway_Klarna {
 						
 						// Button/form for getAddress
 						$data = new WC_Klarna_Get_Address;
-						echo $data->get_address_button();
+						echo $data->get_address_button( $this->get_klarna_country() );
 					?>
 				</p>
 				
