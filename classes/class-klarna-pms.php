@@ -138,7 +138,7 @@ class WC_Klarna_PMS {
 							} else {
 								$read_more_text = 'Read more';
 							}
-							$payment_options_details_output .= '<div class="klarna-pms-terms-uri" style="margin-bottom:1em;"><a href="' . $payment_method['terms']['uri'] . '">' . $read_more_text . '</a></div>';
+							$payment_options_details_output .= '<div class="klarna-pms-terms-uri" style="margin-bottom:1em;"><a href="' . $payment_method['terms']['uri'] . '" target="_blank">' . $read_more_text . '</a></div>';
 						}
 
 					$payment_options_details_output .= '</div>';
