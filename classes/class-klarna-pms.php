@@ -107,30 +107,46 @@ class WC_Klarna_PMS {
 
 				// Create payment option details output
 				if ( $i < 2 ) {
-					$inline_style = 'style="clear:both"';
+					$inline_style = 'style="clear:both;position:relative"';
 				} else {
-					$inline_style = 'style="clear:both;display:none"';
+					$inline_style = 'style="clear:both;display:none;position:relative"';
 				}
 
 				$payment_options_details_output = '<div class="klarna-pms-details" data-pclass="' . $payment_method['pclass_id'] . '" ' . $inline_style . '>';
 
-					$payment_options_details_output .= '<ul style="list-style:none">';
-						foreach ( $payment_method['details'] as $pd_k => $pd_v ) {
-							$payment_options_details_output .= '<li id="pms-details-' . $pd_k . '">' . implode( ' ', $pd_v ) . '</li>';
+					$payment_options_details_output .= '<div style="padding:3px 120px 3px 3px;min-height:30px; font-size:0.95em">';
+
+						$payment_options_details_output .= '<strong style="font-size:1.2em;display:block;margin-bottom:0.5em;">' . $payment_method['group']['title'] . '</strong>';
+
+						if ( ! empty( $payment_method['details'] ) ) {
+							$payment_options_details_output .= '<ul style="list-style:none;margin-bottom:0.75em">';
+								foreach ( $payment_method['details'] as $pd_k => $pd_v ) {
+									$payment_options_details_output .= '<li id="pms-details-' . $pd_k . '">' . implode( ' ', $pd_v ) . '</li>';
+								}
+							$payment_options_details_output .= '</ul>';
 						}
-					$payment_options_details_output .= '</ul>';
 
-					if ( isset( $payment_method['use_case'] ) && '' != $payment_method['use_case'] ) {
-						$payment_options_details_output .= '<div class="klarna-pms-use-case">' . $payment_method['use_case'] . '</div>';
-					}
+						if ( isset( $payment_method['use_case'] ) && '' != $payment_method['use_case'] ) {
+							$payment_options_details_output .= '<div class="klarna-pms-use-case" style="margin-bottom:0.75em">' . $payment_method['use_case'] . '</div>';
+						}
 
-					if ( isset( $payment_method['terms']['uri'] ) && '' != $payment_method['terms']['uri'] ) {
-						$payment_options_details_output .= '<div class="klarna-pms-terms-uri"><a href="' . $payment_method['terms']['uri'] . '">Read more</a></div>';
-					}
+						if ( isset( $payment_method['terms']['uri'] ) && '' != $payment_method['terms']['uri'] ) {
+							if ( 'SE' == $shop_country ) {
+								$read_more_text = 'Läs mer';
+							} elseif ( 'NO' == $shop_country ) {
+								$read_more_text = 'Les mer';
+							} else {
+								$read_more_text = 'Read more';
+							}
+							$payment_options_details_output .= '<div class="klarna-pms-terms-uri" style="margin-bottom:1em;"><a href="' . $payment_method['terms']['uri'] . '">' . $read_more_text . '</a></div>';
+						}
+
+					$payment_options_details_output .= '</div>';
 
 					if ( isset( $payment_method['logo']['uri'] ) && '' != $payment_method['logo']['uri'] ) {
-						$payment_options_details_output .= '<div class="klarna-pms-logo-uri="><img src="' . $payment_method['logo']['uri'] . '?width=100" /></div>';
+						$payment_options_details_output .= '<div class="klarna-pms-logo-uri=" style="position:absolute;top:3px;right:3px"><img src="' . $payment_method['logo']['uri'] . '?width=100" /></div>';
 					}
+
 
 				$payment_options_details_output .= '</div>';
 
@@ -142,20 +158,21 @@ class WC_Klarna_PMS {
 
 		// Check if anything was returned
 		if ( ! empty( $payment_options ) ) {
-			$payment_methods_output = '<p class="form-row form-row-first">';
-			$payment_methods_output .= '<label for="klarna_account_pclass">' . __( 'Payment plan', 'klarna') . ' <span class="required">*</span></label>';
-			$payment_methods_output .= '<select id="' . $select_id . '" name="' . $select_id . '" class="woocommerce-select klarna_pms_select">';
+			$payment_methods_output = '<p class="form-row">';
+				$payment_methods_output .= '<label for="klarna_account_pclass">' . __( 'Payment plan', 'klarna') . ' <span class="required">*</span></label>';
+				$payment_methods_output .= '<select id="' . $select_id . '" name="' . $select_id . '" class="woocommerce-select klarna_pms_select">';
 
-				$payment_methods_output .= implode( '', $payment_options );
+					$payment_methods_output .= implode( '', $payment_options );
 
-			$payment_methods_output .= '</select>';
+				$payment_methods_output .= '</select>';
+			$payment_methods_output .= '</p>';
 
 			if ( ! empty( $payment_options_details ) ) {
 				$payment_methods_output .= implode( '', $payment_options_details );
 			}
 
 		} else {
-			$payment_methods_output = __( 'Klarna PClasses seem to be missing.', 'klarna' );
+			$payment_methods_output = false;
 		}
 
 		return $payment_methods_output;
