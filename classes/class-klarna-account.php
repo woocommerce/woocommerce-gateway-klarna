@@ -1333,14 +1333,14 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 			$k = new Klarna();
 		
 		$k->config(
-		    $this->get_eid(), 							// EID
-		    $this->get_secret(), 						// Secret
-		    $country, 									// Country
-		    $this->get_klarna_language($country), 		// Language
-		    $this->get_currency_for_country($country), 	// Currency
-		    $klarna_mode, 								// Live or test
-		    $pcStorage = 'jsondb', 						// PClass storage
-		    $pcURI = 'klarna_pclasses_' . $country		// PClass storage URI path
+		    $this->get_eid( $country ), 					// EID
+		    $this->get_secret( $country ), 					// Secret
+		    $country, 										// Country
+		    $this->get_klarna_language( $country ),			// Language
+		    $this->get_currency_for_country( $country ),	// Currency
+		    $klarna_mode, 									// Live or test
+		    $pcStorage = 'jsondb', 							// PClass storage
+		    $pcURI = 'klarna_pclasses_' . $country			// PClass storage URI path
 		);
 		
 		if( $k->getPClasses() ) {
@@ -1520,12 +1520,11 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 	
 	
 	// Helper function - get eid
-	function get_eid() {
+	function get_eid( $country = false ) {
 		global $woocommerce;
-		$country = ( isset( $woocommerce->customer->country ) ) ? $woocommerce->customer->country : '';
 	
 		if( empty($country) ) {
-			$country = $this->shop_country;
+			$country = ( isset( $woocommerce->customer->country ) ) ? $woocommerce->customer->country : $this->shop_country;
 		}
 		
 		$current_eid = '';
@@ -1562,13 +1561,12 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 	
 	
 	// Helper function - get secret
-	function get_secret() {
-		
+	function get_secret( $country = false ) {
+
 		global $woocommerce;
-		$country = ( isset( $woocommerce->customer->country ) ) ? $woocommerce->customer->country : '';
 	
 		if( empty($country) ) {
-			$country = $this->shop_country;
+			$country = ( isset( $woocommerce->customer->country ) ) ? $woocommerce->customer->country : $this->shop_country;
 		}
 		
 		$current_secret = '';

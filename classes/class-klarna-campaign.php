@@ -1307,13 +1307,12 @@ class WC_Gateway_Klarna_Campaign extends WC_Gateway_Klarna {
 	}
 	
 	// Helper function - get eid
-	function get_eid() {
+	function get_eid( $country = false ) {
 		
 		global $woocommerce;
-		$country = $woocommerce->customer->country;
 	
 		if( empty($country) ) {
-			$country = $this->shop_country;
+			$country = ( isset( $woocommerce->customer->country ) ) ? $woocommerce->customer->country : $this->shop_country;
 		}
 		
 		$current_eid = '';
@@ -1350,13 +1349,12 @@ class WC_Gateway_Klarna_Campaign extends WC_Gateway_Klarna {
 	
 	
 	// Helper function - get secret
-	function get_secret() {
+	function get_secret( $country = false ) {
 		
 		global $woocommerce;
-		$country = $woocommerce->customer->country;
 	
 		if( empty($country) ) {
-			$country = $this->shop_country;
+			$country = ( isset( $woocommerce->customer->country ) ) ? $woocommerce->customer->country : $this->shop_country;
 		}
 		
 		$current_secret = '';
