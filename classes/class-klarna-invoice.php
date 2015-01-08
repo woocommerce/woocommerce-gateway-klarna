@@ -310,7 +310,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 		endif; 
 
 		// Use Klarna PMS for Norway
-		if ( 'NO' == $this->get_klarna_country() || 'SE' == $this->get_klarna_country() ) { ?>
+		if ( 'NO' == $this->get_klarna_country() ) { ?>
 			<fieldset>
 				<?php
 				$klarna_pms = new WC_Klarna_PMS;
@@ -1345,7 +1345,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 			$klarna_invoice_icon = 'https://cdn.klarna.com/1.0/shared/image/generic/logo/nl_nl/basic/blue-black.png?width=100&eid=' . $this->get_eid();
 			break;
 		case 'NO' :
-			$klarna_invoice_icon = 'https://cdn.klarna.com/1.0/shared/image/generic/logo/nb_no/basic/blue-black.png?width=100&eid=' . $this->get_eid();
+			$klarna_invoice_icon = false;
 			break;
 		case 'FI' :
 			$klarna_invoice_icon = 'https://cdn.klarna.com/1.0/shared/image/generic/logo/fi_fi/basic/blue-black.png?width=100&eid=' . $this->get_eid();

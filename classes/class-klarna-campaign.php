@@ -455,7 +455,7 @@ class WC_Gateway_Klarna_Campaign extends WC_Gateway_Klarna {
 		endif;
 
 		// Use Klarna PMS for Norway
-		if ( 'NO' == $this->get_klarna_country() || 'SE' == $this->get_klarna_country() ) { ?>
+		if ( 'NO' == $this->get_klarna_country() ) { ?>
 			<fieldset>
 				<?php
 				$klarna_pms = new WC_Klarna_PMS;

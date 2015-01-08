@@ -22,6 +22,7 @@ class WC_Klarna_PMS {
 	public function __construct() {
 	
 		add_action( 'wp_enqueue_scripts', array( $this, 'load_scripts') );
+		add_action( 'wp_enqueue_scripts', 'add_thickbox' );
 
 	}
 
@@ -31,8 +32,8 @@ class WC_Klarna_PMS {
 	function load_scripts() {
 		
 		if ( is_checkout() ) {
-		wp_register_script( 'klarna-pms-js', plugins_url( '../js/klarnapms.js' , __FILE__ ), array('jquery'), '1.0', false );
-		wp_enqueue_script( 'klarna-pms-js' );
+			wp_register_script( 'klarna-pms-js', plugins_url( '../js/klarnapms.js' , __FILE__ ), array('jquery'), '1.0', false );
+			wp_enqueue_script( 'klarna-pms-js' );
 		}
 
 	} // End function
@@ -138,7 +139,8 @@ class WC_Klarna_PMS {
 							} else {
 								$read_more_text = 'Read more';
 							}
-							$payment_options_details_output .= '<div class="klarna-pms-terms-uri" style="margin-bottom:1em;"><a href="' . $payment_method['terms']['uri'] . '" target="_blank">' . $read_more_text . '</a></div>';
+							add_thickbox();
+							$payment_options_details_output .= '<div class="klarna-pms-terms-uri" style="margin-bottom:1em;"><a class="thickbox" href="' . $payment_method['terms']['uri'] . '?TB_iframe=true&width=600&height=550" target="_blank">' . $read_more_text . '</a></div>';
 						}
 
 					$payment_options_details_output .= '</div>';
