@@ -189,9 +189,12 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		$this->klarna_language 				= apply_filters( 'klarna_language', $klarna_language );
 		$this->klarna_currency 				= apply_filters( 'klarna_currency', $klarna_currency );
 		$this->klarna_eid					= apply_filters( 'klarna_eid', $klarna_eid );
-       	$this->klarna_secret				= apply_filters( 'klarna_secret', $klarna_secret );
-       	$this->klarna_checkout_url			= apply_filters( 'klarna_checkout_url', $klarna_checkout_url );
-       	$this->klarna_checkout_thanks_url	= apply_filters( 'klarna_checkout_thanks_url', $klarna_checkout_thanks_url );
+		$this->klarna_secret				= apply_filters( 'klarna_secret', $klarna_secret );
+		$this->klarna_checkout_url			= apply_filters( 'klarna_checkout_url', $klarna_checkout_url );
+		$this->klarna_checkout_thanks_url	= apply_filters( 'klarna_checkout_thanks_url', $klarna_checkout_thanks_url );
+		
+		global $klarna_checkout_thanks_url;
+		$klarna_checkout_thanks_url = $this->klarna_checkout_thanks_url;
 		
 	   	add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
        	
@@ -2254,7 +2257,7 @@ class WC_Gateway_Klarna_Checkout_Extra {
 		$account_login_text = '';
 		$account_login_text = $data->get_account_login_text();
 		
-
+	
 		// Change the Checkout URL if this is enabled in the settings
 		if( !empty($account_login_text) ) {
 			echo $account_login_text;
@@ -2267,18 +2270,15 @@ class WC_Gateway_Klarna_Checkout_Extra {
 	 */
 	public function change_checkout_page_id( $checkout_page_id ) {
 		global $post;
-
-		$data = new WC_Gateway_Klarna_Checkout;
-		$klarna_checkout_page_url = $data->klarna_checkout_thanks_url;
+		global $klarna_checkout_thanks_url;
 
 		if ( is_page() ) {
 			$current_page_url = get_permalink( $post->ID );
 			// Compare Klarna Thank You page URL to current page URL
-			if ( esc_url( trailingslashit( $klarna_checkout_page_url ) ) == esc_url( trailingslashit( $current_page_url ) ) ) {
+			if ( esc_url( trailingslashit( $klarna_checkout_thanks_url ) ) == esc_url( trailingslashit( $current_page_url ) ) ) {
 				$checkout_page_id = $post->ID;
 			}
 		}
-
 		return $checkout_page_id;
 	}
 		

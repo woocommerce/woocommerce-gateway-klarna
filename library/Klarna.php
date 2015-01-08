@@ -12,6 +12,10 @@
  * @link      https://developers.klarna.com/
  */
 
+if (!defined("ENT_HTML401")) {
+    define("ENT_HTML401", 0);
+}
+
 /**
  * This API provides a way to integrate with Klarna's services over the
  * XMLRPC protocol.
@@ -43,7 +47,7 @@ class Klarna
      *
      * @var string
      */
-    protected $VERSION = 'php:api:2.5.0';
+    protected $VERSION = 'php:api:3.2.0';
 
     /**
      * Klarna protocol identifier.
@@ -51,21 +55,6 @@ class Klarna
      * @var string
      */
     protected $PROTO = '4.1';
-
-    /**
-     * Flag to indicate use of the report server Candice.
-     *
-     * @var bool
-     */
-    private static $_candice = true;
-
-    /**
-     * URL/Address to the Candice server.
-     * Port used is 80.
-     *
-     * @var string
-     */
-    private static $_c_addr = "clientstat.klarna.com";
 
     /**
      * Constants used with LIVE mode for the communications with Klarna.
@@ -390,6 +379,13 @@ class Klarna
     protected $config;
 
     /**
+     * Client IP
+     *
+     * @var string
+     */
+    protected $clientIP;
+
+    /**
      * Empty constructor, because sometimes it's needed.
      */
     public function __construct()
@@ -514,13 +510,6 @@ class Klarna
         }
 
         try {
-            $this->hasFields('candice');
-            self::$_candice = (bool)$this->config['candice'];
-        } catch(Exception $e) {
-            //No 'candice' field ignore it...
-        }
-
-        try {
             $this->hasFields('xmlrpcDebug');
             Klarna::$xmlrpcDebug = $this->config['xmlrpcDebug'];
         } catch(Exception $e) {
@@ -548,6 +537,8 @@ class Klarna
             $this->_url['port'],
             $this->_url['scheme']
         );
+
+        $this->xmlrpc->setSSLVerifyHost(2);
 
         $this->xmlrpc->request_charset_encoding = 'ISO-8859-1';
     }
@@ -579,7 +570,6 @@ class Klarna
      * @param string $pcStorage PClass storage module.
      * @param string $pcURI     PClass URI.
      * @param bool   $ssl       Whether HTTPS (HTTP over SSL) or HTTP is used.
-     * @param bool   $candice   Error reporting to Klarna.
      *
      * @see Klarna::setConfig()
      * @see KlarnaConfig
@@ -590,7 +580,7 @@ class Klarna
     public function config(
         $eid, $secret, $country, $language, $currency,
         $mode = Klarna::LIVE, $pcStorage = 'json', $pcURI = 'pclasses.json',
-        $ssl = true, $candice = true
+        $ssl = true
     ) {
         try {
             KlarnaConfig::$store = false;
@@ -603,7 +593,6 @@ class Klarna
             $this->config['currency'] = $currency;
             $this->config['mode'] = $mode;
             $this->config['ssl'] = $ssl;
-            $this->config['candice'] = $candice;
             $this->config['pcStorage'] = $pcStorage;
             $this->config['pcURI'] = $pcURI;
 
@@ -1048,13 +1037,6 @@ class Klarna
      * <b>Available named values are</b>:<br>
      * string - cust_no<br>
      * string - estore_user<br>
-     * string - maiden_name<br>
-     * string - place_of_birth<br>
-     * string - password<br>
-     * string - new_password<br>
-     * string - captcha<br>
-     * int    - poa_group<br>
-     * string - poa_pno<br>
      * string - ready_date<br>
      * string - rand_string<br>
      * int    - bclass<br>
@@ -1081,14 +1063,6 @@ class Klarna
      *
      * Using this method is optional.
      *
-     * <b>Available named values are</b>:<br>
-     * int - yearly_salary<br>
-     * int - no_people_in_household<br>
-     * int - no_children_below_18<br>
-     * int - net_monthly_household_income<br>
-     * int - monthly_cost_accommodation<br>
-     * int - monthly_cost_other_loans<br>
-     *
      * Make sure you send in the values as the right data type.<br>
      * Use strval, intval or similar methods to ensure the right type is sent.
      *
@@ -1109,15 +1083,6 @@ class Klarna
      * Sets the bank information for the upcoming transaction.<br>
      *
      * Using this method is optional.
-     *
-     * <b>Available named values are</b>:<br>
-     * int    - bank_acc_bic<br>
-     * int    - bank_acc_no<br>
-     * int    - bank_acc_pin<br>
-     * int    - bank_acc_tan<br>
-     * string - bank_name<br>
-     * string - bank_city<br>
-     * string - iban<br>
      *
      * Make sure you send in the values as the right data type.<br>
      * Use strval, intval or similar methods to ensure the right type is sent.
@@ -1140,16 +1105,6 @@ class Klarna
      *
      * Using this method is optional.
      *
-     * <b>Available named values are</b>:<br>
-     * string - travel_company<br>
-     * string - reseller_company<br>
-     * string - departure_date<br>
-     * string - return_date<br>
-     * array  - destinations<br>
-     * array  - passenger_list<br>
-     * array  - passport_no<br>
-     * array  - driver_license_no<br>
-     *
      * Make sure you send in the values as the right data type.<br>
      * Use strval, intval or similar methods to ensure the right type is sent.
      *
@@ -1167,12 +1122,28 @@ class Klarna
     }
 
     /**
+     * Set client IP
+     *
+     * @param string $clientIP Client IP address
+     *
+     * @return void
+     */
+    public function setClientIP($clientIP)
+    {
+        $this->clientIP = $clientIP;
+    }
+
+    /**
      * Returns the clients IP address.
      *
      * @return string
      */
     public function getClientIP()
     {
+        if (isset($this->clientIP)) {
+            return $this->clientIP;
+        }
+
         $tmp_ip = '';
         $x_fwd = null;
 
@@ -1947,7 +1918,7 @@ class Klarna
         } else {
             $billing = $this->assembleAddr($this->billing);
             $shipping = $this->assembleAddr($this->shipping);
-		
+
             if (strlen($shipping['country']) > 0
                 && ($shipping['country'] !== $this->_country)
             ) {
@@ -1994,7 +1965,7 @@ class Klarna
             $this->sid,
             $this->extraInfo
         );
-		
+
         self::printDebug('reserve_amount', $paramList);
 
         $result = $this->xmlrpc_call('reserve_amount', $paramList);
@@ -2328,8 +2299,7 @@ class Klarna
      * Gender is only required for Germany and Netherlands.<br>
      *
      * Use of the OCR parameter is optional.
-     * An OCR number can be retrieved by using:
-     * {@link Klarna::reserveOCR()} or {@link Klarna::reserveOCRemail()}.
+     * An OCR number can be retrieved by using: {@link Klarna::reserveOCR()}.
      *
      * <b>Flags can be set to</b>:<br>
      * {@link KlarnaFlags::NO_FLAG}<br>
@@ -2543,47 +2513,6 @@ class Klarna
         self::printDebug('reserve_ocr_nums array', $paramList);
 
         return $this->xmlrpc_call('reserve_ocr_nums', $paramList);
-    }
-
-    /**
-     * Reserves the number of OCRs specified and sends them to the given email.
-     *
-     * @param int    $no      Number of OCR numbers to reserve.
-     * @param string $email   address.
-     * @param int    $country {@link KlarnaCountry} constant.
-     *
-     * @return bool True, if the OCRs were reserved and sent.
-     */
-    public function reserveOCRemail($no, $email, $country = null)
-    {
-        $this->_checkNo($no);
-        $this->_checkPNO($email, KlarnaEncoding::EMAIL);
-
-        if ($country === null) {
-            if (!$this->_country) {
-                throw new Klarna_MissingCountryException;
-            }
-            $country = $this->_country;
-        } else {
-            $this->_checkCountry($country);
-        }
-
-        $digestSecret = self::digest(
-            $this->colon($this->_eid, $no, $this->_secret)
-        );
-        $paramList = array(
-            $no,
-            $email,
-            $this->_eid,
-            $digestSecret,
-            $country
-        );
-
-        self::printDebug('reserve_ocr_nums_email array', $paramList);
-
-        $result = $this->xmlrpc_call('reserve_ocr_nums_email', $paramList);
-
-        return ($result == 'ok');
     }
 
     /**
@@ -3283,39 +3212,6 @@ class Klarna
     }
 
     /**
-     * Sets notes/log information for the specified invoice  number.
-     *
-     * @param string $invNo Invoice number.
-     * @param string $notes Note(s) to be associated with the invoice.
-     *
-     * @throws KlarnaException
-     * @return string  Invoice number.
-     */
-    public function updateNotes($invNo, $notes)
-    {
-        $this->_checkInvNo($invNo);
-
-        if (!is_string($notes)) {
-            $notes = strval($notes);
-        }
-
-        $digestSecret = self::digest(
-            $this->colon($invNo, $notes, $this->_secret)
-        );
-
-        $paramList = array(
-            $this->_eid,
-            $digestSecret,
-            $invNo,
-            $notes
-        );
-
-        self::printDebug('update_notes', $paramList);
-
-        return $this->xmlrpc_call('update_notes', $paramList);
-    }
-
-    /**
      * Returns the configured PCStorage object.
      *
      * @throws Exception|KlarnaException
@@ -3769,11 +3665,6 @@ class Klarna
 
             $status = $xmlrpcresp->faultCode();
 
-            //Send report to candice.
-            if (self::$_candice === true) {
-                $this->sendStat($method, $time, $selectTime, $status);
-            }
-
             if ($status !== 0) {
                 throw new KlarnaException($xmlrpcresp->faultString(), $status);
             }
@@ -3787,6 +3678,55 @@ class Klarna
         catch(Exception $e) {
             throw new KlarnaException($e->getMessage(), $e->getCode());
         }
+    }
+
+    /**
+     * Create a new CurlTransport
+     *
+     * @return CurlTransport New CurlTransport instance
+     */
+    public function createTransport()
+    {
+        return new CurlTransport(
+            new CurlHandle(),
+            isset($this->config['timeout']) ? intval($this->config['timeout']) : 10
+        );
+    }
+
+    /**
+     * Perform a checkout service request.
+     *
+     * @param int|float $price    The total price for the checkout including VAT.
+     * @param string    $currency ISO 4217 Currency Code
+     * @param string    $locale   Specify what locale is used by the checkout.
+     *                            ISO 639 language and ISO 3166-1 country separated
+     *                            by underscore. Example: sv_SE
+     * @param string    $country  (Optional) Specify what ISO 3166-1 country to use
+     *                            for fetching payment methods. If not specified
+     *                            the locale country will be used.
+     *
+     * @throws RuntimeException  If the curl extension is not loaded
+     *
+     * @return CheckoutServiceResponse Response with payment methods
+     */
+    public function checkoutService($price, $currency, $locale, $country = null)
+    {
+        $this->_checkAmount($price);
+
+        $params = array(
+            'merchant_id' => $this->config['eid'],
+            'total_price' => $price,
+            'currency' => strtoupper($currency),
+            'locale' => strtolower($locale)
+        );
+
+        if ($country !== null) {
+            $params['country'] = $country;
+        }
+
+        return $this->createTransport()->send(
+            new CheckoutServiceRequest($this->config, $params)
+        );
     }
 
     /**
@@ -3816,40 +3756,6 @@ class Klarna
 
         $this->artNos = array();
         $this->coObjects = array();
-    }
-
-    /**
-     * Sends a report to Candice.
-     *
-     * @param string $method     XMLRPC method.
-     * @param int    $time       Elapsed time of entire XMLRPC call.
-     * @param int    $selectTime Time to create the XMLRPC parameters.
-     * @param int    $status     XMLRPC error code.
-     *
-     * @return void
-     */
-    protected function sendStat($method, $time, $selectTime, $status)
-    {
-        $fp = @fsockopen('udp://'.self::$_c_addr, 80, $errno, $errstr, 1500);
-        if ($fp) {
-            $uri = "{$this->_url['scheme']}://{$this->_url['host']}" .
-                    ":{$this->_url['port']}";
-
-            $data = $this->pipe(
-                $this->_eid,
-                $method,
-                $time,
-                $selectTime,
-                $status,
-                $uri
-            );
-            $digest = self::digest($this->pipe($data, $this->_secret));
-
-            self::printDebug("candice report", $data);
-
-            @fwrite($fp, $this->pipe($data, $digest));
-            @fclose($fp);
-        }
     }
 
     /**
@@ -3942,9 +3848,11 @@ class Klarna
      */
     public static function num_htmlentities($str)
     {
+        $charset = 'ISO-8859-1';
+
         if (!self::$htmlentities) {
             self::$htmlentities = array();
-            $table = get_html_translation_table(HTML_ENTITIES, ENT_QUOTES);
+            $table = get_html_translation_table(HTML_ENTITIES, ENT_QUOTES, $charset);
             foreach ($table as $char => $entity) {
                 self::$htmlentities[$entity] = '&#' . ord($char) . ';';
             }
@@ -3953,7 +3861,7 @@ class Klarna
         return str_replace(
             array_keys(
                 self::$htmlentities
-            ), self::$htmlentities, htmlentities($str, ENT_COMPAT | ENT_HTML401, 'ISO-8859-1')
+            ), self::$htmlentities, htmlentities($str, ENT_COMPAT | ENT_HTML401, $charset)
         );
     }
 
@@ -4553,3 +4461,15 @@ require_once 'Flags.php';
 require_once 'Country.php';
 require_once 'Currency.php';
 require_once 'Language.php';
+
+/**
+ * Include cURL wrappers
+ */
+require_once 'CurlTransport.php';
+require_once 'CurlHandle.php';
+
+/**
+ * Include cURL requests and responses
+ */
+require_once 'CheckoutServiceRequest.php';
+require_once 'CheckoutServiceResponse.php';

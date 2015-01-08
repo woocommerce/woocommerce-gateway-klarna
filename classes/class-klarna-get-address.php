@@ -333,13 +333,13 @@ class WC_Klarna_Get_Address {
  	 *
  	**/
 
-	public function get_address_button() {
+	public function get_address_button( $country ) {
 		
 		if( ($this->invo_enabled && $this->invo_dob_display == 'description_box') || ($this->partpay_enabled && $this->partpay_dob_display == 'description_box') ) {
 			ob_start();
 
 				// Only display GetAddress button for Sweden
-				if($this->get_shop_country() == 'SE') { ?>
+				if( $country == 'SE' ) { ?>
 					<span class="klarna-push-pno get-address-button button"><?php _e('Fetch', 'klarna'); ?></span>
 					<p class="form-row">
 						<div class="klarna-get-address-message"></div>
