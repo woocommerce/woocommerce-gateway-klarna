@@ -320,14 +320,15 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 					$klarna_mode = 'live';
 				}
 				$klarna_pms_data = $klarna_pms->get_data(
-					$this->get_eid(),            // $eid
-					$this->get_secret(),         // $secret
-					$this->selected_currency,    // $selected_currency
-					$this->get_klarna_country(), // $shop_country
-					$woocommerce->cart->total,   // $cart_total
-					'invoice',                   // $payment_method_group
-					'klarna_invo_pclass',        // $select_id,
-					$klarna_mode                 // $klarna_mode
+					$this->get_eid(),               // $eid
+					$this->get_secret(),            // $secret
+					$this->selected_currency,       // $selected_currency
+					$this->get_klarna_country(),    // $shop_country
+					$woocommerce->cart->total,      // $cart_total
+					'invoice',                      // $payment_method_group
+					'klarna_invo_pclass',           // $select_id,
+					$klarna_mode,                   // $klarna_mode
+					$this->get_invoice_fee_price()  // $invice_fee
 				);
 				echo $klarna_pms_data;
 				?>

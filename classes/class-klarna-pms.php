@@ -42,7 +42,7 @@ class WC_Klarna_PMS {
 	/**
  	 * Gets response from Klarna
  	 */
-	function get_data( $eid, $secret, $selected_currency, $shop_country, $cart_total, $payment_method_group, $select_id ) {
+	function get_data( $eid, $secret, $selected_currency, $shop_country, $cart_total, $payment_method_group, $select_id, $klarna_mode, $invoice_fee = false ) {
 
 		require_once( KLARNA_LIB . 'Klarna.php' );
 		
@@ -55,7 +55,10 @@ class WC_Klarna_PMS {
 		$config = new KlarnaConfig();
 
 		// Default required options
-		$config['mode']      = Klarna::BETA;
+		$config['mode'] = Klarna::BETA;
+		if ( $klarna_mode = 'live' ) {
+			$config['mode'] = Klarna::LIVE;
+		}
 		$config['pcStorage'] = 'json';
 		$config['pcURI']     = './pclasses.json';
 
@@ -132,6 +135,20 @@ class WC_Klarna_PMS {
 						}
 
 						if ( isset( $payment_method['terms']['uri'] ) && '' != $payment_method['terms']['uri'] ) {
+							$klarna_terms_uri = $payment_method['terms']['uri'];
+
+							// Check if invoice fee needs to be added
+							// Invoice terms links ends with ?fee=
+							if ( strpos( $klarna_terms_uri, '?fee=' ) ) {
+								if ( $invoice_fee ) {
+									$klarna_terms_uri = $klarna_terms_uri . $invoice_fee . '&TB_iframe=true&width=600&height=550';
+								} else {
+									$klarna_terms_uri = $klarna_terms_uri . '0&TB_iframe=true&width=600&height=550';
+								}
+							} else {
+								$klarna_terms_uri .= '?TB_iframe=true&width=600&height=550'; 
+							}
+
 							if ( 'SE' == $shop_country ) {
 								$read_more_text = 'Läs mer';
 							} elseif ( 'NO' == $shop_country ) {
@@ -140,7 +157,7 @@ class WC_Klarna_PMS {
 								$read_more_text = 'Read more';
 							}
 							add_thickbox();
-							$payment_options_details_output .= '<div class="klarna-pms-terms-uri" style="margin-bottom:1em;"><a class="thickbox" href="' . $payment_method['terms']['uri'] . '?TB_iframe=true&width=600&height=550" target="_blank">' . $read_more_text . '</a></div>';
+							$payment_options_details_output .= '<div class="klarna-pms-terms-uri" style="margin-bottom:1em;"><a class="thickbox" href="' . $klarna_terms_uri . '" target="_blank">' . $read_more_text . '</a></div>';
 						}
 
 					$payment_options_details_output .= '</div>';
