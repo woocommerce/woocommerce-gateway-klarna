@@ -1,6 +1,6 @@
 *** Klarna Changelog ***
 
-201x.xx.xx	- version 1.9.5
+2015.01.08	- version 1.9.5
 * Update    - Updated Klarna invoice and part payment client library to v3.2.0.
 * Update 	- Switches to using Klarna PMS for Norway (Klarna special requirements - Norway).
 * Update 	- Adds country as optional parameter in get_eid() and get_secret() methods.
