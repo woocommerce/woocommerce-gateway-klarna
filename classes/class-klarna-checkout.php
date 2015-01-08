@@ -193,8 +193,8 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		$this->klarna_checkout_url			= apply_filters( 'klarna_checkout_url', $klarna_checkout_url );
 		$this->klarna_checkout_thanks_url	= apply_filters( 'klarna_checkout_thanks_url', $klarna_checkout_thanks_url );
 		
-		global $klarna_checkout_url;
-		$klarna_checkout_url = $this->klarna_checkout_url;
+		global $klarna_checkout_thanks_url;
+		$klarna_checkout_thanks_url = $this->klarna_checkout_thanks_url;
 		
 	   	add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
        	
@@ -2270,16 +2270,15 @@ class WC_Gateway_Klarna_Checkout_Extra {
 	 */
 	public function change_checkout_page_id( $checkout_page_id ) {
 		global $post;
-		global $klarna_checkout_url;
+		global $klarna_checkout_thanks_url;
 
 		if ( is_page() ) {
 			$current_page_url = get_permalink( $post->ID );
 			// Compare Klarna Thank You page URL to current page URL
-			if ( esc_url( trailingslashit( $klarna_checkout_url ) ) == esc_url( trailingslashit( $current_page_url ) ) ) {
+			if ( esc_url( trailingslashit( $klarna_checkout_thanks_url ) ) == esc_url( trailingslashit( $current_page_url ) ) ) {
 				$checkout_page_id = $post->ID;
 			}
 		}
-
 		return $checkout_page_id;
 	}
 		
