@@ -1,5 +1,8 @@
 *** Klarna Changelog ***
 
+2015.01.15	- version 1.9.6
+* Fix 		- Change of endpoint URI for Klarna PMS (live mode).
+
 2015.01.08	- version 1.9.5
 * Update    - Updated Klarna invoice and part payment client library to v3.2.0.
 * Update 	- Switches to using Klarna PMS for Norway (Klarna special requirements - Norway).

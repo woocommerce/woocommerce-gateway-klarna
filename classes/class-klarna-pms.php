@@ -42,7 +42,7 @@ class WC_Klarna_PMS {
 	/**
  	 * Gets response from Klarna
  	 */
-	function get_data( $eid, $secret, $selected_currency, $shop_country, $cart_total, $payment_method_group, $select_id, $klarna_mode, $invoice_fee = false ) {
+	function get_data( $eid, $secret, $selected_currency, $shop_country, $cart_total, $payment_method_group, $select_id, $mode, $invoice_fee = false ) {
 
 		require_once( KLARNA_LIB . 'Klarna.php' );
 		
@@ -53,23 +53,41 @@ class WC_Klarna_PMS {
 
 		$klarna = new Klarna();
 		$config = new KlarnaConfig();
-
+		
 		// Default required options
-		$config['mode'] = Klarna::BETA;
-		if ( $klarna_mode = 'live' ) {
-			$config['mode'] = Klarna::LIVE;
+		if ( $mode == 'test' ) {
+			$klarna_ssl = 'false';
+			$klarna_endpoint = 'https://api-test.klarna.com/touchpoint/checkout/';
+			$klarna_mode = Klarna::BETA;
+		} else {
+			// Set SSL if used in webshop
+			if (is_ssl()) {
+				$klarna_ssl = 'true';
+			} else {
+				$klarna_ssl = 'false';
+			}
+			$klarna_endpoint = 'https://api.klarna.com/touchpoint/checkout/';
+			$klarna_mode = Klarna::LIVE;
 		}
-		$config['pcStorage'] = 'json';
-		$config['pcURI']     = './pclasses.json';
-
+		
 		// Configuration needed for the checkout service
-		$config['eid']       = $eid;
-		$config['secret']    = $secret;
+		$config['mode'] 				= $klarna_mode;
+		$config['ssl'] 					= $klarna_ssl;
+		$config['checkout_service_uri'] = $klarna_endpoint;
+		$config['pcStorage'] 			= 'json';
+		$config['pcURI']     			= './pclasses.json';
+		$config['eid']       			= $eid;
+		$config['secret']    			= $secret;
 
 		$klarna->setConfig( $config );
 
 		$klarna_pms_locale = $this->get_locale( $shop_country );
-
+		$response = $klarna->checkoutService(
+				$cart_total,        // Total price of the checkout including VAT
+				$selected_currency, // Currency used by the checkout
+				$klarna_pms_locale  // Locale used by the checkout
+			);
+		
 		try {
 			$response = $klarna->checkoutService(
 				$cart_total,        // Total price of the checkout including VAT
