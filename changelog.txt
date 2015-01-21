@@ -4,6 +4,7 @@
 * Fix 		- Removes duplicate code in class-klarna-pms.php.
 * Fix 		- Fixes HTML error in Klarna Checkout page.
 * Fix 		- Removes unused jacascript files.
+* Fix 		- Only cleans up address fields in checkout form when switching from Klarna to another payment method if getAddress feature was used.
 
 2015.01.15	- version 1.9.6
 * Fix 		- Change of endpoint URI for Klarna PMS (live mode).
