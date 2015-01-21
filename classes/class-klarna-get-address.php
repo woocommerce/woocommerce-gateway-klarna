@@ -105,34 +105,39 @@ class WC_Klarna_Get_Address {
 			?>
 			
 			<script type="text/javascript">
+			var getAddressCompleted = 'no';
+
 			jQuery(document).ajaxComplete(function() {
 				
 				// On switch of payment method
 				jQuery('input[name="payment_method"]').on('change', function(){
-					var selected_paytype = jQuery('input[name=payment_method]:checked').val();
-					if( selected_paytype !== 'klarna' && selected_paytype !== 'klarna_account' && selected_paytype !== 'klarna_special_campaign'){
-						
-						jQuery(".klarna-response").hide();
-						
-						// Replace fetched customer values from Klarna with the original customer values
-						jQuery("#billing_first_name").val('<?php echo $original_billing_first_name;?>');
-						jQuery("#billing_last_name").val('<?php echo $original_billing_last_name;?>');
-						jQuery("#billing_company").val('<?php echo $original_billing_company;?>');
-						jQuery("#billing_address_1").val('<?php echo $original_customer['address'];?>');
-						jQuery("#billing_address_2").val('<?php echo $original_customer['address_2'];?>');
-						jQuery("#billing_postcode").val('<?php echo $original_customer['postcode'];?>');
-						jQuery("#billing_city").val('<?php echo $original_customer['city'];?>');
-						
-						jQuery("#shipping_first_name").val('<?php echo $original_shipping_first_name;?>');
-						jQuery("#shipping_last_name").val('<?php echo $original_shipping_last_name;?>');
-						jQuery("#shipping_company").val('<?php echo $original_shipping_company;?>');
-						jQuery("#shipping_address_1").val('<?php echo $original_customer['shipping_address'];?>');
-						jQuery("#shipping_address_2").val('<?php echo $original_customer['shipping_address_2'];?>');
-						jQuery("#shipping_postcode").val('<?php echo $original_customer['shipping_postcode'];?>');
-						jQuery("#shipping_city").val('<?php echo $original_customer['shipping_city'];?>');
-						
-						
+					if ( 'yes' == getAddressCompleted ) {
+						var selected_paytype = jQuery('input[name=payment_method]:checked').val();
+						if( selected_paytype !== 'klarna' && selected_paytype !== 'klarna_account' && selected_paytype !== 'klarna_special_campaign'){
+							
+							jQuery(".klarna-response").hide();
+							
+							// Replace fetched customer values from Klarna with the original customer values
+							jQuery("#billing_first_name").val('<?php echo $original_billing_first_name;?>');
+							jQuery("#billing_last_name").val('<?php echo $original_billing_last_name;?>');
+							jQuery("#billing_company").val('<?php echo $original_billing_company;?>');
+							jQuery("#billing_address_1").val('<?php echo $original_customer['address'];?>');
+							jQuery("#billing_address_2").val('<?php echo $original_customer['address_2'];?>');
+							jQuery("#billing_postcode").val('<?php echo $original_customer['postcode'];?>');
+							jQuery("#billing_city").val('<?php echo $original_customer['city'];?>');
+							
+							jQuery("#shipping_first_name").val('<?php echo $original_shipping_first_name;?>');
+							jQuery("#shipping_last_name").val('<?php echo $original_shipping_last_name;?>');
+							jQuery("#shipping_company").val('<?php echo $original_shipping_company;?>');
+							jQuery("#shipping_address_1").val('<?php echo $original_customer['shipping_address'];?>');
+							jQuery("#shipping_address_2").val('<?php echo $original_customer['shipping_address_2'];?>');
+							jQuery("#shipping_postcode").val('<?php echo $original_customer['shipping_postcode'];?>');
+							jQuery("#shipping_city").val('<?php echo $original_customer['shipping_city'];?>');
+							
+							
+						}
 					}
+					console.log( getAddressCompleted );
 				});
 			});
 			</script>
@@ -188,7 +193,8 @@ class WC_Klarna_Get_Address {
 						jQuery("#shipping_city").val(adress['city']); //.prop( "readonly", true );
 						
 						jQuery("#phone_number").val(adress['cellno']);
-						//jQuery("#klarna_pno").val(orgno_getadress);
+						// jQuery("#klarna_pno").val(orgno_getadress);
+						getAddressCompleted = 'yes';
 					}
 					
 					if(type == 'private'){
@@ -217,7 +223,8 @@ class WC_Klarna_Get_Address {
 							jQuery("#shipping_city").val(adress['city']); //.prop( "readonly", true );
 							
 							jQuery("#phone_number").val(adress['cellno']);
-							//jQuery("#klarna_pno").val(pno_getadress);
+							// jQuery("#klarna_pno").val(pno_getadress);
+							getAddressCompleted = 'yes';
 						}
 					}
 				}
