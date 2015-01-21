@@ -2163,12 +2163,8 @@ class WC_Gateway_Klarna_Checkout_Extra {
     
 	// Shortcode KCO page
 	function klarna_checkout_page() {
-		 
-    	echo '<div class="klarna_checkout">';
-    	
 		$data = new WC_Gateway_Klarna_Checkout;
-		return $data->get_klarna_checkout_page();
-		echo '</div>';
+		return '<div class="klarna_checkout">' . $data->get_klarna_checkout_page() . '</div>';
 	}
 	
 	// Shortcode Order note

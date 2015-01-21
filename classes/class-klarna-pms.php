@@ -82,11 +82,6 @@ class WC_Klarna_PMS {
 		$klarna->setConfig( $config );
 
 		$klarna_pms_locale = $this->get_locale( $shop_country );
-		$response = $klarna->checkoutService(
-				$cart_total,        // Total price of the checkout including VAT
-				$selected_currency, // Currency used by the checkout
-				$klarna_pms_locale  // Locale used by the checkout
-			);
 		
 		try {
 			$response = $klarna->checkoutService(
