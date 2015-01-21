@@ -1,5 +1,8 @@
 *** Klarna Changelog ***
 
+2015.01.22	- version 1.9.7
+* Fix 		- Removes duplicate code in class-klarna-pms.php.
+
 2015.01.15	- version 1.9.6
 * Fix 		- Change of endpoint URI for Klarna PMS (live mode).
 
