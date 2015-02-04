@@ -1,5 +1,8 @@
 *** Klarna Changelog ***
 
+2015.0X.XX	- version 1.9.8
+* Enhancement   - Adds German translation files, credits: Kevin Konrad, Alexander Weissenburger.
+
 2015.01.22	- version 1.9.7
 * Fix 		- Removes duplicate code in class-klarna-pms.php.
 * Fix 		- Fixes HTML error in Klarna Checkout page.
