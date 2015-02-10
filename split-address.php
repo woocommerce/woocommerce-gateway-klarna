@@ -4,40 +4,40 @@
  * House extension.
  *
  * @param string $address Address string to split
- *
  * @return array
  */
-function splitAddress($address) {
-    // Get everything up to the first number with a regex
-    $hasMatch = preg_match('/^[^0-9]*/', $address, $match);
+function splitAddress( $address ) {
 
-    // If no matching is possible, return the supplied string as the street
-    if (!$hasMatch) {
-        return array($address, "", "");
-    }
+	// Get everything up to the first number with a regex
+	$hasMatch = preg_match( '/^[^0-9]*/', $address, $match );
 
-    // Remove the street from the address.
-    $address = str_replace($match[0], "", $address);
-    $street = trim($match[0]);
+	// If no matching is possible, return the supplied string as the street
+	if ( ! $hasMatch ) {
+		return array( $address, '', '' );
+	}
 
-    // Nothing left to split, return
-    if (strlen($address == 0)) {
-        return array($street, "", "");
-    }
-    // Explode address to an array
-    $addrArray = explode(" ", $address);
+	// Remove the street from the address.
+	$address = str_replace( $match[0], '', $address );
+	$street = trim($match[0]);
 
-    // Shift the first element off the array, that is the house number
-    $housenumber = array_shift($addrArray);
+	// Nothing left to split, return
+	if ( strlen( $address == 0 ) ) {
+		return array( $street, '', '' );
+	}
+	// Explode address to an array
+	$addrArray = explode( ' ', $address );
 
-    // If the array is empty now, there is no extension.
-    if (count($addrArray) == 0) {
-        return array($street, $housenumber, "");
-    }
+	// Shift the first element off the array, that is the house number
+	$housenumber = array_shift( $addrArray );
 
-    // Join together the remaining pieces as the extension.
-    $extension = implode(" ", $addrArray);
+	// If the array is empty now, there is no extension.
+	if ( count( $addrArray ) == 0 ) {
+		return array( $street, $housenumber, '' );
+	}
 
-    return array($street, $housenumber, $extension);
+	// Join together the remaining pieces as the extension.
+	$extension = implode( ' ', $addrArray );
+
+	return array( $street, $housenumber, $extension );
+
 }
-?>
