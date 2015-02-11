@@ -147,21 +147,21 @@ function init_klarna_gateway() {
 	
 	// Include the WooCommerce Compatibility Utility class
 	// The purpose of this class is to provide a single point of compatibility functions for dealing with supporting multiple versions of WooCommerce (currently 2.0.x and 2.1)
-	require_once 'classes/class-wc-klarna-compatibility.php';
+	require_once 'includes/class-wc-klarna-compatibility.php';
 	
 	// Include our Klarna classes
-	require_once 'classes/class-klarna-invoice.php'; // Invoice
-	require_once 'classes/class-klarna-account.php'; // Account
-	require_once 'classes/class-klarna-campaign.php'; // Special campaign
-	require_once 'classes/class-klarna-partpayment-widget.php'; // Partpayment widget
-	require_once 'classes/class-klarna-get-address.php'; // Get address 
-	require_once 'classes/class-klarna-pms.php'; // PMS
+	require_once 'includes/class-klarna-invoice.php'; // Invoice
+	require_once 'includes/class-klarna-account.php'; // Account
+	require_once 'includes/class-klarna-campaign.php'; // Special campaign
+	require_once 'includes/class-klarna-partpayment-widget.php'; // Partpayment widget
+	require_once 'includes/class-klarna-get-address.php'; // Get address 
+	require_once 'includes/class-klarna-pms.php'; // PMS
 
 	// Klarna Checkout class
 	$klarna_shop_country = get_option( 'woocommerce_default_country' );
 	$available_countries = array( 'SE', 'NO', 'FI', 'DE' );
 	if ( in_array( $klarna_shop_country, $available_countries ) ) {
-		require_once 'classes/class-klarna-checkout.php';
+		require_once 'includes/class-klarna-checkout.php';
 	}
 
 	/**
