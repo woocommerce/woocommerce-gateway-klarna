@@ -1,29 +1,25 @@
 <?php
-/*
-Plugin Name: WooCommerce Klarna Gateway
-Plugin URI:  http://woothemes.com/woocommerce
-Description: Extends WooCommerce. Provides a <a href="http://www.klarna.se" target="_blank">Klarna</a> gateway for WooCommerce.
-Version:     2.0-dev
-Author:      Krokedil
-Author URI:  http://krokedil.com
-*/
+/**
+ * WooCommerce Klarna Gateway
+ * 
+ * @link http://www.woothemes.com/products/klarna/
+ * @since 0.3
+ *
+ * @package WC_Gateway_Klarna
+ * 
+ * @wordpress-plugin
+ * Plugin Name:     WooCommerce Klarna Gateway
+ * Plugin URI:      http://woothemes.com/woocommerce
+ * Description:     Extends WooCommerce. Provides a <a href="http://www.klarna.se" target="_blank">Klarna</a> gateway for WooCommerce.
+ * Version:         2.0-dev
+ * Author:          Krokedil
+ * Author URI:      http://krokedil.com
+ * License:         GPL-2.0+
+ * License URI:     http://www.gnu.org/licenses/gpl-2.0.txt
+ * Text Domain:     klarna
+ * Domain Path:     /languages
+ */
 
-/*
-	Copyright 2011-2014  Krokedil Produktionsbyrå AB  (email : info@krokedil.se)
-
-	This program is free software; you can redistribute it and/or modify
-	it under the terms of the GNU General Public License, version 2, as 
-	published by the Free Software Foundation.
-
-	This program is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-	GNU General Public License for more details.
-
-	You should have received a copy of the GNU General Public License
-	along with this program; if not, write to the Free Software
-	Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA   
-*/
 
 /**
  * Required functions
