@@ -14,6 +14,12 @@
  */
 class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
      
+	/**
+	 * Class constructor.
+	 *
+	 * @since 1.0.0
+	 * @todo  Move user set variables to an include file?
+	 */
 	public function __construct() {
 
 		global $woocommerce;
@@ -21,7 +27,7 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 		parent::__construct();
 		
 		$this->id                 = 'klarna_account';
-		$this->method_title       = __('Klarna Account', 'klarna');
+		$this->method_title       = __( 'Klarna Account', 'klarna' );
 		$this->has_fields         = true;
 		$this->order_button_text  = apply_filters( 'klarna_order_button_text', __( 'Place order', 'woocommerce' ) );
 				
@@ -37,8 +43,9 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 		$this->init_settings();
 		
 		// Load shortcodes. 
-		// This is used so that the merchant easily can modify the displayed monthly cost text (on single product and shop page) via the settings page.
-		require_once( KLARNA_DIR . 'shortcodes.php');
+		// This is used so that the merchant easily can modify the displayed monthly 
+		// cost text (on single product and shop page) via the settings page.
+		require_once( KLARNA_DIR . 'shortcodes.php' );
 
 		// Define user set variables
 		$this->enabled = ( isset( $this->settings['enabled'] ) ) ? $this->settings['enabled'] : '';
@@ -108,9 +115,9 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 				
 		// Actions
 		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
-		add_action('woocommerce_receipt_klarna_account', array( $this, 'receipt_page'));
-		add_action('woocommerce_checkout_process', array( $this, 'klarna_account_checkout_field_process'));
-		add_action('wp_print_footer_scripts', array( $this, 'footer_scripts'));
+		add_action( 'woocommerce_receipt_klarna_account', array( $this, 'receipt_page' ) );
+		add_action( 'woocommerce_checkout_process', array( $this, 'klarna_account_checkout_field_process' ) );
+		add_action( 'wp_print_footer_scripts', array(  $this, 'footer_scripts' ) );
 		
 	}
 	
@@ -118,6 +125,7 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 	 * Initialise Gateway Settings Form Fields.
 	 *
 	 * @since 1.0.0
+	 * @todo  Move this to end of file?
 	 */
 	function init_form_fields() {
 
@@ -289,6 +297,7 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 	 * Options for bits like 'title' and availability on a country-by-country basis
 	 *
 	 * @since 1.0.0
+	 * @todo  Move PClasses retrieval out of this method.
 	 */
 	public function admin_options() { ?>
 
@@ -306,17 +315,16 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 		}
 
 		if ( ! empty( $this->authorized_countries ) && $this->enabled == 'yes' ) {
-			echo '<h4>' . __('Active PClasses', 'klarna') . '</h4>';
-			foreach($this->authorized_countries as $key=>$country) {
+			echo '<h4>' . __( 'Active PClasses', 'klarna' ) . '</h4>';
+			foreach ( $this->authorized_countries as $key => $country ) {
 				$pclasses = $this->fetch_pclasses( $country );
-				if( $pclasses ) {
+				if ( $pclasses ) {
 					echo '<p>' . $country . '</p>';
 					foreach( $pclasses as $pclass ) {
 						if ( $pclass->getType() == 0 || $pclass->getType() == 1 ) {
 							echo $pclass->getDescription() . ', ';
 						}
 					}
-
 					echo '<br/>';
 				}
 			}
@@ -334,6 +342,7 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 	 * Check if this gateway is enabled and available in user's country.
 	 *
 	 * @since 1.0.0
+	 * @todo  Move all individual checks to helper functions, since they are used in each method?
 	 */		
 	function is_available() {
 
@@ -441,7 +450,6 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 		    $pcURI = 'klarna_pclasses_' . $this->get_klarna_country()		// PClass storage URI path
 		);
 		
-		
 		Klarna::$xmlrpcDebug = false;
 		Klarna::$debug = false;
 		
@@ -472,6 +480,7 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
  	 * Process the gateway specific checkout form fields
 	 *
 	 * @since 1.0.0
+	 * @todo  Use helper functions. One for SE, NO, DK and FI, and one for DE and AT.
  	 **/
 	function klarna_account_checkout_field_process() {
 
@@ -537,7 +546,7 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 					);
 				}
 
-				if ( $compare_billing_and_shipping==1 && isset( $_POST['shipping_postcode'] ) && $_POST['shipping_postcode'] !== $_POST['billing_postcode'] ) {
+				if ( $compare_billing_and_shipping == 1 && isset( $_POST['shipping_postcode'] ) && $_POST['shipping_postcode'] !== $_POST['billing_postcode'] ) {
 					wc_add_notice(
 						__( 'Shipping and billing address must be the same when paying via Klarna.', 'klarna' ),
 						'error'
@@ -571,8 +580,19 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 	 * Process the payment and return the result
 	 *
 	 * @since 1.0.0
+	 * @todo  Introduce new methods: 
+	 *        Collect DOB
+	 *        Split address
+	 *        Test or Live check
+	 *        Add items to cart
+	 *        Add discount
+	 *        Add fees
+	 *        Set shipping
+	 *        Set billing
+	 *        Reserve amount with Klarna
 	 **/
 	function process_payment( $order_id ) {
+
 		global $woocommerce;
 		
 		$order = WC_Klarna_Compatibility::wc_get_order( $order_id );
@@ -1072,6 +1092,7 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 	 * is entered and the customer is from Germany or Austria.
 	 *
 	 * @since 1.0.0
+	 * @todo  move to separate JS file?
 	 **/
 	function footer_scripts () {
 			
@@ -1245,7 +1266,7 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 
 		global $woocommerce;
 	
-		if( empty($country) ) {
+		if ( empty( $country ) ) {
 			$country = ( isset( $woocommerce->customer->country ) ) ? $woocommerce->customer->country : $this->shop_country;
 		}
 		
