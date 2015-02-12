@@ -981,11 +981,11 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 		}
 			
 		// Test mode or Live mode		
-		if ( $this->testmode == 'yes' ):
+		if ( $this->testmode == 'yes' ) {
 			// Disable SSL if in testmode
 			$klarna_ssl = 'false';
 			$klarna_mode = Klarna::BETA;
-		else :
+		} else {
 			// Set SSL if used in webshop
 			if ( is_ssl() ) {
 				$klarna_ssl = 'true';
@@ -993,9 +993,9 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 				$klarna_ssl = 'false';
 			}
 			$klarna_mode = Klarna::LIVE;
-		endif;
+		}
    		
-			$k = new Klarna();
+		$k = new Klarna();
 		
 		$k->config(
 		    $this->get_eid( $country ), 					// EID
@@ -1008,30 +1008,21 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 		    $pcURI = 'klarna_pclasses_' . $country			// PClass storage URI path
 		);
 		
-		if( $k->getPClasses() ) {
-		
+		if ( $k->getPClasses() ) {
 			return $k->getPClasses();
-		
 		} else {
-				
 			try {
-			    $k->fetchPClasses($country); //You can specify country (and language, currency if you wish) if you don't want to use the configured country.
-			    /* PClasses successfully fetched, now you can use getPClasses() to load them locally or getPClass to load a specific PClass locally. */
-				// Redirect to settings page
-				//wp_redirect(get_payment_gateway_configuration_url('WC_Gateway_Klarna_Account&klarna_error_status=0'));
+				// You can specify country (and language, currency if you wish) if you don't want 
+				// to use the configured country.
+				$k->fetchPClasses( $country ); 
 				return $k->getPClasses();
 			}
-			catch(Exception $e) {
-			    //Something went wrong, print the message: 
-			    //$redirect_url = 'WC_Gateway_Klarna_Account&klarna_error_status=1&klarna_error_code=' . $e->getCode();
-				    
-			   //wp_redirect(admin_url($redirect_url));
-			   //wp_redirect(get_payment_gateway_configuration_url($redirect_url));
-			    return false;
+			catch( Exception $e ) {
+				return false;
 			}
-			
-		} // End if $k->getPClasses
-	} // End function
+		}
+
+	}
 
 
 	/**

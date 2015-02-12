@@ -2,8 +2,9 @@
 /**
  * This file is used to markup payment fields displayed in checkout page.
  *
- * @link http://www.woothemes.com/products/klarna/
+ * @link  http://www.woothemes.com/products/klarna/
  * @since 1.0.0
+ * @todo  Change part_payment and klarna_account_pclass to variables.
  *
  * @package WC_Gateway_Klarna
  */
