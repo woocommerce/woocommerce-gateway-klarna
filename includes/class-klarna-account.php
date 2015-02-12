@@ -478,61 +478,92 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 		global $woocommerce;
 
  		// Only run this if Klarna account is the choosen payment method
- 		if ($_POST['payment_method'] == 'klarna_account') {
+ 		if ( $_POST['payment_method'] == 'klarna_account' ) {
  		
  			// SE, NO, DK & FI
- 			if ( $_POST['billing_country'] == 'SE' || $_POST['billing_country'] == 'NO' || $_POST['billing_country'] == 'DK' || $_POST['billing_country'] == 'FI' ){
- 			
-    			// Check if set, if its not set add an error.
-    			if (!$_POST['klarna_pno'])
-        		 	wc_add_notice(__('<strong>Date of birth</strong> is a required field', 'klarna'), 'error');
-        	 	
+ 			if ( $_POST['billing_country'] == 'SE' || $_POST['billing_country'] == 'NO' || $_POST['billing_country'] == 'DK' || $_POST['billing_country'] == 'FI' ) {
+				if ( ! $_POST['klarna_pno'] ) { // Check if set, if its not set add an error.
+					wc_add_notice(
+						__( '<strong>Date of birth</strong> is a required field', 'klarna' ),
+						'error'
+					);
+				}
 			}
 			
 			// NL & DE
-	 		if ( $_POST['billing_country'] == 'NL' || $_POST['billing_country'] == 'DE' ){
+	 		if ( $_POST['billing_country'] == 'NL' || $_POST['billing_country'] == 'DE' ) {
 	    		// Check if set, if its not set add an error.
 	    		
 	    		// Gender
-	    		if (empty($_POST['klarna_account_gender']))
-	        	 	wc_add_notice(__('<strong>Gender</strong> is a required field', 'klarna'), 'error');
-	         	
-	         	// Date of birth
-				if (!$_POST['date_of_birth_day'] || !$_POST['date_of_birth_month'] || !$_POST['date_of_birth_year'])
-	         		wc_add_notice(__('<strong>Date of birth</strong> is a required field', 'klarna'), 'error');
-	         	
-	         	
-	         	// Shipping and billing address must be the same
-	         	$compare_billing_and_shipping = 0;
-	         	
-	         	if( isset( $_POST['ship_to_different_address'] ) && $_POST['ship_to_different_address']=1 ) {
-	         		$compare_billing_and_shipping = 1;	
-			 	}
+	    		if ( empty( $_POST['klarna_account_gender'] ) ) {
+	        	 	wc_add_notice(
+	        	 		__('<strong>Gender</strong> is a required field', 'klarna'), 
+	        	 		'error'
+	        	 	);
+	    		}
+
+				// Date of birth
+				if ( ! $_POST['date_of_birth_day'] || ! $_POST['date_of_birth_month'] || ! $_POST['date_of_birth_year'] ) {
+					wc_add_notice(
+						__( '<strong>Date of birth</strong> is a required field', 'klarna' ),
+						'error'
+					);
+				}
+
+				// Shipping and billing address must be the same
+				$compare_billing_and_shipping = 0;
+				if ( isset( $_POST['ship_to_different_address'] ) && $_POST['ship_to_different_address'] = 1 ) {
+					$compare_billing_and_shipping = 1;	
+				}
 				
-	         	
-	         	if ($compare_billing_and_shipping==1 && isset($_POST['shipping_first_name']) && $_POST['shipping_first_name'] !== $_POST['billing_first_name'])
-	        	 	wc_add_notice(__('Shipping and billing address must be the same when paying via Klarna.', 'klarna'), 'error');
-	        	 
-	        	 if ($compare_billing_and_shipping==1 && isset($_POST['shipping_last_name']) && $_POST['shipping_last_name'] !== $_POST['billing_last_name'])
-	        	 	wc_add_notice(__('Shipping and billing address must be the same when paying via Klarna.', 'klarna'), 'error');
-	        	 
-	        	 if ($compare_billing_and_shipping==1 && isset($_POST['shipping_address_1']) && $_POST['shipping_address_1'] !== $_POST['billing_address_1'])
-	        	 	wc_add_notice(__('Shipping and billing address must be the same when paying via Klarna.', 'klarna'), 'error');
-	        	 
-	        	 if ($compare_billing_and_shipping==1 && isset($_POST['shipping_postcode']) && $_POST['shipping_postcode'] !== $_POST['billing_postcode'])
-	        	 	wc_add_notice(__('Shipping and billing address must be the same when paying via Klarna.', 'klarna'), 'error');
-	        	 	
-	        	 if ($compare_billing_and_shipping==1 && isset($_POST['shipping_city']) && $_POST['shipping_city'] !== $_POST['billing_city'])
-	        	 	wc_add_notice(__('Shipping and billing address must be the same when paying via Klarna.', 'klarna'), 'error');
+				if ( $compare_billing_and_shipping == 1 && isset( $_POST['shipping_first_name'] ) && $_POST['shipping_first_name'] !== $_POST['billing_first_name'] ) {
+					wc_add_notice(
+						__( 'Shipping and billing address must be the same when paying via Klarna.', 'klarna' ),
+						'error'
+					);
+				}
+
+				if ( $compare_billing_and_shipping == 1 && isset( $_POST['shipping_last_name'] ) && $_POST['shipping_last_name'] !== $_POST['billing_last_name'] ) {
+					wc_add_notice(
+						__( 'Shipping and billing address must be the same when paying via Klarna.', 'klarna' ),
+						'error'
+					);
+				}
+
+				if ( $compare_billing_and_shipping == 1 && isset( $_POST['shipping_address_1'] ) && $_POST['shipping_address_1'] !== $_POST['billing_address_1'] ) {
+					wc_add_notice(
+						__( 'Shipping and billing address must be the same when paying via Klarna.', 'klarna' ),
+						'error'
+					);
+				}
+
+				if ( $compare_billing_and_shipping==1 && isset( $_POST['shipping_postcode'] ) && $_POST['shipping_postcode'] !== $_POST['billing_postcode'] ) {
+					wc_add_notice(
+						__( 'Shipping and billing address must be the same when paying via Klarna.', 'klarna' ),
+						'error'
+					);
+				}
+
+				if ( $compare_billing_and_shipping == 1 && isset( $_POST['shipping_city'] ) && $_POST['shipping_city'] !== $_POST['billing_city'] ) {
+					wc_add_notice(
+						__( 'Shipping and billing address must be the same when paying via Klarna.', 'klarna' ),
+						'error'
+					);
+				}
 			}
 			
 			// DE & AT
 			if ( ( $this->shop_country == 'DE' || $this->shop_country == 'AT' ) && $this->de_consent_terms == 'yes') {
-	    		// Check if set, if its not set add an error.
-	    		if (!isset($_POST['klarna_de_consent_terms']))
-	        	 	wc_add_notice(__('You must accept the Klarna consent terms.', 'klarna'), 'error');
+				// Check if set, if its not set add an error.
+				if ( ! isset($_POST['klarna_de_consent_terms'] ) ) {
+					wc_add_notice(
+						__( 'You must accept the Klarna consent terms.', 'klarna' ),
+						'error'
+					);
+				}
 			}
 		}
+
 	}
 	
 	
@@ -546,53 +577,50 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 		
 		$order = WC_Klarna_Compatibility::wc_get_order( $order_id );
 		
-		require_once(KLARNA_LIB . 'Klarna.php');
-		require_once(KLARNA_LIB . 'pclasses/storage.intf.php');
+		require_once( KLARNA_LIB . 'Klarna.php' );
+		require_once( KLARNA_LIB . 'pclasses/storage.intf.php' );
 		
-		if(!function_exists('xmlrpc_encode_entitites') && !class_exists('xmlrpcresp')) {
-			require_once(KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc.inc');
-			require_once(KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc_wrappers.inc');
+		if ( ! function_exists( 'xmlrpc_encode_entitites' ) && ! class_exists( 'xmlrpcresp' ) ) {
+			require_once( KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc.inc' );
+			require_once( KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc_wrappers.inc' );
 		}
 		
 		// Get values from klarna form on checkout page
 		
 		// Collect the dob different depending on country
-		if ( $_POST['billing_country'] == 'NL' || $_POST['billing_country'] == 'DE' ) :
-			$klarna_pno_day 			= isset($_POST['date_of_birth_day']) ? woocommerce_clean($_POST['date_of_birth_day']) : '';
-			$klarna_pno_month 			= isset($_POST['date_of_birth_month']) ? woocommerce_clean($_POST['date_of_birth_month']) : '';
-			$klarna_pno_year 			= isset($_POST['date_of_birth_year']) ? woocommerce_clean($_POST['date_of_birth_year']) : '';
-			$klarna_pno 				= $klarna_pno_day . $klarna_pno_month . $klarna_pno_year;
-		else :
-			$klarna_pno 			= isset($_POST['klarna_pno']) ? woocommerce_clean($_POST['klarna_pno']) : '';
-		endif;
+		if ( $_POST['billing_country'] == 'NL' || $_POST['billing_country'] == 'DE' ) {
+			$klarna_pno_day = isset( $_POST['date_of_birth_day'] ) ? woocommerce_clean( $_POST['date_of_birth_day'] ) : '';
+			$klarna_pno_month = isset( $_POST['date_of_birth_month'] ) ? woocommerce_clean( $_POST['date_of_birth_month'] ) : '';
+			$klarna_pno_year = isset( $_POST['date_of_birth_year'] ) ? woocommerce_clean( $_POST['date_of_birth_year'] ) : '';
+			$klarna_pno = $klarna_pno_day . $klarna_pno_month . $klarna_pno_year;
+		} else {
+			$klarna_pno = isset( $_POST['klarna_pno'] ) ? woocommerce_clean( $_POST['klarna_pno'] ) : '';
+		}
 		
-		$klarna_pclass 				= isset($_POST['klarna_account_pclass']) ? woocommerce_clean($_POST['klarna_account_pclass']) : '';
-		$klarna_gender 				= isset($_POST['klarna_account_gender']) ? woocommerce_clean($_POST['klarna_account_gender']) : '';
+		$klarna_pclass = isset( $_POST['klarna_account_pclass'] ) ? woocommerce_clean( $_POST['klarna_account_pclass'] ) : '';
+		$klarna_gender = isset( $_POST['klarna_account_gender'] ) ? woocommerce_clean( $_POST['klarna_account_gender'] ) : '';
 		
-		$klarna_de_consent_terms	= isset($_POST['klarna_de_consent_terms']) ? woocommerce_clean($_POST['klarna_de_consent_terms']) : '';
+		$klarna_de_consent_terms = isset( $_POST['klarna_de_consent_terms'] ) ? woocommerce_clean( $_POST['klarna_de_consent_terms'] ) : '';
 		
 		
 		// Split address into House number and House extension for NL & DE customers
-		if ( $_POST['billing_country'] == 'NL' || $_POST['billing_country'] == 'DE' ) :
-		
-			require_once(KLARNA_DIR . 'split-address.php');
+		if ( $_POST['billing_country'] == 'NL' || $_POST['billing_country'] == 'DE' ) {
+			require_once( KLARNA_DIR . 'split-address.php' );
 			
 			$klarna_billing_address				= $order->billing_address_1;
-			$splitted_address 					= splitAddress($klarna_billing_address);
+			$splitted_address 					= splitAddress( $klarna_billing_address );
 			
 			$klarna_billing_address				= $splitted_address[0];
 			$klarna_billing_house_number		= $splitted_address[1];
 			$klarna_billing_house_extension		= $splitted_address[2];
 			
 			$klarna_shipping_address			= $order->shipping_address_1;
-			$splitted_address 					= splitAddress($klarna_shipping_address);
+			$splitted_address 					= splitAddress( $klarna_shipping_address );
 			
 			$klarna_shipping_address			= $splitted_address[0];
 			$klarna_shipping_house_number		= $splitted_address[1];
 			$klarna_shipping_house_extension	= $splitted_address[2];
-		
-		else :
-			
+		} else {			
 			$klarna_billing_address				= $order->billing_address_1;
 			$klarna_billing_house_number		= '';
 			$klarna_billing_house_extension		= '';
@@ -600,12 +628,10 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 			$klarna_shipping_address			= $order->shipping_address_1;
 			$klarna_shipping_house_number		= '';
 			$klarna_shipping_house_extension	= '';
-			
-		endif;
+		}
 				
 		// Store Klarna specific form values in order as post meta
 		update_post_meta( $order_id, 'klarna_pno', $klarna_pno);
-		
 		
 		// Test mode or Live mode		
 		if ( $this->testmode == 'yes' ):
@@ -635,24 +661,24 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 		    $pcURI = 'klarna_pclasses_' . $this->get_klarna_country()		// PClass storage URI path
 		);
 
-		
 		// Cart Contents
-		if (sizeof($order->get_items())>0) : foreach ($order->get_items() as $item) :
-			$_product = $order->get_product_from_item( $item );
-			if ($_product->exists() && $item['qty']) :
-			
-				// We manually calculate the tax percentage here
-				if ($order->get_line_tax($item) !==0) :
-					// Calculate tax percentage
-					$item_tax_percentage = @number_format( ( $order->get_line_tax($item) / $order->get_line_total( $item, false ) )*100, 2, '.', '');
-				else :
-					$item_tax_percentage = 0.00;
-				endif;
+		if ( sizeof( $order->get_items() ) > 0 ) {
+			foreach ( $order->get_items() as $item ) {
+				$_product = $order->get_product_from_item( $item );
+				if ( $_product->exists() && $item['qty'] ) {
 				
-				// apply_filters to item price so we can filter this if needed
-				$klarna_item_price_including_tax = $order->get_item_total( $item, true );
-				$item_price = apply_filters( 'klarna_item_price_including_tax', $klarna_item_price_including_tax );
+					// We manually calculate the tax percentage here
+					if ( $order->get_line_tax( $item ) !== 0 ) {
+						// Calculate tax percentage
+						$item_tax_percentage = @number_format( ( $order->get_line_tax( $item ) / $order->get_line_total( $item, false ) ) * 100, 2, '.', '' );
+					} else {
+						$item_tax_percentage = 0.00;
+					}
 					
+					// apply_filters to item price so we can filter this if needed
+					$klarna_item_price_including_tax = $order->get_item_total( $item, true );
+					$item_price = apply_filters( 'klarna_item_price_including_tax', $klarna_item_price_including_tax );
+						
 					// Get SKU or product id
 					$reference = '';
 					if ( $_product->get_sku() ) {
@@ -664,75 +690,68 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 					}
 					
 					$k->addArticle(
-		    		$qty = $item['qty'], 					//Quantity
-		    		$artNo = strval($reference),		 					//Article number
-		    		$title = utf8_decode ($item['name']), 	//Article name/title
-		    		$price = $item_price, 					// Price including tax
-		    		$vat = round( $item_tax_percentage ),			// Tax
-		    		$discount = 0, 
-		    		$flags = KlarnaFlags::INC_VAT 			//Price is including VAT.
-				);
-									
-			endif;
-		endforeach; endif;
+			    		$qty = $item['qty'],                   // Quantity
+			    		$artNo = strval($reference),           // Article number
+			    		$title = utf8_decode ($item['name']),  // Article name/title
+			    		$price = $item_price,                  // Price including tax
+			    		$vat = round( $item_tax_percentage ),  // Tax
+			    		$discount = 0,                         // Discount is applied later
+			    		$flags = KlarnaFlags::INC_VAT          // Price is including VAT.
+					);
+										
+				}
+			}
+		}
 		 
 		// Discount
-		if ($order->order_discount>0) :
-			
+		if ( $order->order_discount > 0 ) {
 			// apply_filters to order discount so we can filter this if needed
 			$klarna_order_discount = $order->order_discount;
 			$order_discount = apply_filters( 'klarna_order_discount', $klarna_order_discount );
 		
 			$k->addArticle(
 			    $qty = 1,
-			    $artNo = "",
-			    $title = __('Discount', 'klarna'),
+			    $artNo = '',
+			    $title = __( 'Discount', 'klarna' ),
 			    $price = -$order_discount,
 			    $vat = 0,
 			    $discount = 0,
-			    $flags = KlarnaFlags::INC_VAT //Price is including VAT
+			    $flags = KlarnaFlags::INC_VAT
 			);
-		endif;
-		
-		
+		}
 		
 		// Fees
 		if ( sizeof( $order->get_fees() ) > 0 ) {
 			foreach ( $order->get_fees() as $item ) {
-			
-			
-			// We manually calculate the tax percentage here
-			if ($order->get_total_tax() >0) :
-				// Calculate tax percentage
-				$item_tax_percentage = number_format( ( $item['line_tax'] / $item['line_total'] )*100, 2, '.', '');
-			else :
-				$item_tax_percentage = 0.00;
-			endif;
-			
-			
-			// apply_filters to item price so we can filter this if needed
-			$klarna_item_price_including_tax = $item['line_total'] + $item['line_tax'];
-			$item_price = apply_filters( 'klarna_fee_price_including_tax', $klarna_item_price_including_tax );
-			
-				$item_loop++;
+				// We manually calculate the tax percentage here
+				if ( $order->get_total_tax() > 0 ) {
+					// Calculate tax percentage
+					$item_tax_percentage = number_format( ( $item['line_tax'] / $item['line_total'] ) * 100, 2, '.', '' );
+				} else {
+					$item_tax_percentage = 0.00;
+				}
 				
+				// apply_filters to item price so we can filter this if needed
+				$klarna_item_price_including_tax = $item['line_total'] + $item['line_tax'];
+				$item_price = apply_filters( 'klarna_fee_price_including_tax', $klarna_item_price_including_tax );
+				
+				$item_loop++;
+
 				$k->addArticle(
-				    $qty = 1,
-				    $artNo = "",
-				    $title = $item['name'],
-				    $price = $item_price,
-				    $vat = round( $item_tax_percentage ),
-				    $discount = 0,
-			    	$flags = KlarnaFlags::INC_VAT
-			    );
-			    
+					$qty = 1,
+					$artNo = '',
+					$title = $item['name'],
+					$price = $item_price,
+					$vat = round( $item_tax_percentage ),
+					$discount = 0,
+					$flags = KlarnaFlags::INC_VAT
+				);
+
 			}
 		}
 		
-		
 		// Shipping
-		if ($order->get_total_shipping()>0) :
-			
+		if ( $order->get_total_shipping() > 0 ) {
 			// We manually calculate the shipping tax percentage here
 			$calculated_shipping_tax_percentage = ($order->order_shipping_tax/$order->get_total_shipping())*100; //25.00
 			$calculated_shipping_tax_decimal = ($order->order_shipping_tax/$order->get_total_shipping())+1; //0.25
@@ -742,171 +761,172 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 			$shipping_price = apply_filters( 'klarna_shipping_price_including_tax', $klarna_shipping_price_including_tax );
 			
 			$k->addArticle(
-			    $qty = 1,
-			    $artNo = "",
-			    $title = __('Shipping cost', 'klarna'),
-			    $price = $shipping_price,
-			    $vat = round( $calculated_shipping_tax_percentage ),
-			    $discount = 0,
-			    $flags = KlarnaFlags::INC_VAT + KlarnaFlags::IS_SHIPMENT //Price is including VAT and is shipment fee
+				$qty = 1,
+				$artNo = '',
+				$title = __( 'Shipping cost', 'klarna' ),
+				$price = $shipping_price,
+				$vat = round( $calculated_shipping_tax_percentage ),
+				$discount = 0,
+				$flags = KlarnaFlags::INC_VAT + KlarnaFlags::IS_SHIPMENT // Price is including VAT and is shipment fee
 			);
-		endif;
+		}		
 		
-		
-		
-		//Create the address object and specify the values.
+		// Create the address object and specify the values.
 		
 		// Billing address
 		$addr_billing = new KlarnaAddr(
     		$email = $order->billing_email,
-    		$telno = '', //We skip the normal land line phone, only one is needed.
+    		$telno = '', // We skip the normal land line phone, only one is needed.
     		$cellno = $order->billing_phone,
-    		//$company = $order->billing_company,
-    		$fname = utf8_decode ($order->billing_first_name),
-    		$lname = utf8_decode ($order->billing_last_name),
-    		$careof = utf8_decode ($order->billing_address_2),  //No care of, C/O.
-    		$street = utf8_decode ($klarna_billing_address), //For DE and NL specify street number in houseNo.
-    		$zip = utf8_decode ($order->billing_postcode),
-    		$city = utf8_decode ($order->billing_city),
-    		$country = utf8_decode ($order->billing_country),
-    		$houseNo = utf8_decode ($klarna_billing_house_number), //For DE and NL we need to specify houseNo.
-    		$houseExt = utf8_decode ($klarna_billing_house_extension) //Only required for NL.
+    		// $company = $order->billing_company,
+    		$fname = utf8_decode( $order->billing_first_name ),
+    		$lname = utf8_decode( $order->billing_last_name ),
+    		$careof = utf8_decode( $order->billing_address_2 ),  // No care of, C/O.
+    		$street = utf8_decode( $klarna_billing_address ), // For DE and NL specify street number in houseNo.
+    		$zip = utf8_decode( $order->billing_postcode ),
+    		$city = utf8_decode ( $order->billing_city ),
+    		$country = utf8_decode( $order->billing_country ),
+    		$houseNo = utf8_decode( $klarna_billing_house_number ), // For DE and NL we need to specify houseNo.
+    		$houseExt = utf8_decode( $klarna_billing_house_extension ) // Only required for NL.
 		);
 		
 		
 		// Shipping address
-		if ( $order->get_shipping_method() == '' || $this->ship_to_billing_address == 'yes') {
-			
+		if ( $order->get_shipping_method() == '' || $this->ship_to_billing_address == 'yes' ) {
 			// Use billing address if Shipping is disabled in Woocommerce
 			$addr_shipping = new KlarnaAddr(
     			$email = $order->billing_email,
     			$telno = '', //We skip the normal land line phone, only one is needed.
     			$cellno = $order->billing_phone,
-    			//$company = $order->shipping_company,
-    			$fname = utf8_decode ($order->billing_first_name),
-    			$lname = utf8_decode ($order->billing_last_name),
-    			$careof = utf8_decode ($order->billing_address_2),  //No care of, C/O.
-    			$street = utf8_decode ($klarna_billing_address), //For DE and NL specify street number in houseNo.
-    			$zip = utf8_decode ($order->billing_postcode),
-    			$city = utf8_decode ($order->billing_city),
-    			$country = utf8_decode ($order->billing_country),
-    			$houseNo = utf8_decode ($klarna_billing_house_number), //For DE and NL we need to specify houseNo.
-    			$houseExt = utf8_decode ($klarna_billing_house_extension) //Only required for NL.
+    			// $company = $order->shipping_company,
+    			$fname = utf8_decode( $order->billing_first_name ),
+    			$lname = utf8_decode( $order->billing_last_name ),
+    			$careof = utf8_decode( $order->billing_address_2 ),  // No care of, C/O.
+    			$street = utf8_decode( $klarna_billing_address ), // For DE and NL specify street number in houseNo.
+    			$zip = utf8_decode( $order->billing_postcode ),
+    			$city = utf8_decode( $order->billing_city ),
+    			$country = utf8_decode( $order->billing_country ),
+    			$houseNo = utf8_decode( $klarna_billing_house_number ), // For DE and NL we need to specify houseNo.
+    			$houseExt = utf8_decode( $klarna_billing_house_extension ) // Only required for NL.
 			);
-		
 		} else {
-		
 			$addr_shipping = new KlarnaAddr(
     			$email = $order->billing_email,
     			$telno = '', //We skip the normal land line phone, only one is needed.
     			$cellno = $order->billing_phone,
-    			//$company = $order->shipping_company,
-    			$fname = utf8_decode ($order->shipping_first_name),
-    			$lname = utf8_decode ($order->shipping_last_name),
-    			$careof = utf8_decode ($order->shipping_address_2),  //No care of, C/O.
-    			$street = utf8_decode ($klarna_shipping_address), //For DE and NL specify street number in houseNo.
-    			$zip = utf8_decode ($order->shipping_postcode),
-    			$city = utf8_decode ($order->shipping_city),
-    			$country = utf8_decode ($order->shipping_country),
-    			$houseNo = utf8_decode ($klarna_shipping_house_number), //For DE and NL we need to specify houseNo.
-    			$houseExt = utf8_decode ($klarna_shipping_house_extension) //Only required for NL.
+    			// $company = $order->shipping_company,
+    			$fname = utf8_decode( $order->shipping_first_name ),
+    			$lname = utf8_decode( $order->shipping_last_name ),
+    			$careof = utf8_decode( $order->shipping_address_2 ),  // No care of, C/O.
+    			$street = utf8_decode( $klarna_shipping_address ), // For DE and NL specify street number in houseNo.
+    			$zip = utf8_decode( $order->shipping_postcode ),
+    			$city = utf8_decode( $order->shipping_city ),
+    			$country = utf8_decode( $order->shipping_country ),
+    			$houseNo = utf8_decode( $klarna_shipping_house_number ), // For DE and NL we need to specify houseNo.
+    			$houseExt = utf8_decode( $klarna_shipping_house_extension ) // Only required for NL.
 			);
-		
 		}
 
-		
-		//Next we tell the Klarna instance to use the address in the next order.
-		$k->setAddress(KlarnaFlags::IS_BILLING, $addr_billing); //Billing / invoice address
-		$k->setAddress(KlarnaFlags::IS_SHIPPING, $addr_shipping); //Shipping / delivery address
+		// Next we tell the Klarna instance to use the address in the next order.
+		$k->setAddress( KlarnaFlags::IS_BILLING, $addr_billing ); // Billing / invoice address
+		$k->setAddress( KlarnaFlags::IS_SHIPPING, $addr_shipping ); // Shipping / delivery address
 
-		//Set store specific information so you can e.g. search and associate invoices with order numbers.
+		// Set store specific information so you can e.g. search and associate invoices with order numbers.
 		$k->setEstoreInfo(
-		    $orderid1 = ltrim( $order->get_order_number(), '#'),
+		    $orderid1 = ltrim( $order->get_order_number(), '#' ),
 		    $orderid2 = $order_id,
 		    $user = '' //Username, email or identifier for the user?
 		);
 		
-		
 		/** Shipment type? **/
 
-		//Normal shipment is defaulted, delays the start of invoice expiration/due-date.
+		// Normal shipment is defaulted, delays the start of invoice expiration/due-date.
 		// $k->setShipmentInfo('delay_adjust', KlarnaFlags::EXPRESS_SHIPMENT);		    
 		try {
-    		//Transmit all the specified data, from the steps above, to Klarna.
+			// Transmit all the specified data, from the steps above, to Klarna.
 			$result = $k->reserveAmount(
-				$klarna_pno, 			//Date of birth.
-				$klarna_gender,			//Gender.
+				$klarna_pno, 			// Date of birth.
+				$klarna_gender,			// Gender.
 				-1, 					// Automatically calculate and reserve the cart total amount
-				KlarnaFlags::NO_FLAG, 	//No specific behaviour like RETURN_OCR or TEST_MODE.
+				KlarnaFlags::NO_FLAG, 	// No specific behaviour like RETURN_OCR or TEST_MODE.
 				$klarna_pclass 			// Get the pclass object that the customer has choosen.
-    		);
+			);
     		
-    		// Prepare redirect url
-    		$redirect_url = $order->get_checkout_order_received_url();
-    		
-    		// Store the selected pclass in the order
-    		update_post_meta( $order_id, '_klarna_order_pclass', $klarna_pclass );
-    		
-    		// Retreive response
-    		$invno = $result[0];
-    		switch($result[1]) {
-            case KlarnaFlags::ACCEPTED:
-                $order->add_order_note( __('Klarna payment completed. Klarna Invoice number: ', 'klarna') . $invno );
-                update_post_meta( $order_id, '_klarna_order_reservation', $invno );
-                
-                // Payment complete
-				$order->payment_complete();		
-				
-				// Remove cart
-				$woocommerce->cart->empty_cart();			
-				
-				// Return thank you redirect
-				return array(
-						'result' 	=> 'success',
-						'redirect'	=> $redirect_url
-				);
-						
-                break;
-            case KlarnaFlags::PENDING:
-                $order->add_order_note( __('Order is PENDING APPROVAL by Klarna. Please visit Klarna Online for the latest status on this order. Klarna Invoice number: ', 'klarna') . $invno );
-                
-                // Payment complete
-				$order->payment_complete();
-				
-				// Remove cart
-				$woocommerce->cart->empty_cart();
-				
-				// Return thank you redirect
-				return array(
-						'result' 	=> 'success',
-						'redirect'	=> $redirect_url
-				);
-				
-                break;
-            case KlarnaFlags::DENIED:
-                //Order is denied, store it in a database.
-				$order->add_order_note( __('Klarna payment denied.', 'klarna') );
-				wc_add_notice(__('Klarna payment denied.', 'klarna'), 'error');
-                return;
-                break;
-            default:
-            	//Unknown response, store it in a database.
-				$order->add_order_note( __('Unknown response from Klarna.', 'klarna') );
-				wc_add_notice(__('Unknown response from Klarna.', 'klarna'), 'error');
-                return;
-                break;
-        	}
- 			
- 	   		
+			// Prepare redirect url
+			$redirect_url = $order->get_checkout_order_received_url();
+
+			// Store the selected pclass in the order
+			update_post_meta( $order_id, '_klarna_order_pclass', $klarna_pclass );
+
+			// Retreive response
+			$invno = $result[0];
+
+    		switch( $result[1] ) {
+				case KlarnaFlags::ACCEPTED :
+					$order->add_order_note(
+						__( 'Klarna payment completed. Klarna Invoice number: ', 'klarna' ) . $invno
+					);
+					update_post_meta( $order_id, '_klarna_order_reservation', $invno );
+					$order->payment_complete(); // Payment complete
+					$woocommerce->cart->empty_cart(); // Remove cart	
+					// Return thank you redirect
+					return array(
+						'result'   => 'success',
+						'redirect' => $redirect_url
+					);
+					break;
+
+				case KlarnaFlags::PENDING :
+					$order->add_order_note(
+						__( 'Order is PENDING APPROVAL by Klarna. Please visit Klarna Online for the latest status on this order. Klarna Invoice number: ', 'klarna' ) . $invno
+					);
+					$order->payment_complete(); // Payment complete					
+					$woocommerce->cart->empty_cart(); // Remove cart
+					// Return thank you redirect
+					return array(
+						'result'   => 'success',
+						'redirect' => $redirect_url
+					);
+					break;
+
+				case KlarnaFlags::DENIED : // Order is denied, store it in a database.
+					$order->add_order_note(
+						__( 'Klarna payment denied.', 'klarna' )
+					);
+					wc_add_notice(
+						__( 'Klarna payment denied.', 'klarna' ), 
+						'error'
+					);
+					return;
+					break;
+
+				default: // Unknown response, store it in a database.
+					$order->add_order_note(
+						__( 'Unknown response from Klarna.', 'klarna' )
+					);
+					wc_add_notice(
+						__( 'Unknown response from Klarna.', 'klarna' ),
+						'error'
+					);
+					return;
+					break;
 			}
+
+		}
 		
-		catch(Exception $e) {
-    		//The purchase was denied or something went wrong, print the message:
-			wc_add_notice(sprintf(__('%s (Error code: %s)', 'klarna'), utf8_encode($e->getMessage()), $e->getCode() ), 'error');
+		catch( Exception $e ) {
+    		// The purchase was denied or something went wrong, print the message:
+			wc_add_notice(
+				sprintf(
+					__( '%s (Error code: %s)', 'klarna' ),
+					utf8_encode($e->getMessage() ),
+					$e->getCode()
+				),
+				'error'
+			);
 			return;
 		}
 
-	
 	}
 	
 	/**
