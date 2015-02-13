@@ -138,6 +138,25 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 		$klarna_basic_icon = '';
 		$klarna_account_info = '';
 
+		// Define Klarna object
+		require_once( KLARNA_LIB . 'Klarna.php' );
+		$this->klarna = new Klarna();
+
+		// Test mode or Live mode		
+		if ( $this->testmode == 'yes' ) {
+			// Disable SSL if in testmode
+			$this->klarna_ssl = 'false';
+			$this->klarna_mode = Klarna::BETA;
+		} else {
+			// Set SSL if used in webshop
+			if ( is_ssl() ) {
+				$this->klarna_ssl = 'true';
+			} else {
+				$this->klarna_ssl = 'false';
+			}
+			$this->klarna_mode = Klarna::LIVE;
+		}
+
 		// Apply filters to Country and language
 		$this->klarna_account_info = apply_filters( 'klarna_account_info', $klarna_account_info );
 		$this->icon = apply_filters( 'klarna_account_icon', $this->get_account_icon() );	
@@ -275,10 +294,8 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 			}
 			$klarna_mode = Klarna::LIVE;
 		}
-	   	
-  		$k = new Klarna();
-		
-		$k->config(
+	   			
+		$this->klarna->config(
 		    $this->get_eid(), 												// EID
 		    $this->get_secret(), 											// Secret
 		    $this->get_klarna_country(), 									// Country
@@ -444,7 +461,6 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 	 *
 	 * @since 1.0.0
 	 * @todo  Introduce new methods: 
-	 *        Collect DOB
 	 *        Split address
 	 *        Test or Live check
 	 *        Add items to cart
@@ -480,8 +496,7 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 		$klarna_gender = isset( $_POST['klarna_account_gender'] ) ? woocommerce_clean( $_POST['klarna_account_gender'] ) : '';
 		
 		$klarna_de_consent_terms = isset( $_POST['klarna_de_consent_terms'] ) ? woocommerce_clean( $_POST['klarna_de_consent_terms'] ) : '';
-		
-		
+			
 		// Split address into House number and House extension for NL & DE customers
 		if ( $_POST['billing_country'] == 'NL' || $_POST['billing_country'] == 'DE' ) {
 			require_once( KLARNA_DIR . 'split-address.php' );
@@ -508,35 +523,23 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 			$klarna_shipping_house_number		= '';
 			$klarna_shipping_house_extension	= '';
 		}
-				
-		
-		// Test mode or Live mode		
-		if ( $this->testmode == 'yes' ):
-			// Disable SSL if in testmode
-			$klarna_ssl = 'false';
-			$klarna_mode = Klarna::BETA;
-		else :
-			// Set SSL if used in webshop
-			if (is_ssl()) {
-				$klarna_ssl = 'true';
-			} else {
-				$klarna_ssl = 'false';
-			}
-			$klarna_mode = Klarna::LIVE;
-		endif;
 			
-		$k = new Klarna();
+		$klarna = $this->klarna;
 		
-		$k->config(
+		$klarna->config(
 		    $this->get_eid(), 												// EID
 		    $this->get_secret(), 											// Secret
 		    $this->get_klarna_country(), 									// Country
 		    $this->get_klarna_language($this->get_klarna_country()), 		// Language
 		    $this->selected_currency, 										// Currency
-		    $klarna_mode, 													// Live or test
+		    $this->klarna_mode, 											// Live or test
 		    $pcStorage = 'jsondb', 											// PClass storage
 		    $pcURI = 'klarna_pclasses_' . $this->get_klarna_country()		// PClass storage URI path
 		);
+
+		/**
+		 * @continue_here
+		 */
 
 		// Cart Contents
 		if ( sizeof( $order->get_items() ) > 0 ) {
@@ -566,7 +569,7 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 						$reference = $_product->id;
 					}
 					
-					$k->addArticle(
+					$klarna->addArticle(
 			    		$qty = $item['qty'],                   // Quantity
 			    		$artNo = strval($reference),           // Article number
 			    		$title = utf8_decode ($item['name']),  // Article name/title
@@ -586,7 +589,7 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 			$klarna_order_discount = $order->order_discount;
 			$order_discount = apply_filters( 'klarna_order_discount', $klarna_order_discount );
 		
-			$k->addArticle(
+			$klarna->addArticle(
 			    $qty = 1,
 			    $artNo = '',
 			    $title = __( 'Discount', 'klarna' ),
@@ -614,7 +617,7 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 				
 				$item_loop++;
 
-				$k->addArticle(
+				$klarna->addArticle(
 					$qty = 1,
 					$artNo = '',
 					$title = $item['name'],
@@ -637,7 +640,7 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 			$klarna_shipping_price_including_tax = $order->get_total_shipping()*$calculated_shipping_tax_decimal;
 			$shipping_price = apply_filters( 'klarna_shipping_price_including_tax', $klarna_shipping_price_including_tax );
 			
-			$k->addArticle(
+			$klarna->addArticle(
 				$qty = 1,
 				$artNo = '',
 				$title = __( 'Shipping cost', 'klarna' ),
@@ -705,11 +708,11 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 		}
 
 		// Next we tell the Klarna instance to use the address in the next order.
-		$k->setAddress( KlarnaFlags::IS_BILLING, $addr_billing ); // Billing / invoice address
-		$k->setAddress( KlarnaFlags::IS_SHIPPING, $addr_shipping ); // Shipping / delivery address
+		$klarna->setAddress( KlarnaFlags::IS_BILLING, $addr_billing ); // Billing / invoice address
+		$klarna->setAddress( KlarnaFlags::IS_SHIPPING, $addr_shipping ); // Shipping / delivery address
 
 		// Set store specific information so you can e.g. search and associate invoices with order numbers.
-		$k->setEstoreInfo(
+		$klarna->setEstoreInfo(
 		    $orderid1 = ltrim( $order->get_order_number(), '#' ),
 		    $orderid2 = $order_id,
 		    $user = '' //Username, email or identifier for the user?
@@ -718,10 +721,9 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 		/** Shipment type? **/
 
 		// Normal shipment is defaulted, delays the start of invoice expiration/due-date.
-		// $k->setShipmentInfo('delay_adjust', KlarnaFlags::EXPRESS_SHIPMENT);		    
 		try {
 			// Transmit all the specified data, from the steps above, to Klarna.
-			$result = $k->reserveAmount(
+			$result = $klarna->reserveAmount(
 				$klarna_pno, 			// Date of birth.
 				$klarna_gender,			// Gender.
 				-1, 					// Automatically calculate and reserve the cart total amount
@@ -796,7 +798,7 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 			wc_add_notice(
 				sprintf(
 					__( '%s (Error code: %s)', 'klarna' ),
-					utf8_encode($e->getMessage() ),
+					utf8_encode( $e->getMessage() ),
 					$e->getCode()
 				),
 				'error'
@@ -836,43 +838,28 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 			require_once( KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc.inc' );
 			require_once( KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc_wrappers.inc' );
 		}
-			
-		// Test mode or Live mode		
-		if ( $this->testmode == 'yes' ) {
-			// Disable SSL if in testmode
-			$klarna_ssl = 'false';
-			$klarna_mode = Klarna::BETA;
-		} else {
-			// Set SSL if used in webshop
-			if ( is_ssl() ) {
-				$klarna_ssl = 'true';
-			} else {
-				$klarna_ssl = 'false';
-			}
-			$klarna_mode = Klarna::LIVE;
-		}
-   		
-		$k = new Klarna();
-		
-		$k->config(
+					
+		$klarna = $this->klarna;
+
+		$klarna->config(
 		    $this->get_eid( $country ), 					// EID
 		    $this->get_secret( $country ), 					// Secret
 		    $country, 										// Country
 		    $this->get_klarna_language( $country ),			// Language
 		    $this->get_currency_for_country( $country ),	// Currency
-		    $klarna_mode, 									// Live or test
+		    $this->klarna_mode, 							// Live or test
 		    $pcStorage = 'jsondb', 							// PClass storage
 		    $pcURI = 'klarna_pclasses_' . $country			// PClass storage URI path
 		);
 		
-		if ( $k->getPClasses() ) {
-			return $k->getPClasses();
+		if ( $klarna->getPClasses() ) {
+			return $klarna->getPClasses();
 		} else {
 			try {
 				// You can specify country (and language, currency if you wish) if you don't want 
 				// to use the configured country.
-				$k->fetchPClasses( $country ); 
-				return $k->getPClasses();
+				$klarna->fetchPClasses( $country ); 
+				return $klarna->getPClasses();
 			}
 			catch( Exception $e ) {
 				return false;
@@ -889,17 +876,19 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 	 **/ 
 	function print_product_monthly_cost() {
 		
-		if ( $this->enabled!="yes" || $this->get_klarna_locale(get_locale()) == 'nl_nl' ) return;
+		if ( $this->enabled!="yes" || $this->get_klarna_locale(get_locale()) == 'nl_nl' )
+			return;
 			
 		global $woocommerce, $product, $klarna_account_shortcode_currency, $klarna_account_shortcode_price, $klarna_shortcode_img, $klarna_account_country;
 		
 		$klarna_product_total = $product->get_price();
 		
 		// Product with no price - do nothing
-		if ( empty($klarna_product_total) ) return;
+		if ( empty( $klarna_product_total ) )
+			return;
 		
 		$sum = apply_filters( 'klarna_product_total', $klarna_product_total ); // Product price.
-		$sum = trim($sum);
+		$sum = trim( $sum );
 		
 	 	// Only execute this if the feature is activated in the gateway settings
 		if ( $this->show_monthly_cost == 'yes' ) {
@@ -927,12 +916,11 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 					echo '<img src="' . $this->klarna_wb_img_single_product . '" class="klarna-wb" style="max-width: 100%;"/>';	
 				}
 	    				    	
-	    	} // End threshold check
+	    	}
 		
-		} // End show_monthly_cost check
+		}
 		
-	} // End function
-	
+	}
 	
 	
 	/**
