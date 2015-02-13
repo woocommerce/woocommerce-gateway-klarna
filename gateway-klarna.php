@@ -177,7 +177,7 @@ function init_klarna_gateway() {
 		 */
 		public function __construct() {
 
-			add_action( 'admin_notices', array( $this, ' krokedil_admin_notice' ) );
+			add_action( 'admin_notices', array( $this, 'krokedil_admin_notice' ) );
 			add_action( 'admin_init', array( $this, 'krokedil_nag_ignore' ) );
 
 		}
