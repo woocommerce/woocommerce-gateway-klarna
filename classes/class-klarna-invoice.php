@@ -933,17 +933,8 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 		    $orderid2 = $order_id,
 		    $user = '' //Username, email or identifier for the user?
 		);
-		
-		/*
-		echo '<pre>';
-		print_r($k);
-		echo '</pre>';
-		die();
-		*/
-		/** Shipment type? **/
 
-		//Normal shipment is defaulted, delays the start of invoice expiration/due-date.
-		// $k->setShipmentInfo('delay_adjust', KlarnaFlags::EXPRESS_SHIPMENT);
+
 		try {
 		
     		//Transmit all the specified data, from the steps above, to Klarna.

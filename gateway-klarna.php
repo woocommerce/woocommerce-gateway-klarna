@@ -156,6 +156,7 @@ function init_klarna_gateway() {
 	require_once 'classes/class-klarna-partpayment-widget.php'; // Partpayment widget
 	require_once 'classes/class-klarna-get-address.php'; // Get address 
 	require_once 'classes/class-klarna-pms.php'; // PMS
+	require_once 'classes/class-klarna-order.php'; // Handles Klarna orders
 
 	// Klarna Checkout class
 	$klarna_shop_country = get_option( 'woocommerce_default_country' );
