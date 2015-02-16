@@ -510,7 +510,7 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 		// Get values from klarna form on checkout page
 		
 		// Collect the DoB
-		$klarna_pno = $this->collect_dob();
+		$klarna_pno = $this->collect_dob( $order_id );
 
 		// Store Klarna specific form values in order as post meta
 		update_post_meta( $order_id, 'klarna_pno', $klarna_pno);
@@ -551,7 +551,7 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 		/**
 		 * Setup Klarna configuration
 		 */
-		WC_Gateway_Klarna_Order::configure_klarna( $klarna );
+		$this->configure_klarna( $klarna );
 
 		/**
 		 * Process cart contents
