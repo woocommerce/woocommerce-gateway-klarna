@@ -322,11 +322,17 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 		}
 			
 		if ( 'NO' == $this->get_klarna_country() ) {
+
 			// Use Klarna PMS for Norway
+			$payment_method_group = 'part_payment';
+			$payment_method_select_id = 'klarna_account_pclass';
 			include_once( KLARNA_DIR . 'views/public/payment-fields-pms.php' );
+
 		} else {
+
 			// For countries other than NO do the old thing
-			include_once( KLARNA_DIR . 'views/public/payment-fields.php' );
+			include_once( KLARNA_DIR . 'views/public/payment-fields-account.php' );
+		
 		}
 	
 	}
@@ -467,14 +473,14 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 	function configure_klarna( $klarna ) {
 
 		$klarna->config(
-		    $this->get_eid(), 												// EID
-		    $this->get_secret(), 											// Secret
-		    $this->get_klarna_country(), 									// Country
-		    $this->get_klarna_language($this->get_klarna_country()), 		// Language
-		    $this->selected_currency, 										// Currency
-		    $this->klarna_mode, 											// Live or test
-		    $pcStorage = 'jsondb', 											// PClass storage
-		    $pcURI = 'klarna_pclasses_' . $this->get_klarna_country()		// PClass storage URI path
+			$this->get_eid(), // EID
+			$this->get_secret(), // Secret
+			$this->get_klarna_country(), // Country
+			$this->get_klarna_language( $this->get_klarna_country() ), // Language
+			$this->selected_currency, // Currency
+			$this->klarna_mode, // Live or test
+			$pcStorage = 'jsondb', // PClass storage
+			$pcURI = 'klarna_pclasses_' . $this->get_klarna_country() // PClass storage URI path
 		);
 
 	}
@@ -483,15 +489,6 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 	 * Process the payment and return the result
 	 *
 	 * @since 1.0.0
-	 * @todo  Introduce new methods: 
-	 *        Split address
-	 *        Test or Live check
-	 *        Add items to cart
-	 *        Add discount
-	 *        Add fees
-	 *        Set shipping
-	 *        Set billing
-	 *        Reserve amount with Klarna
 	 **/
 	function process_payment( $order_id ) {
 
@@ -517,32 +514,35 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 		
 		$klarna_pclass = isset( $_POST['klarna_account_pclass'] ) ? woocommerce_clean( $_POST['klarna_account_pclass'] ) : '';
 		$klarna_gender = isset( $_POST['klarna_account_gender'] ) ? woocommerce_clean( $_POST['klarna_account_gender'] ) : '';
-		
 		$klarna_de_consent_terms = isset( $_POST['klarna_de_consent_terms'] ) ? woocommerce_clean( $_POST['klarna_de_consent_terms'] ) : '';
 			
 		// Split address into House number and House extension for NL & DE customers
+		$klarna_billing = array();
+		$klarna_shipping = array();
 		if ( $_POST['billing_country'] == 'NL' || $_POST['billing_country'] == 'DE' ) {
 			require_once( KLARNA_DIR . 'split-address.php' );
 			
-			$klarna_billing_address				= $order->billing_address_1;
-			$splitted_address 					= splitAddress( $klarna_billing_address );
-			$klarna_billing_address				= $splitted_address[0];
-			$klarna_billing_house_number		= $splitted_address[1];
-			$klarna_billing_house_extension		= $splitted_address[2];
+			// Set up billing address array
+			$klarna_billing_address             = $order->billing_address_1;
+			$splitted_address                   = splitAddress( $klarna_billing_address );
+			$klarna_billing['address']          = $splitted_address[0];
+			$klarna_billing['house_number']	    = $splitted_address[1];
+			$klarna_billing['house_extension']  = $splitted_address[2];
 			
-			$klarna_shipping_address			= $order->shipping_address_1;
-			$splitted_address 					= splitAddress( $klarna_shipping_address );
-			$klarna_shipping_address			= $splitted_address[0];
-			$klarna_shipping_house_number		= $splitted_address[1];
-			$klarna_shipping_house_extension	= $splitted_address[2];
+			// Set up shipping address array
+			$klarna_shipping_address            = $order->shipping_address_1;
+			$splitted_address                   = splitAddress( $klarna_shipping_address );
+			$klarna_shipping['address']         = $splitted_address[0];
+			$klarna_shipping['house_number']    = $splitted_address[1];
+			$klarna_shipping['house_extension'] = $splitted_address[2];
 		} else {			
-			$klarna_billing_address				= $order->billing_address_1;
-			$klarna_billing_house_number		= '';
-			$klarna_billing_house_extension		= '';
+			$klarna_billing['address']          = $order->billing_address_1;
+			$klarna_billing['house_number']     = '';
+			$klarna_billing['house_extension']  = '';
 			
-			$klarna_shipping_address			= $order->shipping_address_1;
-			$klarna_shipping_house_number		= '';
-			$klarna_shipping_house_extension	= '';
+			$klarna_shipping['address']         = $order->shipping_address_1;
+			$klarna_shipping['house_number']    = '';
+			$klarna_shipping['house_extension'] = '';
 		}
 			
 		$klarna = $this->klarna;
@@ -553,40 +553,13 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 		 */
 		$this->configure_klarna( $klarna );
 
-		/**
-		 * Process cart contents
-		 */
-		WC_Gateway_Klarna_Order::process_cart_contents( $order, $klarna );
-		 
-		/**
-		 * Process discount
-		 */
-		WC_Gateway_Klarna_Order::process_discount( $order, $klarna );
-
-		/**
-		 * Process fees
-		 */
-		WC_Gateway_Klarna_Order::process_fees( $order, $klarna );
-		
-		/**
-		 * Process shipping
-		 */
-		WC_Gateway_Klarna_Order::process_shipping( $order, $klarna );			
-
-		/**
-		 * Set shipping and billing address
-		 */
-		WC_Gateway_Klarna_Order::set_addresses(
+		$klarna_order = new WC_Gateway_Klarna_Order(
 			$order,
-			$klarna_billing_address,
-			$klarna_billing_house_number,
-			$klarna_billing_house_extension,
-			$klarna_shipping_address,
-			$klarna_shipping_house_number,
-			$klarna_shipping_house_extension,
+			$klarna_billing,
+			$klarna_shipping,
 			$this->ship_to_billing_address,
 			$klarna
-		);	
+		);
 
 		// Set store specific information so you can e.g. search and associate invoices with order numbers.
 		$klarna->setEstoreInfo(

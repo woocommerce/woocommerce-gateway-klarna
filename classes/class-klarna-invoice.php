@@ -51,16 +51,31 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 		$this->ship_to_billing_address	= ( isset( $this->settings['ship_to_billing_address'] ) ) ? $this->settings['ship_to_billing_address'] : '';
 		
 		
-		//if ( $this->handlingfee == "") $this->handlingfee = 0;
-		//if ( $this->handlingfee_tax == "") $this->handlingfee_tax = 0;
-		if ( $this->invoice_fee_id == "") $this->invoice_fee_id = 0;
+		// Define Klarna object
+		require_once( KLARNA_LIB . 'Klarna.php' );
+		$this->klarna = new Klarna();
 
+		// Test mode or Live mode		
+		if ( $this->testmode == 'yes' ) {
+			// Disable SSL if in testmode
+			$this->klarna_ssl = 'false';
+			$this->klarna_mode = Klarna::BETA;
+		} else {
+			// Set SSL if used in webshop
+			if ( is_ssl() ) {
+				$this->klarna_ssl = 'true';
+			} else {
+				$this->klarna_ssl = 'false';
+			}
+			$this->klarna_mode = Klarna::LIVE;
+		}
+
+		if ( $this->invoice_fee_id == "") $this->invoice_fee_id = 0;
 		
 		// Apply filters
 		$this->icon 				= apply_filters( 'klarna_invoice_icon', $this->get_invoice_icon() );
 		$this->description			= apply_filters( 'klarna_invoice_description', $this->description );
-		
-		
+				
 		// Actions
 		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
 		
@@ -295,14 +310,12 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 	 */
 	
 	function payment_fields() {
+
 	   	global $woocommerce;
 	   	
-	   	?>
-	   	
-	   	<?php if ($this->testmode=='yes') : ?><p><?php _e('TEST MODE ENABLED', 'klarna'); ?></p>
-	   	
-	   	<?php 
-	   	endif;
+		if ( 'yes' == $this->testmode ) { ?>
+			<p><?php _e('TEST MODE ENABLED', 'klarna'); ?></p>
+		<?php }
 		
 		// Description
 		if ($this->description) :	
@@ -310,306 +323,70 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 		endif; 
 
 		// Use Klarna PMS for Norway
-		if ( 'NO' == $this->get_klarna_country() ) { ?>
-			<fieldset>
-				<?php
-				$klarna_pms = new WC_Klarna_PMS;
-				if ( $this->testmode == 'yes' ) {
-					$klarna_mode = 'test';
-				} else {
-					$klarna_mode = 'live';
-				}
-				$klarna_pms_data = $klarna_pms->get_data(
-					$this->get_eid(),               // $eid
-					$this->get_secret(),            // $secret
-					$this->selected_currency,       // $selected_currency
-					$this->get_klarna_country(),    // $shop_country
-					$woocommerce->cart->total,      // $cart_total
-					'invoice',                      // $payment_method_group
-					'klarna_invo_pclass',           // $select_id,
-					$klarna_mode,                   // $klarna_mode
-					$this->get_invoice_fee_price()  // $invice_fee
-				);
-				echo $klarna_pms_data;
-				?>
+		if ( 'NO' == $this->get_klarna_country() ) {
 
-				<p class="form-row form-row-first">
-					<label for="klarna_invo_pno"><?php echo __("Date of Birth", 'klarna') ?> <span class="required">*</span></label>
-					<input type="text" class="input-text" name="klarna_invo_pno" id="klarna_invo_pno" />
-
-					<?php
-					// Button/form for getAddress
-					$data = new WC_Klarna_Get_Address;
-					echo $data->get_address_button( $this->get_klarna_country() );
-					?>
-				</p>
-
-			</fieldset>
-		<?php	
-		// For countries other than NO do the old thing
+			// Use Klarna PMS for Norway
+			$payment_method_group = 'part_payment';
+			$payment_method_select_id = 'klarna_account_pclass';
+			include_once( KLARNA_DIR . 'views/public/payment-fields-pms.php' );
+		
 		} else {
 
-			// Mobile or desktop browser
-			if (wp_is_mobile() ) {
-				$klarna_layout = 'mobile';
-			 } else {
-			 	$klarna_layout = 'desktop';
-			 }
-			
-			// Script for displaying the terms link
-			?>
-			
-			<script type="text/javascript">
-			
-				// Document ready
-				jQuery(document).ready(function($) {		
-					
-					var klarna_invo_selected_country = $( "#billing_country" ).val();
-					
-					// If no Billing Country is set in the checkout form, use the default shop country
-					if( !klarna_invo_selected_country ) {
-						var klarna_invo_selected_country = '<?php echo $this->shop_country;?>';
-					}
-					
-					if( klarna_invo_selected_country == 'SE' ) {
-					
-						var klarna_invo_current_locale = 'sv_SE';
-					
-					} else if( klarna_invo_selected_country == 'NO' ) {
+			// For countries other than NO do the old thing
+			include_once( KLARNA_DIR . 'views/public/payment-fields-invoice.php' );
 
-						var klarna_invo_current_locale = 'nb_NO';
-					
-					} else if( klarna_invo_selected_country == 'DK' ) {
+		}
 
-						var klarna_invo_current_locale = 'da_DK';
-					
-					} else if( klarna_invo_selected_country == 'FI' ) {
-
-						var klarna_invo_current_locale = 'fi_FI';
-						
-					} else if( klarna_invo_selected_country == 'DE' ) {
-
-						var klarna_invo_current_locale = 'de_DE';
-					
-					}  else if( klarna_invo_selected_country == 'NL' ) {
-
-						var klarna_invo_current_locale = 'nl_NL';
-					
-					} else if( klarna_invo_selected_country == 'AT' ) {
-
-						var klarna_invo_current_locale = 'de_AT';
-					} else {
-						
-					}
-					
-					new Klarna.Terms.Invoice({
-					    el: 'klarna-invoice-terms',
-					    eid: '<?php echo $this->get_eid(); ?>',
-					    locale: klarna_invo_current_locale,
-					    charge: '<?php echo $this->get_invoice_fee_price();?>',
-					    type: '<?php echo $klarna_layout;?>',
-					});
-					
-				});
-				
-			</script>
-			<span id="klarna-invoice-terms"></span>
-			
-			
-
-			<fieldset>
-				<p class="form-row form-row-first">
-					<?php if ( $this->get_klarna_country() == 'NL' || $this->get_klarna_country() == 'DE' || $this->get_klarna_country() == 'AT' ) : ?>
-					
-					<label for="klarna_pno"><?php echo __("Date of Birth", 'klarna') ?> <span class="required">*</span></label>
-					<span class="dob">
-	                    <select class="dob_select dob_day" name="klarna_invo_date_of_birth_day" style="width:60px;">
-	                        <option value="">
-	                        <?php echo __("Day", 'klarna') ?>
-	                        </option>
-	                        <option value="01">01</option>
-	                        <option value="02">02</option>
-	                        <option value="03">03</option>
-	                        <option value="04">04</option>
-	                        <option value="05">05</option>
-	                        <option value="06">06</option>
-	                        <option value="07">07</option>
-	                        <option value="08">08</option>
-	                        <option value="09">09</option>
-	                        <option value="10">10</option>
-	                        <option value="11">11</option>
-	                        <option value="12">12</option>
-	                        <option value="13">13</option>
-	                        <option value="14">14</option>
-	                        <option value="15">15</option>
-	                        <option value="16">16</option>
-	                        <option value="17">17</option>
-	                        <option value="18">18</option>
-	                        <option value="19">19</option>
-	                        <option value="20">20</option>
-	                        <option value="21">21</option>
-	                        <option value="22">22</option>
-	                        <option value="23">23</option>
-	                        <option value="24">24</option>
-	                        <option value="25">25</option>
-	                        <option value="26">26</option>
-	                        <option value="27">27</option>
-	                        <option value="28">28</option>
-	                        <option value="29">29</option>
-	                        <option value="30">30</option>
-	                        <option value="31">31</option>
-	                    </select>
-	                    <select class="dob_select dob_month" name="klarna_invo_date_of_birth_month" style="width:80px;">
-	                        <option value="">
-	                        <?php echo __("Month", 'klarna') ?>
-	                        </option>
-	                        <option value="01"><?php echo __("Jan", 'klarna') ?></option>
-	                        <option value="02"><?php echo __("Feb", 'klarna') ?></option>
-	                        <option value="03"><?php echo __("Mar", 'klarna') ?></option>
-	                        <option value="04"><?php echo __("Apr", 'klarna') ?></option>
-	                        <option value="05"><?php echo __("May", 'klarna') ?></option>
-	                        <option value="06"><?php echo __("Jun", 'klarna') ?></option>
-	                        <option value="07"><?php echo __("Jul", 'klarna') ?></option>
-	                        <option value="08"><?php echo __("Aug", 'klarna') ?></option>
-	                        <option value="09"><?php echo __("Sep", 'klarna') ?></option>
-	                        <option value="10"><?php echo __("Oct", 'klarna') ?></option>
-	                        <option value="11"><?php echo __("Nov", 'klarna') ?></option>
-	                        <option value="12"><?php echo __("Dec", 'klarna') ?></option>
-	                    </select>
-	                    <select class="dob_select dob_year" name="klarna_invo_date_of_birth_year" style="width:60px;">
-	                        <option value="">
-	                        <?php echo __("Year", 'klarna') ?>
-	                        </option>
-	                        <option value="1920">1920</option>
-	                        <option value="1921">1921</option>
-	                        <option value="1922">1922</option>
-	                        <option value="1923">1923</option>
-	                        <option value="1924">1924</option>
-	                        <option value="1925">1925</option>
-	                        <option value="1926">1926</option>
-	                        <option value="1927">1927</option>
-	                        <option value="1928">1928</option>
-	                        <option value="1929">1929</option>
-	                        <option value="1930">1930</option>
-	                        <option value="1931">1931</option>
-	                        <option value="1932">1932</option>
-	                        <option value="1933">1933</option>
-	                        <option value="1934">1934</option>
-	                        <option value="1935">1935</option>
-	                        <option value="1936">1936</option>
-	                        <option value="1937">1937</option>
-	                        <option value="1938">1938</option>
-	                        <option value="1939">1939</option>
-	                        <option value="1940">1940</option>
-	                        <option value="1941">1941</option>
-	                        <option value="1942">1942</option>
-	                        <option value="1943">1943</option>
-	                        <option value="1944">1944</option>
-	                        <option value="1945">1945</option>
-	                        <option value="1946">1946</option>
-	                        <option value="1947">1947</option>
-	                        <option value="1948">1948</option>
-	                        <option value="1949">1949</option>
-	                        <option value="1950">1950</option>
-	                        <option value="1951">1951</option>
-	                        <option value="1952">1952</option>
-	                        <option value="1953">1953</option>
-	                        <option value="1954">1954</option>
-	                        <option value="1955">1955</option>
-	                        <option value="1956">1956</option>
-	                        <option value="1957">1957</option>
-	                        <option value="1958">1958</option>
-	                        <option value="1959">1959</option>
-	                        <option value="1960">1960</option>
-	                        <option value="1961">1961</option>
-	                        <option value="1962">1962</option>
-	                        <option value="1963">1963</option>
-	                        <option value="1964">1964</option>
-	                        <option value="1965">1965</option>
-	                        <option value="1966">1966</option>
-	                        <option value="1967">1967</option>
-	                        <option value="1968">1968</option>
-	                        <option value="1969">1969</option>
-	                        <option value="1970">1970</option>
-	                        <option value="1971">1971</option>
-	                        <option value="1972">1972</option>
-	                        <option value="1973">1973</option>
-	                        <option value="1974">1974</option>
-	                        <option value="1975">1975</option>
-	                        <option value="1976">1976</option>
-	                        <option value="1977">1977</option>
-	                        <option value="1978">1978</option>
-	                        <option value="1979">1979</option>
-	                        <option value="1980">1980</option>
-	                        <option value="1981">1981</option>
-	                        <option value="1982">1982</option>
-	                        <option value="1983">1983</option>
-	                        <option value="1984">1984</option>
-	                        <option value="1985">1985</option>
-	                        <option value="1986">1986</option>
-	                        <option value="1987">1987</option>
-	                        <option value="1988">1988</option>
-	                        <option value="1989">1989</option>
-	                        <option value="1990">1990</option>
-	                        <option value="1991">1991</option>
-	                        <option value="1992">1992</option>
-	                        <option value="1993">1993</option>
-	                        <option value="1994">1994</option>
-	                        <option value="1995">1995</option>
-	                        <option value="1996">1996</option>
-	                        <option value="1997">1997</option>
-	                        <option value="1998">1998</option>
-	                        <option value="1999">1999</option>
-	                        <option value="2000">2000</option>
-	                    </select>
-	                </span><!-- .dob -->
-						
-					<?php else : ?>
-						<label for="klarna_invo_pno"><?php echo __("Date of Birth", 'klarna') ?> <span class="required">*</span></label>
-						<input type="text" class="input-text" name="klarna_invo_pno" id="klarna_invo_pno" />
-					<?php endif; 
-					
-					// Button/form for getAddress
-					$data = new WC_Klarna_Get_Address;
-					echo $data->get_address_button( $this->get_klarna_country() );
-						
-					?>
-				</p>
-				
-				<?php if ( $this->get_klarna_country() == 'NL' || $this->get_klarna_country() == 'DE' || $this->get_klarna_country() == 'AT' ) : 
-					
-				?>
-					<p class="form-row form-row-last">
-						<label for="klarna_invo_gender"><?php echo __("Gender", 'klarna') ?> <span class="required">*</span></label>
-						<select id="klarna_invo_gender" name="klarna_invo_gender" class="woocommerce-select" style="width:120px;">
-							<option value=""><?php echo __("Select gender", 'klarna') ?></options>
-							<option value="f"><?php echo __("Female", 'klarna') ?></options>
-							<option value="m"><?php echo __("Male", 'klarna') ?></options>
-						</select>
-					</p>
-				<?php endif; ?>
-
-	        	
-				<div class="clear"></div>
-			
-				<?php 
-				// Consent terms for German & Austrian shops
-				if ( ( $this->get_klarna_country() == 'DE' || $this->get_klarna_country() == 'AT' ) && $this->de_consent_terms == 'yes' ) : ?>
-					<p class="form-row">
-						<label for="klarna_invo_de_consent_terms"></label>
-						<input type="checkbox" class="input-checkbox" value="yes" name="klarna_invo_de_consent_terms" />
-						<?php echo sprintf(__('Mit der Übermittlung der für die Abwicklungdes Rechnungskaufes und einer Identitäts-und Bonitätsprüfung erforderlichen Daten an Klarna bin ich einverstanden. Meine <a href="%s" target="_blank">Einwilligung</a> kann ich jederzeit mit Wirkung für die Zukunft widerrufen. Es gelten die AGB des Händlers.', 'klarna'), 'https://online.klarna.com/consent_de.yaws') ?>
-						
-					</p>
-				<?php endif; ?>
-				
-			</fieldset>
-		<?php } // end if NO ?>
-		<?php	
 	}
 	
 		
 
+	/**
+	 * Collect DoB, based on country.
+	 * 
+	 * @since  2.0
+	 **/
+	function collect_dob( $order_id ) {
+	
+		// Collect the dob different depending on country
+		if ( $_POST['billing_country'] == 'NL' || $_POST['billing_country'] == 'DE' ) {
+			$klarna_pno_day = 
+				isset( $_POST['date_of_birth_day'] ) ? woocommerce_clean( $_POST['date_of_birth_day'] ) : '';
+			$klarna_pno_month = 
+				isset( $_POST['date_of_birth_month'] ) ? woocommerce_clean( $_POST['date_of_birth_month'] ) : '';
+			$klarna_pno_year = 
+				isset( $_POST['date_of_birth_year'] ) ? woocommerce_clean( $_POST['date_of_birth_year'] ) : '';
+
+			$klarna_pno = $klarna_pno_day . $klarna_pno_month . $klarna_pno_year;
+		} else {
+			$klarna_pno = 
+				isset( $_POST['klarna_invo_pno'] ) ? woocommerce_clean( $_POST['klarna_invo_pno'] ) : '';
+		}
+
+		return $klarna_pno;
+
+	}
+
+
+	/**
+	 * Set up Klarna configuration.
+	 * 
+	 * @since  2.0
+	 **/
+	function configure_klarna( $klarna ) {
+
+		$klarna->config(
+			$this->get_eid(), // EID
+			$this->get_secret(), // Secret
+			$this->get_klarna_country(), // Country
+			$this->get_klarna_language( $this->get_klarna_country() ), // Language
+			$this->selected_currency, // Currency
+			$this->klarna_mode, // Live or test
+			$pcStorage = 'jsondb', // PClass storage
+			$pcURI = '/srv/pclasses.json' // PClass storage URI path
+		);
+
+	}
 	
 	
 	/**
@@ -631,314 +408,72 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 		
 		// Get values from klarna form on checkout page
 		
-		// Collect the dob different depending on country
-		if ( $_POST['billing_country'] == 'NL' || $_POST['billing_country'] == 'DE' || $_POST['billing_country'] == 'AT' ) :
-			$klarna_pno_day 			= isset($_POST['klarna_invo_date_of_birth_day']) ? woocommerce_clean($_POST['klarna_invo_date_of_birth_day']) : '';
-			$klarna_pno_month 			= isset($_POST['klarna_invo_date_of_birth_month']) ? woocommerce_clean($_POST['klarna_invo_date_of_birth_month']) : '';
-			$klarna_pno_year 			= isset($_POST['klarna_invo_date_of_birth_year']) ? woocommerce_clean($_POST['klarna_invo_date_of_birth_year']) : '';
-			$klarna_pno 				= $klarna_pno_day . $klarna_pno_month . $klarna_pno_year;
-		else :
-			$klarna_pno 				= isset($_POST['klarna_invo_pno']) ? woocommerce_clean($_POST['klarna_invo_pno']) : '';
-		endif;
-		
-		$klarna_pclass 					= isset($_POST['klarna_invo_pclass']) ? woocommerce_clean($_POST['klarna_invo_pclass']) : KlarnaPClass::INVOICE; // KlarnaPClass::INVOICE = -1
-		$klarna_gender 					= isset($_POST['klarna_invo_gender']) ? woocommerce_clean($_POST['klarna_invo_gender']) : '';
-		$klarna_de_consent_terms		= isset($_POST['klarna_invo_de_consent_terms']) ? woocommerce_clean($_POST['klarna_invo_de_consent_terms']) : '';
-		
+		// Collect the DoB
+		$klarna_pno = $this->collect_dob( $order_id );
 
-		// Split address into House number and House extension for NL & DE customers
-		if ( $_POST['billing_country'] == 'NL' || $_POST['billing_country'] == 'DE' ) :
-		
-			require_once(KLARNA_DIR . 'split-address.php');
-			
-			$klarna_billing_address				= $order->billing_address_1;
-			$splitted_address 					= splitAddress($klarna_billing_address);
-			
-			$klarna_billing_address				= $splitted_address[0];
-			$klarna_billing_house_number		= $splitted_address[1];
-			$klarna_billing_house_extension		= $splitted_address[2];
-			
-			$klarna_shipping_address			= $order->shipping_address_1;
-			$splitted_address 					= splitAddress($klarna_shipping_address);
-			
-			$klarna_shipping_address			= $splitted_address[0];
-			$klarna_shipping_house_number		= $splitted_address[1];
-			$klarna_shipping_house_extension	= $splitted_address[2];
-		
-		else :
-			
-			$klarna_billing_address				= $order->billing_address_1;
-			$klarna_billing_house_number		= '';
-			$klarna_billing_house_extension		= '';
-			
-			$klarna_shipping_address			= $order->shipping_address_1;
-			$klarna_shipping_house_number		= '';
-			$klarna_shipping_house_extension	= '';
-			
-		endif;
-		
 		// Store Klarna specific form values in order as post meta
 		update_post_meta( $order_id, 'klarna_pno', $klarna_pno);
 		
-		// Test mode or Live mode		
-		if ( $this->testmode == 'yes' ):
-			// Disable SSL if in testmode
-			$klarna_ssl = 'false';
-			$klarna_mode = Klarna::BETA;
-		else :
-			// Set SSL if used in webshop
-			if (is_ssl()) {
-				$klarna_ssl = 'true';
-			} else {
-				$klarna_ssl = 'false';
-			}
-			$klarna_mode = Klarna::LIVE;
-		endif;
-			
-		$k = new Klarna();
-		
-	
-		$k->config(
-		    $this->get_eid(), 												// EID
-		    $this->get_secret(), 											// Secret
-		    $this->get_klarna_country(), 									// Country
-		    $this->get_klarna_language($this->get_klarna_country()), 		// Language
-		    $this->selected_currency, 										// Currency
-		    $klarna_mode, 													// Live or test
-		    $pcStorage = 'json', 											// PClass storage
-		    $pcURI = '/srv/pclasses.json'									// PClass storage URI path
-		);
-		
-		
-		// Cart Contents
-		if (sizeof($order->get_items())>0) : foreach ($order->get_items() as $item) :
-			
-			if ( function_exists( 'get_product' ) ) {
-				
-				// Version 2.0
-				$_product = $order->get_product_from_item($item);
-				
-				// Get SKU or product id
-				$reference = '';
-				if ( $_product->get_sku() ) {
-					$reference = $_product->get_sku();
-				} elseif ( $_product->variation_id ) {
-					$reference = $_product->variation_id;
-				} else {
-					$reference = $_product->id;
-				}
-					
-			} else {
-				
-				// Version 1.6.6
-				$_product = new WC_Product( $item['id'] );
-				
-				// Get SKU or product id
-				if ( $_product->get_sku() ) {
-					$reference = $_product->get_sku();
-				} else {
-					$reference = $item['id'];
-				}
-					
-			}	
-				
-			// We manually calculate the tax percentage here
-			if ($order->get_total_tax() >0) :
-				// Calculate tax percentage
-				$item_tax_percentage = number_format( ( $order->get_line_tax($item) / $order->get_line_total( $item, false ) )*100, 2, '.', '');
-			else :
-				$item_tax_percentage = 0.00;
-			endif;
-				
-				
-			// apply_filters to item price so we can filter this if needed
-			$klarna_item_price_including_tax = $order->get_item_total( $item, true );
-			$item_price = apply_filters( 'klarna_item_price_including_tax', $klarna_item_price_including_tax );
-				
-				$k->addArticle(
-		    			$item['qty'], 					// Quantity
-						strval($reference),		 		// Article number
-			    		utf8_decode ($item['name']), 	// Article name/title
-			    		$item_price, 					// Price including tax
-						round( $item_tax_percentage ),	// Tax
-		    			0, 								// Discount
-		    			KlarnaFlags::INC_VAT 			// Price is including VAT.
-					);
-									
-		//endif;
-		endforeach; endif;
-		 
-		// Discount
-		if ($order->order_discount>0) :
-			
-			// apply_filters to order discount so we can filter this if needed
-			$klarna_order_discount = $order->order_discount;
-			$order_discount = apply_filters( 'klarna_order_discount', $klarna_order_discount );
-		
-			$k->addArticle(
-			    $qty = 1, 								// Quantity
-			    $artNo = "",							// Article number
-			    $title = __('Discount', 'klarna'),		// Article name/title
-			    $price = -$order_discount,				// Price
-			    $vat = 0,								// Tax
-			    $discount = 0,							// Discount
-			    $flags = KlarnaFlags::INC_VAT 			// Price is including VAT
-			);
-		endif;
-		
-		
-		
-		// Fees
-		if ( sizeof( $order->get_fees() ) > 0 ) {
-			foreach ( $order->get_fees() as $item ) {
-			
-			
-			// We manually calculate the tax percentage here
-			if ($order->get_total_tax() >0) :
-				// Calculate tax percentage
-				$item_tax_percentage = number_format( ( $item['line_tax'] / $item['line_total'] )*100, 2, '.', '');
-			else :
-				$item_tax_percentage = 0.00;
-			endif;
-			
-			
-			// Invoice fee or regular fee
-			if( $this->get_invoice_fee_name() == $item['name'] ) {
-				$tmp_flags = KlarnaFlags::INC_VAT + KlarnaFlags::IS_HANDLING; //Price is including VAT and is handling/invoice fee
-			} else {
-				$tmp_flags = KlarnaFlags::INC_VAT; //Price is including VAT
-			}
-			
-			
-			// apply_filters to item price so we can filter this if needed
-			$klarna_item_price_including_tax = $item['line_total'] + $item['line_tax'];
-			$item_price = apply_filters( 'klarna_fee_price_including_tax', $klarna_item_price_including_tax );
-			
-				$item_loop++;
-				
-				$k->addArticle(
-				    $qty = 1,								// Quantity
-				    $artNo = "",							// Article number
-				    $title = $item['name'],					// Article name
-				    $price = $item_price,					// Price
-				    $vat = round( $item_tax_percentage ),	// Tax
-				    $discount = 0,							// Discount
-			    	$flags = $tmp_flags						// Flags
-			    );
-			    
-			}
-		}
-		
-		
-		// Shipping
-		if ($order->get_total_shipping()>0) :
-			
-			// We manually calculate the shipping tax percentage here
-			$calculated_shipping_tax_percentage = ($order->order_shipping_tax/$order->get_total_shipping())*100; //25.00
-			$calculated_shipping_tax_decimal = ($order->order_shipping_tax/$order->get_total_shipping())+1; //0.25
-			
-			// apply_filters to Shipping so we can filter this if needed
-			$klarna_shipping_price_including_tax = $order->get_total_shipping()*$calculated_shipping_tax_decimal;
-			$shipping_price = apply_filters( 'klarna_shipping_price_including_tax', $klarna_shipping_price_including_tax );
-			
-			$k->addArticle(
-			    $qty = 1,												// Quantity
-			    $artNo = "",											// Article number
-			    $title = __('Shipping cost', 'klarna'),					// Article name
-			    $price = $shipping_price,								// Price
-			    $vat = round( $calculated_shipping_tax_percentage ),	// Tax
-			    $discount = 0,											// Discount
-			    $flags = KlarnaFlags::INC_VAT + KlarnaFlags::IS_SHIPMENT //Price is including VAT and is shipment fee
-			);
-		endif;
+		$klarna_pclass = isset($_POST['klarna_invo_pclass']) ? woocommerce_clean($_POST['klarna_invo_pclass']) : KlarnaPClass::INVOICE; // KlarnaPClass::INVOICE = -1
+		$klarna_gender = isset($_POST['klarna_invo_gender']) ? woocommerce_clean($_POST['klarna_invo_gender']) : '';
+		$klarna_de_consent_terms = isset($_POST['klarna_invo_de_consent_terms']) ? woocommerce_clean($_POST['klarna_invo_de_consent_terms']) : '';
 		
 
-		
-		// Billing address
-		$addr_billing = new KlarnaAddr(
-    		$order->billing_email, 							// Email
-    		'', 											// We skip the normal land line phone, only one is needed.
-    		$order->billing_phone,							// Cellno
-    		utf8_decode ($order->billing_first_name),		// First name
-    		utf8_decode ($order->billing_last_name),		// Last name
-    		utf8_decode ($order->billing_address_2),  		// No care of, C/O.
-    		utf8_decode ($klarna_billing_address), 			// For DE and NL specify street number in houseNo.
-    		utf8_decode ($order->billing_postcode),			// Post code
-    		utf8_decode ($order->billing_city),				// City
-    		utf8_decode ($order->billing_country),			// Country (SE)
-    		utf8_decode ($klarna_billing_house_number), 	//For DE and NL we need to specify houseNo.
-    		utf8_decode ($klarna_billing_house_extension)	//Only required for NL.
-		);
-		
-		// Add Company if one is set
-		if($order->billing_company) {
-			$addr_billing->setCompanyName(utf8_decode($order->billing_company));
+		// Split address into House number and House extension for NL & DE customers
+		$klarna_billing = array();
+		$klarna_shipping = array();
+		if ( $_POST['billing_country'] == 'NL' || $_POST['billing_country'] == 'DE' ) {
+			require_once( KLARNA_DIR . 'split-address.php' );
+			
+			// Set up billing address array
+			$klarna_billing_address             = $order->billing_address_1;
+			$splitted_address                   = splitAddress( $klarna_billing_address );
+			$klarna_billing['address']          = $splitted_address[0];
+			$klarna_billing['house_number']	    = $splitted_address[1];
+			$klarna_billing['house_extension']  = $splitted_address[2];
+			
+			// Set up shipping address array
+			$klarna_shipping_address            = $order->shipping_address_1;
+			$splitted_address                   = splitAddress( $klarna_shipping_address );
+			$klarna_shipping['address']         = $splitted_address[0];
+			$klarna_shipping['house_number']    = $splitted_address[1];
+			$klarna_shipping['house_extension'] = $splitted_address[2];
+		} else {			
+			$klarna_billing['address']          = $order->billing_address_1;
+			$klarna_billing['house_number']     = '';
+			$klarna_billing['house_extension']  = '';
+			
+			$klarna_shipping['address']         = $order->shipping_address_1;
+			$klarna_shipping['house_number']    = '';
+			$klarna_shipping['house_extension'] = '';
 		}
-		
-		// Shipping address
-		if ( $order->get_shipping_method() == '' || $this->ship_to_billing_address == 'yes') {
-			
-			// Use billing address if Shipping is disabled in Woocommerce
-			$addr_shipping = new KlarnaAddr(
-    			$order->billing_email,
-    			'', //We skip the normal land line phone, only one is needed.
-    			$order->billing_phone,
-    			utf8_decode ($order->billing_first_name),
-    			utf8_decode ($order->billing_last_name),
-    			utf8_decode ($order->billing_address_2),  //No care of, C/O.
-    			utf8_decode ($klarna_billing_address), //For DE and NL specify street number in houseNo.
-    			utf8_decode ($order->billing_postcode),
-    			utf8_decode ($order->billing_city),
-    			utf8_decode ($order->billing_country),
-    			utf8_decode ($klarna_billing_house_number), //For DE and NL we need to specify houseNo.
-    			utf8_decode ($klarna_billing_house_extension) //Only required for NL.
-			);
-			
-			// Add Company if one is set
-			if($order->billing_company) {
-				$addr_shipping->setCompanyName(utf8_decode($order->billing_company));
-			}
-		
-		} else {
-		
-			$addr_shipping = new KlarnaAddr(
-    			$order->billing_email,
-    			'', //We skip the normal land line phone, only one is needed.
-    			$order->billing_phone,
-    			utf8_decode ($order->shipping_first_name),
-    			utf8_decode ($order->shipping_last_name),
-    			utf8_decode ($order->shipping_address_2),  //No care of, C/O.
-    			utf8_decode ($klarna_shipping_address), //For DE and NL specify street number in houseNo.
-    			utf8_decode ($order->shipping_postcode),
-    			utf8_decode ($order->shipping_city),
-    			utf8_decode ($order->shipping_country),
-    			utf8_decode ($klarna_shipping_house_number), //For DE and NL we need to specify houseNo.
-    			utf8_decode ($klarna_shipping_house_extension) //Only required for NL.
-			);
-			
-			// Add Company if one is set
-			if($order->shipping_company) {
-				$addr_shipping->setCompanyName(utf8_decode($order->shipping_company));
-			}
-		
-		}
-		
-		//Next we tell the Klarna instance to use the address in the next order.
-		$k->setAddress(KlarnaFlags::IS_BILLING, $addr_billing); //Billing / invoice address
-		$k->setAddress(KlarnaFlags::IS_SHIPPING, $addr_shipping); //Shipping / delivery address
 
-		//Set store specific information so you can e.g. search and associate invoices with order numbers.
-		$k->setEstoreInfo(
-		    $orderid1 = ltrim( $order->get_order_number(), '#'),
-		    $orderid2 = $order_id,
-		    $user = '' //Username, email or identifier for the user?
+		$klarna = $this->klarna;
+
+		/**
+		 * Setup Klarna configuration
+		 */
+		$this->configure_klarna( $klarna );
+		
+		$klarna_order = new WC_Gateway_Klarna_Order(
+			$order,
+			$klarna_billing,
+			$klarna_shipping,
+			$this->ship_to_billing_address,
+			$klarna
 		);
 
+		// Set store specific information so you can e.g. search and associate invoices with order numbers.
+		$klarna->setEstoreInfo(
+			$orderid1 = ltrim( $order->get_order_number(), '#'),
+			$orderid2 = $order_id,
+			$user = '' // Username, email or identifier for the user?
+		);
 
 		try {
 		
     		//Transmit all the specified data, from the steps above, to Klarna.
-    		$result = $k->reserveAmount(
+    		$result = $klarna->reserveAmount(
 				$klarna_pno, 				// Date of birth. 
 				$klarna_gender,				// Gender.
 				-1, 						// Automatically calculate and reserve the cart total amount
@@ -1008,7 +543,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
  	   		
 			}
 		
-		catch(Exception $e) {
+		catch( Exception $e ) {
     		//The purchase was denied or something went wrong, print the message:
     		wc_add_notice(sprintf(__('%s (Error code: %s)', 'klarna'), utf8_encode($e->getMessage()), $e->getCode() ), 'error');
 			return;

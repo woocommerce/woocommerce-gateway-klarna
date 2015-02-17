@@ -14,6 +14,30 @@
  */
 class WC_Gateway_Klarna_Order {
 
+	public function __construct(
+		$order,
+		$klarna_billing,
+		$klarna_shipping,
+		$ship_to_billing_address,
+		$klarna
+	) {
+
+		$this->process_cart_contents( $order, $klarna );
+		$this->process_discount( $order, $klarna );
+		$this->process_fees( $order, $klarna );
+		$this->process_shipping( $order, $klarna );
+		$this->set_addresses(
+			$order,
+			$klarna_billing,
+			$klarna_shipping,
+			$ship_to_billing_address,
+			$klarna,
+			$invoice_fee_name = ''
+		);
+
+	}
+
+
 	/**
 	 * Process cart contents.
 	 * 
@@ -107,7 +131,14 @@ class WC_Gateway_Klarna_Order {
 				} else {
 					$item_tax_percentage = 0.00;
 				}
-				
+
+				// Invoice fee or regular fee
+				if( $invoice_fee_name == $item['name'] ) {
+					$klarna_flags = KlarnaFlags::INC_VAT + KlarnaFlags::IS_HANDLING; // Price is including VAT and is handling/invoice fee
+				} else {
+					$klarna_flags = KlarnaFlags::INC_VAT; // Price is including VAT
+				}
+
 				// apply_filters to item price so we can filter this if needed
 				$klarna_item_price_including_tax = $item['line_total'] + $item['line_tax'];
 				$item_price = apply_filters( 'klarna_fee_price_including_tax', $klarna_item_price_including_tax );
@@ -121,7 +152,7 @@ class WC_Gateway_Klarna_Order {
 					$price = $item_price,
 					$vat = round( $item_tax_percentage ),
 					$discount = 0,
-					$flags = KlarnaFlags::INC_VAT
+					$flags = $klarna_flags
 				);
 
 			}
@@ -167,22 +198,25 @@ class WC_Gateway_Klarna_Order {
 	 **/
 	function set_addresses(
 		$order,
-		$klarna_billing_address,
-		$klarna_billing_house_number,
-		$klarna_billing_house_extension,
-		$klarna_shipping_address,
-		$klarna_shipping_house_number,
-		$klarna_shipping_house_extension,
+		$klarna_billing,
+		$klarna_shipping,
 		$ship_to_billing_address,
 		$klarna
 	) {
 		
+		$klarna_billing_address = $klarna_billing['address'];
+		$klarna_billing_house_number = $klarna_billing['house_number'];
+		$klarna_billing_house_extension = $klarna_billing['house_extension'];
+
+		$klarna_shipping_address = $klarna_shipping['address'];
+		$klarna_shipping_house_number = $klarna_shipping['house_number'];
+		$klarna_shipping_house_extension = $klarna_shipping['house_extension'];
+
 		// Billing address
 		$addr_billing = new KlarnaAddr(
 			$email    = $order->billing_email,
 			$telno    = '', // We skip the normal land line phone, only one is needed.
 			$cellno   = $order->billing_phone,
-			// $company = $order->billing_company,
 			$fname    = utf8_decode( $order->billing_first_name ),
 			$lname    = utf8_decode( $order->billing_last_name ),
 			$careof   = utf8_decode( $order->billing_address_2 ),  // No care of, C/O.
@@ -234,6 +268,5 @@ class WC_Gateway_Klarna_Order {
 		$klarna->setAddress( KlarnaFlags::IS_SHIPPING, $addr_shipping ); // Shipping / delivery address
 
 	}
-
 
 }
