@@ -475,20 +475,26 @@ class WC_Klarna_Get_Address {
 	
 	// Helper function - get_country
 	public function get_country() {
+
 		$data = new WC_Gateway_Klarna_Invoice;
 		return $data->get_klarna_country();
+
 	}
 	
 	// Helper function - get_shop_country
 	public function get_shop_country() {
-	$data = new WC_Gateway_Klarna_Invoice;
+
+		$data = new WC_Gateway_Klarna_Invoice;
 		return $data->get_klarna_shop_country();
+
 	}
 	
 	// Helper function - get_klarna_language
-	public function get_klarna_language($country) {
+	public function get_klarna_language( $country ) {
+
 		$data = new WC_Gateway_Klarna_Invoice;
-		return $data->get_klarna_country($country);
+		return $data->get_klarna_country( $country );
+
 	}
 	
 } // End Class
