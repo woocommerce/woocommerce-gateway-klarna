@@ -159,7 +159,7 @@ if ( wp_is_mobile() ) {
 	
 	<p class="form-row form-row-first">
 	<?php if ( $this->get_klarna_country() == 'NL' || $this->get_klarna_country() == 'DE' ) { ?>
-		<label for="klarna_pno">
+		<label for="klarna_account_pno">
 			<?php echo __("Date of Birth", 'klarna') ?> <span class="required">*</span>
 		</label>
 		<select class="dob_select dob_day" name="date_of_birth_day" style="width:60px;">
@@ -297,8 +297,8 @@ if ( wp_is_mobile() ) {
 		</select>
 			
 	<?php } else { ?>
-		<label for="klarna_pno"><?php echo __("Date of Birth", 'klarna') ?> <span class="required">*</span></label>
-		<input type="text" class="input-text" id="klarna_pno" name="klarna_pno" />
+		<label for="klarna_account_pno"><?php echo __("Date of Birth", 'klarna') ?> <span class="required">*</span></label>
+		<input type="text" class="input-text" id="klarna_account_pno" name="klarna_account_pno" />
 	<?php }
 	// Button/form for getAddress
 	$data = new WC_Klarna_Get_Address;

@@ -15,76 +15,45 @@ if ( $this->shop_country == 'NL' ) {
 }
 
 // Terms
-if( $this->get_klarna_country() ==  'SE' && $this->terms_se != '' ) {
-	
-	// Swedish custom terms
+if ( $this->get_klarna_country() == 'SE' && $this->terms_se != '' ) { // Swedish custom terms
 	echo '<span id="klarna-campaign-terms"><a href="' . $this->terms_se . '" target="_blank">Läs mer</a></span>';
-
-} elseif( $this->get_klarna_country() ==  'NO' && $this->terms_no != '' ) {
-	
-	// Norwegian custom terms
+} elseif( $this->get_klarna_country() == 'NO' && $this->terms_no != '' ) { // Norwegian custom terms
 	echo '<span id="klarna-campaign-terms"><a href="' . $this->terms_no . '" target="_blank">Les mer</a></span>';
-	
-} elseif( $this->get_klarna_country() ==  'FI' && $this->terms_fi != '' ) {
-	
-	// Finnish custom terms
+} elseif ( $this->get_klarna_country() == 'FI' && $this->terms_fi != '' ) { // Finnish custom terms
 	echo '<span id="klarna-campaign-terms"><a href="' . $this->terms_fi . '" target="_blank">Lue lisää</a></span>';
-	
 } else {
-	
 	// Script for displaying the terms link
-	
 	// Mobile or desktop browser
-	if (wp_is_mobile() ) {
+	if ( wp_is_mobile() ) {
 		$klarna_layout = 'mobile';
-	 } else {
-	 	$klarna_layout = 'desktop';
-	 }
-
-	?>
+	} else {
+		$klarna_layout = 'desktop';
+	} ?>
 	
 	<script type="text/javascript">
-	
 		// Document ready
 		jQuery(document).ready(function($) {
-			
 			var klarna_campaign_selected_country = $( "#billing_country" ).val();
-			
 			// If no Billing Country is set in the checkout form, use the default shop country
-			if( !klarna_campaign_selected_country ) {
+			if ( ! klarna_campaign_selected_country ) {
 				var klarna_account_selected_country = '<?php echo $this->shop_country;?>';
 			}
 			
-			if( klarna_campaign_selected_country == 'SE' ) {
-			
+			if ( klarna_campaign_selected_country == 'SE' ) {
 				var klarna_campaign_current_locale = 'sv_SE';
-			
-			} else if( klarna_campaign_selected_country == 'NO' ) {
-
+			} else if ( klarna_campaign_selected_country == 'NO' ) {
 				var klarna_campaign_current_locale = 'nb_NO';
-			
-			} else if( klarna_campaign_selected_country == 'DK' ) {
-
+			} else if ( klarna_campaign_selected_country == 'DK' ) {
 				var klarna_campaign_current_locale = 'da_DK';
-			
-			} else if( klarna_campaign_selected_country == 'FI' ) {
-
+			} else if ( klarna_campaign_selected_country == 'FI' ) {
 				var klarna_campaign_current_locale = 'fi_FI';
-				
-			} else if( klarna_campaign_selected_country == 'DE' ) {
-
+			} else if ( klarna_campaign_selected_country == 'DE' ) {
 				var klarna_campaign_current_locale = 'de_DE';
-			
 			}  else if( klarna_campaign_selected_country == 'NL' ) {
-
 				var klarna_campaign_current_locale = 'nl_NL';
-			
 			} else if( klarna_campaign_selected_country == 'AT' ) {
-
 				var klarna_campaign_current_locale = 'de_AT';
-			} else {
-				
-			}
+			} else { }
 			
 			new Klarna.Terms.Account({
 			    el: 'klarna-campaign-terms',
@@ -94,78 +63,62 @@ if( $this->get_klarna_country() ==  'SE' && $this->terms_se != '' ) {
 			});
 			
 		});
-		
 	</script>
 	<span id="klarna-campaign-terms"></span>
-
 <?php } // End if terms check ?>
-
 <div class="clear"></div>
 	
 <fieldset>
-
 	<p class="form-row form-row-first">
-	
 		<?php
 		// Check if we have any PClasses
-		// TODO Deactivate this gateway if the file pclasses.json doesn't exist 
-		if($klarna->getPClasses()) {
-		?>
-			<label for="klarna_campaign_pclass"><?php echo __("Payment plan", 'klarna') ?> <span class="required">*</span></label><br/>
+		if ( $klarna->getPClasses() ) { ?>
+			<label for="klarna_campaign_pclass"><?php echo __( 'Payment plan', 'klarna' ); ?> <span class="required">*</span></label><br/>
+
 			<select id="klarna_campaign_pclass" name="klarna_campaign_pclass" class="woocommerce-select">
+				<?php
+			   	// Loop through the available PClasses stored in the file srv/pclasses.json
+				foreach ( $klarna->getPClasses() as $pclass ) {
+					
+					if ( $pclass->getType() == 2 ) {
+						// Get monthly cost for current pclass
+						$monthly_cost = KlarnaCalc::calc_monthly_cost(
+							$sum,
+							$pclass,
+							$flag
+						);
+									
+	    				// Get total credit purchase cost for current pclass
+	    				$total_credit_purchase_cost = KlarnaCalc::total_credit_purchase_cost(
+							$sum,
+							$pclass,
+							$flag
+						);
+
+	    				// Check that Cart total is larger than min amount for current PClass				
+	    				if ( $sum > $pclass->getMinAmount() ) {				
+		   					echo '<option value="' . $pclass->getId() . '">';
+			   					echo sprintf(__('%s - Start %s', 'klarna'), $pclass->getDescription(), $pclass->getStartFee() );
+		   					echo '</option>';
+		   				} 
+		   			}
 				
-			<?php
-		   	// Loop through the available PClasses stored in the file srv/pclasses.json
-			foreach ($klarna->getPClasses() as $pclass) {
-				
-				if ( $pclass->getType() == 2 ) {
-					// Get monthly cost for current pclass
-					$monthly_cost = KlarnaCalc::calc_monthly_cost(
-    									$sum,
-    									$pclass,
-    									$flag
-    								);
-								
-    				// Get total credit purchase cost for current pclass
-    				$total_credit_purchase_cost = KlarnaCalc::total_credit_purchase_cost(
-    									$sum,
-    									$pclass,
-    									$flag
-    								);
-				
-    				// Check that Cart total is larger than min amount for current PClass				
-    				if($sum > $pclass->getMinAmount()) {				
-	    				
-	   					echo '<option value="' . $pclass->getId() . '">';
-		   					echo sprintf(__('%s - Start %s', 'klarna'), $pclass->getDescription(), $pclass->getStartFee() );
-	   					echo '</option>';
-		   		
-	   				} // End if ($sum > $pclass->getMinAmount())
-	   			
-	   			} // End if ( $pclass->getType() == 2 )
-			
-			} // End foreach
-			?>
-				
+				} // End foreach
+				?>
 			</select>
 		
-			<?php
-		} else {
-			echo __('Klarna PClasses seem to be missing. Klarna Campaign does not work.', 'klarna');
-		}
-		?>				
-		
+		<?php } else {
+			echo __( 'Klarna PClasses seem to be missing. Klarna Campaign does not work.', 'klarna' );
+		} ?>				
 	</p>
 	<div class="clear"></div>
 	
 	<p class="form-row form-row-first">
-		<?php if ( $this->shop_country == 'NL' || $this->shop_country == 'DE' ) : ?>
+		<?php if ( $this->shop_country == 'NL' || $this->shop_country == 'DE' ) { ?>
 		
 		<label for="klarna_campaign_pno"><?php echo __("Date of Birth", 'klarna') ?> <span class="required">*</span></label>
             <select class="dob_select dob_day" name="klarna_campaign_date_of_birth_day" style="width:60px;">
-                <option value="">
-                <?php echo __("Day", 'klarna') ?>
-                </option>
+                <option value=""><?php echo __( 'Day', 'klarna') ?></option>
                 <option value="01">01</option>
                 <option value="02">02</option>
                 <option value="03">03</option>
@@ -199,9 +152,7 @@ if( $this->get_klarna_country() ==  'SE' && $this->terms_se != '' ) {
                 <option value="31">31</option>
             </select>
             <select class="dob_select dob_month" name="klarna_campaign_date_of_birth_month" style="width:80px;">
-                <option value="">
-                <?php echo __("Month", 'klarna') ?>
-                </option>
+                <option value=""><?php echo __( 'Month', 'klarna' ) ?></option>
                 <option value="01"><?php echo __("Jan", 'klarna') ?></option>
                 <option value="02"><?php echo __("Feb", 'klarna') ?></option>
                 <option value="03"><?php echo __("Mar", 'klarna') ?></option>
@@ -216,9 +167,7 @@ if( $this->get_klarna_country() ==  'SE' && $this->terms_se != '' ) {
                 <option value="12"><?php echo __("Dec", 'klarna') ?></option>
             </select>
             <select class="dob_select dob_year" name="klarna_campaign_date_of_birth_year" style="width:60px;">
-                <option value="">
-                <?php echo __("Year", 'klarna') ?>
-                </option>
+                <option value=""><?php echo __( 'Year', 'klarna' ); ?></option>
                 <option value="1920">1920</option>
                 <option value="1921">1921</option>
                 <option value="1922">1922</option>
@@ -301,40 +250,41 @@ if( $this->get_klarna_country() ==  'SE' && $this->terms_se != '' ) {
                 <option value="1999">1999</option>
                 <option value="2000">2000</option>
             </select>
-			
-		<?php else : ?>
-			<label for="klarna_campaign_pno"><?php echo __("Date of Birth", 'klarna') ?> <span class="required">*</span></label>
+		<?php } else { ?>
+			<label for="klarna_campaign_pno">
+				<?php echo __("Date of Birth", 'klarna') ?> <span class="required">*</span>
+			</label>
 			<input type="text" class="input-text" id="klarna_campaign_pno" name="klarna_campaign_pno" />
-		<?php endif; 
-			
+		<?php }
 			// Button/form for getAddress
 			$data = new WC_Klarna_Get_Address;
 			echo $data->get_address_button( $this->get_klarna_country() );
 		?>
 	</p>
 	
-	<?php if ( $this->get_klarna_country() == 'NL' || $this->get_klarna_country() == 'DE' ) : ?>
+	<?php if ( $this->get_klarna_country() == 'NL' || $this->get_klarna_country() == 'DE' ) { ?>
 		<p class="form-row form-row-last">
-			<label for="klarna_campaign_gender"><?php echo __("Gender", 'klarna') ?> <span class="required">*</span></label>
+			<label for="klarna_campaign_gender">
+				<?php echo __( 'Gender', 'klarna' ); ?> <span class="required">*</span>
+			</label>
 			<select id="klarna_campaign_gender" name="klarna_campaign_gender" class="woocommerce-select" style="width:120px;">
-				<option value=""><?php echo __("Select gender", 'klarna') ?></options>
-				<option value="f"><?php echo __("Female", 'klarna') ?></options>
-				<option value="m"><?php echo __("Male", 'klarna') ?></options>
+				<option value=""><?php echo __( 'Select gender', 'klarna' ); ?></options>
+				<option value="f"><?php echo __( 'Female', 'klarna' ); ?></options>
+				<option value="m"><?php echo __( 'Male', 'klarna' ); ?></options>
 			</select>
 		</p>
-	<?php endif; ?>
-	
+	<?php } ?>
 	<div class="clear"></div>
 	
 	<?php 
 	// Consent terms for German & Austrian shops
-	if ( ( $this->get_klarna_country() == 'DE' || $this->get_klarna_country() == 'AT' ) && $this->de_consent_terms == 'yes' ) : ?>
+	if ( ( $this->get_klarna_country() == 'DE' || $this->get_klarna_country() == 'AT' ) && $this->de_consent_terms == 'yes' ) { ?>
 		<p class="form-row">
 			<label for="klarna_de_terms"></label>
 			<input type="checkbox" class="input-checkbox" value="yes" name="klarna_campaign_de_consent_terms" />
 			<?php echo sprintf(__('Mit der Übermittlung der für die Abwicklungdes Rechnungskaufes und einer Identitäts-und Bonitätsprüfung erforderlichen Daten an Klarna bin ich einverstanden. Meine <a href="%s" target="_blank">Einwilligung</a> kann ich jederzeit mit Wirkung für die Zukunft widerrufen. Es gelten die AGB des Händlers.', 'klarna'), 'https://online.klarna.com/consent_de.yaws') ?>
 			
 		</p>
-	<?php endif; ?>
+	<?php } ?>
 	<div class="clear"></div>
 </fieldset>

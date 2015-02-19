@@ -10,7 +10,7 @@
 
 
 // Mobile or desktop browser
-if (wp_is_mobile() ) {
+if ( wp_is_mobile() ) {
 	$klarna_layout = 'mobile';
 } else {
  	$klarna_layout = 'desktop';
