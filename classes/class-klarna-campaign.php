@@ -3,10 +3,10 @@
 class WC_Gateway_Klarna_Campaign extends WC_Gateway_Klarna {
 	
 	/**
-     * Class for Klarna Campaign payment.
-     *
-     */
-     
+	 * Class constructor.
+	 *
+	 * @since 1.0.0
+	 */
 	public function __construct() {
 
 		global $woocommerce;
@@ -217,8 +217,9 @@ class WC_Gateway_Klarna_Campaign extends WC_Gateway_Klarna {
 				// Loop through the available PClasses stored in the file srv/pclasses.json
 				foreach ( $pclasses as $pclass ) {
 					// Check if there are any Special Campaign classes and that these classes is still active
-					if ( $pclass->getType() == 2 && $pclass->getExpire() >= time() )
+					if ( $pclass->getType() == 2 && $pclass->getExpire() >= time() ) {
        	    			$find_special_campaign++;
+					}
 				}
 			
 				// All PClasses have been checked
@@ -363,10 +364,12 @@ class WC_Gateway_Klarna_Campaign extends WC_Gateway_Klarna {
  		
  			// SE, NO, DK & FI
  			if ( $_POST['billing_country'] == 'SE' || $_POST['billing_country'] == 'NO' || $_POST['billing_country'] == 'DK' || $_POST['billing_country'] == 'FI' ) {
- 			
     			// Check if set, if its not set add an error.
     			if ( ! $_POST['klarna_campaign_pno'] ) {
-        		 	wc_add_notice(__('<strong>Date of birth</strong> is a required field.', 'klarna'), 'error');
+        		 	wc_add_notice(
+        		 		__('<strong>Date of birth</strong> is a required field.', 'klarna'), 
+        		 		'error'
+        		 	);
     			}
         	 	
 			}
@@ -377,12 +380,18 @@ class WC_Gateway_Klarna_Campaign extends WC_Gateway_Klarna {
 	    		
 	    		// Gender
 	    		if ( empty($_POST['klarna_campaign_gender'] ) ) {
-	        	 	wc_add_notice(__('<strong>Gender</strong> is a required field.', 'klarna'), 'error');
+	        	 	wc_add_notice(
+	        	 		__('<strong>Gender</strong> is a required field.', 'klarna'), 
+	        	 		'error'
+	        	 	);
 	    		}
 	         	
 	         	// Date of birth
 				if ( ! $_POST['date_of_birth_day'] || ! $_POST['date_of_birth_month'] || ! $_POST['date_of_birth_year'] ) {
-	         		wc_add_notice(__('<strong>Date of birth</strong> is a required field.', 'klarna'), 'error');
+	         		wc_add_notice(
+	         			__('<strong>Date of birth</strong> is a required field.', 'klarna'), 
+	         			'error'
+	         		);
 				}
 	         	
 	         	// Shipping and billing address must be the same
@@ -393,23 +402,38 @@ class WC_Gateway_Klarna_Campaign extends WC_Gateway_Klarna {
 			 	}
 	         	
 	         	if ( $compare_billing_and_shipping == 1 && isset( $_POST['shipping_first_name'] ) && $_POST['shipping_first_name'] !== $_POST['billing_first_name'] ) {
-	         		wc_add_notice(__('Shipping and billing address must be the same when paying via Klarna.', 'klarna'), 'error');
+	         		wc_add_notice(
+	         			__('Shipping and billing address must be the same when paying via Klarna.','klarna'), 
+	         			'error'
+	         		);
 	         	}
 	        	 
 	        	 if ( $compare_billing_and_shipping == 1 && isset( $_POST['shipping_last_name'] ) && $_POST['shipping_last_name'] !== $_POST['billing_last_name'] ) {
-	        	 	wc_add_notice(__('Shipping and billing address must be the same when paying via Klarna.', 'klarna'), 'error');
+	        	 	wc_add_notice(
+	        	 		__('Shipping and billing address must be the same when paying via Klarna.', 'klarna'), 
+	        	 		'error'
+	        	 	);
 	        	 }
 	        	 
 	        	 if ( $compare_billing_and_shipping == 1 && isset( $_POST['shipping_address_1'] ) && $_POST['shipping_address_1'] !== $_POST['billing_address_1'] ) {
-	        	 	wc_add_notice(__('Shipping and billing address must be the same when paying via Klarna.', 'klarna'), 'error');
+	        	 	wc_add_notice(
+	        	 		__('Shipping and billing address must be the same when paying via Klarna.', 'klarna'), 
+	        	 		'error'
+	        	 	);
 	        	 }
 	        	 
 	        	 if ( $compare_billing_and_shipping == 1 && isset( $_POST['shipping_postcode'] ) && $_POST['shipping_postcode'] !== $_POST['billing_postcode'] ) {
-	        	 	wc_add_notice(__('Shipping and billing address must be the same when paying via Klarna.', 'klarna'), 'error');
+	        	 	wc_add_notice(
+	        	 		__('Shipping and billing address must be the same when paying via Klarna.', 'klarna'), 
+	        	 		'error'
+	        	 	);
 	        	 }
 	        	 	
 	        	 if ( $compare_billing_and_shipping == 1 && isset($_POST['shipping_city']) && $_POST['shipping_city'] !== $_POST['billing_city'] ) {
-	        	 	wc_add_notice( __('Shipping and billing address must be the same when paying via Klarna.', 'klarna'), 'error');
+	        	 	wc_add_notice(
+	        	 		__('Shipping and billing address must be the same when paying via Klarna.', 'klarna'), 
+	        	 		'error'
+	        	 	);
 	        	 }
 			}
 			
@@ -417,7 +441,10 @@ class WC_Gateway_Klarna_Campaign extends WC_Gateway_Klarna {
 			if ( ( $this->shop_country == 'DE' || $this->shop_country == 'AT' ) && $this->de_consent_terms == 'yes') {
 	    		// Check if set, if its not set add an error.
 	    		if ( ! isset($_POST['klarna_campaign_de_consent_terms'] ) ) {
-	        	 	wc_add_notice(__('You must accept the Klarna consent terms.', 'klarna'), 'error');
+	        	 	wc_add_notice(
+	        	 		__('You must accept the Klarna consent terms.', 'klarna'), 
+	        	 		'error'
+	        	 	);
 	    		}
 			}
 		}

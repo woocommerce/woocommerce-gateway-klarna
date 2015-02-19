@@ -13,12 +13,11 @@
  * Class for Klarna Account payment.
  */
 class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
-     
+
 	/**
 	 * Class constructor.
 	 *
 	 * @since 1.0.0
-	 * @todo  Move user set variables to an include file?
 	 */
 	public function __construct() {
 
@@ -594,6 +593,7 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 
 				// Shipping and billing address must be the same
 				$compare_billing_and_shipping = 0;
+				
 				if ( isset( $_POST['ship_to_different_address'] ) && $_POST['ship_to_different_address'] = 1 ) {
 					$compare_billing_and_shipping = 1;	
 				}
