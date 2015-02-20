@@ -26,33 +26,33 @@ if ( wp_is_mobile() ) {
 <script type="text/javascript">
 	// Document ready
 	jQuery(document).ready(function($) {
-		var klarna_account_selected_country = $( "#billing_country" ).val();
+		var klarna_kpm_part_payment_selected_country = $( "#billing_country" ).val();
 		
 		// If no Billing Country is set in the checkout form, use the default shop country
-		if( ! klarna_account_selected_country ) {
-			var klarna_account_selected_country = '<?php echo $this->shop_country;?>';
+		if( ! klarna_kpm_part_payment_selected_country ) {
+			var klarna_kpm_part_payment_selected_country = '<?php echo $this->shop_country;?>';
 		}
 		
-		if( klarna_account_selected_country == 'SE' ) {
-			var klarna_account_current_locale = 'sv_SE';
-		} else if( klarna_account_selected_country == 'NO' ) {
-			var klarna_account_current_locale = 'nb_NO';
-		} else if( klarna_account_selected_country == 'DK' ) {
-			var klarna_account_current_locale = 'da_DK';
-		} else if( klarna_account_selected_country == 'FI' ) {
-			var klarna_account_current_locale = 'fi_FI';
-		} else if( klarna_account_selected_country == 'DE' ) {
-			var klarna_account_current_locale = 'de_DE';
-		}  else if( klarna_account_selected_country == 'NL' ) {
-			var klarna_account_current_locale = 'nl_NL';
-		} else if( klarna_account_selected_country == 'AT' ) {
-			var klarna_account_current_locale = 'de_AT';
+		if( klarna_kpm_part_payment_selected_country == 'SE' ) {
+			var klarna_kpm_part_payment_current_locale = 'sv_SE';
+		} else if( klarna_kpm_part_payment_selected_country == 'NO' ) {
+			var klarna_kpm_part_payment_current_locale = 'nb_NO';
+		} else if( klarna_kpm_part_payment_selected_country == 'DK' ) {
+			var klarna_kpm_part_payment_current_locale = 'da_DK';
+		} else if( klarna_kpm_part_payment_selected_country == 'FI' ) {
+			var klarna_kpm_part_payment_current_locale = 'fi_FI';
+		} else if( klarna_kpm_part_payment_selected_country == 'DE' ) {
+			var klarna_kpm_part_payment_current_locale = 'de_DE';
+		}  else if( klarna_kpm_part_payment_selected_country == 'NL' ) {
+			var klarna_kpm_part_payment_current_locale = 'nl_NL';
+		} else if( klarna_kpm_part_payment_selected_country == 'AT' ) {
+			var klarna_kpm_part_payment_current_locale = 'de_AT';
 		} else { }
 		
 		new Klarna.Terms.Account({
 		    el: 'klarna-account-terms',
 		    eid: '<?php echo $this->get_eid(); ?>',
-		    locale: klarna_account_current_locale,
+		    locale: klarna_kpm_part_payment_current_locale,
 		    type: '<?php echo $klarna_layout;?>',
 		});
 	});
@@ -66,19 +66,15 @@ if ( wp_is_mobile() ) {
 		// Check if we have any PClasses
 		// TODO Deactivate this gateway if the file pclasses.json doesn't exist
 		$pclasses = $this->fetch_pclasses( $this->get_klarna_country() );
-		if ( $pclasses ) { 
-			echo '<pre>';
-			print_r( $pclasses );
-			echo '</pre>';
-			?>
+		if ( $pclasses ) { ?>
 
-			<label for="klarna_account_pclass">
+			<label for="klarna_kpm_part_payment_pclass">
 				<?php echo __("Payment plan", 'klarna') ?> <span class="required">*</span>
 			</label>
 
-			<select id="klarna_account_pclass" name="klarna_account_pclass" class="woocommerce-select">
+			<select id="klarna_kpm_part_payment_pclass" name="klarna_kpm_part_payment_pclass" class="woocommerce-select">
 			<?php foreach ( $pclasses as $pclass ) { // Loop through the available PClasses stored in the file srv/pclasses.json
-				if ( $pclass->getType() == 0 || $pclass->getType() == 1 ) {
+				// if ( $pclass->getType() == 0 || $pclass->getType() == 1 ) {
 					// Get monthly cost for current pclass
 					$monthly_cost = KlarnaCalc::calc_monthly_cost(
 						$sum,
@@ -149,7 +145,7 @@ if ( wp_is_mobile() ) {
 					
 					} // End if ($sum > $pclass->getMinAmount())
 					
-	   			} // End if $pclass->getType() == 0 or 1
+	   			// } // End if $pclass->getType() == 0 or 1
 			
 			} // End foreach
 			?>
@@ -163,7 +159,7 @@ if ( wp_is_mobile() ) {
 	
 	<p class="form-row form-row-first">
 	<?php if ( $this->get_klarna_country() == 'NL' || $this->get_klarna_country() == 'DE' ) { ?>
-		<label for="klarna_account_pno">
+		<label for="klarna_kpm_part_payment_pno">
 			<?php echo __("Date of Birth", 'klarna') ?> <span class="required">*</span>
 		</label>
 		<select class="dob_select dob_day" name="date_of_birth_day" style="width:60px;">
@@ -301,8 +297,8 @@ if ( wp_is_mobile() ) {
 		</select>
 			
 	<?php } else { ?>
-		<label for="klarna_account_pno"><?php echo __("Date of Birth", 'klarna') ?> <span class="required">*</span></label>
-		<input type="text" class="input-text" id="klarna_account_pno" name="klarna_account_pno" />
+		<label for="klarna_kpm_part_payment_pno"><?php echo __("Date of Birth", 'klarna') ?> <span class="required">*</span></label>
+		<input type="text" class="input-text" id="klarna_kpm_part_payment_pno" name="klarna_kpm_part_payment_pno" />
 	<?php }
 	// Button/form for getAddress
 	$data = new WC_Klarna_Get_Address;
@@ -312,10 +308,10 @@ if ( wp_is_mobile() ) {
 	
 	<?php if ( $this->get_klarna_country() == 'NL' || $this->get_klarna_country() == 'DE' ) { ?>
 		<p class="form-row form-row-last">
-			<label for="klarna_account_gender">
+			<label for="klarna_kpm_part_payment_gender">
 				<?php echo __("Gender", 'klarna') ?> <span class="required">*</span>
 			</label>
-			<select id="klarna_account_gender" name="klarna_account_gender" class="woocommerce-select" style="width:120px;">
+			<select id="klarna_kpm_part_payment_gender" name="klarna_kpm_part_payment_gender" class="woocommerce-select" style="width:120px;">
 				<option value=""><?php echo __("Select gender", 'klarna') ?></option>
 				<option value="f"><?php echo __("Female", 'klarna') ?></option>
 				<option value="m"><?php echo __("Male", 'klarna') ?></option>

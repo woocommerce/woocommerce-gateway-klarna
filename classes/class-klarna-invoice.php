@@ -223,7 +223,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 		} else {
 
 			// For countries other than NO do the old thing
-			include_once( KLARNA_DIR . 'views/public/payment-fields-invoice.php' );
+			include_once( KLARNA_DIR . 'views/public/payment-fields-kpm.php' );
 
 		}
 

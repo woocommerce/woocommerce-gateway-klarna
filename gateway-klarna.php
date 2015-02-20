@@ -155,9 +155,9 @@ function init_klarna_gateway() {
 	require_once 'classes/class-klarna-campaign.php'; // Special campaign
 	require_once 'classes/class-klarna-partpayment-widget.php'; // Partpayment widget
 	require_once 'classes/class-klarna-get-address.php'; // Get address 
-	require_once 'classes/class-klarna-kpm.php'; // KPM
 	require_once 'classes/class-klarna-pms.php'; // PMS
 	require_once 'classes/class-klarna-order.php'; // Handles Klarna orders
+	require_once 'classes/class-klarna-kpm-part-payment.php'; // KPM Part Payment
 
 	// Klarna Checkout class
 	$klarna_shop_country = get_option( 'woocommerce_default_country' );
@@ -247,7 +247,7 @@ function add_klarna_gateway( $methods ) {
 	$methods[] = 'WC_Gateway_Klarna_Invoice';
 	$methods[] = 'WC_Gateway_Klarna_Account';
 	$methods[] = 'WC_Gateway_Klarna_Campaign';
-	$methods[] = 'WC_Gateway_Klarna_KPM';
+	$methods[] = 'WC_Gateway_Klarna_KPM_Part_Payment';
 		
 	$klarna_shop_country = get_option( 'woocommerce_default_country' );
 	
