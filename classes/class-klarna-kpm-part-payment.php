@@ -10,7 +10,7 @@
 
 
 /**
- * Class for Klarna Account payment.
+ * Class for Klarna Part Payment.
  */
 class WC_Gateway_Klarna_KPM_Part_Payment extends WC_Gateway_Klarna {
 
@@ -26,15 +26,11 @@ class WC_Gateway_Klarna_KPM_Part_Payment extends WC_Gateway_Klarna {
 		parent::__construct();
 		
 		$this->id                 = 'klarna_kpm_part_payment';
-		$this->method_title       = __( 'Klarna Account', 'klarna' );
+		$this->method_title       = __( 'Klarna Part Payment', 'klarna' );
+		$this->method_description = sprintf( __( 'With Klarna your customers can pay by invoice. Klarna works by adding extra personal information fields and then sending the details to Klarna for verification. Documentation <a href="%s" target="_blank">can be found here</a>.', 'klarna' ), 'http://docs.woothemes.com/document/klarna/' );
 		$this->has_fields         = true;
 		$this->order_button_text  = apply_filters( 'klarna_order_button_text', __( 'Place order', 'woocommerce' ) );
-				
-		// Klarna warning banner - used for NL only
-		$klarna_wb_img_checkout       = 'http://www.afm.nl/~/media/Images/wetten-regels/kredietwaarschuwing/balk_afm1-jpg.ashx';
-		$klarna_wb_img_single_product = 'http://www.afm.nl/~/media/Images/wetten-regels/kredietwaarschuwing/balk_afm2-jpg.ashx';
-		$klarna_wb_img_product_list   = 'http://www.afm.nl/~/media/Images/wetten-regels/kredietwaarschuwing/balk_afm2-jpg.ashx';
-		
+						
 		// Load the form fields.
 		$this->init_form_fields();
 		
@@ -46,72 +42,54 @@ class WC_Gateway_Klarna_KPM_Part_Payment extends WC_Gateway_Klarna {
 		// cost text (on single product and shop page) via the settings page.
 		include_once( KLARNA_DIR . 'classes/class-klarna-shortcodes.php' );
 
-		// Define user set variables
-		$this->enabled =
-			( isset( $this->settings['enabled'] ) ) ? $this->settings['enabled'] : '';
-		$this->title =
-			( isset( $this->settings['title'] ) ) ? $this->settings['title'] : '';
-		$this->description =
-			( isset( $this->settings['description'] ) ) ? $this->settings['description'] : '';
+		/**
+		 * Define user set variables
+		 */
+		$this->enabled     = $this->get_option( 'enabled' );
+		$this->testmode    = $this->get_option( 'testmode' );
+		$this->title       = $this->get_option( 'title' );
+		$this->description = $this->get_option( 'description' );
 
-		$this->eid_se =
-			( isset( $this->settings['eid_se'] ) ) ? $this->settings['eid_se'] : '';
-		$this->secret_se = 
-			( isset( $this->settings['secret_se'] ) ) ? $this->settings['secret_se'] : '';
+		// Sweden
+		$this->eid_se    = $this->get_option( 'eid_se' );
+		$this->secret_se = $this->get_option( 'secret_se' );
 
-		$this->eid_no = 
-			( isset( $this->settings['eid_no'] ) ) ? $this->settings['eid_no'] : '';
-		$this->secret_no = 
-			( isset( $this->settings['secret_no'] ) ) ? $this->settings['secret_no'] : '';
+		// Norway
+		$this->eid_no    = $this->get_option( 'eid_no' );
+		$this->secret_no = $this->get_option( 'secret_no' );
 
-		$this->eid_fi = 
-			( isset( $this->settings['eid_fi'] ) ) ? $this->settings['eid_fi'] : '';
-		$this->secret_fi = 
-			( isset( $this->settings['secret_fi'] ) ) ? $this->settings['secret_fi'] : '';
+		// Finland
+		$this->eid_fi    = $this->get_option( 'eid_fi' );
+		$this->secret_fi = $this->get_option( 'secret_fi' );
 
-		$this->eid_dk = 
-			( isset( $this->settings['eid_dk'] ) ) ? $this->settings['eid_dk'] : '';
-		$this->secret_dk = 
-			( isset( $this->settings['secret_dk'] ) ) ? $this->settings['secret_dk'] : '';
+		// Denmark
+		$this->eid_dk    = $this->get_option( 'eid_dk' );
+		$this->secret_dk = $this->get_option( 'secret_dk' );
 
-		$this->eid_de = 
-			( isset( $this->settings['eid_de'] ) ) ? $this->settings['eid_de'] : '';
-		$this->secret_de = 
-			( isset( $this->settings['secret_de'] ) ) ? $this->settings['secret_de'] : '';
+		// Germany
+		$this->eid_de    = $this->get_option( 'eid_de' );
+		$this->secret_de = $this->get_option( 'secret_de' );
 
-		$this->eid_nl = 
-			( isset( $this->settings['eid_nl'] ) ) ? $this->settings['eid_nl'] : '';
-		$this->secret_nl = 
-			( isset( $this->settings['secret_nl'] ) ) ? $this->settings['secret_nl'] : '';
+		// Netherlands
+		$this->eid_nl    = $this->get_option( 'eid_nl' );
+		$this->secret_nl = $this->get_option( 'secret_nl' );
 
-		$this->eid_at = 
-			( isset( $this->settings['eid_at'] ) ) ? $this->settings['eid_at'] : '';
-		$this->secret_at = 
-			( isset( $this->settings['secret_at'] ) ) ? $this->settings['secret_at'] : '';
+		// Austria
+		$this->eid_at    = $this->get_option( 'eid_at' );
+		$this->secret_at = $this->get_option( 'secret_at' );
 
+		// Lower and upper treshold
+		$this->lower_threshold = $this->get_option( 'lower_threshold' );
+		$this->upper_threshold = $this->get_option( 'upper_threshold' );
 
-		$this->lower_threshold = 
-			( isset( $this->settings['lower_threshold'] ) ) ? $this->settings['lower_threshold'] : '';
-		$this->upper_threshold = 
-			( isset( $this->settings['upper_threshold'] ) ) ? $this->settings['upper_threshold'] : '';
-		$this->show_monthly_cost = 
-			( isset( $this->settings['show_monthly_cost'] ) ) ? $this->settings['show_monthly_cost'] : '';
-		$this->show_monthly_cost_prio = 
-			( isset( $this->settings['show_monthly_cost_prio'] ) ) ? $this->settings['show_monthly_cost_prio'] : '15';
+		// Monthly cost widget
+		$this->show_monthly_cost            = $this->get_option( 'show_monthly_cost' );
+		$this->show_monthly_cost_prio       = $this->get_option( 'show_monthly_cost_prio', 15 );
+		$this->lower_threshold_monthly_cost = $this->get_option( 'lower_threshold_monthly_cost', 0 );
+		$this->upper_threshold_monthly_cost = $this->get_option( 'upper_threshold_monthly_cost', 10000000 );
 
-		$this->testmode = 
-			( isset( $this->settings['testmode'] ) ) ? $this->settings['testmode'] : '';
-		$this->de_consent_terms = 
-			( isset( $this->settings['de_consent_terms'] ) ) ? $this->settings['de_consent_terms'] : '';
-		$this->lower_threshold_monthly_cost = 
-			( isset( $this->settings['lower_threshold_monthly_cost'] ) ) ? $this->settings['lower_threshold_monthly_cost'] : '';
-		$this->upper_threshold_monthly_cost = 
-			( isset( $this->settings['upper_threshold_monthly_cost'] ) ) ? $this->settings['upper_threshold_monthly_cost'] : '';
-		$this->ship_to_billing_address = 
-			( isset( $this->settings['ship_to_billing_address'] ) ) ? $this->settings['ship_to_billing_address'] : '';
-
-		if ( $this->lower_threshold_monthly_cost == '' ) $this->lower_threshold_monthly_cost = 0;
-		if ( $this->upper_threshold_monthly_cost == '' ) $this->upper_threshold_monthly_cost = 10000000;	
+		$this->de_consent_terms        = $this->get_option( 'de_consent_terms' );
+		$this->ship_to_billing_address = $this->get_option( 'ship_to_billing_address' );
 
 		// Authorized countries
 		$this->authorized_countries = array();
@@ -134,9 +112,6 @@ class WC_Gateway_Klarna_KPM_Part_Payment extends WC_Gateway_Klarna {
 			$this->authorized_countries[] = 'NL';
 		}
 		
-		$klarna_basic_icon = '';
-		$klarna_kpm_part_payment_info = '';
-
 		// Define Klarna object
 		require_once( KLARNA_LIB . 'Klarna.php' );
 		$this->klarna = new Klarna();
@@ -157,12 +132,16 @@ class WC_Gateway_Klarna_KPM_Part_Payment extends WC_Gateway_Klarna {
 		}
 
 		// Apply filters to Country and language
-		$this->klarna_kpm_part_payment_info = apply_filters( 'klarna_kpm_part_payment_info', $klarna_kpm_part_payment_info );
+		$this->klarna_kpm_part_payment_info = apply_filters( 'klarna_kpm_part_payment_info', '' );
 		$this->icon = apply_filters( 'klarna_kpm_part_payment_icon', $this->get_account_icon() );	
-		$this->icon_basic = apply_filters( 'klarna_basic_icon', $klarna_basic_icon );
-		$this->klarna_wb_img_checkout = apply_filters( 'klarna_wb_img_checkout', $klarna_wb_img_checkout );
-		$this->klarna_wb_img_single_product = apply_filters( 'klarna_wb_img_single_product', $klarna_wb_img_single_product );
-		$this->klarna_wb_img_product_list = apply_filters( 'klarna_wb_img_product_list', $klarna_wb_img_product_list );
+		$this->icon_basic = apply_filters( 'klarna_basic_icon', '' );
+
+		// Apply filters to Klarna warning banners (NL only)
+		$klarna_wb = $this->get_klarna_wb();
+
+		$this->klarna_wb_img_checkout = apply_filters( 'klarna_wb_img_checkout', $klarna_wb['img_checkout'] );
+		$this->klarna_wb_img_single_product = apply_filters( 'klarna_wb_img_single_product', $klarna_wb['img_single_product'] );
+		$this->klarna_wb_img_product_list = apply_filters( 'klarna_wb_img_product_list', $klarna_wb['img_product_list'] );
 				
 		// Actions
 		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
@@ -173,7 +152,6 @@ class WC_Gateway_Klarna_KPM_Part_Payment extends WC_Gateway_Klarna {
 	}
 
 
-
 	/**
 	 * Initialise Gateway Settings Form Fields.
 	 *
@@ -181,172 +159,7 @@ class WC_Gateway_Klarna_KPM_Part_Payment extends WC_Gateway_Klarna {
 	 */
 	function init_form_fields() {
 
-	   	$this->form_fields = array(
-			'enabled' => array(
-				'title' => __( 'Enable/Disable', 'klarna' ), 
-				'type' => 'checkbox', 
-				'label' => __( 'Enable Klarna Part Payment (KPM)', 'klarna' ), 
-				'default' => 'no'
-			), 
-			'title' => array(
-				'title' => __( 'Title', 'klarna' ), 
-				'type' => 'text', 
-				'description' => __( 'This controls the title which the user sees during checkout.', 'klarna' ), 
-				'default' => __( 'Part payments', 'klarna' )
-			),
-			'description' => array(
-				'title' => __( 'Description', 'klarna' ), 
-				'type' => 'textarea', 
-				'description' => __( 'This controls the description which the user sees during checkout. ', 'klarna' ), 
-				'default' => ''
-			),
-
-			'eid_se' => array(
-				'title' => __( 'Eid - Sweden', 'klarna' ), 
-				'type' => 'text', 
-				'description' => __( 'Please enter your Klarna Eid for Sweden. Leave blank to disable.', 'klarna' ), 
-				'default' => ''
-			),
-			'secret_se' => array(
-				'title' => __( 'Shared Secret - Sweden', 'klarna' ), 
-				'type' => 'text', 
-				'description' => __( 'Please enter your Klarna Shared Secret for Sweden.', 'klarna' ), 
-				'default' => ''
-			),
-
-			'eid_no' => array(
-				'title' => __( 'Eid - Norway', 'klarna' ), 
-				'type' => 'text', 
-				'description' => __( 'Please enter your Klarna Eid for Norway. Leave blank to disable.', 'klarna' ), 
-				'default' => ''
-			),
-			'secret_no' => array(
-				'title' => __( 'Shared Secret - Norway', 'klarna' ), 
-				'type' => 'text', 
-				'description' => __( 'Please enter your Klarna Shared Secret for Norway.', 'klarna' ), 
-				'default' => ''
-			),
-
-			'eid_fi' => array(
-				'title' => __( 'Eid - Finland', 'klarna' ), 
-				'type' => 'text', 
-				'description' => __( 'Please enter your Klarna Eid for Finland. Leave blank to disable.', 'klarna' ), 
-				'default' => ''
-			),
-			'secret_fi' => array(
-				'title' => __( 'Shared Secret - Finland', 'klarna' ), 
-				'type' => 'text', 
-				'description' => __( 'Please enter your Klarna Shared Secret for Finland.', 'klarna' ), 
-				'default' => ''
-			),
-
-			'eid_dk' => array(
-				'title' => __( 'Eid - Denmark', 'klarna' ), 
-				'type' => 'text', 
-				'description' => __( 'Please enter your Klarna Eid for Denmark. Leave blank to disable.', 'klarna' ), 
-				'default' => ''
-			),
-			'secret_dk' => array(
-				'title' => __( 'Shared Secret - Denmark', 'klarna' ), 
-				'type' => 'text', 
-				'description' => __( 'Please enter your Klarna Shared Secret for Denmark.', 'klarna' ), 
-				'default' => ''
-			),
-
-			'eid_de' => array(
-				'title' => __( 'Eid - Germany', 'klarna' ), 
-				'type' => 'text', 
-				'description' => __( 'Please enter your Klarna Eid for Germany. Leave blank to disable.', 'klarna' ), 
-				'default' => ''
-			),
-			'secret_de' => array(
-				'title' => __( 'Shared Secret - Germany', 'klarna' ), 
-				'type' => 'text', 
-				'description' => __( 'Please enter your Klarna Shared Secret for Germany.', 'klarna' ), 
-				'default' => ''
-			),
-
-			'eid_nl' => array(
-				'title' => __( 'Eid - Netherlands', 'klarna' ), 
-				'type' => 'text', 
-				'description' => __( 'Please enter your Klarna Eid for Netherlands. Leave blank to disable.', 'klarna' ), 
-				'default' => ''
-			),
-			'secret_nl' => array(
-				'title' => __( 'Shared Secret - Netherlands', 'klarna' ), 
-				'type' => 'text', 
-				'description' => __( 'Please enter your Klarna Shared Secret for Netherlands.', 'klarna' ), 
-				'default' => ''
-			),
-
-			'lower_threshold' => array(
-				'title' => __( 'Lower threshold', 'klarna' ), 
-				'type' => 'text', 
-				'description' => __( 'Disable Klarna Account if Cart Total is lower than the specified value. Leave blank to disable this feature.', 'klarna' ), 
-				'default' => ''
-			),
-			'upper_threshold' => array(
-				'title' => __( 'Upper threshold', 'klarna' ), 
-				'type' => 'text', 
-				'description' => __( 'Disable Klarna Account if Cart Total is higher than the specified value. Leave blank to disable this feature.', 'klarna' ), 
-				'default' => ''
-			),
-
-			'show_monthly_cost' => array(
-				'title' => __( 'Display monthly cost - product page', 'klarna' ), 
-				'type' => 'checkbox',
-				'label' => __( 'Display monthly cost on single products page.', 'klarna' ), 
-				'default' => 'yes'
-			),
-			'show_monthly_cost_prio' => array(
-				'title' => __( 'Placement of monthly cost - product page', 'klarna' ), 
-				'type' => 'select',
-				'options' => array(
-					'4' => __( 'Above Title', 'klarna' ),
-					'7' => __( 'Between Title and Price', 'klarna'),
-					'15' => __( 'Between Price and Excerpt', 'klarna'), 
-					'25' => __( 'Between Excerpt and Add to cart-button', 'klarna'), 
-					'35' => __( 'Between Add to cart-button and Product meta', 'klarna'), 
-					'45' => __( 'Between Product meta and Product sharing-buttons', 'klarna'), 
-					'55' => __( 'After Product sharing-buttons', 'klarna' )
-				),
-				'description' => __( 'Select where on the products page the Monthly cost information should be displayed.', 'klarna' ), 
-				'default' => '15'
-			),
-			'lower_threshold_monthly_cost' => array(
-				'title' => __( 'Lower threshold for monthly cost', 'klarna' ), 
-				'type' => 'text', 
-				'description' => __( 'Disable the monthly cost feature if <i>Product price</i> is lower than the specified value. Leave blank to disable.', 'klarna' ), 
-				'default' => ''
-			),
-			'upper_threshold_monthly_cost' => array(
-				'title' => __( 'Upper threshold for monthly cost', 'klarna' ), 
-				'type' => 'text', 
-				'description' => __( 'Disable the monthly cost feature if <i>Product price</i> is higher than the specified value. Leave blank to disable.', 'klarna' ), 
-				'default' => ''
-			),
-
-			'ship_to_billing_address' => array(
-				'title' => __( 'Send billing address as shipping address', 'klarna' ), 
-				'type' => 'checkbox', 
-				'label' => __( 'Send the entered billing address in WooCommerce checkout as shipping address to Klarna.', 'klarna' ), 
-				'default' => 'no'
-			),
-
-			'de_consent_terms' => array(
-				'title' => __( 'Klarna consent terms (DE & AT only)', 'klarna' ), 
-				'type' => 'checkbox', 
-				'label' => __( 'Enable Klarna consent terms checkbox in checkout. This only apply to German and Austrian merchants.', 'klarna' ), 
-				'default' => 'no'
-			),
-
-			'testmode' => array(
-				'title' => __( 'Test Mode', 'klarna' ), 
-				'type' => 'checkbox', 
-				'label' => __( 'Enable Klarna Test Mode. This will only work if you have a Klarna test account. For test purchases with a live account, <a href="http://integration.klarna.com/en/testing/test-persons" target="_blank">follow these instructions</a>.', 'klarna' ), 
-				'default' => 'no'
-			)
-		);
+		$this->form_fields = include( KLARNA_DIR . 'includes/settings-kpm-part-payment.php' );
 	    
 	}
 
@@ -354,33 +167,17 @@ class WC_Gateway_Klarna_KPM_Part_Payment extends WC_Gateway_Klarna {
 	/**
 	 * Admin Panel Options.
 	 * 
-	 * Options for bits like 'title' and availability on a country-by-country basis
-	 *
 	 * @since 1.0.0
 	 * @todo  Move PClasses retrieval out of this method.
 	 */
 	public function admin_options() { ?>
 
-		<h3><?php _e('Klarna Account', 'klarna'); ?></h3>
-		<p><?php printf(__('With Klarna your customers can pay by invoice. Klarna works by adding extra personal information fields and then sending the details to Klarna for verification. Documentation <a href="%s" target="_blank">can be found here</a>.', 'klarna'), 'http://docs.woothemes.com/document/klarna/' ); ?></p>
+		<h3>
+			<?php echo ( ! empty( $this->method_title ) ) ? $this->method_title : __( 'Settings', 'klarna' ) ; ?>
+		</h3>
+		<?php echo ( ! empty( $this->method_description ) ) ? wpautop( $this->method_description ) : ''; ?>
 
-		<?php
-		if ( ! empty( $this->authorized_countries ) && $this->enabled == 'yes' ) {
-			echo '<h4>' . __( 'Active PClasses', 'klarna' ) . '</h4>';
-			foreach ( $this->authorized_countries as $key => $country ) {
-				$pclasses = $this->fetch_pclasses( $country );
-				if ( $pclasses ) {
-					echo '<p>' . $country . '</p>';
-					foreach( $pclasses as $pclass ) {
-						if ( $pclass->getType() == 0 || $pclass->getType() == 1 ) { // Passed from parent file
-							echo $pclass->getDescription() . ', ';
-						}
-					}
-					echo '<br/>';
-				}
-			}
-		}
-		?>
+		<?php $this->display_available_pclasses( array( 0, 1 ) ); ?>
 
 		<table class="form-table">
 			<?php $this->generate_settings_html(); // Generate the HTML For the settings form. ?>
@@ -388,68 +185,253 @@ class WC_Gateway_Klarna_KPM_Part_Payment extends WC_Gateway_Klarna {
 
 	<?php }
 
-	
+
+	/**
+	 * Shows all available PClasses.
+	 * 
+	 * @since 1.0.0
+	 */
+	function display_available_pclasses( $type ) {
+
+		if ( ! empty( $this->authorized_countries ) && $this->enabled == 'yes' ) { ?>
+			<h4><?php echo __( 'Active PClasses', 'klarna' ); ?></h4>
+			<?php
+			foreach ( $this->authorized_countries as $key => $country ) {
+				$this->display_pclasses_for_country_and_type( $country, $type );
+			}
+		}
+
+	}
+
+
+	/**
+	 * Retrieves PClasses for country.
+	 * 
+	 * @since 1.0.0
+	 * 
+	 * @param  $country  Country code
+	 * @param  $type     Array of PClasses types
+	 * @return $pclasses Key value array of countries and their PClasses
+	 */
+	function get_pclasses_for_country_and_type( $country, $type ) {
+
+		$pclasses_country_all = $this->fetch_pclasses( $country );
+		$pclasses_country_type = array();
+
+		if ( $pclasses_country_all ) {
+			foreach ( $pclasses_country_all as $pclass ) {
+				if ( in_array( $pclass->getType(), $type ) ) { // Passed from parent file
+					$pclasses_country_type[] = $pclass;
+				}
+			}
+		}
+
+		if ( ! empty( $pclasses_country_type ) ) {
+			return $pclasses_country_type;
+		}
+
+	}
+
+
+	/**
+	 * Displays available PClasses.
+	 * 
+	 * @since 1.0.0
+	 */
+	function display_pclasses_for_country_and_type( $country, $type ) {
+
+		$pclasses = $this->get_pclasses_for_country_and_type( $country, $type );
+
+		if ( $pclasses ) { ?>
+			<h5 style="margin-bottom:0.25em;"><?php echo $country; ?></h5>
+			<?php
+			$pclass_string = '';
+			foreach( $pclasses as $pclass ) {
+				if ( $pclass->getType() == 0 || $pclass->getType() == 1 ) { // Passed from parent file
+					$pclass_string .= $pclass->getDescription() . ', ';
+				}
+			}
+			$pclass_string = substr( $pclass_string, 0 ,-2 );
+			?>
+			<p style="margin-top:0;"><?php echo $pclass_string; ?></p>
+		<?php }
+				
+	}
+
+
+	/**
+	 * Gets Klarna warning banner images, used for NL only.
+	 *
+	 * @since  1.0.0
+	 * 
+	 * @return $klarna_wb array
+	 */		
+	function get_klarna_wb() {
+		
+		$klarna_wb = array();
+
+		// Klarna warning banner - used for NL only
+		$klarna_wb['img_checkout'] = 'http://www.afm.nl/~/media/Images/wetten-regels/kredietwaarschuwing/balk_afm1-jpg.ashx';
+		$klarna_wb['img_single_product'] = 'http://www.afm.nl/~/media/Images/wetten-regels/kredietwaarschuwing/balk_afm2-jpg.ashx';
+		$klarna_wb['img_product_list'] = 'http://www.afm.nl/~/media/Images/wetten-regels/kredietwaarschuwing/balk_afm2-jpg.ashx';
+
+		return $klarna_wb;
+
+	}
+
+
 	/**
 	 * Check if this gateway is enabled and available in user's country.
 	 *
 	 * @since 1.0.0
-	 * @todo  Move all individual checks to helper functions, since they are used in each method?
 	 */		
 	function is_available() {
 
 		global $woocommerce;
 		
-		// Check if this payment method is enabled
-		if ( 'yes' == $this->enabled ) {
-		
-			// Required fields check
-			if ( ! $this->get_eid() || ! $this->get_secret() )
-				return false;
-			
-			// PClass check
-			$pclasses = $this->fetch_pclasses( $this->get_klarna_country() );
-			if ( empty( $pclasses ) ) {
-				return false;
-			}
-			
-			// Checkout form check
-			if ( isset( $woocommerce->cart->total ) ) {
-			
-				// Cart totals check - Lower threshold
-				if ( $this->lower_threshold !== '' ) {
-					if ( $woocommerce->cart->total < $this->lower_threshold )
-						return false;
-				}
-			
-				// Cart totals check - Upper threshold
-				if ( $this->upper_threshold !== '' ) {
-					if ( $woocommerce->cart->total > $this->upper_threshold )
-						return false;
-				}
-				
-				// Don't allow orders over the amount of €250 for Dutch customers
-				if ( ( $woocommerce->customer->get_country() == true && $woocommerce->customer->get_country() == 'NL' ) && $woocommerce->cart->total >= 251 )
-					return false;
-			
-				// Only activate the payment gateway if the customers country is the same as the filtered shop country ($this->klarna_country)
-				if ( $woocommerce->customer->get_country() == true && ! in_array( $woocommerce->customer->get_country(), $this->authorized_countries ) )
-					return false;
-				
-				// Currency check
-				$currency_for_country = $this->get_currency_for_country($woocommerce->customer->get_country());
-				if ( ! empty($currency_for_country) && $currency_for_country !== $this->selected_currency )
-					return false;
-			
-			} // End Checkout form check
-			
-			return true;
-			
-		}	
+		$this->check_enabled();
+		$this->check_required_fields();
+		$this->check_pclasses();
+		$this->check_cart_total();
+		$this->check_lower_threshold();
+		$this->check_upper_threshold();
+		$this->check_customer_country();
+		$this->check_customer_currency();
 
-		return false;
+		return true;
 
 	}
-	
+
+
+	/**
+	 * Checks if payment method is enabled.
+	 * 
+	 * @since  2.0
+	 **/
+	function check_enabled() {
+
+		if ( 'yes' != $this->enabled )
+			return false;
+
+	}	
+
+
+	/**
+	 * Checks if required fields are set.
+	 * 
+	 * @since  2.0
+	 **/
+	function check_required_fields() {
+
+		// Required fields check
+		if ( ! $this->get_eid() || ! $this->get_secret() )
+			return false;
+
+	}	
+
+
+	/**
+	 * Checks if there are PClasses.
+	 * 
+	 * @since  2.0
+	 **/
+	function check_pclasses() {
+
+		$pclasses = $this->fetch_pclasses( $this->get_klarna_country() );
+		if ( empty( $pclasses ) )
+			return false;
+
+	}	
+
+
+	/**
+	 * Checks if there is cart total.
+	 * 
+	 * @since  2.0
+	 **/
+	function check_cart_total() {
+
+		global $woocommerce;
+
+		if ( ! isset( $woocommerce->cart->total ) )
+			return false;
+
+	}	
+
+
+	/**
+	 * Checks if lower threshold is OK.
+	 * 
+	 * @since  2.0
+	 **/
+	function check_lower_threshold() {
+
+		global $woocommerce;
+
+		// Cart totals check - Lower threshold
+		if ( $this->lower_threshold !== '' ) {
+			if ( $woocommerce->cart->total < $this->lower_threshold )
+				return false;
+		}
+
+	}	
+
+
+	/**
+	 * Checks if upper threshold is OK.
+	 * 
+	 * @since  2.0
+	 **/
+	function check_upper_threshold() {
+
+		global $woocommerce;
+		
+		// Cart totals check - Upper threshold
+		if ( $this->upper_threshold !== '' ) {
+			if ( $woocommerce->cart->total > $this->upper_threshold )
+				return false;
+		}
+
+	}	
+
+
+	/**
+	 * Checks if selling to customer's country is allowed.
+	 * 
+	 * @since  2.0
+	 **/
+	function check_customer_country() {
+
+		global $woocommerce;
+		
+		// Only activate the payment gateway if the customers country is the same as 
+		// the filtered shop country ($this->klarna_country)
+		if ( $woocommerce->customer->get_country() == true && ! in_array( $woocommerce->customer->get_country(), $this->authorized_countries ) )
+			return false;
+
+		// Don't allow orders over the amount of €250 for Dutch customers
+		if ( ( $woocommerce->customer->get_country() == true && $woocommerce->customer->get_country() == 'NL' ) && $woocommerce->cart->total >= 251 )
+			return false;
+
+	}	
+
+
+	/**
+	 * Checks if customer's currency is allowed.
+	 * 
+	 * @since  2.0
+	 **/
+	function check_customer_currency() {
+
+		global $woocommerce;
+		
+		// Currency check
+		$currency_for_country = $this->get_currency_for_country( $woocommerce->customer->get_country() );
+		if ( ! empty( $currency_for_country ) && $currency_for_country !== $this->selected_currency )
+			return false;
+
+	}	
+
 
 	/**
 	 * Set up Klarna configuration.
@@ -558,7 +540,7 @@ class WC_Gateway_Klarna_KPM_Part_Payment extends WC_Gateway_Klarna {
 
 		global $woocommerce;
 
- 		// Only run this if Klarna account is the choosen payment method
+ 		// Only run this if Klarna Part Payment is the choosen payment method
  		if ( $_POST['payment_method'] == 'klarna_kpm_part_payment' ) {
  		
  			$klarna_field_prefix = 'klarna_kpm_part_payment_';
@@ -883,7 +865,7 @@ class WC_Gateway_Klarna_KPM_Part_Payment extends WC_Gateway_Klarna {
 	
 	
 	/**
-	 * Disable the radio button for the Klarna Account payment method if Company name
+	 * Disable the radio button for the Klarna Part Payment payment method if Company name
 	 * is entered and the customer is from Germany or Austria.
 	 *
 	 * @since 1.0.0
