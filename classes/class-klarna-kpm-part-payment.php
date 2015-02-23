@@ -271,9 +271,12 @@ class WC_Gateway_Klarna_KPM_Part_Payment extends WC_Gateway_Klarna {
 		$klarna_wb = array();
 
 		// Klarna warning banner - used for NL only
-		$klarna_wb['img_checkout'] = 'http://www.afm.nl/~/media/Images/wetten-regels/kredietwaarschuwing/balk_afm1-jpg.ashx';
-		$klarna_wb['img_single_product'] = 'http://www.afm.nl/~/media/Images/wetten-regels/kredietwaarschuwing/balk_afm2-jpg.ashx';
-		$klarna_wb['img_product_list'] = 'http://www.afm.nl/~/media/Images/wetten-regels/kredietwaarschuwing/balk_afm2-jpg.ashx';
+		$klarna_wb['img_checkout'] = 
+			'http://www.afm.nl/~/media/Images/wetten-regels/kredietwaarschuwing/balk_afm1-jpg.ashx';
+		$klarna_wb['img_single_product'] = 
+			'http://www.afm.nl/~/media/Images/wetten-regels/kredietwaarschuwing/balk_afm2-jpg.ashx';
+		$klarna_wb['img_product_list'] = 
+			'http://www.afm.nl/~/media/Images/wetten-regels/kredietwaarschuwing/balk_afm2-jpg.ashx';
 
 		return $klarna_wb;
 
@@ -287,8 +290,6 @@ class WC_Gateway_Klarna_KPM_Part_Payment extends WC_Gateway_Klarna {
 	 */		
 	function is_available() {
 
-		global $woocommerce;
-		
 		$this->check_enabled();
 		$this->check_required_fields();
 		$this->check_pclasses();
@@ -475,22 +476,7 @@ class WC_Gateway_Klarna_KPM_Part_Payment extends WC_Gateway_Klarna {
 		if ( 'yes' == $this->testmode ) { ?>
 			<p><?php _e('TEST MODE ENABLED', 'klarna'); ?></p>
 		<?php }
-
-		// Test mode or Live mode		
-		if ( 'yes' == $this->testmode ) {
-			// Disable SSL if in testmode
-			$klarna_ssl = 'false';
-			$klarna_mode = Klarna::BETA;
-		} else {
-			// Set SSL if used in webshop
-			if ( is_ssl() ) {
-				$klarna_ssl = 'true';
-			} else {
-				$klarna_ssl = 'false';
-			}
-			$klarna_mode = Klarna::LIVE;
-		}
-	   			
+	
 		$klarna = $this->klarna;
 
 		/**
@@ -1246,4 +1232,4 @@ class WC_Gateway_Klarna_KPM_Part_Payment extends WC_Gateway_Klarna {
 
 	}
 			 
-} // End class WC_Gateway_klarna_kpm_part_payment
+} // End class WC_Gateway_Klarna_KPM_Part_Payment
