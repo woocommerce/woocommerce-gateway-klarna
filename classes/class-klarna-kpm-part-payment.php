@@ -42,75 +42,15 @@ class WC_Gateway_Klarna_KPM_Part_Payment extends WC_Gateway_Klarna {
 		// cost text (on single product and shop page) via the settings page.
 		include_once( KLARNA_DIR . 'classes/class-klarna-shortcodes.php' );
 
-		/**
-		 * Define user set variables
-		 */
-		$this->enabled     = $this->get_option( 'enabled' );
-		$this->testmode    = $this->get_option( 'testmode' );
-		$this->title       = $this->get_option( 'title' );
-		$this->description = $this->get_option( 'description' );
+		// Klarna PClasses handling. 
+		include_once( KLARNA_DIR . 'classes/class-klarna-kpm-pclasses.php' );
 
-		// Sweden
-		$this->eid_se    = $this->get_option( 'eid_se' );
-		$this->secret_se = $this->get_option( 'secret_se' );
+		// Helper class
+		include_once( KLARNA_DIR . 'classes/class-klarna-kpm-helper.php' );
+		$this->klarna_helper = new WC_Gateway_Klarna_KPM_Helper( $this );
 
-		// Norway
-		$this->eid_no    = $this->get_option( 'eid_no' );
-		$this->secret_no = $this->get_option( 'secret_no' );
-
-		// Finland
-		$this->eid_fi    = $this->get_option( 'eid_fi' );
-		$this->secret_fi = $this->get_option( 'secret_fi' );
-
-		// Denmark
-		$this->eid_dk    = $this->get_option( 'eid_dk' );
-		$this->secret_dk = $this->get_option( 'secret_dk' );
-
-		// Germany
-		$this->eid_de    = $this->get_option( 'eid_de' );
-		$this->secret_de = $this->get_option( 'secret_de' );
-
-		// Netherlands
-		$this->eid_nl    = $this->get_option( 'eid_nl' );
-		$this->secret_nl = $this->get_option( 'secret_nl' );
-
-		// Austria
-		$this->eid_at    = $this->get_option( 'eid_at' );
-		$this->secret_at = $this->get_option( 'secret_at' );
-
-		// Lower and upper treshold
-		$this->lower_threshold = $this->get_option( 'lower_threshold' );
-		$this->upper_threshold = $this->get_option( 'upper_threshold' );
-
-		// Monthly cost widget
-		$this->show_monthly_cost            = $this->get_option( 'show_monthly_cost' );
-		$this->show_monthly_cost_prio       = $this->get_option( 'show_monthly_cost_prio', 15 );
-		$this->lower_threshold_monthly_cost = $this->get_option( 'lower_threshold_monthly_cost', 0 );
-		$this->upper_threshold_monthly_cost = $this->get_option( 'upper_threshold_monthly_cost', 10000000 );
-
-		$this->de_consent_terms        = $this->get_option( 'de_consent_terms' );
-		$this->ship_to_billing_address = $this->get_option( 'ship_to_billing_address' );
-
-		// Authorized countries
-		$this->authorized_countries = array();
-		if ( ! empty( $this->eid_se ) ) {
-			$this->authorized_countries[] = 'SE';
-		}
-		if ( ! empty( $this->eid_no ) ) {
-			$this->authorized_countries[] = 'NO';
-		}
-		if ( ! empty( $this->eid_fi ) ) {
-			$this->authorized_countries[] = 'FI';
-		}
-		if ( ! empty( $this->eid_dk ) ) {
-			$this->authorized_countries[] = 'DK';
-		}
-		if ( ! empty( $this->eid_de ) ) {
-			$this->authorized_countries[] = 'DE';
-		}
-		if ( ! empty( $this->eid_nl ) ) {
-			$this->authorized_countries[] = 'NL';
-		}
+		// Define user set variables
+		include( KLARNA_DIR . 'includes/variables-kpm-part-payment.php' );
 		
 		// Define Klarna object
 		require_once( KLARNA_LIB . 'Klarna.php' );
@@ -133,7 +73,7 @@ class WC_Gateway_Klarna_KPM_Part_Payment extends WC_Gateway_Klarna {
 
 		// Apply filters to Country and language
 		$this->klarna_kpm_part_payment_info = apply_filters( 'klarna_kpm_part_payment_info', '' );
-		$this->icon = apply_filters( 'klarna_kpm_part_payment_icon', $this->get_account_icon() );	
+		$this->icon = apply_filters( 'klarna_kpm_part_payment_icon', $this->klarna_helper->get_account_icon() );	
 		$this->icon_basic = apply_filters( 'klarna_basic_icon', '' );
 
 		// Apply filters to Klarna warning banners (NL only)
@@ -168,7 +108,6 @@ class WC_Gateway_Klarna_KPM_Part_Payment extends WC_Gateway_Klarna {
 	 * Admin Panel Options.
 	 * 
 	 * @since 1.0.0
-	 * @todo  Move PClasses retrieval out of this method.
 	 */
 	public function admin_options() { ?>
 
@@ -177,86 +116,31 @@ class WC_Gateway_Klarna_KPM_Part_Payment extends WC_Gateway_Klarna {
 		</h3>
 		<?php echo ( ! empty( $this->method_description ) ) ? wpautop( $this->method_description ) : ''; ?>
 
-		<?php $this->display_available_pclasses( array( 0, 1 ) ); ?>
+		<?php
+		require_once( KLARNA_LIB . 'pclasses/storage.intf.php' );
+		
+		if ( ! function_exists( 'xmlrpc_encode_entitites' ) && ! class_exists( 'xmlrpcresp' ) ) {
+			require_once( KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc.inc' );
+			require_once( KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc_wrappers.inc' );
+		}
+
+		if ( ! empty( $this->authorized_countries ) && $this->enabled == 'yes' ) {
+			echo '<h4>' . __( 'Active PClasses', 'klarna' ) . '</h4>';
+			foreach( $this->authorized_countries as $key => $country ) {
+				$klarna = $this->klarna;
+				$this->configure_klarna( $klarna, $country );
+
+				$pclasses = new WC_Gateway_Klarna_KPM_PClasses( $klarna, array( 0, 1 ), $country );
+				$pclasses->display_pclasses_for_country_and_type();
+			}   
+		}
+		?>
 
 		<table class="form-table">
 			<?php $this->generate_settings_html(); // Generate the HTML For the settings form. ?>
 		</table>
 
 	<?php }
-
-
-	/**
-	 * Shows all available PClasses.
-	 * 
-	 * @since 1.0.0
-	 */
-	function display_available_pclasses( $type ) {
-
-		if ( ! empty( $this->authorized_countries ) && $this->enabled == 'yes' ) { ?>
-			<h4><?php echo __( 'Active PClasses', 'klarna' ); ?></h4>
-			<?php
-			foreach ( $this->authorized_countries as $key => $country ) {
-				$this->display_pclasses_for_country_and_type( $country, $type );
-			}
-		}
-
-	}
-
-
-	/**
-	 * Retrieves PClasses for country.
-	 * 
-	 * @since 1.0.0
-	 * 
-	 * @param  $country  Country code
-	 * @param  $type     Array of PClasses types
-	 * @return $pclasses Key value array of countries and their PClasses
-	 */
-	function get_pclasses_for_country_and_type( $country, $type ) {
-
-		$pclasses_country_all = $this->fetch_pclasses( $country );
-		$pclasses_country_type = array();
-
-		if ( $pclasses_country_all ) {
-			foreach ( $pclasses_country_all as $pclass ) {
-				if ( in_array( $pclass->getType(), $type ) ) { // Passed from parent file
-					$pclasses_country_type[] = $pclass;
-				}
-			}
-		}
-
-		if ( ! empty( $pclasses_country_type ) ) {
-			return $pclasses_country_type;
-		}
-
-	}
-
-
-	/**
-	 * Displays available PClasses.
-	 * 
-	 * @since 1.0.0
-	 */
-	function display_pclasses_for_country_and_type( $country, $type ) {
-
-		$pclasses = $this->get_pclasses_for_country_and_type( $country, $type );
-
-		if ( $pclasses ) { ?>
-			<h5 style="margin-bottom:0.25em;"><?php echo $country; ?></h5>
-			<?php
-			$pclass_string = '';
-			foreach( $pclasses as $pclass ) {
-				if ( $pclass->getType() == 0 || $pclass->getType() == 1 ) { // Passed from parent file
-					$pclass_string .= $pclass->getDescription() . ', ';
-				}
-			}
-			$pclass_string = substr( $pclass_string, 0 ,-2 );
-			?>
-			<p style="margin-top:0;"><?php echo $pclass_string; ?></p>
-		<?php }
-				
-	}
 
 
 	/**
@@ -325,7 +209,7 @@ class WC_Gateway_Klarna_KPM_Part_Payment extends WC_Gateway_Klarna {
 	function check_required_fields() {
 
 		// Required fields check
-		if ( ! $this->get_eid() || ! $this->get_secret() )
+		if ( ! $this->klarna_helper->get_eid() || ! $this->klarna_helper->get_secret() )
 			return false;
 
 	}	
@@ -337,8 +221,20 @@ class WC_Gateway_Klarna_KPM_Part_Payment extends WC_Gateway_Klarna {
 	 * @since  2.0
 	 **/
 	function check_pclasses() {
+		
+		require_once( KLARNA_LIB . 'pclasses/storage.intf.php' );
 
-		$pclasses = $this->fetch_pclasses( $this->get_klarna_country() );
+		if ( ! function_exists( 'xmlrpc_encode_entitites' ) && ! class_exists( 'xmlrpcresp' ) ) {
+			require_once( KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc.inc' );
+			require_once( KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc_wrappers.inc' );
+		}
+
+		$country = $this->klarna_helper->get_klarna_country();
+		$klarna = $this->klarna;
+		$this->configure_klarna( $klarna, $country );
+
+		$klarna_pclasses = new WC_Gateway_Klarna_KPM_PClasses( $klarna, false, $country );
+		$pclasses = $klarna_pclasses->fetch_pclasses();
 		if ( empty( $pclasses ) )
 			return false;
 
@@ -427,7 +323,7 @@ class WC_Gateway_Klarna_KPM_Part_Payment extends WC_Gateway_Klarna {
 		global $woocommerce;
 		
 		// Currency check
-		$currency_for_country = $this->get_currency_for_country( $woocommerce->customer->get_country() );
+		$currency_for_country = $this->klarna_helper->get_currency_for_country( $woocommerce->customer->get_country() );
 		if ( ! empty( $currency_for_country ) && $currency_for_country !== $this->selected_currency )
 			return false;
 
@@ -439,17 +335,17 @@ class WC_Gateway_Klarna_KPM_Part_Payment extends WC_Gateway_Klarna {
 	 * 
 	 * @since  2.0
 	 **/
-	function configure_klarna( $klarna ) {
+	function configure_klarna( $klarna, $country ) {
 
 		$klarna->config(
-			$this->get_eid(), 												// EID
-			$this->get_secret(), 											// Secret
-			$this->get_klarna_country(), 									// Country
-			$this->get_klarna_language($this->get_klarna_country()), 		// Language
+			$this->klarna_helper->get_eid(), 												// EID
+			$this->klarna_helper->get_secret(), 											// Secret
+			$country, 									// Country
+			$this->klarna_helper->get_klarna_language( $country ), 		// Language
 			$this->selected_currency, 										// Currency
 			$this->klarna_mode, 										    // Live or test
 			$pcStorage = 'jsondb', 											// PClass storage
-			$pcURI = 'klarna_pclasses_' . $this->get_klarna_country()		// PClass storage URI path
+			$pcURI = 'klarna_pclasses_' . $country		// PClass storage URI path
 		);
 
 	}
@@ -482,7 +378,8 @@ class WC_Gateway_Klarna_KPM_Part_Payment extends WC_Gateway_Klarna {
 		/**
 		 * Setup Klarna configuration
 		 */
-		$this->configure_klarna( $klarna );
+		$country = $this->klarna_helper->get_klarna_country();
+		$this->configure_klarna( $klarna, $country );
 		
 		Klarna::$xmlrpcDebug = false;
 		Klarna::$debug = false;
@@ -499,7 +396,7 @@ class WC_Gateway_Klarna_KPM_Part_Payment extends WC_Gateway_Klarna {
 			echo '<p>' . apply_filters( 'klarna_kpm_part_payment_description', $klarna_description ) . '</p>';
 		}
 			
-		if ( 'NO' == $this->get_klarna_country() ) {
+		if ( 'NO' == $this->klarna_helper->get_klarna_country() ) {
 
 			// Use Klarna PMS for Norway
 			$payment_method_group = 'part_payment';
@@ -509,6 +406,7 @@ class WC_Gateway_Klarna_KPM_Part_Payment extends WC_Gateway_Klarna {
 		} else {
 
 			// For countries other than NO do the old thing
+			$pclass_type = array( 0, 1 );
 			include_once( KLARNA_DIR . 'views/public/payment-fields-kpm.php' );
 		
 		}
@@ -634,7 +532,8 @@ class WC_Gateway_Klarna_KPM_Part_Payment extends WC_Gateway_Klarna {
 		/**
 		 * Setup Klarna configuration
 		 */
-		$this->configure_klarna( $klarna );
+		$country = $this->klarna_helper->get_klarna_country();
+		$this->configure_klarna( $klarna, $country );
 
 		$klarna_order = new WC_Gateway_Klarna_Order(
 			$order,
@@ -747,53 +646,6 @@ class WC_Gateway_Klarna_KPM_Part_Payment extends WC_Gateway_Klarna {
 		echo '<p>'.__('Thank you for your order.', 'klarna').'</p>';
 		
 	}
-	
-	
-	
-	/**
-	 * Retrieve the PClasses from Klarna
-	 *
-	 * @since 1.0.0
-	 */
-	function fetch_pclasses( $country ) {
-		
-		// Get PClasses so that the customer can chose between different payment plans.
-		require_once( KLARNA_LIB . 'Klarna.php' );
-		require_once( KLARNA_LIB . 'pclasses/storage.intf.php' );
-		
-		if ( ! function_exists( 'xmlrpc_encode_entitites' ) && ! class_exists( 'xmlrpcresp' ) ) {
-			require_once( KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc.inc' );
-			require_once( KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc_wrappers.inc' );
-		}
-					
-		$klarna = $this->klarna;
-
-		$klarna->config(
-		    $this->get_eid( $country ), 					// EID
-		    $this->get_secret( $country ), 					// Secret
-		    $country, 										// Country
-		    $this->get_klarna_language( $country ),			// Language
-		    $this->get_currency_for_country( $country ),	// Currency
-		    $this->klarna_mode, 							// Live or test
-		    $pcStorage = 'jsondb', 							// PClass storage
-		    $pcURI = 'klarna_pclasses_' . $country			// PClass storage URI path
-		);
-		
-		if ( $klarna->getPClasses() ) {
-			return $klarna->getPClasses();
-		} else {
-			try {
-				// You can specify country (and language, currency if you wish) if you don't want 
-				// to use the configured country.
-				$klarna->fetchPClasses( $country ); 
-				return $klarna->getPClasses();
-			}
-			catch( Exception $e ) {
-				return false;
-			}
-		}
-
-	}
 
 
 	/**
@@ -803,7 +655,7 @@ class WC_Gateway_Klarna_KPM_Part_Payment extends WC_Gateway_Klarna {
 	 **/ 
 	function print_product_monthly_cost() {
 		
-		if ( $this->enabled!="yes" || $this->get_klarna_locale(get_locale()) == 'nl_nl' )
+		if ( $this->enabled!="yes" || $this->klarna_helper->get_klarna_locale(get_locale()) == 'nl_nl' )
 			return;
 			
 		global $woocommerce, $product, $klarna_kpm_part_payment_shortcode_currency, $klarna_kpm_part_payment_shortcode_price, $klarna_shortcode_img, $klarna_kpm_part_payment_country;
@@ -829,8 +681,8 @@ class WC_Gateway_Klarna_KPM_Part_Payment extends WC_Gateway_Klarna {
 	    		?>
 				<div style="width:220px; height:70px" 
 				     class="klarna-widget klarna-part-payment"
-				     data-eid="<?php echo $this->get_eid();?>" 
-				     data-locale="<?php echo $this->get_klarna_locale(get_locale());?>"
+				     data-eid="<?php echo $this->klarna_helper->get_eid();?>" 
+				     data-locale="<?php echo $this->klarna_helper->get_klarna_locale(get_locale());?>"
 				     data-price="<?php echo $sum;?>"
 				     data-layout="pale"
 				     data-invoice-fee="<?php echo $invoice_fee;?>">
@@ -916,319 +768,6 @@ class WC_Gateway_Klarna_KPM_Part_Payment extends WC_Gateway_Klarna {
 	function get_enabled() {
 
 		return $this->enabled;
-
-	}
-
-
-	/**
-	 * Helper function, gets Klarna locale based on current locale.
-	 *
-	 * @since 1.0.0
-	 * 
-	 * @param string $locale
-	 * @return string $klarna_locale
-	 **/
-	function get_klarna_locale( $locale ) {
-
-		switch ( $locale ) {
-			case 'da_DK':
-				$klarna_locale = 'da_dk';
-				break;
-			case 'de_DE' :
-				$klarna_locale = 'de_de';
-				break;
-			case 'no_NO' :
-			case 'nb_NO' :
-			case 'nn_NO' :
-				$klarna_locale = 'nb_no';
-				break;
-			case 'nl_NL' :
-				$klarna_locale = 'nl_nl';
-				break;
-			case 'fi_FI' :
-			case 'fi' :
-				$klarna_locale = 'fi_fi';
-				break;
-			case 'sv_SE' :
-				$klarna_locale = 'sv_se';
-				break;
-			case 'de_AT' :
-				$klarna_locale = 'de_at';
-				break;
-			case 'en_US' :
-			case 'en_GB' :
-				$klarna_locale = 'en_se';
-				break;
-			default:
-				$klarna_locale = '';
-		}
-		
-		return $klarna_locale;
-
-	}
-	
-	
-	/**
-	 * Helper function, gets Klarna eid based on country.
-	 *
-	 * @since 1.0.0
-	 * 
-	 * @param string $country
-	 * @return integer $current_eid
-	 **/
-	function get_eid( $country = false ) {
-
-		global $woocommerce;
-	
-		if ( empty( $country ) ) {
-			$country = ( isset( $woocommerce->customer->country ) ) ? $woocommerce->customer->country : $this->shop_country;
-		}
-		
-		$current_eid = '';
-		
-		switch ( $country )	{
-			case 'DK' :
-				$current_eid = $this->eid_dk;
-				break;
-			case 'DE' :
-				$current_eid = $this->eid_de;
-				break;
-			case 'NL' :
-				$current_eid = $this->eid_nl;
-				break;
-			case 'NO' :
-				$current_eid = $this->eid_no;
-				break;
-			case 'FI' :
-				$current_eid = $this->eid_fi;
-				break;
-			case 'SE' :
-				$current_eid = $this->eid_se;
-				break;
-			case 'AT' :
-				$current_eid = $this->eid_at;
-				break;
-			default:
-				$current_eid = '';
-		}
-		
-		return $current_eid;
-
-	}
-	
-	
-	/**
-	 * Helper function, gets Klarna secret based on country.
-	 *
-	 * @since 1.0.0
-	 * 
-	 * @param string $country
-	 * @return string $current_secret
-	 **/
-	function get_secret( $country = false ) {
-
-		global $woocommerce;
-	
-		if ( empty( $country ) ) {
-			$country = ( isset( $woocommerce->customer->country ) ) ? $woocommerce->customer->country : $this->shop_country;
-		}
-		
-		$current_secret = '';
-		
-		switch ( $country )	{
-			case 'DK' :
-				$current_secret = $this->secret_dk;
-				break;
-			case 'DE' :
-				$current_secret = $this->secret_de;
-				break;
-			case 'NL' :
-				$current_secret = $this->secret_nl;
-				break;
-			case 'NO' :
-				$current_secret = $this->secret_no;
-				break;
-			case 'FI' :
-				$current_secret = $this->secret_fi;
-				break;
-			case 'SE' :
-				$current_secret = $this->secret_se;
-				break;
-			case 'AT' :
-				$current_secret = $this->secret_at;
-				break;
-			default:
-				$current_secret = '';
-		}
-		
-		return $current_secret;
-
-	}
-	
-	
-	/**
-	 * Helper function, gets currency for selected country.
-	 *
-	 * @since 1.0.0
-	 * 
-	 * @param string $country
-	 * @return string $currency
-	 **/
-	function get_currency_for_country( $country ) {
-				
-		switch ( $country )	{
-			case 'DK' :
-				$currency = 'DKK';
-				break;
-			case 'DE' :
-				$currency = 'EUR';
-				break;
-			case 'NL' :
-				$currency = 'EUR';
-				break;
-			case 'NO' :
-				$currency = 'NOK';
-				break;
-			case 'FI' :
-				$currency = 'EUR';
-				break;
-			case 'SE' :
-				$currency = 'SEK';
-				break;
-			case 'AT' :
-				$currency = 'EUR';
-				break;
-			default:
-				$currency = '';
-		}
-		
-		return $currency;
-
-	}
-	
-	
-	/**
-	 * Helper function, gets Klarna language for selected country.
-	 *
-	 * @since 1.0.0
-	 * 
-	 * @param string $country
-	 * @return string $language
-	 **/
-	function get_klarna_language( $country ) {
-				
-		switch ( $country )	{
-			case 'DK' :
-				$language = 'DA';
-				break;
-			case 'DE' :
-				$language = 'DE';
-				break;
-			case 'NL' :
-				$language = 'NL';
-				break;
-			case 'NO' :
-				$language = 'NB';
-				break;
-			case 'FI' :
-				$language = 'FI';
-				break;
-			case 'SE' :
-				$language = 'SV';
-				break;
-			case 'AT' :
-				$language = 'DE';
-				break;
-			default:
-				$language = '';
-		}
-		
-		return $language;
-
-	}
-	
-	
-	/**
-	 * Helper function, gets Klarna country.
-	 *
-	 * @since 1.0.0
-	 * 
-	 * @return string $klarna_country
-	 **/
-	function get_klarna_country() {
-
-		global $woocommerce;
-		
-		if ( $woocommerce->customer->get_country() ) {
-			$klarna_country = $woocommerce->customer->get_country();
-		} else {
-			$klarna_country = $this->shop_language;
-			switch ( $this->shop_country ) {
-				case 'NB' :
-					$klarna_country = 'NO';
-					break;
-				case 'SV' :
-					$klarna_country = 'SE';
-					break;
-			}
-		}
-		
-		// Check if $klarna_country exists among the authorized countries
-		if ( ! in_array( $klarna_country, $this->authorized_countries ) ) {
-			return $this->shop_country;
-		} else {
-			return $klarna_country;
-		}
-
-	}
-	
-	
-	/**
-	 * Helper function, gets invoice icon.
-	 *
-	 * @since 1.0.0
-	 * 
-	 * @return string $klarna_kpm_part_payment_icon
-	 **/
-	function get_account_icon() {
-		
-		global $woocommerce;
-
-		$country = ( isset( $woocommerce->customer->country ) ) ? $woocommerce->customer->country : '';
-	
-		if ( empty( $country ) ) {
-			$country = $this->shop_country;
-		}
-		
-		$current_secret = '';
-		
-		switch ( $country ) {
-			case 'DK':
-				$klarna_kpm_part_payment_icon = 'https://cdn.klarna.com/1.0/shared/image/generic/logo/da_dk/basic/blue-black.png?width=100&eid=' . $this->get_eid();
-				break;
-			case 'DE' :
-				$klarna_kpm_part_payment_icon = 'https://cdn.klarna.com/1.0/shared/image/generic/logo/de_de/basic/blue-black.png?width=100&eid=' . $this->get_eid();
-				break;
-			case 'NL' :
-				$klarna_kpm_part_payment_icon = 'https://cdn.klarna.com/1.0/shared/image/generic/logo/nl_nl/basic/blue-black.png?width=100&eid=' . $this->get_eid();
-				break;
-			case 'NO' :
-				$klarna_kpm_part_payment_icon = false;
-				break;
-			case 'FI' :
-				$klarna_kpm_part_payment_icon = 'https://cdn.klarna.com/1.0/shared/image/generic/logo/fi_fi/basic/blue-black.png?width=100&eid=' . $this->get_eid();
-				break;
-			case 'SE' :
-				$klarna_kpm_part_payment_icon = 'https://cdn.klarna.com/1.0/shared/image/generic/logo/sv_se/basic/blue-black.png?width=100&eid=' . $this->get_eid();
-				break;
-			case 'AT' :
-				$klarna_kpm_part_payment_icon = 'https://cdn.klarna.com/1.0/shared/image/generic/logo/de_at/basic/blue-black.png?width=100&eid=' . $this->get_eid();
-				break;
-			default:
-				$klarna_kpm_part_payment_icon = '';
-		}
-		
-		return $klarna_kpm_part_payment_icon;
 
 	}
 			 

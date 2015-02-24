@@ -10,7 +10,7 @@
 
 
 // Show klarna_warning_banner if NL
-if ( $this->get_klarna_country() == 'NL' ) {
+if ( $this->klarna_helper->get_klarna_country() == 'NL' ) {
 	echo '<p><img src="' . $this->klarna_wb_img_checkout . '" class="klarna-wb" style="max-width: 100%;"/></p>';	
 }
 
@@ -51,7 +51,7 @@ if ( wp_is_mobile() ) {
 		
 		new Klarna.Terms.Account({
 		    el: 'klarna-account-terms',
-		    eid: '<?php echo $this->get_eid(); ?>',
+		    eid: '<?php echo $this->klarna_helper->get_eid(); ?>',
 		    locale: klarna_kpm_part_payment_current_locale,
 		    type: '<?php echo $klarna_layout;?>',
 		});
@@ -64,8 +64,19 @@ if ( wp_is_mobile() ) {
 	<p class="form-row form-row-first">
 		<?php
 		// Check if we have any PClasses
-		// TODO Deactivate this gateway if the file pclasses.json doesn't exist
-		$pclasses = $this->fetch_pclasses( $this->get_klarna_country() );
+		require_once( KLARNA_LIB . 'pclasses/storage.intf.php' );
+
+		if ( ! function_exists( 'xmlrpc_encode_entitites' ) && ! class_exists( 'xmlrpcresp' ) ) {
+			require_once( KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc.inc' );
+			require_once( KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc_wrappers.inc' );
+		}
+
+		$country = $this->klarna_helper->get_klarna_country();
+		$klarna = $this->klarna;
+		$this->configure_klarna( $klarna, $country );
+
+		$klarna_pclasses = new WC_Gateway_Klarna_KPM_PClasses( $klarna, $pclass_type, $country );
+		$pclasses = $klarna_pclasses->fetch_pclasses();
 		if ( $pclasses ) { ?>
 
 			<label for="klarna_kpm_part_payment_pclass">
@@ -92,7 +103,7 @@ if ( wp_is_mobile() ) {
 					// Check that Cart total is larger than min amount for current PClass				
 	   				if ( $sum > $pclass->getMinAmount() ) {
 	   					echo '<option value="' . $pclass->getId() . '">';
-		   					if ( $this->get_klarna_country() == 'NO' ) {
+		   					if ( $this->klarna_helper->get_klarna_country() == 'NO' ) {
 								if ( $pclass->getType() == 1 ) {
 									//If Account - Do not show startfee. This is always 0.
 									echo sprintf(
@@ -158,7 +169,7 @@ if ( wp_is_mobile() ) {
 	<div class="clear"></div>
 	
 	<p class="form-row form-row-first">
-	<?php if ( $this->get_klarna_country() == 'NL' || $this->get_klarna_country() == 'DE' ) { ?>
+	<?php if ( $this->klarna_helper->get_klarna_country() == 'NL' || $this->klarna_helper->get_klarna_country() == 'DE' ) { ?>
 		<label for="klarna_kpm_part_payment_pno">
 			<?php echo __("Date of Birth", 'klarna') ?> <span class="required">*</span>
 		</label>
@@ -302,11 +313,11 @@ if ( wp_is_mobile() ) {
 	<?php }
 	// Button/form for getAddress
 	$data = new WC_Klarna_Get_Address;
-	echo $data->get_address_button( $this->get_klarna_country() );
+	echo $data->get_address_button( $this->klarna_helper->get_klarna_country() );
 	?>
 	</p>
 	
-	<?php if ( $this->get_klarna_country() == 'NL' || $this->get_klarna_country() == 'DE' ) { ?>
+	<?php if ( $this->klarna_helper->get_klarna_country() == 'NL' || $this->klarna_helper->get_klarna_country() == 'DE' ) { ?>
 		<p class="form-row form-row-last">
 			<label for="klarna_kpm_part_payment_gender">
 				<?php echo __("Gender", 'klarna') ?> <span class="required">*</span>
@@ -320,7 +331,7 @@ if ( wp_is_mobile() ) {
 	<?php } ?>
 	<div class="clear"></div>
 
-	<?php if ( ( $this->get_klarna_country() == 'DE' || $this->get_klarna_country() == 'AT' ) && $this->de_consent_terms == 'yes' ) { // Consent terms for German & Austrian shops ?>
+	<?php if ( ( $this->klarna_helper->get_klarna_country() == 'DE' || $this->klarna_helper->get_klarna_country() == 'AT' ) && $this->de_consent_terms == 'yes' ) { // Consent terms for German & Austrian shops ?>
 		<p class="form-row">
 			<label for="klarna_de_terms"></label>
 			<input type="checkbox" class="input-checkbox" value="yes" name="klarna_de_consent_terms" />
