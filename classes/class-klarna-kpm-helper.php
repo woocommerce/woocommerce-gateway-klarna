@@ -18,6 +18,29 @@ class WC_Gateway_Klarna_KPM_Helper {
 
 
 	/**
+	 * Helper function, gets Klarna payment method testmode.
+	 *
+	 * @since 1.0.0
+	 **/
+	function get_test_mode() {
+
+		return $this->parent->testmode;
+
+	}
+	
+	/**
+	 * Checks if method is enabled.
+	 *
+	 * @since 1.0.0
+	 **/
+	function get_enabled() {
+
+		return $this->parent->enabled;
+
+	}
+
+
+	/**
 	 * Helper function, gets Klarna locale based on current locale.
 	 *
 	 * @since 1.0.0

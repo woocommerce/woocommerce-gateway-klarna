@@ -19,29 +19,29 @@
 class WC_Klarna_Get_Address {
 	public function __construct() {
 		
-		$data 									= new WC_Gateway_Klarna_Invoice;
-		$this->testmode 						= $data->get_testmode();
-		$this->eid		 						= $data->get_eid();
-		$this->secret 							= $data->get_secret();
-		$this->invo_enabled 					= $data->get_enabled();
-		$this->invo_dob_display					= 'description_box'; //$data->get_dob_display();
+		$data                     = new WC_Gateway_Klarna_KPM_Invoice;
+		$this->testmode           = $data->klarna_helper->get_test_mode();
+		$this->eid                = $data->klarna_helper->get_eid();
+		$this->secret             = $data->klarna_helper->get_secret();
+		$this->invo_enabled       = $data->klarna_helper->get_enabled();
+		$this->invo_dob_display	  = 'description_box';
 		
-		$data 									= new WC_Gateway_Klarna_Account;
-		$this->partpay_enabled 					= $data->get_enabled();
-		$this->partpay_dob_display				= 'description_box'; //$data->get_dob_display();
+		$data                        = new WC_Gateway_Klarna_KPM_Part_Payment;
+		$this->partpay_enabled       = $data->klarna_helper->get_enabled();
+		$this->partpay_dob_display   = 'description_box';
 
 		// If Invoice payment isn't activated by the merchant, use Part payment credentials for getAddresses instead
-		if( empty($this->eid) ) {
-			$this->eid		 					= $data->get_eid();
-			$this->secret 						= $data->get_secret();
-			$this->order_type_partpayment 		= 'yes';
+		if ( empty( $this->eid ) ) {
+			$this->eid                     = $data->klarna_helper->get_eid();
+			$this->secret                  = $data->klarna_helper->get_secret();
+			$this->order_type_partpayment  = 'yes';
 		}
 		
-		$data 									= new WC_Gateway_Klarna_Campaign;
-		$this->campaign_enabled 				= $data->get_enabled();
+		$data                    = new WC_Gateway_Klarna_KPM_Invoice;
+		$this->campaign_enabled  = $data->get_enabled();
 		
 		
-		add_action( 'wp_ajax_ajax_request', array($this, 'ajax_request') );
+		add_action( 'wp_ajax_ajax_request', array( $this, 'ajax_request' ) );
 		add_action( 'wp_ajax_nopriv_ajax_request', array($this, 'ajax_request') );
 		
 		add_action( 'wp_footer', array( $this, 'js' ) );
@@ -57,14 +57,10 @@ class WC_Klarna_Get_Address {
        
 	} // End constructor
 	
-	
 
-	
-	
 	/**
  	 * CSS for Get Addresses form
- 	 *
- 	**/
+ 	 */
 	function enqueue_scripts() {
 		if( is_checkout() && ($this->partpay_enabled || $this->invo_enabled || $this->campaign_enabled ) ) {
 			wp_enqueue_style('klarna-style', KLARNA_URL . 'assets/css/style.css');
@@ -72,14 +68,13 @@ class WC_Klarna_Get_Address {
 	}
 	
 	
-	
-	
 	/**
- 	 * JS restoring the default checkout field values if user switch from Klarna (invoice, account or campaign) to another payment method
- 	 * This is to prevent that customers use Klarnas Get Address feature and in the end use another payment method than Klarna.
- 	 *
- 	**/
-	
+ 	 * JS restoring the default checkout field values if user switch from 
+ 	 * Klarna (invoice, account or campaign) to another payment method.
+ 	 * 
+ 	 * This is to prevent that customers use Klarnas Get Address feature 
+ 	 * and in the end use another payment method than Klarna.
+ 	 */
 	public function checkout_restore_customer_defaults() {
 		
 		if( is_checkout() &&  $this->get_shop_country() == 'SE' && ($this->partpay_enabled || $this->invo_enabled || $this->campaign_enabled) ) {
@@ -145,11 +140,12 @@ class WC_Klarna_Get_Address {
 		}
 		
 	} // End function
+
 	
 	/**
- 	 * JS for fetching the personal identity number before the call to Klarna and populating the checkout fields after the call to Klarna
- 	 *
- 	**/
+ 	 * JS for fetching the personal identity number before the call to Klarna 
+ 	 * and populating the checkout fields after the call to Klarna.
+ 	 */
 	function js() {
 		
 		if( is_checkout() && $this->get_shop_country() == 'SE' && ($this->partpay_enabled || $this->invo_enabled || $this->campaign_enabled) ) {
@@ -337,9 +333,7 @@ class WC_Klarna_Get_Address {
 	
 	/**
  	 * Display the GetAddress fields
- 	 *
- 	**/
-
+ 	 */
 	public function get_address_button( $country ) {
 		
 		if( ($this->invo_enabled && $this->invo_dob_display == 'description_box') || ($this->partpay_enabled && $this->partpay_dob_display == 'description_box') ) {
@@ -358,14 +352,10 @@ class WC_Klarna_Get_Address {
 		}
 	} // End function
 	
-	
-
 
 	/**
  	 * Display the GetAddress response above the billing form on checkout
- 	 *
- 	**/
-
+ 	 */
 	public function get_address_response() {
 		
 		if( ($this->invo_enabled && $this->invo_dob_display == 'description_box') || ($this->partpay_enabled && $this->partpay_dob_display == 'description_box') ) {
@@ -379,8 +369,6 @@ class WC_Klarna_Get_Address {
 	} // End function
 
 
-
-	
 	/**
 	 * Ajax request callback function
 	 */
@@ -455,7 +443,7 @@ class WC_Klarna_Get_Address {
 			} catch(Exception $e) {
 				//$message = "{$e->getMessage()} (#{$e->getCode()})\n";
 				$return = array(
-					'get_address_message'	=> __('No address found', 'klarna')
+					'get_address_message' => __('No address found', 'klarna')
 				);
 				
 			}
@@ -472,11 +460,11 @@ class WC_Klarna_Get_Address {
 		die();
 	} // End function
 	
-	
+
 	// Helper function - get_country
 	public function get_country() {
 
-		$data = new WC_Gateway_Klarna_Invoice;
+		$data = new WC_Gateway_Klarna_KPM_Invoice;
 		return $data->get_klarna_country();
 
 	}
@@ -484,7 +472,7 @@ class WC_Klarna_Get_Address {
 	// Helper function - get_shop_country
 	public function get_shop_country() {
 
-		$data = new WC_Gateway_Klarna_Invoice;
+		$data = new WC_Gateway_Klarna_KPM_Invoice;
 		return $data->get_klarna_shop_country();
 
 	}
@@ -492,7 +480,7 @@ class WC_Klarna_Get_Address {
 	// Helper function - get_klarna_language
 	public function get_klarna_language( $country ) {
 
-		$data = new WC_Gateway_Klarna_Invoice;
+		$data = new WC_Gateway_Klarna_KPM_Invoice;
 		return $data->get_klarna_country( $country );
 
 	}

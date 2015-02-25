@@ -85,7 +85,8 @@ if ( wp_is_mobile() ) {
 
 			<select id="klarna_kpm_part_payment_pclass" name="klarna_kpm_part_payment_pclass" class="woocommerce-select">
 			<?php foreach ( $pclasses as $pclass ) { // Loop through the available PClasses stored in the file srv/pclasses.json
-				// if ( $pclass->getType() == 0 || $pclass->getType() == 1 ) {
+
+				if ( in_array( $pclass->getType(), $pclass_type ) ) {
 					// Get monthly cost for current pclass
 					$monthly_cost = KlarnaCalc::calc_monthly_cost(
 						$sum,
@@ -156,7 +157,7 @@ if ( wp_is_mobile() ) {
 					
 					} // End if ($sum > $pclass->getMinAmount())
 					
-	   			// } // End if $pclass->getType() == 0 or 1
+	   			} // End PClass type check
 			
 			} // End foreach
 			?>
