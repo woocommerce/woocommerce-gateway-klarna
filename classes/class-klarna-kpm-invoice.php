@@ -1,6 +1,6 @@
 <?php
 /**
- * Klarna part payment KPM
+ * Klarna invoice KPM
  *
  * @link http://www.woothemes.com/products/klarna/
  * @since 1.0.0
@@ -10,7 +10,7 @@
 
 
 /**
- * Class for Klarna Part Payment.
+ * Class for Klarna Invoice.
  */
 class WC_Gateway_Klarna_KPM_Invoice extends WC_Gateway_Klarna {
 
@@ -51,7 +51,7 @@ class WC_Gateway_Klarna_KPM_Invoice extends WC_Gateway_Klarna {
 		$this->klarna_helper = new WC_Gateway_Klarna_KPM_Helper( $this );
 
 		// Define user set variables
-		include( KLARNA_DIR . 'includes/variables-kpm-part-payment.php' );
+		include( KLARNA_DIR . 'includes/variables-kpm-invoice.php' );
 		
 		// Define Klarna object
 		require_once( KLARNA_LIB . 'Klarna.php' );
@@ -407,6 +407,8 @@ class WC_Gateway_Klarna_KPM_Invoice extends WC_Gateway_Klarna {
 		} else {
 			// For countries other than NO do the old thing
 			$pclass_type = $this->pclass_type;
+			$klarna_select_pclass_element = $this->id . '_pclass';
+			$klarna_dob_element = $this->id . '_pno';
 			include( KLARNA_DIR . 'views/public/payment-fields-kpm.php' );	
 		}
 	
@@ -549,7 +551,6 @@ class WC_Gateway_Klarna_KPM_Invoice extends WC_Gateway_Klarna {
 		    $user     = '' // Username, email or identifier for the user?
 		);
 		
-
 		try {
 			// Transmit all the specified data, from the steps above, to Klarna.
 			$result = $klarna->reserveAmount(
@@ -559,7 +560,7 @@ class WC_Gateway_Klarna_KPM_Invoice extends WC_Gateway_Klarna {
 				KlarnaFlags::NO_FLAG, 	// No specific behaviour like RETURN_OCR or TEST_MODE.
 				$klarna_pclass 			// Get the pclass object that the customer has choosen.
 			);
-    		
+
 			// Prepare redirect url
 			$redirect_url = $order->get_checkout_order_received_url();
 

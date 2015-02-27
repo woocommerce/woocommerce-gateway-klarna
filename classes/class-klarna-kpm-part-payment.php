@@ -408,6 +408,8 @@ class WC_Gateway_Klarna_KPM_Part_Payment extends WC_Gateway_Klarna {
 
 			// For countries other than NO do the old thing
 			$pclass_type = $this->pclass_type;
+			$klarna_select_pclass_element = $this->id . '_pclass';
+			$klarna_dob_element = $this->id . '_pno';
 			include( KLARNA_DIR . 'views/public/payment-fields-kpm.php' );
 		
 		}

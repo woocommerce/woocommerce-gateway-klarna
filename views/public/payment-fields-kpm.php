@@ -76,14 +76,16 @@ if ( wp_is_mobile() ) {
 		$this->configure_klarna( $klarna, $country );
 
 		$klarna_pclasses = new WC_Gateway_Klarna_KPM_PClasses( $klarna, $pclass_type, $country );
-		$pclasses = $klarna_pclasses->fetch_pclasses();
+		$pclasses = $klarna_pclasses->get_pclasses_for_country_and_type();
+
 		if ( $pclasses ) { ?>
 
-			<label for="klarna_kpm_part_payment_pclass">
+			<label for="<?php echo $klarna_select_pclass_element; ?>">
 				<?php echo __("Payment plan", 'klarna') ?> <span class="required">*</span>
 			</label>
 
-			<select id="klarna_kpm_part_payment_pclass" name="klarna_kpm_part_payment_pclass" class="woocommerce-select">
+			<select id="<?php echo $klarna_select_pclass_element; ?>" name="<?php echo $klarna_select_pclass_element; ?>" class="woocommerce-select">
+
 			<?php foreach ( $pclasses as $pclass ) { // Loop through the available PClasses stored in the file srv/pclasses.json
 
 				if ( in_array( $pclass->getType(), $pclass_type ) ) {
@@ -171,7 +173,7 @@ if ( wp_is_mobile() ) {
 	
 	<p class="form-row form-row-first">
 	<?php if ( $this->klarna_helper->get_klarna_country() == 'NL' || $this->klarna_helper->get_klarna_country() == 'DE' ) { ?>
-		<label for="klarna_kpm_part_payment_pno">
+		<label for="<?php echo $klarna_dob_element; ?>">
 			<?php echo __("Date of Birth", 'klarna') ?> <span class="required">*</span>
 		</label>
 		<select class="dob_select dob_day" name="date_of_birth_day" style="width:60px;">
@@ -309,8 +311,8 @@ if ( wp_is_mobile() ) {
 		</select>
 			
 	<?php } else { ?>
-		<label for="klarna_kpm_part_payment_pno"><?php echo __("Date of Birth", 'klarna') ?> <span class="required">*</span></label>
-		<input type="text" class="input-text" id="klarna_kpm_part_payment_pno" name="klarna_kpm_part_payment_pno" />
+		<label for="<?php echo $klarna_dob_element; ?>"><?php echo __("Date of Birth", 'klarna') ?> <span class="required">*</span></label>
+		<input type="text" class="input-text" id="<?php echo $klarna_dob_element; ?>" name="<?php echo $klarna_dob_element; ?>" />
 	<?php }
 	// Button/form for getAddress
 	$data = new WC_Klarna_Get_Address;

@@ -65,7 +65,7 @@ class WC_Gateway_Klarna_KPM_PClasses {
 			<?php
 			$pclass_string = '';
 			foreach( $pclasses as $pclass ) {
-				if ( $pclass->getType() == 0 || $pclass->getType() == 1 ) { // Passed from parent file
+				if ( in_array( $pclass->getType(), $this->type ) ) { // Passed from parent file
 					$pclass_string .= $pclass->getDescription() . ', ';
 				}
 			}
@@ -86,13 +86,13 @@ class WC_Gateway_Klarna_KPM_PClasses {
 		$klarna = $this->klarna;
 
 		if ( $klarna->getPClasses() ) {
-			return $klarna->getPClasses();
+			return $klarna->getAllPClasses();
 		} else {
 			try {
 				// You can specify country (and language, currency if you wish) if you don't want 
 				// to use the configured country.
 				$klarna->fetchPClasses( $this->country ); 
-				return $klarna->getPClasses();
+				return $klarna->getAllPClasses();
 			}
 			catch( Exception $e ) {
 				return false;
