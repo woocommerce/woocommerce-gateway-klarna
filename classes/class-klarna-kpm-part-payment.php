@@ -26,17 +26,20 @@ class WC_Gateway_Klarna_KPM_Part_Payment extends WC_Gateway_Klarna {
 		parent::__construct();
 		
 		$this->id                 = 'klarna_kpm_part_payment';
-		$this->method_title       = __( 'Klarna Part Payment', 'klarna' );
+		$this->method_title       = __( 'Klarna Part Payment (PMS)', 'klarna' );
 		$this->method_description = sprintf( __( 'With Klarna your customers can pay by invoice. Klarna works by adding extra personal information fields and then sending the details to Klarna for verification. Documentation <a href="%s" target="_blank">can be found here</a>.', 'klarna' ), 'http://docs.woothemes.com/document/klarna/' );
 		$this->has_fields         = true;
 		$this->order_button_text  = apply_filters( 'klarna_order_button_text', __( 'Place order', 'woocommerce' ) );
-		$this->pclass_type        = array( 0, 1 );
+		$this->pclass_type        = array( 0, 1 ); // Part payment flexible and part payment fixed
 						
 		// Load the form fields.
 		$this->init_form_fields();
 		
 		// Load the settings.
 		$this->init_settings();
+
+		// Define user set variables
+		include( KLARNA_DIR . 'includes/variables-kpm-part-payment.php' );
 		
 		// Load shortcodes. 
 		// This is used so that the merchant easily can modify the displayed monthly 
@@ -49,9 +52,6 @@ class WC_Gateway_Klarna_KPM_Part_Payment extends WC_Gateway_Klarna {
 		// Helper class
 		include_once( KLARNA_DIR . 'classes/class-klarna-kpm-helper.php' );
 		$this->klarna_helper = new WC_Gateway_Klarna_KPM_Helper( $this );
-
-		// Define user set variables
-		include( KLARNA_DIR . 'includes/variables-kpm-part-payment.php' );
 		
 		// Define Klarna object
 		require_once( KLARNA_LIB . 'Klarna.php' );
@@ -175,14 +175,14 @@ class WC_Gateway_Klarna_KPM_Part_Payment extends WC_Gateway_Klarna {
 	 */		
 	function is_available() {
 
-		$this->check_enabled();
-		$this->check_required_fields();
-		$this->check_pclasses();
-		$this->check_cart_total();
-		$this->check_lower_threshold();
-		$this->check_upper_threshold();
-		$this->check_customer_country();
-		$this->check_customer_currency();
+		if ( ! $this->check_enabled() ) return false;
+		if ( ! $this->check_required_fields() ) return false;
+		if ( ! $this->check_pclasses() ) return false;
+		if ( ! $this->check_cart_total() ) return false;
+		if ( ! $this->check_lower_threshold() ) return false;
+		if ( ! $this->check_upper_threshold() ) return false;
+		if ( ! $this->check_customer_country() ) return false;
+		if ( ! $this->check_customer_currency() ) return false;
 
 		return true;
 
@@ -196,8 +196,11 @@ class WC_Gateway_Klarna_KPM_Part_Payment extends WC_Gateway_Klarna {
 	 **/
 	function check_enabled() {
 
-		if ( 'yes' != $this->enabled )
-			return false;
+		if ( 'yes' != $this->enabled ) {
+			return false; 
+		}
+
+		return true;
 
 	}	
 
@@ -210,8 +213,11 @@ class WC_Gateway_Klarna_KPM_Part_Payment extends WC_Gateway_Klarna {
 	function check_required_fields() {
 
 		// Required fields check
-		if ( ! $this->klarna_helper->get_eid() || ! $this->klarna_helper->get_secret() )
+		if ( ! $this->klarna_helper->get_eid() || ! $this->klarna_helper->get_secret() ) {
 			return false;
+		}
+
+		return true;
 
 	}	
 
@@ -236,8 +242,11 @@ class WC_Gateway_Klarna_KPM_Part_Payment extends WC_Gateway_Klarna {
 
 		$klarna_pclasses = new WC_Gateway_Klarna_KPM_PClasses( $klarna, false, $country );
 		$pclasses = $klarna_pclasses->fetch_pclasses();
-		if ( empty( $pclasses ) )
+		if ( empty( $pclasses ) ) {
 			return false;
+		}
+
+		return true;
 
 	}	
 
@@ -251,8 +260,11 @@ class WC_Gateway_Klarna_KPM_Part_Payment extends WC_Gateway_Klarna {
 
 		global $woocommerce;
 
-		if ( ! isset( $woocommerce->cart->total ) )
+		if ( ! isset( $woocommerce->cart->total ) ) {
 			return false;
+		}
+
+		return true;
 
 	}	
 
@@ -268,9 +280,12 @@ class WC_Gateway_Klarna_KPM_Part_Payment extends WC_Gateway_Klarna {
 
 		// Cart totals check - Lower threshold
 		if ( $this->lower_threshold !== '' ) {
-			if ( $woocommerce->cart->total < $this->lower_threshold )
+			if ( $woocommerce->cart->total < $this->lower_threshold ) {
 				return false;
+			}
 		}
+
+		return true;
 
 	}	
 
@@ -286,9 +301,12 @@ class WC_Gateway_Klarna_KPM_Part_Payment extends WC_Gateway_Klarna {
 		
 		// Cart totals check - Upper threshold
 		if ( $this->upper_threshold !== '' ) {
-			if ( $woocommerce->cart->total > $this->upper_threshold )
+			if ( $woocommerce->cart->total > $this->upper_threshold ) {
 				return false;
+			} 
 		}
+
+		return true;
 
 	}	
 
@@ -304,12 +322,16 @@ class WC_Gateway_Klarna_KPM_Part_Payment extends WC_Gateway_Klarna {
 		
 		// Only activate the payment gateway if the customers country is the same as 
 		// the filtered shop country ($this->klarna_country)
-		if ( $woocommerce->customer->get_country() == true && ! in_array( $woocommerce->customer->get_country(), $this->authorized_countries ) )
+		if ( $woocommerce->customer->get_country() == true && ! in_array( $woocommerce->customer->get_country(), $this->authorized_countries ) ) {
 			return false;
+		}
 
 		// Don't allow orders over the amount of €250 for Dutch customers
-		if ( ( $woocommerce->customer->get_country() == true && $woocommerce->customer->get_country() == 'NL' ) && $woocommerce->cart->total >= 251 )
+		if ( ( $woocommerce->customer->get_country() == true && $woocommerce->customer->get_country() == 'NL' ) && $woocommerce->cart->total >= 251 ) {
 			return false;
+		}
+
+		return true;
 
 	}	
 
@@ -325,8 +347,11 @@ class WC_Gateway_Klarna_KPM_Part_Payment extends WC_Gateway_Klarna {
 		
 		// Currency check
 		$currency_for_country = $this->klarna_helper->get_currency_for_country( $woocommerce->customer->get_country() );
-		if ( ! empty( $currency_for_country ) && $currency_for_country !== $this->selected_currency )
+		if ( ! empty( $currency_for_country ) && $currency_for_country !== $this->selected_currency ) {
 			return false;
+		}
+
+		return true;
 
 	}	
 
@@ -658,7 +683,7 @@ class WC_Gateway_Klarna_KPM_Part_Payment extends WC_Gateway_Klarna {
 	 **/ 
 	function print_product_monthly_cost() {
 		
-		if ( $this->enabled!="yes" || $this->klarna_helper->get_klarna_locale(get_locale()) == 'nl_nl' )
+		if ( $this->enabled != "yes" || $this->klarna_helper->get_klarna_locale(get_locale()) == 'nl_nl' )
 			return;
 			
 		global $woocommerce, $product, $klarna_kpm_part_payment_shortcode_currency, $klarna_kpm_part_payment_shortcode_price, $klarna_shortcode_img, $klarna_kpm_part_payment_country;

@@ -11,7 +11,7 @@ return apply_filters( 'klarna_invoice_form_fields', array(
 	'enabled' => array(
 		'title' => __( 'Enable/Disable', 'klarna' ), 
 		'type' => 'checkbox', 
-		'label' => __( 'Enable Klarna Invoice', 'klarna' ), 
+		'label' => __( 'Enable Klarna Invoice (KPM)', 'klarna' ), 
 		'default' => 'no'
 	), 
 	'title' => array(

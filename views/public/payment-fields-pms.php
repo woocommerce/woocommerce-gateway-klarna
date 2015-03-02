@@ -19,10 +19,10 @@
 		$klarna_mode = 'live';
 	}
 	$klarna_pms_data = $klarna_pms->get_data(
-		$this->get_eid(),            // $eid
-		$this->get_secret(),         // $secret
-		$this->selected_currency,    // $selected_currency
-		$this->get_klarna_country(), // $shop_country
+		$this->klarna_helper->get_eid(),            // $eid
+		$this->klarna_helper->get_secret(),         // $secret
+		$this->klarna_helper->selected_currency,    // $selected_currency
+		$this->klarna_helper->get_klarna_country(), // $shop_country
 		$woocommerce->cart->total,   // $cart_total
 		$payment_method_group,       // $payment_method_group
 		$payment_method_select_id,   // $select_id,
