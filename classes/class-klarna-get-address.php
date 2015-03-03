@@ -132,7 +132,7 @@ class WC_Klarna_Get_Address {
 							
 						}
 					}
-					console.log( getAddressCompleted );
+					// console.log( getAddressCompleted );
 				});
 			});
 			</script>
@@ -250,7 +250,7 @@ class WC_Klarna_Get_Address {
 								_wpnonce		: '<?php echo wp_create_nonce('nonce-register_like'); ?>',
 							},
 							function(response){
-								console.log(response);
+								// console.log(response);
 								
 								if(response.get_address_message == "" || (typeof response.get_address_message === 'undefined')){
 									$(".klarna-get-address-message").hide();
