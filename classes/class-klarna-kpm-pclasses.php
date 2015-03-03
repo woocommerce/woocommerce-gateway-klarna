@@ -33,8 +33,9 @@ class WC_Gateway_Klarna_KPM_PClasses {
 	 */
 	function get_pclasses_for_country_and_type() {
 
-		$pclasses_country_all = $this->fetch_pclasses( $this->country );
+		$pclasses_country_all = $this->fetch_pclasses();
 		$pclasses_country_type = array();
+		unset( $pclasses_country_type );
 
 		if ( $pclasses_country_all ) {
 			foreach ( $pclasses_country_all as $pclass ) {
@@ -59,7 +60,6 @@ class WC_Gateway_Klarna_KPM_PClasses {
 	function display_pclasses_for_country_and_type() {
 
 		$pclasses = $this->get_pclasses_for_country_and_type( $this->country, $this->type );
-
 		if ( $pclasses ) { ?>
 			<h5 style="margin-bottom:0.25em;"><?php echo $this->country; ?></h5>
 			<?php
@@ -69,7 +69,7 @@ class WC_Gateway_Klarna_KPM_PClasses {
 					$pclass_string .= $pclass->getDescription() . ', ';
 				}
 			}
-			$pclass_string = substr( $pclass_string, 0 ,-2 );
+			$pclass_string = substr( $pclass_string, 0, -2 );
 			?>
 			<p style="margin-top:0;"><?php echo $pclass_string; ?></p>
 		<?php }

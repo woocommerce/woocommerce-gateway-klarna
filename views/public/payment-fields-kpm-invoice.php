@@ -73,7 +73,7 @@ if ( wp_is_mobile() ) {
 		}
 
 		$country = $this->klarna_helper->get_klarna_country();
-		$klarna = $this->klarna;
+		$klarna = new Klarna();
 		$this->configure_klarna( $klarna, $country );
 
 		$klarna_pclasses = new WC_Gateway_Klarna_KPM_PClasses( $klarna, $pclass_type, $country );
@@ -87,7 +87,26 @@ if ( wp_is_mobile() ) {
 
 			<select id="<?php echo $klarna_select_pclass_element; ?>" name="<?php echo $klarna_select_pclass_element; ?>" class="woocommerce-select">
 
-			<option value="-1">Invoice</option>
+			<?php
+			$country = ( isset( $woocommerce->customer->country ) ) ? $woocommerce->customer->country : $this->klarna_helper->shop_country;
+			switch ( $country ) {
+				case 'DK' :
+					$invoice_string = 'Betal om 14 dage';
+					break;
+				case 'NO' :
+					$invoice_string = 'Betal om 14 dager';
+					break;
+				case 'FI' :
+					$invoice_string = 'Maksa 14 päivän kuluessa';
+					break;
+				case 'SE' :
+					$invoice_string = 'Betala om 14 dagar';
+					break;
+				default:
+					$invoice_string = __( 'Pay in 14 days', 'klarna' );
+			}
+			?>
+			<option value="-1"><?php echo $invoice_string; ?></option>
 
 			<?php foreach ( $pclasses as $pclass ) { // Loop through the available PClasses stored in the file srv/pclasses.json
 

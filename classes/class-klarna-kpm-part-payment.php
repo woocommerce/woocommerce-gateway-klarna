@@ -55,7 +55,6 @@ class WC_Gateway_Klarna_KPM_Part_Payment extends WC_Gateway_Klarna {
 		
 		// Define Klarna object
 		require_once( KLARNA_LIB . 'Klarna.php' );
-		$this->klarna = new Klarna();
 
 		// Test mode or Live mode		
 		if ( $this->testmode == 'yes' ) {
@@ -128,7 +127,7 @@ class WC_Gateway_Klarna_KPM_Part_Payment extends WC_Gateway_Klarna {
 		if ( ! empty( $this->authorized_countries ) && $this->enabled == 'yes' ) {
 			echo '<h4>' . __( 'Active PClasses', 'klarna' ) . '</h4>';
 			foreach( $this->authorized_countries as $key => $country ) {
-				$klarna = $this->klarna;
+				$klarna = new Klarna();
 				$this->configure_klarna( $klarna, $country );
 
 				$pclasses = new WC_Gateway_Klarna_KPM_PClasses( $klarna, $this->pclass_type, $country );
@@ -237,7 +236,7 @@ class WC_Gateway_Klarna_KPM_Part_Payment extends WC_Gateway_Klarna {
 		}
 
 		$country = $this->klarna_helper->get_klarna_country();
-		$klarna = $this->klarna;
+		$klarna = new Klarna();
 		$this->configure_klarna( $klarna, $country );
 
 		$klarna_pclasses = new WC_Gateway_Klarna_KPM_PClasses( $klarna, false, $country );
@@ -399,7 +398,7 @@ class WC_Gateway_Klarna_KPM_Part_Payment extends WC_Gateway_Klarna {
 			<p><?php _e('TEST MODE ENABLED', 'klarna'); ?></p>
 		<?php }
 	
-		$klarna = $this->klarna;
+		$klarna = new Klarna();
 
 		/**
 		 * Setup Klarna configuration
@@ -435,7 +434,7 @@ class WC_Gateway_Klarna_KPM_Part_Payment extends WC_Gateway_Klarna {
 			$pclass_type = $this->pclass_type;
 			$klarna_select_pclass_element = $this->id . '_pclass';
 			$klarna_dob_element = $this->id . '_pno';
-			include( KLARNA_DIR . 'views/public/payment-fields-kpm.php' );
+			include( KLARNA_DIR . 'views/public/payment-fields-kpm-part-payment.php' );
 		
 		}
 	
@@ -554,7 +553,7 @@ class WC_Gateway_Klarna_KPM_Part_Payment extends WC_Gateway_Klarna {
 			$klarna_shipping['house_extension'] = '';
 		}
 			
-		$klarna = $this->klarna;
+		$klarna = new Klarna();
 		
 
 		/**

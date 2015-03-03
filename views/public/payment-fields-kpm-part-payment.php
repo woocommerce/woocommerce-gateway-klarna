@@ -10,7 +10,7 @@
 
 
 // Show klarna_warning_banner if NL
-if ( $this->get_klarna_country() == 'NL' ) {
+if ( $this->klarna_helper->get_klarna_country() == 'NL' ) {
 	echo '<p><img src="' . $this->klarna_wb_img_checkout . '" class="klarna-wb" style="max-width: 100%;"/></p>';	
 }
 
@@ -26,33 +26,33 @@ if ( wp_is_mobile() ) {
 <script type="text/javascript">
 	// Document ready
 	jQuery(document).ready(function($) {
-		var klarna_account_selected_country = $( "#billing_country" ).val();
+		var klarna_kpm_part_payment_selected_country = $( "#billing_country" ).val();
 		
 		// If no Billing Country is set in the checkout form, use the default shop country
-		if( ! klarna_account_selected_country ) {
-			var klarna_account_selected_country = '<?php echo $this->shop_country;?>';
+		if( ! klarna_kpm_part_payment_selected_country ) {
+			var klarna_kpm_part_payment_selected_country = '<?php echo $this->shop_country;?>';
 		}
 		
-		if( klarna_account_selected_country == 'SE' ) {
-			var klarna_account_current_locale = 'sv_SE';
-		} else if( klarna_account_selected_country == 'NO' ) {
-			var klarna_account_current_locale = 'nb_NO';
-		} else if( klarna_account_selected_country == 'DK' ) {
-			var klarna_account_current_locale = 'da_DK';
-		} else if( klarna_account_selected_country == 'FI' ) {
-			var klarna_account_current_locale = 'fi_FI';
-		} else if( klarna_account_selected_country == 'DE' ) {
-			var klarna_account_current_locale = 'de_DE';
-		}  else if( klarna_account_selected_country == 'NL' ) {
-			var klarna_account_current_locale = 'nl_NL';
-		} else if( klarna_account_selected_country == 'AT' ) {
-			var klarna_account_current_locale = 'de_AT';
+		if( klarna_kpm_part_payment_selected_country == 'SE' ) {
+			var klarna_kpm_part_payment_current_locale = 'sv_SE';
+		} else if( klarna_kpm_part_payment_selected_country == 'NO' ) {
+			var klarna_kpm_part_payment_current_locale = 'nb_NO';
+		} else if( klarna_kpm_part_payment_selected_country == 'DK' ) {
+			var klarna_kpm_part_payment_current_locale = 'da_DK';
+		} else if( klarna_kpm_part_payment_selected_country == 'FI' ) {
+			var klarna_kpm_part_payment_current_locale = 'fi_FI';
+		} else if( klarna_kpm_part_payment_selected_country == 'DE' ) {
+			var klarna_kpm_part_payment_current_locale = 'de_DE';
+		}  else if( klarna_kpm_part_payment_selected_country == 'NL' ) {
+			var klarna_kpm_part_payment_current_locale = 'nl_NL';
+		} else if( klarna_kpm_part_payment_selected_country == 'AT' ) {
+			var klarna_kpm_part_payment_current_locale = 'de_AT';
 		} else { }
 		
 		new Klarna.Terms.Account({
 		    el: 'klarna-account-terms',
-		    eid: '<?php echo $this->get_eid(); ?>',
-		    locale: klarna_account_current_locale,
+		    eid: '<?php echo $this->klarna_helper->get_eid(); ?>',
+		    locale: klarna_kpm_part_payment_current_locale,
 		    type: '<?php echo $klarna_layout;?>',
 		});
 	});
@@ -64,17 +64,31 @@ if ( wp_is_mobile() ) {
 	<p class="form-row form-row-first">
 		<?php
 		// Check if we have any PClasses
-		// TODO Deactivate this gateway if the file pclasses.json doesn't exist
-		$pclasses = $this->fetch_pclasses( $this->get_klarna_country() );
+		require_once( KLARNA_LIB . 'pclasses/storage.intf.php' );
+
+		if ( ! function_exists( 'xmlrpc_encode_entitites' ) && ! class_exists( 'xmlrpcresp' ) ) {
+			require_once( KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc.inc' );
+			require_once( KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc_wrappers.inc' );
+		}
+
+		$country = $this->klarna_helper->get_klarna_country();
+		$klarna = new Klarna();
+		$this->configure_klarna( $klarna, $country );
+
+		$klarna_pclasses = new WC_Gateway_Klarna_KPM_PClasses( $klarna, $pclass_type, $country );
+		$pclasses = $klarna_pclasses->get_pclasses_for_country_and_type();
+
 		if ( $pclasses ) { ?>
 
-			<label for="klarna_account_pclass">
+			<label for="<?php echo $klarna_select_pclass_element; ?>">
 				<?php echo __("Payment plan", 'klarna') ?> <span class="required">*</span>
 			</label>
 
-			<select id="klarna_account_pclass" name="klarna_account_pclass" class="woocommerce-select">
+			<select id="<?php echo $klarna_select_pclass_element; ?>" name="<?php echo $klarna_select_pclass_element; ?>" class="woocommerce-select">
+
 			<?php foreach ( $pclasses as $pclass ) { // Loop through the available PClasses stored in the file srv/pclasses.json
-				if ( $pclass->getType() == 0 || $pclass->getType() == 1 ) {
+
+				if ( in_array( $pclass->getType(), $pclass_type ) ) {
 					// Get monthly cost for current pclass
 					$monthly_cost = KlarnaCalc::calc_monthly_cost(
 						$sum,
@@ -92,7 +106,7 @@ if ( wp_is_mobile() ) {
 					// Check that Cart total is larger than min amount for current PClass				
 	   				if ( $sum > $pclass->getMinAmount() ) {
 	   					echo '<option value="' . $pclass->getId() . '">';
-		   					if ( $this->get_klarna_country() == 'NO' ) {
+		   					if ( $this->klarna_helper->get_klarna_country() == 'NO' ) {
 								if ( $pclass->getType() == 1 ) {
 									//If Account - Do not show startfee. This is always 0.
 									echo sprintf(
@@ -145,7 +159,7 @@ if ( wp_is_mobile() ) {
 					
 					} // End if ($sum > $pclass->getMinAmount())
 					
-	   			} // End if $pclass->getType() == 0 or 1
+	   			} // End PClass type check
 			
 			} // End foreach
 			?>
@@ -158,8 +172,8 @@ if ( wp_is_mobile() ) {
 	<div class="clear"></div>
 	
 	<p class="form-row form-row-first">
-	<?php if ( $this->get_klarna_country() == 'NL' || $this->get_klarna_country() == 'DE' ) { ?>
-		<label for="klarna_account_pno">
+	<?php if ( $this->klarna_helper->get_klarna_country() == 'NL' || $this->klarna_helper->get_klarna_country() == 'DE' ) { ?>
+		<label for="<?php echo $klarna_dob_element; ?>">
 			<?php echo __("Date of Birth", 'klarna') ?> <span class="required">*</span>
 		</label>
 		<select class="dob_select dob_day" name="date_of_birth_day" style="width:60px;">
@@ -297,21 +311,21 @@ if ( wp_is_mobile() ) {
 		</select>
 			
 	<?php } else { ?>
-		<label for="klarna_account_pno"><?php echo __("Date of Birth", 'klarna') ?> <span class="required">*</span></label>
-		<input type="text" class="input-text" id="klarna_account_pno" name="klarna_account_pno" />
+		<label for="<?php echo $klarna_dob_element; ?>"><?php echo __("Date of Birth", 'klarna') ?> <span class="required">*</span></label>
+		<input type="text" class="input-text" id="<?php echo $klarna_dob_element; ?>" name="<?php echo $klarna_dob_element; ?>" />
 	<?php }
 	// Button/form for getAddress
 	$data = new WC_Klarna_Get_Address;
-	echo $data->get_address_button( $this->get_klarna_country() );
+	echo $data->get_address_button( $this->klarna_helper->get_klarna_country() );
 	?>
 	</p>
 	
-	<?php if ( $this->get_klarna_country() == 'NL' || $this->get_klarna_country() == 'DE' ) { ?>
+	<?php if ( $this->klarna_helper->get_klarna_country() == 'NL' || $this->klarna_helper->get_klarna_country() == 'DE' ) { ?>
 		<p class="form-row form-row-last">
-			<label for="klarna_account_gender">
+			<label for="klarna_kpm_part_payment_gender">
 				<?php echo __("Gender", 'klarna') ?> <span class="required">*</span>
 			</label>
-			<select id="klarna_account_gender" name="klarna_account_gender" class="woocommerce-select" style="width:120px;">
+			<select id="klarna_kpm_part_payment_gender" name="klarna_kpm_part_payment_gender" class="woocommerce-select" style="width:120px;">
 				<option value=""><?php echo __("Select gender", 'klarna') ?></option>
 				<option value="f"><?php echo __("Female", 'klarna') ?></option>
 				<option value="m"><?php echo __("Male", 'klarna') ?></option>
@@ -320,7 +334,7 @@ if ( wp_is_mobile() ) {
 	<?php } ?>
 	<div class="clear"></div>
 
-	<?php if ( ( $this->get_klarna_country() == 'DE' || $this->get_klarna_country() == 'AT' ) && $this->de_consent_terms == 'yes' ) { // Consent terms for German & Austrian shops ?>
+	<?php if ( ( $this->klarna_helper->get_klarna_country() == 'DE' || $this->klarna_helper->get_klarna_country() == 'AT' ) && $this->de_consent_terms == 'yes' ) { // Consent terms for German & Austrian shops ?>
 		<p class="form-row">
 			<label for="klarna_de_terms"></label>
 			<input type="checkbox" class="input-checkbox" value="yes" name="klarna_de_consent_terms" />
