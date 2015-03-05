@@ -8,7 +8,7 @@
  * @package WC_Gateway_Klarna
  */
 
-class WC_Gateway_Klarna_KPM_PClasses {
+class WC_Gateway_Klarna_PClasses {
 
 	/**
 	 * Class constructor.

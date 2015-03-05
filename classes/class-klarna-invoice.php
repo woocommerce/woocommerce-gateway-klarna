@@ -12,7 +12,7 @@
 /**
  * Class for Klarna Part Payment.
  */
-class WC_Gateway_Klarna_KPM_Part_Payment extends WC_Gateway_Klarna {
+class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 
 	/**
 	 * Class constructor.
@@ -25,33 +25,33 @@ class WC_Gateway_Klarna_KPM_Part_Payment extends WC_Gateway_Klarna {
 		
 		parent::__construct();
 		
-		$this->id                 = 'klarna_kpm_part_payment';
-		$this->method_title       = __( 'Klarna Part Payment (PMS)', 'klarna' );
+		$this->id                 = 'klarna_invoice';
+		$this->method_title       = __( 'Klarna Invoice (KPM)', 'klarna' );
 		$this->method_description = sprintf( __( 'With Klarna your customers can pay by invoice. Klarna works by adding extra personal information fields and then sending the details to Klarna for verification. Documentation <a href="%s" target="_blank">can be found here</a>.', 'klarna' ), 'http://docs.woothemes.com/document/klarna/' );
 		$this->has_fields         = true;
 		$this->order_button_text  = apply_filters( 'klarna_order_button_text', __( 'Place order', 'woocommerce' ) );
-		$this->pclass_type        = array( 0, 1 ); // Part payment flexible and part payment fixed
+		$this->pclass_type        = array( 2 );
 						
 		// Load the form fields.
 		$this->init_form_fields();
 		
 		// Load the settings.
 		$this->init_settings();
-
-		// Define user set variables
-		include( KLARNA_DIR . 'includes/variables-kpm-part-payment.php' );
 		
+		// Define user set variables
+		include( KLARNA_DIR . 'includes/variables-invoice.php' );
+
 		// Load shortcodes. 
 		// This is used so that the merchant easily can modify the displayed monthly 
 		// cost text (on single product and shop page) via the settings page.
 		include_once( KLARNA_DIR . 'classes/class-klarna-shortcodes.php' );
 
 		// Klarna PClasses handling. 
-		include_once( KLARNA_DIR . 'classes/class-klarna-kpm-pclasses.php' );
+		include_once( KLARNA_DIR . 'classes/class-klarna-pclasses.php' );
 
 		// Helper class
-		include_once( KLARNA_DIR . 'classes/class-klarna-kpm-helper.php' );
-		$this->klarna_helper = new WC_Gateway_Klarna_KPM_Helper( $this );
+		include_once( KLARNA_DIR . 'classes/class-klarna-helper.php' );
+		$this->klarna_helper = new WC_Gateway_Klarna_Helper( $this );
 		
 		// Define Klarna object
 		require_once( KLARNA_LIB . 'Klarna.php' );
@@ -72,8 +72,8 @@ class WC_Gateway_Klarna_KPM_Part_Payment extends WC_Gateway_Klarna {
 		}
 
 		// Apply filters to Country and language
-		$this->klarna_kpm_part_payment_info = apply_filters( 'klarna_kpm_part_payment_info', '' );
-		$this->icon = apply_filters( 'klarna_kpm_part_payment_icon', $this->klarna_helper->get_account_icon() );	
+		$this->klarna_invoice_info = apply_filters( 'klarna_invoice_info', '' );
+		$this->icon = apply_filters( 'klarna_invoice_icon', $this->klarna_helper->get_account_icon() );	
 		$this->icon_basic = apply_filters( 'klarna_basic_icon', '' );
 
 		// Apply filters to Klarna warning banners (NL only)
@@ -85,8 +85,8 @@ class WC_Gateway_Klarna_KPM_Part_Payment extends WC_Gateway_Klarna {
 				
 		// Actions
 		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
-		add_action( 'woocommerce_receipt_klarna_kpm_part_payment', array( $this, 'receipt_page' ) );
-		add_action( 'woocommerce_checkout_process', array( $this, 'klarna_kpm_part_payment_checkout_field_process' ) );
+		add_action( 'woocommerce_receipt_klarna_invoice', array( $this, 'receipt_page' ) );
+		add_action( 'woocommerce_checkout_process', array( $this, 'klarna_invoice_checkout_field_process' ) );
 		add_action( 'wp_print_footer_scripts', array(  $this, 'footer_scripts' ) );
 		
 	}
@@ -99,7 +99,7 @@ class WC_Gateway_Klarna_KPM_Part_Payment extends WC_Gateway_Klarna {
 	 */
 	function init_form_fields() {
 
-		$this->form_fields = include( KLARNA_DIR . 'includes/settings-kpm-part-payment.php' );
+		$this->form_fields = include( KLARNA_DIR . 'includes/settings-invoice.php' );
 	    
 	}
 
@@ -130,7 +130,7 @@ class WC_Gateway_Klarna_KPM_Part_Payment extends WC_Gateway_Klarna {
 				$klarna = new Klarna();
 				$this->configure_klarna( $klarna, $country );
 
-				$pclasses = new WC_Gateway_Klarna_KPM_PClasses( $klarna, $this->pclass_type, $country );
+				$pclasses = new WC_Gateway_Klarna_PClasses( $klarna, $this->pclass_type, $country );
 				$pclasses->display_pclasses_for_country_and_type();
 			}   
 		}
@@ -239,7 +239,7 @@ class WC_Gateway_Klarna_KPM_Part_Payment extends WC_Gateway_Klarna {
 		$klarna = new Klarna();
 		$this->configure_klarna( $klarna, $country );
 
-		$klarna_pclasses = new WC_Gateway_Klarna_KPM_PClasses( $klarna, false, $country );
+		$klarna_pclasses = new WC_Gateway_Klarna_PClasses( $klarna, false, $country );
 		$pclasses = $klarna_pclasses->fetch_pclasses();
 		if ( empty( $pclasses ) ) {
 			return false;
@@ -418,14 +418,14 @@ class WC_Gateway_Klarna_KPM_Part_Payment extends WC_Gateway_Klarna {
 		if ( $this->description ) {
 			$klarna_description = $this->description;
 			// apply_filters to the description so we can filter this if needed
-			echo '<p>' . apply_filters( 'klarna_kpm_part_payment_description', $klarna_description ) . '</p>';
+			echo '<p>' . apply_filters( 'klarna_invoice_description', $klarna_description ) . '</p>';
 		}
 			
 		if ( 'NO' == $this->klarna_helper->get_klarna_country() ) {
 
 			// Use Klarna PMS for Norway
-			$payment_method_group = 'part_payment';
-			$payment_method_select_id = 'klarna_kpm_part_payment_pclass';
+			$payment_method_group = 'invoice';
+			$payment_method_select_id = 'klarna_invoice_pclass';
 			include( KLARNA_DIR . 'views/public/payment-fields-pms.php' );
 
 		} else {
@@ -434,7 +434,7 @@ class WC_Gateway_Klarna_KPM_Part_Payment extends WC_Gateway_Klarna {
 			$pclass_type = $this->pclass_type;
 			$klarna_select_pclass_element = $this->id . '_pclass';
 			$klarna_dob_element = $this->id . '_pno';
-			include( KLARNA_DIR . 'views/public/payment-fields-kpm-part-payment.php' );
+			include( KLARNA_DIR . 'views/public/payment-fields-invoice.php' );
 		
 		}
 	
@@ -447,14 +447,14 @@ class WC_Gateway_Klarna_KPM_Part_Payment extends WC_Gateway_Klarna {
 	 * @since 1.0.0
 	 * @todo  Use helper functions. One for SE, NO, DK and FI, and one for DE and AT.
  	 **/
-	function klarna_kpm_part_payment_checkout_field_process() {
+	function klarna_invoice_checkout_field_process() {
 
 		global $woocommerce;
 
  		// Only run this if Klarna Part Payment is the choosen payment method
- 		if ( $_POST['payment_method'] == 'klarna_kpm_part_payment' ) {
+ 		if ( $_POST['payment_method'] == 'klarna_invoice' ) {
  		
- 			$klarna_field_prefix = 'klarna_kpm_part_payment_';
+ 			$klarna_field_prefix = 'klarna_invoice_';
 
 			include_once( KLARNA_DIR . 'includes/checkout-field-process.php' );
 
@@ -468,21 +468,21 @@ class WC_Gateway_Klarna_KPM_Part_Payment extends WC_Gateway_Klarna {
 	 * 
 	 * @since  2.0
 	 **/
-	function collect_dob( $order_id ) {
+	function collect_dob() {
 	
 		// Collect the dob different depending on country
 		if ( $_POST['billing_country'] == 'NL' || $_POST['billing_country'] == 'DE' ) {
 			$klarna_pno_day = 
-				isset( $_POST['date_of_birth_day'] ) ? woocommerce_clean( $_POST['date_of_birth_day'] ) : '';
+				isset( $_POST['klarna_invo_date_of_birth_day'] ) ? woocommerce_clean( $_POST['klarna_invo_date_of_birth_day'] ) : '';
 			$klarna_pno_month = 
-				isset( $_POST['date_of_birth_month'] ) ? woocommerce_clean( $_POST['date_of_birth_month'] ) : '';
+				isset( $_POST['klarna_invo_date_of_birth_month'] ) ? woocommerce_clean( $_POST['klarna_invo_date_of_birth_month'] ) : '';
 			$klarna_pno_year = 
-				isset( $_POST['date_of_birth_year'] ) ? woocommerce_clean( $_POST['date_of_birth_year'] ) : '';
+				isset( $_POST['klarna_invo_date_of_birth_year'] ) ? woocommerce_clean( $_POST['klarna_invo_date_of_birth_year'] ) : '';
 
 			$klarna_pno = $klarna_pno_day . $klarna_pno_month . $klarna_pno_year;
 		} else {
 			$klarna_pno = 
-				isset( $_POST['klarna_kpm_part_payment_pno'] ) ? woocommerce_clean( $_POST['klarna_kpm_part_payment_pno'] ) : '';
+				isset( $_POST['klarna_invoice_pno'] ) ? woocommerce_clean( $_POST['klarna_invoice_pno'] ) : '';
 		}
 
 		return $klarna_pno;
@@ -498,6 +498,7 @@ class WC_Gateway_Klarna_KPM_Part_Payment extends WC_Gateway_Klarna {
 	function process_payment( $order_id ) {
 
 		global $woocommerce;
+		$klarna_gender = null;
 		
 		$order = WC_Klarna_Compatibility::wc_get_order( $order_id );
 		
@@ -512,15 +513,15 @@ class WC_Gateway_Klarna_KPM_Part_Payment extends WC_Gateway_Klarna {
 		// Get values from klarna form on checkout page
 		
 		// Collect the DoB
-		$klarna_pno = $this->collect_dob( $order_id );
+		$klarna_pno = $this->collect_dob();
 
 		// Store Klarna specific form values in order as post meta
 		update_post_meta( $order_id, 'klarna_pno', $klarna_pno);
 		
 		$klarna_pclass = 
-			isset( $_POST['klarna_kpm_part_payment_pclass'] ) ? woocommerce_clean( $_POST['klarna_kpm_part_payment_pclass'] ) : '';
+			isset( $_POST['klarna_invoice_pclass'] ) ? woocommerce_clean( $_POST['klarna_invoice_pclass'] ) : '';
 		$klarna_gender = 
-			isset( $_POST['klarna_kpm_part_payment_gender'] ) ? woocommerce_clean( $_POST['klarna_kpm_part_payment_gender'] ) : '';
+			isset( $_POST['klarna_invoice_gender'] ) ? woocommerce_clean( $_POST['klarna_invoice_gender'] ) : '';
 		$klarna_de_consent_terms = 
 			isset( $_POST['klarna_de_consent_terms'] ) ? woocommerce_clean( $_POST['klarna_de_consent_terms'] ) : '';
 			
@@ -682,10 +683,10 @@ class WC_Gateway_Klarna_KPM_Part_Payment extends WC_Gateway_Klarna {
 	 **/ 
 	function print_product_monthly_cost() {
 		
-		if ( $this->enabled != "yes" || $this->klarna_helper->get_klarna_locale(get_locale()) == 'nl_nl' )
+		if ( $this->enabled!="yes" || $this->klarna_helper->get_klarna_locale(get_locale()) == 'nl_nl' )
 			return;
 			
-		global $woocommerce, $product, $klarna_kpm_part_payment_shortcode_currency, $klarna_kpm_part_payment_shortcode_price, $klarna_shortcode_img, $klarna_kpm_part_payment_country;
+		global $woocommerce, $product, $klarna_invoice_shortcode_currency, $klarna_invoice_shortcode_price, $klarna_shortcode_img, $klarna_invoice_country;
 		
 		$klarna_product_total = $product->get_price();
 		
@@ -707,8 +708,8 @@ class WC_Gateway_Klarna_KPM_Part_Payment extends WC_Gateway_Klarna {
 	    		
 	    		?>
 				<div style="width:220px; height:70px" 
-				     class="klarna-widget klarna-part-payment"
-				     data-eid="<?php echo $this->klarna_helper->get_eid();?>" 
+				     class="klarna-widget klarna-invoice"
+				     data-eid="<?php echo $this->klarna_helper->get_eid(); ?>" 
 				     data-locale="<?php echo $this->klarna_helper->get_klarna_locale(get_locale());?>"
 				     data-price="<?php echo $sum;?>"
 				     data-layout="pale"
@@ -743,16 +744,16 @@ class WC_Gateway_Klarna_KPM_Part_Payment extends WC_Gateway_Klarna {
 				//<![CDATA[
 				jQuery(document).ajaxComplete(function(){
 					if (jQuery.trim(jQuery('input[name=billing_company]').val()) && (jQuery( "#billing_country" ).val()=='DE' || jQuery( "#billing_country" ).val()=='AT')) {
-						jQuery('#payment_method_klarna_kpm_part_payment').prop('disabled', true);
-					} else jQuery('#payment_method_klarna_kpm_part_payment').prop('disabled', false);
+						jQuery('#payment_method_klarna_invoice').prop('disabled', true);
+					} else jQuery('#payment_method_klarna_invoice').prop('disabled', false);
 				});
 				
 				jQuery(document).ready(function($){
 					$(window).load(function(){
 						$('input[name=billing_company]').keyup(function() {
 							if ($.trim(this.value).length && ($( "#billing_country" ).val()=='DE' || $( "#billing_country" ).val()=='AT')) {
-								$('#payment_method_klarna_kpm_part_payment').prop('disabled', true);
-							} else $('#payment_method_klarna_kpm_part_payment').prop('disabled', false);
+								$('#payment_method_klarna_invoice').prop('disabled', true);
+							} else $('#payment_method_klarna_invoice').prop('disabled', false);
 						});
 					});	
 				});
@@ -797,5 +798,71 @@ class WC_Gateway_Klarna_KPM_Part_Payment extends WC_Gateway_Klarna {
 		return $this->enabled;
 
 	}
-			 
-} // End class WC_Gateway_Klarna_KPM_Part_Payment
+
+
+	/**
+	 * Helper function, gets Klarna shop country.
+	 *
+	 * @since 1.0.0
+	 **/
+	function get_klarna_shop_country() {
+
+		return $this->shop_country;
+
+	}	
+
+
+	/**
+	 * Helper function, gets invoice fee ID.
+	 *
+	 * @since 1.0.0
+	 **/
+	function get_invoice_fee_id() {
+
+		return $this->invoice_fee_id;
+
+	}
+
+	
+	/**
+	 * Helper function, gets invoice fee name.
+	 *
+	 * @since 1.0.0
+	 **/
+	function get_invoice_fee_name() {
+
+		if ( $this->invoice_fee_id > 0 ) {
+			$product = WC_Klarna_Compatibility::wc_get_product( $this->invoice_fee_id );			
+			if ( $product ) {
+				return $product->get_title();
+			} else {
+				return '';
+			}
+		} else {
+			return '';
+		}
+		
+	}
+	
+	
+	/**
+	 * Helper function, gets invoice fee price.
+	 *
+	 * @since 1.0.0
+	 **/
+	function get_invoice_fee_price() {
+
+		if ( $this->invoice_fee_id > 0 ) {
+			$product = WC_Klarna_Compatibility::wc_get_product( $this->invoice_fee_id );
+			if ( $product ) {
+				return $product->get_price();
+			} else {
+				return '';
+			}
+		} else {		
+			return '';
+		}
+		
+	}
+
+} // End class WC_Gateway_Klarna_invoice

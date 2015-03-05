@@ -25,7 +25,7 @@ class WC_Klarna_Partpayment_Widget {
 	
 	
 	function get_monthly_cost_prio() {
-		$data = new WC_Gateway_Klarna_KPM_Part_Payment;
+		$data = new WC_Gateway_Klarna_Part_Payment;
 		return $data->get_monthly_cost_prio();
 	}
 	
@@ -51,7 +51,7 @@ class WC_Klarna_Partpayment_Widget {
 	 **/
 	 
 	function print_product_monthly_cost() {
-		$data = new WC_Gateway_Klarna_KPM_Part_Payment;
+		$data = new WC_Gateway_Klarna_Part_Payment;
 		$data->print_product_monthly_cost();
 		
 	} // End function

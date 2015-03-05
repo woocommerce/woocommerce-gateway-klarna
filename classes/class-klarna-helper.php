@@ -8,7 +8,7 @@
  * @package WC_Gateway_Klarna
  */
 
-class WC_Gateway_Klarna_KPM_Helper {
+class WC_Gateway_Klarna_Helper {
 
 	public function __construct( $parent ) {
 
@@ -322,31 +322,31 @@ class WC_Gateway_Klarna_KPM_Helper {
 		
 		switch ( $country ) {
 			case 'DK':
-				$klarna_kpm_part_payment_icon = 'https://cdn.klarna.com/1.0/shared/image/generic/logo/da_dk/basic/blue-black.png?width=100&eid=' . $this->get_eid();
+				$klarna_part_payment_icon = 'https://cdn.klarna.com/1.0/shared/image/generic/logo/da_dk/basic/blue-black.png?width=100&eid=' . $this->get_eid();
 				break;
 			case 'DE' :
-				$klarna_kpm_part_payment_icon = 'https://cdn.klarna.com/1.0/shared/image/generic/logo/de_de/basic/blue-black.png?width=100&eid=' . $this->get_eid();
+				$klarna_part_payment_icon = 'https://cdn.klarna.com/1.0/shared/image/generic/logo/de_de/basic/blue-black.png?width=100&eid=' . $this->get_eid();
 				break;
 			case 'NL' :
-				$klarna_kpm_part_payment_icon = 'https://cdn.klarna.com/1.0/shared/image/generic/logo/nl_nl/basic/blue-black.png?width=100&eid=' . $this->get_eid();
+				$klarna_part_payment_icon = 'https://cdn.klarna.com/1.0/shared/image/generic/logo/nl_nl/basic/blue-black.png?width=100&eid=' . $this->get_eid();
 				break;
 			case 'NO' :
-				$klarna_kpm_part_payment_icon = false;
+				$klarna_part_payment_icon = false;
 				break;
 			case 'FI' :
-				$klarna_kpm_part_payment_icon = 'https://cdn.klarna.com/1.0/shared/image/generic/logo/fi_fi/basic/blue-black.png?width=100&eid=' . $this->get_eid();
+				$klarna_part_payment_icon = 'https://cdn.klarna.com/1.0/shared/image/generic/logo/fi_fi/basic/blue-black.png?width=100&eid=' . $this->get_eid();
 				break;
 			case 'SE' :
-				$klarna_kpm_part_payment_icon = 'https://cdn.klarna.com/1.0/shared/image/generic/logo/sv_se/basic/blue-black.png?width=100&eid=' . $this->get_eid();
+				$klarna_part_payment_icon = 'https://cdn.klarna.com/1.0/shared/image/generic/logo/sv_se/basic/blue-black.png?width=100&eid=' . $this->get_eid();
 				break;
 			case 'AT' :
-				$klarna_kpm_part_payment_icon = 'https://cdn.klarna.com/1.0/shared/image/generic/logo/de_at/basic/blue-black.png?width=100&eid=' . $this->get_eid();
+				$klarna_part_payment_icon = 'https://cdn.klarna.com/1.0/shared/image/generic/logo/de_at/basic/blue-black.png?width=100&eid=' . $this->get_eid();
 				break;
 			default:
-				$klarna_kpm_part_payment_icon = '';
+				$klarna_part_payment_icon = '';
 		}
 		
-		return $klarna_kpm_part_payment_icon;
+		return $klarna_part_payment_icon;
 
 	}	
 

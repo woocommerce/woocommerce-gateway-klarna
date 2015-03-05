@@ -19,14 +19,14 @@
 class WC_Klarna_Get_Address {
 	public function __construct() {
 		
-		$data                     = new WC_Gateway_Klarna_KPM_Invoice;
+		$data                     = new WC_Gateway_Klarna_Invoice;
 		$this->testmode           = $data->klarna_helper->get_test_mode();
 		$this->eid                = $data->klarna_helper->get_eid();
 		$this->secret             = $data->klarna_helper->get_secret();
 		$this->invo_enabled       = $data->klarna_helper->get_enabled();
 		$this->invo_dob_display	  = 'description_box';
 		
-		$data                        = new WC_Gateway_Klarna_KPM_Part_Payment;
+		$data                        = new WC_Gateway_Klarna_Part_Payment;
 		$this->partpay_enabled       = $data->klarna_helper->get_enabled();
 		$this->partpay_dob_display   = 'description_box';
 
@@ -37,7 +37,7 @@ class WC_Klarna_Get_Address {
 			$this->order_type_partpayment  = 'yes';
 		}
 		
-		$data                    = new WC_Gateway_Klarna_KPM_Invoice;
+		$data                    = new WC_Gateway_Klarna_Invoice;
 		$this->campaign_enabled  = $data->get_enabled();
 		
 		
@@ -464,7 +464,7 @@ class WC_Klarna_Get_Address {
 	// Helper function - get_country
 	public function get_country() {
 
-		$data = new WC_Gateway_Klarna_KPM_Invoice;
+		$data = new WC_Gateway_Klarna_Invoice;
 		return $data->get_klarna_country();
 
 	}
@@ -472,7 +472,7 @@ class WC_Klarna_Get_Address {
 	// Helper function - get_shop_country
 	public function get_shop_country() {
 
-		$data = new WC_Gateway_Klarna_KPM_Invoice;
+		$data = new WC_Gateway_Klarna_Invoice;
 		return $data->get_klarna_shop_country();
 
 	}
@@ -480,7 +480,7 @@ class WC_Klarna_Get_Address {
 	// Helper function - get_klarna_language
 	public function get_klarna_language( $country ) {
 
-		$data = new WC_Gateway_Klarna_KPM_Invoice;
+		$data = new WC_Gateway_Klarna_Invoice;
 		return $data->get_klarna_country( $country );
 
 	}

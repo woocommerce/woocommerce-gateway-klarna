@@ -26,39 +26,38 @@ if ( wp_is_mobile() ) {
 <script type="text/javascript">
 	// Document ready
 	jQuery(document).ready(function($) {
-		var klarna_kpm_invoice_selected_country = $( "#billing_country" ).val();
+		var klarna_part_payment_selected_country = $( "#billing_country" ).val();
 		
 		// If no Billing Country is set in the checkout form, use the default shop country
-		if( ! klarna_kpm_invoice_selected_country ) {
-			var klarna_kpm_invoice_selected_country = '<?php echo $this->shop_country;?>';
+		if( ! klarna_part_payment_selected_country ) {
+			var klarna_part_payment_selected_country = '<?php echo $this->shop_country;?>';
 		}
 		
-		if( klarna_kpm_invoice_selected_country == 'SE' ) {
-			var klarna_kpm_invoice_current_locale = 'sv_SE';
-		} else if( klarna_kpm_invoice_selected_country == 'NO' ) {
-			var klarna_kpm_invoice_current_locale = 'nb_NO';
-		} else if( klarna_kpm_invoice_selected_country == 'DK' ) {
-			var klarna_kpm_invoice_current_locale = 'da_DK';
-		} else if( klarna_kpm_invoice_selected_country == 'FI' ) {
-			var klarna_kpm_invoice_current_locale = 'fi_FI';
-		} else if( klarna_kpm_invoice_selected_country == 'DE' ) {
-			var klarna_kpm_invoice_current_locale = 'de_DE';
-		}  else if( klarna_kpm_invoice_selected_country == 'NL' ) {
-			var klarna_kpm_invoice_current_locale = 'nl_NL';
-		} else if( klarna_kpm_invoice_selected_country == 'AT' ) {
-			var klarna_kpm_invoice_current_locale = 'de_AT';
+		if( klarna_part_payment_selected_country == 'SE' ) {
+			var klarna_part_payment_current_locale = 'sv_SE';
+		} else if( klarna_part_payment_selected_country == 'NO' ) {
+			var klarna_part_payment_current_locale = 'nb_NO';
+		} else if( klarna_part_payment_selected_country == 'DK' ) {
+			var klarna_part_payment_current_locale = 'da_DK';
+		} else if( klarna_part_payment_selected_country == 'FI' ) {
+			var klarna_part_payment_current_locale = 'fi_FI';
+		} else if( klarna_part_payment_selected_country == 'DE' ) {
+			var klarna_part_payment_current_locale = 'de_DE';
+		}  else if( klarna_part_payment_selected_country == 'NL' ) {
+			var klarna_part_payment_current_locale = 'nl_NL';
+		} else if( klarna_part_payment_selected_country == 'AT' ) {
+			var klarna_part_payment_current_locale = 'de_AT';
 		} else { }
 		
-		new Klarna.Terms.Invoice({
-		    el: 'klarna-invoice-terms',
+		new Klarna.Terms.Account({
+		    el: 'klarna-account-terms',
 		    eid: '<?php echo $this->klarna_helper->get_eid(); ?>',
-		    locale: klarna_kpm_invoice_current_locale,
-		    charge: '<?php echo $this->get_invoice_fee_price();?>',
+		    locale: klarna_part_payment_current_locale,
 		    type: '<?php echo $klarna_layout;?>',
 		});
 	});
 </script>
-<span id="klarna-invoice-terms"></span>
+<span id="klarna-account-terms"></span>
 <div class="clear"></div>
 				
 <fieldset>
@@ -76,7 +75,7 @@ if ( wp_is_mobile() ) {
 		$klarna = new Klarna();
 		$this->configure_klarna( $klarna, $country );
 
-		$klarna_pclasses = new WC_Gateway_Klarna_KPM_PClasses( $klarna, $pclass_type, $country );
+		$klarna_pclasses = new WC_Gateway_Klarna_PClasses( $klarna, $pclass_type, $country );
 		$pclasses = $klarna_pclasses->get_pclasses_for_country_and_type();
 
 		if ( $pclasses ) { ?>
@@ -86,27 +85,6 @@ if ( wp_is_mobile() ) {
 			</label>
 
 			<select id="<?php echo $klarna_select_pclass_element; ?>" name="<?php echo $klarna_select_pclass_element; ?>" class="woocommerce-select">
-
-			<?php
-			$country = ( isset( $woocommerce->customer->country ) ) ? $woocommerce->customer->country : $this->klarna_helper->shop_country;
-			switch ( $country ) {
-				case 'DK' :
-					$invoice_string = 'Betal om 14 dage';
-					break;
-				case 'NO' :
-					$invoice_string = 'Betal om 14 dager';
-					break;
-				case 'FI' :
-					$invoice_string = 'Maksa 14 päivän kuluessa';
-					break;
-				case 'SE' :
-					$invoice_string = 'Betala om 14 dagar';
-					break;
-				default:
-					$invoice_string = __( 'Pay in 14 days', 'klarna' );
-			}
-			?>
-			<option value="-1"><?php echo $invoice_string; ?></option>
 
 			<?php foreach ( $pclasses as $pclass ) { // Loop through the available PClasses stored in the file srv/pclasses.json
 
@@ -128,16 +106,55 @@ if ( wp_is_mobile() ) {
 					// Check that Cart total is larger than min amount for current PClass				
 	   				if ( $sum > $pclass->getMinAmount() ) {
 	   					echo '<option value="' . $pclass->getId() . '">';
-							// Sweden, Denmark, Finland, Germany & Netherlands - Don't show total cost
-							echo sprintf(
-								__('%s - %s %s/month - %s%s - Start %s', 'klarna'),
-								$pclass->getDescription(),
-								$monthly_cost,
-								$this->selected_currency,
-								$pclass->getInterestRate(),
-								'%',
-								$pclass->getStartFee()
-							);
+		   					if ( $this->klarna_helper->get_klarna_country() == 'NO' ) {
+								if ( $pclass->getType() == 1 ) {
+									//If Account - Do not show startfee. This is always 0.
+									echo sprintf(
+										__('%s - %s %s/month - %s%s', 'klarna'),
+										$pclass->getDescription(),
+										$monthly_cost,
+										$this->selected_currency,
+										$pclass->getInterestRate(),
+										'%'
+									);
+								} else {
+									// Norway - Show total cost
+									echo sprintf(
+										__('%s - %s %s/month - %s%s - Start %s - Tot %s %s', 'klarna'),
+										$pclass->getDescription(),
+										$monthly_cost,
+										$this->selected_currency,
+										$pclass->getInterestRate(),
+										'%',
+										$pclass->getStartFee(),
+										$total_credit_purchase_cost,
+										$this->klarna_currency
+									);
+								}
+							} else {
+								if ( $pclass->getType() == 1 ) {
+									// If Account - Do not show startfee. This is always 0.
+									echo sprintf(
+										__('%s - %s %s/month - %s%s', 'klarna'),
+										$pclass->getDescription(),
+										$monthly_cost,
+										$this->selected_currency,
+										$pclass->getInterestRate(),
+										'%'
+									);
+								} else {
+									// Sweden, Denmark, Finland, Germany & Netherlands - Don't show total cost
+									echo sprintf(
+										__('%s - %s %s/month - %s%s - Start %s', 'klarna'),
+										$pclass->getDescription(),
+										$monthly_cost,
+										$this->selected_currency,
+										$pclass->getInterestRate(),
+										'%',
+										$pclass->getStartFee()
+									);
+								}
+							}
 						echo '</option>';
 					
 					} // End if ($sum > $pclass->getMinAmount())
@@ -149,7 +166,7 @@ if ( wp_is_mobile() ) {
 			</select>
 	
 		<?php } else {
-			echo __('Klarna PClasses seem to be missing. Klarna Invoice does not work.', 'klarna');
+			echo __('Klarna PClasses seem to be missing. Klarna Account does not work.', 'klarna');
 		} ?>		
 	</p>
 	<div class="clear"></div>
@@ -305,10 +322,10 @@ if ( wp_is_mobile() ) {
 	
 	<?php if ( $this->klarna_helper->get_klarna_country() == 'NL' || $this->klarna_helper->get_klarna_country() == 'DE' ) { ?>
 		<p class="form-row form-row-last">
-			<label for="klarna_kpm_invoice_gender">
+			<label for="klarna_part_payment_gender">
 				<?php echo __("Gender", 'klarna') ?> <span class="required">*</span>
 			</label>
-			<select id="klarna_kpm_invoice_gender" name="klarna_kpm_invoice_gender" class="woocommerce-select" style="width:120px;">
+			<select id="klarna_part_payment_gender" name="klarna_part_payment_gender" class="woocommerce-select" style="width:120px;">
 				<option value=""><?php echo __("Select gender", 'klarna') ?></option>
 				<option value="f"><?php echo __("Female", 'klarna') ?></option>
 				<option value="m"><?php echo __("Male", 'klarna') ?></option>
