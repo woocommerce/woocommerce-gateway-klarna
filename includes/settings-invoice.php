@@ -5,13 +5,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Settings for Klarna KPM Invoice
+ * Settings for Klarna Invoice
  */
 return apply_filters( 'klarna_invoice_form_fields', array(
 	'enabled' => array(
 		'title' => __( 'Enable/Disable', 'klarna' ), 
 		'type' => 'checkbox', 
-		'label' => __( 'Enable Klarna Invoice (KPM)', 'klarna' ), 
+		'label' => __( 'Enable Klarna Invoice', 'klarna' ), 
 		'default' => 'no'
 	), 
 	'title' => array(

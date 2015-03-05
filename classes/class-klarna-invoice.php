@@ -1,6 +1,6 @@
 <?php
 /**
- * Klarna part payment KPM
+ * Klarna invoice class
  *
  * @link http://www.woothemes.com/products/klarna/
  * @since 1.0.0
@@ -26,7 +26,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 		parent::__construct();
 		
 		$this->id                 = 'klarna_invoice';
-		$this->method_title       = __( 'Klarna Invoice (KPM)', 'klarna' );
+		$this->method_title       = __( 'Klarna Invoice', 'klarna' );
 		$this->method_description = sprintf( __( 'With Klarna your customers can pay by invoice. Klarna works by adding extra personal information fields and then sending the details to Klarna for verification. Documentation <a href="%s" target="_blank">can be found here</a>.', 'klarna' ), 'http://docs.woothemes.com/document/klarna/' );
 		$this->has_fields         = true;
 		$this->order_button_text  = apply_filters( 'klarna_order_button_text', __( 'Place order', 'woocommerce' ) );
@@ -529,6 +529,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 		$klarna_billing = array();
 		$klarna_shipping = array();
 		if ( $_POST['billing_country'] == 'NL' || $_POST['billing_country'] == 'DE' ) {
+
 			require_once( KLARNA_DIR . 'split-address.php' );
 			
 			// Set up billing address array
@@ -544,7 +545,9 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 			$klarna_shipping['address']         = $splitted_address[0];
 			$klarna_shipping['house_number']    = $splitted_address[1];
 			$klarna_shipping['house_extension'] = $splitted_address[2];
-		} else {			
+
+		} else {
+
 			$klarna_billing['address']          = $order->billing_address_1;
 			$klarna_billing['house_number']     = '';
 			$klarna_billing['house_extension']  = '';
@@ -552,10 +555,10 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 			$klarna_shipping['address']         = $order->shipping_address_1;
 			$klarna_shipping['house_number']    = '';
 			$klarna_shipping['house_extension'] = '';
+
 		}
 			
 		$klarna = new Klarna();
-		
 
 		/**
 		 * Setup Klarna configuration

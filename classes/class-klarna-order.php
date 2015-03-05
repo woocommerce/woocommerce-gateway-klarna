@@ -73,13 +73,13 @@ class WC_Gateway_Klarna_Order {
 					}
 					
 					$klarna->addArticle(
-			    		$qty      = $item['qty'],                  // Quantity
-			    		$artNo    = strval($reference),            // Article number
-			    		$title    = utf8_decode ($item['name']),   // Article name/title
-			    		$price    = $item_price,                   // Price including tax
-			    		$vat      = round( $item_tax_percentage ), // Tax
-			    		$discount = 0,                             // Discount is applied later
-			    		$flags    = KlarnaFlags::INC_VAT           // Price is including VAT.
+						$qty      = $item['qty'],                  // Quantity
+						$artNo    = strval( $reference ),          // Article number
+						$title    = utf8_decode ($item['name']),   // Article name/title
+						$price    = $item_price,                   // Price including tax
+						$vat      = round( $item_tax_percentage ), // Tax
+						$discount = 0,                             // Discount is applied later
+						$flags    = KlarnaFlags::INC_VAT           // Price is including VAT.
 					);
 										
 				}
@@ -231,6 +231,7 @@ class WC_Gateway_Klarna_Order {
 		
 		// Shipping address
 		if ( $order->get_shipping_method() == '' || $ship_to_billing_address == 'yes' ) {
+
 			// Use billing address if Shipping is disabled in Woocommerce
 			$addr_shipping = new KlarnaAddr(
 				$email     = $order->billing_email,
@@ -246,7 +247,9 @@ class WC_Gateway_Klarna_Order {
 				$houseNo   = utf8_decode( $klarna_billing_house_number ), // For DE and NL we need to specify houseNo.
 				$houseExt  = utf8_decode( $klarna_billing_house_extension ) // Only required for NL.
 			);
+
 		} else {
+
 			$addr_shipping = new KlarnaAddr(
 				$email     = $order->billing_email,
 				$telno     = '', //We skip the normal land line phone, only one is needed.
@@ -261,6 +264,7 @@ class WC_Gateway_Klarna_Order {
 				$houseNo   = utf8_decode( $klarna_shipping_house_number ), // For DE and NL we need to specify houseNo.
 				$houseExt  = utf8_decode( $klarna_shipping_house_extension ) // Only required for NL.
 			);
+
 		}
 
 		// Next we tell the Klarna instance to use the address in the next order.

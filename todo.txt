@@ -1,1 +1,2 @@
 Format checkout fields for KPM
+Use Klarna Order class in KCO

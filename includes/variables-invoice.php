@@ -5,7 +5,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * User set variables for Klarna KPM Invoice
+ * User set variables for Klarna Invoice
  */
 $this->enabled     = $this->get_option( 'enabled' );
 $this->testmode    = $this->get_option( 'testmode' );

@@ -1,6 +1,6 @@
 <?php
 /**
- * Klarna part payment KPM
+ * Klarna part payment class
  *
  * @link http://www.woothemes.com/products/klarna/
  * @since 1.0.0
