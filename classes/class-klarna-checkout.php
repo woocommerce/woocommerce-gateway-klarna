@@ -35,6 +35,28 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		// Define user set variables
 		include( KLARNA_DIR . 'includes/variables-checkout.php' );
 
+		// Helper class
+		include_once( KLARNA_DIR . 'classes/class-klarna-helper.php' );
+		$this->klarna_helper = new WC_Gateway_Klarna_Helper( $this );
+		
+		// Define Klarna object
+		require_once( KLARNA_LIB . 'Klarna.php' );
+
+		// Test mode or Live mode		
+		if ( $this->testmode == 'yes' ) {
+			// Disable SSL if in testmode
+			$this->klarna_ssl = 'false';
+			$this->klarna_mode = Klarna::BETA;
+		} else {
+			// Set SSL if used in webshop
+			if ( is_ssl() ) {
+				$this->klarna_ssl = 'true';
+			} else {
+				$this->klarna_ssl = 'false';
+			}
+			$this->klarna_mode = Klarna::LIVE;
+		}
+
 		// Actions
 		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
 		add_action( 'woocommerce_api_wc_gateway_klarna_checkout', array( $this, 'check_checkout_listener' ) );
@@ -119,8 +141,31 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 
 	}
 
- 	
- 	/**
+
+	/**
+	 * Set up Klarna configuration.
+	 * 
+	 * @since  2.0
+	 **/
+	function configure_klarna( $klarna, $country ) {
+
+		$klarna->config(
+			$eid = $this->klarna_eid,
+			$secret = $this->klarna_secret,
+			$country = $this->klarna_country,
+			$language = $this->klarna_language,
+			$currency = $this->klarna_currency,
+			$mode = $klarna_mode,
+			$pcStorage = 'json',
+			$pcURI = '/srv/pclasses.json',
+			$ssl = $klarna_ssl,
+			$candice = false
+		);
+
+	}
+
+	
+	/**
 	 * Render checkout page
 	 *
 	 * @since 1.0.0
@@ -1260,187 +1305,30 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			
 		}
 				
-		// Test mode or Live mode		
-		if ( $this->testmode == 'yes' ) {
+		$klarna = new Klarna();
 
-			// Disable SSL if in testmode
-			$klarna_ssl = 'false';
-			$klarna_mode = Klarna::BETA;
-
-		} else {
-
-			// Set SSL if used in webshop
-			if ( is_ssl() ) {
-				$klarna_ssl = 'true';
-			} else {
-				$klarna_ssl = 'false';
-			}
-			$klarna_mode = Klarna::LIVE;
-
-		}
-			
-		$k = new Klarna();
-		
-		$k->config(
-		    $eid = $this->klarna_eid,
-		    $secret = $this->klarna_secret,
-		    $country = $this->klarna_country,
-		    $language = $this->klarna_language,
-		    $currency = $this->klarna_currency,
-		    $mode = $klarna_mode,
-		    $pcStorage = 'json',
-		    $pcURI = '/srv/pclasses.json',
-		    $ssl = $klarna_ssl,
-		    $candice = false
-		);
+		/**
+		 * Setup Klarna configuration
+		 */
+		$country = $this->klarna_helper->get_klarna_country();
+		$this->configure_klarna( $klarna, $country );
 		
 		Klarna::$xmlrpcDebug = false;
 		Klarna::$debug = false;
 		
-		// Cart Contents
-		if ( sizeof( $order->get_items() ) > 0 ) {
-			foreach ( $order->get_items() as $item ) {
-				$_product = $order->get_product_from_item( $item );
-				if ( $_product->exists() && $item['qty'] ) {
+		/**
+		 * Setup Klarna configuration
+		 */
+		$country = $this->klarna_helper->get_klarna_country();
+		$this->configure_klarna( $klarna, $country );
 
-					// We manually calculate the tax percentage here
-					if ( $order->get_line_tax( $item ) !== 0 ) {
-						// Calculate tax percentage
-						$item_tax_percentage = @number_format( ( $order->get_line_tax( $item ) / $order->get_line_total( $item, false ) ) * 100, 2, '.', '' );
-					} else {
-						$item_tax_percentage = 0.00;
-					}
-					
-					// apply_filters to item price so we can filter this if needed
-					$klarna_item_price_including_tax = $order->get_item_total( $item, true );
-					$item_price = apply_filters( 'klarna_item_price_including_tax', $klarna_item_price_including_tax );
-						
-					// Get SKU or product id
-					if ( $_product->get_sku() ) {
-						$sku = $_product->get_sku();
-					} else {
-						$sku = $_product->id;
-					}
-
-					$k->addArticle(
-						$qty      = $item['qty'],                  // Quantity
-						$artNo    = strval($sku),                  // Article number
-						$title    = utf8_decode ($item['name']),   // Article name/title
-						$price    = $item_price,                   // Price including tax
-						$vat      = round( $item_tax_percentage ), // Tax
-						$discount = 0,                             // Discount is applied later
-						$flags    = KlarnaFlags::INC_VAT           // Price is including VAT.
-					);
-				
-				}
-			}
-		}
-		 
-		// Discount
-		if ( $order->order_discount > 0 ) {
-			
-			// apply_filters to order discount so we can filter this if needed
-			$klarna_order_discount = $order->order_discount;
-			$order_discount = apply_filters( 'klarna_order_discount', $klarna_order_discount );
-		
-			$k->addArticle(
-			    $qty = 1,
-			    $artNo = "",
-			    $title = __('Discount', 'klarna'),
-			    $price = -$order_discount,
-			    $vat = 0,
-			    $discount = 0,
-			    $flags = KlarnaFlags::INC_VAT //Price is including VAT
-			);
-
-		}
-		
-		// Shipping
-		if ( get_total_shipping( $order ) > 0 ) {
-			
-			// We manually calculate the shipping tax percentage here
-			$calculated_shipping_tax_percentage = ($order->order_shipping_tax/get_total_shipping($order))*100; //25.00
-			$calculated_shipping_tax_decimal = ($order->order_shipping_tax/get_total_shipping($order))+1; //0.25
-			
-			// apply_filters to Shipping so we can filter this if needed
-			$klarna_shipping_price_including_tax = get_total_shipping($order)*$calculated_shipping_tax_decimal;
-			$shipping_price = apply_filters( 'klarna_shipping_price_including_tax', $klarna_shipping_price_including_tax );
-			
-			$k->addArticle(
-			    $qty = 1,
-			    $artNo = '',
-			    $title = __('Shipping cost', 'klarna'),
-			    $price = $shipping_price,
-			    $vat = round( $calculated_shipping_tax_percentage ),
-			    $discount = 0,
-			    $flags = KlarnaFlags::INC_VAT + KlarnaFlags::IS_SHIPMENT //Price is including VAT and is shipment fee
-			);
-		
-		}
-		
-		// Create the address object and specify the values.
-		
-		// Billing address
-		$addr_billing = new KlarnaAddr(
-			$email = $order->billing_email,
-			$telno = '', //We skip the normal land line phone, only one is needed.
-			$cellno = $order->billing_phone,
-			//$company = $order->billing_company,
-			$fname = utf8_decode( $order->billing_first_name ),
-			$lname = utf8_decode( $order->billing_last_name ),
-			$careof = utf8_decode( $order->billing_address_2 ),  //No care of, C/O.
-			$street = utf8_decode( $klarna_billing_address ), //For DE and NL specify street number in houseNo.
-			$zip = utf8_decode( $order->billing_postcode ),
-			$city = utf8_decode( $order->billing_city ),
-			$country = utf8_decode( $order->billing_country ),
-			$houseNo = utf8_decode( $klarna_billing_house_number ), //For DE and NL we need to specify houseNo.
-			$houseExt = utf8_decode( $klarna_billing_house_extension ) //Only required for NL.
+		$klarna_order = new WC_Gateway_Klarna_Order(
+			$order,
+			$klarna_billing,
+			$klarna_shipping,
+			$this->ship_to_billing_address,
+			$klarna
 		);
-		
-		
-		// Shipping address
-		if ( $order->get_shipping_method() == '' ) {
-			
-			// Use billing address if Shipping is disabled in Woocommerce
-			$addr_shipping = new KlarnaAddr(
-				$email = $order->billing_email,
-				$telno = '', //We skip the normal land line phone, only one is needed.
-				$cellno = $order->billing_phone,
-				//$company = $order->shipping_company,
-				$fname = utf8_decode( $order->billing_first_name ),
-				$lname = utf8_decode( $order->billing_last_name ),
-				$careof = utf8_decode( $order->billing_address_2 ),  //No care of, C/O.
-				$street = utf8_decode( $klarna_billing_address ), //For DE and NL specify street number in houseNo.
-				$zip = utf8_decode( $order->billing_postcode ),
-				$city = utf8_decode( $order->billing_city ),
-				$country = utf8_decode( $order->billing_country ),
-				$houseNo = utf8_decode( $klarna_billing_house_number ), //For DE and NL we need to specify houseNo.
-				$houseExt = utf8_decode( $klarna_billing_house_extension ) //Only required for NL.
-			);
-		
-		} else {
-		
-			$addr_shipping = new KlarnaAddr(
-				$email = $order->billing_email,
-				$telno = '', //We skip the normal land line phone, only one is needed.
-				$cellno = $order->billing_phone,
-				//$company = $order->shipping_company,
-				$fname = utf8_decode( $order->shipping_first_name ),
-				$lname = utf8_decode( $order->shipping_last_name ),
-				$careof = utf8_decode( $order->shipping_address_2 ),  //No care of, C/O.
-				$street = utf8_decode( $klarna_shipping_address ), //For DE and NL specify street number in houseNo.
-				$zip = utf8_decode( $order->shipping_postcode ),
-				$city = utf8_decode( $order->shipping_city ),
-				$country = utf8_decode( $order->shipping_country ),
-				$houseNo = utf8_decode( $klarna_shipping_house_number ), //For DE and NL we need to specify houseNo.
-				$houseExt = utf8_decode( $klarna_shipping_house_extension ) //Only required for NL.
-			);
-		
-		}
-		
-		// Next we tell the Klarna instance to use the address in the next order.
-		$k->setAddress( KlarnaFlags::IS_BILLING, $addr_billing ); //Billing / invoice address
-		$k->setAddress( KlarnaFlags::IS_SHIPPING, $addr_shipping ); //Shipping / delivery address
 
 		// Set store specific information so you can e.g. search and associate invoices with order numbers.
 		$k->setEstoreInfo(
