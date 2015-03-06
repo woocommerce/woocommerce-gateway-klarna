@@ -34,6 +34,7 @@ Documentation can be found at http://docs.woothemes.com/document/klarna/
 
 
 
+
 == CREDITS	 ==
 
 Huge thanks to: 

@@ -78,7 +78,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		add_action( 'wp_ajax_nopriv_customer_update_kco_order_note', array($this, 'customer_update_kco_order_note') );
 		add_action( 'wp_footer', array( $this, 'js_order_note' ) );
 		add_action( 'wp_footer', array( $this, 'ajaxurl'));
-			
+
     }
 
 
