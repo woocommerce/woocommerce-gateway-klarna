@@ -2,3 +2,4 @@ Format checkout fields for KPM
 Use Klarna Order class in KCO
 
 Move order creation to check_checkout_listener (KCO)
+KCO shortcode not rendering
