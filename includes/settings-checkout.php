@@ -8,7 +8,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Settings for Klarna Checkout
  */
 
-$this->form_fields = apply_filters('klarna_checkout_form_fields', array(
+return apply_filters('klarna_checkout_form_fields', array(
 	'enabled' => array(
 				'title' => __( 'Enable/Disable', 'klarna' ), 
 				'type' => 'checkbox', 
