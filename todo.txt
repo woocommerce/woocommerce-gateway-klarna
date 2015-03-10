@@ -1,3 +1,6 @@
 Format checkout fields for KPM
 
 Move order creation to check_checkout_listener (KCO)
+
+https://gist.github.com/slobodan/69feda4fc0e67ab0e91d
+https://gist.github.com/slobodan/c8cf9512fd7f1aa8ff43
