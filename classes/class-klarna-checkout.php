@@ -187,11 +187,15 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		// otherwise display checkout page
 		if ( isset( $_GET['klarna_order'] ) ) { // Display Order response/thank you page via iframe from Klarna
 
+			ob_start();
 			include( KLARNA_DIR . 'includes/checkout-thank-you-page.php' );
+			return ob_get_clean();
 
 		} else { // Display Checkout page
 
+			ob_start();
 			include( KLARNA_DIR . 'includes/checkout-page.php' );
+			return ob_get_clean();
 
 		} // End if isset($_GET['klarna_order'])
 

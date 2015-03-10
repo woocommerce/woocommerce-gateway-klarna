@@ -340,10 +340,8 @@ if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 	// Display checkout
 	$snippet = $klarna_order['gui']['snippet'];
 
-	ob_start();
 	do_action( 'klarna_before_kco_checkout', $order_id );
 	echo '<div>' . apply_filters( 'klarna_kco_checkout', $snippet ) . '</div>';
 	do_action( 'klarna_after_kco_checkout', $order_id );
-	return ob_get_clean();
 
 } // End if sizeof cart 

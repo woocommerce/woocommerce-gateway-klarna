@@ -36,11 +36,9 @@ $snippet = $klarna_order['gui']['snippet'];
 // DESKTOP: Width of containing block shall be at least 750px
 // MOBILE: Width of containing block shall be 100% of browser window (No
 // padding or margin)
-ob_start();
 do_action( 'klarna_before_kco_confirmation', $_GET['sid'] );
 echo '<div>' . $snippet . '</div>';	
 do_action( 'klarna_after_kco_confirmation', $_GET['sid'] );
 do_action( 'woocommerce_thankyou', $_GET['sid'] );
 unset( $_SESSION['klarna_checkout'] );
 $woocommerce->cart->empty_cart(); // Remove cart
-return ob_get_clean();
