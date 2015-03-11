@@ -8,12 +8,19 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Display Klarna Checkout page
  */
 
+global $woocommerce;
+
 /**
  * Don't render the Klarna Checkout form if the payment gateway isn't enabled.
  */
 if ( $this->enabled != 'yes' ) {
 	return;
 }
+
+// echo '<pre>';
+// print_r( $woocommerce->cart );
+// echo '</pre>';
+
 
 /**
  * If no Klarna country is set - return.
@@ -115,32 +122,36 @@ if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 	$cart = array();
 
 	// Cart Contents
-	if ( sizeof( $order->get_items() ) > 0 ) {
+	if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 
-		foreach ( $order->get_items() as $item ) {
+		foreach ( $woocommerce->cart->get_cart() as $cart_item ) {
 
-			if ( $item['qty'] ) {
+			if ( $cart_item['quantity'] ) {
 
-				$_product = $order->get_product_from_item( $item );	
+				$_product = wc_get_product( $cart_item['product_id'] );
+
+				echo '<pre>';
+				print_r( $cart_item );
+				echo '</pre>';
 
 				// We manually calculate the tax percentage here
-				if ( $_product->is_taxable() && $order->get_line_tax($item) > 0 ) {
+				if ( $_product->is_taxable() && $cart_item['line_subtotal_tax'] > 0 ) {
 					// Calculate tax percentage
-					$item_tax_percentage = round($order->get_item_tax( $item, false) / $order->get_item_total( $item, false, false ), 2)*100;
+					$item_tax_percentage = round( $cart_item['line_subtotal_tax'] / $cart_item['line_subtotal'], 2 ) * 100;
 				} else {
 					$item_tax_percentage = 00;
 				}
 
-				$item_name 	= $item['name'];
+				$item_name = $item->data->post->post_title;
 
-				$item_meta = new WC_Order_Item_Meta( $item['item_meta'] );
-				if ( $meta = $item_meta->display( true, true ) )
-					$item_name .= ' ( ' . $meta . ' )';
+				// $item_meta = new WC_Order_Item_Meta( $item['item_meta'] );
+				// if ( $meta = $item_meta->display( true, true ) ) {
+					// $item_name .= ' ( ' . $meta . ' )';
+				// }
 					
 				// apply_filters to item price so we can filter this if needed
-				$klarna_item_price_including_tax = $order->get_item_total( $item, true );
+				$klarna_item_price_including_tax = $cart_item['line_subtotal'] + $cart_item['line_subtotal_tax'];
 				$item_price = apply_filters( 'klarna_item_price_including_tax', $klarna_item_price_including_tax );
-
 
 				// Get SKU or product id
 				$reference = '';
@@ -152,11 +163,11 @@ if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 					$reference = $_product->id;
 				}
 
-				$item_price = number_format( $order->get_item_total( $item, true ) * 100, 0, '', '' );
+				$item_price = number_format( $item_price * 100, 0, '', '' );
 				$cart[] = array(
 					'reference'      => strval( $reference ),
 					'name'           => strip_tags( $item_name ),
-					'quantity'       => (int) $item['qty'],
+					'quantity'       => (int) $cart_item['quantity'],
 					'unit_price'     => (int) $item_price,
 					'discount_rate'  => 0,
 					'tax_rate'       => intval( $item_tax_percentage . '00' )
@@ -170,33 +181,33 @@ if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 
 
 	// Shipping
-	if ( $order->get_total_shipping() > 0 ) {
+	if ( $woocommerce->cart->shipping_total > 0 ) {
 
 		// We manually calculate the tax percentage here
-		if ( $order->get_total_shipping() > 0 ) {
+		if ( $woocommerce->cart->shipping_total > 0 ) {
 			// Calculate tax percentage
-			$shipping_tax_percentage = round( $order->get_shipping_tax() / $order->get_total_shipping(), 2 ) * 100;
+			$shipping_tax_percentage = round( $woocommerce->cart->shipping_tax_total / $woocommerce->cart->shipping_total, 2 ) * 100;
 		} else {
 			$shipping_tax_percentage = 00;
 		}
 
-		$shipping_price = number_format( ( $order->get_total_shipping() + $order->get_shipping_tax() ) * 100, 0, '', '' );
+		$shipping_price = number_format( ( $woocommerce->cart->shipping_total + $woocommerce->cart->shipping_tax_total ) * 100, 0, '', '' );
 
 		$cart[] = array(  
 			'type'       => 'shipping_fee',
 			'reference'  => 'SHIPPING',
 			'name'       => $order->get_shipping_method(),
 			'quantity'   => 1,
-			'unit_price' => (int)$shipping_price,
-			'tax_rate'   => intval($shipping_tax_percentage . '00')
+			'unit_price' => (int) $shipping_price,
+			'tax_rate'   => intval( $shipping_tax_percentage . '00' )
 		);
 
 	}
 
 	// Discount
-	if ( $order->order_discount > 0 ) {
+	if ( $woocommerce->cart->discount_cart > 0 ) {
 
-		$klarna_order_discount = (int) number_format( $order->order_discount, 2, '', '' );
+		$klarna_order_discount = (int) number_format( $woocommerce->cart->discount_cart, 2, '', '' );
 
 		$cart[] = array(    
 			'reference'   => 'DISCOUNT',  
@@ -207,6 +218,10 @@ if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 		);
 
 	}
+
+	echo '<pre>';
+	print_r( $cart );
+	echo '</pre>';
 
 	// Merchant ID
 	$eid = $this->klarna_eid;
