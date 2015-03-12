@@ -7,3 +7,6 @@ https://gist.github.com/slobodan/c8cf9512fd7f1aa8ff43
 
 Calculate Klarna order totals properly from cart in KCO
 Add product meta to Klarna item
+
+
+https://developers.klarna.com/en/api-references-v1/klarna-checkout#resource_structure
