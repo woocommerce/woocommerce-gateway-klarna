@@ -124,6 +124,10 @@ if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 	// Cart Contents
 	if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 
+		echo '<pre>';
+		print_r( $woocommerce->cart );
+		echo '</pre>';
+
 		foreach ( $woocommerce->cart->get_cart() as $cart_item ) {
 
 			if ( $cart_item['quantity'] ) {
@@ -159,13 +163,21 @@ if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 					$reference = $_product->id;
 				}
 
+				// Check if there's a discount applied
+				if ( $cart_item['line_subtotal'] > $cart_item['line_total'] ) {
+					$item_discount = round( 1 - ( $cart_item['line_total'] / $cart_item['line_subtotal'] ), 2 ) * 10000;
+				} else {
+					$item_discount = 0;
+				}
+
+
 				$item_price = number_format( $item_price * 100, 0, '', '' );
 				$cart[] = array(
 					'reference'      => strval( $reference ),
 					'name'           => strip_tags( $item_name ),
 					'quantity'       => (int) $cart_item['quantity'],
 					'unit_price'     => (int) $item_price,
-					'discount_rate'  => 0,
+					'discount_rate'  => $item_discount,
 					'tax_rate'       => intval( $item_tax_percentage . '00' )
 				);
 
@@ -221,6 +233,7 @@ if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 	}
 
 	// Discount
+	/*
 	if ( $woocommerce->cart->discount_cart > 0 ) {
 
 		$klarna_order_discount = (int) number_format( $woocommerce->cart->discount_cart, 2, '', '' );
@@ -234,10 +247,7 @@ if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 		);
 
 	}
-
-	echo '<pre>';
-	print_r( $cart );
-	echo '</pre>';
+	*/
 
 	// Merchant ID
 	$eid = $this->klarna_eid;
