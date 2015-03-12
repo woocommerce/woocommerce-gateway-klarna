@@ -131,7 +131,7 @@ if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 				$_product = wc_get_product( $cart_item['product_id'] );
 
 				echo '<pre>';
-				print_r( $cart_item );
+				print_r( $woocommerce->cart );
 				echo '</pre>';
 
 				// We manually calculate the tax percentage here
@@ -184,7 +184,7 @@ if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 	if ( $woocommerce->cart->shipping_total > 0 ) {
 
 		// We manually calculate the tax percentage here
-		if ( $woocommerce->cart->shipping_total > 0 ) {
+		if ( $woocommerce->cart->shipping_tax_total > 0 ) {
 			// Calculate tax percentage
 			$shipping_tax_percentage = round( $woocommerce->cart->shipping_tax_total / $woocommerce->cart->shipping_total, 2 ) * 100;
 		} else {
