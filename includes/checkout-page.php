@@ -130,10 +130,6 @@ if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 
 				$_product = wc_get_product( $cart_item['product_id'] );
 
-				echo '<pre>';
-				print_r( $woocommerce->cart );
-				echo '</pre>';
-
 				// We manually calculate the tax percentage here
 				if ( $_product->is_taxable() && $cart_item['line_subtotal_tax'] > 0 ) {
 					// Calculate tax percentage
@@ -193,10 +189,30 @@ if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 
 		$shipping_price = number_format( ( $woocommerce->cart->shipping_total + $woocommerce->cart->shipping_tax_total ) * 100, 0, '', '' );
 
+		// Get shipping method name				
+		$shipping_packages = WC()->shipping->get_packages();
+		foreach ( $shipping_packages as $i => $package ) {
+			$chosen_method = isset( WC()->session->chosen_shipping_methods[ $i ] ) ? WC()->session->chosen_shipping_methods[ $i ] : '';
+			if ( '' != $chosen_method ) {
+			
+				$package_rates = $package['rates'];
+				foreach ( $package_rates as $rate_key => $rate_value ) {
+					if ( $rate_key == $chosen_method ) {
+						$klarna_shipping_method = $rate_value->label;
+					}
+				}
+
+			}
+
+		}
+		if ( ! isset( $klarna_shipping_method ) ) {
+			$klarna_shipping_method = __( 'Shipping', 'klarna' );
+		}
+
 		$cart[] = array(  
 			'type'       => 'shipping_fee',
 			'reference'  => 'SHIPPING',
-			'name'       => $order->get_shipping_method(),
+			'name'       => $klarna_shipping_method,
 			'quantity'   => 1,
 			'unit_price' => (int) $shipping_price,
 			'tax_rate'   => intval( $shipping_tax_percentage . '00' )
