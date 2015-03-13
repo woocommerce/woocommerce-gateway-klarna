@@ -244,7 +244,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			
 			$checkoutId = $_GET['klarna_order'];  
 			$klarna_order = new Klarna_Checkout_Order( $connector, $checkoutId );  
-			$klarna_order->fetch();  
+			$klarna_order->fetch();
 
 			if ( $this->debug == 'yes' ) {
 
@@ -258,6 +258,8 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			
 			if ( $klarna_order['status'] == 'checkout_complete' ) { 
 						
+				$this->create_order( $klarna_order ); 
+
 				$order_id = $_GET['sid'];
 				$order = WC_Klarna_Compatibility::wc_get_order( $_GET['sid'] );
 				
@@ -356,7 +358,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 
 				}
 				
-				$order->add_order_note( sprintf( __( 'Klarna Checkout payment completed. Reservation number: %s.  Klarna order number: %s', 'klarna' ), $klarna_order['reservation'], $klarna_order['id'] ) );
+				// $order->add_order_note( sprintf( __( 'Klarna Checkout payment completed. Reservation number: %s.  Klarna order number: %s', 'klarna' ), $klarna_order['reservation'], $klarna_order['id'] ) );
 				
 				// Update the order in Klarnas system
 				$update['status'] = 'created';
@@ -405,7 +407,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 *
 	 * @since 1.0.0
 	 */
-	public function create_order() {
+	public function create_order( $klarna_order ) {
 		
 		global $woocommerce, $wpdb;
 		
@@ -490,11 +492,13 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			}
 
 			// Store the line items to the new/resumed order
-			foreach ( WC()->cart->get_cart() as $cart_item_key => $values ) {
+			foreach ( $klarna_order['cart']['items'] as $cart_item ) {
+
+				$product = wc_get_product( $cart_item['reference'] );
 
 				$item_id = $order->add_product(
 					$values['data'],
-					$values['quantity'],
+					$cart_item['quantity'],
 					array(
 						'variation' => $values['variation'],
 						'totals'    => array(

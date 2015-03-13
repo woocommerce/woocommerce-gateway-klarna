@@ -102,8 +102,19 @@ if ( $this->add_std_checkout_button == 'yes' ) {
 
 if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 
+	/**
+	 * Hack: not actual WooCommerce order ID
+	 * 
+	 * Order is created at a later stage and WooCommerce order ID
+	 * is now not available, it needs to be sent to Klarna later,
+	 * by updating the Klarna order.
+	 */
+	$order_id = rand( 1000, 1000000 );
+	$woocommerce->session->order_awaiting_payment = $order_id;
+	
+	/*
 	// Create a new order
-	$order_id = $this->create_order();
+	// $order_id = $this->create_order();
 
 	// Check that the order doesnt contain an error message (from check_cart_item_stock() 
 	// fired in create_order())
@@ -120,13 +131,10 @@ if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 	// Get an instance of the created order
 	$order = WC_Klarna_Compatibility::wc_get_order( $order_id );			
 	$cart = array();
+	*/
 
 	// Cart Contents
 	if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
-
-		echo '<pre>';
-		print_r( $woocommerce->cart );
-		echo '</pre>';
 
 		foreach ( $woocommerce->cart->get_cart() as $cart_item ) {
 
@@ -142,7 +150,8 @@ if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 					$item_tax_percentage = 00;
 				}
 
-				$item_name = $item->data->post->post_title;
+				$cart_item_data = $cart_item['data'];
+				$cart_item_name = $cart_item_data->post->post_title;
 
 				// $item_meta = new WC_Order_Item_Meta( $item['item_meta'] );
 				// if ( $meta = $item_meta->display( true, true ) ) {
@@ -174,7 +183,7 @@ if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 				$item_price = number_format( $item_price * 100, 0, '', '' );
 				$cart[] = array(
 					'reference'      => strval( $reference ),
-					'name'           => strip_tags( $item_name ),
+					'name'           => strip_tags( $cart_item_name ),
 					'quantity'       => (int) $cart_item['quantity'],
 					'unit_price'     => (int) $item_price,
 					'discount_rate'  => $item_discount,
@@ -248,6 +257,10 @@ if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 
 	}
 	*/
+
+	echo '<pre>';
+	print_r( $cart );
+	echo '</pre>';
 
 	// Merchant ID
 	$eid = $this->klarna_eid;
