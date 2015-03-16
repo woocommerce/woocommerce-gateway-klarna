@@ -258,10 +258,6 @@ if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 	}
 	*/
 
-	echo '<pre>';
-	print_r( $cart );
-	echo '</pre>';
-
 	// Merchant ID
 	$eid = $this->klarna_eid;
 

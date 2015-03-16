@@ -209,6 +209,9 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
      */
 	function check_checkout_listener() {
 
+		/**
+		 * Check if order is returned from Klarna
+		 */
 		if ( isset( $_GET['klarna_order'] ) ) {
 
 			global $woocommerce;
@@ -219,8 +222,10 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 				$this->log->add( 'klarna', 'GET: ' . json_encode($_GET) );
 			}
 			
+			/**
+			 * Retrieve Klarna order
+			 */
 			require_once( KLARNA_DIR . '/src/Klarna/Checkout.php' );  
-			
 			Klarna_Checkout_Order::$contentType = "application/vnd.klarna.checkout.aggregated-order-v2+json";  
 			
 			switch ( $_GET['scountry'] ) {
@@ -240,29 +245,24 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 					$klarna_secret = '';
 			}
 	
-			$connector = Klarna_Checkout_Connector::create( $klarna_secret );  
-			
-			$checkoutId = $_GET['klarna_order'];  
+			$connector    = Klarna_Checkout_Connector::create( $klarna_secret );  			
+			$checkoutId   = $_GET['klarna_order'];  
 			$klarna_order = new Klarna_Checkout_Order( $connector, $checkoutId );  
 			$klarna_order->fetch();
 
 			if ( $this->debug == 'yes' ) {
-
 				$this->log->add( 'klarna', 'ID: ' . $klarna_order['id'] );
 				$this->log->add( 'klarna', 'Billing: ' . $klarna_order['billing_address']['given_name'] );
-				$this->log->add( 'klarna', 'Order ID: ' . $_GET['sid'] );
+				// $this->log->add( 'klarna', 'Order ID: ' . $_GET['sid'] );
 				$this->log->add( 'klarna', 'Reference: ' . $klarna_order['reservation'] );
 				$this->log->add( 'klarna', 'Fetched order from Klarna: ' . var_export( $klarna_order, true ) );
-	
 			}
 			
-			if ( $klarna_order['status'] == 'checkout_complete' ) { 
-						
-				$this->create_order( $klarna_order ); 
+			$order_id = $this->create_order( $klarna_order ); 
+			$order = WC_Klarna_Compatibility::wc_get_order( $order_id );
 
-				$order_id = $_GET['sid'];
-				$order = WC_Klarna_Compatibility::wc_get_order( $_GET['sid'] );
-				
+			if ( $klarna_order['status'] == 'checkout_complete' ) { 
+										
 				// Different names on the returned street address if it's a German purchase or not
 				$received__billing_address_1  = '';
 				$received__shipping_address_1 = '';
@@ -383,7 +383,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 					
 					$order->payment_complete();
 					// Debug
-					if ( $this->debug=='yes') {
+					if ( $this->debug == 'yes') {
 						$this->log->add( 'klarna', 'Payment complete action triggered' );
 					}
 					
@@ -412,30 +412,27 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		global $woocommerce, $wpdb;
 		
 		$this->shipping_methods = WC()->session->get( 'chosen_shipping_methods' );
-		
+
 		if ( sizeof( $woocommerce->cart->get_cart() ) == 0 ) {
-
-			wc_add_notice(
-				sprintf( 
-					__( 'Sorry, your session has expired. <a href="%s">Return to homepage &rarr;</a>', 'klarna' ), 
-					home_url() ), 
-				'error'
-			);
-
+			wc_add_notice( sprintf( 
+				__( 'Sorry, your session has expired. <a href="%s">Return to homepage &rarr;</a>', 'klarna' ), 
+				home_url() 
+			), 'error' );
 		}
-
+			
 		// Recheck cart items so that they are in stock
+		// TODO: Move this to before order is sent to Klarna
+		/*
 		$result = $woocommerce->cart->check_cart_item_stock();
 		if ( is_wp_error( $result ) ) {
-
 			return $result->get_error_message();
 			exit();
-
 		}
-
+		*/
+		
 		// Update cart totals
 		$woocommerce->cart->calculate_totals();
-
+			
 		// Customer accounts
 		$this->customer_id = apply_filters( 'woocommerce_checkout_customer_id', get_current_user_id() );
 
@@ -445,7 +442,6 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		}
 
 		try {
-
 			// Start transaction if available
 			$wpdb->query( 'START TRANSACTION' );
 
@@ -465,14 +461,10 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 				$order                  = wc_update_order( $order_data );
 
 				if ( is_wp_error( $order ) ) {
-
 					throw new Exception( __( 'Error: Unable to create order. Please try again.', 'woocommerce' ) );
-				
 				} else {
-
 					$order->remove_order_items();
 					do_action( 'woocommerce_resume_order', $order_id );
-				
 				}
 
 			} else {
@@ -480,25 +472,20 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 				$order = wc_create_order( $order_data );
 
 				if ( is_wp_error( $order ) ) {
-
 					throw new Exception( __( 'Error: Unable to create order. Please try again.', 'woocommerce' ) );
-				
 				} else {
-
 					$order_id = $order->id;
 					do_action( 'woocommerce_new_order', $order_id );
-
 				}
 			}
 
 			// Store the line items to the new/resumed order
-			foreach ( $klarna_order['cart']['items'] as $cart_item ) {
-
-				$product = wc_get_product( $cart_item['reference'] );
+			foreach ( $klarna_order['cart']['items'] as $values ) {
+				$item_product = wc_get_product( $values['reference'] );
 
 				$item_id = $order->add_product(
-					$values['data'],
-					$cart_item['quantity'],
+					$item_product,
+					$values['quantity'],
 					array(
 						'variation' => $values['variation'],
 						'totals'    => array(
@@ -517,12 +504,10 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 
 				// Allow plugins to add order item meta
 				do_action( 'woocommerce_add_order_item_meta', $item_id, $values, $cart_item_key );
-
 			}
 
 			// Store fees
 			foreach ( WC()->cart->get_fees() as $fee_key => $fee ) {
-
 				$item_id = $order->add_fee( $fee );
 
 				if ( ! $item_id ) {
@@ -531,14 +516,11 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 
 				// Allow plugins to add order item meta to fees
 				do_action( 'woocommerce_add_order_fee_meta', $order_id, $item_id, $fee, $fee_key );
-
 			}
 
 			// Store shipping for all packages
 			foreach ( WC()->shipping->get_packages() as $package_key => $package ) {
-
 				if ( isset( $package['rates'][ $this->shipping_methods[ $package_key ] ] ) ) {
-
 					$item_id = $order->add_shipping( $package['rates'][ $this->shipping_methods[ $package_key ] ] );
 
 					if ( ! $item_id ) {
@@ -547,33 +529,23 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 
 					// Allows plugins to add order item meta to shipping
 					do_action( 'woocommerce_add_shipping_order_item', $order_id, $item_id, $package_key );
-
 				}
-			
 			}
 
 			// Store tax rows
 			foreach ( array_keys( WC()->cart->taxes + WC()->cart->shipping_taxes ) as $tax_rate_id ) {
-
 				if ( ! $order->add_tax( $tax_rate_id, WC()->cart->get_tax_amount( $tax_rate_id ), WC()->cart->get_shipping_tax_amount( $tax_rate_id ) ) ) {
-
 					throw new Exception( __( 'Error: Unable to create order. Please try again.', 'woocommerce' ) );
-				
 				}
-
 			}
 
 			// Store coupons
 			foreach ( WC()->cart->get_coupons() as $code => $coupon ) {
-
 				if ( ! $order->add_coupon( $code, WC()->cart->get_coupon_discount_amount( $code ) ) ) {
-
 					throw new Exception( __( 'Error: Unable to create order. Please try again.', 'woocommerce' ) );
-				
 				}
-			
 			}
-
+			
 			// Payment Method
 			$available_gateways = WC()->payment_gateways->payment_gateways();
 			$this->payment_method = $available_gateways[ 'klarna_checkout' ];
@@ -593,11 +565,9 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			$wpdb->query( 'COMMIT' );
 
 		} catch ( Exception $e ) {
-
 			// There was an error adding order data!
 			$wpdb->query( 'ROLLBACK' );
 			return new WP_Error( 'checkout-error', $e->getMessage() );
-
 		}
 
 		return $order_id;
