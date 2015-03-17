@@ -109,8 +109,8 @@ if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 	 * is now not available, it needs to be sent to Klarna later,
 	 * by updating the Klarna order.
 	 */
-	$order_id = rand( 1000, 1000000 );
-	$woocommerce->session->order_awaiting_payment = $order_id;
+	// $order_id = rand( 1000, 1000000 );
+	// $woocommerce->session->order_awaiting_payment = $order_id;
 	
 	/*
 	// Create a new order

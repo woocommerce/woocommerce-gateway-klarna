@@ -26,12 +26,6 @@ $klarna_order = new Klarna_Checkout_Order( $connector, $orderUri );
 
 $klarna_order->fetch();
 
-foreach( $klarna_order['cart']['items'] as $item ) {
-	echo '<pre>';
-	print_r( $item );
-	echo '</pre>';
-}
-
 if ( $klarna_order['status'] == 'checkout_incomplete' ) {
 	wp_redirect( $this->klarna_checkout_url );
 	exit;  

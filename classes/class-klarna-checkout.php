@@ -257,12 +257,16 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 				$this->log->add( 'klarna', 'Reference: ' . $klarna_order['reservation'] );
 				$this->log->add( 'klarna', 'Fetched order from Klarna: ' . var_export( $klarna_order, true ) );
 			}
-			
-			$order_id = $this->create_order( $klarna_order ); 
-			$order = WC_Klarna_Compatibility::wc_get_order( $order_id );
 
 			if ( $klarna_order['status'] == 'checkout_complete' ) { 
-										
+
+				// Create order in WooCommerce
+				$order = $this->create_order( $klarna_order );
+				$order_id = $order->id;
+
+				// Add order items
+				$this->add_order_items( $order, $klarna_order );
+
 				// Different names on the returned street address if it's a German purchase or not
 				$received__billing_address_1  = '';
 				$received__shipping_address_1 = '';
@@ -411,6 +415,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		
 		global $woocommerce, $wpdb;
 		
+		/* 
 		$this->shipping_methods = WC()->session->get( 'chosen_shipping_methods' );
 
 		if ( sizeof( $woocommerce->cart->get_cart() ) == 0 ) {
@@ -422,158 +427,129 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			
 		// Recheck cart items so that they are in stock
 		// TODO: Move this to before order is sent to Klarna
-		/*
 		$result = $woocommerce->cart->check_cart_item_stock();
 		if ( is_wp_error( $result ) ) {
 			return $result->get_error_message();
 			exit();
 		}
 		*/
-		
-		// Update cart totals
-		$woocommerce->cart->calculate_totals();
 			
 		// Customer accounts
 		$this->customer_id = apply_filters( 'woocommerce_checkout_customer_id', get_current_user_id() );
-
-		// Give plugins the opportunity to create an order themselves
-		if ( $order_id = apply_filters( 'woocommerce_create_order', null, $this ) ) {
-			return $order_id;
-		}
-
-		try {
-			// Start transaction if available
-			$wpdb->query( 'START TRANSACTION' );
-
-			$order_data = array(
-				'status'        => apply_filters( 'woocommerce_default_order_status', 'pending' ),
-				'customer_id'   => $this->customer_id,
-				'customer_note' => isset( $this->posted['order_comments'] ) ? $this->posted['order_comments'] : ''
-			);
-
-			// Insert or update the post data
-			$order_id = absint( WC()->session->order_awaiting_payment );
-
-			// Resume the unpaid order if its pending
-			if ( $order_id > 0 && ( $order = wc_get_order( $order_id ) ) && $order->has_status( array( 'pending', 'failed' ) ) ) {
-
-				$order_data['order_id'] = $order_id;
-				$order                  = wc_update_order( $order_data );
-
-				if ( is_wp_error( $order ) ) {
-					throw new Exception( __( 'Error: Unable to create order. Please try again.', 'woocommerce' ) );
-				} else {
-					$order->remove_order_items();
-					do_action( 'woocommerce_resume_order', $order_id );
-				}
-
-			} else {
-
-				$order = wc_create_order( $order_data );
-
-				if ( is_wp_error( $order ) ) {
-					throw new Exception( __( 'Error: Unable to create order. Please try again.', 'woocommerce' ) );
-				} else {
-					$order_id = $order->id;
-					do_action( 'woocommerce_new_order', $order_id );
-				}
-			}
-
-			// Store the line items to the new/resumed order
-			foreach ( $klarna_order['cart']['items'] as $values ) {
-				$item_product = wc_get_product( $values['reference'] );
-
-				$item_id = $order->add_product(
-					$item_product,
-					$values['quantity'],
-					array(
-						'variation' => $values['variation'],
-						'totals'    => array(
-							'subtotal'     => $values['line_subtotal'],
-							'subtotal_tax' => $values['line_subtotal_tax'],
-							'total'        => $values['line_total'],
-							'tax'          => $values['line_tax'],
-							'tax_data'     => $values['line_tax_data'] // Since 2.2
-						)
-					)
-				);
-
-				if ( ! $item_id ) {
-					throw new Exception( __( 'Error: Unable to create order. Please try again.', 'woocommerce' ) );
-				}
-
-				// Allow plugins to add order item meta
-				do_action( 'woocommerce_add_order_item_meta', $item_id, $values, $cart_item_key );
-			}
-
-			// Store fees
-			foreach ( WC()->cart->get_fees() as $fee_key => $fee ) {
-				$item_id = $order->add_fee( $fee );
-
-				if ( ! $item_id ) {
-					throw new Exception( __( 'Error: Unable to create order. Please try again.', 'woocommerce' ) );
-				}
-
-				// Allow plugins to add order item meta to fees
-				do_action( 'woocommerce_add_order_fee_meta', $order_id, $item_id, $fee, $fee_key );
-			}
-
-			// Store shipping for all packages
-			foreach ( WC()->shipping->get_packages() as $package_key => $package ) {
-				if ( isset( $package['rates'][ $this->shipping_methods[ $package_key ] ] ) ) {
-					$item_id = $order->add_shipping( $package['rates'][ $this->shipping_methods[ $package_key ] ] );
-
-					if ( ! $item_id ) {
-						throw new Exception( __( 'Error: Unable to create order. Please try again.', 'woocommerce' ) );
-					}
-
-					// Allows plugins to add order item meta to shipping
-					do_action( 'woocommerce_add_shipping_order_item', $order_id, $item_id, $package_key );
-				}
-			}
-
-			// Store tax rows
-			foreach ( array_keys( WC()->cart->taxes + WC()->cart->shipping_taxes ) as $tax_rate_id ) {
-				if ( ! $order->add_tax( $tax_rate_id, WC()->cart->get_tax_amount( $tax_rate_id ), WC()->cart->get_shipping_tax_amount( $tax_rate_id ) ) ) {
-					throw new Exception( __( 'Error: Unable to create order. Please try again.', 'woocommerce' ) );
-				}
-			}
-
-			// Store coupons
-			foreach ( WC()->cart->get_coupons() as $code => $coupon ) {
-				if ( ! $order->add_coupon( $code, WC()->cart->get_coupon_discount_amount( $code ) ) ) {
-					throw new Exception( __( 'Error: Unable to create order. Please try again.', 'woocommerce' ) );
-				}
-			}
-			
-			// Payment Method
-			$available_gateways = WC()->payment_gateways->payment_gateways();
-			$this->payment_method = $available_gateways[ 'klarna_checkout' ];
 		
-			$order->set_payment_method( $this->payment_method );
-			$order->set_total( WC()->cart->shipping_total, 'shipping' );
-			$order->set_total( WC()->cart->get_order_discount_total(), 'order_discount' );
-			$order->set_total( WC()->cart->get_cart_discount_total(), 'cart_discount' );
-			$order->set_total( WC()->cart->tax_total, 'tax' );
-			$order->set_total( WC()->cart->shipping_tax_total, 'shipping_tax' );
-			$order->set_total( WC()->cart->total );
+		// Order data
+		$order_data = array(
+			'status'        => apply_filters( 'woocommerce_default_order_status', 'pending' ),
+			'customer_id'   => $this->customer_id,
+			'customer_note' => isset( $this->posted['order_comments'] ) ? $this->posted['order_comments'] : ''
+		);
 
-			// Let plugins add meta
-			do_action( 'woocommerce_checkout_update_order_meta', $order_id, array() );
 
-			// If we got here, the order was created without problems!
-			$wpdb->query( 'COMMIT' );
+		// Create the order
+		$order = wc_create_order( $order_data );
 
-		} catch ( Exception $e ) {
-			// There was an error adding order data!
-			$wpdb->query( 'ROLLBACK' );
-			return new WP_Error( 'checkout-error', $e->getMessage() );
+		if ( is_wp_error( $order ) ) {
+			throw new Exception( __( 'Error: Unable to create order. Please try again.', 'woocommerce' ) );
+		} else {
+			$order_id = $order->id;
+			do_action( 'woocommerce_new_order', $order_id );
+			update_post_meta( $order_id, '_test', 'test' );
 		}
+
+		return $order;
+
+		/*
+		// Store fees
+		foreach ( WC()->cart->get_fees() as $fee_key => $fee ) {
+			$item_id = $order->add_fee( $fee );
+
+			if ( ! $item_id ) {
+				throw new Exception( __( 'Error: Unable to create order. Please try again.', 'woocommerce' ) );
+			}
+
+			// Allow plugins to add order item meta to fees
+			do_action( 'woocommerce_add_order_fee_meta', $order_id, $item_id, $fee, $fee_key );
+		}
+
+		// Store shipping for all packages
+		foreach ( WC()->shipping->get_packages() as $package_key => $package ) {
+			if ( isset( $package['rates'][ $this->shipping_methods[ $package_key ] ] ) ) {
+				$item_id = $order->add_shipping( $package['rates'][ $this->shipping_methods[ $package_key ] ] );
+
+				if ( ! $item_id ) {
+					throw new Exception( __( 'Error: Unable to create order. Please try again.', 'woocommerce' ) );
+				}
+
+				// Allows plugins to add order item meta to shipping
+				do_action( 'woocommerce_add_shipping_order_item', $order_id, $item_id, $package_key );
+			}
+		}
+
+		// Store tax rows
+		foreach ( array_keys( WC()->cart->taxes + WC()->cart->shipping_taxes ) as $tax_rate_id ) {
+			if ( ! $order->add_tax( $tax_rate_id, WC()->cart->get_tax_amount( $tax_rate_id ), WC()->cart->get_shipping_tax_amount( $tax_rate_id ) ) ) {
+				throw new Exception( __( 'Error: Unable to create order. Please try again.', 'woocommerce' ) );
+			}
+		}
+
+		// Store coupons
+		foreach ( WC()->cart->get_coupons() as $code => $coupon ) {
+			if ( ! $order->add_coupon( $code, WC()->cart->get_coupon_discount_amount( $code ) ) ) {
+				throw new Exception( __( 'Error: Unable to create order. Please try again.', 'woocommerce' ) );
+			}
+		}
+		
+		// Payment Method
+		$available_gateways = WC()->payment_gateways->payment_gateways();
+		$this->payment_method = $available_gateways[ 'klarna_checkout' ];
+	
+		$order->set_payment_method( $this->payment_method );
+		$order->set_total( WC()->cart->shipping_total, 'shipping' );
+		$order->set_total( WC()->cart->get_order_discount_total(), 'order_discount' );
+		$order->set_total( WC()->cart->get_cart_discount_total(), 'cart_discount' );
+		$order->set_total( WC()->cart->tax_total, 'tax' );
+		$order->set_total( WC()->cart->shipping_tax_total, 'shipping_tax' );
+		$order->set_total( WC()->cart->total );
+		*/
+
+		// Let plugins add meta
+		do_action( 'woocommerce_checkout_update_order_meta', $order_id, array() );
 
 		return $order_id;
 	
 	} // End function create_order()
-	 
+
+
+	/**
+	 * Adds items to order
+	 *
+	 * @since 1.0.0
+	 */
+	public function add_order_items( $order, $klarna_order ) {
+
+		foreach ( $klarna_order['cart']['items'] as $values ) {
+			$item_product = wc_get_product( $values['reference'] );
+
+			$item_id = $order->add_product(
+				$item_product,
+				$values['quantity'],
+				array(
+					'variation' => $values['variation'],
+					'totals'    => array(
+						'subtotal'     => $values['line_subtotal'],
+						'subtotal_tax' => $values['line_subtotal_tax'],
+						'total'        => $values['line_total'],
+						'tax'          => $values['line_tax'],
+						'tax_data'     => $values['line_tax_data'] // Since 2.2
+					)
+				)
+			);
+
+			// Allow plugins to add order item meta
+			// do_action( 'woocommerce_add_order_item_meta', $item_id, $values, $cart_item_key );
+		}
+
+	}
 
 	/**
 	 * Create a new customer

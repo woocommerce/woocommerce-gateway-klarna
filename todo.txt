@@ -13,3 +13,8 @@ https://developers.klarna.com/en/api-references-v1/klarna-checkout#resource_stru
 
 
 Product reference that's sent to Klarna Order has to be product ID, because it's needed for creating WooCommerce order later
+
+
+Continue splitting create_order and check_checkout_listener into smaller methods
+
+add_order_items stops code after it from executing
