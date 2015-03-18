@@ -17,10 +17,6 @@ if ( $this->enabled != 'yes' ) {
 	return;
 }
 
-// echo '<pre>';
-// print_r( $woocommerce->cart );
-// echo '</pre>';
-
 
 /**
  * If no Klarna country is set - return.
@@ -111,6 +107,9 @@ if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 	 */
 	// $order_id = rand( 1000, 1000000 );
 	// $woocommerce->session->order_awaiting_payment = $order_id;
+	
+	$klarna_temp = WC();
+	set_transient( 'klarna_temp', $klarna_temp, 48 * 60 * 60 );
 	
 	/*
 	// Create a new order
