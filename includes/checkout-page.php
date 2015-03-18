@@ -17,11 +17,6 @@ if ( $this->enabled != 'yes' ) {
 	return;
 }
 
-// echo '<pre>';
-// print_r( $woocommerce->cart );
-// echo '</pre>';
-
-
 /**
  * If no Klarna country is set - return.
  */
@@ -96,43 +91,24 @@ $add_klarna_window_size_script = true;
  * Add button to Standard Checkout Page if this is enabled in the settings
  */
 if ( $this->add_std_checkout_button == 'yes' ) {
-	echo '<div class="woocommerce"><a href="' . get_permalink( get_option('woocommerce_checkout_page_id') ) . '" class="button std-checkout-button">' . $this->std_checkout_button_label . '</a></div>';
+	echo '<div class="woocommerce"><a href="' . get_permalink( get_option( 'woocommerce_checkout_page_id' ) ) . '" class="button std-checkout-button">' . $this->std_checkout_button_label . '</a></div>';
 }
-
 
 if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 
 	/**
-	 * Hack: not actual WooCommerce order ID
-	 * 
-	 * Order is created at a later stage and WooCommerce order ID
-	 * is now not available, it needs to be sent to Klarna later,
-	 * by updating the Klarna order.
+	 * Store WC object as transient
 	 */
-	// $order_id = rand( 1000, 1000000 );
-	// $woocommerce->session->order_awaiting_payment = $order_id;
+	 
+	$klarna_wc = $woocommerce;
+	$klarna_transient = md5( time() . rand( 1000, 1000000 ) );
+	set_transient( $klarna_transient, $klarna_wc, 48 * 60 * 60 );
 	
-	/*
-	// Create a new order
-	// $order_id = $this->create_order();
 
-	// Check that the order doesnt contain an error message (from check_cart_item_stock() 
-	// fired in create_order())
-	if ( ! is_numeric( $order_id ) ) {
-		echo '<ul class="woocommerce-error"><li>' . __( $order_id, 'woocommerce' ) . '</li></ul>';
-		exit();
-	}
-
-	do_action( 'woocommerce_checkout_order_processed', $order_id, false );
-
-	// Store Order ID in session so it can be re-used if customer navigates away from the checkout and then return again
-	$woocommerce->session->order_awaiting_payment = $order_id;
-
-	// Get an instance of the created order
-	$order = WC_Klarna_Compatibility::wc_get_order( $order_id );			
-	$cart = array();
-	*/
-
+	/**
+	 * Create Klarna order from WC object
+	 */
+	 
 	// Cart Contents
 	if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 
@@ -153,10 +129,10 @@ if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 				$cart_item_data = $cart_item['data'];
 				$cart_item_name = $cart_item_data->post->post_title;
 
-				// $item_meta = new WC_Order_Item_Meta( $item['item_meta'] );
-				// if ( $meta = $item_meta->display( true, true ) ) {
-					// $item_name .= ' ( ' . $meta . ' )';
-				// }
+				$item_meta = new WC_Order_Item_Meta( $item['item_meta'] );
+				if ( $meta = $item_meta->display( true, true ) ) {
+					$item_name .= ' ( ' . $meta . ' )';
+				}
 					
 				// apply_filters to item price so we can filter this if needed
 				$klarna_item_price_including_tax = $cart_item['line_subtotal'] + $cart_item['line_subtotal_tax'];
@@ -179,8 +155,8 @@ if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 					$item_discount = 0;
 				}
 
-
-				$item_price = number_format( $item_price * 100, 0, '', '' );
+				$item_price = number_format( $item_price * 100, 0, '', '' ) / $cart_item['quantity'];
+				
 				$cart[] = array(
 					'reference'      => strval( $reference ),
 					'name'           => strip_tags( $cart_item_name ),
@@ -271,6 +247,14 @@ if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 
 	$klarna_order = null;
 
+	
+	/**
+	 * Check if Klarna order already exists
+	 *
+	 * If it does, see if it needs to be updated
+	 * If it doesn't, create Klarna order
+	 */
+	
 	if ( array_key_exists( 'klarna_checkout', $_SESSION ) ) {
 
 		// Resume session
@@ -289,7 +273,7 @@ if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 				
 				// Reset session
 				$klarna_order = null;
-				unset($_SESSION['klarna_checkout']);
+				unset( $_SESSION['klarna_checkout'] );
 				
 			} else {
 
@@ -297,7 +281,7 @@ if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 				
 				// Reset cart
 				$update['cart']['items'] = array();
-				foreach ($cart as $item) {
+				foreach ( $woocommerce->cart->get_cart() as $item ) {
 			    	$update['cart']['items'][] = $item;
 				}
 
@@ -308,8 +292,8 @@ if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 				$update['merchant']['id']               = $eid;
 				$update['merchant']['terms_uri']        = $this->terms_url;
 				$update['merchant']['checkout_uri']     = add_query_arg( 'klarnaListener', 'checkout', $this->klarna_checkout_url );
-				$update['merchant']['confirmation_uri'] = add_query_arg ( array('klarna_order' => '{checkout.order.uri}', 'sid' => $order_id, 'order-received' => $order_id ), $this->klarna_checkout_thanks_url);
-				$update['merchant']['push_uri']         = add_query_arg( array('sid' => $order_id, 'scountry' => $this->klarna_country, 'klarna_order' => '{checkout.order.uri}', 'wc-api' => 'WC_Gateway_Klarna_Checkout'), $this->klarna_checkout_url );
+				$update['merchant']['confirmation_uri'] = add_query_arg ( array('klarna_order' => '{checkout.order.uri}', 'sid' => $klarna_transient, 'order-received' => $klarna_transient ), $this->klarna_checkout_thanks_url);
+				$update['merchant']['push_uri']         = add_query_arg( array( 'sid' => $klarna_transient, 'scountry' => $this->klarna_country, 'klarna_order' => '{checkout.order.uri}', 'wc-api' => 'WC_Gateway_Klarna_Checkout'), $this->klarna_checkout_url );
 
 
 				// Customer info if logged in
@@ -348,8 +332,8 @@ if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 		$create['merchant']['id']               = $eid;
 		$create['merchant']['terms_uri']        = $this->terms_url;
 		$create['merchant']['checkout_uri']     = add_query_arg( 'klarnaListener', 'checkout', $this->klarna_checkout_url );
-		$create['merchant']['confirmation_uri'] = add_query_arg ( array('klarna_order' => '{checkout.order.uri}', 'sid' => $order_id, 'order-received' => $order_id ), $this->klarna_checkout_thanks_url);
-		$create['merchant']['push_uri']         = add_query_arg( array('sid' => $order_id, 'scountry' => $this->klarna_country, 'klarna_order' => '{checkout.order.uri}', 'wc-api' => 'WC_Gateway_Klarna_Checkout'), $this->klarna_checkout_url );
+		$create['merchant']['confirmation_uri'] = add_query_arg ( array('klarna_order' => '{checkout.order.uri}', 'sid' => $klarna_transient, 'order-received' => $klarna_transient ), $this->klarna_checkout_thanks_url);
+		$create['merchant']['push_uri']         = add_query_arg( array('sid' => $klarna_transient, 'scountry' => $this->klarna_country, 'klarna_order' => '{checkout.order.uri}', 'wc-api' => 'WC_Gateway_Klarna_Checkout'), $this->klarna_checkout_url );
 
 		// Make phone a mandatory field for German stores?
 		if ( $this->phone_mandatory_de == 'yes' ) {
@@ -390,8 +374,8 @@ if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 	// Display checkout
 	$snippet = $klarna_order['gui']['snippet'];
 
-	do_action( 'klarna_before_kco_checkout', $order_id );
+	do_action( 'klarna_before_kco_checkout', $klarna_transient );
 	echo '<div>' . apply_filters( 'klarna_kco_checkout', $snippet ) . '</div>';
-	do_action( 'klarna_after_kco_checkout', $order_id );
+	do_action( 'klarna_after_kco_checkout', $klarna_transient );
 
 } // End if sizeof cart 

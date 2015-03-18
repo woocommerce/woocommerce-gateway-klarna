@@ -266,57 +266,31 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 
 				// Add order items
 				$this->add_order_items( $order, $klarna_order );
+				
+				// Store addresses
+				$this->store_fees( $order, $klarna_order );
 
-				// Different names on the returned street address if it's a German purchase or not
-				$received__billing_address_1  = '';
-				$received__shipping_address_1 = '';
+				// Store addresses
+				$this->store_shipping( $order, $klarna_order );				
 				
-				if ( $_GET['scountry'] == 'DE' ) {
+				// Store addresses
+				$this->store_addresses( $order, $klarna_order );
 
-					$received__billing_address_1 = $klarna_order['billing_address']['street_name'] . ' ' . $klarna_order['billing_address']['street_number'];
-					$received__shipping_address_1 = $klarna_order['shipping_address']['street_name'] . ' ' . $klarna_order['shipping_address']['street_number'];					
-				
-				} else {
-				
-					$received__billing_address_1 	= $klarna_order['billing_address']['street_address'];
-					$received__shipping_address_1 	= $klarna_order['shipping_address']['street_address'];
-				
-				}
-					
-				// Add customer billing address - retrieved from callback from Klarna
-				update_post_meta( $order_id, '_billing_first_name', $klarna_order['billing_address']['given_name'] );
-				update_post_meta( $order_id, '_billing_last_name', $klarna_order['billing_address']['family_name'] );
-				update_post_meta( $order_id, '_billing_address_1', $received__billing_address_1 );
-				update_post_meta( $order_id, '_billing_address_2', $klarna_order['billing_address']['care_of'] );
-				update_post_meta( $order_id, '_billing_postcode', $klarna_order['billing_address']['postal_code'] );
-				update_post_meta( $order_id, '_billing_city', $klarna_order['billing_address']['city'] );
-				update_post_meta( $order_id, '_billing_country', $klarna_order['billing_address']['country'] );
-				update_post_meta( $order_id, '_billing_email', $klarna_order['billing_address']['email'] );
-				update_post_meta( $order_id, '_billing_phone', $klarna_order['billing_address']['phone'] );
-				
-				// Add customer shipping address - retrieved from callback from Klarna
-				$allow_separate_shipping = ( isset( $klarna_order['options']['allow_separate_shipping_address'] ) ) ? $klarna_order['options']['allow_separate_shipping_address'] : '';
-				
-				if ( $allow_separate_shipping == 'true' || $_GET['scountry'] == 'DE' ) {
-					
-					update_post_meta( $order_id, '_shipping_first_name', $klarna_order['shipping_address']['given_name'] );
-					update_post_meta( $order_id, '_shipping_last_name', $klarna_order['shipping_address']['family_name'] );
-					update_post_meta( $order_id, '_shipping_address_1', $received__shipping_address_1 );
-					update_post_meta( $order_id, '_shipping_address_2', $klarna_order['shipping_address']['care_of'] );
-					update_post_meta( $order_id, '_shipping_postcode', $klarna_order['shipping_address']['postal_code'] );
-					update_post_meta( $order_id, '_shipping_city', $klarna_order['shipping_address']['city'] );
-					update_post_meta( $order_id, '_shipping_country', $klarna_order['shipping_address']['country'] );
-				
-				} else {
-					
-					update_post_meta( $order_id, '_shipping_first_name', $klarna_order['billing_address']['given_name'] );
-					update_post_meta( $order_id, '_shipping_last_name', $klarna_order['billing_address']['family_name'] );
-					update_post_meta( $order_id, '_shipping_address_1', $received__billing_address_1 );
-					update_post_meta( $order_id, '_shipping_address_2', $klarna_order['billing_address']['care_of'] );
-					update_post_meta( $order_id, '_shipping_postcode', $klarna_order['billing_address']['postal_code'] );
-					update_post_meta( $order_id, '_shipping_city', $klarna_order['billing_address']['city'] );
-					update_post_meta( $order_id, '_shipping_country', $klarna_order['billing_address']['country'] );
-				}
+				// Store addresses
+				$this->store_tax_rows( $order, $klarna_order );
+
+				// Store addresses
+				$this->store_coupons( $order, $klarna_order );
+
+				// Store addresses
+				$this->store_payment_method( $order, $klarna_order );
+						
+				// Let plugins add meta
+				do_action( 'woocommerce_checkout_update_order_meta', $order_id, array() );
+
+
+				// Check if Klarna order needs to be updated
+				$this->compare_orders( $order, $klarna_order );
 				
 				
 				// Store user id in order so the user can keep track of track it in My account
@@ -362,7 +336,12 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 
 				}
 				
-				// $order->add_order_note( sprintf( __( 'Klarna Checkout payment completed. Reservation number: %s.  Klarna order number: %s', 'klarna' ), $klarna_order['reservation'], $klarna_order['id'] ) );
+				$order->add_order_note( sprintf( 
+					__( 'Klarna Checkout payment completed. Reservation number: %s.  Klarna order number: %s', 'klarna' ),
+					$klarna_order['reservation'], 
+					$klarna_order['id'] 
+				) );
+
 				
 				// Update the order in Klarnas system
 				$update['status'] = 'created';
@@ -405,6 +384,23 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	
 	} // End function check_checkout_listener
 		
+
+	/**
+	 * Create new order
+	 *
+	 * @since 1.0.0
+	 */
+	public function compare_orders( $order, $klarna_order ) {
+
+		// $order->add_order_note( 'WooCommerce order total - ' . $order->get_total() );
+		// $order->add_order_note( 'Klarna order total - ' . $klarna_order['cart']['total_price_including_tax'] );
+		
+		/**
+		 * Compare these two amounts and update Klarna order if necessary
+		 */
+
+	}
+
 		
 	/**
 	 * Create new order
@@ -412,8 +408,6 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 * @since 1.0.0
 	 */
 	public function create_order( $klarna_order ) {
-		
-		global $woocommerce, $wpdb;
 		
 		/* 
 		$this->shipping_methods = WC()->session->get( 'chosen_shipping_methods' );
@@ -457,65 +451,6 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		}
 
 		return $order;
-
-		/*
-		// Store fees
-		foreach ( WC()->cart->get_fees() as $fee_key => $fee ) {
-			$item_id = $order->add_fee( $fee );
-
-			if ( ! $item_id ) {
-				throw new Exception( __( 'Error: Unable to create order. Please try again.', 'woocommerce' ) );
-			}
-
-			// Allow plugins to add order item meta to fees
-			do_action( 'woocommerce_add_order_fee_meta', $order_id, $item_id, $fee, $fee_key );
-		}
-
-		// Store shipping for all packages
-		foreach ( WC()->shipping->get_packages() as $package_key => $package ) {
-			if ( isset( $package['rates'][ $this->shipping_methods[ $package_key ] ] ) ) {
-				$item_id = $order->add_shipping( $package['rates'][ $this->shipping_methods[ $package_key ] ] );
-
-				if ( ! $item_id ) {
-					throw new Exception( __( 'Error: Unable to create order. Please try again.', 'woocommerce' ) );
-				}
-
-				// Allows plugins to add order item meta to shipping
-				do_action( 'woocommerce_add_shipping_order_item', $order_id, $item_id, $package_key );
-			}
-		}
-
-		// Store tax rows
-		foreach ( array_keys( WC()->cart->taxes + WC()->cart->shipping_taxes ) as $tax_rate_id ) {
-			if ( ! $order->add_tax( $tax_rate_id, WC()->cart->get_tax_amount( $tax_rate_id ), WC()->cart->get_shipping_tax_amount( $tax_rate_id ) ) ) {
-				throw new Exception( __( 'Error: Unable to create order. Please try again.', 'woocommerce' ) );
-			}
-		}
-
-		// Store coupons
-		foreach ( WC()->cart->get_coupons() as $code => $coupon ) {
-			if ( ! $order->add_coupon( $code, WC()->cart->get_coupon_discount_amount( $code ) ) ) {
-				throw new Exception( __( 'Error: Unable to create order. Please try again.', 'woocommerce' ) );
-			}
-		}
-		
-		// Payment Method
-		$available_gateways = WC()->payment_gateways->payment_gateways();
-		$this->payment_method = $available_gateways[ 'klarna_checkout' ];
-	
-		$order->set_payment_method( $this->payment_method );
-		$order->set_total( WC()->cart->shipping_total, 'shipping' );
-		$order->set_total( WC()->cart->get_order_discount_total(), 'order_discount' );
-		$order->set_total( WC()->cart->get_cart_discount_total(), 'cart_discount' );
-		$order->set_total( WC()->cart->tax_total, 'tax' );
-		$order->set_total( WC()->cart->shipping_tax_total, 'shipping_tax' );
-		$order->set_total( WC()->cart->total );
-		*/
-
-		// Let plugins add meta
-		do_action( 'woocommerce_checkout_update_order_meta', $order_id, array() );
-
-		return $order_id;
 	
 	} // End function create_order()
 
@@ -527,11 +462,12 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 */
 	public function add_order_items( $order, $klarna_order ) {
 
-		foreach ( $klarna_order['cart']['items'] as $values ) {
-			$item_product = wc_get_product( $values['reference'] );
+		$klarna_transient = sanitize_key( $_GET['sid'] );
+		$klarna_wc = get_transient( $klarna_transient );
 
+		foreach ( $klarna_wc->cart->get_cart() as $cart_item_key => $values ) {
 			$item_id = $order->add_product(
-				$item_product,
+				$values['data'],
 				$values['quantity'],
 				array(
 					'variation' => $values['variation'],
@@ -545,11 +481,193 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 				)
 			);
 
+			if ( ! $item_id ) {
+				throw new Exception( __( 'Error: Unable to create order. Please try again.', 'woocommerce' ) );
+			}
+
 			// Allow plugins to add order item meta
-			// do_action( 'woocommerce_add_order_item_meta', $item_id, $values, $cart_item_key );
+			do_action( 'woocommerce_add_order_item_meta', $item_id, $values, $cart_item_key );
 		}
 
 	}
+
+
+	/**
+	 * Adds addresses to order
+	 *
+	 * @since 1.0.0
+	 */
+	function store_addresses( $order, $klarna_order ) {
+		
+		$order_id = $order->id;
+		
+		// Different names on the returned street address if it's a German purchase or not
+		$received__billing_address_1  = '';
+		$received__shipping_address_1 = '';
+
+		if ( $_GET['scountry'] == 'DE' ) {
+
+			$received__billing_address_1 = $klarna_order['billing_address']['street_name'] . ' ' . $klarna_order['billing_address']['street_number'];
+			$received__shipping_address_1 = $klarna_order['shipping_address']['street_name'] . ' ' . $klarna_order['shipping_address']['street_number'];					
+		
+		} else {
+		
+			$received__billing_address_1 	= $klarna_order['billing_address']['street_address'];
+			$received__shipping_address_1 	= $klarna_order['shipping_address']['street_address'];
+		
+		}
+			
+		// Add customer billing address - retrieved from callback from Klarna
+		update_post_meta( $order_id, '_billing_first_name', $klarna_order['billing_address']['given_name'] );
+		update_post_meta( $order_id, '_billing_last_name', $klarna_order['billing_address']['family_name'] );
+		update_post_meta( $order_id, '_billing_address_1', $received__billing_address_1 );
+		update_post_meta( $order_id, '_billing_address_2', $klarna_order['billing_address']['care_of'] );
+		update_post_meta( $order_id, '_billing_postcode', $klarna_order['billing_address']['postal_code'] );
+		update_post_meta( $order_id, '_billing_city', $klarna_order['billing_address']['city'] );
+		update_post_meta( $order_id, '_billing_country', $klarna_order['billing_address']['country'] );
+		update_post_meta( $order_id, '_billing_email', $klarna_order['billing_address']['email'] );
+		update_post_meta( $order_id, '_billing_phone', $klarna_order['billing_address']['phone'] );
+		
+		// Add customer shipping address - retrieved from callback from Klarna
+		$allow_separate_shipping = ( isset( $klarna_order['options']['allow_separate_shipping_address'] ) ) ? $klarna_order['options']['allow_separate_shipping_address'] : '';
+		
+		if ( $allow_separate_shipping == 'true' || $_GET['scountry'] == 'DE' ) {
+			
+			update_post_meta( $order_id, '_shipping_first_name', $klarna_order['shipping_address']['given_name'] );
+			update_post_meta( $order_id, '_shipping_last_name', $klarna_order['shipping_address']['family_name'] );
+			update_post_meta( $order_id, '_shipping_address_1', $received__shipping_address_1 );
+			update_post_meta( $order_id, '_shipping_address_2', $klarna_order['shipping_address']['care_of'] );
+			update_post_meta( $order_id, '_shipping_postcode', $klarna_order['shipping_address']['postal_code'] );
+			update_post_meta( $order_id, '_shipping_city', $klarna_order['shipping_address']['city'] );
+			update_post_meta( $order_id, '_shipping_country', $klarna_order['shipping_address']['country'] );
+		
+		} else {
+			
+			update_post_meta( $order_id, '_shipping_first_name', $klarna_order['billing_address']['given_name'] );
+			update_post_meta( $order_id, '_shipping_last_name', $klarna_order['billing_address']['family_name'] );
+			update_post_meta( $order_id, '_shipping_address_1', $received__billing_address_1 );
+			update_post_meta( $order_id, '_shipping_address_2', $klarna_order['billing_address']['care_of'] );
+			update_post_meta( $order_id, '_shipping_postcode', $klarna_order['billing_address']['postal_code'] );
+			update_post_meta( $order_id, '_shipping_city', $klarna_order['billing_address']['city'] );
+			update_post_meta( $order_id, '_shipping_country', $klarna_order['billing_address']['country'] );
+		}
+		
+	}
+
+
+	/**
+	 * Adds fees to order
+	 *
+	 * @since 1.0.0
+	 */
+	function store_fees( $order, $klarna_order ) {
+
+		$klarna_transient = sanitize_key( $_GET['sid'] );
+		$klarna_wc = get_transient( $klarna_transient );
+		
+		foreach ( $klarna_wc->cart->get_fees() as $fee_key => $fee ) {
+			$item_id = $order->add_fee( $fee );
+
+			if ( ! $item_id ) {
+				throw new Exception( __( 'Error: Unable to create order. Please try again.', 'woocommerce' ) );
+			}
+
+			// Allow plugins to add order item meta to fees
+			do_action( 'woocommerce_add_order_fee_meta', $order_id, $item_id, $fee, $fee_key );
+		}
+		
+	}
+
+
+	/**
+	 * Adds fees to order
+	 *
+	 * @since 1.0.0
+	 */
+	function store_shipping( $order, $klarna_order ) {
+
+		$klarna_transient = sanitize_key( $_GET['sid'] );
+		$klarna_wc = get_transient( $klarna_transient );
+
+		// Store shipping for all packages
+		foreach ( $klarna_wc->shipping->get_packages() as $package_key => $package ) {
+			if ( isset( $package['rates'][ $this->shipping_methods[ $package_key ] ] ) ) {
+				$item_id = $order->add_shipping( $package['rates'][ $this->shipping_methods[ $package_key ] ] );
+
+				if ( ! $item_id ) {
+					throw new Exception( __( 'Error: Unable to create order. Please try again.', 'woocommerce' ) );
+				}
+
+				// Allows plugins to add order item meta to shipping
+				do_action( 'woocommerce_add_shipping_order_item', $order_id, $item_id, $package_key );
+			}
+		}
+		
+	}
+
+	/**
+	 * Adds tax_rows to order
+	 *
+	 * @since 1.0.0
+	 */
+	function store_tax_rows( $order, $klarna_order ) {
+
+		$klarna_transient = sanitize_key( $_GET['sid'] );
+		$klarna_wc = get_transient( $klarna_transient );
+
+		foreach ( array_keys( $klarna_wc->cart->taxes + $klarna_wc->cart->shipping_taxes ) as $tax_rate_id ) {
+			if ( ! $order->add_tax( $tax_rate_id, $klarna_wc->cart->get_tax_amount( $tax_rate_id ), WC()->cart->get_shipping_tax_amount( $tax_rate_id ) ) ) {
+				throw new Exception( __( 'Error: Unable to create order. Please try again.', 'woocommerce' ) );
+			}
+		}
+
+	}
+
+	/**
+	 * Adds coupons to order
+	 *
+	 * @since 1.0.0
+	 */
+	function store_coupons( $order, $klarna_order ) {
+
+		$klarna_transient = sanitize_key( $_GET['sid'] );
+		$klarna_wc = get_transient( $klarna_transient );
+
+		foreach ( $klarna_wc->cart->get_coupons() as $code => $coupon ) {
+			if ( ! $order->add_coupon( $code, $klarna_wc->cart->get_coupon_discount_amount( $code ) ) ) {
+				throw new Exception( __( 'Error: Unable to create order. Please try again.', 'woocommerce' ) );
+			}
+		}
+
+	}
+	
+	/**
+	 * Adds fees to order
+	 *
+	 * @since 1.0.0
+	 */
+	function store_payment_method( $order, $klarna_order ) {
+
+		$klarna_transient = sanitize_key( $_GET['sid'] );
+		$klarna_wc = get_transient( $klarna_transient );
+
+		$available_gateways = $klarna_wc->payment_gateways->payment_gateways();
+		$this->payment_method = $available_gateways[ 'klarna_checkout' ];
+	
+		$order->set_payment_method( $this->payment_method );
+		$order->set_total( $klarna_wc->cart->shipping_total, 'shipping' );
+		$order->set_total( $klarna_wc->cart->get_order_discount_total(), 'order_discount' );
+		$order->set_total( $klarna_wc->cart->get_cart_discount_total(), 'cart_discount' );
+		$order->set_total($klarna_wc->cart->tax_total, 'tax' );
+		$order->set_total( $klarna_wc->cart->shipping_tax_total, 'shipping_tax' );
+		$order->set_total( $klarna_wc->cart->total );
+
+	}
+
+
+
+
+
 
 	/**
 	 * Create a new customer
@@ -938,9 +1056,9 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 
 		// Set store specific information so you can e.g. search and associate invoices with order numbers.
 		$k->setEstoreInfo(
-		    $orderid1 = $order_id, //Maybe the estore's order number/id.
-		    $orderid2 = $order->order_key, //Could an order number from another system?
-		    $user = '' //Username, email or identifier for the user?
+		    $orderid1 = $order_id,         // Maybe the estore's order number/id.
+		    $orderid2 = $order->order_key, // Could an order number from another system?
+		    $user = ''                     // Username, email or identifier for the user?
 		);
 		
 		try {
