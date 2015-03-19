@@ -9,6 +9,7 @@
  */
 
 
+
 class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			
 	/**
