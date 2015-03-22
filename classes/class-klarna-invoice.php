@@ -82,13 +82,232 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 		$this->klarna_wb_img_checkout = apply_filters( 'klarna_wb_img_checkout', $klarna_wb['img_checkout'] );
 		$this->klarna_wb_img_single_product = apply_filters( 'klarna_wb_img_single_product', $klarna_wb['img_single_product'] );
 		$this->klarna_wb_img_product_list = apply_filters( 'klarna_wb_img_product_list', $klarna_wb['img_product_list'] );
+
+		// Subscription support
+		$this->supports = array( 
+			'products', 
+			'refunds'
+		);
 				
 		// Actions
 		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
 		add_action( 'woocommerce_receipt_klarna_invoice', array( $this, 'receipt_page' ) );
 		add_action( 'woocommerce_checkout_process', array( $this, 'klarna_invoice_checkout_field_process' ) );
 		add_action( 'wp_print_footer_scripts', array(  $this, 'footer_scripts' ) );
+		add_action( 'wp_print_footer_scripts', array(  $this, 'footer_scripts' ) );
+		add_action( 'woocommerce_order_status_cancelled', array( $this, 'cancel_klarna_order' ) );
+		add_action( 'woocommerce_order_status_completed', array( $this, 'activate_klarna_order' ) );
 		
+	}
+
+
+	/**
+	 * Can the order be refunded via Klarna?
+	 * @param  WC_Order $order
+	 * @return bool
+	 */
+	public function can_refund_order( $order ) {
+
+		if ( get_post_meta( $order->id, '_klarna_invoice_number', true ) ) {
+			return true;
+		}
+
+		return false;
+
+	}
+
+
+	/**
+	 * Refund order in Klarna system
+	 *
+	 * @since 1.0.0
+	 */
+	public function process_refund( $orderid, $amount = NULL, $reason = '' ) {
+
+		$order = wc_get_order( $orderid );
+		if ( ! $this->can_refund_order( $order ) ) {
+			// $this->log->add( 'klarna', 'Refund Failed: No Klarna invoice ID.' );
+			return false;
+		}
+
+		$country = get_post_meta( $orderid, '_billing_country', true );
+
+		// Get PClasses so that the customer can chose between different payment plans.
+		require_once( KLARNA_LIB . 'Klarna.php' );
+		require_once( KLARNA_LIB . 'pclasses/storage.intf.php' );
+		
+		if ( ! function_exists( 'xmlrpc_encode_entitites' ) && ! class_exists( 'xmlrpcresp' ) ) {
+			require_once( KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc.inc' );
+			require_once( KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc_wrappers.inc' );
+		}
+
+		$klarna = new Klarna();
+		$this->configure_klarna( $klarna, $country );
+		$invNo = get_post_meta( $order->id, '_klarna_invoice_number', true );
+
+		try {
+
+			$result = $klarna->returnAmount( // returns 1 on success
+				$invNo,               // Invoice number
+				$amount,              // Amount given as a discount.
+				80,                   // 25% VAT
+				KlarnaFlags::INC_VAT, // Amount including VAT.
+				$reason               // Description
+			);
+
+			if ( $result ) {
+
+				$order->add_order_note(
+					sprintf(
+						__( 'Klarna order refunded. Refund amount: %s.', 'klarna' ),
+						$amount
+					)
+				);
+
+				return true;
+
+			}
+
+		} catch( Exception $e ) {
+
+			$order->add_order_note(
+				sprintf(
+					__( 'Klarna order refund failed. Error code %s. Error message %s', 'klarna' ),
+					$e->getCode(),
+					utf8_encode( $e->getMessage() )
+				)					
+			);
+
+		}
+
+		return false;
+
+	}
+
+
+	/**
+	 * Activate order in Klarna system
+	 *
+	 * @since 1.0.0
+	 */
+	function activate_klarna_order( $orderid ) {
+
+		// Klarna reservation number and billing country must be set
+		if ( get_post_meta( $orderid, '_klarna_order_reservation', true ) && get_post_meta( $orderid, '_billing_country', true ) ) {
+
+			// Check if this order hasn't been activated already
+			if ( ! get_post_meta( $orderid, '_klarna_order_activated', true ) ) {
+
+				$rno = get_post_meta( $orderid, '_klarna_order_reservation', true );
+				$country = get_post_meta( $orderid, '_billing_country', true );
+
+				$order = wc_get_order( $orderid );
+			
+				// Get PClasses so that the customer can chose between different payment plans.
+				require_once( KLARNA_LIB . 'Klarna.php' );
+				require_once( KLARNA_LIB . 'pclasses/storage.intf.php' );
+				
+				if ( ! function_exists( 'xmlrpc_encode_entitites' ) && ! class_exists( 'xmlrpcresp' ) ) {
+					require_once( KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc.inc' );
+					require_once( KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc_wrappers.inc' );
+				}
+
+				$klarna = new Klarna();
+				$this->configure_klarna( $klarna, $country );
+
+				try {
+
+					$result = $klarna->activate(
+				    	$rno,
+						null, // OCR Number
+						KlarnaFlags::RSRV_SEND_BY_EMAIL
+				    );
+					$risk = $result[0];  // "ok" or "no_risk"
+					$invNo = $result[1]; // "9876451"
+
+					$order->add_order_note(
+						sprintf(
+							__( 'Klarna order activated. Invoice number %s - risk status %s.', 'klarna' ),
+							$invNo,
+							$risk
+						)
+					);
+					add_post_meta( $orderid, '_klarna_order_activated', time() );
+					add_post_meta( $orderid, '_klarna_invoice_number', $invNo );
+
+				} catch( Exception $e ) {
+
+					$order->add_order_note(
+						sprintf(
+							__( 'Klarna order activation failed. Error code %s. Error message %s', 'klarna' ),
+							$e->getCode(),
+							utf8_encode( $e->getMessage() )
+						)					
+					);
+
+				}
+
+			}
+
+		}	
+
+	}
+
+
+	/**
+	 * Cancel order in Klarna system
+	 *
+	 * @since 1.0.0
+	 */
+	function cancel_klarna_order( $orderid ) {
+
+		// Klarna reservation number and billing country must be set
+		if ( get_post_meta( $orderid, '_klarna_order_reservation', true ) && get_post_meta( $orderid, '_billing_country', true ) ) {
+
+			// Check if this order hasn't been cancelled already
+			if ( ! get_post_meta( $orderid, '_klarna_order_cancelled', true ) ) {
+
+				$rno = get_post_meta( $orderid, '_klarna_order_reservation', true );
+				$country = get_post_meta( $orderid, '_billing_country', true );
+
+				$order = wc_get_order( $orderid );
+			
+				// Get PClasses so that the customer can chose between different payment plans.
+				require_once( KLARNA_LIB . 'Klarna.php' );
+				require_once( KLARNA_LIB . 'pclasses/storage.intf.php' );
+				
+				if ( ! function_exists( 'xmlrpc_encode_entitites' ) && ! class_exists( 'xmlrpcresp' ) ) {
+					require_once( KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc.inc' );
+					require_once( KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc_wrappers.inc' );
+				}
+
+				$klarna = new Klarna();
+				$this->configure_klarna( $klarna, $country );
+
+				try {
+
+				    $klarna->cancelReservation( $rno );
+					$order->add_order_note(
+						__( 'Klarna order cancellation completed.', 'klarna' )
+					);
+					add_post_meta( $orderid, '_klarna_order_cancelled', time() );
+
+				} catch( Exception $e ) {
+
+					$order->add_order_note(
+						sprintf(
+							__( 'Klarna order cancellation failed. Error code %s. Error message %s', 'klarna' ),
+							$e->getCode(),
+							utf8_encode( $e->getMessage() )
+						)					
+					);
+
+				}
+
+			}
+
+		}	
+
 	}
 
 
