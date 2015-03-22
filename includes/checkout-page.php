@@ -1,15 +1,16 @@
 <?php
-
+/**
+ * Displays Klarna checkout page
+ *
+ * @package WC_Gateway_Klarna
+ */
+ 
+ 
+// Bail if accessed directly
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-
-/**
- * Display Klarna Checkout page
- */
-
-global $woocommerce;
 
 /**
  * Don't render the Klarna Checkout form if the payment gateway isn't enabled.
@@ -17,6 +18,7 @@ global $woocommerce;
 if ( $this->enabled != 'yes' ) {
 	return;
 }
+
 
 /**
  * If no Klarna country is set - return.
@@ -33,9 +35,11 @@ if ( empty( $this->klarna_country ) ) {
 	return;
 }
 
+
 /**
  * If checkout registration is disabled and not logged in, the user cannot checkout
  */
+global $woocommerce;
 $checkout = $woocommerce->checkout();
 if ( ! $checkout->enable_guest_checkout && ! is_user_logged_in() ) {
 	echo apply_filters( 
@@ -45,6 +49,7 @@ if ( ! $checkout->enable_guest_checkout && ! is_user_logged_in() ) {
 	return;
 }
 
+
 /**
  * Process order via Klarna Checkout page
  */
@@ -52,17 +57,20 @@ if ( ! defined( 'WOOCOMMERCE_CHECKOUT' ) ) {
 	define( 'WOOCOMMERCE_CHECKOUT', true );
 }
 
+
 /**
  * Set Klarna Checkout as the choosen payment method in the WC session
  */
 WC()->session->set( 'chosen_payment_method', 'klarna_checkout' );
 
+
 /**
  * Debug
  */
-if ( $this->debug=='yes' ) {
+if ( $this->debug == 'yes' ) {
 	$this->log->add( 'klarna', 'Rendering Checkout page...' );
 }
+
 
 /**
  * Mobile or desktop browser
@@ -73,6 +81,7 @@ if ( wp_is_mobile() ) {
 	$klarna_checkout_layout = 'desktop';
 }
 
+
 /**
  * If the WooCommerce terms page or the Klarna Checkout settings field 
  * Terms Page isn't set, do nothing.
@@ -81,12 +90,14 @@ if ( empty( $this->terms_url ) ) {
 	return;
 }
 
+
 /**
  * Set $add_klarna_window_size_script to true so that Window size 
  * detection script can load in the footer
  */
 global $add_klarna_window_size_script;
 $add_klarna_window_size_script = true;
+
 
 /**
  * Add button to Standard Checkout Page if this is enabled in the settings
@@ -95,22 +106,32 @@ if ( $this->add_std_checkout_button == 'yes' ) {
 	echo '<div class="woocommerce"><a href="' . get_permalink( get_option( 'woocommerce_checkout_page_id' ) ) . '" class="button std-checkout-button">' . $this->std_checkout_button_label . '</a></div>';
 }
 
+
+/**
+ * Recheck cart items so that they are in stock
+ */
+$result = $woocommerce->cart->check_cart_item_stock();
+if ( is_wp_error( $result ) ) {
+	return $result->get_error_message();
+	exit();
+}
+
+/**
+ * Check if there's anything in the cart
+ */
 if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 
 	/**
 	 * Store WC object as transient
-	 */
-	 
+	 */ 
 	$klarna_wc = $woocommerce;
 	$klarna_transient = md5( time() . rand( 1000, 1000000 ) );
 	set_transient( $klarna_transient, $klarna_wc, 48 * 60 * 60 );
 	
 
 	/**
-	 * Create Klarna order from WC object
+	 * Process cart contents
 	 */
-	 
-	// Cart Contents
 	if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 
 		foreach ( $woocommerce->cart->get_cart() as $cart_item ) {
@@ -174,7 +195,9 @@ if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 	} // End if sizeof get_items()
 
 
-	// Shipping
+	/**
+	 * Process shipping
+	 */
 	if ( $woocommerce->cart->shipping_total > 0 ) {
 
 		// We manually calculate the tax percentage here
@@ -218,7 +241,9 @@ if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 
 	}
 
-	// Discount
+	/**
+	 * Process discount
+	 */
 	/*
 	if ( $woocommerce->cart->discount_cart > 0 ) {
 
@@ -255,7 +280,6 @@ if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 	 * If it does, see if it needs to be updated
 	 * If it doesn't, create Klarna order
 	 */
-	
 	if ( array_key_exists( 'klarna_checkout', $_SESSION ) ) {
 
 		// Resume session
@@ -278,7 +302,9 @@ if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 				
 			} else {
 
-				// Update order
+				/**
+				 * Update Klarna order
+				 */
 				
 				// Reset cart
 				$update['cart']['items'] = array();
@@ -318,12 +344,16 @@ if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 
 			// Reset session
 			$klarna_order = null;
-			unset($_SESSION['klarna_checkout']);
+			unset( $_SESSION['klarna_checkout'] );
 
 		}
 
 	}
 
+
+	/**
+	 * Update Klarna order
+	 */
 	if ( $klarna_order == null ) {
 
 		// Start new session

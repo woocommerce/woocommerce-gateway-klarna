@@ -9,7 +9,6 @@
  */
 
 
-
 class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			
 	/**
@@ -75,8 +74,8 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		}
 			
 		// Ajax
-		add_action( 'wp_ajax_customer_update_kco_order_note', array($this, 'customer_update_kco_order_note') );
-		add_action( 'wp_ajax_nopriv_customer_update_kco_order_note', array($this, 'customer_update_kco_order_note') );
+		add_action( 'wp_ajax_customer_update_kco_order_note', array( $this, 'customer_update_kco_order_note' ) );
+		add_action( 'wp_ajax_nopriv_customer_update_kco_order_note', array( $this, 'customer_update_kco_order_note' ) );
 		add_action( 'wp_footer', array( $this, 'js_order_note' ) );
 		add_action( 'wp_footer', array( $this, 'ajaxurl'));
 
@@ -245,7 +244,11 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 				default:
 					$klarna_secret = '';
 			}
-	
+
+			if ( $this->debug == 'yes' ) {
+				$this->log->add( 'klarna', 'Fetching Klarna order...' );
+			}
+				
 			$connector    = Klarna_Checkout_Connector::create( $klarna_secret );  			
 			$checkoutId   = $_GET['klarna_order'];  
 			$klarna_order = new Klarna_Checkout_Order( $connector, $checkoutId );  
@@ -254,7 +257,6 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			if ( $this->debug == 'yes' ) {
 				$this->log->add( 'klarna', 'ID: ' . $klarna_order['id'] );
 				$this->log->add( 'klarna', 'Billing: ' . $klarna_order['billing_address']['given_name'] );
-				// $this->log->add( 'klarna', 'Order ID: ' . $_GET['sid'] );
 				$this->log->add( 'klarna', 'Reference: ' . $klarna_order['reservation'] );
 				$this->log->add( 'klarna', 'Fetched order from Klarna: ' . var_export( $klarna_order, true ) );
 			}
@@ -262,28 +264,37 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			if ( $klarna_order['status'] == 'checkout_complete' ) { 
 
 				// Create order in WooCommerce
+				$this->log->add( 'klarna', 'Creating local order...' );
 				$order = $this->create_order( $klarna_order );
 				$order_id = $order->id;
+				$this->log->add( 'klarna', 'Local order created, order ID: ' . $order_id );
 
 				// Add order items
+				$this->log->add( 'klarna', 'Adding order items...' );
 				$this->add_order_items( $order, $klarna_order );
 				
 				// Store addresses
+				$this->log->add( 'klarna', 'Adding order fees...' );
 				$this->store_fees( $order, $klarna_order );
 
 				// Store addresses
+				$this->log->add( 'klarna', 'Adding order shipping info...' );
 				$this->store_shipping( $order, $klarna_order );				
 				
 				// Store addresses
+				$this->log->add( 'klarna', 'Adding order addresses...' );
 				$this->store_addresses( $order, $klarna_order );
 
 				// Store addresses
+				$this->log->add( 'klarna', 'Adding order tax...' );
 				$this->store_tax_rows( $order, $klarna_order );
 
 				// Store addresses
+				$this->log->add( 'klarna', 'Adding order coupons...' );
 				$this->store_coupons( $order, $klarna_order );
 
 				// Store addresses
+				$this->log->add( 'klarna', 'Adding order payment method...' );
 				$this->store_payment_method( $order, $klarna_order );
 						
 				// Let plugins add meta
@@ -345,6 +356,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 
 				
 				// Update the order in Klarnas system
+				$this->log->add( 'klarna', 'Updating Klarna order status to "created"...' );
 				$update['status'] = 'created';
 				$update['merchant_reference'] = array(  
 					'orderid1' => ltrim( $order->get_order_number(), '#' )
@@ -419,14 +431,6 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 				home_url() 
 			), 'error' );
 		}
-			
-		// Recheck cart items so that they are in stock
-		// TODO: Move this to before order is sent to Klarna
-		$result = $woocommerce->cart->check_cart_item_stock();
-		if ( is_wp_error( $result ) ) {
-			return $result->get_error_message();
-			exit();
-		}
 		*/
 			
 		// Customer accounts
@@ -444,11 +448,14 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		$order = wc_create_order( $order_data );
 
 		if ( is_wp_error( $order ) ) {
+
 			throw new Exception( __( 'Error: Unable to create order. Please try again.', 'woocommerce' ) );
+
 		} else {
-			$order_id = $order->id;
-			do_action( 'woocommerce_new_order', $order_id );
-			update_post_meta( $order_id, '_test', 'test' );
+
+			// $order_id = $order->id;
+			// do_action( 'woocommerce_new_order', $order_id );
+
 		}
 
 		return $order;

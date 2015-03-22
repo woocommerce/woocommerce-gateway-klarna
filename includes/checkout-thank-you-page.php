@@ -16,14 +16,11 @@ if ( $this->debug == 'yes' ) {
 // Shared secret
 $sharedSecret = $this->klarna_secret;
 
+// Connect to Klarna
 Klarna_Checkout_Order::$contentType = 'application/vnd.klarna.checkout.aggregated-order-v2+json';  
-
 $orderUri = $_GET['klarna_order'];
-
 $connector = Klarna_Checkout_Connector::create( $sharedSecret );  
-
 $klarna_order = new Klarna_Checkout_Order( $connector, $orderUri );
-
 $klarna_order->fetch();
 
 if ( $klarna_order['status'] == 'checkout_incomplete' ) {
@@ -31,14 +28,13 @@ if ( $klarna_order['status'] == 'checkout_incomplete' ) {
 	exit;  
 }
 
+// Display Klarna iframe
 $snippet = $klarna_order['gui']['snippet'];
-
-// DESKTOP: Width of containing block shall be at least 750px
-// MOBILE: Width of containing block shall be 100% of browser window (No
-// padding or margin)
 do_action( 'klarna_before_kco_confirmation', $_GET['sid'] );
-echo '<div>' . $snippet . '</div>';	
+echo '<div class="klarna-thank-you-snippet">' . $snippet . '</div>';	
 do_action( 'klarna_after_kco_confirmation', $_GET['sid'] );
 do_action( 'woocommerce_thankyou', $_GET['sid'] );
+
+// Clear session and empty cart
 unset( $_SESSION['klarna_checkout'] );
 $woocommerce->cart->empty_cart(); // Remove cart
