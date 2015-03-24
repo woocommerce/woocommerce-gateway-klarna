@@ -97,7 +97,171 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 		add_action( 'wp_print_footer_scripts', array(  $this, 'footer_scripts' ) );
 		add_action( 'woocommerce_order_status_cancelled', array( $this, 'cancel_klarna_order' ) );
 		add_action( 'woocommerce_order_status_completed', array( $this, 'activate_klarna_order' ) );
+
+		// Add Refund item button
+		// add_action( 'woocommerce_after_order_itemmeta', array( $this, 'add_refund_item_button' ), 10, 3 );
 		
+		// Update Klarna order
+		add_action( 'woocommerce_saved_order_items', array( $this, 'update_klarna_order' ), 10, 2 );
+		
+	}
+
+
+	/**
+	 * Update order in Klarna system
+	 *
+	 * @since 1.0.0
+	 */
+	function update_klarna_order( $orderid, $items ) {
+
+		$order = wc_get_order( $orderid );
+		$billing_address = array(
+			'first_name'    => $order->billing_first_name,
+			'last_name'     => $order->billing_last_name,
+			'company'       => $order->billing_company,
+			'address_1'     => $order->billing_address_1,
+			'address_2'     => $order->billing_address_2,
+			'city'          => $order->billing_city,
+			'state'         => $order->billing_state,
+			'postcode'      => $order->billing_postcode,
+			'country'       => $order->billing_country
+		);
+
+		$shipping_address = array(
+			'first_name'    => $order->shipping_first_name,
+			'last_name'     => $order->shipping_last_name,
+			'company'       => $order->shipping_company,
+			'address_1'     => $order->shipping_address_1,
+			'address_2'     => $order->shipping_address_2,
+			'city'          => $order->shipping_city,
+			'state'         => $order->shipping_state,
+			'postcode'      => $order->shipping_postcode,
+			'country'       => $order->shipping_country
+		);
+
+		/*
+		echo '<pre>';
+		print_r( $address );
+		echo '</pre>';
+		*/
+
+		// Klarna reservation number and billing country must be set
+		if ( get_post_meta( $orderid, '_klarna_order_reservation', true ) && get_post_meta( $orderid, '_billing_country', true ) ) {
+
+			// Check if this order hasn't been activated already
+			if ( ! get_post_meta( $orderid, '_klarna_order_activated', true ) ) {
+
+				$rno = get_post_meta( $orderid, '_klarna_order_reservation', true );
+				$country = get_post_meta( $orderid, '_billing_country', true );
+
+				$order = wc_get_order( $orderid );
+
+				// Get PClasses so that the customer can chose between different payment plans.
+				require_once( KLARNA_LIB . 'Klarna.php' );
+				require_once( KLARNA_LIB . 'pclasses/storage.intf.php' );
+				
+				if ( ! function_exists( 'xmlrpc_encode_entitites' ) && ! class_exists( 'xmlrpcresp' ) ) {
+					require_once( KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc.inc' );
+					require_once( KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc_wrappers.inc' );
+				}
+				$klarna = new Klarna();
+
+				/**
+				 * Setup Klarna configuration
+				 */
+				$this->configure_klarna( $klarna, $country );
+
+				if ( sizeof( $order->get_items() ) > 0 ) {
+					foreach ( $order->get_items() as $item ) {
+						$_product = $order->get_product_from_item( $item );
+						if ( $_product->exists() && $item['qty'] ) {
+						
+							// We manually calculate the tax percentage here
+							if ( $order->get_line_tax( $item ) !== 0 ) {
+								// Calculate tax percentage
+								$item_tax_percentage = @number_format( ( $order->get_line_tax( $item ) / $order->get_line_total( $item, false ) ) * 100, 2, '.', '' );
+							} else {
+								$item_tax_percentage = 0.00;
+							}
+							
+							// apply_filters to item price so we can filter this if needed
+							$klarna_item_price_including_tax = $order->get_item_total( $item, true );
+							$item_price = apply_filters( 'klarna_item_price_including_tax', $klarna_item_price_including_tax );
+								
+							// Get SKU or product id
+							$reference = '';
+							if ( $_product->get_sku() ) {
+								$reference = $_product->get_sku();
+							} elseif ( $_product->variation_id ) {
+								$reference = $_product->variation_id;
+							} else {
+								$reference = $_product->id;
+							}
+							
+							$klarna->addArticle(
+								$qty      = $item['qty'],                  // Quantity
+								$artNo    = strval( $reference ),          // Article number
+								$title    = utf8_decode ($item['name']),   // Article name/title
+								$price    = $item_price,                   // Price including tax
+								$vat      = round( $item_tax_percentage ), // Tax
+								$discount = 0,                             // Discount is applied later
+								$flags    = KlarnaFlags::INC_VAT           // Price is including VAT.
+							);
+												
+						}
+					}
+				}
+
+				try {
+
+					$result = $klarna->update( $rno );
+
+					if ( $result ) {
+
+						$order->add_order_note( __( 'Klarna order updated.', 'klarna' )	);
+
+					}
+
+				} catch( Exception $e ) {
+
+					$order->add_order_note(
+						sprintf(
+							__( 'Klarna order update failed. Error code %s. Error message %s', 'klarna' ),
+							$e->getCode(),
+							utf8_encode( $e->getMessage() )
+						)					
+					);
+
+				}
+
+			}
+
+		}
+
+	}
+
+
+	/**
+	 * Add refund item button
+	 *
+	 * @since 1.0.0
+	 */
+	function add_refund_tax_rate_field() {
+
+		echo '<button type="button" class="button klarna-refund-item-action">REFUND Item</button>';
+
+	}
+
+
+	/**
+	 * Add refund item button
+	 *
+	 * @since 1.0.0
+	 */
+	function add_refund_item_button( $item_id, $item, $_product ) {
+
+		echo '<button type="button" class="button klarna-refund-item-action">REFUND Item</button>';
+
 	}
 
 
@@ -150,7 +314,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 			$result = $klarna->returnAmount( // returns 1 on success
 				$invNo,               // Invoice number
 				$amount,              // Amount given as a discount.
-				80,                   // 25% VAT
+				0,                   // 25% VAT
 				KlarnaFlags::INC_VAT, // Amount including VAT.
 				$reason               // Description
 			);
