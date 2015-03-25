@@ -97,12 +97,8 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 		add_action( 'wp_print_footer_scripts', array(  $this, 'footer_scripts' ) );
 		add_action( 'woocommerce_order_status_cancelled', array( $this, 'cancel_klarna_order' ) );
 		add_action( 'woocommerce_order_status_completed', array( $this, 'activate_klarna_order' ) );
-
-		// Add Refund item button
-		// add_action( 'woocommerce_after_order_itemmeta', array( $this, 'add_refund_item_button' ), 10, 3 );
-		
 		// Update Klarna order
-		add_action( 'woocommerce_saved_order_items', array( $this, 'update_klarna_order' ), 10, 2 );
+		// add_action( 'woocommerce_saved_order_items', array( $this, 'update_klarna_order' ), 10, 2 );
 		
 	}
 
@@ -115,6 +111,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 	function update_klarna_order( $orderid, $items ) {
 
 		$order = wc_get_order( $orderid );
+
 		$billing_address = array(
 			'first_name'    => $order->billing_first_name,
 			'last_name'     => $order->billing_last_name,
@@ -138,12 +135,6 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 			'postcode'      => $order->shipping_postcode,
 			'country'       => $order->shipping_country
 		);
-
-		/*
-		echo '<pre>';
-		print_r( $address );
-		echo '</pre>';
-		*/
 
 		// Klarna reservation number and billing country must be set
 		if ( get_post_meta( $orderid, '_klarna_order_reservation', true ) && get_post_meta( $orderid, '_billing_country', true ) ) {
@@ -242,33 +233,11 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 
 
 	/**
-	 * Add refund item button
-	 *
-	 * @since 1.0.0
-	 */
-	function add_refund_tax_rate_field() {
-
-		echo '<button type="button" class="button klarna-refund-item-action">REFUND Item</button>';
-
-	}
-
-
-	/**
-	 * Add refund item button
-	 *
-	 * @since 1.0.0
-	 */
-	function add_refund_item_button( $item_id, $item, $_product ) {
-
-		echo '<button type="button" class="button klarna-refund-item-action">REFUND Item</button>';
-
-	}
-
-
-	/**
 	 * Can the order be refunded via Klarna?
+	 * 
 	 * @param  WC_Order $order
 	 * @return bool
+	 * @since  2.0.0
 	 */
 	public function can_refund_order( $order ) {
 
@@ -283,14 +252,19 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 
 	/**
 	 * Refund order in Klarna system
-	 *
-	 * @since 1.0.0
+	 * 
+	 * @param  integer $orderid
+	 * @param  integer $amount
+	 * @param  string  $reason
+	 * @return bool
+	 * @since  2.0.0
 	 */
 	public function process_refund( $orderid, $amount = NULL, $reason = '' ) {
 
 		$order = wc_get_order( $orderid );
 		if ( ! $this->can_refund_order( $order ) ) {
-			// $this->log->add( 'klarna', 'Refund Failed: No Klarna invoice ID.' );
+			$this->log->add( 'klarna', 'Refund Failed: No Klarna invoice ID.' );
+			$order->add_order_note( __( 'This order cannot be refunded. Please make sure it is activated.', 'klarna' ) );
 			return false;
 		}
 
@@ -309,38 +283,105 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 		$this->configure_klarna( $klarna, $country );
 		$invNo = get_post_meta( $order->id, '_klarna_invoice_number', true );
 
-		try {
+		/**
+		 * Check if return amount is equal to order total, if yes
+		 * refund entire order.
+		 */
+		if ( $order->get_total() == $amount ) {
 
-			$result = $klarna->returnAmount( // returns 1 on success
-				$invNo,               // Invoice number
-				$amount,              // Amount given as a discount.
-				0,                   // 25% VAT
-				KlarnaFlags::INC_VAT, // Amount including VAT.
-				$reason               // Description
-			);
+			try {
 
-			if ( $result ) {
+				$ocr = $klarna->creditInvoice( $invNo ); // Invoice number
+
+				if ( $ocr ) {
+
+					$order->add_order_note(
+						sprintf(
+							__( 'Klarna order fully refunded.', 'klarna' ),
+							$ocr
+						)
+					);
+
+					return true;
+
+				}
+
+			} catch( Exception $e ) {
 
 				$order->add_order_note(
 					sprintf(
-						__( 'Klarna order refunded. Refund amount: %s.', 'klarna' ),
-						$amount
-					)
+						__( 'Klarna order refund failed. Error code %s. Error message %s', 'klarna' ),
+						$e->getCode(),
+						utf8_encode( $e->getMessage() )
+					)					
 				);
 
-				return true;
+				return false;
 
 			}
 
-		} catch( Exception $e ) {
+		/**
+		 * If return amount is not equal to order total, maybe perform
+		 * good-will partial refund.
+		 */
+		} else {
 
-			$order->add_order_note(
-				sprintf(
-					__( 'Klarna order refund failed. Error code %s. Error message %s', 'klarna' ),
-					$e->getCode(),
-					utf8_encode( $e->getMessage() )
-				)					
-			);
+			/**
+			 * Tax rate needs to be specified for good-will refunds.
+			 * Check if there's only one tax rate in the entire order.
+			 * If yes, go ahead with good-will refund.
+			 */
+			if ( 1 == count( $order->get_taxes() ) ) {
+
+				$tax_rate = $order->get_cart_tax() / $order->get_total() * 100;
+
+				try {
+
+					$ocr = $klarna->returnAmount( // returns 1 on success
+						$invNo,               // Invoice number
+						$amount,              // Amount given as a discount.
+						$tax_rate,            // VAT (%)
+						KlarnaFlags::INC_VAT, // Amount including VAT.
+						$reason               // Description
+					);
+
+					if ( $ocr ) {
+
+						$order->add_order_note(
+							sprintf(
+								__( 'Klarna order partially refunded. Refund amount: %s.', 'klarna' ),
+								$amount
+							)
+						);
+
+						return true;
+
+					}
+
+				} catch( Exception $e ) {
+
+					$order->add_order_note(
+						sprintf(
+							__( 'Klarna order refund failed. Error code %s. Error message %s', 'klarna' ),
+							$e->getCode(),
+							utf8_encode( $e->getMessage() )
+						)					
+					);
+
+					return false;
+
+				}
+
+			/**
+			 * If there are multiple tax rates, bail and leave order note.
+			 */
+			} else {
+
+				$order->add_order_note( __( 'Refund failed. WooCommerce Klarna partial refund not possible for orders containing items with different tax rates.', 'klarna' ) );
+
+				return false;
+
+			}
 
 		}
 
@@ -351,8 +392,9 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 
 	/**
 	 * Activate order in Klarna system
-	 *
-	 * @since 1.0.0
+	 * 
+	 * @param  integer $orderid
+	 * @since  2.0.0
 	 */
 	function activate_klarna_order( $orderid ) {
 
@@ -360,7 +402,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 		if ( get_post_meta( $orderid, '_klarna_order_reservation', true ) && get_post_meta( $orderid, '_billing_country', true ) ) {
 
 			// Check if this order hasn't been activated already
-			if ( ! get_post_meta( $orderid, '_klarna_order_activated', true ) ) {
+			if ( ! get_post_meta( $orderid, '_klarna_invoice_number', true ) ) {
 
 				$rno = get_post_meta( $orderid, '_klarna_order_reservation', true );
 				$country = get_post_meta( $orderid, '_billing_country', true );
@@ -386,7 +428,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 						null, // OCR Number
 						KlarnaFlags::RSRV_SEND_BY_EMAIL
 				    );
-					$risk = $result[0];  // "ok" or "no_risk"
+					$risk  = $result[0]; // "ok" or "no_risk"
 					$invNo = $result[1]; // "9876451"
 
 					$order->add_order_note(
@@ -420,8 +462,9 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 
 	/**
 	 * Cancel order in Klarna system
-	 *
-	 * @since 1.0.0
+	 * 
+	 * @param  integer $orderid
+	 * @since  2.0.0
 	 */
 	function cancel_klarna_order( $orderid ) {
 
