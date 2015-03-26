@@ -283,109 +283,8 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 		$this->configure_klarna( $klarna, $country );
 		$invNo = get_post_meta( $order->id, '_klarna_invoice_number', true );
 
-		/**
-		 * Check if return amount is equal to order total, if yes
-		 * refund entire order.
-		 */
-		if ( $order->get_total() == $amount ) {
-
-			try {
-
-				$ocr = $klarna->creditInvoice( $invNo ); // Invoice number
-
-				if ( $ocr ) {
-
-					$order->add_order_note(
-						sprintf(
-							__( 'Klarna order fully refunded.', 'klarna' ),
-							$ocr
-						)
-					);
-
-					return true;
-
-				}
-
-			} catch( Exception $e ) {
-
-				$order->add_order_note(
-					sprintf(
-						__( 'Klarna order refund failed. Error code %s. Error message %s', 'klarna' ),
-						$e->getCode(),
-						utf8_encode( $e->getMessage() )
-					)					
-				);
-
-				return false;
-
-			}
-
-		/**
-		 * If return amount is not equal to order total, maybe perform
-		 * good-will partial refund.
-		 */
-		} else {
-
-			/**
-			 * Tax rate needs to be specified for good-will refunds.
-			 * Check if there's only one tax rate in the entire order.
-			 * If yes, go ahead with good-will refund.
-			 */
-			if ( 1 == count( $order->get_taxes() ) ) {
-
-				$tax_rate = $order->get_cart_tax() / $order->get_total() * 100;
-
-				try {
-
-					$ocr = $klarna->returnAmount( // returns 1 on success
-						$invNo,               // Invoice number
-						$amount,              // Amount given as a discount.
-						$tax_rate,            // VAT (%)
-						KlarnaFlags::INC_VAT, // Amount including VAT.
-						$reason               // Description
-					);
-
-					if ( $ocr ) {
-
-						$order->add_order_note(
-							sprintf(
-								__( 'Klarna order partially refunded. Refund amount: %s.', 'klarna' ),
-								$amount
-							)
-						);
-
-						return true;
-
-					}
-
-				} catch( Exception $e ) {
-
-					$order->add_order_note(
-						sprintf(
-							__( 'Klarna order refund failed. Error code %s. Error message %s', 'klarna' ),
-							$e->getCode(),
-							utf8_encode( $e->getMessage() )
-						)					
-					);
-
-					return false;
-
-				}
-
-			/**
-			 * If there are multiple tax rates, bail and leave order note.
-			 */
-			} else {
-
-				$order->add_order_note( __( 'Refund failed. WooCommerce Klarna partial refund not possible for orders containing items with different tax rates.', 'klarna' ) );
-
-				return false;
-
-			}
-
-		}
-
-		return false;
+		$klarna_order = new WC_Gateway_Klarna_Order( $order, $klarna );
+		$klarna_order->refund_order( $amount = NULL, $reason = '' );
 
 	}
 
@@ -421,37 +320,8 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 				$klarna = new Klarna();
 				$this->configure_klarna( $klarna, $country );
 
-				try {
-
-					$result = $klarna->activate(
-				    	$rno,
-						null, // OCR Number
-						KlarnaFlags::RSRV_SEND_BY_EMAIL
-				    );
-					$risk  = $result[0]; // "ok" or "no_risk"
-					$invNo = $result[1]; // "9876451"
-
-					$order->add_order_note(
-						sprintf(
-							__( 'Klarna order activated. Invoice number %s - risk status %s.', 'klarna' ),
-							$invNo,
-							$risk
-						)
-					);
-					add_post_meta( $orderid, '_klarna_order_activated', time() );
-					add_post_meta( $orderid, '_klarna_invoice_number', $invNo );
-
-				} catch( Exception $e ) {
-
-					$order->add_order_note(
-						sprintf(
-							__( 'Klarna order activation failed. Error code %s. Error message %s', 'klarna' ),
-							$e->getCode(),
-							utf8_encode( $e->getMessage() )
-						)					
-					);
-
-				}
+				$klarna_order = new WC_Gateway_Klarna_Order( $order, $klarna );
+				$klarna_order->activate_order( $rno );
 
 			}
 
@@ -491,25 +361,8 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 				$klarna = new Klarna();
 				$this->configure_klarna( $klarna, $country );
 
-				try {
-
-				    $klarna->cancelReservation( $rno );
-					$order->add_order_note(
-						__( 'Klarna order cancellation completed.', 'klarna' )
-					);
-					add_post_meta( $orderid, '_klarna_order_cancelled', time() );
-
-				} catch( Exception $e ) {
-
-					$order->add_order_note(
-						sprintf(
-							__( 'Klarna order cancellation failed. Error code %s. Error message %s', 'klarna' ),
-							$e->getCode(),
-							utf8_encode( $e->getMessage() )
-						)					
-					);
-
-				}
+				$klarna_order = new WC_Gateway_Klarna_Order( $order, $klarna );
+				$klarna_order->cancel_order( $rno );
 
 			}
 
@@ -992,12 +845,11 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 		$country = $this->klarna_helper->get_klarna_country();
 		$this->configure_klarna( $klarna, $country );
 
-		$klarna_order = new WC_Gateway_Klarna_Order(
-			$order,
+		$klarna_order = new WC_Gateway_Klarna_Order( $order, $klarna );
+		$klarna_order->prepare_order(
 			$klarna_billing,
 			$klarna_shipping,
-			$this->ship_to_billing_address,
-			$klarna
+			$this->ship_to_billing_address
 		);
 
 		// Set store specific information so you can e.g. search and associate invoices with order numbers.

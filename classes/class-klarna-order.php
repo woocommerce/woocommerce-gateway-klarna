@@ -14,36 +14,51 @@
  */
 class WC_Gateway_Klarna_Order {
 
-	public function __construct(
-		$order,
-		$klarna_billing,
-		$klarna_shipping,
-		$ship_to_billing_address,
-		$klarna
-	) {
+	/**
+	 * Class constructor.
+	 *
+	 * @since 1.0.0
+	 */
+	public function __construct( $order, $klarna ) {
 
-		$this->process_cart_contents( $order, $klarna );
-		$this->process_discount( $order, $klarna );
-		$this->process_fees( $order, $klarna );
-		$this->process_shipping( $order, $klarna );
-		$this->set_addresses(
-			$order,
-			$klarna_billing,
-			$klarna_shipping,
-			$ship_to_billing_address,
-			$klarna,
-			$invoice_fee_name = ''
-		);
+		$this->order = $order;
+		$this->klarna = $klarna;
 
 	}
 
+
+	/**
+	 * Prepare Klarna order for creation.
+	 * 
+	 * @since  2.0
+	 **/
+	function prepare_order(
+		$klarna_billing,
+		$klarna_shipping,
+		$ship_to_billing_address
+	) {
+
+		$this->process_cart_contents( $this->order, $this->klarna );
+		$this->process_discount( $this->order, $this->klarna );
+		$this->process_fees( $this->order, $this->klarna );
+		$this->process_shipping( $this->order, $this->klarna );
+		$this->set_addresses(
+			$klarna_billing,
+			$klarna_shipping,
+			$ship_to_billing_address
+		);
+
+	}
 
 	/**
 	 * Process cart contents.
 	 * 
 	 * @since  2.0
 	 **/
-	function process_cart_contents( $order, $klarna ) {
+	function process_cart_contents() {
+
+		$order = $this->order;
+		$klarna = $this->klarna;
 
 		if ( sizeof( $order->get_items() ) > 0 ) {
 			foreach ( $order->get_items() as $item ) {
@@ -94,7 +109,10 @@ class WC_Gateway_Klarna_Order {
 	 * 
 	 * @since  2.0
 	 **/
-	function process_discount( $order, $klarna ) {
+	function process_discount() {
+
+		$order = $this->order;
+		$klarna = $this->klarna;
 
 		if ( $order->order_discount > 0 ) {
 			// apply_filters to order discount so we can filter this if needed
@@ -120,7 +138,10 @@ class WC_Gateway_Klarna_Order {
 	 * 
 	 * @since  2.0
 	 **/
-	function process_fees( $order, $klarna ) {
+	function process_fees() {
+
+		$order = $this->order;
+		$klarna = $this->klarna;
 
 		if ( sizeof( $order->get_fees() ) > 0 ) {
 			foreach ( $order->get_fees() as $item ) {
@@ -166,7 +187,10 @@ class WC_Gateway_Klarna_Order {
 	 * 
 	 * @since  2.0
 	 **/
-	function process_shipping( $order, $klarna ) {
+	function process_shipping() {
+
+		$order = $this->order;
+		$klarna = $this->klarna;
 
 		if ( $order->get_total_shipping() > 0 ) {
 			// We manually calculate the shipping tax percentage here
@@ -197,12 +221,13 @@ class WC_Gateway_Klarna_Order {
 	 * @since  2.0
 	 **/
 	function set_addresses(
-		$order,
 		$klarna_billing,
 		$klarna_shipping,
-		$ship_to_billing_address,
-		$klarna
+		$ship_to_billing_address
 	) {
+
+		$order = $this->order;
+		$klarna = $this->klarna;
 		
 		$klarna_billing_address = $klarna_billing['address'];
 		$klarna_billing_house_number = $klarna_billing['house_number'];
@@ -270,6 +295,203 @@ class WC_Gateway_Klarna_Order {
 		// Next we tell the Klarna instance to use the address in the next order.
 		$klarna->setAddress( KlarnaFlags::IS_BILLING, $addr_billing ); // Billing / invoice address
 		$klarna->setAddress( KlarnaFlags::IS_SHIPPING, $addr_shipping ); // Shipping / delivery address
+
+	}
+
+
+	/**
+	 * Refunds a Klarna order
+	 * 
+	 * @since  2.0
+	 **/
+	function refund_order( $amount = NULL, $reason = '' ) {
+
+		$order = $this->order;
+		$klarna = $this->klarna;
+
+		/**
+		 * Check if return amount is equal to order total, if yes
+		 * refund entire order.
+		 */
+		if ( $order->get_total() == $amount ) {
+
+			try {
+
+				$ocr = $klarna->creditInvoice( $invNo ); // Invoice number
+
+				if ( $ocr ) {
+
+					$order->add_order_note(
+						sprintf(
+							__( 'Klarna order fully refunded.', 'klarna' ),
+							$ocr
+						)
+					);
+
+					return true;
+
+				}
+
+			} catch( Exception $e ) {
+
+				$order->add_order_note(
+					sprintf(
+						__( 'Klarna order refund failed. Error code %s. Error message %s', 'klarna' ),
+						$e->getCode(),
+						utf8_encode( $e->getMessage() )
+					)					
+				);
+
+				return false;
+
+			}
+
+		/**
+		 * If return amount is not equal to order total, maybe perform
+		 * good-will partial refund.
+		 */
+		} else {
+
+			/**
+			 * Tax rate needs to be specified for good-will refunds.
+			 * Check if there's only one tax rate in the entire order.
+			 * If yes, go ahead with good-will refund.
+			 */
+			if ( 1 == count( $order->get_taxes() ) ) {
+
+				$tax_rate = $order->get_cart_tax() / $order->get_total() * 100;
+
+				try {
+
+					$ocr = $klarna->returnAmount( // returns 1 on success
+						$invNo,               // Invoice number
+						$amount,              // Amount given as a discount.
+						$tax_rate,            // VAT (%)
+						KlarnaFlags::INC_VAT, // Amount including VAT.
+						$reason               // Description
+					);
+
+					if ( $ocr ) {
+
+						$order->add_order_note(
+							sprintf(
+								__( 'Klarna order partially refunded. Refund amount: %s.', 'klarna' ),
+								$amount
+							)
+						);
+
+						return true;
+
+					}
+
+				} catch( Exception $e ) {
+
+					$order->add_order_note(
+						sprintf(
+							__( 'Klarna order refund failed. Error code %s. Error message %s', 'klarna' ),
+							$e->getCode(),
+							utf8_encode( $e->getMessage() )
+						)					
+					);
+
+					return false;
+
+				}
+
+			/**
+			 * If there are multiple tax rates, bail and leave order note.
+			 */
+			} else {
+
+				$order->add_order_note( __( 'Refund failed. WooCommerce Klarna partial refund not possible for orders containing items with different tax rates.', 'klarna' ) );
+
+				return false;
+
+			}
+
+		}
+
+		return false;
+
+	}
+
+
+	/**
+	 * Activates a Klarna order
+	 * 
+	 * @since  2.0
+	 **/
+	function activate_order( $rno ) {
+
+		$order = $this->order;
+		$klarna = $this->klarna;
+		$orderid = $order->id;
+
+		try {
+
+			$result = $klarna->activate(
+		    	$rno,
+				null, // OCR Number
+				KlarnaFlags::RSRV_SEND_BY_EMAIL
+		    );
+			$risk  = $result[0]; // "ok" or "no_risk"
+			$invNo = $result[1]; // "9876451"
+
+			$order->add_order_note(
+				sprintf(
+					__( 'Klarna order activated. Invoice number %s - risk status %s.', 'klarna' ),
+					$invNo,
+					$risk
+				)
+			);
+			add_post_meta( $orderid, '_klarna_order_activated', time() );
+			add_post_meta( $orderid, '_klarna_invoice_number', $invNo );
+
+		} catch( Exception $e ) {
+
+			$order->add_order_note(
+				sprintf(
+					__( 'Klarna order activation failed. Error code %s. Error message %s', 'klarna' ),
+					$e->getCode(),
+					utf8_encode( $e->getMessage() )
+				)					
+			);
+
+		}
+
+	}
+
+
+	/**
+	 * Cancels a Klarna order
+	 * 
+	 * @since  2.0
+	 **/
+	function cancel_order( $rno ) {
+
+		$order = $this->order;
+		$klarna = $this->klarna;
+		$orderid = $order->id;
+
+		try {
+
+		    $klarna->cancelReservation( $rno );
+			$order->add_order_note(
+				__( 'Klarna order cancellation completed.', 'klarna' )
+			);
+			add_post_meta( $orderid, '_klarna_order_cancelled', time() );
+
+		} catch( Exception $e ) {
+
+			$order->add_order_note(
+				sprintf(
+					__( 'Klarna order cancellation failed. Error code %s. Error message %s', 'klarna' ),
+					$e->getCode(),
+					utf8_encode( $e->getMessage() )
+				)					
+			);
+
+		}
 
 	}
 

@@ -562,12 +562,11 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 		$country = $this->klarna_helper->get_klarna_country();
 		$this->configure_klarna( $klarna, $country );
 
-		$klarna_order = new WC_Gateway_Klarna_Order(
-			$order,
+		$klarna_order = new WC_Gateway_Klarna_Order( $order, $klarna );
+		$klarna_order->prepare_order(
 			$klarna_billing,
 			$klarna_shipping,
-			$this->ship_to_billing_address,
-			$klarna
+			$this->ship_to_billing_address
 		);
 
 		// Set store specific information so you can e.g. search and associate invoices with order numbers.

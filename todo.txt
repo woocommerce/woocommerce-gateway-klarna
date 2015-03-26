@@ -1,3 +1,6 @@
+Optimize Klarna order class, move refunds, activation, cancellation there
+
+
 Format checkout fields for KPM
 
 Move order creation to check_checkout_listener (KCO)
