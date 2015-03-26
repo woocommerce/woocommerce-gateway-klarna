@@ -53,9 +53,13 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 		include_once( KLARNA_DIR . 'classes/class-klarna-helper.php' );
 		$this->klarna_helper = new WC_Gateway_Klarna_Helper( $this );
 		
-		// Define Klarna object
+		// Load Klarna library
 		require_once( KLARNA_LIB . 'Klarna.php' );
-
+		require_once( KLARNA_LIB . 'pclasses/storage.intf.php' );
+		if ( ! function_exists( 'xmlrpc_encode_entitites' ) && ! class_exists( 'xmlrpcresp' ) ) {
+			require_once( KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc.inc' );
+			require_once( KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc_wrappers.inc' );
+		}
 		// Test mode or Live mode		
 		if ( $this->testmode == 'yes' ) {
 			// Disable SSL if in testmode
@@ -82,13 +86,139 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 		$this->klarna_wb_img_checkout = apply_filters( 'klarna_wb_img_checkout', $klarna_wb['img_checkout'] );
 		$this->klarna_wb_img_single_product = apply_filters( 'klarna_wb_img_single_product', $klarna_wb['img_single_product'] );
 		$this->klarna_wb_img_product_list = apply_filters( 'klarna_wb_img_product_list', $klarna_wb['img_product_list'] );
-				
+
+		// Subscription support
+		$this->supports = array( 
+			'products', 
+			'refunds'
+		);
+
 		// Actions
 		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
 		add_action( 'woocommerce_receipt_klarna_part_payment', array( $this, 'receipt_page' ) );
 		add_action( 'woocommerce_checkout_process', array( $this, 'klarna_part_payment_checkout_field_process' ) );
-		add_action( 'wp_print_footer_scripts', array(  $this, 'footer_scripts' ) );
+		add_action( 'wp_print_footer_scripts', array( $this, 'footer_scripts' ) );
+		add_action( 'woocommerce_order_status_cancelled', array( $this, 'cancel_klarna_order' ) );
+		add_action( 'woocommerce_order_status_completed', array( $this, 'activate_klarna_order' ) );
 		
+	}
+
+
+	/**
+	 * Can the order be refunded via Klarna?
+	 * 
+	 * @param  WC_Order $order
+	 * @return bool
+	 * @since  2.0.0
+	 */
+	public function can_refund_order( $order ) {
+
+		if ( get_post_meta( $order->id, '_klarna_invoice_number', true ) ) {
+			return true;
+		}
+
+		return false;
+
+	}
+
+
+	/**
+	 * Refund order in Klarna system
+	 * 
+	 * @param  integer $orderid
+	 * @param  integer $amount
+	 * @param  string  $reason
+	 * @return bool
+	 * @since  2.0.0
+	 */
+	public function process_refund( $orderid, $amount = NULL, $reason = '' ) {
+
+		$order = wc_get_order( $orderid );
+		if ( ! $this->can_refund_order( $order ) ) {
+			$this->log->add( 'klarna', 'Refund Failed: No Klarna invoice ID.' );
+			$order->add_order_note( __( 'This order cannot be refunded. Please make sure it is activated.', 'klarna' ) );
+			return false;
+		}
+
+		$country = get_post_meta( $orderid, '_billing_country', true );
+
+		$klarna = new Klarna();
+		$this->configure_klarna( $klarna, $country );
+		$invNo = get_post_meta( $order->id, '_klarna_invoice_number', true );
+
+		$klarna_order = new WC_Gateway_Klarna_Order( $order, $klarna );
+		$refund_order = $klarna_order->refund_order( $amount, $reason = '', $invNo );
+
+		if ( $refund_order ) {
+			return true;
+		}
+
+		return false;
+
+	}
+
+
+	/**
+	 * Activate order in Klarna system
+	 * 
+	 * @param  integer $orderid
+	 * @since  2.0.0
+	 */
+	function activate_klarna_order( $orderid ) {
+
+		// Klarna reservation number and billing country must be set
+		if ( get_post_meta( $orderid, '_klarna_order_reservation', true ) && get_post_meta( $orderid, '_billing_country', true ) ) {
+
+			// Check if this order hasn't been activated already
+			if ( ! get_post_meta( $orderid, '_klarna_invoice_number', true ) ) {
+
+				$rno = get_post_meta( $orderid, '_klarna_order_reservation', true );
+				$country = get_post_meta( $orderid, '_billing_country', true );
+
+				$order = wc_get_order( $orderid );
+
+				$klarna = new Klarna();
+				$this->configure_klarna( $klarna, $country );
+
+				$klarna_order = new WC_Gateway_Klarna_Order( $order, $klarna );
+				$klarna_order->activate_order( $rno );
+
+			}
+
+		}	
+
+	}
+
+
+	/**
+	 * Cancel order in Klarna system
+	 * 
+	 * @param  integer $orderid
+	 * @since  2.0.0
+	 */
+	function cancel_klarna_order( $orderid ) {
+
+		// Klarna reservation number and billing country must be set
+		if ( get_post_meta( $orderid, '_klarna_order_reservation', true ) && get_post_meta( $orderid, '_billing_country', true ) ) {
+
+			// Check if this order hasn't been cancelled already
+			if ( ! get_post_meta( $orderid, '_klarna_order_cancelled', true ) ) {
+
+				$rno = get_post_meta( $orderid, '_klarna_order_reservation', true );
+				$country = get_post_meta( $orderid, '_billing_country', true );
+
+				$order = wc_get_order( $orderid );
+
+				$klarna = new Klarna();
+				$this->configure_klarna( $klarna, $country );
+
+				$klarna_order = new WC_Gateway_Klarna_Order( $order, $klarna );
+				$klarna_order->cancel_order( $rno );
+
+			}
+
+		}	
+
 	}
 
 
@@ -117,13 +247,6 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 		<?php echo ( ! empty( $this->method_description ) ) ? wpautop( $this->method_description ) : ''; ?>
 
 		<?php
-		require_once( KLARNA_LIB . 'pclasses/storage.intf.php' );
-		
-		if ( ! function_exists( 'xmlrpc_encode_entitites' ) && ! class_exists( 'xmlrpcresp' ) ) {
-			require_once( KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc.inc' );
-			require_once( KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc_wrappers.inc' );
-		}
-
 		if ( ! empty( $this->authorized_countries ) && $this->enabled == 'yes' ) {
 			echo '<h4>' . __( 'Active PClasses', 'klarna' ) . '</h4>';
 			foreach( $this->authorized_countries as $key => $country ) {
@@ -227,13 +350,6 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 	 * @since  2.0
 	 **/
 	function check_pclasses() {
-		
-		require_once( KLARNA_LIB . 'pclasses/storage.intf.php' );
-
-		if ( ! function_exists( 'xmlrpc_encode_entitites' ) && ! class_exists( 'xmlrpcresp' ) ) {
-			require_once( KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc.inc' );
-			require_once( KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc_wrappers.inc' );
-		}
 
 		$country = $this->klarna_helper->get_klarna_country();
 		$klarna = new Klarna();
@@ -384,15 +500,6 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 	function payment_fields() {
 
 	   	global $woocommerce;
-	   		   	
-	   	// Get PClasses so that the customer can chose between different payment plans.
-	  	require_once( KLARNA_LIB . 'Klarna.php' );
-		require_once( KLARNA_LIB . 'pclasses/storage.intf.php' );
-		
-		if ( ! function_exists( 'xmlrpc_encode_entitites' ) && ! class_exists( 'xmlrpcresp' ) ) {
-			require_once( KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc.inc' );
-			require_once( KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc_wrappers.inc' );
-		}
 
 		if ( 'yes' == $this->testmode ) { ?>
 			<p><?php _e('TEST MODE ENABLED', 'klarna'); ?></p>
@@ -499,15 +606,7 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 
 		global $woocommerce;
 		
-		$order = WC_Klarna_Compatibility::wc_get_order( $order_id );
-		
-		require_once( KLARNA_LIB . 'Klarna.php' );
-		require_once( KLARNA_LIB . 'pclasses/storage.intf.php' );
-		
-		if ( ! function_exists( 'xmlrpc_encode_entitites' ) && ! class_exists( 'xmlrpcresp' ) ) {
-			require_once( KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc.inc' );
-			require_once( KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc_wrappers.inc' );
-		}
+		$order = wc_get_order( $order_id );
 		
 		// Get values from klarna form on checkout page
 		

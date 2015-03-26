@@ -304,7 +304,7 @@ class WC_Gateway_Klarna_Order {
 	 * 
 	 * @since  2.0
 	 **/
-	function refund_order( $amount = NULL, $reason = '' ) {
+	function refund_order( $amount, $reason = '', $invNo ) {
 
 		$order = $this->order;
 		$klarna = $this->klarna;
@@ -316,6 +316,7 @@ class WC_Gateway_Klarna_Order {
 		if ( $order->get_total() == $amount ) {
 
 			try {
+
 
 				$ocr = $klarna->creditInvoice( $invNo ); // Invoice number
 

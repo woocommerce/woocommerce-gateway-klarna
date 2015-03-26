@@ -53,8 +53,13 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 		include_once( KLARNA_DIR . 'classes/class-klarna-helper.php' );
 		$this->klarna_helper = new WC_Gateway_Klarna_Helper( $this );
 		
-		// Define Klarna object
+		// Load Klarna library
 		require_once( KLARNA_LIB . 'Klarna.php' );
+		require_once( KLARNA_LIB . 'pclasses/storage.intf.php' );
+		if ( ! function_exists( 'xmlrpc_encode_entitites' ) && ! class_exists( 'xmlrpcresp' ) ) {
+			require_once( KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc.inc' );
+			require_once( KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc_wrappers.inc' );
+		}
 
 		// Test mode or Live mode		
 		if ( $this->testmode == 'yes' ) {
@@ -107,6 +112,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 	 * Update order in Klarna system
 	 *
 	 * @since 1.0.0
+	 * @todo  Decide what to do with this
 	 */
 	function update_klarna_order( $orderid, $items ) {
 
@@ -147,14 +153,6 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 
 				$order = wc_get_order( $orderid );
 
-				// Get PClasses so that the customer can chose between different payment plans.
-				require_once( KLARNA_LIB . 'Klarna.php' );
-				require_once( KLARNA_LIB . 'pclasses/storage.intf.php' );
-				
-				if ( ! function_exists( 'xmlrpc_encode_entitites' ) && ! class_exists( 'xmlrpcresp' ) ) {
-					require_once( KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc.inc' );
-					require_once( KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc_wrappers.inc' );
-				}
 				$klarna = new Klarna();
 
 				/**
@@ -259,7 +257,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 	 * @return bool
 	 * @since  2.0.0
 	 */
-	public function process_refund( $orderid, $amount = NULL, $reason = '' ) {
+	public function process_refund( $orderid, $amount = null, $reason = '' ) {
 
 		$order = wc_get_order( $orderid );
 		if ( ! $this->can_refund_order( $order ) ) {
@@ -270,21 +268,18 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 
 		$country = get_post_meta( $orderid, '_billing_country', true );
 
-		// Get PClasses so that the customer can chose between different payment plans.
-		require_once( KLARNA_LIB . 'Klarna.php' );
-		require_once( KLARNA_LIB . 'pclasses/storage.intf.php' );
-		
-		if ( ! function_exists( 'xmlrpc_encode_entitites' ) && ! class_exists( 'xmlrpcresp' ) ) {
-			require_once( KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc.inc' );
-			require_once( KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc_wrappers.inc' );
-		}
-
 		$klarna = new Klarna();
 		$this->configure_klarna( $klarna, $country );
 		$invNo = get_post_meta( $order->id, '_klarna_invoice_number', true );
 
 		$klarna_order = new WC_Gateway_Klarna_Order( $order, $klarna );
-		$klarna_order->refund_order( $amount = NULL, $reason = '' );
+		$refund_order = $klarna_order->refund_order( $amount, $reason = '', $invNo );
+
+		if ( $refund_order ) {
+			return true;
+		}
+
+		return false;
 
 	}
 
@@ -307,15 +302,6 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 				$country = get_post_meta( $orderid, '_billing_country', true );
 
 				$order = wc_get_order( $orderid );
-			
-				// Get PClasses so that the customer can chose between different payment plans.
-				require_once( KLARNA_LIB . 'Klarna.php' );
-				require_once( KLARNA_LIB . 'pclasses/storage.intf.php' );
-				
-				if ( ! function_exists( 'xmlrpc_encode_entitites' ) && ! class_exists( 'xmlrpcresp' ) ) {
-					require_once( KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc.inc' );
-					require_once( KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc_wrappers.inc' );
-				}
 
 				$klarna = new Klarna();
 				$this->configure_klarna( $klarna, $country );
@@ -348,15 +334,6 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 				$country = get_post_meta( $orderid, '_billing_country', true );
 
 				$order = wc_get_order( $orderid );
-			
-				// Get PClasses so that the customer can chose between different payment plans.
-				require_once( KLARNA_LIB . 'Klarna.php' );
-				require_once( KLARNA_LIB . 'pclasses/storage.intf.php' );
-				
-				if ( ! function_exists( 'xmlrpc_encode_entitites' ) && ! class_exists( 'xmlrpcresp' ) ) {
-					require_once( KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc.inc' );
-					require_once( KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc_wrappers.inc' );
-				}
 
 				$klarna = new Klarna();
 				$this->configure_klarna( $klarna, $country );
@@ -396,12 +373,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 		<?php echo ( ! empty( $this->method_description ) ) ? wpautop( $this->method_description ) : ''; ?>
 
 		<?php
-		require_once( KLARNA_LIB . 'pclasses/storage.intf.php' );
-		
-		if ( ! function_exists( 'xmlrpc_encode_entitites' ) && ! class_exists( 'xmlrpcresp' ) ) {
-			require_once( KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc.inc' );
-			require_once( KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc_wrappers.inc' );
-		}
+
 
 		if ( ! empty( $this->authorized_countries ) && $this->enabled == 'yes' ) {
 			echo '<h4>' . __( 'Active PClasses', 'klarna' ) . '</h4>';
@@ -506,13 +478,6 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 	 * @since  2.0
 	 **/
 	function check_pclasses() {
-		
-		require_once( KLARNA_LIB . 'pclasses/storage.intf.php' );
-
-		if ( ! function_exists( 'xmlrpc_encode_entitites' ) && ! class_exists( 'xmlrpcresp' ) ) {
-			require_once( KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc.inc' );
-			require_once( KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc_wrappers.inc' );
-		}
 
 		$country = $this->klarna_helper->get_klarna_country();
 		$klarna = new Klarna();
@@ -663,15 +628,6 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 	function payment_fields() {
 
 	   	global $woocommerce;
-	   		   	
-	   	// Get PClasses so that the customer can chose between different payment plans.
-	  	require_once( KLARNA_LIB . 'Klarna.php' );
-		require_once( KLARNA_LIB . 'pclasses/storage.intf.php' );
-		
-		if ( ! function_exists( 'xmlrpc_encode_entitites' ) && ! class_exists( 'xmlrpcresp' ) ) {
-			require_once( KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc.inc' );
-			require_once( KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc_wrappers.inc' );
-		}
 
 		if ( 'yes' == $this->testmode ) { ?>
 			<p><?php _e('TEST MODE ENABLED', 'klarna'); ?></p>
@@ -779,16 +735,8 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 		global $woocommerce;
 		$klarna_gender = null;
 		
-		$order = WC_Klarna_Compatibility::wc_get_order( $order_id );
-		
-		require_once( KLARNA_LIB . 'Klarna.php' );
-		require_once( KLARNA_LIB . 'pclasses/storage.intf.php' );
-		
-		if ( ! function_exists( 'xmlrpc_encode_entitites' ) && ! class_exists( 'xmlrpcresp' ) ) {
-			require_once( KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc.inc' );
-			require_once( KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc_wrappers.inc' );
-		}
-		
+		$order = wc_get_order( $order_id );
+
 		// Get values from klarna form on checkout page
 		
 		// Collect the DoB
@@ -1113,7 +1061,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 	function get_invoice_fee_name() {
 
 		if ( $this->invoice_fee_id > 0 ) {
-			$product = WC_Klarna_Compatibility::wc_get_product( $this->invoice_fee_id );			
+			$product = wc_get_product( $this->invoice_fee_id );			
 			if ( $product ) {
 				return $product->get_title();
 			} else {
@@ -1134,7 +1082,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 	function get_invoice_fee_price() {
 
 		if ( $this->invoice_fee_id > 0 ) {
-			$product = WC_Klarna_Compatibility::wc_get_product( $this->invoice_fee_id );
+			$product = wc_get_product( $this->invoice_fee_id );
 			if ( $product ) {
 				return $product->get_price();
 			} else {
