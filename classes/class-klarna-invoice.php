@@ -833,6 +833,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 						__( 'Klarna payment completed. Klarna Invoice number: ', 'klarna' ) . $invno
 					);
 					update_post_meta( $order_id, '_klarna_order_reservation', $invno );
+					update_post_meta( $order_id, '_transaction_id', $invno );
 					$order->payment_complete(); // Payment complete
 					$woocommerce->cart->empty_cart(); // Remove cart	
 					// Return thank you redirect

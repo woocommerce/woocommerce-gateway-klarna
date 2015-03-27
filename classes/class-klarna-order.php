@@ -140,7 +140,7 @@ class WC_Gateway_Klarna_Order {
 	 **/
 	function process_fees() {
 
-		$order = $this->order;
+		$order  = $this->order;
 		$klarna = $this->klarna;
 
 		if ( sizeof( $order->get_fees() ) > 0 ) {
@@ -177,6 +177,7 @@ class WC_Gateway_Klarna_Order {
 				);
 
 			}
+
 		}
 
 	}
@@ -445,8 +446,9 @@ class WC_Gateway_Klarna_Order {
 					$risk
 				)
 			);
-			add_post_meta( $orderid, '_klarna_order_activated', time() );
-			add_post_meta( $orderid, '_klarna_invoice_number', $invNo );
+			update_post_meta( $orderid, '_klarna_order_activated', time() );
+			update_post_meta( $orderid, '_klarna_invoice_number', $invNo );
+			update_post_meta( $orderid, '_transaction_id', $invNo );
 
 		} catch( Exception $e ) {
 
