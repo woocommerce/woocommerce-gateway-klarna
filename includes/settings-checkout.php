@@ -196,5 +196,41 @@ return apply_filters('klarna_checkout_form_fields', array(
 				'type' => 'checkbox', 
 				'label' => __( 'Enable logging (<code>woocommerce/logs/klarna.txt</code>)', 'klarna' ), 
 				'default' => 'no'
+			),
+'color_button' => array(
+				'title' => __( 'Checkout button color', 'klarna' ), 
+				'type' => 'color', 
+				'desc_tip' => __( 'Checkout page button color', 'klarna' ), 
+				'default' => ''
+			),
+'color_button_text' => array(
+				'title' => __( 'Checkout button text color', 'klarna' ), 
+				'type' => 'color', 
+				'desc_tip' => __( 'Checkout page button text color', 'klarna' ), 
+				'default' => ''
+			),
+'color_checkbox' => array(
+				'title' => __( 'Checkout checkbox color', 'klarna' ), 
+				'type' => 'color', 
+				'desc_tip' => __( 'Checkout page checkbox color', 'klarna' ), 
+				'default' => ''
+			),
+'color_checkbox_checkmark' => array(
+				'title' => __( 'Checkout checkbox checkmark color', 'klarna' ), 
+				'type' => 'color', 
+				'desc_tip' => __( 'Checkout page checkbox checkmark color', 'klarna' ), 
+				'default' => ''
+			),
+'color_header' => array(
+				'title' => __( 'Checkout header color', 'klarna' ), 
+				'type' => 'color', 
+				'desc_tip' => __( 'Checkout page header color', 'klarna' ), 
+				'default' => ''
+			),
+'color_link' => array(
+				'title' => __( 'Checkout link color', 'klarna' ), 
+				'type' => 'color', 
+				'desc_tip' => __( 'Checkout page link color', 'klarna' ), 
+				'default' => ''
 			)
 ) );

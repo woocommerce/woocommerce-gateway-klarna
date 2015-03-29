@@ -53,6 +53,15 @@ $this->send_new_account_email			= ( isset( $this->settings['send_new_account_ema
 $this->account_signup_text				= ( isset( $this->settings['account_signup_text'] ) ) ? $this->settings['account_signup_text'] : '';
 $this->account_login_text				= ( isset( $this->settings['account_login_text'] ) ) ? $this->settings['account_login_text'] : '';
 
+// Color options
+$this->color_button = ( isset( $this->settings['color_button'] ) ) ? $this->settings['color_button'] : '';
+$this->color_button_text = ( isset( $this->settings['color_button_text'] ) ) ? $this->settings['color_button_text'] : '';
+$this->color_checkbox = ( isset( $this->settings['color_checkbox'] ) ) ? $this->settings['color_checkbox'] : '';
+$this->color_checkbox_checkmark = ( isset( $this->settings['color_checkbox_checkmark'] ) ) ? $this->settings['color_checkbox_checkmark'] : '';
+$this->color_header = ( isset( $this->settings['color_header'] ) ) ? $this->settings['color_header'] : '';
+$this->color_link = ( isset( $this->settings['color_link'] ) ) ? $this->settings['color_link'] : '';
+
+
 if ( empty($this->terms_url) ) 
 	$this->terms_url = esc_url( get_permalink(woocommerce_get_page_id('terms')) );
 	
