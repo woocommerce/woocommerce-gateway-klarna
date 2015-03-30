@@ -11,7 +11,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-
 /**
  * Don't render the Klarna Checkout form if the payment gateway isn't enabled.
  */

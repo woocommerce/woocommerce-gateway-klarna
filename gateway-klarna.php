@@ -97,8 +97,6 @@ function init_klarna_gateway() {
 			// Actions
 			add_action( 'wp_enqueue_scripts', array( $this, 'klarna_load_scripts') );
 
-			add_filter( 'woocommerce_get_settings_pages', array( $this, 'klarna_load_settings_page') );
-
 		}
 
 
@@ -145,18 +143,6 @@ function init_klarna_gateway() {
 
 		}
 
-
-		/**
-	 	 * Loads Klarna settings page
-	 	 */
-		public function klarna_load_settings_page( $settings ) {
-
-			$settings[] = include_once( 'classes/class-klarna-settings.php' );
-
-			return $settings;
-
-		}
-
 	} // End class WC_Gateway_Klarna
 	
 	// Include the WooCommerce Compatibility Utility class
@@ -173,6 +159,9 @@ function init_klarna_gateway() {
 	require_once 'classes/class-klarna-get-address.php'; // Get address 
 	require_once 'classes/class-klarna-pms.php'; // PMS
 	require_once 'classes/class-klarna-order.php'; // Handles Klarna orders
+	if ( is_admin() ) {
+		require_once 'classes/class-klarna-settings.php'; // Adds Klarna settings
+	}
 
 	// Klarna Checkout class
 	$klarna_shop_country = get_option( 'woocommerce_default_country' );
