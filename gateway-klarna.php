@@ -155,13 +155,10 @@ function init_klarna_gateway() {
 	// require_once 'classes/class-klarna-campaign.php'; // Special campaign
 	require_once 'classes/class-klarna-part-payment.php'; // KPM Part Payment
 	require_once 'classes/class-klarna-invoice.php'; // KPM Part Payment
-	require_once 'classes/class-klarna-partpayment-widget.php'; // Partpayment widget
+	require_once 'classes/class-klarna-payment-method-widget.php'; // Partpayment widget
 	require_once 'classes/class-klarna-get-address.php'; // Get address 
 	require_once 'classes/class-klarna-pms.php'; // PMS
 	require_once 'classes/class-klarna-order.php'; // Handles Klarna orders
-	if ( is_admin() ) {
-		require_once 'classes/class-klarna-settings.php'; // Adds Klarna settings
-	}
 
 	// Klarna Checkout class
 	$klarna_shop_country = get_option( 'woocommerce_default_country' );
