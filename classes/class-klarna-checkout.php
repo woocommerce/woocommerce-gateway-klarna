@@ -1115,11 +1115,23 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 class WC_Gateway_Klarna_Checkout_Extra {
 	
 	public function __construct() {
-		
-		add_action( 'init', array( $this, 'start_session' ),1 );
+
+		add_action( 'init', array( $this, 'start_session' ), 1 );
 		
 		add_shortcode( 'woocommerce_klarna_checkout', array( $this, 'klarna_checkout_page') );
 		add_shortcode( 'woocommerce_klarna_checkout_order_note', array( $this, 'klarna_checkout_order_note') );
+		add_shortcode( 'woocommerce_klarna_coupons', array( $this, 'klarna_checkout_coupons') );
+		add_action( 'wp_footer', array( $this, 'klarna_checkout_coupons_js' ) );
+		add_shortcode( 'woocommerce_klarna_login', array( $this, 'klarna_checkout_login') );
+
+		add_shortcode( 'woocommerce_klarna_cart', array( $this, 'klarna_checkout_cart') );
+		add_action( 'wp', array( $this, 'set_cart_constant' ), 1 );
+		add_action( 'wp_head', array( $this, 'klarna_checkout_css' ) );
+		add_filter( 'woocommerce_get_cart_url', array( $this, 'maybe_change_cart_url' ) );
+
+		// add_shortcode( 'woocommerce_klarna_country', array( $this, 'klarna_checkout_country') );
+		// add_shortcode( 'woocommerce_klarna_shipping', array( $this, 'klarna_checkout_shipping') );
+
 				
 		add_filter( 'woocommerce_get_checkout_url', array( $this, 'change_checkout_url' ), 20 );
 		
@@ -1130,15 +1142,22 @@ class WC_Gateway_Klarna_Checkout_Extra {
 		// output Ecommerce tracking code on Klarna Thank You page
 		add_filter( 'woocommerce_get_checkout_page_id', array( $this, 'change_checkout_page_id' ) );
 
+		// add_action( 'wp_head', array( $this, 'slbd_dump' ) );
+		
 	}
-	
+
+
+function slbd_dump() {
+	var_dump( WC()->shipping->get_packages() );
+}
+		
 	// Set session
 	function start_session() {		
 		
 		$data = new WC_Gateway_Klarna_Checkout;
 		$enabled = $data->get_enabled();
 		
-    	if(!session_id() && $enabled == 'yes') {
+    	if ( ! session_id() && $enabled == 'yes' ) {
         	session_start();
         }
     }
@@ -1172,6 +1191,135 @@ class WC_Gateway_Klarna_Checkout_Extra {
     	
 	}
 	
+
+	// Klarna Checkout page coupons
+	function klarna_checkout_coupons() {
+	
+		ob_start(); 
+		echo '<div class="woocommerce">';
+		wc_get_template( 'checkout/form-coupon.php', array( 'checkout' => WC()->checkout() ) ); 
+		echo '</div>';
+		return ob_get_clean();
+
+	}
+
+
+	// Klarna Checkout page coupons
+	function klarna_checkout_coupons_js() { ?>
+		
+		<script>
+		jQuery(document).ready(function($){
+			jQuery('#klarna-suspend').toggle(function ( event ) {
+				event.preventDefault();
+				window._klarnaCheckout(function (api) {
+					api.suspend();
+				});
+			}, function( event ) {
+				event.preventDefault();
+				window._klarnaCheckout(function (api) {
+					api.resume();
+				});
+			});
+		});
+		</script>
+	
+	<?php }
+
+
+	// Klarna Checkout page login
+	function klarna_checkout_login() {
+
+		ob_start();
+		echo '<div class="woocommerce">';
+		wc_get_template( 'checkout/form-login.php', array( 'checkout' => WC()->checkout() ) );
+		echo '</div>';
+		return ob_get_clean();
+
+	}
+
+
+	function klarna_checkout_css() {
+
+		global $post;
+		global $klarna_checkout_thanks_url;
+
+		$checkout_page_id = url_to_postid( $klarna_checkout_thanks_url );
+
+		if ( $post->ID == $checkout_page_id ) { ?>
+			<style type="text/css">.wc-proceed-to-checkout{display:none !important;}.woocommerce .cart-collaterals .cart_totals{width:100%;float:none;}</style>
+		<?php }
+
+	}
+
+
+	function set_cart_constant() {
+
+		global $post;
+		global $klarna_checkout_thanks_url;
+
+		$checkout_page_id = url_to_postid( $klarna_checkout_thanks_url );
+
+		if ( $post->ID == $checkout_page_id ) {
+			
+			if ( has_shortcode( $post->post_content, 'woocommerce_klarna_cart' ) ) {
+
+				remove_action( 'woocommerce_cart_collaterals', 'woocommerce_cross_sell_display' );
+				remove_action( 'woocommerce_proceed_to_checkout', 'woocommerce_button_proceed_to_checkout', 10 );
+
+				if ( ! defined('WOOCOMMERCE_CART') ) {
+					define( 'WOOCOMMERCE_CART', true );
+				}
+
+			}
+
+		}
+
+	}
+
+
+	// Klarna Checkout page cart
+	function klarna_checkout_cart() {
+
+		ob_start();
+		// echo '<div class="woocommerce">';
+		// wc_get_template( 'checkout/review-order.php', array( 'checkout' => WC()->checkout() ) );
+		// echo '</div>';
+		echo do_shortcode( '[woocommerce_cart]' );
+		return ob_get_clean();
+
+	}
+
+
+	function maybe_change_cart_url( $cart_page_url ) {
+
+		global $post;
+		global $klarna_checkout_thanks_url;
+
+		return '';
+
+		// if ( isset( $post ) ) {
+
+			$checkout_page_id = url_to_postid( $klarna_checkout_thanks_url );
+
+			if ( $post->ID == $checkout_page_id ) {
+				return $klarna_checkout_thanks_url;
+			}
+
+		// }
+
+		return $cart_page_url;
+
+	}
+
+
+	// Klarna Checkout shipping
+	function klarna_checkout_shipping() {
+
+		ob_start();
+		wc_get_template( 'checkout/review-order.php', array( 'checkout' => WC()->checkout() ) );
+		return ob_get_clean();
+
+	}
 	
 	/**
 	 *  Change Checkout URL
