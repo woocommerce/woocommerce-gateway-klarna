@@ -178,13 +178,15 @@ if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 
 				$item_price = number_format( $item_price * 100, 0, '', '' ) / $cart_item['quantity'];
 				
-				$cart[] = array(
-					'reference'      => strval( $reference ),
-					'name'           => strip_tags( $cart_item_name ),
-					'quantity'       => (int) $cart_item['quantity'],
-					'unit_price'     => (int) $item_price,
-					'discount_rate'  => $item_discount,
-					'tax_rate'       => intval( $item_tax_percentage . '00' )
+				$cart = array(
+					array(
+						'reference'      => strval( $reference ),
+						'name'           => strip_tags( $cart_item_name ),
+						'quantity'       => (int) $cart_item['quantity'],
+						'unit_price'     => (int) $item_price,
+						'discount_rate'  => $item_discount,
+						'tax_rate'       => intval( $item_tax_percentage . '00' )
+					)
 				);
 
 			} // End if qty

@@ -294,7 +294,7 @@ class WC_Gateway_Klarna_Helper {
 		}
 		
 		// Check if $klarna_country exists among the authorized countries
-		if ( ! in_array( $klarna_country, $this->parent->authorized_countries ) ) {
+		if ( ! in_array( $klarna_country, $this->parent->get_authorized_countries() ) ) {
 			return $this->parent->shop_country;
 		} else {
 			return $klarna_country;

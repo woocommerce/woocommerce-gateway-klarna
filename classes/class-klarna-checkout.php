@@ -79,7 +79,99 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		add_action( 'wp_footer', array( $this, 'js_order_note' ) );
 		add_action( 'wp_footer', array( $this, 'ajaxurl'));
 
+		// AJAX Coupons
+		add_shortcode( 'woocommerce_klarna_coupons', array( $this, 'klarna_checkout_coupons') );
+		add_action( 'init', array( $this, 'klarna_checkout_coupons_enqueuer' ) );
+		add_action( 'wp_ajax_klarna_checkout_coupons_callback', array( $this, 'klarna_checkout_coupons_callback' ) );
+		add_action( 'wp_ajax_nopriv_klarna_checkout_coupons_callback', array( $this, 'klarna_checkout_coupons_callback' ) );
+
     }
+
+
+
+	// Klarna Checkout page coupons
+	function klarna_checkout_coupons() {
+	
+		if ( WC()->cart->coupons_enabled() ) {
+		ob_start();
+			echo '<div class="klarna-checkout-coupons">';
+			echo '</div>';
+		return ob_get_clean();
+		}
+
+	}
+
+
+	// Klarna Checkout page coupons
+	function klarna_checkout_coupons_enqueuer() {
+		
+		wp_register_script( 'klarna_checkout_coupons', KLARNA_URL . 'js/klarna-checkout-coupons.js' );
+		wp_localize_script( 'klarna_checkout_coupons', 'couponsAjax', array( 'ajaxurl' => admin_url( 'admin-ajax.php' ), 'klarna_checkout_coupons_nonce' => wp_create_nonce( 'klarna_checkout_coupons_nonce' ) ) );        
+		wp_enqueue_script( 'jquery' );
+		wp_enqueue_script( 'klarna_checkout_coupons' );
+	
+	}
+
+
+	// Klarna Checkout page coupons
+	function klarna_checkout_coupons_callback() {
+
+		if ( ! wp_verify_nonce( $_REQUEST['nonce'], 'klarna_checkout_coupons_nonce' ) ) {
+			exit( 'Nonce can not be verified.' );
+		}
+
+		$coupon = $_REQUEST['coupon'];
+		$coupon_success = WC()->cart->add_discount( $coupon );
+		
+		wc_clear_notices(); // This notice handled by Klarna plugin
+
+		$data = array();
+		$data['coupon_success'] = $coupon_success;
+
+		if ( array_key_exists( 'klarna_checkout', $_SESSION ) ) {
+			$sharedSecret = $this->klarna_secret;
+			require_once( KLARNA_DIR . '/src/Klarna/Checkout.php' );
+			Klarna_Checkout_Order::$baseUri = $this->klarna_server;
+			Klarna_Checkout_Order::$contentType = 'application/vnd.klarna.checkout.aggregated-order-v2+json';
+			$connector = Klarna_Checkout_Connector::create( $sharedSecret );
+
+			// Resume session
+			$klarna_order = new Klarna_Checkout_Order(
+				$connector,
+				$_SESSION['klarna_checkout']
+			);
+
+			var_dump( $klarna_order );
+
+			$klarna_order->fetch();
+			$data['klarna_order'] = $_SESSION['klarna_checkout'];
+
+			$klarna = new Klarna();
+
+			/**
+			 * Setup Klarna configuration
+			 */
+			$country = $this->klarna_helper->get_klarna_country();
+			$this->configure_klarna( $klarna, $country );
+
+			$flags = KlarnaFlags::INC_VAT | KlarnaFlags::IS_HANDLING;
+			$klarna->addArticle(
+				4,              // Quantity
+				"HANDLING",     // Article number
+				"Handling fee", // Article name/title
+				50.99,          // Price
+				25,             // 25% VAT
+				0,              // Discount
+				$flags          // Flags
+			);
+
+			$klarna->update(  );
+		}
+		wp_send_json_success( $data );
+
+		wp_die();
+	
+	}
 
 
 	/**
@@ -155,10 +247,10 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			$country = $this->klarna_country,
 			$language = $this->klarna_language,
 			$currency = $this->klarna_currency,
-			$mode = $klarna_mode,
+			$mode = $this->klarna_mode,
 			$pcStorage = 'json',
 			$pcURI = '/srv/pclasses.json',
-			$ssl = $klarna_ssl,
+			$ssl = $this->klarna_ssl,
 			$candice = false
 		);
 
@@ -1120,19 +1212,12 @@ class WC_Gateway_Klarna_Checkout_Extra {
 		
 		add_shortcode( 'woocommerce_klarna_checkout', array( $this, 'klarna_checkout_page') );
 		add_shortcode( 'woocommerce_klarna_checkout_order_note', array( $this, 'klarna_checkout_order_note') );
-		add_shortcode( 'woocommerce_klarna_coupons', array( $this, 'klarna_checkout_coupons') );
-		add_action( 'wp_footer', array( $this, 'klarna_checkout_coupons_js' ) );
-		add_shortcode( 'woocommerce_klarna_login', array( $this, 'klarna_checkout_login') );
 
-		add_shortcode( 'woocommerce_klarna_cart', array( $this, 'klarna_checkout_cart') );
-		add_action( 'wp', array( $this, 'set_cart_constant' ), 1 );
-		add_action( 'wp_head', array( $this, 'klarna_checkout_css' ) );
-		add_filter( 'woocommerce_get_cart_url', array( $this, 'maybe_change_cart_url' ) );
-
+		// add_shortcode( 'woocommerce_klarna_login', array( $this, 'klarna_checkout_login') );
+		// add_shortcode( 'woocommerce_klarna_cart', array( $this, 'klarna_checkout_cart') );
 		// add_shortcode( 'woocommerce_klarna_country', array( $this, 'klarna_checkout_country') );
 		// add_shortcode( 'woocommerce_klarna_shipping', array( $this, 'klarna_checkout_shipping') );
-
-				
+		
 		add_filter( 'woocommerce_get_checkout_url', array( $this, 'change_checkout_url' ), 20 );
 		
 		add_action( 'woocommerce_register_form_start', array( $this, 'add_account_signup_text' ) );
@@ -1141,15 +1226,32 @@ class WC_Gateway_Klarna_Checkout_Extra {
 		// Filter Checkout page ID, so WooCommerce Google Analytics integration can
 		// output Ecommerce tracking code on Klarna Thank You page
 		add_filter( 'woocommerce_get_checkout_page_id', array( $this, 'change_checkout_page_id' ) );
-
-		// add_action( 'wp_head', array( $this, 'slbd_dump' ) );
 		
 	}
 
 
-function slbd_dump() {
-	var_dump( WC()->shipping->get_packages() );
-}
+	// Klarna Checkout page coupons
+	function klarna_checkout_coupons_js_2() { ?>
+		
+		<script>
+		jQuery(document).ready(function($){
+			jQuery('#klarna-suspend').toggle(function ( event ) {
+				event.preventDefault();
+				window._klarnaCheckout(function (api) {
+					api.suspend();
+				});
+			}, function( event ) {
+				event.preventDefault();
+				window._klarnaCheckout(function (api) {
+					api.resume();
+				});
+			});
+		});
+		</script>
+	
+	<?php }
+
+
 		
 	// Set session
 	function start_session() {		
@@ -1191,40 +1293,6 @@ function slbd_dump() {
     	
 	}
 	
-
-	// Klarna Checkout page coupons
-	function klarna_checkout_coupons() {
-	
-		ob_start(); 
-		echo '<div class="woocommerce">';
-		wc_get_template( 'checkout/form-coupon.php', array( 'checkout' => WC()->checkout() ) ); 
-		echo '</div>';
-		return ob_get_clean();
-
-	}
-
-
-	// Klarna Checkout page coupons
-	function klarna_checkout_coupons_js() { ?>
-		
-		<script>
-		jQuery(document).ready(function($){
-			jQuery('#klarna-suspend').toggle(function ( event ) {
-				event.preventDefault();
-				window._klarnaCheckout(function (api) {
-					api.suspend();
-				});
-			}, function( event ) {
-				event.preventDefault();
-				window._klarnaCheckout(function (api) {
-					api.resume();
-				});
-			});
-		});
-		</script>
-	
-	<?php }
-
 
 	// Klarna Checkout page login
 	function klarna_checkout_login() {
