@@ -103,6 +103,11 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		add_action( 'wp_ajax_klarna_checkout_shipping_callback', array( $this, 'klarna_checkout_shipping_callback' ) );
 		add_action( 'wp_ajax_nopriv_klarna_checkout_shipping_callback', array( $this, 'klarna_checkout_shipping_callback' ) );
 
+		// Checkout Page Order Note
+		add_shortcode( 'woocommerce_klarna_order_note', array( $this, 'klarna_checkout_order_note') );
+		add_action( 'wp_ajax_klarna_checkout_order_note_callback', array( $this, 'klarna_checkout_order_note_callback' ) );
+		add_action( 'wp_ajax_nopriv_klarna_checkout_order_note_callback', array( $this, 'klarna_checkout_order_note_callback' ) );
+
     }
 
 
@@ -236,7 +241,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 									'input_name'  => "cart[{$cart_item_key}][qty]",
 									'input_value' => $cart_item['quantity'],
 									'max_value'   => $_product->backorders_allowed() ? '' : $_product->get_stock_quantity(),
-									'min_value'   => '0'
+									'min_value'   => '1'
 								), $_product, false );
 							}
 							echo apply_filters( 'woocommerce_cart_item_quantity', $product_quantity, $cart_item_key );
@@ -544,6 +549,98 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		
 	}	
 	
+
+	/**
+	 * Klarna Checkout coupons shortcode callback.
+	 * 
+	 * @since  2.0
+	 **/
+	function klarna_checkout_order_note() {
+
+		ob_start(); ?>
+			<div class="woocommerce">
+				<form>
+					<div class="form-row">
+						<label for="klarna-checkout-order-note"><?php echo __( 'Add order note.', 'klarna' ); ?></label>
+						<textarea id="klarna-checkout-order-note" class="input-text" name="klarna-checkout-order-note" placeholder="<?php __( 'Notes about your order, e.g. special notes for delivery.', 'klarna' ); ?>"></textarea>
+					</div>
+				</form>
+			</div>
+		<?php return ob_get_clean();
+
+	}
+	
+	
+	/**
+	 * Klarna Checkout coupons AJAX callback.
+	 * 
+	 * @since  2.0
+	 **/
+	function klarna_checkout_order_note_callback() {
+
+		if ( ! wp_verify_nonce( $_REQUEST['nonce'], 'klarna_checkout_nonce' ) ) {
+			exit( 'Nonce can not be verified.' );
+		}
+
+		$data = array();
+		
+		// Adding coupon
+		if ( isset( $_REQUEST['coupon'] ) && is_string( $_REQUEST['coupon'] ) ) {
+			
+			$coupon = $_REQUEST['coupon'];
+			$coupon_success = WC()->cart->add_discount( $coupon );
+			$applied_coupons = WC()->cart->applied_coupons;
+			WC()->session->set( 'applied_coupons', $applied_coupons );
+			WC()->cart->calculate_totals();
+			wc_clear_notices(); // This notice handled by Klarna plugin	
+			
+			$coupon_object = new WC_Coupon( $coupon );
+	
+			$amount = wc_price( WC()->cart->get_coupon_discount_amount( $coupon, WC()->cart->display_cart_ex_tax ) );
+			$data['amount'] = $amount;
+				
+			$data['coupon_success'] = $coupon_success;
+			$data['coupon'] = $coupon;
+	
+			if ( array_key_exists( 'klarna_checkout', $_SESSION ) ) {
+				
+				$sharedSecret = $this->klarna_secret;
+				require_once( KLARNA_DIR . '/src/Klarna/Checkout.php' );
+				Klarna_Checkout_Order::$baseUri = $this->klarna_server;
+				Klarna_Checkout_Order::$contentType = 'application/vnd.klarna.checkout.aggregated-order-v2+json';
+				$connector = Klarna_Checkout_Connector::create( $sharedSecret );
+	
+				// Resume session
+				$klarna_order = new Klarna_Checkout_Order(
+					$connector,
+					$_SESSION['klarna_checkout']
+				);
+	
+				$klarna_order->fetch();
+				
+				$data['klarna_order'] = $_SESSION['klarna_checkout'];
+	
+				$cart = $this->cart_to_klarna();
+	
+				// Reset cart
+				$update['cart']['items'] = array();
+				foreach ( $cart as $item ) {
+					$update['cart']['items'][] = $item;
+				}
+				
+				$klarna_order->update( $update );
+				
+			}
+			
+		}
+		
+		wp_send_json_success( $data );
+
+		wp_die();
+	
+	}
+
+
 	/**
 	 * WooCommerce cart to Klarna cart items.
 	 *
@@ -950,9 +1047,11 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 					
 					// Create new user
 					if ( $this->create_customer_account == 'yes' ) {
-						
+												
 						$password = '';
 						$new_customer = $this->create_new_customer( $klarna_order['billing_address']['email'], $klarna_order['billing_address']['email'], $password );
+						$order->add_order_note( sprintf( __( 'New customer created (user ID %s).', 'klarna' ), $new_customer, $klarna_order['id'] ) );
+
 						
 						if ( is_wp_error( $new_customer ) ) { // Creation failed
 
@@ -962,6 +1061,43 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 						} else { // Creation succeeded
 
 							$order->add_order_note( sprintf( __( 'New customer created (user ID %s).', 'klarna' ), $new_customer, $klarna_order['id'] ) );
+							
+							// Add customer billing address - retrieved from callback from Klarna
+							update_user_meta( $new_customer, 'billing_first_name', $klarna_order['billing_address']['given_name'] );
+							update_user_meta( $new_customer, 'billing_last_name', $klarna_order['billing_address']['family_name'] );
+							update_user_meta( $new_customer, 'billing_address_1', $received__billing_address_1 );
+							update_user_meta( $new_customer, 'billing_address_2', $klarna_order['billing_address']['care_of'] );
+							update_user_meta( $new_customer, 'billing_postcode', $klarna_order['billing_address']['postal_code'] );
+							update_user_meta( $new_customer, 'billing_city', $klarna_order['billing_address']['city'] );
+							update_user_meta( $new_customer, 'billing_country', $klarna_order['billing_address']['country'] );
+							update_user_meta( $new_customer, 'billing_email', $klarna_order['billing_address']['email'] );
+							update_user_meta( $new_customer, 'billing_phone', $klarna_order['billing_address']['phone'] );
+							
+							// Add customer shipping address - retrieved from callback from Klarna
+							$allow_separate_shipping = ( isset( $klarna_order['options']['allow_separate_shipping_address'] ) ) ? $klarna_order['options']['allow_separate_shipping_address'] : '';
+							
+							if ( $allow_separate_shipping == 'true' || $_GET['scountry'] == 'DE' ) {
+								
+								update_user_meta( $new_customer, 'shipping_first_name', $klarna_order['shipping_address']['given_name'] );
+								update_user_meta( $new_customer, 'shipping_last_name', $klarna_order['shipping_address']['family_name'] );
+								update_user_meta( $new_customer, 'shipping_address_1', $received__shipping_address_1 );
+								update_user_meta( $new_customer, 'shipping_address_2', $klarna_order['shipping_address']['care_of'] );
+								update_user_meta( $new_customer, 'shipping_postcode', $klarna_order['shipping_address']['postal_code'] );
+								update_user_meta( $new_customer, 'shipping_city', $klarna_order['shipping_address']['city'] );
+								update_user_meta( $new_customer, 'shipping_country', $klarna_order['shipping_address']['country'] );
+							
+							} else {
+								
+								update_user_meta( $new_customer, 'shipping_first_name', $klarna_order['billing_address']['given_name'] );
+								update_user_meta( $new_customer, 'shipping_last_name', $klarna_order['billing_address']['family_name'] );
+								update_user_meta( $new_customer, 'shipping_address_1', $received__billing_address_1 );
+								update_user_meta( $new_customer, 'shipping_address_2', $klarna_order['billing_address']['care_of'] );
+								update_user_meta( $new_customer, 'shipping_postcode', $klarna_order['billing_address']['postal_code'] );
+								update_user_meta( $new_customer, 'shipping_city', $klarna_order['billing_address']['city'] );
+								update_user_meta( $new_customer, 'shipping_country', $klarna_order['billing_address']['country'] );
+							}
+
+
 							$this->customer_id = $new_customer;
 							
 						}
@@ -1368,109 +1504,6 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		return $customer_id;
 
 	}
-
-	
-	/**
-	 * Add ajaxurl var to head
-	 *
-	 * @since 1.0.0
-	 */
-	function ajaxurl() {
-
-		global $post;
-
-		if ( has_shortcode( $post->post_content, 'woocommerce_klarna_checkout_order_note') || defined( 'WOOCOMMERCE_KLARNA_CHECKOUT' ) ) { ?>
-
-			<script type="text/javascript">
-				var ajaxurl = '<?php echo admin_url('admin-ajax.php'); ?>';
-			</script>
-			
-		<?php }
-
-	}
-
-	/**
- 	 * JS for update the Order note field (via ajax) if displayed on KCO checkout 
- 	 *
- 	 *
-	 * @since 1.0.0
-	 */
-	function js_order_note() {
-
-		global $post;
-
-		if( has_shortcode( $post->post_content, 'woocommerce_klarna_checkout_order_note') || defined( 'WOOCOMMERCE_KLARNA_CHECKOUT' ) ) { ?>
-
-			<script type="text/javascript">
-			jQuery(document).ready(function($){
-				
-				jQuery('#kco_order_note').blur(function () {
-					var kco_order_note = '';
-					
-					if ( jQuery('#kco_order_note').val() != '' ) {
-						var kco_order_note = jQuery('#kco_order_note').val();
-					}
-					
-					if ( kco_order_note == '' ) {
-					
-					} else {
-							
-						jQuery.post(
-							'<?php echo get_option('siteurl') . '/wp-admin/admin-ajax.php' ?>',
-							{
-								action			: 'customer_update_kco_order_note',
-								kco_order_note	: kco_order_note,
-								kco_order_id	: '<?php echo WC()->session->order_awaiting_payment;?>',
-								_wpnonce		: '<?php echo wp_create_nonce('update-kco-checkout-order-note'); ?>',
-							},
-							function(response) {
-								console.log(response);
-							}
-						);
-						
-					}				
-				});
-			});
-			</script>
-		
-		<?php } // End if has_shortcode()
-		
-	} // End function
-	
-	
-	/**
-     * Function customer_update_kco_order_note
-     * Ajax request callback function
-	 *
-	 * @since 1.0.0
-     */
-	function customer_update_kco_order_note() {
-		
-		// The $_REQUEST contains all the data sent via ajax
-		if ( isset($_REQUEST) && wp_verify_nonce( $_POST['_wpnonce'], 'update-kco-checkout-order-note' ) ) {
-		
-			$kco_order_note = sanitize_text_field( $_REQUEST['kco_order_note'] );
-			$kco_order_id   = sanitize_text_field($_REQUEST['kco_order_id']);
-	
-			// Update Order Excerpt (Customer note)
-			$my_post = array(
-				'ID'           => $kco_order_id,
-				'post_excerpt' => $kco_order_note
-			);
-			
-			$response = wp_update_post( $my_post );
-			
-			echo $response;
-		
-		} else {
-		
-			echo '';
-		
-		}
-		
-		die(); // this is required to terminate immediately and return a proper response
-
-	} // End function
 
 	
 	/**
