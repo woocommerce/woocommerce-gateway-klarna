@@ -764,10 +764,28 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 								$update['locale'] = $this->klarna_language;
 								$update['merchant']['id'] = $eid;
 								$update['merchant']['terms_uri'] = $this->terms_url;
-								$update['merchant']['checkout_uri'] = add_query_arg( 'klarnaListener', 'checkout', $this->klarna_checkout_url );
-		        			
-	        					$update['merchant']['confirmation_uri'] = add_query_arg ( array('klarna_order' => '{checkout.order.uri}', 'sid' => $order_id, 'order-received' => $order_id ), $this->klarna_checkout_thanks_url);
-	        					$update['merchant']['push_uri'] = add_query_arg( array('sid' => $order_id, 'scountry' => $this->klarna_country, 'klarna_order' => '{checkout.order.uri}', 'wc-api' => 'WC_Gateway_Klarna_Checkout'), $this->klarna_checkout_url );
+								$update['merchant']['checkout_uri'] = esc_url_raw( add_query_arg(
+									'klarnaListener',
+									'checkout',
+									$this->klarna_checkout_url
+								) );
+	        					$update['merchant']['confirmation_uri'] = add_query_arg( 
+	        						array(
+	        							'klarna_order' => '{checkout.order.uri}',
+	        							'sid' => $order_id,
+	        							'order-received' => $order_id
+	        						),
+	        						$this->klarna_checkout_thanks_url
+	        					);
+	        					$update['merchant']['push_uri'] = add_query_arg(
+	        						array(
+	        							'sid' => $order_id, 
+	        							'scountry' => $this->klarna_country, 
+	        							'klarna_order' => '{checkout.order.uri}', 
+	        							'wc-api' => 'WC_Gateway_Klarna_Checkout'
+	        						), 
+	        						$this->klarna_checkout_url 
+	        					);
 	        					
 		
 	        					// Customer info if logged in
@@ -802,9 +820,28 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	        			$create['locale'] = $this->klarna_language;
 	        			$create['merchant']['id'] = $eid;
 	        			$create['merchant']['terms_uri'] = $this->terms_url;
-	        			$create['merchant']['checkout_uri'] = add_query_arg( 'klarnaListener', 'checkout', $this->klarna_checkout_url );
-	        			$create['merchant']['confirmation_uri'] = add_query_arg ( array('klarna_order' => '{checkout.order.uri}', 'sid' => $order_id, 'order-received' => $order_id ), $this->klarna_checkout_thanks_url);
-	        			$create['merchant']['push_uri'] = add_query_arg( array('sid' => $order_id, 'scountry' => $this->klarna_country, 'klarna_order' => '{checkout.order.uri}', 'wc-api' => 'WC_Gateway_Klarna_Checkout'), $this->klarna_checkout_url );
+	        			$create['merchant']['checkout_uri'] = esc_url_raw( add_query_arg(
+	        				'klarnaListener',
+	        				'checkout',
+	        				$this->klarna_checkout_url
+	        			) );
+	        			$create['merchant']['confirmation_uri'] = add_query_arg(
+	        				array(
+	        					'klarna_order' => '{checkout.order.uri}',
+	        					'sid' => $order_id,
+	        					'order-received' => $order_id
+	        				),
+	        				$this->klarna_checkout_thanks_url
+	        			);
+	        			$create['merchant']['push_uri'] = add_query_arg(
+	        				array(
+	        					'sid' => $order_id, 
+	        					'scountry' => $this->klarna_country, 
+	        					'klarna_order' => '{checkout.order.uri}', 
+	        					'wc-api' => 'WC_Gateway_Klarna_Checkout'
+	        				),
+	        				$this->klarna_checkout_url
+	        			);
 	        			
 	        			// Make phone a mandatory field for German stores?
 	        			if( $this->phone_mandatory_de == 'yes' ) {
