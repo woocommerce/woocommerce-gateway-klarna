@@ -1,5 +1,45 @@
 jQuery(document).ready(function($) {
 
+	// Update order note
+	$('textarea#klarna-checkout-order-note').change( function() {
+		
+		window._klarnaCheckout(function (api) {
+			api.suspend();
+		});
+		
+		order_note = $(this).val();
+
+		$.ajax(
+			kcoAjax.ajaxurl,
+			{
+				type     : 'POST',
+				dataType : 'json',
+				data     : {
+					action : 'klarna_checkout_order_note_callback', 
+					order_note : order_note,
+					nonce : kcoAjax.klarna_checkout_nonce
+				},
+				success: function( response ) {
+					console.log( 'success' );
+					console.log( response.data );
+					
+					window._klarnaCheckout(function (api) {
+						api.resume();
+					});
+				},
+				error: function( response ) {
+					console.log( 'error' );
+					console.log( response );
+
+					window._klarnaCheckout(function (api) {
+						api.resume();
+					});
+				}
+			}
+		);
+		
+	});
+
 	// Update shipping
 	$('#klarna-checkout-shipping input[type="radio"]').change( function() {
 		

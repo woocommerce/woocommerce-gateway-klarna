@@ -593,22 +593,9 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		$data = array();
 		
 		// Adding coupon
-		if ( isset( $_REQUEST['coupon'] ) && is_string( $_REQUEST['coupon'] ) ) {
+		if ( isset( $_REQUEST['order_note'] ) && is_string( $_REQUEST['order_note'] ) ) {
 			
-			$coupon = $_REQUEST['coupon'];
-			$coupon_success = WC()->cart->add_discount( $coupon );
-			$applied_coupons = WC()->cart->applied_coupons;
-			WC()->session->set( 'applied_coupons', $applied_coupons );
-			WC()->cart->calculate_totals();
-			wc_clear_notices(); // This notice handled by Klarna plugin	
-			
-			$coupon_object = new WC_Coupon( $coupon );
-	
-			$amount = wc_price( WC()->cart->get_coupon_discount_amount( $coupon, WC()->cart->display_cart_ex_tax ) );
-			$data['amount'] = $amount;
-				
-			$data['coupon_success'] = $coupon_success;
-			$data['coupon'] = $coupon;
+			$order_note = sanitize_text_field( $_REQUEST['order_note'] );
 	
 			if ( array_key_exists( 'klarna_checkout', $_SESSION ) ) {
 				
@@ -625,16 +612,10 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 				);
 	
 				$klarna_order->fetch();
-				
-				$data['klarna_order'] = $_SESSION['klarna_checkout'];
-	
-				$cart = $this->cart_to_klarna();
+					
 	
 				// Reset cart
-				$update['cart']['items'] = array();
-				foreach ( $cart as $item ) {
-					$update['cart']['items'][] = $item;
-				}
+				$update['merchant_order_data'] = $order_note;
 				
 				$klarna_order->update( $update );
 				
@@ -1001,6 +982,10 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 				// Add order items
 				$this->log->add( 'klarna', 'Adding order items...' );
 				$this->add_order_items( $order, $klarna_order );
+
+				// Add order note
+				$this->log->add( 'klarna', 'Adding order note...' );
+				$this->add_order_note( $order, $klarna_order );
 				
 				// Store addresses
 				$this->log->add( 'klarna', 'Adding order fees...' );
@@ -1189,17 +1174,6 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 * @since 1.0.0
 	 */
 	public function create_order( $klarna_order ) {
-		
-		/* 
-		$this->shipping_methods = WC()->session->get( 'chosen_shipping_methods' );
-
-		if ( sizeof( $woocommerce->cart->get_cart() ) == 0 ) {
-			wc_add_notice( sprintf( 
-				__( 'Sorry, your session has expired. <a href="%s">Return to homepage &rarr;</a>', 'klarna' ), 
-				home_url() 
-			), 'error' );
-		}
-		*/
 			
 		// Customer accounts
 		$this->customer_id = apply_filters( 'woocommerce_checkout_customer_id', get_current_user_id() );
@@ -1210,7 +1184,6 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			'customer_id'   => $this->customer_id,
 			'customer_note' => isset( $this->posted['order_comments'] ) ? $this->posted['order_comments'] : ''
 		);
-
 
 		// Create the order
 		$order = wc_create_order( $order_data );
@@ -1276,8 +1249,8 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	public function add_order_note( $order, $klarna_order ) {
 
 		if ( isset( $klarna_order['merchant_order_data'] ) ) {
-			// $order->add_order_note( sprintf(__('Klarna payment reservation has been activated. Invoice number: %s.', 'klarna'), $invno));
-			// CONTINUE HERE
+
+			$order->add_order_note( sanitize_text_field( $klarna_order['merchant_order_data'] ) );
 
 		}
 
