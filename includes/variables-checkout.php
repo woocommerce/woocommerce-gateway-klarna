@@ -13,7 +13,6 @@ $this->enabled							= ( isset( $this->settings['enabled'] ) ) ? $this->settings
 $this->title 							= ( isset( $this->settings['title'] ) ) ? $this->settings['title'] : '';
 $this->log 								= new WC_Logger();
 
-
 $this->eid_se							= ( isset( $this->settings['eid_se'] ) ) ? $this->settings['eid_se'] : '';
 $this->secret_se						= ( isset( $this->settings['secret_se'] ) ) ? $this->settings['secret_se'] : '';
 $this->klarna_checkout_url_se			= ( isset( $this->settings['klarna_checkout_url_se'] ) ) ? $this->settings['klarna_checkout_url_se'] : '';
@@ -60,7 +59,6 @@ $this->color_checkbox = ( isset( $this->settings['color_checkbox'] ) ) ? $this->
 $this->color_checkbox_checkmark = ( isset( $this->settings['color_checkbox_checkmark'] ) ) ? $this->settings['color_checkbox_checkmark'] : '';
 $this->color_header = ( isset( $this->settings['color_header'] ) ) ? $this->settings['color_header'] : '';
 $this->color_link = ( isset( $this->settings['color_link'] ) ) ? $this->settings['color_link'] : '';
-
 
 if ( empty($this->terms_url) ) 
 	$this->terms_url = esc_url( get_permalink(woocommerce_get_page_id('terms')) );
