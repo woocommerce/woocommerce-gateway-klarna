@@ -273,14 +273,22 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		
 		$updated_item_key = $_REQUEST['cart_item_key'];
 		$new_quantity = $_REQUEST['new_quantity'];
-		
-		WC()->cart->set_quantity( $updated_item_key, $new_quantity );
-		
+
+				
 		$cart_items = WC()->cart->get_cart();
 		$updated_item = $cart_items[ $updated_item_key ];
 		$updated_product = wc_get_product( $updated_item['product_id'] );
+		
+		// Update Klarna order line item
 		$data['updated_line_total'] = apply_filters( 'woocommerce_cart_item_subtotal', WC()->cart->get_product_subtotal( $updated_product, $updated_item['quantity'] ), $updated_item, $updated_item_key );
 
+		// Update WooCommerce cart and transient order item
+		$klarna_wc = WC();
+		$klarna_sid = WC()->session->get( 'klarna_sid' );
+		WC()->cart->set_quantity( $updated_item_key, $new_quantity );
+		set_transient( $klarna_sid, $klarna_wc, 48 * 60 * 60 );
+	
+	
 		if ( array_key_exists( 'klarna_checkout', $_SESSION ) ) {
 			$sharedSecret = $this->klarna_secret;
 			require_once( KLARNA_DIR . '/src/Klarna/Checkout.php' );
@@ -1259,6 +1267,22 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 
 	}
 
+
+	/**
+	 * Adds items to order
+	 *
+	 * @since 1.0.0
+	 */
+	public function add_order_note( $order, $klarna_order ) {
+
+		if ( isset( $klarna_order['merchant_order_data'] ) ) {
+			// $order->add_order_note( sprintf(__('Klarna payment reservation has been activated. Invoice number: %s.', 'klarna'), $invno));
+			// CONTINUE HERE
+
+		}
+
+	}
+	
 
 	/**
 	 * Adds addresses to order

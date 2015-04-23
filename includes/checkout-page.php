@@ -134,9 +134,10 @@ if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 	/**
 	 * Store WC object as transient
 	 */ 
-	$klarna_wc = $woocommerce;
+	$klarna_wc = WC();
 	$klarna_transient = md5( time() . rand( 1000, 1000000 ) );
 	set_transient( $klarna_transient, $klarna_wc, 48 * 60 * 60 );
+	WC()->session->set( 'klarna_sid', $klarna_transient );
 	
 
 	// Process cart contents and prepare them for Klarna
@@ -258,6 +259,7 @@ if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 	if ( $klarna_order == null ) {
 
 		// Start new session
+		$create['merchant_order_data'] = 'Testing merchant_order_data';
 		$create['purchase_country'] = $this->klarna_country;
 		$create['purchase_currency'] = $this->klarna_currency;
 		$create['locale'] = $this->klarna_language;

@@ -28,6 +28,10 @@ if ( $klarna_order['status'] == 'checkout_incomplete' ) {
 	exit;  
 }
 
+echo '<pre>';
+print_r( $klarna_order );
+echo '</pre>';
+
 // Display Klarna iframe
 $snippet = $klarna_order['gui']['snippet'];
 do_action( 'klarna_before_kco_confirmation', $_GET['sid'] );
