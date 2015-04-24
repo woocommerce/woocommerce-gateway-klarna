@@ -1,5 +1,47 @@
 jQuery(document).ready(function($) {
 
+	// Update country
+	$('select#klarna-checkout-euro-country').change( function() {
+		
+		window._klarnaCheckout(function (api) {
+			api.suspend();
+		});
+		
+		new_country = $(this).val();
+
+		$.ajax(
+			kcoAjax.ajaxurl,
+			{
+				type     : 'POST',
+				dataType : 'json',
+				data     : {
+					action : 'klarna_checkout_country_callback', 
+					new_country : new_country,
+					nonce : kcoAjax.klarna_checkout_nonce
+				},
+				success: function( response ) {
+					console.log( 'success' );
+					console.log( response.data );
+					
+					window._klarnaCheckout(function (api) {
+						api.resume();
+					});
+
+					location.reload();
+				},
+				error: function( response ) {
+					console.log( 'error' );
+					console.log( response );
+
+					window._klarnaCheckout(function (api) {
+						api.resume();
+					});
+				}
+			}
+		);
+		
+	});
+
 	// Update order note
 	$('textarea#klarna-checkout-order-note').change( function() {
 		

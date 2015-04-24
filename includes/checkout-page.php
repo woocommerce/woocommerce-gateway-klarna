@@ -201,11 +201,11 @@ if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 				$update['locale'] = $this->klarna_language;
 				$update['merchant']['id']= $eid;
 				$update['merchant']['terms_uri']= $this->terms_url;
-				$update['merchant']['checkout_uri'] = add_query_arg( 
+				$update['merchant']['checkout_uri'] = esc_url_raw( add_query_arg( 
 					'klarnaListener', 
 					'checkout', 
 					$this->klarna_checkout_url 
-				);
+				) );
 				$update['merchant']['confirmation_uri'] = add_query_arg( 
 					array(
 						'klarna_order' => '{checkout.order.uri}', 
@@ -259,17 +259,41 @@ if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 	if ( $klarna_order == null ) {
 
 		// Start new session
-		$create['merchant_order_data'] = 'Testing merchant_order_data';
-		$create['purchase_country'] = $this->klarna_country;
+	
+		// Check if country was set in WC session
+		// Used when changing countries in KCO page
+		$kco_session_country = WC()->session->get( 'klarna_country', '' );
+		$kco_session_locale = '';
+
+		if ( '' != $kco_session_country ) {
+			if ( 'DE' == $kco_session_country ) {
+				$kco_session_locale = 'de-de';
+			} elseif ( 'FI' == $kco_session_country ) {
+				// Check if WPML is used and determine if Finnish or Swedish is used as language
+				if ( class_exists( 'woocommerce_wpml' ) && defined( 'ICL_LANGUAGE_CODE' ) && strtoupper( ICL_LANGUAGE_CODE ) == 'SV' ) {
+					// Swedish
+					$kco_session_locale = 'sv-fi';
+				} else {
+					// Finnish
+					$kco_session_locale = 'fi-fi';
+				}
+			}
+		}
+
+		$kco_country = ( '' != $kco_session_country ) ? $kco_session_country : $this->klarna_country;
+		$kco_locale = ( '' != $kco_session_locale ) ? $kco_session_locale : $this->klarna_language;
+
+		$create['purchase_country'] = $kco_country;
 		$create['purchase_currency'] = $this->klarna_currency;
-		$create['locale'] = $this->klarna_language;
+		$create['locale'] = $kco_locale;
+
 		$create['merchant']['id'] = $eid;
 		$create['merchant']['terms_uri'] = $this->terms_url;
-		$create['merchant']['checkout_uri'] = add_query_arg( 
+		$create['merchant']['checkout_uri'] = esc_url_raw( add_query_arg( 
 			'klarnaListener', 
 			'checkout', 
 			$this->klarna_checkout_url 
-		);
+		) );
 		$create['merchant']['confirmation_uri'] = add_query_arg ( 
 			array(
 				'klarna_order' => '{checkout.order.uri}', 

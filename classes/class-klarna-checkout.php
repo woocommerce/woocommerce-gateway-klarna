@@ -103,6 +103,8 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 
 		// Checkout Page Login
 		add_shortcode( 'woocommerce_klarna_country', array( $this, 'klarna_checkout_country') );
+		add_action( 'wp_ajax_klarna_checkout_country_callback', array( $this, 'klarna_checkout_country_callback' ) );
+		add_action( 'wp_ajax_nopriv_klarna_checkout_country_callback', array( $this, 'klarna_checkout_country_callback' ) );
 
     }
 
@@ -603,12 +605,18 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 
 			ob_start();
 			
-				// Get array of Klarna Checkout countries with Eid and secret
-				$klarna_checkout_countries = array( 'se', 'no', 'fi', 'de' );
+				// Get array of Euro Klarna Checkout countries with Eid and secret defined
+				$klarna_checkout_countries = array(
+					'FI' => __( 'Finland', 'klarna' ),
+					'DE' => __( 'Germany', 'klarna' )
+				);
 				$klarna_checkout_enabled_countries = array();
-				foreach( $klarna_checkout_countries as $klarna_checkout_country ) {
+				foreach( $klarna_checkout_countries as $klarna_checkout_country_code => $klarna_checkout_country ) {
+					$lowercase_country_code = strtolower( $klarna_checkout_country_code );
 					if ( isset( $this->settings["eid_$lowercase_country_code"] ) && isset( $this->settings["secret_$lowercase_country_code"] ) ) {
-						$klarna_checkout_enabled_countries[] = $klarna_checkout_country;
+						if ( array_key_exists( $klarna_checkout_country_code, WC()->countries->get_allowed_countries() ) ) {
+							$klarna_checkout_enabled_countries[ $klarna_checkout_country_code ] = $klarna_checkout_country;
+						}
 					}
 				}
 				
@@ -616,25 +624,86 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 				if ( count( $klarna_checkout_enabled_countries ) < 2 ) {
 					return;
 				}
-				
-				
-			
-				// Go through countries allowed in WooCommerce settings
-				print_r( WC()->countries->get_allowed_countries() );
-				foreach( WC()->countries->get_allowed_countries() as $country_code => $country_name ) {
-					// Check if Klarna Eid and secret are defined for this country
-					$lowercase_country_code = strtolower( $country_code );
-					// if ( isset( $this->settings["eid_$lowercase_country_code"] ) && isset( $this->settings["secret_$lowercase_country_code"] ) ) {
-						echo '<p>' . $country_code . ' - ' . $country_name . '</p>';
-					// }
+
+				$kco_session_country = WC()->session->get( 'klarna_country', '' );
+
+				echo '<div class="woocommerce">';
+				echo '<label for="klarna-checkout-euro-country">';
+				echo __( 'Country:', 'klarna' );
+				echo '<br />';
+				echo '<select id="klarna-checkout-euro-country" name="klarna-checkout-euro-country">';
+				foreach( $klarna_checkout_enabled_countries as $klarna_checkout_enabled_country_code => $klarna_checkout_enabled_country ) {
+					echo '<option value="' . $klarna_checkout_enabled_country_code . '"' . selected( $klarna_checkout_enabled_country_code, $kco_session_country ) . '>' . $klarna_checkout_enabled_country . '</option>';
 				}
+				echo '</select>';
+				echo '</label>';
+				echo '</div>';
+
 			return ob_get_clean();
 			
 		}
 
 	}
 	
+
+	/**
+	 * Klarna Checkout coupons AJAX callback.
+	 * 
+	 * @since  2.0
+	 **/
+	function klarna_checkout_country_callback() {
+
+		if ( ! wp_verify_nonce( $_REQUEST['nonce'], 'klarna_checkout_nonce' ) ) {
+			exit( 'Nonce can not be verified.' );
+		}
+
+		$data = array();
 		
+		// Adding coupon
+		if ( isset( $_REQUEST['new_country'] ) && is_string( $_REQUEST['new_country'] ) ) {
+			
+			$new_country = sanitize_text_field( $_REQUEST['new_country'] );
+
+			if ( array_key_exists( 'klarna_checkout', $_SESSION ) ) {
+				
+				$sharedSecret = $this->klarna_secret;
+				require_once( KLARNA_DIR . '/src/Klarna/Checkout.php' );
+				Klarna_Checkout_Order::$baseUri = $this->klarna_server;
+				Klarna_Checkout_Order::$contentType = 'application/vnd.klarna.checkout.aggregated-order-v2+json';
+				$connector = Klarna_Checkout_Connector::create( $sharedSecret );
+	
+				// Resume session
+				$klarna_order = new Klarna_Checkout_Order(
+					$connector,
+					$_SESSION['klarna_checkout']
+				);
+	
+				$klarna_order->fetch();
+				$klarna_order_as_array = $klarna_order->marshal();
+
+				// Reset session if the country in the store has changed since last time the checkout was loaded
+				if ( strtolower( $new_country ) != strtolower( $klarna_order_as_array['purchase_country'] ) ) {
+
+					// Reset session
+					$klarna_order = null;
+					unset( $_SESSION['klarna_checkout'] );
+
+					// Store new country as WC session value
+					WC()->session->set( 'klarna_country', $new_country );
+
+				}
+				
+			}
+			
+		}
+		
+		wp_send_json_success( $data );
+
+		wp_die();
+	
+	}
+
+
 	/**
 	 * WooCommerce cart to Klarna cart items.
 	 *
