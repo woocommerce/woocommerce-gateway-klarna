@@ -143,7 +143,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 							echo '<th class="product-name">Product</th>';
 							echo '<th class="product-price">Price</th>';
 							echo '<th class="product-quantity">Quantity</th>';
-							echo '<th class="product-subtotal">Total</th>';
+							// echo '<th class="product-subtotal">Total</th>';
 						echo '</tr>';
 					echo '</thead>';
 					echo '<tbody>';
@@ -177,9 +177,9 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 								}
 								echo apply_filters( 'woocommerce_cart_item_quantity', $product_quantity, $cart_item_key );
 							echo '</td>';
-							echo '<td class="product-subtotal">';
-								echo apply_filters( 'woocommerce_cart_item_subtotal', WC()->cart->get_product_subtotal( $_product, $cart_item['quantity'] ), $cart_item, $cart_item_key );
-							echo '</td>';
+							// echo '<td class="product-subtotal">';
+								// echo apply_filters( 'woocommerce_cart_item_subtotal', WC()->cart->get_product_subtotal( $_product, $cart_item['quantity'] ), $cart_item, $cart_item_key );
+							// echo '</td>';
 						echo '</tr>';
 					}
 					echo '</tbody>';
@@ -211,15 +211,22 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		$updated_item = $cart_items[ $updated_item_key ];
 		$updated_product = wc_get_product( $updated_item['product_id'] );
 		
-		// Update Klarna order line item
-		$data['updated_line_total'] = apply_filters( 'woocommerce_cart_item_subtotal', WC()->cart->get_product_subtotal( $updated_product, $updated_item['quantity'] ), $updated_item, $updated_item_key );
-
 		// Update WooCommerce cart and transient order item
 		$klarna_wc = WC();
 		$klarna_sid = WC()->session->get( 'klarna_sid' );
 		WC()->cart->set_quantity( $updated_item_key, $new_quantity );
 		set_transient( $klarna_sid, $klarna_wc, 48 * 60 * 60 );
-	
+
+		// Update Klarna order line item
+		$data['updated_line_total'] = apply_filters( 
+			'woocommerce_cart_item_subtotal', 
+			WC()->cart->get_product_subtotal( 
+				$updated_product, 
+				$updated_item['quantity']
+			), 
+			$updated_item, 
+			$updated_item_key 
+		);
 	
 		if ( array_key_exists( 'klarna_checkout', $_SESSION ) ) {
 			$sharedSecret = $this->klarna_secret;
