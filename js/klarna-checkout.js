@@ -130,7 +130,10 @@ jQuery(document).ready(function($) {
 		});
 		
 		ancestor = $( this ).closest( 'td.product-quantity' );
-		subtotal_field = $( this ).closest( 'tr' ).find( 'td.product-subtotal' );
+		total_field = $( 'td#kco-cart-total' );
+		subtotal_field = $( 'td#kco-cart-subtotal' );
+		line_total_field = $( this ).closest( 'tr' ).find( 'td.product-total' );
+
 		cart_item_key = $( ancestor ).data( 'cart_item_key' );
 		new_quantity = $( this ).val();
 		
@@ -146,10 +149,12 @@ jQuery(document).ready(function($) {
 					nonce : kcoAjax.klarna_checkout_nonce
 				},
 				success: function( response ) {
-					console.log( 'success' );
-					console.log( response.data );
+					// console.log( 'success' );
+					// console.log( response.data );
 
-					$( subtotal_field ).html( response.data.updated_line_total );
+					$( total_field ).html( response.data.cart_total );
+					$( subtotal_field ).html( response.data.cart_subtotal );
+					$( line_total_field ).html( response.data.line_total );
 					
 					window._klarnaCheckout(function (api) {
 						api.resume();
@@ -181,9 +186,10 @@ jQuery(document).ready(function($) {
 			api.suspend();
 		});
 
-		coupon = $( '.klarna_checkout_coupon .input-text' ).val();
-		
+		coupon = $( '.klarna_checkout_coupon .input-text' ).val();		
 		input_field = $( this ).find( '.input-text' );
+		total_field = $( 'td#kco-cart-total' );
+		subtotal_field = $( 'td#kco-cart-subtotal' );
 
 		$.ajax(
 			kcoAjax.ajaxurl,
@@ -205,11 +211,14 @@ jQuery(document).ready(function($) {
 					
 					if ( response.data.coupon_success ) {
 						$( '#klarna_checkout_coupon_result' ).html( '<p>Coupon added.</p>' );
+												
+						html_string = '<tr class="kco-applied-coupon"><td class="kco-rightalign">Coupon: ' + response.data.coupon + ' <a class="kco-remove-coupon" data-coupon="' + response.data.coupon + '" href="#">(remove)</a></td><td class="kco-rightalign">-' + response.data.amount + '</td></tr>';
 						
-						html_string = '<li><strong>' + response.data.coupon + ':</strong> ' + response.data.amount + ' <a class="klarna-checkout-remove-coupon" href="#" data-coupon="' + response.data.coupon + '">(Remove)</a>';
-						$( '#klarna-checkout-applied-coupons' ).append( html_string );
-						
+						$( 'tr#kco-page-total' ).before( html_string );					
 						$( input_field ).val( '' );
+						$( total_field ).html( response.data.cart_total );
+						$( subtotal_field ).html( response.data.cart_subtotal );
+
 					}
 					else {
 						$( '#klarna_checkout_coupon_result' ).html( '<p>Coupon could not be added.</p>' );
@@ -232,7 +241,7 @@ jQuery(document).ready(function($) {
 
 	
 	// Remove coupon
-	$('#klarna-checkout-applied-coupons').on( 'click', '.klarna-checkout-remove-coupon', function( event ) {
+	$('table#kco-totals').on( 'click', '.kco-remove-coupon', function( event ) {
 
 		event.preventDefault();
 
@@ -242,6 +251,8 @@ jQuery(document).ready(function($) {
 
 		remove_coupon = $( this ).data( 'coupon' );
 		clicked_el = $( this );
+		total_field = $( 'td#kco-cart-total' );
+		subtotal_field = $( 'td#kco-cart-subtotal' );
 
 		$.ajax(
 			kcoAjax.ajaxurl,
@@ -254,10 +265,12 @@ jQuery(document).ready(function($) {
 					nonce  : kcoAjax.klarna_checkout_nonce
 				},
 				success: function( response ) {
-					console.log( 'remove-success' );
-					console.log( response.data );
+					// console.log( 'remove-success' );
+					// console.log( response.data );
 					
-					$( clicked_el ).closest( 'li' ).remove();
+					$( clicked_el ).closest( 'tr' ).remove();
+					$( total_field ).html( response.data.cart_total );
+					$( subtotal_field ).html( response.data.cart_subtotal );
 										
 					window._klarnaCheckout(function (api) {
 						api.resume();

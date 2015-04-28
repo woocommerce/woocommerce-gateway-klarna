@@ -175,9 +175,9 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 									// Meta data
 									echo WC()->cart->get_item_data( $cart_item );
 								echo '</td>';
-								echo '<td class="product-price kco-centeralign">';
+								echo '<td class="product-price kco-centeralign"><span class="amount">';
 									echo apply_filters( 'woocommerce_cart_item_price', WC()->cart->get_product_price( $_product ), $cart_item, $cart_item_key );
-								echo '</td>';
+								echo '</span></td>';
 								echo '<td class="product-quantity kco-centeralign" data-cart_item_key="' . $cart_item_key .'">';
 									if ( $_product->is_sold_individually() ) {
 										$product_quantity = sprintf( '1 <input type="hidden" name="cart[%s][qty]" value="1" />', $cart_item_key );
@@ -191,9 +191,9 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 									}
 									echo apply_filters( 'woocommerce_cart_item_quantity', $product_quantity, $cart_item_key );
 								echo '</td>';
-								echo '<td class="product-subtotal kco-rightalign">';
+								echo '<td class="product-total kco-rightalign"><span class="amount">';
 									echo apply_filters( 'woocommerce_cart_item_subtotal', WC()->cart->get_product_subtotal( $_product, $cart_item['quantity'] ), $cart_item, $cart_item_key );
-								echo '</td>';
+								echo '</span></td>';
 							echo '</tr>';
 						}
 						?>
@@ -201,51 +201,44 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 				</table>
 				</div>
 
+				<?php
 				<div>
-				<table>
+				<table id="kco-totals">
 					<tbody>
-						<tr>
+						<tr id="kco-page-subtotal">
 							<td class="kco-culumn-desc kco-rightalign">Subtotal</td>
-							<td class="kco-column-number kco-rightalign"><?php echo WC()->cart->get_cart_subtotal(); ?></td>
+							<td id="kco-cart-subtotal" class="kco-column-number kco-rightalign"><span class="amount"><?php echo WC()->cart->get_cart_subtotal(); ?></span></td>
 						</tr>
 						
-						<?php /*
-						<tr>
-							<td style="text-align:right">
-								<label>
-									<input type="radio" />
-									<?php wc_cart_totals_shipping_html(); ?>
-									Free Shipping (0 kr)
-								</label><br />
-								<label>
-									<input type="radio" checked="checked" />
-									Local Delivery (30 kr)
-								</label><br />
-							</td>
-							<td class="kco-rightalign">30kr</td>
-						</tr>
-						*/ ?>
+						<?php
+						// Shipping row
+						// include( KLARNA_DIR . 'views/public/checkout-shipping.php' );
+						?>
 						
 						<?php foreach ( WC()->cart->get_applied_coupons() as $coupon ) { ?>
 							<tr class="kco-applied-coupon">
 								<td class="kco-rightalign">
 									Coupon: <?php echo $coupon; ?> 
-									<a class="klarna-checkout-remove-coupon" data-coupon="<?php echo $coupon; ?>" href="#">(remove)</a>
+									<a class="kco-remove-coupon" data-coupon="<?php echo $coupon; ?>" href="#">(remove)</a>
 								</td>
 								<td class="kco-rightalign">-<?php echo wc_price( WC()->cart->get_coupon_discount_amount( $coupon, WC()->cart->display_cart_ex_tax ) ); ?></td>
 							</tr>
 						<?php }	?>
 
-						<tr>
+						<tr id="kco-page-total">
 							<td class="kco-rightalign kco-bold">Total</a></td>
-							<td class="kco-rightalign kco-bold"><?php echo WC()->cart->get_cart_total(); ?></td>
+							<td id="kco-cart-total" class="kco-rightalign kco-bold"><span class="amount"><?php echo WC()->cart->get_cart_total(); ?></span></td>
 						</tr>
 					</tbody>
 				</table>
 				</div>
 
 				<div>
-					<textarea placeholder="Add order note" style="display:block;width:100%;box-sizing:border-box"></textarea>
+					<form>
+						<div class="form-row">
+							<textarea id="klarna-checkout-order-note" class="input-text" name="klarna-checkout-order-note" placeholder="<?php _e( 'Notes about your order, e.g. special notes for delivery.', 'klarna' ); ?>"></textarea>
+						</div>
+					</form>
 				</div>
 
 			</div>
@@ -335,7 +328,6 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		
 		$updated_item_key = $_REQUEST['cart_item_key'];
 		$new_quantity = $_REQUEST['new_quantity'];
-
 				
 		$cart_items = WC()->cart->get_cart();
 		$updated_item = $cart_items[ $updated_item_key ];
@@ -345,14 +337,18 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		$klarna_wc = WC();
 		$klarna_sid = WC()->session->get( 'klarna_sid' );
 		WC()->cart->set_quantity( $updated_item_key, $new_quantity );
+		WC()->cart->calculate_totals();
 		set_transient( $klarna_sid, $klarna_wc, 48 * 60 * 60 );
+		
+		$data['cart_total'] = WC()->cart->get_cart_total();
+		$data['cart_subtotal'] = WC()->cart->get_cart_subtotal();
 
 		// Update Klarna order line item
-		$data['updated_line_total'] = apply_filters( 
+		$data['line_total'] = apply_filters( 
 			'woocommerce_cart_item_subtotal', 
 			WC()->cart->get_product_subtotal( 
 				$updated_product, 
-				$updated_item['quantity']
+				$new_quantity
 			), 
 			$updated_item, 
 			$updated_item_key 
@@ -458,6 +454,9 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 				
 			$data['coupon_success'] = $coupon_success;
 			$data['coupon'] = $coupon;
+
+			$data['cart_total'] = WC()->cart->get_cart_total();
+			$data['cart_subtotal'] = WC()->cart->get_cart_subtotal();
 	
 			if ( array_key_exists( 'klarna_checkout', $_SESSION ) ) {
 				
@@ -474,9 +473,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 				);
 	
 				$klarna_order->fetch();
-				
-				$data['klarna_order'] = $_SESSION['klarna_checkout'];
-	
+					
 				$cart = $this->cart_to_klarna();
 	
 				// Reset cart
@@ -521,6 +518,9 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			WC()->session->set( 'applied_coupons', $applied_coupons );
 			WC()->cart->calculate_totals();
 			wc_clear_notices(); // This notice handled by Klarna plugin	
+	
+			$data['cart_total'] = WC()->cart->get_cart_total();
+			$data['cart_subtotal'] = WC()->cart->get_cart_subtotal();
 
 			if ( array_key_exists( 'klarna_checkout', $_SESSION ) ) {
 				
@@ -923,6 +923,8 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		/**
 		 * Process shipping
 		 */
+		$woocommerce->cart->calculate_shipping();
+		$woocommerce->cart->calculate_totals();
 		if ( $woocommerce->cart->shipping_total > 0 ) {
 	
 			// We manually calculate the tax percentage here
