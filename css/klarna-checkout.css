@@ -1,10 +1,16 @@
-#klarna-checkout-widget {
-	float: left;
-	width: 40%;
+@media all and (min-width: 800px) {
+	#klarna-checkout-widget {
+		float: left;
+		width: 40%;
+	}
+	.klarna_checkout {
+		float: right;
+		width: 55%;
+	}
 }
-.klarna_checkout {
-	float: right;
-	width: 55%;
+
+a.std-checkout-button {
+	margin-bottom: 20px;
 }
 
 #klarna-checkout-widget table {

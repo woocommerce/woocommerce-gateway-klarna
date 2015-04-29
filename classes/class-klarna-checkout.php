@@ -72,41 +72,52 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 				remove_action( 'woocommerce_thankyou', 'woocommerce_order_details_table', 10 );
 			}
 		}
-			
-		// Ajax
+		
+
+		// Enqueue scripts and styles
 		add_action( 'wp_enqueue_scripts', array( $this, 'klarna_checkout_enqueuer' ) );
 
-		// Checkout Page Coupons
-		add_shortcode( 'woocommerce_klarna_coupons', array( $this, 'klarna_checkout_coupons') );
+	
+		/**
+		 * Checkout page AJAX
+		 */
+				
+		// Add coupon
 		add_action( 'wp_ajax_klarna_checkout_coupons_callback', array( $this, 'klarna_checkout_coupons_callback' ) );
 		add_action( 'wp_ajax_nopriv_klarna_checkout_coupons_callback', array( $this, 'klarna_checkout_coupons_callback' ) );
+
+		// Remove coupon
 		add_action( 'wp_ajax_klarna_checkout_remove_coupon_callback', array( $this, 'klarna_checkout_remove_coupon_callback' ) );
 		add_action( 'wp_ajax_nopriv_klarna_checkout_remove_coupon_callback', array( $this, 'klarna_checkout_remove_coupon_callback' ) );
-
-		// Checkout Page Cart
-		add_shortcode( 'woocommerce_klarna_cart', array( $this, 'klarna_checkout_cart') );
+		
+		// Cart quantity
 		add_action( 'wp_ajax_klarna_checkout_cart_callback', array( $this, 'klarna_checkout_cart_callback' ) );
 		add_action( 'wp_ajax_nopriv_klarna_checkout_cart_callback', array( $this, 'klarna_checkout_cart_callback' ) );
-
-		// Checkout Page Shipping
-		add_shortcode( 'woocommerce_klarna_shipping', array( $this, 'klarna_checkout_shipping') );
+		
+		// Shipping method selector
 		add_action( 'wp_ajax_klarna_checkout_shipping_callback', array( $this, 'klarna_checkout_shipping_callback' ) );
 		add_action( 'wp_ajax_nopriv_klarna_checkout_shipping_callback', array( $this, 'klarna_checkout_shipping_callback' ) );
-
-		// Checkout Page Order Note
-		add_shortcode( 'woocommerce_klarna_order_note', array( $this, 'klarna_checkout_order_note') );
-		add_action( 'wp_ajax_klarna_checkout_order_note_callback', array( $this, 'klarna_checkout_order_note_callback' ) );
-		add_action( 'wp_ajax_nopriv_klarna_checkout_order_note_callback', array( $this, 'klarna_checkout_order_note_callback' ) );
-
-		// Checkout Page Login
-		add_shortcode( 'woocommerce_klarna_login', array( $this, 'klarna_checkout_login') );
-
-		// Checkout Page Login
-		add_shortcode( 'woocommerce_klarna_country', array( $this, 'klarna_checkout_country') );
+		
+		// Country selector
 		add_action( 'wp_ajax_klarna_checkout_country_callback', array( $this, 'klarna_checkout_country_callback' ) );
 		add_action( 'wp_ajax_nopriv_klarna_checkout_country_callback', array( $this, 'klarna_checkout_country_callback' ) );
 
+		// Order note
+		add_action( 'wp_ajax_klarna_checkout_order_note_callback', array( $this, 'klarna_checkout_order_note_callback' ) );
+		add_action( 'wp_ajax_nopriv_klarna_checkout_order_note_callback', array( $this, 'klarna_checkout_order_note_callback' ) );
+
+
+		/**
+		 * Checkout page shortcodes
+		 */ 
+
 		add_shortcode( 'woocommerce_klarna_checkout_widget', array( $this, 'klarna_checkout_widget' ) );
+		add_shortcode( 'woocommerce_klarna_coupons', array( $this, 'klarna_checkout_coupons') );
+		add_shortcode( 'woocommerce_klarna_cart', array( $this, 'klarna_checkout_cart') );
+		add_shortcode( 'woocommerce_klarna_shipping', array( $this, 'klarna_checkout_shipping') );
+		add_shortcode( 'woocommerce_klarna_order_note', array( $this, 'klarna_checkout_order_note') );
+		add_shortcode( 'woocommerce_klarna_login', array( $this, 'klarna_checkout_login') );
+		add_shortcode( 'woocommerce_klarna_country', array( $this, 'klarna_checkout_country') );
 
     }
 
@@ -127,6 +138,11 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		wp_enqueue_style( 'klarna_checkout' );
 	
 	}
+
+
+	//
+	// Shortcode callbacks
+	//
 
 
 	/**
@@ -317,7 +333,144 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		}
 
 	}
+
+
+	/**
+	 * Klarna Checkout coupons shortcode callback.
+	 * 
+	 * @since  2.0
+	 **/
+	function klarna_checkout_coupons() {
 	
+		if ( sizeof( WC()->cart->get_cart() ) > 0 ) {
+
+			if ( WC()->cart->coupons_enabled() ) {
+		
+				WC()->cart->calculate_totals();
+	
+				ob_start();
+					echo '<div class="klarna-checkout-coupons woocommerce">';
+						echo '<ul id="klarna-checkout-applied-coupons">';
+							foreach ( WC()->cart->get_applied_coupons() as $coupon ) {
+								echo '<li>';
+								echo '<strong>' . $coupon . ':</strong> ';
+								echo wc_price( WC()->cart->get_coupon_discount_amount( $coupon, WC()->cart->display_cart_ex_tax ) );
+								echo ' <a class="klarna-checkout-remove-coupon" data-coupon="' . $coupon . '" href="#">(Remove)</a>';
+								echo '</li>';
+							}
+						echo '</ul>';
+						echo '<div class="klarna-checkout-coupons-form"></div>';	
+					echo '</div>';
+				return ob_get_clean();
+			
+			}
+		
+		}
+
+	}	
+
+
+	/**
+	 * Klarna Checkout coupons shortcode callback.
+	 * 
+	 * @since  2.0
+	 **/
+	function klarna_checkout_order_note() {
+
+		if ( sizeof( WC()->cart->get_cart() ) > 0 ) {
+
+			ob_start(); ?>
+				<div class="woocommerce">
+					<form>
+						<div class="form-row">
+							<label for="klarna-checkout-order-note"><?php echo __( 'Add order note.', 'klarna' ); ?></label>
+							<textarea id="klarna-checkout-order-note" class="input-text" name="klarna-checkout-order-note" placeholder="<?php __( 'Notes about your order, e.g. special notes for delivery.', 'klarna' ); ?>"></textarea>
+						</div>
+					</form>
+				</div>
+			<?php return ob_get_clean();
+			
+		}
+
+	}
+
+
+	/**
+	 * Klarna Checkout login shortcode callback.
+	 * 
+	 * @since  2.0
+	 **/
+	function klarna_checkout_login() {
+
+		if ( sizeof( WC()->cart->get_cart() ) > 0 ) {
+
+			if ( ! is_user_logged_in() ) {
+				
+				wp_login_form();
+				
+			}
+		
+		}
+
+	}
+	
+
+	/**
+	 * Klarna Checkout country selector shortcode callback.
+	 * 
+	 * @since  2.0
+	 **/
+	function klarna_checkout_country() {
+
+		if ( sizeof( WC()->cart->get_cart() ) > 0 ) {
+
+			ob_start();
+			
+				// Get array of Euro Klarna Checkout countries with Eid and secret defined
+				$klarna_checkout_countries = array(
+					'FI' => __( 'Finland', 'klarna' ),
+					'DE' => __( 'Germany', 'klarna' )
+				);
+				$klarna_checkout_enabled_countries = array();
+				foreach( $klarna_checkout_countries as $klarna_checkout_country_code => $klarna_checkout_country ) {
+					$lowercase_country_code = strtolower( $klarna_checkout_country_code );
+					if ( isset( $this->settings["eid_$lowercase_country_code"] ) && isset( $this->settings["secret_$lowercase_country_code"] ) ) {
+						if ( array_key_exists( $klarna_checkout_country_code, WC()->countries->get_allowed_countries() ) ) {
+							$klarna_checkout_enabled_countries[ $klarna_checkout_country_code ] = $klarna_checkout_country;
+						}
+					}
+				}
+				
+				// If there's no Klarna enabled countries, or there's only one, bail
+				if ( count( $klarna_checkout_enabled_countries ) < 2 ) {
+					return;
+				}
+
+				$kco_session_country = WC()->session->get( 'klarna_country', '' );
+
+				echo '<div class="woocommerce">';
+				echo '<label for="klarna-checkout-euro-country">';
+				echo __( 'Country:', 'klarna' );
+				echo '<br />';
+				echo '<select id="klarna-checkout-euro-country" name="klarna-checkout-euro-country">';
+				foreach( $klarna_checkout_enabled_countries as $klarna_checkout_enabled_country_code => $klarna_checkout_enabled_country ) {
+					echo '<option value="' . $klarna_checkout_enabled_country_code . '"' . selected( $klarna_checkout_enabled_country_code, $kco_session_country ) . '>' . $klarna_checkout_enabled_country . '</option>';
+				}
+				echo '</select>';
+				echo '</label>';
+				echo '</div>';
+
+			return ob_get_clean();
+			
+		}
+
+	}
+
+
+	//
+	// AJAX callbacks
+	//
+
 
 	/**
 	 * Klarna Checkout cart AJAX callback.
@@ -398,41 +551,6 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		
 	}
 	
-	
-	/**
-	 * Klarna Checkout coupons shortcode callback.
-	 * 
-	 * @since  2.0
-	 **/
-	function klarna_checkout_coupons() {
-	
-		if ( sizeof( WC()->cart->get_cart() ) > 0 ) {
-
-			if ( WC()->cart->coupons_enabled() ) {
-		
-				WC()->cart->calculate_totals();
-	
-				ob_start();
-					echo '<div class="klarna-checkout-coupons woocommerce">';
-						echo '<ul id="klarna-checkout-applied-coupons">';
-							foreach ( WC()->cart->get_applied_coupons() as $coupon ) {
-								echo '<li>';
-								echo '<strong>' . $coupon . ':</strong> ';
-								echo wc_price( WC()->cart->get_coupon_discount_amount( $coupon, WC()->cart->display_cart_ex_tax ) );
-								echo ' <a class="klarna-checkout-remove-coupon" data-coupon="' . $coupon . '" href="#">(Remove)</a>';
-								echo '</li>';
-							}
-						echo '</ul>';
-						echo '<div class="klarna-checkout-coupons-form"></div>';	
-					echo '</div>';
-				return ob_get_clean();
-			
-			}
-		
-		}
-
-	}
-
 
 	/**
 	 * Klarna Checkout coupons AJAX callback.
@@ -594,90 +712,6 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	
 
 	/**
-	 * Gets shipping options as formatted HTML.
-	 * 
-	 * @since  2.0
-	 **/
-	function klarna_checkout_get_shipping_options_row_html() {
-
-		ob_start();
-		if ( ! defined( 'WOOCOMMERCE_CART' ) ) {
-			define( 'WOOCOMMERCE_CART', true );
-		}
-		WC()->cart->calculate_shipping();
-		WC()->cart->calculate_fees();
-		WC()->cart->calculate_totals();
-
-		?>
-		<tr id="kco-page-shipping">
-			<td style="text-align:right">
-				<?php
-					WC()->cart->calculate_shipping();
-					$packages = WC()->shipping->get_packages();
-					foreach ( $packages as $i => $package ) {
-						$chosen_method = isset( WC()->session->chosen_shipping_methods[ $i ] ) ? WC()->session->chosen_shipping_methods[ $i ] : '';
-						$available_methods = $package['rates'];
-						$show_package_details = sizeof( $packages ) > 1;
-						$index = $i;
-						?>
-							<?php if ( ! empty( $available_methods ) ) { ?>
-					
-								<?php if ( 1 === count( $available_methods ) ) {
-									$method = current( $available_methods );
-									echo wp_kses_post( wc_cart_totals_shipping_method_label( $method ) ); ?>
-									<input type="hidden" name="shipping_method[<?php echo $index; ?>]" data-index="<?php echo $index; ?>" id="shipping_method_<?php echo $index; ?>" value="<?php echo esc_attr( $method->id ); ?>" class="shipping_method" />
-					
-								<?php } else { ?>
-					
-									<ul id="shipping_method">
-										<?php foreach ( $available_methods as $method ) : ?>
-											<li>
-												<input type="radio" name="shipping_method[<?php echo $index; ?>]" data-index="<?php echo $index; ?>" id="shipping_method_<?php echo $index; ?>_<?php echo sanitize_title( $method->id ); ?>" value="<?php echo esc_attr( $method->id ); ?>" <?php checked( $method->id, $chosen_method ); ?> class="shipping_method" />
-												<label for="shipping_method_<?php echo $index; ?>_<?php echo sanitize_title( $method->id ); ?>"><?php echo wp_kses_post( wc_cart_totals_shipping_method_label( $method ) ); ?></label>
-											</li>
-										<?php endforeach; ?>
-									</ul>
-					
-								<?php } ?>
-					
-							<?php } ?>				
-						<?php
-					}
-				?>
-			</td>
-			<td id="kco-page-shipping-total" class="kco-rightalign">
-				<?php echo WC()->cart->get_cart_shipping_total(); ?>
-			</td>
-		</tr>
-		<?php
-		return ob_get_clean();
-
-	}
-	
-	/**
-	 * Klarna Checkout coupons shortcode callback.
-	 * 
-	 * @since  2.0
-	 **/
-	function klarna_checkout_shipping() {
-	
-		if ( sizeof( WC()->cart->get_cart() ) > 0 ) {
-			
-			ob_start();
-	
-			echo '<div id="klarna-checkout-shipping" class="woocommerce">';
-				WC()->cart->calculate_totals();
-				wc_cart_totals_shipping_html();
-			echo '</div>';
-	
-			return ob_get_clean();
-			
-		}
-
-	}
-
-
-	/**
 	 * Klarna Checkout shipping AJAX callback.
 	 * 
 	 * @since  2.0
@@ -739,32 +773,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		wp_die();
 		
 	}	
-	
-
-	/**
-	 * Klarna Checkout coupons shortcode callback.
-	 * 
-	 * @since  2.0
-	 **/
-	function klarna_checkout_order_note() {
-
-		if ( sizeof( WC()->cart->get_cart() ) > 0 ) {
-
-			ob_start(); ?>
-				<div class="woocommerce">
-					<form>
-						<div class="form-row">
-							<label for="klarna-checkout-order-note"><?php echo __( 'Add order note.', 'klarna' ); ?></label>
-							<textarea id="klarna-checkout-order-note" class="input-text" name="klarna-checkout-order-note" placeholder="<?php __( 'Notes about your order, e.g. special notes for delivery.', 'klarna' ); ?>"></textarea>
-						</div>
-					</form>
-				</div>
-			<?php return ob_get_clean();
-			
-		}
-
-	}
-	
+		
 	
 	/**
 	 * Klarna Checkout coupons AJAX callback.
@@ -815,82 +824,10 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		wp_die();
 	
 	}
-
-
-	/**
-	 * Klarna Checkout login shortcode callback.
-	 * 
-	 * @since  2.0
-	 **/
-	function klarna_checkout_login() {
-
-		if ( sizeof( WC()->cart->get_cart() ) > 0 ) {
-
-			if ( ! is_user_logged_in() ) {
-				
-				wp_login_form();
-				
-			}
-		
-		}
-
-	}
 	
 
 	/**
-	 * Klarna Checkout country selector shortcode callback.
-	 * 
-	 * @since  2.0
-	 **/
-	function klarna_checkout_country() {
-
-		if ( sizeof( WC()->cart->get_cart() ) > 0 ) {
-
-			ob_start();
-			
-				// Get array of Euro Klarna Checkout countries with Eid and secret defined
-				$klarna_checkout_countries = array(
-					'FI' => __( 'Finland', 'klarna' ),
-					'DE' => __( 'Germany', 'klarna' )
-				);
-				$klarna_checkout_enabled_countries = array();
-				foreach( $klarna_checkout_countries as $klarna_checkout_country_code => $klarna_checkout_country ) {
-					$lowercase_country_code = strtolower( $klarna_checkout_country_code );
-					if ( isset( $this->settings["eid_$lowercase_country_code"] ) && isset( $this->settings["secret_$lowercase_country_code"] ) ) {
-						if ( array_key_exists( $klarna_checkout_country_code, WC()->countries->get_allowed_countries() ) ) {
-							$klarna_checkout_enabled_countries[ $klarna_checkout_country_code ] = $klarna_checkout_country;
-						}
-					}
-				}
-				
-				// If there's no Klarna enabled countries, or there's only one, bail
-				if ( count( $klarna_checkout_enabled_countries ) < 2 ) {
-					return;
-				}
-
-				$kco_session_country = WC()->session->get( 'klarna_country', '' );
-
-				echo '<div class="woocommerce">';
-				echo '<label for="klarna-checkout-euro-country">';
-				echo __( 'Country:', 'klarna' );
-				echo '<br />';
-				echo '<select id="klarna-checkout-euro-country" name="klarna-checkout-euro-country">';
-				foreach( $klarna_checkout_enabled_countries as $klarna_checkout_enabled_country_code => $klarna_checkout_enabled_country ) {
-					echo '<option value="' . $klarna_checkout_enabled_country_code . '"' . selected( $klarna_checkout_enabled_country_code, $kco_session_country ) . '>' . $klarna_checkout_enabled_country . '</option>';
-				}
-				echo '</select>';
-				echo '</label>';
-				echo '</div>';
-
-			return ob_get_clean();
-			
-		}
-
-	}
-	
-
-	/**
-	 * Klarna Checkout coupons AJAX callback.
+	 * Klarna Checkout country selector AJAX callback.
 	 * 
 	 * @since  2.0
 	 **/
@@ -944,6 +881,73 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 
 		wp_die();
 	
+	}
+
+
+	//
+	//
+	//
+	
+
+	/**
+	 * Gets shipping options as formatted HTML.
+	 * 
+	 * @since  2.0
+	 **/
+	function klarna_checkout_get_shipping_options_row_html() {
+
+		ob_start();
+		if ( ! defined( 'WOOCOMMERCE_CART' ) ) {
+			define( 'WOOCOMMERCE_CART', true );
+		}
+		WC()->cart->calculate_shipping();
+		WC()->cart->calculate_fees();
+		WC()->cart->calculate_totals();
+
+		?>
+		<tr id="kco-page-shipping">
+			<td style="text-align:right">
+				<?php
+					WC()->cart->calculate_shipping();
+					$packages = WC()->shipping->get_packages();
+					foreach ( $packages as $i => $package ) {
+						$chosen_method = isset( WC()->session->chosen_shipping_methods[ $i ] ) ? WC()->session->chosen_shipping_methods[ $i ] : '';
+						$available_methods = $package['rates'];
+						$show_package_details = sizeof( $packages ) > 1;
+						$index = $i;
+						?>
+							<?php if ( ! empty( $available_methods ) ) { ?>
+					
+								<?php if ( 1 === count( $available_methods ) ) {
+									$method = current( $available_methods );
+									echo wp_kses_post( wc_cart_totals_shipping_method_label( $method ) ); ?>
+									<input type="hidden" name="shipping_method[<?php echo $index; ?>]" data-index="<?php echo $index; ?>" id="shipping_method_<?php echo $index; ?>" value="<?php echo esc_attr( $method->id ); ?>" class="shipping_method" />
+					
+								<?php } else { ?>
+					
+									<ul id="shipping_method">
+										<?php foreach ( $available_methods as $method ) : ?>
+											<li>
+												<input type="radio" name="shipping_method[<?php echo $index; ?>]" data-index="<?php echo $index; ?>" id="shipping_method_<?php echo $index; ?>_<?php echo sanitize_title( $method->id ); ?>" value="<?php echo esc_attr( $method->id ); ?>" <?php checked( $method->id, $chosen_method ); ?> class="shipping_method" />
+												<label for="shipping_method_<?php echo $index; ?>_<?php echo sanitize_title( $method->id ); ?>"><?php echo wp_kses_post( wc_cart_totals_shipping_method_label( $method ) ); ?></label>
+											</li>
+										<?php endforeach; ?>
+									</ul>
+					
+								<?php } ?>
+					
+							<?php } ?>				
+						<?php
+					}
+				?>
+			</td>
+			<td id="kco-page-shipping-total" class="kco-rightalign">
+				<?php echo WC()->cart->get_cart_shipping_total(); ?>
+			</td>
+		</tr>
+		<?php
+		return ob_get_clean();
+
 	}
 
 
