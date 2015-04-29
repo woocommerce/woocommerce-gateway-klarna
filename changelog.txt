@@ -1,5 +1,8 @@
 *** Klarna Changelog ***
 
+2015.04.29	- version 1.9.8.1
+* Fix       - Fixes deprecated notice - get_order_discount_total.
+
 2015.04.22	- version 1.9.8
 * Update    - Adds German translation files, credits: Kevin Konrad, Alexander Weissenburger.
 * Fix       - Fixes add_query_arg vulnerability.
