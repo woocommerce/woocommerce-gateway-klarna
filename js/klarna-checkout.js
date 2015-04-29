@@ -83,13 +83,15 @@ jQuery(document).ready(function($) {
 	});
 
 	// Update shipping
-	$('#klarna-checkout-shipping input[type="radio"]').change( function() {
+	$('table#kco-totals').on( 'change', '#kco-page-shipping input[type="radio"]', function( event ) {
 		
 		window._klarnaCheckout(function (api) {
 			api.suspend();
 		});
 		
 		new_method = $(this).val();
+		shipping_total_field = $( '#kco-page-shipping-total' );
+		total_field = $( '#kco-page-total-amount' );
 
 		$.ajax(
 			kcoAjax.ajaxurl,
@@ -102,8 +104,11 @@ jQuery(document).ready(function($) {
 					nonce : kcoAjax.klarna_checkout_nonce
 				},
 				success: function( response ) {
-					console.log( 'success' );
+					// console.log( 'success' );
 					console.log( response.data );
+					
+					$( total_field ).html( response.data.cart_total );
+					$( shipping_total_field ).html( response.data.cart_shipping_total );
 					
 					window._klarnaCheckout(function (api) {
 						api.resume();
@@ -130,9 +135,10 @@ jQuery(document).ready(function($) {
 		});
 		
 		ancestor = $( this ).closest( 'td.product-quantity' );
-		total_field = $( 'td#kco-cart-total' );
-		subtotal_field = $( 'td#kco-cart-subtotal' );
+		total_field = $( 'td#kco-page-total-amount' );
+		subtotal_field = $( 'td#kco-page-subtotal-amount' );
 		line_total_field = $( this ).closest( 'tr' ).find( 'td.product-total' );
+		shipping_row = $( 'tr#kco-page-shipping' );
 
 		cart_item_key = $( ancestor ).data( 'cart_item_key' );
 		new_quantity = $( this ).val();
@@ -150,11 +156,12 @@ jQuery(document).ready(function($) {
 				},
 				success: function( response ) {
 					// console.log( 'success' );
-					// console.log( response.data );
+					console.log( response.data );
 
 					$( total_field ).html( response.data.cart_total );
 					$( subtotal_field ).html( response.data.cart_subtotal );
 					$( line_total_field ).html( response.data.line_total );
+					$( shipping_row ).replaceWith( response.data.shipping_row );
 					
 					window._klarnaCheckout(function (api) {
 						api.resume();
@@ -176,7 +183,7 @@ jQuery(document).ready(function($) {
 
 
 	// Add coupon form using JS, so it's only shown for JS users
-	$('.klarna-checkout-coupons .klarna-checkout-coupons-form').append( '<div id="klarna_checkout_coupon_result"></div><form class="klarna_checkout_coupon" method="post"><p class="form-row form-row-first"><input type="text" name="coupon_code" class="input-text" placeholder="Coupon Code" id="coupon_code" value="" /></p><p class="form-row form-row-last"><input type="submit" class="button" name="apply_coupon" value="Apply Coupon" /></p><div class="clear"></div></form>' );
+	// $('.klarna-checkout-coupons .klarna-checkout-coupons-form').append( '<div id="klarna_checkout_coupon_result"></div><form class="klarna_checkout_coupon" method="post"><p class="form-row form-row-first"><input type="text" name="coupon_code" class="input-text" placeholder="Coupon Code" id="coupon_code" value="" /></p><p class="form-row form-row-last"><input type="submit" class="button" name="apply_coupon" value="Apply Coupon" /></p><div class="clear"></div></form>' );
 
 	$('.klarna_checkout_coupon').submit( function( event ) {
 
@@ -188,8 +195,9 @@ jQuery(document).ready(function($) {
 
 		coupon = $( '.klarna_checkout_coupon .input-text' ).val();		
 		input_field = $( this ).find( '.input-text' );
-		total_field = $( 'td#kco-cart-total' );
-		subtotal_field = $( 'td#kco-cart-subtotal' );
+		total_field = $( 'td#kco-page-total-amount' );
+		subtotal_field = $( 'td#kco-page-subtotal-amount' );
+		shipping_row = $( 'tr#kco-page-shipping' );
 
 		$.ajax(
 			kcoAjax.ajaxurl,
@@ -218,6 +226,7 @@ jQuery(document).ready(function($) {
 						$( input_field ).val( '' );
 						$( total_field ).html( response.data.cart_total );
 						$( subtotal_field ).html( response.data.cart_subtotal );
+						$( shipping_row ).replaceWith( response.data.shipping_row );
 
 					}
 					else {
@@ -251,8 +260,9 @@ jQuery(document).ready(function($) {
 
 		remove_coupon = $( this ).data( 'coupon' );
 		clicked_el = $( this );
-		total_field = $( 'td#kco-cart-total' );
-		subtotal_field = $( 'td#kco-cart-subtotal' );
+		total_field = $( 'td#kco-page-total-amount' );
+		subtotal_field = $( 'td#kco-page-subtotal-amount' );
+		shipping_row = $( 'tr#kco-page-shipping' );
 
 		$.ajax(
 			kcoAjax.ajaxurl,
@@ -266,11 +276,12 @@ jQuery(document).ready(function($) {
 				},
 				success: function( response ) {
 					// console.log( 'remove-success' );
-					// console.log( response.data );
+					console.log( response.data );
 					
 					$( clicked_el ).closest( 'tr' ).remove();
 					$( total_field ).html( response.data.cart_total );
 					$( subtotal_field ).html( response.data.cart_subtotal );
+					$( shipping_row ).replaceWith( response.data.shipping_row );
 										
 					window._klarnaCheckout(function (api) {
 						api.resume();

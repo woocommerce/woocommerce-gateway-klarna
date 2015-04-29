@@ -136,6 +136,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 **/
 	function klarna_checkout_widget() {
 
+		global $woocommerce;
 		ob_start(); ?>
 			
 			<div id="klarna-checkout-widget" class="woocommerce">
@@ -162,7 +163,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 							<th class="kco-column-total kco-rightalign">Total</th>
 						</tr>
 						<?php
-						foreach ( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
+						foreach ( $woocommerce->cart->get_cart() as $cart_item_key => $cart_item ) {
 							$_product = $cart_item['data'];
 							$cart_item_product = wc_get_product( $cart_item['product_id'] );
 							echo '<tr>';
@@ -173,10 +174,10 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 										echo apply_filters( 'woocommerce_cart_item_name', sprintf( '<a href="%s">%s </a>', $_product->get_permalink( $cart_item ), $_product->get_title() ), $cart_item, $cart_item_key );
 									}
 									// Meta data
-									echo WC()->cart->get_item_data( $cart_item );
+									echo $woocommerce->cart->get_item_data( $cart_item );
 								echo '</td>';
 								echo '<td class="product-price kco-centeralign"><span class="amount">';
-									echo apply_filters( 'woocommerce_cart_item_price', WC()->cart->get_product_price( $_product ), $cart_item, $cart_item_key );
+									echo apply_filters( 'woocommerce_cart_item_price', $woocommerce->cart->get_product_price( $_product ), $cart_item, $cart_item_key );
 								echo '</span></td>';
 								echo '<td class="product-quantity kco-centeralign" data-cart_item_key="' . $cart_item_key .'">';
 									if ( $_product->is_sold_individually() ) {
@@ -192,7 +193,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 									echo apply_filters( 'woocommerce_cart_item_quantity', $product_quantity, $cart_item_key );
 								echo '</td>';
 								echo '<td class="product-total kco-rightalign"><span class="amount">';
-									echo apply_filters( 'woocommerce_cart_item_subtotal', WC()->cart->get_product_subtotal( $_product, $cart_item['quantity'] ), $cart_item, $cart_item_key );
+									echo apply_filters( 'woocommerce_cart_item_subtotal', $woocommerce->cart->get_product_subtotal( $_product, $cart_item['quantity'] ), $cart_item, $cart_item_key );
 								echo '</span></td>';
 							echo '</tr>';
 						}
@@ -202,32 +203,35 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 				</div>
 
 				<?php
+				if ( ! defined( 'WOOCOMMERCE_CART' ) ) {
+					define( 'WOOCOMMERCE_CART', true );
+				}
+				$woocommerce->cart->calculate_shipping();
+				$woocommerce->cart->calculate_totals();
+				?>
 				<div>
 				<table id="kco-totals">
 					<tbody>
 						<tr id="kco-page-subtotal">
-							<td class="kco-culumn-desc kco-rightalign">Subtotal</td>
-							<td id="kco-cart-subtotal" class="kco-column-number kco-rightalign"><span class="amount"><?php echo WC()->cart->get_cart_subtotal(); ?></span></td>
+							<td class="kco-column-desc kco-rightalign">Subtotal</td>
+							<td id="kco-page-subtotal-amount" class="kco-column-number kco-rightalign"><span class="amount"><?php echo $woocommerce->cart->get_cart_subtotal(); ?></span></td>
 						</tr>
 						
-						<?php
-						// Shipping row
-						// include( KLARNA_DIR . 'views/public/checkout-shipping.php' );
-						?>
+						<?php echo $this->klarna_checkout_get_shipping_options_row_html(); ?>
 						
-						<?php foreach ( WC()->cart->get_applied_coupons() as $coupon ) { ?>
+						<?php foreach ( $woocommerce->cart->get_applied_coupons() as $coupon ) { ?>
 							<tr class="kco-applied-coupon">
 								<td class="kco-rightalign">
 									Coupon: <?php echo $coupon; ?> 
 									<a class="kco-remove-coupon" data-coupon="<?php echo $coupon; ?>" href="#">(remove)</a>
 								</td>
-								<td class="kco-rightalign">-<?php echo wc_price( WC()->cart->get_coupon_discount_amount( $coupon, WC()->cart->display_cart_ex_tax ) ); ?></td>
+								<td class="kco-rightalign">-<?php echo wc_price( $woocommerce->cart->get_coupon_discount_amount( $coupon, $woocommerce->cart->display_cart_ex_tax ) ); ?></td>
 							</tr>
 						<?php }	?>
 
 						<tr id="kco-page-total">
 							<td class="kco-rightalign kco-bold">Total</a></td>
-							<td id="kco-cart-total" class="kco-rightalign kco-bold"><span class="amount"><?php echo WC()->cart->get_cart_total(); ?></span></td>
+							<td id="kco-page-total-amount" class="kco-rightalign kco-bold"><span class="amount"><?php echo $woocommerce->cart->get_total(); ?></span></td>
 						</tr>
 					</tbody>
 				</table>
@@ -325,28 +329,34 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		if ( ! wp_verify_nonce( $_REQUEST['nonce'], 'klarna_checkout_nonce' ) ) {
 			exit( 'Nonce can not be verified.' );
 		}
+
+		global $woocommerce;
 		
 		$updated_item_key = $_REQUEST['cart_item_key'];
 		$new_quantity = $_REQUEST['new_quantity'];
+
+		if ( ! defined( 'WOOCOMMERCE_CART' ) ) {
+			define( 'WOOCOMMERCE_CART', true );
+		}
 				
-		$cart_items = WC()->cart->get_cart();
+		$cart_items = $woocommerce->cart->get_cart();
 		$updated_item = $cart_items[ $updated_item_key ];
 		$updated_product = wc_get_product( $updated_item['product_id'] );
 		
 		// Update WooCommerce cart and transient order item
-		$klarna_wc = WC();
-		$klarna_sid = WC()->session->get( 'klarna_sid' );
-		WC()->cart->set_quantity( $updated_item_key, $new_quantity );
-		WC()->cart->calculate_totals();
+		$klarna_sid = $woocommerce->session->get( 'klarna_sid' );
+		$woocommerce->cart->set_quantity( $updated_item_key, $new_quantity );
+		$woocommerce->cart->calculate_totals();
 		set_transient( $klarna_sid, $klarna_wc, 48 * 60 * 60 );
 		
-		$data['cart_total'] = WC()->cart->get_cart_total();
-		$data['cart_subtotal'] = WC()->cart->get_cart_subtotal();
+		$data['cart_total'] = wc_price( $woocommerce->cart->total );
+		$data['cart_subtotal'] = $woocommerce->cart->get_cart_subtotal();
+		$data['shipping_row'] = $this->klarna_checkout_get_shipping_options_row_html();
 
 		// Update Klarna order line item
 		$data['line_total'] = apply_filters( 
 			'woocommerce_cart_item_subtotal', 
-			WC()->cart->get_product_subtotal( 
+			$woocommerce->cart->get_product_subtotal( 
 				$updated_product, 
 				$new_quantity
 			), 
@@ -435,28 +445,39 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			exit( 'Nonce can not be verified.' );
 		}
 
+		global $woocommerce;
+
 		$data = array();
 		
 		// Adding coupon
 		if ( isset( $_REQUEST['coupon'] ) && is_string( $_REQUEST['coupon'] ) ) {
 			
 			$coupon = $_REQUEST['coupon'];
-			$coupon_success = WC()->cart->add_discount( $coupon );
-			$applied_coupons = WC()->cart->applied_coupons;
-			WC()->session->set( 'applied_coupons', $applied_coupons );
-			WC()->cart->calculate_totals();
+			$coupon_success = $woocommerce->cart->add_discount( $coupon );
+			$applied_coupons = $woocommerce->cart->applied_coupons;
+			$woocommerce->session->set( 'applied_coupons', $applied_coupons );
+			$woocommerce->cart->calculate_totals();
 			wc_clear_notices(); // This notice handled by Klarna plugin	
 			
 			$coupon_object = new WC_Coupon( $coupon );
 	
-			$amount = wc_price( WC()->cart->get_coupon_discount_amount( $coupon, WC()->cart->display_cart_ex_tax ) );
+			$amount = wc_price( $woocommerce->cart->get_coupon_discount_amount( $coupon, $woocommerce->cart->display_cart_ex_tax ) );
 			$data['amount'] = $amount;
 				
 			$data['coupon_success'] = $coupon_success;
 			$data['coupon'] = $coupon;
 
-			$data['cart_total'] = WC()->cart->get_cart_total();
-			$data['cart_subtotal'] = WC()->cart->get_cart_subtotal();
+			if ( ! defined( 'WOOCOMMERCE_CART' ) ) {
+				define( 'WOOCOMMERCE_CART', true );
+			}
+
+			$woocommerce->cart->calculate_shipping();
+			$woocommerce->cart->calculate_fees();
+			$woocommerce->cart->calculate_totals();
+
+			$data['cart_total'] = wc_price( $woocommerce->cart->total );
+			$data['cart_subtotal'] = $woocommerce->cart->get_cart_subtotal();
+			$data['shipping_row'] = $this->klarna_checkout_get_shipping_options_row_html();
 	
 			if ( array_key_exists( 'klarna_checkout', $_SESSION ) ) {
 				
@@ -506,6 +527,8 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			exit( 'Nonce can not be verified.' );
 		}
 
+		global $woocommerce;
+
 		$data = array();
 		
 		// Removing coupon
@@ -513,14 +536,23 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			
 			$remove_coupon = $_REQUEST['remove_coupon'];
 			
-			WC()->cart->remove_coupon( $remove_coupon );
-			$applied_coupons = WC()->cart->applied_coupons;
-			WC()->session->set( 'applied_coupons', $applied_coupons );
-			WC()->cart->calculate_totals();
+			$woocommerce->cart->remove_coupon( $remove_coupon );
+			$applied_coupons = $woocommerce->cart->applied_coupons;
+			$woocommerce->session->set( 'applied_coupons', $applied_coupons );
+			$woocommerce->cart->calculate_totals();
 			wc_clear_notices(); // This notice handled by Klarna plugin	
+
+			if ( ! defined( 'WOOCOMMERCE_CART' ) ) {
+				define( 'WOOCOMMERCE_CART', true );
+			}
+
+			$woocommerce->cart->calculate_shipping();
+			$woocommerce->cart->calculate_fees();
+			$woocommerce->cart->calculate_totals();
 	
-			$data['cart_total'] = WC()->cart->get_cart_total();
-			$data['cart_subtotal'] = WC()->cart->get_cart_subtotal();
+			$data['cart_total'] = wc_price( $woocommerce->cart->total );
+			$data['cart_subtotal'] = $woocommerce->cart->get_cart_subtotal();
+			$data['shipping_row'] = $this->klarna_checkout_get_shipping_options_row_html();
 
 			if ( array_key_exists( 'klarna_checkout', $_SESSION ) ) {
 				
@@ -560,6 +592,67 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	
 	}
 	
+
+	/**
+	 * Gets shipping options as formatted HTML.
+	 * 
+	 * @since  2.0
+	 **/
+	function klarna_checkout_get_shipping_options_row_html() {
+
+		ob_start();
+		if ( ! defined( 'WOOCOMMERCE_CART' ) ) {
+			define( 'WOOCOMMERCE_CART', true );
+		}
+		WC()->cart->calculate_shipping();
+		WC()->cart->calculate_fees();
+		WC()->cart->calculate_totals();
+
+		?>
+		<tr id="kco-page-shipping">
+			<td style="text-align:right">
+				<?php
+					WC()->cart->calculate_shipping();
+					$packages = WC()->shipping->get_packages();
+					foreach ( $packages as $i => $package ) {
+						$chosen_method = isset( WC()->session->chosen_shipping_methods[ $i ] ) ? WC()->session->chosen_shipping_methods[ $i ] : '';
+						$available_methods = $package['rates'];
+						$show_package_details = sizeof( $packages ) > 1;
+						$index = $i;
+						?>
+							<?php if ( ! empty( $available_methods ) ) { ?>
+					
+								<?php if ( 1 === count( $available_methods ) ) {
+									$method = current( $available_methods );
+									echo wp_kses_post( wc_cart_totals_shipping_method_label( $method ) ); ?>
+									<input type="hidden" name="shipping_method[<?php echo $index; ?>]" data-index="<?php echo $index; ?>" id="shipping_method_<?php echo $index; ?>" value="<?php echo esc_attr( $method->id ); ?>" class="shipping_method" />
+					
+								<?php } else { ?>
+					
+									<ul id="shipping_method">
+										<?php foreach ( $available_methods as $method ) : ?>
+											<li>
+												<input type="radio" name="shipping_method[<?php echo $index; ?>]" data-index="<?php echo $index; ?>" id="shipping_method_<?php echo $index; ?>_<?php echo sanitize_title( $method->id ); ?>" value="<?php echo esc_attr( $method->id ); ?>" <?php checked( $method->id, $chosen_method ); ?> class="shipping_method" />
+												<label for="shipping_method_<?php echo $index; ?>_<?php echo sanitize_title( $method->id ); ?>"><?php echo wp_kses_post( wc_cart_totals_shipping_method_label( $method ) ); ?></label>
+											</li>
+										<?php endforeach; ?>
+									</ul>
+					
+								<?php } ?>
+					
+							<?php } ?>				
+						<?php
+					}
+				?>
+			</td>
+			<td id="kco-page-shipping-total" class="kco-rightalign">
+				<?php echo WC()->cart->get_cart_shipping_total(); ?>
+			</td>
+		</tr>
+		<?php
+		return ob_get_clean();
+
+	}
 	
 	/**
 	 * Klarna Checkout coupons shortcode callback.
@@ -595,10 +688,23 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			exit( 'Nonce can not be verified.' );
 		}
 
+		global $woocommerce;
+
 		$new_method = $_REQUEST['new_method'];
 		$chosen_shipping_methods[] = wc_clean( $new_method );
-		WC()->session->set( 'chosen_shipping_methods', $chosen_shipping_methods );
-		WC()->cart->calculate_totals();
+		$woocommerce->session->set( 'chosen_shipping_methods', $chosen_shipping_methods );
+
+		if ( ! defined( 'WOOCOMMERCE_CART' ) ) {
+			define( 'WOOCOMMERCE_CART', true );
+		}
+
+		$woocommerce->cart->calculate_shipping();
+		$woocommerce->cart->calculate_fees();
+		$woocommerce->cart->calculate_totals();
+
+		$data['new_method'] = $new_method;
+		$data['cart_total'] = wc_price( $woocommerce->cart->total );
+		$data['cart_shipping_total'] = $woocommerce->cart->get_cart_shipping_total();
 
 		if ( array_key_exists( 'klarna_checkout', $_SESSION ) ) {
 			$sharedSecret = $this->klarna_secret;
@@ -615,7 +721,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 
 			$klarna_order->fetch();
 			
-			$data['klarna_order'] = $_SESSION['klarna_checkout'];
+			// $data['klarna_order'] = $_SESSION['klarna_checkout'];
 
 			$cart = $this->cart_to_klarna();
 
