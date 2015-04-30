@@ -74,6 +74,13 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		}
 		
 
+		// Subscription support
+		$this->supports = array( 
+			'products', 
+			'refunds'
+		);
+
+
 		// Enqueue scripts and styles
 		add_action( 'wp_enqueue_scripts', array( $this, 'klarna_checkout_enqueuer' ) );
 
@@ -133,9 +140,15 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		wp_localize_script( 'klarna_checkout', 'kcoAjax', array( 'ajaxurl' => admin_url( 'admin-ajax.php' ), 'klarna_checkout_nonce' => wp_create_nonce( 'klarna_checkout_nonce' ) ) );        
 		wp_enqueue_script( 'jquery' );
 		wp_enqueue_script( 'klarna_checkout' );
-		
-		wp_register_style( 'klarna_checkout', KLARNA_URL . 'css/klarna-checkout.css' );
-		wp_enqueue_style( 'klarna_checkout' );
+
+		wp_register_style( 'klarna_checkout', KLARNA_URL . 'css/klarna-checkout.css' );	
+		if ( is_page() ) {
+			global $post;
+			$klarna_checkout_page_id = url_to_postid( $this->klarna_checkout_url );
+			if ( $post->ID == $klarna_checkout_page_id ) {
+				wp_enqueue_style( 'klarna_checkout' );
+			}
+		}
 	
 	}
 
@@ -2084,6 +2097,123 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	    }
 
 	} // End function activate_reservation
+
+	/**
+	 * Can the order be refunded via Klarna?
+	 * 
+	 * @param  WC_Order $order
+	 * @return bool
+	 * @since  2.0.0
+	 */
+	public function can_refund_order( $order ) {
+
+		if ( get_post_meta( $order->id, '_klarna_invoice_number', true ) ) {
+			return true;
+		}
+
+		return false;
+
+	}
+
+
+	/**
+	 * Refund order in Klarna system
+	 * 
+	 * @param  integer $orderid
+	 * @param  integer $amount
+	 * @param  string  $reason
+	 * @return bool
+	 * @since  2.0.0
+	 */
+	public function process_refund( $orderid, $amount = NULL, $reason = '' ) {
+
+		$order = wc_get_order( $orderid );
+		if ( ! $this->can_refund_order( $order ) ) {
+			$this->log->add( 'klarna', 'Refund Failed: No Klarna invoice ID.' );
+			$order->add_order_note( __( 'This order cannot be refunded. Please make sure it is activated.', 'klarna' ) );
+			return false;
+		}
+
+		$country = get_post_meta( $orderid, '_billing_country', true );
+
+		$klarna = new Klarna();
+		$this->configure_klarna( $klarna, $country );
+		$invNo = get_post_meta( $order->id, '_klarna_invoice_number', true );
+
+		$klarna_order = new WC_Gateway_Klarna_Order( $order, $klarna );
+		$refund_order = $klarna_order->refund_order( $amount, $reason = '', $invNo );
+
+		if ( $refund_order ) {
+			return true;
+		}
+
+		return false;
+
+	}
+
+
+	/**
+	 * Activate order in Klarna system
+	 * 
+	 * @param  integer $orderid
+	 * @since  2.0.0
+	 */
+	function activate_klarna_order( $orderid ) {
+
+		// Klarna reservation number and billing country must be set
+		if ( get_post_meta( $orderid, '_klarna_order_reservation', true ) && get_post_meta( $orderid, '_billing_country', true ) ) {
+
+			// Check if this order hasn't been activated already
+			if ( ! get_post_meta( $orderid, '_klarna_invoice_number', true ) ) {
+
+				$rno = get_post_meta( $orderid, '_klarna_order_reservation', true );
+				$country = get_post_meta( $orderid, '_billing_country', true );
+
+				$order = wc_get_order( $orderid );
+
+				$klarna = new Klarna();
+				$this->configure_klarna( $klarna, $country );
+
+				$klarna_order = new WC_Gateway_Klarna_Order( $order, $klarna );
+				$klarna_order->activate_order( $rno );
+
+			}
+
+		}	
+
+	}
+
+
+	/**
+	 * Cancel order in Klarna system
+	 * 
+	 * @param  integer $orderid
+	 * @since  2.0.0
+	 */
+	function cancel_klarna_order( $orderid ) {
+
+		// Klarna reservation number and billing country must be set
+		if ( get_post_meta( $orderid, '_klarna_order_reservation', true ) && get_post_meta( $orderid, '_billing_country', true ) ) {
+
+			// Check if this order hasn't been cancelled already
+			if ( ! get_post_meta( $orderid, '_klarna_order_cancelled', true ) ) {
+
+				$rno = get_post_meta( $orderid, '_klarna_order_reservation', true );
+				$country = get_post_meta( $orderid, '_billing_country', true );
+
+				$order = wc_get_order( $orderid );
+
+				$klarna = new Klarna();
+				$this->configure_klarna( $klarna, $country );
+
+				$klarna_order = new WC_Gateway_Klarna_Order( $order, $klarna );
+				$klarna_order->cancel_order( $rno );
+
+			}
+
+		}	
+
+	}
     
 } // End class WC_Gateway_Klarna_Checkout
 

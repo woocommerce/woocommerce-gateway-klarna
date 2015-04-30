@@ -9,48 +9,47 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 
 // Define user set variables
-$this->enabled							= ( isset( $this->settings['enabled'] ) ) ? $this->settings['enabled'] : '';
-$this->title 							= ( isset( $this->settings['title'] ) ) ? $this->settings['title'] : '';
-$this->log 								= new WC_Logger();
+$this->enabled = ( isset( $this->settings['enabled'] ) ) ? $this->settings['enabled'] : '';
+$this->title = ( isset( $this->settings['title'] ) ) ? $this->settings['title'] : '';
+$this->log = new WC_Logger();
 
-$this->eid_se							= ( isset( $this->settings['eid_se'] ) ) ? $this->settings['eid_se'] : '';
-$this->secret_se						= ( isset( $this->settings['secret_se'] ) ) ? $this->settings['secret_se'] : '';
-$this->klarna_checkout_url_se			= ( isset( $this->settings['klarna_checkout_url_se'] ) ) ? $this->settings['klarna_checkout_url_se'] : '';
-$this->klarna_checkout_thanks_url_se	= ( isset( $this->settings['klarna_checkout_thanks_url_se'] ) ) ? $this->settings['klarna_checkout_thanks_url_se'] : '';
+$this->eid_se = ( isset( $this->settings['eid_se'] ) ) ? $this->settings['eid_se'] : '';
+$this->secret_se = ( isset( $this->settings['secret_se'] ) ) ? $this->settings['secret_se'] : '';
+$this->klarna_checkout_url_se = ( isset( $this->settings['klarna_checkout_url_se'] ) ) ? $this->settings['klarna_checkout_url_se'] : '';
+$this->klarna_checkout_thanks_url_se = ( isset( $this->settings['klarna_checkout_thanks_url_se'] ) ) ? $this->settings['klarna_checkout_thanks_url_se'] : '';
 
-$this->eid_no							= ( isset( $this->settings['eid_no'] ) ) ? $this->settings['eid_no'] : '';
-$this->secret_no						= ( isset( $this->settings['secret_no'] ) ) ? $this->settings['secret_no'] : '';
-$this->klarna_checkout_url_no			= ( isset( $this->settings['klarna_checkout_url_no'] ) ) ? $this->settings['klarna_checkout_url_no'] : '';
-$this->klarna_checkout_thanks_url_no	= ( isset( $this->settings['klarna_checkout_thanks_url_no'] ) ) ? $this->settings['klarna_checkout_thanks_url_no'] : '';
+$this->eid_no = ( isset( $this->settings['eid_no'] ) ) ? $this->settings['eid_no'] : '';
+$this->secret_no = ( isset( $this->settings['secret_no'] ) ) ? $this->settings['secret_no'] : '';
+$this->klarna_checkout_url_no = ( isset( $this->settings['klarna_checkout_url_no'] ) ) ? $this->settings['klarna_checkout_url_no'] : '';
+$this->klarna_checkout_thanks_url_no = ( isset( $this->settings['klarna_checkout_thanks_url_no'] ) ) ? $this->settings['klarna_checkout_thanks_url_no'] : '';
 
-$this->eid_fi							= ( isset( $this->settings['eid_fi'] ) ) ? $this->settings['eid_fi'] : '';
-$this->secret_fi						= ( isset( $this->settings['secret_fi'] ) ) ? $this->settings['secret_fi'] : '';
-$this->klarna_checkout_url_fi			= ( isset( $this->settings['klarna_checkout_url_fi'] ) ) ? $this->settings['klarna_checkout_url_fi'] : '';
-$this->klarna_checkout_thanks_url_fi	= ( isset( $this->settings['klarna_checkout_thanks_url_fi'] ) ) ? $this->settings['klarna_checkout_thanks_url_fi'] : '';
+$this->eid_fi = ( isset( $this->settings['eid_fi'] ) ) ? $this->settings['eid_fi'] : '';
+$this->secret_fi = ( isset( $this->settings['secret_fi'] ) ) ? $this->settings['secret_fi'] : '';
+$this->klarna_checkout_url_fi = ( isset( $this->settings['klarna_checkout_url_fi'] ) ) ? $this->settings['klarna_checkout_url_fi'] : '';
+$this->klarna_checkout_thanks_url_fi = ( isset( $this->settings['klarna_checkout_thanks_url_fi'] ) ) ? $this->settings['klarna_checkout_thanks_url_fi'] : '';
 
-$this->eid_de							= ( isset( $this->settings['eid_de'] ) ) ? $this->settings['eid_de'] : '';
-$this->secret_de						= ( isset( $this->settings['secret_de'] ) ) ? $this->settings['secret_de'] : '';
-$this->klarna_checkout_url_de			= ( isset( $this->settings['klarna_checkout_url_de'] ) ) ? $this->settings['klarna_checkout_url_de'] : '';
-$this->klarna_checkout_thanks_url_de	= ( isset( $this->settings['klarna_checkout_thanks_url_de'] ) ) ? $this->settings['klarna_checkout_thanks_url_de'] : '';
-$this->phone_mandatory_de				= ( isset( $this->settings['phone_mandatory_de'] ) ) ? $this->settings['phone_mandatory_de'] : '';
-$this->dhl_packstation_de				= ( isset( $this->settings['dhl_packstation_de'] ) ) ? $this->settings['dhl_packstation_de'] : '';
+$this->eid_de = ( isset( $this->settings['eid_de'] ) ) ? $this->settings['eid_de'] : '';
+$this->secret_de = ( isset( $this->settings['secret_de'] ) ) ? $this->settings['secret_de'] : '';
+$this->klarna_checkout_url_de = ( isset( $this->settings['klarna_checkout_url_de'] ) ) ? $this->settings['klarna_checkout_url_de'] : '';
+$this->klarna_checkout_thanks_url_de = ( isset( $this->settings['klarna_checkout_thanks_url_de'] ) ) ? $this->settings['klarna_checkout_thanks_url_de'] : '';
+$this->phone_mandatory_de = ( isset( $this->settings['phone_mandatory_de'] ) ) ? $this->settings['phone_mandatory_de'] : '';
+$this->dhl_packstation_de = ( isset( $this->settings['dhl_packstation_de'] ) ) ? $this->settings['dhl_packstation_de'] : '';
 
+$this->default_eur_contry = ( isset( $this->settings['default_eur_contry'] ) ) ? $this->settings['default_eur_contry'] : '';
 
-$this->default_eur_contry				= ( isset( $this->settings['default_eur_contry'] ) ) ? $this->settings['default_eur_contry'] : '';
+$this->terms_url = ( isset( $this->settings['terms_url'] ) ) ? $this->settings['terms_url'] : '';
+$this->testmode = ( isset( $this->settings['testmode'] ) ) ? $this->settings['testmode'] : '';
+$this->debug = ( isset( $this->settings['debug'] ) ) ? $this->settings['debug'] : '';
 
-$this->terms_url						= ( isset( $this->settings['terms_url'] ) ) ? $this->settings['terms_url'] : '';
-$this->testmode							= ( isset( $this->settings['testmode'] ) ) ? $this->settings['testmode'] : '';
-$this->debug							= ( isset( $this->settings['debug'] ) ) ? $this->settings['debug'] : '';
+$this->modify_standard_checkout_url = ( isset( $this->settings['modify_standard_checkout_url'] ) ) ? $this->settings['modify_standard_checkout_url'] : '';
+$this->add_std_checkout_button = ( isset( $this->settings['add_std_checkout_button'] ) ) ? $this->settings['add_std_checkout_button'] : '';
+$this->std_checkout_button_label = ( isset( $this->settings['std_checkout_button_label'] ) ) ? $this->settings['std_checkout_button_label'] : '';
 
-$this->modify_standard_checkout_url		= ( isset( $this->settings['modify_standard_checkout_url'] ) ) ? $this->settings['modify_standard_checkout_url'] : '';
-$this->add_std_checkout_button			= ( isset( $this->settings['add_std_checkout_button'] ) ) ? $this->settings['add_std_checkout_button'] : '';
-$this->std_checkout_button_label		= ( isset( $this->settings['std_checkout_button_label'] ) ) ? $this->settings['std_checkout_button_label'] : '';
+$this->create_customer_account = ( isset( $this->settings['create_customer_account'] ) ) ? $this->settings['create_customer_account'] : '';
+$this->send_new_account_email = ( isset( $this->settings['send_new_account_email'] ) ) ? $this->settings['send_new_account_email'] : '';
 
-$this->create_customer_account			= ( isset( $this->settings['create_customer_account'] ) ) ? $this->settings['create_customer_account'] : '';
-$this->send_new_account_email			= ( isset( $this->settings['send_new_account_email'] ) ) ? $this->settings['send_new_account_email'] : '';
-
-$this->account_signup_text				= ( isset( $this->settings['account_signup_text'] ) ) ? $this->settings['account_signup_text'] : '';
-$this->account_login_text				= ( isset( $this->settings['account_login_text'] ) ) ? $this->settings['account_login_text'] : '';
+$this->account_signup_text = ( isset( $this->settings['account_signup_text'] ) ) ? $this->settings['account_signup_text'] : '';
+$this->account_login_text = ( isset( $this->settings['account_login_text'] ) ) ? $this->settings['account_login_text'] : '';
 
 // Color options
 $this->color_button = ( isset( $this->settings['color_button'] ) ) ? $this->settings['color_button'] : '';
