@@ -100,7 +100,64 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 		add_action( 'wp_print_footer_scripts', array( $this, 'footer_scripts' ) );
 		add_action( 'woocommerce_order_status_cancelled', array( $this, 'cancel_klarna_order' ) );
 		add_action( 'woocommerce_order_status_completed', array( $this, 'activate_klarna_order' ) );
+
+		// Add Klarna shipping info to order confirmation page and email
+		add_filter( 'woocommerce_thankyou_order_received_text', array( $this, 'output_klarna_details_confirmation' ) );
+		add_action( 'woocommerce_email_footer', array( $this, 'output_klarna_details_confirmation_email' ) );
+
+	}
+
+
+	/**
+	 * Add Klarna's shipping details to order confirmation page.
+	 * 
+	 * @param  $text  Default order confirmation text
+	 * @since  2.0.0
+	 */
+	public function output_klarna_details_confirmation( $text ) {
+
+		return $text . $this->get_klarna_shipping_info();
+
+	}
+
+
+	/**
+	 * Add Klarna's shipping details to confirmation email.
+	 * 
+	 * @since  2.0.0
+	 */
+	public function output_klarna_details_confirmation_email() {
+
+		echo $this->get_klarna_shipping_info();
+
+	}
+
+
+	/**
+	 * Get Klarna's shipping info.
+	 * 
+	 * @since  2.0.0
+	 */
+	public function get_klarna_shipping_info() {
+
+		$klarna_locale = $this->klarna_helper->get_klarna_locale( get_locale() );
 		
+		// Information not available for en_se, switching to sv_se instead
+		if ( 'en_se' == $klarna_locale ) {
+			$klarna_locale = 'sv_se';
+		}
+
+		$klarna_info = wp_remote_get( 'http://cdn.klarna.com/1.0/shared/content/policy/packing/' . $this->klarna_helper->get_eid() . '/' . $klarna_locale . '/minimal' );
+
+		if ( 200 == $klarna_info['response']['code'] ) {
+			$klarna_message = json_decode( $klarna_info['body'] );
+			$klarna_shipping_info = wpautop( $klarna_message->template->text );
+
+			return $klarna_shipping_info;
+		}
+
+		return '';
+
 	}
 
 
