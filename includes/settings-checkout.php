@@ -147,6 +147,31 @@ return apply_filters( 'klarna_checkout_form_fields', array(
 		'default' => 'no'
 	),
 
+	'eid_uk' => array(
+		'title' => __( 'Eid - UK', 'klarna' ), 
+		'type' => 'text', 
+		'description' => __( 'Please enter your Klarna Eid for UK. Leave blank to disable.', 'klarna' ), 
+		'default' => ''
+	),
+	'secret_uk' => array(
+		'title' => __( 'Shared Secret - UK', 'klarna' ), 
+		'type' => 'text', 
+		'description' => __( 'Please enter your Klarna Shared Secret for UK.', 'klarna' ), 
+		'default' => ''
+	),
+	'klarna_checkout_url_uk' => array(
+		'title' => __( 'Custom Checkout Page - UK', 'klarna' ), 
+		'type' => 'text', 
+		'description' => __( 'Please enter the URL to the page that acts as Checkout Page for Klarna Checkout UK. This page must contain the shortcode [woocommerce_klarna_checkout].', 'klarna' ), 
+		'default' => ''
+	),
+	'klarna_checkout_thanks_url_uk' => array(
+		'title' => __( 'Custom Thanks Page - UK', 'klarna' ), 
+		'type' => 'text', 
+		'description' => __( 'Enter the URL to the page that acts as Thanks Page for Klarna Checkout UK. This page must contain the shortcode [woocommerce_klarna_checkout]. Leave blank to use the Custom Checkout Page as Thanks Page.', 'klarna' ), 
+		'default' => ''
+	),
+
 	'default_eur_contry' => array(
 		'title' => __( 'Default Checkout Country', 'klarna' ),
 		'type' => 'select',
