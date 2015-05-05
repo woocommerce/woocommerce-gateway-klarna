@@ -482,7 +482,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 * Render checkout page
 	 */
 		function get_klarna_checkout_page() {
-			
+
 			// Debug
 			if ($this->debug=='yes') $this->log->add( 'klarna', 'KCO page about to render...' );
 			
@@ -511,9 +511,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 				$orderUri = $_GET['klarna_order'];
 				
 				$connector = Klarna_Checkout_Connector::create($sharedSecret);  
-				
-				//$checkoutId = $_SESSION['klarna_checkout'];	
-				
+								
 				$klarna_order = new Klarna_Checkout_Order($connector, $orderUri);
 				
 				$klarna_order->fetch();  
@@ -542,7 +540,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 				
 				do_action( 'woocommerce_thankyou', $_GET['sid'] );
 				
-				unset($_SESSION['klarna_checkout']);
+				WC()->session->__unset( 'klarna_checkout' );
 				
 				// Remove cart
 				$woocommerce->cart->empty_cart();
@@ -729,31 +727,29 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 					
 					//@session_start();
 					
-					$connector = Klarna_Checkout_Connector::create($sharedSecret);
-    		
+					$connector = Klarna_Checkout_Connector::create($sharedSecret);   		
 
 					$klarna_order = null;
 					
-					if (array_key_exists('klarna_checkout', $_SESSION)) {
+		        	if ( WC()->session->get( 'klarna_checkout' ) ) {
 						
 						// Resume session
 						$klarna_order = new Klarna_Checkout_Order(
 							$connector,
-							$_SESSION['klarna_checkout']
-						);
-					
+							WC()->session->get( 'klarna_checkout' )
+						);					
 						
 						try {
+
        						$klarna_order->fetch();
        						$klarna_order_as_array = $klarna_order->marshal();
-       						
-       						
+
        						// Reset session if the country in the store has changed since last time the checkout was loaded
-       						if( $this->klarna_country != $klarna_order_as_array['purchase_country'] ) {
+							if ( strtolower( $this->klarna_country ) != strtolower( $klarna_order_as_array['purchase_country'] ) ) {
 	       						
 	       						// Reset session
 		   						$klarna_order = null;
-		   						unset($_SESSION['klarna_checkout']);
+								WC()->session->__unset( 'klarna_checkout' );
 		   						
        						} else {
        						
@@ -793,32 +789,34 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	        						$this->klarna_checkout_url 
 	        					);
 	        					
-		
 	        					// Customer info if logged in
 								if( $this->testmode !== 'yes' ) {
-									if($current_user->user_email) {
+
+									if ( $current_user->user_email ) {
 										$update['shipping_address']['email'] = $current_user->user_email;
 									}
 							
-									if($woocommerce->customer->get_shipping_postcode()) {
+									if ( $woocommerce->customer->get_shipping_postcode() ) {
 										$update['shipping_address']['postal_code'] = $woocommerce->customer->get_shipping_postcode();
 									}
 									
 								}
 							
 	        					$klarna_order->update( apply_filters( 'kco_update_order', $update ) );
-        					
+ 
         					} // End if country change
         				
-        				} catch (Exception $e) {
+        				} catch ( Exception $e ) {
+
         					// Reset session
         					$klarna_order = null;
-        					unset($_SESSION['klarna_checkout']);
+							WC()->session->__unset( 'klarna_checkout' );
+
         				}
         			}
 					
 		        		
-        			if ($klarna_order == null) {
+        			if ( $klarna_order == null ) {
 						
 	        			// Start new session
 	        			$create['purchase_country'] = $this->klarna_country;
@@ -883,11 +881,15 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		        		$klarna_order = new Klarna_Checkout_Order($connector);
 		        		$klarna_order->create( apply_filters( 'kco_create_order', $create ) );
 		        		$klarna_order->fetch();
+
 		        	}
 					
 		        	
 		        	// Store location of checkout session
-		        	$_SESSION['klarna_checkout'] = $sessionId = $klarna_order->getLocation();
+		        	$sessionId = $klarna_order->getLocation();
+		        	if ( null === WC()->session->get( 'klarna_checkout' ) ) {
+		        		WC()->session->set( 'klarna_checkout', $sessionId );
+		        	}
 		        	
 		        	// Display checkout
 		        	$snippet = $klarna_order['gui']['snippet'];
