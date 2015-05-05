@@ -1,7 +1,9 @@
 *** Klarna Changelog ***
 
-2015.04.29	- version 1.9.8.1
+2015.05.05	- version 1.9.8.1
+* Feature	- Added filter klarna_checkout_billing_phone() for returned phone number in KCO.
 * Fix       - Fixes deprecated notice - get_order_discount_total.
+* Fix		- Check cart items so that they are in stock in get_klarna_checkout_page().
 
 2015.04.22	- version 1.9.8
 * Update    - Adds German translation files, credits: Kevin Konrad, Alexander Weissenburger.
