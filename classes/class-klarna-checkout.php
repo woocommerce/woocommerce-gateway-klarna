@@ -482,7 +482,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 * Render checkout page
 	 */
 		function get_klarna_checkout_page() {
-			
+
 			// Debug
 			if ($this->debug=='yes') $this->log->add( 'klarna', 'KCO page about to render...' );
 			
@@ -511,9 +511,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 				$orderUri = $_GET['klarna_order'];
 				
 				$connector = Klarna_Checkout_Connector::create($sharedSecret);  
-				
-				//$checkoutId = $_SESSION['klarna_checkout'];	
-				
+								
 				$klarna_order = new Klarna_Checkout_Order($connector, $orderUri);
 				
 				$klarna_order->fetch();  
@@ -542,7 +540,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 				
 				do_action( 'woocommerce_thankyou', $_GET['sid'] );
 				
-				unset($_SESSION['klarna_checkout']);
+				WC()->session->__unset( 'klarna_checkout' );
 				
 				// Remove cart
 				$woocommerce->cart->empty_cart();
@@ -563,6 +561,11 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 					return;
 				}
 				
+				// Recheck cart items so that they are in stock
+				$result = $woocommerce->cart->check_cart_item_stock();
+				if( is_wp_error($result) ) {
+					return $result->get_error_message();
+				}
 				
 				// If checkout registration is disabled and not logged in, the user cannot checkout
 				$checkout = $woocommerce->checkout();
@@ -626,6 +629,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
         			// Cart Contents
         			if ( sizeof( $order->get_items() ) > 0 ) {
 						foreach ( $order->get_items() as $item ) {
+							
 							if ( $item['qty'] ) {
 								$_product = $order->get_product_from_item( $item );	
 								
@@ -723,31 +727,29 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 					
 					//@session_start();
 					
-					$connector = Klarna_Checkout_Connector::create($sharedSecret);
-    		
+					$connector = Klarna_Checkout_Connector::create($sharedSecret);   		
 
 					$klarna_order = null;
 					
-					if (array_key_exists('klarna_checkout', $_SESSION)) {
+		        	if ( WC()->session->get( 'klarna_checkout' ) ) {
 						
 						// Resume session
 						$klarna_order = new Klarna_Checkout_Order(
 							$connector,
-							$_SESSION['klarna_checkout']
-						);
-					
+							WC()->session->get( 'klarna_checkout' )
+						);					
 						
 						try {
+
        						$klarna_order->fetch();
        						$klarna_order_as_array = $klarna_order->marshal();
-       						
-       						
+
        						// Reset session if the country in the store has changed since last time the checkout was loaded
-       						if( $this->klarna_country != $klarna_order_as_array['purchase_country'] ) {
+							if ( strtolower( $this->klarna_country ) != strtolower( $klarna_order_as_array['purchase_country'] ) ) {
 	       						
 	       						// Reset session
 		   						$klarna_order = null;
-		   						unset($_SESSION['klarna_checkout']);
+								WC()->session->__unset( 'klarna_checkout' );
 		   						
        						} else {
        						
@@ -787,32 +789,34 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	        						$this->klarna_checkout_url 
 	        					);
 	        					
-		
 	        					// Customer info if logged in
 								if( $this->testmode !== 'yes' ) {
-									if($current_user->user_email) {
+
+									if ( $current_user->user_email ) {
 										$update['shipping_address']['email'] = $current_user->user_email;
 									}
 							
-									if($woocommerce->customer->get_shipping_postcode()) {
+									if ( $woocommerce->customer->get_shipping_postcode() ) {
 										$update['shipping_address']['postal_code'] = $woocommerce->customer->get_shipping_postcode();
 									}
 									
 								}
 							
 	        					$klarna_order->update( apply_filters( 'kco_update_order', $update ) );
-        					
+ 
         					} // End if country change
         				
-        				} catch (Exception $e) {
+        				} catch ( Exception $e ) {
+
         					// Reset session
         					$klarna_order = null;
-        					unset($_SESSION['klarna_checkout']);
+							WC()->session->__unset( 'klarna_checkout' );
+
         				}
         			}
 					
 		        		
-        			if ($klarna_order == null) {
+        			if ( $klarna_order == null ) {
 						
 	        			// Start new session
 	        			$create['purchase_country'] = $this->klarna_country;
@@ -877,11 +881,15 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		        		$klarna_order = new Klarna_Checkout_Order($connector);
 		        		$klarna_order->create( apply_filters( 'kco_create_order', $create ) );
 		        		$klarna_order->fetch();
+
 		        	}
 					
 		        	
 		        	// Store location of checkout session
-		        	$_SESSION['klarna_checkout'] = $sessionId = $klarna_order->getLocation();
+		        	$sessionId = $klarna_order->getLocation();
+		        	if ( null === WC()->session->get( 'klarna_checkout' ) ) {
+		        		WC()->session->set( 'klarna_checkout', $sessionId );
+		        	}
 		        	
 		        	// Display checkout
 		        	$snippet = $klarna_order['gui']['snippet'];
@@ -986,7 +994,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 					update_post_meta( $order_id, '_billing_city', $klarna_order['billing_address']['city'] );
 					update_post_meta( $order_id, '_billing_country', $klarna_order['billing_address']['country'] );
 					update_post_meta( $order_id, '_billing_email', $klarna_order['billing_address']['email'] );
-					update_post_meta( $order_id, '_billing_phone', $klarna_order['billing_address']['phone'] );
+					update_post_meta( $order_id, '_billing_phone', apply_filters( 'klarna_checkout_billing_phone', $klarna_order['billing_address']['phone'] ) );
 					
 					// Add customer shipping address - retrieved from callback from Klarna
 					$allow_separate_shipping = ( isset( $klarna_order['options']['allow_separate_shipping_address'] ) ) ? $klarna_order['options']['allow_separate_shipping_address'] : '';
@@ -1129,7 +1137,6 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			if ( sizeof( $woocommerce->cart->get_cart() ) == 0 )
 				wc_add_notice(sprintf( __( 'Sorry, your session has expired. <a href="%s">Return to homepage &rarr;</a>', 'klarna' ), home_url() ), 'error');
 				
-				
 			// Recheck cart items so that they are in stock
 			$result = $woocommerce->cart->check_cart_item_stock();
 			if( is_wp_error($result) ) {
@@ -1202,7 +1209,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 							)
 						)
 					);
-	
+					
 					if ( ! $item_id ) {
 						throw new Exception( __( 'Error: Unable to create order. Please try again.', 'woocommerce' ) );
 					}
@@ -1279,7 +1286,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			
 				$order->set_payment_method( $this->payment_method );
 				$order->set_total( WC()->cart->shipping_total, 'shipping' );
-				$order->set_total( WC()->cart->get_order_discount_total(), 'order_discount' );
+				$order->set_total( WC()->cart->get_total_discount(), 'order_discount' );
 				$order->set_total( WC()->cart->get_cart_discount_total(), 'cart_discount' );
 				$order->set_total( WC()->cart->tax_total, 'tax' );
 				$order->set_total( WC()->cart->shipping_tax_total, 'shipping_tax' );
@@ -1535,7 +1542,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			}
 			
 			update_post_meta( $order_id, '_order_shipping', 		wc_format_decimal( WC()->cart->shipping_total ) );
-			update_post_meta( $order_id, '_order_discount', 		wc_format_decimal( WC()->cart->get_order_discount_total() ) );
+			update_post_meta( $order_id, '_order_discount', 		wc_format_decimal( WC()->cart->get_total_discount() ) );
 			update_post_meta( $order_id, '_cart_discount', 			wc_format_decimal( WC()->cart->get_cart_discount_total() ) );
 			update_post_meta( $order_id, '_order_tax', 				wc_format_decimal( WC()->cart->tax_total ) );
 			update_post_meta( $order_id, '_order_shipping_tax', 	wc_format_decimal( WC()->cart->shipping_tax_total ) );
@@ -1654,44 +1661,50 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 	 *
 	 	**/
 		function js_order_note() {
-			global $post;
-			if( has_shortcode( $post->post_content, 'woocommerce_klarna_checkout_order_note') || defined( 'WOOCOMMERCE_KLARNA_CHECKOUT' ) ) {
 			
-				?>
-				<script type="text/javascript">
-				jQuery(document).ready(function($){
-					
-					jQuery('#kco_order_note').blur(function () {
-						var kco_order_note = '';
-						
-						if( jQuery('#kco_order_note').val() != '' ) {
-							var kco_order_note = jQuery('#kco_order_note').val();
-						}
-						
-						if(kco_order_note == '') {
-						
-						} else {
-								
-							jQuery.post(
-								'<?php echo get_option('siteurl') . '/wp-admin/admin-ajax.php' ?>',
-								{
-									action			: 'customer_update_kco_order_note',
-									kco_order_note	: kco_order_note,
-									kco_order_id	: '<?php echo WC()->session->order_awaiting_payment;?>',
-									_wpnonce		: '<?php echo wp_create_nonce('update-kco-checkout-order-note'); ?>',
-								},
-								function(response) {
-									console.log(response);
-								}
-							);
-							
-						}				
-					});
-				});
-				</script>
-				<?php
+			global $post;
+
+			if ( is_singular() ) {
 				
-			} // End if has_shortcode()
+				if ( has_shortcode( $post->post_content, 'woocommerce_klarna_checkout_order_note') || defined( 'WOOCOMMERCE_KLARNA_CHECKOUT' ) ) {
+				
+					?>
+					<script type="text/javascript">
+					jQuery(document).ready(function($){
+						
+						jQuery('#kco_order_note').blur(function () {
+							var kco_order_note = '';
+							
+							if( jQuery('#kco_order_note').val() != '' ) {
+								var kco_order_note = jQuery('#kco_order_note').val();
+							}
+							
+							if(kco_order_note == '') {
+							
+							} else {
+									
+								jQuery.post(
+									'<?php echo get_option('siteurl') . '/wp-admin/admin-ajax.php' ?>',
+									{
+										action			: 'customer_update_kco_order_note',
+										kco_order_note	: kco_order_note,
+										kco_order_id	: '<?php echo WC()->session->order_awaiting_payment;?>',
+										_wpnonce		: '<?php echo wp_create_nonce('update-kco-checkout-order-note'); ?>',
+									},
+									function(response) {
+										console.log(response);
+									}
+								);
+								
+							}				
+						});
+					});
+					</script>
+					<?php
+					
+				} // End if has_shortcode()
+
+			} // End if is_singular()
 			
 		} // End function
 		
