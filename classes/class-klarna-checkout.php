@@ -992,7 +992,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 					update_post_meta( $order_id, '_billing_city', $klarna_order['billing_address']['city'] );
 					update_post_meta( $order_id, '_billing_country', $klarna_order['billing_address']['country'] );
 					update_post_meta( $order_id, '_billing_email', $klarna_order['billing_address']['email'] );
-					update_post_meta( $order_id, '_billing_phone', $klarna_order['billing_address']['phone'] );
+					update_post_meta( $order_id, '_billing_phone', apply_filters( 'klarna_checkout_billing_phone', $klarna_order['billing_address']['phone'] ) );
 					
 					// Add customer shipping address - retrieved from callback from Klarna
 					$allow_separate_shipping = ( isset( $klarna_order['options']['allow_separate_shipping_address'] ) ) ? $klarna_order['options']['allow_separate_shipping_address'] : '';
