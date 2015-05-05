@@ -563,6 +563,11 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 					return;
 				}
 				
+				// Recheck cart items so that they are in stock
+				$result = $woocommerce->cart->check_cart_item_stock();
+				if( is_wp_error($result) ) {
+					return $result->get_error_message();
+				}
 				
 				// If checkout registration is disabled and not logged in, the user cannot checkout
 				$checkout = $woocommerce->checkout();
@@ -626,6 +631,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
         			// Cart Contents
         			if ( sizeof( $order->get_items() ) > 0 ) {
 						foreach ( $order->get_items() as $item ) {
+							
 							if ( $item['qty'] ) {
 								$_product = $order->get_product_from_item( $item );	
 								
@@ -1129,7 +1135,6 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			if ( sizeof( $woocommerce->cart->get_cart() ) == 0 )
 				wc_add_notice(sprintf( __( 'Sorry, your session has expired. <a href="%s">Return to homepage &rarr;</a>', 'klarna' ), home_url() ), 'error');
 				
-				
 			// Recheck cart items so that they are in stock
 			$result = $woocommerce->cart->check_cart_item_stock();
 			if( is_wp_error($result) ) {
@@ -1202,7 +1207,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 							)
 						)
 					);
-	
+					
 					if ( ! $item_id ) {
 						throw new Exception( __( 'Error: Unable to create order. Please try again.', 'woocommerce' ) );
 					}
