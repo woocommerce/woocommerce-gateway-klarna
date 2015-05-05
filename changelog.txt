@@ -2,6 +2,8 @@
 
 2015.05.05	- version 1.9.8.1
 * Feature	- Added filter klarna_checkout_billing_phone() for returned phone number in KCO.
+* Fix       - Fixes how Klarna customer billing details are handled in session.
+* Fix       - Fixes PHP notice on empty category pages.
 * Fix       - Fixes deprecated notice - get_order_discount_total.
 * Fix		- Check cart items so that they are in stock in get_klarna_checkout_page().
 

@@ -1661,44 +1661,50 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 	 *
 	 	**/
 		function js_order_note() {
-			global $post;
-			if( has_shortcode( $post->post_content, 'woocommerce_klarna_checkout_order_note') || defined( 'WOOCOMMERCE_KLARNA_CHECKOUT' ) ) {
 			
-				?>
-				<script type="text/javascript">
-				jQuery(document).ready(function($){
-					
-					jQuery('#kco_order_note').blur(function () {
-						var kco_order_note = '';
-						
-						if( jQuery('#kco_order_note').val() != '' ) {
-							var kco_order_note = jQuery('#kco_order_note').val();
-						}
-						
-						if(kco_order_note == '') {
-						
-						} else {
-								
-							jQuery.post(
-								'<?php echo get_option('siteurl') . '/wp-admin/admin-ajax.php' ?>',
-								{
-									action			: 'customer_update_kco_order_note',
-									kco_order_note	: kco_order_note,
-									kco_order_id	: '<?php echo WC()->session->order_awaiting_payment;?>',
-									_wpnonce		: '<?php echo wp_create_nonce('update-kco-checkout-order-note'); ?>',
-								},
-								function(response) {
-									console.log(response);
-								}
-							);
-							
-						}				
-					});
-				});
-				</script>
-				<?php
+			global $post;
+
+			if ( is_singular() ) {
 				
-			} // End if has_shortcode()
+				if ( has_shortcode( $post->post_content, 'woocommerce_klarna_checkout_order_note') || defined( 'WOOCOMMERCE_KLARNA_CHECKOUT' ) ) {
+				
+					?>
+					<script type="text/javascript">
+					jQuery(document).ready(function($){
+						
+						jQuery('#kco_order_note').blur(function () {
+							var kco_order_note = '';
+							
+							if( jQuery('#kco_order_note').val() != '' ) {
+								var kco_order_note = jQuery('#kco_order_note').val();
+							}
+							
+							if(kco_order_note == '') {
+							
+							} else {
+									
+								jQuery.post(
+									'<?php echo get_option('siteurl') . '/wp-admin/admin-ajax.php' ?>',
+									{
+										action			: 'customer_update_kco_order_note',
+										kco_order_note	: kco_order_note,
+										kco_order_id	: '<?php echo WC()->session->order_awaiting_payment;?>',
+										_wpnonce		: '<?php echo wp_create_nonce('update-kco-checkout-order-note'); ?>',
+									},
+									function(response) {
+										console.log(response);
+									}
+								);
+								
+							}				
+						});
+					});
+					</script>
+					<?php
+					
+				} // End if has_shortcode()
+
+			} // End if is_singular()
 			
 		} // End function
 		
