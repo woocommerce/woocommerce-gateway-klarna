@@ -153,11 +153,13 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 
 		$klarna_info = wp_remote_get( 'http://cdn.klarna.com/1.0/shared/content/policy/packing/' . $this->klarna_helper->get_eid() . '/' . $klarna_locale . '/minimal' );
 
-		if ( 200 == $klarna_info['response']['code'] ) {
-			$klarna_message = json_decode( $klarna_info['body'] );
-			$klarna_shipping_info = wpautop( $klarna_message->template->text );
+		if ( is_array( $klarna_info ) ) {
+			if ( 200 == $klarna_info['response']['code'] ) {
+				$klarna_message = json_decode( $klarna_info['body'] );
+				$klarna_shipping_info = wpautop( $klarna_message->template->text );
 
-			return $klarna_shipping_info;
+				return $klarna_shipping_info;
+			}
 		}
 
 		return '';

@@ -4,8 +4,8 @@
  *
  * @package WC_Gateway_Klarna
  */
- 
- 
+
+
 // Bail if accessed directly
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -17,17 +17,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 if ( $this->enabled != 'yes' ) {
 	return;
 }
-
-
-
-/*
-$orderid = WC()->checkout->create_order();
-$order = new WC_Order( $orderid );
-$order->update_status( 'kco-incomplete' );
-echo '<pre>';
-print_r( $order );
-echo '</pre>';
-*/
 
 
 /**
@@ -139,7 +128,6 @@ if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 	set_transient( $klarna_transient, $klarna_wc, 48 * 60 * 60 );
 	WC()->session->set( 'klarna_sid', $klarna_transient );
 	
-
 	// Process cart contents and prepare them for Klarna
 	$cart = $this->cart_to_klarna();
 
@@ -149,13 +137,24 @@ if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 	// Shared secret
 	$sharedSecret = $this->klarna_secret;
 
-	Klarna_Checkout_Order::$baseUri = $this->klarna_server;
-	Klarna_Checkout_Order::$contentType = 'application/vnd.klarna.checkout.aggregated-order-v2+json';
-
-	$connector = Klarna_Checkout_Connector::create($sharedSecret);
-
+	// Initiate Klarna
+	if ( $this->is_rest() ) {
+		require_once( KLARNA_LIB . 'vendor/autoload.php' );
+		$connector = Klarna\Rest\Transport\Connector::create(
+		    $eid,
+		    $sharedSecret,
+		    Klarna\Rest\Transport\ConnectorInterface::TEST_BASE_URL
+		);
+	} else {
+		require_once( KLARNA_LIB . '/src/Klarna/Checkout.php' );
+		Klarna_Checkout_Order::$baseUri = $this->klarna_server;
+		Klarna_Checkout_Order::$contentType = 'application/vnd.klarna.checkout.aggregated-order-v2+json';
+		$connector = Klarna_Checkout_Connector::create($sharedSecret);
+	}
 	$klarna_order = null;
 
+	// TEMPORARY HACK TO DELETE ORDER
+	unset( $_SESSION['klarna_checkout'] );
 	
 	/**
 	 * Check if Klarna order already exists
@@ -286,15 +285,20 @@ if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 		$create['purchase_country'] = $kco_country;
 		$create['purchase_currency'] = $this->klarna_currency;
 		$create['locale'] = $kco_locale;
+		if ( ! $this->is_rest() ) {
+			$create['merchant']['id'] = $eid; // Only needed in V2 of API
+		}
 
-		$create['merchant']['id'] = $eid;
-		$create['merchant']['terms_uri'] = $this->terms_url;
-		$create['merchant']['checkout_uri'] = esc_url_raw( add_query_arg( 
+		//
+		// Merchant URIs
+		//
+		$merchant_terms_uri = $this->terms_url;
+		$merchant_checkout_uri = esc_url_raw( add_query_arg( 
 			'klarnaListener', 
 			'checkout', 
 			$this->klarna_checkout_url 
 		) );
-		$create['merchant']['confirmation_uri'] = add_query_arg ( 
+		$merchant_confirmation_uri = add_query_arg ( 
 			array(
 				'klarna_order' => '{checkout.order.uri}', 
 				'sid' => $klarna_transient, 
@@ -302,14 +306,31 @@ if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 			),
 			$this->klarna_checkout_thanks_url
 		);
-		$create['merchant']['push_uri'] = add_query_arg( 
+		$merchant_push_uri = add_query_arg( 
 			array(
 				'sid' => $klarna_transient, 
 				'scountry' => $this->klarna_country, 
 				'klarna_order' => '{checkout.order.uri}', 
 				'wc-api' => 'WC_Gateway_Klarna_Checkout'
-			), $this->klarna_checkout_url 
+			),
+			$this->klarna_checkout_url 
 		);
+
+		// Different format for V3 and V2
+		if ( $this->is_rest() ) {
+			$merchantUrls = array(
+				'terms' =>        $merchant_terms_uri,
+				'checkout' =>     $merchant_checkout_uri,
+				'confirmation' => $merchant_confirmation_uri,
+				'push' =>         $merchant_push_uri
+			);
+			$create['merchant_urls'] = $merchantUrls;
+		} else {
+			$create['merchant']['terms_uri'] =        $merchant_terms_uri;
+			$create['merchant']['checkout_uri'] =     $merchant_checkout_uri;
+			$create['merchant']['confirmation_uri'] = $merchant_confirmation_uri;
+			$create['merchant']['push_uri'] =         $merchant_push_uri;
+		}
 
 		// Make phone a mandatory field for German stores?
 		if ( $this->phone_mandatory_de == 'yes' ) {
@@ -335,7 +356,11 @@ if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 		$create['gui']['layout'] = $klarna_checkout_layout;
 
 		foreach ( $cart as $item ) {
-			$create['cart']['items'][] = $item;
+			if ( $this->is_rest() ) {
+				$create['order_lines'][] = $item;				
+			} else {
+				$create['cart']['items'][] = $item;				
+			}
 		}
 
 		// Colors
@@ -358,9 +383,18 @@ if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 			$create['options']['color_link'] = $this->color_link;
 		}
 
-		$klarna_order = new Klarna_Checkout_Order( $connector );
+		if ( $this->is_rest() ) {
+			$klarna_order = new \Klarna\Rest\Checkout\Order( $connector );
+		} else  {
+			$klarna_order = new Klarna_Checkout_Order( $connector );
+		}
+
+		$create['order_amount'] = WC()->cart->total * 100;
+		$create['order_tax_amount'] = WC()->cart->get_taxes_total() * 100;
+
 		$klarna_order->create( apply_filters( 'kco_create_order', $create ) );
 		$klarna_order->fetch();
+		echo "<div>{$klarna_order['html_snippet']}</div>";
 
 	}
 

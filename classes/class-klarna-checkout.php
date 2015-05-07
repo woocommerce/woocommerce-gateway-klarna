@@ -532,7 +532,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	
 		if ( array_key_exists( 'klarna_checkout', $_SESSION ) ) {
 			$sharedSecret = $this->klarna_secret;
-			require_once( KLARNA_DIR . '/src/Klarna/Checkout.php' );
+			require_once( KLARNA_LIB . '/src/Klarna/Checkout.php' );
 			Klarna_Checkout_Order::$baseUri = $this->klarna_server;
 			Klarna_Checkout_Order::$contentType = 'application/vnd.klarna.checkout.aggregated-order-v2+json';
 			$connector = Klarna_Checkout_Connector::create( $sharedSecret );
@@ -613,7 +613,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			if ( array_key_exists( 'klarna_checkout', $_SESSION ) ) {
 				
 				$sharedSecret = $this->klarna_secret;
-				require_once( KLARNA_DIR . '/src/Klarna/Checkout.php' );
+				require_once( KLARNA_LIB . '/src/Klarna/Checkout.php' );
 				Klarna_Checkout_Order::$baseUri = $this->klarna_server;
 				Klarna_Checkout_Order::$contentType = 'application/vnd.klarna.checkout.aggregated-order-v2+json';
 				$connector = Klarna_Checkout_Connector::create( $sharedSecret );
@@ -688,7 +688,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			if ( array_key_exists( 'klarna_checkout', $_SESSION ) ) {
 				
 				$sharedSecret = $this->klarna_secret;
-				require_once( KLARNA_DIR . '/src/Klarna/Checkout.php' );
+				require_once( KLARNA_LIB . '/src/Klarna/Checkout.php' );
 				Klarna_Checkout_Order::$baseUri = $this->klarna_server;
 				Klarna_Checkout_Order::$contentType = 'application/vnd.klarna.checkout.aggregated-order-v2+json';
 				$connector = Klarna_Checkout_Connector::create( $sharedSecret );
@@ -755,7 +755,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 
 		if ( array_key_exists( 'klarna_checkout', $_SESSION ) ) {
 			$sharedSecret = $this->klarna_secret;
-			require_once( KLARNA_DIR . '/src/Klarna/Checkout.php' );
+			require_once( KLARNA_LIB . '/src/Klarna/Checkout.php' );
 			Klarna_Checkout_Order::$baseUri = $this->klarna_server;
 			Klarna_Checkout_Order::$contentType = 'application/vnd.klarna.checkout.aggregated-order-v2+json';
 			$connector = Klarna_Checkout_Connector::create( $sharedSecret );
@@ -809,7 +809,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			if ( array_key_exists( 'klarna_checkout', $_SESSION ) ) {
 				
 				$sharedSecret = $this->klarna_secret;
-				require_once( KLARNA_DIR . '/src/Klarna/Checkout.php' );
+				require_once( KLARNA_LIB . '/src/Klarna/Checkout.php' );
 				Klarna_Checkout_Order::$baseUri = $this->klarna_server;
 				Klarna_Checkout_Order::$contentType = 'application/vnd.klarna.checkout.aggregated-order-v2+json';
 				$connector = Klarna_Checkout_Connector::create( $sharedSecret );
@@ -860,7 +860,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			if ( array_key_exists( 'klarna_checkout', $_SESSION ) ) {
 				
 				$sharedSecret = $this->klarna_secret;
-				require_once( KLARNA_DIR . '/src/Klarna/Checkout.php' );
+				require_once( KLARNA_LIB . '/src/Klarna/Checkout.php' );
 				Klarna_Checkout_Order::$baseUri = $this->klarna_server;
 				Klarna_Checkout_Order::$contentType = 'application/vnd.klarna.checkout.aggregated-order-v2+json';
 				$connector = Klarna_Checkout_Connector::create( $sharedSecret );
@@ -1027,7 +1027,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	
 					$item_price = number_format( $item_price * 100, 0, '', '' ) / $cart_item['quantity'];
 					
-					$cart[] = array(
+					$klarna_item = array(
 						'reference'      => strval( $reference ),
 						'name'           => strip_tags( $cart_item_name ),
 						'quantity'       => (int) $cart_item['quantity'],
@@ -1035,6 +1035,11 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 						'discount_rate'  => $item_discount,
 						'tax_rate'       => intval( $item_tax_percentage . '00' )
 					);
+					if ( $this->is_rest() ) {
+						$klarna_item['total_amount'] = (int) ( $cart_item['line_total'] + $cart_item['line_tax'] ) * 100;
+						$klarna_item['total_tax_amount'] = (int) $cart_item['line_tax'] * 100;
+					}
+					$cart[] = $klarna_item;
 	
 				} // End if qty
 	
@@ -1080,7 +1085,8 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 				$klarna_shipping_method = __( 'Shipping', 'klarna' );
 			}
 	
-			$cart[] = array(  
+			
+			$shipping = array(  
 				'type'       => 'shipping_fee',
 				'reference'  => 'SHIPPING',
 				'name'       => $klarna_shipping_method,
@@ -1088,6 +1094,11 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 				'unit_price' => (int) $shipping_price,
 				'tax_rate'   => intval( $shipping_tax_percentage . '00' )
 			);
+			if ( $this->is_rest() ) {
+				$shipping['total_amount'] = (int) $shipping_price;
+				$shipping['total_tax_amount'] = (int) $woocommerce->cart->shipping_tax_total * 100;
+			}
+			$cart[] = $shipping;
 	
 		}
 	
@@ -1227,7 +1238,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			$this->log->add( 'klarna', 'KCO page about to render...' );
 		}
 
-		require_once( KLARNA_DIR . '/src/Klarna/Checkout.php' );
+		require_once( KLARNA_LIB . '/src/Klarna/Checkout.php' );
 
 		// Check if Klarna order exists, if it does display thank you page
 		// otherwise display checkout page
@@ -1271,7 +1282,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			/**
 			 * Retrieve Klarna order
 			 */
-			require_once( KLARNA_DIR . '/src/Klarna/Checkout.php' );  
+			require_once( KLARNA_LIB . '/src/Klarna/Checkout.php' );  
 			Klarna_Checkout_Order::$contentType = "application/vnd.klarna.checkout.aggregated-order-v2+json";  
 			
 			switch ( $_GET['scountry'] ) {
@@ -2212,6 +2223,23 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			}
 
 		}	
+
+	}
+
+
+	/**
+	 * Determines which version of Klarna API should be used
+	 * 
+	 * @param  integer $orderid
+	 * @since  2.0.0
+	 */
+	function is_rest() {
+
+		if ( 'GB' == $this->klarna_helper->get_klarna_country() ) {
+			return true;
+		}
+
+		return false;
 
 	}
     

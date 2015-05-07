@@ -228,11 +228,9 @@ class WC_Klarna_Get_Address {
 				
 				jQuery(document).on('click','.klarna-push-pno',function() {
 					if( jQuery('#klarna_invo_pno').val() != '' ) {
-						var pno_getadress = jQuery('#klarna_invo_pno').val();
+						pno_getadress = jQuery('#klarna_invoice_pno').val();
 					} else if( jQuery('#klarna_pno').val() != '' ) {
-						var pno_getadress = jQuery('#klarna_pno').val();
-					} else if( jQuery('#klarna_campaign_pno').val() != '' ) {
-						var pno_getadress = jQuery('#klarna_campaign_pno').val();
+						pno_getadress = jQuery('#klarna_part_payment_pno').val();
 					}
 					
 					if(pno_getadress == '') {
@@ -400,19 +398,18 @@ class WC_Klarna_Get_Address {
 				$klarna_mode = Klarna::LIVE;
 			}
 				
-			$k = new Klarna();
-		
+			$k = new Klarna();		
 	
-		$k->config(
-		    $this->eid, 											// EID
-		    $this->secret, 											// Secret
-		    $this->get_country(), 									// Country
-		    $this->get_klarna_language($this->get_country()), 		// Language
-		    get_woocommerce_currency(), 							// Currency
-		    $klarna_mode, 											// Live or test
-		    $pcStorage = 'json', 									// PClass storage
-		    $pcURI = '/srv/pclasses.json'							// PClass storage URI path
-		);
+			$k->config(
+			    $this->eid, 											// EID
+			    $this->secret, 											// Secret
+			    $this->get_country(), 									// Country
+			    $this->get_klarna_language($this->get_country()), 		// Language
+			    get_woocommerce_currency(), 							// Currency
+			    $klarna_mode, 											// Live or test
+			    $pcStorage = 'json', 									// PClass storage
+			    $pcURI = '/srv/pclasses.json'							// PClass storage URI path
+			);
 			
 			$pno_getadress = $_REQUEST['pno_getadress'];
 			$return = array();
@@ -465,7 +462,7 @@ class WC_Klarna_Get_Address {
 	public function get_country() {
 
 		$data = new WC_Gateway_Klarna_Invoice;
-		return $data->get_klarna_country();
+		return $data->klarna_helper->get_klarna_country();
 
 	}
 	
@@ -481,7 +478,7 @@ class WC_Klarna_Get_Address {
 	public function get_klarna_language( $country ) {
 
 		$data = new WC_Gateway_Klarna_Invoice;
-		return $data->get_klarna_country( $country );
+		return $data->klarna_helper->get_klarna_country( $country );
 
 	}
 	

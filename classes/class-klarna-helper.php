@@ -75,8 +75,10 @@ class WC_Gateway_Klarna_Helper {
 			case 'de_AT' :
 				$klarna_locale = 'de_at';
 				break;
-			case 'en_US' :
 			case 'en_GB' :
+				$klarna_locale = 'en_gb';
+				break;
+			case 'en_US' :
 				$klarna_locale = 'en_se';
 				break;
 			default:
@@ -128,9 +130,6 @@ class WC_Gateway_Klarna_Helper {
 			case 'AT' :
 				$current_eid = $this->parent->eid_at;
 				break;
-			case 'UK' :
-				$current_eid = $this->parent->eid_uk;
-				break;
 			default:
 				$current_eid = '';
 		}
@@ -179,9 +178,6 @@ class WC_Gateway_Klarna_Helper {
 				break;
 			case 'AT' :
 				$current_secret = $this->parent->secret_at;
-				break;
-			case 'UK' :
-				$current_secret = $this->parent->secret_uk;
 				break;
 			default:
 				$current_secret = '';
@@ -298,7 +294,7 @@ class WC_Gateway_Klarna_Helper {
 					break;
 			}
 		}
-		
+
 		// Check if $klarna_country exists among the authorized countries
 		if ( ! in_array( $klarna_country, $this->parent->authorized_countries ) ) {
 			return $this->parent->shop_country;
