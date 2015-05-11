@@ -20,8 +20,8 @@ jQuery(document).ready(function($) {
 					nonce : kcoAjax.klarna_checkout_nonce
 				},
 				success: function( response ) {
-					console.log( 'success' );
-					console.log( response.data );
+					// console.log( 'success' );
+					// console.log( response.data );
 					
 					window._klarnaCheckout(function (api) {
 						api.resume();
@@ -62,8 +62,8 @@ jQuery(document).ready(function($) {
 					nonce : kcoAjax.klarna_checkout_nonce
 				},
 				success: function( response ) {
-					console.log( 'success' );
-					console.log( response.data );
+					// console.log( 'success' );
+					// console.log( response.data );
 					
 					window._klarnaCheckout(function (api) {
 						api.resume();
@@ -105,7 +105,7 @@ jQuery(document).ready(function($) {
 				},
 				success: function( response ) {
 					// console.log( 'success' );
-					console.log( response.data );
+					// console.log( response.data );
 					
 					$( total_field ).html( response.data.cart_total );
 					$( shipping_total_field ).html( response.data.cart_shipping_total );
@@ -156,7 +156,7 @@ jQuery(document).ready(function($) {
 				},
 				success: function( response ) {
 					// console.log( 'success' );
-					console.log( response.data );
+					// console.log( response.data );
 
 					$( total_field ).html( response.data.cart_total );
 					$( subtotal_field ).html( response.data.cart_subtotal );
@@ -210,8 +210,8 @@ jQuery(document).ready(function($) {
 					nonce  : kcoAjax.klarna_checkout_nonce
 				},
 				success: function( response ) {
-					console.log( 'success' );
-					console.log( response.data );
+					// console.log( 'success' );
+					// console.log( response.data );
 										
 					window._klarnaCheckout(function (api) {
 						api.resume();
@@ -276,7 +276,7 @@ jQuery(document).ready(function($) {
 				},
 				success: function( response ) {
 					// console.log( 'remove-success' );
-					console.log( response.data );
+					// console.log( response.data );
 					
 					$( clicked_el ).closest( 'tr' ).remove();
 					$( total_field ).html( response.data.cart_total );

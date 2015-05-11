@@ -196,6 +196,24 @@ switch ( $this->shop_country ) {
 		$klarna_checkout_thanks_url = '';
 }
 
+$this->authorized_countries	= array();
+if ( ! empty( $this->eid_se ) ) {
+	$this->authorized_countries[] = 'SE';
+}
+if ( ! empty( $this->eid_no ) ) {
+	$this->authorized_countries[] = 'NO';
+}
+if ( ! empty( $this->eid_fi ) ) {
+	$this->authorized_countries[] = 'FI';
+}
+if ( ! empty( $this->eid_de ) ) {
+	$this->authorized_countries[] = 'DE';
+}
+if ( ! empty( $this->eid_de ) ) {
+	$this->authorized_countries[] = 'UK';
+}
+
+
 // Apply filters to Country and language
 $this->klarna_country 				= apply_filters( 'klarna_country', $klarna_country );
 $this->klarna_language 				= apply_filters( 'klarna_language', $klarna_language );

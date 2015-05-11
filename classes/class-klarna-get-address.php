@@ -82,7 +82,7 @@ class WC_Klarna_Get_Address {
 			global $woocommerce, $current_user;
 		
 			$original_customer = array();
-			$original_customer = WC()->session->get( 'customer' );
+			$original_customer = $woocommerce->session->get( 'customer' );
 			
 			$original_billing_first_name = '';
 			$original_billing_last_name  = '';
