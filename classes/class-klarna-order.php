@@ -318,7 +318,6 @@ class WC_Gateway_Klarna_Order {
 
 			try {
 
-
 				$ocr = $klarna->creditInvoice( $invNo ); // Invoice number
 
 				if ( $ocr ) {

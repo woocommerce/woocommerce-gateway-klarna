@@ -1243,13 +1243,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 				$this->log->add( 'klarna', 'Klarna order: ' . $_GET['klarna_order'] );
 				$this->log->add( 'klarna', 'GET: ' . json_encode($_GET) );
 			}
-			
-			/**
-			 * Retrieve Klarna order
-			 */
-			require_once( KLARNA_LIB . '/src/Klarna/Checkout.php' );  
-			Klarna_Checkout_Order::$contentType = "application/vnd.klarna.checkout.aggregated-order-v2+json";  
-			
+						
 			switch ( $_GET['scountry'] ) {
 				case 'SE':
 					$klarna_secret = $this->secret_se;
@@ -1263,6 +1257,10 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 				case 'DE' :
 					$klarna_secret = $this->secret_de;
 					break;
+				case 'gb' :
+					$klarna_secret = $this->secret_uk;
+					$klarna_eid = $this->eid_uk;
+					break;
 				default:
 					$klarna_secret = '';
 			}
@@ -1270,10 +1268,29 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			if ( $this->debug == 'yes' ) {
 				$this->log->add( 'klarna', 'Fetching Klarna order...' );
 			}
-				
-			$connector    = Klarna_Checkout_Connector::create( $klarna_secret );  			
-			$checkoutId   = $_GET['klarna_order'];  
-			$klarna_order = new Klarna_Checkout_Order( $connector, $checkoutId );  
+
+			/**
+			 * Retrieve Klarna order
+			 */
+			if ( $this->is_rest() ) {
+				require_once( KLARNA_LIB . 'vendor/autoload.php' );
+				$connector = \Klarna\Rest\Transport\Connector::create(
+					$klarna_eid,
+					$klarna_secret,
+					\Klarna\Rest\Transport\ConnectorInterface::TEST_BASE_URL
+				);
+
+				$klarna_order = new \Klarna\Rest\OrderManagement\Order(
+					$connector,
+					$_GET['klarna_order']
+				);				
+			} else {
+				require_once( KLARNA_LIB . '/src/Klarna/Checkout.php' );  
+				Klarna_Checkout_Order::$contentType = "application/vnd.klarna.checkout.aggregated-order-v2+json";
+				$connector    = Klarna_Checkout_Connector::create( $klarna_secret );  			
+				$checkoutId   = $_GET['klarna_order'];  
+				$klarna_order = new Klarna_Checkout_Order( $connector, $checkoutId );  
+			}
 			$klarna_order->fetch();
 
 			if ( $this->debug == 'yes' ) {
@@ -2183,7 +2200,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 */
 	function is_rest() {
 
-		if ( 'GB' == $this->klarna_helper->get_klarna_country() ) {
+		if ( 'GB' == strtoupper( $this->klarna_country ) ) {
 			return true;
 		}
 
@@ -2397,7 +2414,7 @@ class WC_Gateway_Klarna_Checkout_Extra {
 		$modify_standard_checkout_url = $data->get_modify_standard_checkout_url();
 		$klarna_country = $data->get_klarna_country();
 		$available_countries = $data->authorized_countries;
-		
+
 		// Change the Checkout URL if this is enabled in the settings
 		if ( 
 			$modify_standard_checkout_url == 'yes' && 

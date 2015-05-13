@@ -18,7 +18,6 @@ if ( $this->enabled != 'yes' ) {
 	return;
 }
 
-
 /**
  * If no Klarna country is set - return.
  */
@@ -342,15 +341,27 @@ if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 			),
 			$this->klarna_checkout_thanks_url
 		);
-		$merchant_push_uri = add_query_arg( 
-			array(
-				'sid' => $klarna_transient, 
-				'scountry' => $this->klarna_country, 
-				'klarna_order' => '{checkout.order.uri}', 
-				'wc-api' => 'WC_Gateway_Klarna_Checkout'
-			),
-			$this->klarna_checkout_url 
-		);
+		if ( $this->is_rest() ) {
+			$merchant_push_uri = add_query_arg( 
+				array(
+					'sid' => $klarna_transient, 
+					'scountry' => $this->klarna_country, 
+					'klarna_order' => '{checkout.order.id}', 
+					'wc-api' => 'WC_Gateway_Klarna_Checkout'
+				),
+				$this->klarna_checkout_url 
+			);			
+		} else {
+			$merchant_push_uri = add_query_arg( 
+				array(
+					'sid' => $klarna_transient, 
+					'scountry' => $this->klarna_country, 
+					'klarna_order' => '{checkout.order.uri}', 
+					'wc-api' => 'WC_Gateway_Klarna_Checkout'
+				),
+				$this->klarna_checkout_url 
+			);
+		}
 
 		// Different format for V3 and V2
 		if ( $this->is_rest() ) {

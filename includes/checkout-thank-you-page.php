@@ -14,13 +14,24 @@ if ( $this->debug == 'yes' ) {
 }
 
 // Shared secret
+$merchantId   = $this->klarna_eid;
 $sharedSecret = $this->klarna_secret;
+$orderUri     = $_GET['klarna_order'];
 
 // Connect to Klarna
-Klarna_Checkout_Order::$contentType = 'application/vnd.klarna.checkout.aggregated-order-v2+json';  
-$orderUri = $_GET['klarna_order'];
-$connector = Klarna_Checkout_Connector::create( $sharedSecret );  
-$klarna_order = new Klarna_Checkout_Order( $connector, $orderUri );
+if ( $this->is_rest() ) {
+	require_once( KLARNA_LIB . 'vendor/autoload.php' );
+	$connector = \Klarna\Rest\Transport\Connector::create(
+	    $merchantId,
+	    $sharedSecret,
+	    \Klarna\Rest\Transport\ConnectorInterface::TEST_BASE_URL
+	);
+	$klarna_order = new \Klarna\Rest\Checkout\Order( $connector, $orderUri );
+} else {
+	Klarna_Checkout_Order::$contentType = 'application/vnd.klarna.checkout.aggregated-order-v2+json';  
+	$connector = Klarna_Checkout_Connector::create( $sharedSecret );  
+	$klarna_order = new Klarna_Checkout_Order( $connector, $orderUri );
+}
 $klarna_order->fetch();
 
 if ( $klarna_order['status'] == 'checkout_incomplete' ) {
@@ -29,9 +40,14 @@ if ( $klarna_order['status'] == 'checkout_incomplete' ) {
 }
 
 // Display Klarna iframe
-$snippet = $klarna_order['gui']['snippet'];
+if ( $this->is_rest() ) {
+	$snippet = "<div>{$klarna_order['html_snippet']}</div>";
+} else {
+	$snippet = '<div class="klarna-thank-you-snippet">' . $klarna_order['gui']['snippet'] . '</div>';	
+
+}
 do_action( 'klarna_before_kco_confirmation', $_GET['sid'] );
-echo '<div class="klarna-thank-you-snippet">' . $snippet . '</div>';	
+echo $snippet;	
 do_action( 'klarna_after_kco_confirmation', $_GET['sid'] );
 do_action( 'woocommerce_thankyou', $_GET['sid'] );
 
