@@ -566,6 +566,11 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			$woocommerce->session->set( 'applied_coupons', $applied_coupons );
 			$woocommerce->cart->calculate_totals();
 			wc_clear_notices(); // This notice handled by Klarna plugin	
+
+			$klarna_sid = $woocommerce->session->get( 'klarna_sid' );
+			$woocommerce->cart->calculate_totals();
+			$klarna_wc = $woocommerce;
+			set_transient( $klarna_sid, $klarna_wc, 48 * 60 * 60 );
 			
 			$coupon_object = new WC_Coupon( $coupon );
 	
@@ -963,18 +968,18 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 					}
 
 					$total_amount = (int) ( $cart_item['line_total'] + $cart_item['line_tax'] ) * 100;
-	
+		
+					$item_price = number_format( $item_price * 100, 0, '', '' ) / $cart_item['quantity'];
 					// Check if there's a discount applied
+
 					if ( $cart_item['line_subtotal'] > $cart_item['line_total'] ) {
 						$item_discount_rate = round( 1 - ( $cart_item['line_total'] / $cart_item['line_subtotal'] ), 2 ) * 10000;
-						$item_discount = ( $item_price * $cart_item['quantity'] * 100 - $total_amount );
+						$item_discount = ( $item_price * $cart_item['quantity'] - $total_amount );
 					} else {
 						$item_discount_rate = 0;
 						$item_discount = 0;
 					}
-	
-					$item_price = number_format( $item_price * 100, 0, '', '' ) / $cart_item['quantity'];
-					
+
 					if ( $this->is_rest() ) {
 						$klarna_item = array(
 							'reference'             => strval( $reference ),
@@ -1283,6 +1288,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 				// Create order in WooCommerce
 				$this->log->add( 'klarna', 'Creating local order...' );
 				$order = $this->create_order( $klarna_order );
+				$this->log->add( 'klarna', 'Fetched order from Klarna: ' . var_export( $order, true ) );
 				$order_id = $order->id;
 				$this->log->add( 'klarna', 'Local order created, order ID: ' . $order_id );
 
@@ -1317,10 +1323,13 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 				// Store addresses
 				$this->log->add( 'klarna', 'Adding order payment method...' );
 				$this->store_payment_method( $order, $klarna_order );
+
+				$order->calculate_shipping();
+				$order->calculate_taxes();
+				$order->calculate_totals();
 						
 				// Let plugins add meta
 				do_action( 'woocommerce_checkout_update_order_meta', $order_id, array() );
-
 
 				// Check if Klarna order needs to be updated
 				$this->compare_orders( $order, $klarna_order );
@@ -1521,6 +1530,9 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		$klarna_transient = sanitize_key( $_GET['sid'] );
 		$klarna_wc = get_transient( $klarna_transient );
 
+		$this->log->add( 'klarna', 'KLARNA_TRANSIENT_ID: ' . $klarna_transient );
+		$this->log->add( 'klarna', 'KLARNA_TRANSIENT_VALUE: ' . var_export( $klarna_wc, true ) );
+
 		foreach ( $klarna_wc->cart->get_cart() as $cart_item_key => $values ) {
 			$item_id = $order->add_product(
 				$values['data'],
@@ -1538,6 +1550,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			);
 
 			if ( ! $item_id ) {
+				$this->log->add( 'klarna', 'Unable to add order item.' );
 				throw new Exception( __( 'Error: Unable to create order. Please try again.', 'woocommerce' ) );
 			}
 
@@ -1641,6 +1654,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			$item_id = $order->add_fee( $fee );
 
 			if ( ! $item_id ) {
+				$this->log->add( 'klarna', 'Unable to add order fee.' );
 				throw new Exception( __( 'Error: Unable to create order. Please try again.', 'woocommerce' ) );
 			}
 
@@ -1667,6 +1681,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 				$item_id = $order->add_shipping( $package['rates'][ $this->shipping_methods[ $package_key ] ] );
 
 				if ( ! $item_id ) {
+					$this->log->add( 'klarna', 'Unable to add shipping item.' );
 					throw new Exception( __( 'Error: Unable to create order. Please try again.', 'woocommerce' ) );
 				}
 
@@ -1687,8 +1702,11 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		$klarna_transient = sanitize_key( $_GET['sid'] );
 		$klarna_wc = get_transient( $klarna_transient );
 
+		global $woocommerce;
+
 		foreach ( array_keys( $klarna_wc->cart->taxes + $klarna_wc->cart->shipping_taxes ) as $tax_rate_id ) {
 			if ( ! $order->add_tax( $tax_rate_id, $klarna_wc->cart->get_tax_amount( $tax_rate_id ), $woocommerce->cart->get_shipping_tax_amount( $tax_rate_id ) ) ) {
+				$this->log->add( 'klarna', 'Unable to add taxes.' );
 				throw new Exception( __( 'Error: Unable to create order. Please try again.', 'woocommerce' ) );
 			}
 		}
@@ -1707,6 +1725,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 
 		foreach ( $klarna_wc->cart->get_coupons() as $code => $coupon ) {
 			if ( ! $order->add_coupon( $code, $klarna_wc->cart->get_coupon_discount_amount( $code ) ) ) {
+				$this->log->add( 'klarna', 'Unable to add coupons.' );
 				throw new Exception( __( 'Error: Unable to create order. Please try again.', 'woocommerce' ) );
 			}
 		}
@@ -2378,9 +2397,14 @@ class WC_Gateway_Klarna_Checkout_Extra {
 		$modify_standard_checkout_url = $data->get_modify_standard_checkout_url();
 		$klarna_country = $data->get_klarna_country();
 		$available_countries = $data->authorized_countries;
-
+		
 		// Change the Checkout URL if this is enabled in the settings
-		if ( $modify_standard_checkout_url == 'yes' && $enabled == 'yes' && ! empty( $klarna_checkout_url ) && in_array( $klarna_country, $available_countries ) ) {
+		if ( 
+			$modify_standard_checkout_url == 'yes' && 
+			$enabled == 'yes' && 
+			! empty( $klarna_checkout_url ) && 
+			in_array( strtoupper( $klarna_country ), $available_countries ) 
+		) {
 			$url = $klarna_checkout_url;
 		}
 		

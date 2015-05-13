@@ -209,8 +209,8 @@ if ( ! empty( $this->eid_fi ) ) {
 if ( ! empty( $this->eid_de ) ) {
 	$this->authorized_countries[] = 'DE';
 }
-if ( ! empty( $this->eid_de ) ) {
-	$this->authorized_countries[] = 'UK';
+if ( ! empty( $this->eid_uk ) ) {
+	$this->authorized_countries[] = 'GB';
 }
 
 

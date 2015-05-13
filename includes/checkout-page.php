@@ -147,9 +147,7 @@ if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 		);
 	} else {
 		require_once( KLARNA_LIB . '/src/Klarna/Checkout.php' );
-		Klarna_Checkout_Order::$baseUri = $this->klarna_server;
-		Klarna_Checkout_Order::$contentType = 'application/vnd.klarna.checkout.aggregated-order-v2+json';
-		$connector = Klarna_Checkout_Connector::create($sharedSecret);
+		$connector = Klarna_Checkout_Connector::create( $sharedSecret );
 	}
 	$klarna_order = null;
 
@@ -426,8 +424,9 @@ if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 			$create['order_amount'] = WC()->cart->total * 100;
 			$create['order_tax_amount'] = WC()->cart->get_taxes_total() * 100;
 		} else  {
+			Klarna_Checkout_Order::$baseUri = $this->klarna_server;
+			Klarna_Checkout_Order::$contentType = 'application/vnd.klarna.checkout.aggregated-order-v2+json';
 			$klarna_order = new Klarna_Checkout_Order( $connector );
-			$klarna_order->fetch();
 		}
 
 		$klarna_order->create( apply_filters( 'kco_create_order', $create ) );
