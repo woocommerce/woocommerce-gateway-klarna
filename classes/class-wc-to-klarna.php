@@ -64,24 +64,8 @@ class WC_Gateway_Klarna_WC2K {
 	 *
 	 * @return boolean
 	 */
-	public function is_cart_empty() {
+	public function is_cart_not_empty() {
 		if ( sizeof( $this->cart ) > 0 ) {
-			return true;
-		} else {
-			return false;
-		}
-	}
-
-	/**
-	 * Check if Rest API is used.
-	 * 
-	 * @since  2.0.0
-	 * @access public
-	 *
-	 * @return boolean
-	 */
-	public function is_rest() {
-		if ( $this->is_rest() ) {
 			return true;
 		} else {
 			return false;
@@ -99,6 +83,9 @@ class WC_Gateway_Klarna_WC2K {
 	 * @return array $cart_contents Formatted array ready for Klarna.
 	 */
 	public function process_cart_contents() {
+		global $woocommerce;
+		$woocommerce->cart->calculate_shipping();
+		$woocommerce->cart->calculate_totals();
 		$cart = array();
 
 		foreach ( $woocommerce->cart->get_cart() as $cart_item ) {
@@ -115,7 +102,7 @@ class WC_Gateway_Klarna_WC2K {
 				$item_tax_rate        = $this->get_item_tax_rate( $cart_item, $_product );
 				$item_total_amount    = $this->get_item_total_amount( $cart_item );
 	
-				if ( $this->is_rest() ) {
+				if ( $this->is_rest ) {
 					$klarna_item = array(
 						'reference'             => $item_reference,
 						'name'                  => $item_name,
@@ -124,7 +111,7 @@ class WC_Gateway_Klarna_WC2K {
 						'tax_rate'              => $item_tax_rate,
 						'total_amount'          => $item_total_amount,
 						'total_tax_amount'      => $item_tax_amount,
-						'total_discount_amount' => $item_discount
+						'total_discount_amount' => $item_discount_amount
 					);
 				} else {
 					$klarna_item = array(
@@ -141,6 +128,38 @@ class WC_Gateway_Klarna_WC2K {
 			}
 		}
 
+		// Process shipping
+		if ( $woocommerce->cart->shipping_total > 0 ) {
+			$shipping_name       = $this->get_shipping_name();
+			$shipping_amount     = $this->get_shipping_amount();
+			$shipping_tax_rate   = $this->get_shipping_tax_rate();
+			$shipping_tax_amount = $this->get_shipping_tax_amount();
+	
+			if ( $this->is_rest ) {
+				$shipping = array(  
+					'type'             => 'shipping_fee',
+					'reference'        => 'SHIPPING',
+					'name'             => $shipping_name,
+					'quantity'         => 1,
+					'unit_price'       => $shipping_amount,
+					'tax_rate'         => $shipping_tax_rate,
+					'total_amount'     => $shipping_amount,
+					'total_tax_amount' => $shipping_tax_amount
+				);
+			} else {
+				$shipping = array(  
+					'type'       => 'shipping_fee',
+					'reference'  => 'SHIPPING',
+					'name'       => $shipping_name,
+					'quantity'   => 1,
+					'unit_price' => $shipping_amount,
+					'tax_rate'   => $shipping_tax_rate
+				);
+			}
+			$cart[] = $shipping;
+	
+		}
+
 		return $cart;
 	}
 
@@ -154,7 +173,7 @@ class WC_Gateway_Klarna_WC2K {
 	 * @return integer $item_tax_amount Item tax amount.
 	 */
 	public function get_item_tax_amount( $cart_item ) {
-		$item_tax_amount = $cart_item['line_subtotal_tax'] * 100;
+		$item_tax_amount = $cart_item['line_tax'] * 100;
 
 		return $item_tax_amount;
 	}
@@ -272,7 +291,9 @@ class WC_Gateway_Klarna_WC2K {
 	 */
 	public function get_item_discount_amount( $cart_item ) {
 		if ( $cart_item['line_subtotal'] > $cart_item['line_total'] ) {
-			$item_discount_amount = ( $item_price * $cart_item['quantity'] - $total_amount );
+			$item_price = $this->get_item_price( $cart_item );
+			$item_total_amount = $this->get_item_total_amount( $cart_item );
+			$item_discount_amount = ( $item_price * $cart_item['quantity'] - $item_total_amount );
 		} else {
 			$item_discount_amount = 0;
 		}
@@ -312,6 +333,90 @@ class WC_Gateway_Klarna_WC2K {
 		$item_total_amount = (int) ( $cart_item['line_total'] + $cart_item['line_tax'] ) * 100;
 
 		return $item_total_amount;
+	}
+
+	/**
+	 * Get shipping method name.
+	 *
+	 * @since  2.0.0
+	 * @access public
+	 *
+	 * @return string $shipping_name Name for selected shipping method.
+	 */
+	public function get_shipping_name() {
+		global $woocommerce;
+
+		$shipping_packages = $woocommerce->shipping->get_packages();
+		foreach ( $shipping_packages as $i => $package ) {
+			$chosen_method = isset( $woocommerce->session->chosen_shipping_methods[ $i ] ) ? $woocommerce->session->chosen_shipping_methods[ $i ] : '';
+
+			if ( '' != $chosen_method ) {
+				$package_rates = $package['rates'];
+				foreach ( $package_rates as $rate_key => $rate_value ) {
+					if ( $rate_key == $chosen_method ) {
+						$shipping_name = $rate_value->label;
+					}
+				}
+			}	
+		}
+
+		if ( ! isset( $shipping_name ) ) {
+			$shipping_name = __( 'Shipping', 'klarna' );
+		}
+
+		return $shipping_name;
+	}
+
+	/**
+	 * Get shipping method amount.
+	 *
+	 * @since  2.0.0
+	 * @access public
+	 *
+	 * @return integer $shipping_amount Amount for selected shipping method.
+	 */
+	public function get_shipping_amount() {
+		global $woocommerce;
+
+		$shipping_amount = (int) number_format( ( $woocommerce->cart->shipping_total + $woocommerce->cart->shipping_tax_total ) * 100, 0, '', '' );
+
+		return $shipping_amount;
+	}
+
+	/**
+	 * Get shipping method tax rate.
+	 *
+	 * @since  2.0.0
+	 * @access public
+	 *
+	 * @return integer $shipping_tax_rate Tax rate for selected shipping method.
+	 */
+	public function get_shipping_tax_rate() {
+		global $woocommerce;
+
+		if ( $woocommerce->cart->shipping_tax_total > 0 ) {
+			$shipping_tax_rate = round( $woocommerce->cart->shipping_tax_total / $woocommerce->cart->shipping_total, 2 ) * 100;
+		} else {
+			$shipping_tax_rate = 00;
+		}
+
+		return intval( $shipping_tax_rate . '00' );
+	}
+
+	/**
+	 * Get shipping method tax amount.
+	 *
+	 * @since  2.0.0
+	 * @access public
+	 *
+	 * @return integer $shipping_tax_amount Tax amount for selected shipping method.
+	 */
+	public function get_shipping_tax_amount() {
+		global $woocommerce;
+
+		$shipping_tax_amount = $woocommerce->cart->shipping_tax_total * 100;
+
+		return $shipping_tax_amount;
 	}
 
 }
