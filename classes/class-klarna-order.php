@@ -10,7 +10,7 @@
 
 
 /**
- * Class that handles Klarna orders .
+ * Class that handles Klarna orders.
  */
 class WC_Gateway_Klarna_Order {
 

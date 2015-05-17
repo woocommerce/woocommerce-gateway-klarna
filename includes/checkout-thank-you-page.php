@@ -52,5 +52,5 @@ do_action( 'klarna_after_kco_confirmation', $_GET['sid'] );
 do_action( 'woocommerce_thankyou', $_GET['sid'] );
 
 // Clear session and empty cart
-unset( $_SESSION['klarna_checkout'] );
+WC()->session->__unset('12345');
 $woocommerce->cart->empty_cart(); // Remove cart

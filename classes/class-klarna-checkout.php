@@ -924,6 +924,9 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 				
 		global $woocommerce;
 		
+		$woocommerce->cart->calculate_shipping();
+		$woocommerce->cart->calculate_totals();
+
 		/**
 		 * Process cart contents
 		 */
@@ -932,7 +935,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			foreach ( $woocommerce->cart->get_cart() as $cart_item ) {
 	
 				if ( $cart_item['quantity'] ) {
-	
+
 					$_product = wc_get_product( $cart_item['product_id'] );
 	
 					// We manually calculate the tax percentage here
@@ -988,7 +991,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 							'unit_price'            => (int) $item_price,
 							'tax_rate'              => intval( $item_tax_percentage . '00' ),
 							'total_amount'          => $total_amount,
-							'total_tax_amount'      => (int) $cart_item['line_tax'] * 100,
+							'total_tax_amount'      => $cart_item['line_subtotal_tax'] * 100,
 							'total_discount_amount' => $item_discount
 						);
 					} else {
@@ -1014,8 +1017,6 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		/**
 		 * Process shipping
 		 */
-		$woocommerce->cart->calculate_shipping();
-		$woocommerce->cart->calculate_totals();
 		if ( $woocommerce->cart->shipping_total > 0 ) {
 	
 			// We manually calculate the tax percentage here
@@ -1048,7 +1049,6 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 				$klarna_shipping_method = __( 'Shipping', 'klarna' );
 			}
 	
-			
 			$shipping = array(  
 				'type'       => 'shipping_fee',
 				'reference'  => 'SHIPPING',
@@ -1059,7 +1059,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			);
 			if ( $this->is_rest() ) {
 				$shipping['total_amount'] = (int) $shipping_price;
-				$shipping['total_tax_amount'] = (int) $woocommerce->cart->shipping_tax_total * 100;
+				$shipping['total_tax_amount'] = $woocommerce->cart->shipping_tax_total * 100;
 			}
 			$cart[] = $shipping;
 	
@@ -1347,10 +1347,6 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 						
 				// Let plugins add meta
 				do_action( 'woocommerce_checkout_update_order_meta', $order_id, array() );
-
-				// Check if Klarna order needs to be updated
-				$this->compare_orders( $order, $klarna_order );
-				
 				
 				// Store user id in order so the user can keep track of track it in My account
 				if ( email_exists( $klarna_order['billing_address']['email'] ) ) {
@@ -1546,9 +1542,6 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 
 		$klarna_transient = sanitize_key( $_GET['sid'] );
 		$klarna_wc = get_transient( $klarna_transient );
-
-		$this->log->add( 'klarna', 'KLARNA_TRANSIENT_ID: ' . $klarna_transient );
-		$this->log->add( 'klarna', 'KLARNA_TRANSIENT_VALUE: ' . var_export( $klarna_wc, true ) );
 
 		foreach ( $klarna_wc->cart->get_cart() as $cart_item_key => $values ) {
 			$item_id = $order->add_product(
@@ -2207,6 +2200,56 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		return false;
 
 	}
+
+
+	/**
+	 * Determines if KCO checkout page should be displayed.
+	 * 
+	 * @return boolean
+	 * @since  2.0.0
+	 */
+	function show_kco() {
+
+		// Don't render the Klarna Checkout form if the payment gateway isn't enabled.
+		if ( $this->enabled != 'yes' ) {
+			return false;
+		}
+
+		// If no Klarna country is set - return.
+		if ( empty( $this->klarna_country ) ) {
+			echo apply_filters(
+				'klarna_checkout_wrong_country_message', 
+				sprintf( 
+					__( 'Sorry, you can not buy via Klarna Checkout from your country or currency. Please <a href="%s">use another payment method</a>. ', 'klarna' ),
+					get_permalink( get_option( 'woocommerce_checkout_page_id' ) )
+				) 
+			);
+
+			return false;
+		}
+
+		// If checkout registration is disabled and not logged in, the user cannot checkout
+		global $woocommerce;
+		$checkout = $woocommerce->checkout();
+		if ( ! $checkout->enable_guest_checkout && ! is_user_logged_in() ) {
+			echo apply_filters( 
+				'woocommerce_checkout_must_be_logged_in_message',
+				__( 'You must be logged in to checkout.', 'woocommerce' ) 
+			);
+			return false;
+		}
+
+
+		// If the WooCommerce terms page or the Klarna Checkout settings field 
+		// Terms Page isn't set, do nothing.
+		if ( empty( $this->terms_url ) ) {
+			return false;
+		}
+
+		return true;
+
+	}
+
     
 } // End class WC_Gateway_Klarna_Checkout
 

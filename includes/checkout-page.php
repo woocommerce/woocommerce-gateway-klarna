@@ -5,45 +5,19 @@
  * @package WC_Gateway_Klarna
  */
 
-
 // Bail if accessed directly
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-/**
- * Don't render the Klarna Checkout form if the payment gateway isn't enabled.
- */
-if ( $this->enabled != 'yes' ) {
-	return;
-}
 
-/**
- * If no Klarna country is set - return.
- */
-if ( empty( $this->klarna_country ) ) {
-	echo apply_filters(
-		'klarna_checkout_wrong_country_message', 
-		sprintf( 
-			__( 'Sorry, you can not buy via Klarna Checkout from your country or currency. Please <a href="%s">use another payment method</a>. ', 'klarna' ),
-			get_permalink( get_option( 'woocommerce_checkout_page_id' ) )
-		) 
-	);
+WC()->session->set('12345','12345');
+print_r( WC()->session->get('12345'));
+WC()->session->__unset('12345');
+print_r( WC()->session->get('12345'));
 
-	return;
-}
-
-
-/**
- * If checkout registration is disabled and not logged in, the user cannot checkout
- */
-global $woocommerce;
-$checkout = $woocommerce->checkout();
-if ( ! $checkout->enable_guest_checkout && ! is_user_logged_in() ) {
-	echo apply_filters( 
-		'woocommerce_checkout_must_be_logged_in_message',
-		__( 'You must be logged in to checkout.', 'woocommerce' ) 
-	);
+// Check if iframe needs to be displayed
+if ( ! $this->show_kco() ) {
 	return;
 }
 
@@ -77,15 +51,6 @@ if ( wp_is_mobile() ) {
 	$klarna_checkout_layout = 'mobile';
 } else {
 	$klarna_checkout_layout = 'desktop';
-}
-
-
-/**
- * If the WooCommerce terms page or the Klarna Checkout settings field 
- * Terms Page isn't set, do nothing.
- */
-if ( empty( $this->terms_url ) ) {
-	return;
 }
 
 
