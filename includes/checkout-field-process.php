@@ -41,9 +41,9 @@ if (
 			'error'
 		);
 	}
-
+	
 	// Check if date of birth is set, if not add an error
-	if ( ! $_POST['date_of_birth_day'] || ! $_POST['date_of_birth_month'] || ! $_POST['date_of_birth_year'] ) {
+	if ( ! $_POST[$klarna_field_prefix . 'date_of_birth_day'] || ! $_POST[$klarna_field_prefix . 'date_of_birth_month'] || ! $_POST[$klarna_field_prefix . 'date_of_birth_year'] ) {
 		wc_add_notice(
 			__( '<strong>Date of birth</strong> is a required field.', 'klarna' ), 
 			'error'

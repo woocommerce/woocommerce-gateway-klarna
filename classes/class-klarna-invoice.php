@@ -771,11 +771,11 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 		// Collect the dob different depending on country
 		if ( $_POST['billing_country'] == 'NL' || $_POST['billing_country'] == 'DE' ) {
 			$klarna_pno_day = 
-				isset( $_POST['klarna_invo_date_of_birth_day'] ) ? woocommerce_clean( $_POST['klarna_invo_date_of_birth_day'] ) : '';
+				isset( $_POST['klarna_invoice_date_of_birth_day'] ) ? woocommerce_clean( $_POST['klarna_invoice_date_of_birth_day'] ) : '';
 			$klarna_pno_month = 
-				isset( $_POST['klarna_invo_date_of_birth_month'] ) ? woocommerce_clean( $_POST['klarna_invo_date_of_birth_month'] ) : '';
+				isset( $_POST['klarna_invoice_date_of_birth_month'] ) ? woocommerce_clean( $_POST['klarna_invoice_date_of_birth_month'] ) : '';
 			$klarna_pno_year = 
-				isset( $_POST['klarna_invo_date_of_birth_year'] ) ? woocommerce_clean( $_POST['klarna_invo_date_of_birth_year'] ) : '';
+				isset( $_POST['klarna_invoice_date_of_birth_year'] ) ? woocommerce_clean( $_POST['klarna_invoice_date_of_birth_year'] ) : '';
 
 			$klarna_pno = $klarna_pno_day . $klarna_pno_month . $klarna_pno_year;
 		} else {
