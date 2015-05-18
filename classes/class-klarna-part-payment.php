@@ -102,7 +102,7 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 		add_action( 'woocommerce_order_status_completed', array( $this, 'activate_klarna_order' ) );
 
 		// Add Klarna shipping info to order confirmation page and email
-		add_filter( 'woocommerce_thankyou_order_received_text', array( $this, 'output_klarna_details_confirmation' ) );
+		add_filter( 'woocommerce_thankyou_order_received_text', array( $this, 'output_klarna_details_confirmation' ), 20, 2 );
 		add_action( 'woocommerce_email_footer', array( $this, 'output_klarna_details_confirmation_email' ) );
 
 	}
@@ -114,9 +114,13 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 	 * @param  $text  Default order confirmation text
 	 * @since  2.0.0
 	 */
-	public function output_klarna_details_confirmation( $text ) {
+	public function output_klarna_details_confirmation( $text, $order ) {
 
-		return $text . $this->get_klarna_shipping_info();
+		if( 'klarna_part_payment' == $order->payment_method ) {
+			return $text . $this->get_klarna_shipping_info();
+		} else {
+			return $text;
+		}
 
 	}
 
