@@ -78,8 +78,7 @@ if ( wp_is_mobile() ) {
 
 		$klarna_pclasses = new WC_Gateway_Klarna_PClasses( $klarna, $pclass_type, $country );
 		$pclasses = $klarna_pclasses->get_pclasses_for_country_and_type();
-
-		if ( $pclasses ) { ?>
+		?>
 
 			<label for="<?php echo $klarna_select_pclass_element; ?>">
 				<?php echo __("Payment plan", 'klarna') ?> <span class="required">*</span>
@@ -107,50 +106,49 @@ if ( wp_is_mobile() ) {
 			}
 			?>
 			<option value="-1"><?php echo $invoice_string; ?></option>
-
-			<?php foreach ( $pclasses as $pclass ) { // Loop through the available PClasses stored in the file srv/pclasses.json
-
-				if ( in_array( $pclass->getType(), $pclass_type ) ) {
-					// Get monthly cost for current pclass
-					$monthly_cost = KlarnaCalc::calc_monthly_cost(
-						$sum,
-						$pclass,
-						$flag
-					);
-									
-					// Get total credit purchase cost for current pclass (only required in Norway)
-					$total_credit_purchase_cost = KlarnaCalc::total_credit_purchase_cost(
-						$sum,
-						$pclass,
-						$flag
-					);
-					
-					// Check that Cart total is larger than min amount for current PClass				
-	   				if ( $sum > $pclass->getMinAmount() ) {
-	   					echo '<option value="' . $pclass->getId() . '">';
-							// Sweden, Denmark, Finland, Germany & Netherlands - Don't show total cost
-							echo sprintf(
-								__('%s - %s %s/month - %s%s - Start %s', 'klarna'),
-								$pclass->getDescription(),
-								$monthly_cost,
-								$this->selected_currency,
-								$pclass->getInterestRate(),
-								'%',
-								$pclass->getStartFee()
-							);
-						echo '</option>';
-					
-					} // End if ($sum > $pclass->getMinAmount())
-					
-	   			} // End PClass type check
-			
-			} // End foreach
-			?>
-			</select>
+			<?php 
+			if ( $pclasses ) { 
+				foreach ( $pclasses as $pclass ) { // Loop through the available PClasses stored in the file srv/pclasses.json
 	
-		<?php } else {
-			echo __('Klarna PClasses seem to be missing. Klarna Invoice does not work.', 'klarna');
-		} ?>		
+					if ( in_array( $pclass->getType(), $pclass_type ) ) {
+						// Get monthly cost for current pclass
+						$monthly_cost = KlarnaCalc::calc_monthly_cost(
+							$sum,
+							$pclass,
+							$flag
+						);
+										
+						// Get total credit purchase cost for current pclass (only required in Norway)
+						$total_credit_purchase_cost = KlarnaCalc::total_credit_purchase_cost(
+							$sum,
+							$pclass,
+							$flag
+						);
+						
+						// Check that Cart total is larger than min amount for current PClass				
+		   				if ( $sum > $pclass->getMinAmount() ) {
+		   					echo '<option value="' . $pclass->getId() . '">';
+								// Sweden, Denmark, Finland, Germany & Netherlands - Don't show total cost
+								echo sprintf(
+									__('%s - %s %s/month - %s%s - Start %s', 'klarna'),
+									$pclass->getDescription(),
+									$monthly_cost,
+									$this->selected_currency,
+									$pclass->getInterestRate(),
+									'%',
+									$pclass->getStartFee()
+								);
+							echo '</option>';
+						
+						} // End if ($sum > $pclass->getMinAmount())
+						
+		   			} // End PClass type check
+				
+				} // End foreach
+				
+			} // End if $pclasses
+			?>
+			</select>		
 	</p>
 	<div class="clear"></div>
 	
