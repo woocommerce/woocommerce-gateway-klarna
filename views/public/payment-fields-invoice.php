@@ -153,7 +153,7 @@ if ( wp_is_mobile() ) {
 	<div class="clear"></div>
 	
 	<p class="form-row form-row-first">
-	<?php if ( $this->klarna_helper->get_klarna_country() == 'NL' || $this->klarna_helper->get_klarna_country() == 'DE' ) { ?>
+	<?php if ( $this->klarna_helper->get_klarna_country() == 'NL' || $this->klarna_helper->get_klarna_country() == 'DE' || $this->klarna_helper->get_klarna_country() == 'AT' ) { ?>
 		<label for="<?php echo $klarna_dob_element; ?>">
 			<?php echo __("Date of Birth", 'klarna') ?> <span class="required">*</span>
 		</label>
@@ -301,7 +301,7 @@ if ( wp_is_mobile() ) {
 	?>
 	</p>
 	
-	<?php if ( $this->klarna_helper->get_klarna_country() == 'NL' || $this->klarna_helper->get_klarna_country() == 'DE' ) { ?>
+	<?php if ( $this->klarna_helper->get_klarna_country() == 'NL' || $this->klarna_helper->get_klarna_country() == 'DE' || $this->klarna_helper->get_klarna_country() == 'AT' ) { ?>
 		<p class="form-row form-row-last">
 			<label for="klarna_invoice_gender">
 				<?php echo __("Gender", 'klarna') ?> <span class="required">*</span>

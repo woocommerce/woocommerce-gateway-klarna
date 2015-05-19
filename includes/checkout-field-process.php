@@ -32,7 +32,8 @@ if (
  */
 if ( 
 	$_POST['billing_country'] == 'NL' || 
-	$_POST['billing_country'] == 'DE' 
+	$_POST['billing_country'] == 'DE' ||
+	$_POST['billing_country'] == 'AT'
 ) {
 	// Check if gender is set, if not add an error
 	if ( empty( $_POST[$klarna_field_prefix . 'gender'] ) ) {

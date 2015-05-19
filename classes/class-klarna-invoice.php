@@ -487,10 +487,10 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 	 * @since 1.0.0
 	 */		
 	function is_available() {
-	
+		
 		if ( ! $this->check_enabled() ) return false;
 		if ( ! $this->check_required_fields() ) return false;
-		if ( ! $this->check_pclasses() ) return false;
+		//if ( ! $this->check_pclasses() ) return false;
 		if ( ! $this->check_cart_total() ) return false;
 		if ( ! $this->check_lower_threshold() ) return false;
 		if ( ! $this->check_upper_threshold() ) return false;
@@ -653,6 +653,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 		
 		// Currency check
 		$currency_for_country = $this->klarna_helper->get_currency_for_country( $woocommerce->customer->get_country() );
+		
 		if ( ! empty( $currency_for_country ) && $currency_for_country !== $this->selected_currency ) {
 			return false;
 		}
@@ -769,7 +770,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 	function collect_dob() {
 	
 		// Collect the dob different depending on country
-		if ( $_POST['billing_country'] == 'NL' || $_POST['billing_country'] == 'DE' ) {
+		if ( $_POST['billing_country'] == 'NL' || $_POST['billing_country'] == 'DE' || $_POST['billing_country'] == 'AT' ) {
 			$klarna_pno_day = 
 				isset( $_POST['klarna_invoice_date_of_birth_day'] ) ? woocommerce_clean( $_POST['klarna_invoice_date_of_birth_day'] ) : '';
 			$klarna_pno_month = 
