@@ -78,8 +78,7 @@ if ( wp_is_mobile() ) {
 
 		$klarna_pclasses = new WC_Gateway_Klarna_PClasses( $klarna, $pclass_type, $country );
 		$pclasses = $klarna_pclasses->get_pclasses_for_country_and_type();
-
-		if ( $pclasses ) { ?>
+		?>
 
 			<label for="<?php echo $klarna_select_pclass_element; ?>">
 				<?php echo __("Payment plan", 'klarna') ?> <span class="required">*</span>
@@ -107,59 +106,58 @@ if ( wp_is_mobile() ) {
 			}
 			?>
 			<option value="-1"><?php echo $invoice_string; ?></option>
-
-			<?php foreach ( $pclasses as $pclass ) { // Loop through the available PClasses stored in the file srv/pclasses.json
-
-				if ( in_array( $pclass->getType(), $pclass_type ) ) {
-					// Get monthly cost for current pclass
-					$monthly_cost = KlarnaCalc::calc_monthly_cost(
-						$sum,
-						$pclass,
-						$flag
-					);
-									
-					// Get total credit purchase cost for current pclass (only required in Norway)
-					$total_credit_purchase_cost = KlarnaCalc::total_credit_purchase_cost(
-						$sum,
-						$pclass,
-						$flag
-					);
-					
-					// Check that Cart total is larger than min amount for current PClass				
-	   				if ( $sum > $pclass->getMinAmount() ) {
-	   					echo '<option value="' . $pclass->getId() . '">';
-							// Sweden, Denmark, Finland, Germany & Netherlands - Don't show total cost
-							echo sprintf(
-								__('%s - %s %s/month - %s%s - Start %s', 'klarna'),
-								$pclass->getDescription(),
-								$monthly_cost,
-								$this->selected_currency,
-								$pclass->getInterestRate(),
-								'%',
-								$pclass->getStartFee()
-							);
-						echo '</option>';
-					
-					} // End if ($sum > $pclass->getMinAmount())
-					
-	   			} // End PClass type check
-			
-			} // End foreach
-			?>
-			</select>
+			<?php 
+			if ( $pclasses ) { 
+				foreach ( $pclasses as $pclass ) { // Loop through the available PClasses stored in the file srv/pclasses.json
 	
-		<?php } else {
-			echo __('Klarna PClasses seem to be missing. Klarna Invoice does not work.', 'klarna');
-		} ?>		
+					if ( in_array( $pclass->getType(), $pclass_type ) ) {
+						// Get monthly cost for current pclass
+						$monthly_cost = KlarnaCalc::calc_monthly_cost(
+							$sum,
+							$pclass,
+							$flag
+						);
+										
+						// Get total credit purchase cost for current pclass (only required in Norway)
+						$total_credit_purchase_cost = KlarnaCalc::total_credit_purchase_cost(
+							$sum,
+							$pclass,
+							$flag
+						);
+						
+						// Check that Cart total is larger than min amount for current PClass				
+		   				if ( $sum > $pclass->getMinAmount() ) {
+		   					echo '<option value="' . $pclass->getId() . '">';
+								// Sweden, Denmark, Finland, Germany & Netherlands - Don't show total cost
+								echo sprintf(
+									__('%s - %s %s/month - %s%s - Start %s', 'klarna'),
+									$pclass->getDescription(),
+									$monthly_cost,
+									$this->selected_currency,
+									$pclass->getInterestRate(),
+									'%',
+									$pclass->getStartFee()
+								);
+							echo '</option>';
+						
+						} // End if ($sum > $pclass->getMinAmount())
+						
+		   			} // End PClass type check
+				
+				} // End foreach
+				
+			} // End if $pclasses
+			?>
+			</select>		
 	</p>
 	<div class="clear"></div>
 	
 	<p class="form-row form-row-first">
-	<?php if ( $this->klarna_helper->get_klarna_country() == 'NL' || $this->klarna_helper->get_klarna_country() == 'DE' ) { ?>
+	<?php if ( $this->klarna_helper->get_klarna_country() == 'NL' || $this->klarna_helper->get_klarna_country() == 'DE' || $this->klarna_helper->get_klarna_country() == 'AT' ) { ?>
 		<label for="<?php echo $klarna_dob_element; ?>">
 			<?php echo __("Date of Birth", 'klarna') ?> <span class="required">*</span>
 		</label>
-		<select class="dob_select dob_day" name="date_of_birth_day" style="width:60px;">
+		<select class="dob_select dob_day" name="klarna_invoice_date_of_birth_day" style="width:60px;">
 			<option value=""><?php echo __("Day", 'klarna') ?></option>
 			<option value="01">01</option>
 			<option value="02">02</option>
@@ -193,7 +191,7 @@ if ( wp_is_mobile() ) {
 			<option value="30">30</option>
 			<option value="31">31</option>
 		</select>
-		<select class="dob_select dob_month" name="date_of_birth_month" style="width:80px;">
+		<select class="dob_select dob_month" name="klarna_invoice_date_of_birth_month" style="width:80px;">
 			<option value=""><?php echo __("Month", 'klarna') ?></option>
 			<option value="01"><?php echo __("Jan", 'klarna') ?></option>
 			<option value="02"><?php echo __("Feb", 'klarna') ?></option>
@@ -208,7 +206,7 @@ if ( wp_is_mobile() ) {
 			<option value="11"><?php echo __("Nov", 'klarna') ?></option>
 			<option value="12"><?php echo __("Dec", 'klarna') ?></option>
 		</select>
-		<select class="dob_select dob_year" name="date_of_birth_year" style="width:60px;">
+		<select class="dob_select dob_year" name="klarna_invoice_date_of_birth_year" style="width:60px;">
 			<option value=""><?php echo __("Year", 'klarna') ?></option>
 			<option value="1920">1920</option>
 			<option value="1921">1921</option>
@@ -303,7 +301,7 @@ if ( wp_is_mobile() ) {
 	?>
 	</p>
 	
-	<?php if ( $this->klarna_helper->get_klarna_country() == 'NL' || $this->klarna_helper->get_klarna_country() == 'DE' ) { ?>
+	<?php if ( $this->klarna_helper->get_klarna_country() == 'NL' || $this->klarna_helper->get_klarna_country() == 'DE' || $this->klarna_helper->get_klarna_country() == 'AT' ) { ?>
 		<p class="form-row form-row-last">
 			<label for="klarna_invoice_gender">
 				<?php echo __("Gender", 'klarna') ?> <span class="required">*</span>

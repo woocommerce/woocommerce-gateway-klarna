@@ -102,7 +102,7 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 		add_action( 'woocommerce_order_status_completed', array( $this, 'activate_klarna_order' ) );
 
 		// Add Klarna shipping info to order confirmation page and email
-		add_filter( 'woocommerce_thankyou_order_received_text', array( $this, 'output_klarna_details_confirmation' ) );
+		add_filter( 'woocommerce_thankyou_order_received_text', array( $this, 'output_klarna_details_confirmation' ), 20, 2 );
 		add_action( 'woocommerce_email_footer', array( $this, 'output_klarna_details_confirmation_email' ) );
 
 	}
@@ -114,9 +114,13 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 	 * @param  $text  Default order confirmation text
 	 * @since  2.0.0
 	 */
-	public function output_klarna_details_confirmation( $text ) {
+	public function output_klarna_details_confirmation( $text, $order ) {
 
-		return $text . $this->get_klarna_shipping_info();
+		if( 'klarna_part_payment' == $order->payment_method ) {
+			return $text . $this->get_klarna_shipping_info();
+		} else {
+			return $text;
+		}
 
 	}
 
@@ -637,11 +641,11 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 		// Collect the dob different depending on country
 		if ( $_POST['billing_country'] == 'NL' || $_POST['billing_country'] == 'DE' ) {
 			$klarna_pno_day = 
-				isset( $_POST['date_of_birth_day'] ) ? woocommerce_clean( $_POST['date_of_birth_day'] ) : '';
+				isset( $_POST['klarna_part_payment_date_of_birth_day'] ) ? woocommerce_clean( $_POST['klarna_part_payment_date_of_birth_day'] ) : '';
 			$klarna_pno_month = 
-				isset( $_POST['date_of_birth_month'] ) ? woocommerce_clean( $_POST['date_of_birth_month'] ) : '';
+				isset( $_POST['klarna_part_payment_date_of_birth_month'] ) ? woocommerce_clean( $_POST['klarna_part_payment_date_of_birth_month'] ) : '';
 			$klarna_pno_year = 
-				isset( $_POST['date_of_birth_year'] ) ? woocommerce_clean( $_POST['date_of_birth_year'] ) : '';
+				isset( $_POST['klarna_part_payment_date_of_birth_year'] ) ? woocommerce_clean( $_POST['klarna_part_payment_date_of_birth_year'] ) : '';
 
 			$klarna_pno = $klarna_pno_day . $klarna_pno_month . $klarna_pno_year;
 		} else {

@@ -106,7 +106,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 		// add_action( 'woocommerce_saved_order_items', array( $this, 'update_klarna_order' ), 10, 2 );
 
 		// Add Klarna shipping info to order confirmation page and email
-		add_filter( 'woocommerce_thankyou_order_received_text', array( $this, 'output_klarna_details_confirmation' ) );
+		add_filter( 'woocommerce_thankyou_order_received_text', array( $this, 'output_klarna_details_confirmation'), 20, 2 );
 		add_action( 'woocommerce_email_footer', array( $this, 'output_klarna_details_confirmation_email' ) );
 		
 	}
@@ -118,9 +118,13 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 	 * @param  $text  Default order confirmation text
 	 * @since  2.0.0
 	 */
-	public function output_klarna_details_confirmation( $text ) {
-
-		return $text . $this->get_klarna_shipping_info();
+	public function output_klarna_details_confirmation( $text = false, $order ) {
+		
+		if( 'klarna_invoice' == $order->payment_method ) {
+			return $text . $this->get_klarna_shipping_info();
+		} else {
+			return $text;
+		}
 
 	}
 
@@ -483,10 +487,10 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 	 * @since 1.0.0
 	 */		
 	function is_available() {
-
+		
 		if ( ! $this->check_enabled() ) return false;
 		if ( ! $this->check_required_fields() ) return false;
-		if ( ! $this->check_pclasses() ) return false;
+		//if ( ! $this->check_pclasses() ) return false;
 		if ( ! $this->check_cart_total() ) return false;
 		if ( ! $this->check_lower_threshold() ) return false;
 		if ( ! $this->check_upper_threshold() ) return false;
@@ -649,6 +653,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 		
 		// Currency check
 		$currency_for_country = $this->klarna_helper->get_currency_for_country( $woocommerce->customer->get_country() );
+		
 		if ( ! empty( $currency_for_country ) && $currency_for_country !== $this->selected_currency ) {
 			return false;
 		}
@@ -765,13 +770,13 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 	function collect_dob() {
 	
 		// Collect the dob different depending on country
-		if ( $_POST['billing_country'] == 'NL' || $_POST['billing_country'] == 'DE' ) {
+		if ( $_POST['billing_country'] == 'NL' || $_POST['billing_country'] == 'DE' || $_POST['billing_country'] == 'AT' ) {
 			$klarna_pno_day = 
-				isset( $_POST['klarna_invo_date_of_birth_day'] ) ? woocommerce_clean( $_POST['klarna_invo_date_of_birth_day'] ) : '';
+				isset( $_POST['klarna_invoice_date_of_birth_day'] ) ? woocommerce_clean( $_POST['klarna_invoice_date_of_birth_day'] ) : '';
 			$klarna_pno_month = 
-				isset( $_POST['klarna_invo_date_of_birth_month'] ) ? woocommerce_clean( $_POST['klarna_invo_date_of_birth_month'] ) : '';
+				isset( $_POST['klarna_invoice_date_of_birth_month'] ) ? woocommerce_clean( $_POST['klarna_invoice_date_of_birth_month'] ) : '';
 			$klarna_pno_year = 
-				isset( $_POST['klarna_invo_date_of_birth_year'] ) ? woocommerce_clean( $_POST['klarna_invo_date_of_birth_year'] ) : '';
+				isset( $_POST['klarna_invoice_date_of_birth_year'] ) ? woocommerce_clean( $_POST['klarna_invoice_date_of_birth_year'] ) : '';
 
 			$klarna_pno = $klarna_pno_day . $klarna_pno_month . $klarna_pno_year;
 		} else {

@@ -176,7 +176,7 @@ if ( wp_is_mobile() ) {
 		<label for="<?php echo $klarna_dob_element; ?>">
 			<?php echo __("Date of Birth", 'klarna') ?> <span class="required">*</span>
 		</label>
-		<select class="dob_select dob_day" name="date_of_birth_day" style="width:60px;">
+		<select class="dob_select dob_day" name="klarna_part_payment_date_of_birth_day" style="width:60px;">
 			<option value=""><?php echo __("Day", 'klarna') ?></option>
 			<option value="01">01</option>
 			<option value="02">02</option>
@@ -210,7 +210,7 @@ if ( wp_is_mobile() ) {
 			<option value="30">30</option>
 			<option value="31">31</option>
 		</select>
-		<select class="dob_select dob_month" name="date_of_birth_month" style="width:80px;">
+		<select class="dob_select dob_month" name="klarna_part_payment_date_of_birth_month" style="width:80px;">
 			<option value=""><?php echo __("Month", 'klarna') ?></option>
 			<option value="01"><?php echo __("Jan", 'klarna') ?></option>
 			<option value="02"><?php echo __("Feb", 'klarna') ?></option>
@@ -225,7 +225,7 @@ if ( wp_is_mobile() ) {
 			<option value="11"><?php echo __("Nov", 'klarna') ?></option>
 			<option value="12"><?php echo __("Dec", 'klarna') ?></option>
 		</select>
-		<select class="dob_select dob_year" name="date_of_birth_year" style="width:60px;">
+		<select class="dob_select dob_year" name="klarna_part_payment_date_of_birth_year" style="width:60px;">
 			<option value=""><?php echo __("Year", 'klarna') ?></option>
 			<option value="1920">1920</option>
 			<option value="1921">1921</option>
