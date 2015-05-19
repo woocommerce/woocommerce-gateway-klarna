@@ -120,7 +120,8 @@ class WC_Gateway_Klarna_K2WC {
 		// Retrieve Klarna order
 		$klarna_order = $this->retrieve_klarna_order();
 
-		if ( $klarna_order['status'] == 'checkout_complete' ) { 
+		// Check if order has been completed by Klarna, for V2 and Rest
+		if ( $klarna_order['status'] == 'checkout_complete' || $klarna_order['status'] == 'AUTHORIZED' ) { 
 			// Create order in WooCommerce
 			$order = $this->create_order();
 
@@ -153,21 +154,9 @@ class WC_Gateway_Klarna_K2WC {
 
 			// Calculate order totals
 			$this->add_order_customer_info( $order, $klarna_order );
-			
-			$order->add_order_note( sprintf( 
-				__( 'Klarna Checkout payment completed. Reservation number: %s.  Klarna order number: %s', 'klarna' ),
-				$klarna_order['reservation'], 
-				$klarna_order['id'] 
-			) );
-
-			
-			// Update the order in Klarnas system
-			$this->klarna_log->add( 'klarna', 'Updating Klarna order status to "created"...' );
-			$update['status'] = 'created';
-			$update['merchant_reference'] = array(  
-				'orderid1' => ltrim( $order->get_order_number(), '#' )
-			);
-			$klarna_order->update( $update );
+					
+			// Confirm the order in Klarnas system
+			$this->confirm_klarna_order( $order, $klarna_order );
 			
 			// Check if order is not already completed or processing
 			// To avoid triggering of multiple payment_complete() callbacks
@@ -188,6 +177,13 @@ class WC_Gateway_Klarna_K2WC {
 				
 				// Empty cart
 				$woocommerce->cart->empty_cart();
+			}
+
+			// Store which KCO API was used
+			if ( $this->is_rest ) {
+				update_post_meta( $order->id, '_klarna_api', 'rest' );
+			} else {
+				update_post_meta( $order->id, '_klarna_api', 'v2' );
 			}
 			
 			// Other plugins and themes can hook into here
@@ -219,7 +215,7 @@ class WC_Gateway_Klarna_K2WC {
 
 			$klarna_order = new \Klarna\Rest\OrderManagement\Order(
 				$connector,
-				$klarna_order
+				$this->klarna_order_uri
 			);				
 		} else {
 			require_once( KLARNA_LIB . '/src/Klarna/Checkout.php' );  
@@ -600,6 +596,36 @@ class WC_Gateway_Klarna_K2WC {
 			
 				update_post_meta( $order->id, '_customer_user', $this->customer_id );
 			}
+		}
+	}
+
+	/**
+	 * Confirms Klarna order.
+	 *
+	 * @since  2.0.0
+	 * @access public
+	 * 
+	 * @param  object $order        Local WC order.
+	 * @param  object $klarna_order Klarna order.
+	 */
+	public function confirm_klarna_order( $order, $klarna_order ) {
+
+		$this->klarna_log->add( 'klarna', 'Updating Klarna order status to "created"...' );
+		if ( $this->is_rest ) {
+			$order->add_order_note( sprintf( 
+				__( 'Klarna Checkout payment completed. Klarna reference number: %s.', 'klarna' ),
+				$klarna_order['klarna_reference']
+			) );
+			$klarna_order->acknowledge();
+		} else {
+			$order->add_order_note( sprintf( 
+				__( 'Klarna Checkout payment completed. Reservation number: %s.  Klarna order number: %s', 'klarna' ),
+				$klarna_order['reservation'], 
+				$klarna_order['id'] 
+			) );
+			$update['status'] = 'created';
+			$update['merchant_reference'] = array( 'orderid1' => ltrim( $order->get_order_number(), '#' ) );
+			$klarna_order->update( $update );
 		}
 	}
 
