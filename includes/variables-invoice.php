@@ -75,3 +75,6 @@ if ( ! empty( $this->eid_de ) ) {
 if ( ! empty( $this->eid_nl ) ) {
 	$this->authorized_countries[] = 'NL';
 }
+if ( ! empty( $this->eid_at ) ) {
+	$this->authorized_countries[] = 'AT';
+}

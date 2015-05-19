@@ -487,7 +487,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 	 * @since 1.0.0
 	 */		
 	function is_available() {
-
+	
 		if ( ! $this->check_enabled() ) return false;
 		if ( ! $this->check_required_fields() ) return false;
 		if ( ! $this->check_pclasses() ) return false;
