@@ -143,9 +143,9 @@ if ( '' != $this->color_link ) {
 }
 
 if ( $this->is_rest() ) {
-	$klarna_order = new \Klarna\Rest\Checkout\Order( $connector );
 	$create['order_amount'] = WC()->cart->total * 100;
 	$create['order_tax_amount'] = WC()->cart->get_taxes_total() * 100;
+	$klarna_order = new \Klarna\Rest\Checkout\Order( $connector );
 } else  {
 	Klarna_Checkout_Order::$baseUri = $this->klarna_server;
 	Klarna_Checkout_Order::$contentType = 'application/vnd.klarna.checkout.aggregated-order-v2+json';

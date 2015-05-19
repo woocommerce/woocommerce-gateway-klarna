@@ -1171,7 +1171,6 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 * @since  2.0
 	 **/
 	function configure_klarna( $klarna, $country ) {
-
 		$klarna->config(
 			$eid = $this->klarna_eid,
 			$secret = $this->klarna_secret,
@@ -1184,7 +1183,6 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			$ssl = $this->klarna_ssl,
 			$candice = false
 		);
-
 	}
 
 	
@@ -1231,7 +1229,6 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 * @since 1.0.0
      */
 	function check_checkout_listener() {
-
 		switch ( $_GET['scountry'] ) {
 			case 'SE':
 				$klarna_secret = $this->secret_se;
@@ -1268,11 +1265,8 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 				$this->log,
 				$this->debug
 			);
-			$this->log->add( 'klarna', 'before listener' . $_GET['klarna_order'] );
 			$klarna_to_wc->listener();
-			$this->log->add( 'klarna', 'after listener' );
 		}
-	
 	} // End function check_checkout_listener
 
 
@@ -1666,13 +1660,10 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 * @since  2.0.0
 	 */
 	function cancel_klarna_order( $orderid ) {
-
 		// Klarna reservation number and billing country must be set
 		if ( get_post_meta( $orderid, '_klarna_order_reservation', true ) && get_post_meta( $orderid, '_billing_country', true ) ) {
-
 			// Check if this order hasn't been cancelled already
 			if ( ! get_post_meta( $orderid, '_klarna_order_cancelled', true ) ) {
-
 				$rno = get_post_meta( $orderid, '_klarna_order_reservation', true );
 				$country = get_post_meta( $orderid, '_billing_country', true );
 
@@ -1683,11 +1674,8 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 
 				$klarna_order = new WC_Gateway_Klarna_Order( $order, $klarna );
 				$klarna_order->cancel_order( $rno );
-
 			}
-
 		}	
-
 	}
 
 

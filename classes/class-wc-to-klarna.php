@@ -298,7 +298,7 @@ class WC_Gateway_Klarna_WC2K {
 			$item_discount_amount = 0;
 		}
 
-		return $item_discount_amount;
+		return (int) $item_discount_amount;
 	}
 
 	/**
@@ -317,7 +317,7 @@ class WC_Gateway_Klarna_WC2K {
 			$item_discount_rate = 0;
 		}
 
-		return $item_discount_rate;
+		return (int) $item_discount_rate;
 	}
 
 	/**
@@ -332,7 +332,7 @@ class WC_Gateway_Klarna_WC2K {
 	public function get_item_total_amount( $cart_item ) {
 		$item_total_amount = (int) ( $cart_item['line_total'] + $cart_item['line_tax'] ) * 100;
 
-		return $item_total_amount;
+		return (int) $item_total_amount;
 	}
 
 	/**
@@ -380,7 +380,7 @@ class WC_Gateway_Klarna_WC2K {
 
 		$shipping_amount = (int) number_format( ( $woocommerce->cart->shipping_total + $woocommerce->cart->shipping_tax_total ) * 100, 0, '', '' );
 
-		return $shipping_amount;
+		return (int) $shipping_amount;
 	}
 
 	/**
@@ -416,7 +416,7 @@ class WC_Gateway_Klarna_WC2K {
 
 		$shipping_tax_amount = $woocommerce->cart->shipping_tax_total * 100;
 
-		return $shipping_tax_amount;
+		return (int) $shipping_tax_amount;
 	}
 
 }

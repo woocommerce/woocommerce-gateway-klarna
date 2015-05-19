@@ -115,6 +115,8 @@ class WC_Gateway_Klarna_K2WC {
 	 * @param  string  $debug  Debug yes/no.
 	 */
 	public function listener() {
+		$this->klarna_log->add( 'klarna', 'Listener triggered' );
+
 		global $woocommerce;
 		
 		// Retrieve Klarna order
@@ -122,6 +124,39 @@ class WC_Gateway_Klarna_K2WC {
 
 		// Check if order has been completed by Klarna, for V2 and Rest
 		if ( $klarna_order['status'] == 'checkout_complete' || $klarna_order['status'] == 'AUTHORIZED' ) { 
+
+			// Check if local order has already been created
+			if ( $this->is_rest ) {
+				$klarna_ref = $klarna_order['order_id'];
+				$args = array(
+					'post_type'   => 'shop_order',
+					'meta_query'  => array(
+						array(
+							'key'   => '_klarna_order_id',
+							'value' => $klarna_ref
+						)
+					)
+				);
+				$order_query = new WP_Query( $args );
+			} else {
+				$klarna_ref = $klarna_order['reservation'];
+				$args = array(
+					'post_type'   => 'shop_order',
+					'meta_query'  => array(
+						array(
+							'key'   => '_klarna_order_reservation',
+							'value' => $klarna_ref
+						)
+					)
+				);
+				$order_query = new WP_Query( $args );
+			}
+
+			if ( $order_query->have_posts() ) {
+				$this->klarna_log->add( 'klarna', 'Order already created' );
+				return;
+			}
+
 			// Create order in WooCommerce
 			$order = $this->create_order();
 
@@ -156,7 +191,7 @@ class WC_Gateway_Klarna_K2WC {
 			$this->add_order_customer_info( $order, $klarna_order );
 					
 			// Confirm the order in Klarnas system
-			$this->confirm_klarna_order( $order, $klarna_order );
+			$klarna_order = $this->confirm_klarna_order( $order, $klarna_order );
 			
 			// Check if order is not already completed or processing
 			// To avoid triggering of multiple payment_complete() callbacks
@@ -166,8 +201,12 @@ class WC_Gateway_Klarna_K2WC {
 				}
 		    } else { // Payment complete		    
 		    	// Update order meta
-		    	update_post_meta( $order_id, 'klarna_order_status', 'created' );
-				update_post_meta( $order_id, '_klarna_order_reservation', $klarna_order['reservation'] );
+		    	update_post_meta( $order->id, 'klarna_order_status', 'created' );
+		    	if ( $this->is_rest ) {
+					update_post_meta( $order->id, '_klarna_order_id', $klarna_order['order_id'] );
+		    	} else {
+					update_post_meta( $order->id, '_klarna_order_reservation', $klarna_order['reservation'] );
+		    	}
 				
 				$order->payment_complete();
 				// Debug
@@ -187,7 +226,7 @@ class WC_Gateway_Klarna_K2WC {
 			}
 			
 			// Other plugins and themes can hook into here
-			do_action( 'klarna_after_kco_push_notification', $order_id );
+			do_action( 'klarna_after_kco_push_notification', $order->id );
 		}
 	}
 
@@ -203,6 +242,7 @@ class WC_Gateway_Klarna_K2WC {
 			$this->klarna_log->add( 'klarna', 'Klarna order: ' . $this->klarna_order_uri );
 			$this->klarna_log->add( 'klarna', 'GET: ' . json_encode($_GET) );
 			$this->klarna_log->add( 'klarna', 'Fetching Klarna order...' );
+			$this->klarna_log->add( 'klarna', 'Klarna order URI - ' . $this->klarna_order_uri );
 		}
 
 		if ( $this->is_rest ) {
@@ -260,8 +300,7 @@ class WC_Gateway_Klarna_K2WC {
 			throw new Exception( __( 'Error: Unable to create order. Please try again.', 'woocommerce' ) );
 		}
 
-		$order_id = $order->id;
-		$this->klarna_log->add( 'klarna', 'Local order created, order ID: ' . $order_id );	
+		$this->klarna_log->add( 'klarna', 'Local order created, order ID: ' . $order->id );	
 
 		return $order;
 	}
@@ -279,6 +318,7 @@ class WC_Gateway_Klarna_K2WC {
 		$this->klarna_log->add( 'klarna', 'Adding order items...' );
 
 		$klarna_transient = sanitize_key( $_GET['sid'] );
+		$this->klarna_log->add( 'klarna', 'transient - ' . $klarna_transient );
 		$klarna_wc = get_transient( $klarna_transient );
 		$order_id = $order->id;
 
@@ -289,14 +329,16 @@ class WC_Gateway_Klarna_K2WC {
 				array(
 					'variation' => $values['variation'],
 					'totals'    => array(
-						'subtotal'     => $values['line_subtotal'],
+						'subtotal'     => $values['line_subtotal'] + $values['line_subtotal_tax'],
 						'subtotal_tax' => $values['line_subtotal_tax'],
-						'total'        => $values['line_total'],
+						'total'        => $values['line_total'] + $values['line_tax'],
 						'tax'          => $values['line_tax'],
 						'tax_data'     => $values['line_tax_data'] // Since 2.2
 					)
 				)
 			);
+
+			$this->klarna_log->add( 'klarna', 'Added item - ' . var_export( $values, true ) );
 
 			if ( ! $item_id ) {
 				$this->klarna_log->add( 'klarna', 'Unable to add order item.' );
@@ -609,8 +651,7 @@ class WC_Gateway_Klarna_K2WC {
 	 * @param  object $klarna_order Klarna order.
 	 */
 	public function confirm_klarna_order( $order, $klarna_order ) {
-
-		$this->klarna_log->add( 'klarna', 'Updating Klarna order status to "created"...' );
+		$this->klarna_log->add( 'klarna', 'Updating Klarna order status to "created"' );
 		if ( $this->is_rest ) {
 			$order->add_order_note( sprintf( 
 				__( 'Klarna Checkout payment completed. Klarna reference number: %s.', 'klarna' ),
@@ -627,6 +668,8 @@ class WC_Gateway_Klarna_K2WC {
 			$update['merchant_reference'] = array( 'orderid1' => ltrim( $order->get_order_number(), '#' ) );
 			$klarna_order->update( $update );
 		}
+
+		return $klarna_order;
 	}
 
 }
