@@ -129,19 +129,17 @@ jQuery(document).ready(function($) {
 
 	// Update cart
 	$('td.product-quantity input[type=number]').change( function( event ) {
-
 		window._klarnaCheckout(function (api) {
 			api.suspend();
 		});
 		
-		ancestor = $( this ).closest( 'td.product-quantity' );
-		total_field = $( 'td#kco-page-total-amount' );
-		subtotal_field = $( 'td#kco-page-subtotal-amount' );
+		ancestor         = $( this ).closest( 'td.product-quantity' );
+		total_field      = $( 'td#kco-page-total-amount' );
+		subtotal_field   = $( 'td#kco-page-subtotal-amount' );
 		line_total_field = $( this ).closest( 'tr' ).find( 'td.product-total' );
-		shipping_row = $( 'tr#kco-page-shipping' );
-
-		cart_item_key = $( ancestor ).data( 'cart_item_key' );
-		new_quantity = $( this ).val();
+		shipping_row     = $( 'tr#kco-page-shipping' );
+		cart_item_key    = $( ancestor ).data( 'cart_item_key' );
+		new_quantity     = $( this ).val();
 		
 		$.ajax(
 			kcoAjax.ajaxurl,
@@ -149,7 +147,7 @@ jQuery(document).ready(function($) {
 				type     : 'POST',
 				dataType : 'json',
 				data     : {
-					action : 'klarna_checkout_cart_callback', 
+					action : 'klarna_checkout_cart_callback_update', 
 					cart_item_key : cart_item_key,
 					new_quantity : new_quantity,
 					nonce : kcoAjax.klarna_checkout_nonce
@@ -177,14 +175,63 @@ jQuery(document).ready(function($) {
 				}
 			}
 		);
-
 	});
 
+	// Remove cart item
+	$('td.product-remove a').click( function( event ) {
+		event.preventDefault();
 
+		window._klarnaCheckout(function (api) {
+			api.suspend();
+		});
+		
+		ancestor             = $( this ).closest( 'tr' ).find( 'td.product-quantity' );
+		total_field          = $( 'td#kco-page-total-amount' );
+		subtotal_field       = $( 'td#kco-page-subtotal-amount' );
+		item_row             = $( this ).closest( 'tr' );
+		shipping_row         = $( 'tr#kco-page-shipping' );
+		cart_item_key_remove = $( ancestor ).data( 'cart_item_key' );
+		
+		$.ajax(
+			kcoAjax.ajaxurl,
+			{
+				type     : 'POST',
+				dataType : 'json',
+				data     : {
+					action : 'klarna_checkout_cart_callback_remove', 
+					cart_item_key_remove : cart_item_key_remove,
+					nonce : kcoAjax.klarna_checkout_nonce
+				},
+				success: function( response ) {
+					console.log( 'success' );
+					console.log( response.data );
 
-	// Add coupon form using JS, so it's only shown for JS users
-	// $('.klarna-checkout-coupons .klarna-checkout-coupons-form').append( '<div id="klarna_checkout_coupon_result"></div><form class="klarna_checkout_coupon" method="post"><p class="form-row form-row-first"><input type="text" name="coupon_code" class="input-text" placeholder="Coupon Code" id="coupon_code" value="" /></p><p class="form-row form-row-last"><input type="submit" class="button" name="apply_coupon" value="Apply Coupon" /></p><div class="clear"></div></form>' );
+					if ( 0 == response.data.item_count ) {
+						window.location.href = response.data.cart_url;
+					} else {
+						$( total_field ).html( response.data.cart_total );
+						$( subtotal_field ).html( response.data.cart_subtotal );
+						$( shipping_row ).replaceWith( response.data.shipping_row );
+						$( item_row ).remove();
+						
+						window._klarnaCheckout(function (api) {
+							api.resume();
+						});
+					}
+				},
+				error: function( response ) {
+					console.log( 'error' );
+					console.log( response );
 
+					window._klarnaCheckout(function (api) {
+						api.resume();
+					});
+				}
+			}
+		);
+	});
+
+	// Add coupon
 	$('.klarna_checkout_coupon').submit( function( event ) {
 
 		event.preventDefault();
@@ -205,7 +252,7 @@ jQuery(document).ready(function($) {
 				type     : 'POST',
 				dataType : 'json',
 				data     : {
-					action : 'klarna_checkout_coupons_callback', 
+					action : 'klarna_checkout_coupons_callback_update', 
 					coupon : coupon,
 					nonce  : kcoAjax.klarna_checkout_nonce
 				},

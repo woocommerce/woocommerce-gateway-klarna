@@ -53,6 +53,7 @@ $merchant_confirmation_uri = add_query_arg (
 	),
 	$this->klarna_checkout_thanks_url
 );
+$push_uri_base = get_site_url() . '/wc-api/WC_Gateway_Klarna_Checkout/';
 if ( $this->is_rest() ) {
 	$merchant_push_uri = add_query_arg( 
 		array(
@@ -61,7 +62,7 @@ if ( $this->is_rest() ) {
 			'klarna_order' => '{checkout.order.id}', 
 			'wc-api' => 'WC_Gateway_Klarna_Checkout'
 		),
-		$this->klarna_checkout_url 
+		$push_uri_base
 	);			
 } else {
 	$merchant_push_uri = add_query_arg( 
@@ -69,9 +70,8 @@ if ( $this->is_rest() ) {
 			'sid' => $klarna_transient, 
 			'scountry' => $this->klarna_country, 
 			'klarna_order' => '{checkout.order.uri}', 
-			'wc-api' => 'WC_Gateway_Klarna_Checkout'
 		),
-		$this->klarna_checkout_url 
+		$push_uri_base 
 	);
 }
 
@@ -145,6 +145,7 @@ if ( '' != $this->color_link ) {
 if ( $this->is_rest() ) {
 	$create['order_amount'] = WC()->cart->total * 100;
 	$create['order_tax_amount'] = WC()->cart->get_taxes_total() * 100;
+
 	$klarna_order = new \Klarna\Rest\Checkout\Order( $connector );
 } else  {
 	Klarna_Checkout_Order::$baseUri = $this->klarna_server;

@@ -298,7 +298,7 @@ class WC_Gateway_Klarna_WC2K {
 			$item_discount_amount = 0;
 		}
 
-		return (int) $item_discount_amount;
+		return round( $item_discount_amount );
 	}
 
 	/**
@@ -330,9 +330,9 @@ class WC_Gateway_Klarna_WC2K {
 	 * @return integer $item_total_amount Cart item total amount.
 	 */
 	public function get_item_total_amount( $cart_item ) {
-		$item_total_amount = (int) ( $cart_item['line_total'] + $cart_item['line_tax'] ) * 100;
+		$item_total_amount = ( ( $cart_item['line_total'] + $cart_item['line_tax'] ) * 100 );
 
-		return (int) $item_total_amount;
+		return round( $item_total_amount );
 	}
 
 	/**
