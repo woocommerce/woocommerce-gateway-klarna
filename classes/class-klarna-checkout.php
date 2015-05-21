@@ -162,120 +162,134 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 * @since  2.0
 	 **/
 	function klarna_checkout_widget() {
+		// Check if iframe needs to be displayed
+		if ( ! $this->show_kco() )
+			return;
+
 		global $woocommerce;
-		ob_start(); ?>
-			
-			<div id="klarna-checkout-widget" class="woocommerce">
 
-				<div id="klarna-checkout-coupons">
-					<form class="klarna_checkout_coupon" method="post">
-						<p class="form-row form-row-first">
-							<input type="text" name="coupon_code" class="input-text" placeholder="Coupon Code" id="coupon_code" value="" />
-						</p>
-						<p class="form-row form-row-last" style="text-align:right">
-							<input type="submit" class="button" name="apply_coupon" value="Apply Coupon" />
-						</p>
-						<div class="clear"></div>
-					</form>
-				</div>
+		// Recheck cart items so that they are in stock
+		$result = $woocommerce->cart->check_cart_item_stock();
+		if ( is_wp_error( $result ) ) {
+			return $result->get_error_message();
+			exit();
+		}
 
-				<div>
-				<table id="klarna-checkout-cart">
-					<tbody>
-						<tr>
-							<th class="kco-column-remove kco-centeralign"></th>
-							<th class="kco-column-product kco-leftalign">Product</th>
-							<th class="kco-column-price kco-centeralign">Price</th>
-							<th class="kco-column-quantity kco-centeralign">Quantity</th>
-							<th class="kco-column-total kco-rightalign">Total</th>
-						</tr>
-						<?php
-						foreach ( $woocommerce->cart->get_cart() as $cart_item_key => $cart_item ) {
-							$_product = $cart_item['data'];
-							$cart_item_product = wc_get_product( $cart_item['product_id'] );
-							echo '<tr>';
-								echo '<td class="product-remove kco-centeralign"><a href="#">x</a></td>';
-								echo '<td class="product-name kco-leftalign">';
-									if ( ! $_product->is_visible() ) {
-										echo apply_filters( 'woocommerce_cart_item_name', $_product->get_title(), $cart_item, $cart_item_key ) . '&nbsp;';
-									} else { 
-										echo apply_filters( 'woocommerce_cart_item_name', sprintf( '<a href="%s">%s </a>', $_product->get_permalink( $cart_item ), $_product->get_title() ), $cart_item, $cart_item_key );
-									}
-									// Meta data
-									echo $woocommerce->cart->get_item_data( $cart_item );
-								echo '</td>';
-								echo '<td class="product-price kco-centeralign"><span class="amount">';
-									echo apply_filters( 'woocommerce_cart_item_price', $woocommerce->cart->get_product_price( $_product ), $cart_item, $cart_item_key );
-								echo '</span></td>';
-								echo '<td class="product-quantity kco-centeralign" data-cart_item_key="' . $cart_item_key .'">';
-									if ( $_product->is_sold_individually() ) {
-										$product_quantity = sprintf( '1 <input type="hidden" name="cart[%s][qty]" value="1" />', $cart_item_key );
-									} else {
-										$product_quantity = woocommerce_quantity_input( array(
-											'input_name'  => "cart[{$cart_item_key}][qty]",
-											'input_value' => $cart_item['quantity'],
-											'max_value'   => $_product->backorders_allowed() ? '' : $_product->get_stock_quantity(),
-											'min_value'   => '1'
-										), $_product, false );
-									}
-									echo apply_filters( 'woocommerce_cart_item_quantity', $product_quantity, $cart_item_key );
-								echo '</td>';
-								echo '<td class="product-total kco-rightalign"><span class="amount">';
-									echo apply_filters( 'woocommerce_cart_item_subtotal', $woocommerce->cart->get_product_subtotal( $_product, $cart_item['quantity'] ), $cart_item, $cart_item_key );
-								echo '</span></td>';
-							echo '</tr>';
-						}
-						?>
-					</tbody>
-				</table>
-				</div>
+		if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
+			ob_start(); ?>
+				
+				<div id="klarna-checkout-widget" class="woocommerce">
 
-				<?php
-				if ( ! defined( 'WOOCOMMERCE_CART' ) ) {
-					define( 'WOOCOMMERCE_CART', true );
-				}
-				$woocommerce->cart->calculate_shipping();
-				$woocommerce->cart->calculate_totals();
-				?>
-				<div>
-				<table id="kco-totals">
-					<tbody>
-						<tr id="kco-page-subtotal">
-							<td class="kco-column-desc kco-rightalign">Subtotal</td>
-							<td id="kco-page-subtotal-amount" class="kco-column-number kco-rightalign"><span class="amount"><?php echo $woocommerce->cart->get_cart_subtotal(); ?></span></td>
-						</tr>
-						
-						<?php echo $this->klarna_checkout_get_shipping_options_row_html(); ?>
-						
-						<?php foreach ( $woocommerce->cart->get_applied_coupons() as $coupon ) { ?>
-							<tr class="kco-applied-coupon">
-								<td class="kco-rightalign">
-									Coupon: <?php echo $coupon; ?> 
-									<a class="kco-remove-coupon" data-coupon="<?php echo $coupon; ?>" href="#">(remove)</a>
-								</td>
-								<td class="kco-rightalign">-<?php echo wc_price( $woocommerce->cart->get_coupon_discount_amount( $coupon, $woocommerce->cart->display_cart_ex_tax ) ); ?></td>
+					<div id="klarna-checkout-coupons">
+						<form class="klarna_checkout_coupon" method="post">
+							<p class="form-row form-row-first">
+								<input type="text" name="coupon_code" class="input-text" placeholder="Coupon Code" id="coupon_code" value="" />
+							</p>
+							<p class="form-row form-row-last" style="text-align:right">
+								<input type="submit" class="button" name="apply_coupon" value="Apply Coupon" />
+							</p>
+							<div class="clear"></div>
+						</form>
+					</div>
+
+					<div>
+					<table id="klarna-checkout-cart">
+						<tbody>
+							<tr>
+								<th class="kco-column-remove kco-centeralign"></th>
+								<th class="kco-column-product kco-leftalign">Product</th>
+								<th class="kco-column-price kco-centeralign">Price</th>
+								<th class="kco-column-quantity kco-centeralign">Quantity</th>
+								<th class="kco-column-total kco-rightalign">Total</th>
 							</tr>
-						<?php }	?>
+							<?php
+							foreach ( $woocommerce->cart->get_cart() as $cart_item_key => $cart_item ) {
+								$_product = $cart_item['data'];
+								$cart_item_product = wc_get_product( $cart_item['product_id'] );
+								echo '<tr>';
+									echo '<td class="product-remove kco-centeralign"><a href="#">x</a></td>';
+									echo '<td class="product-name kco-leftalign">';
+										if ( ! $_product->is_visible() ) {
+											echo apply_filters( 'woocommerce_cart_item_name', $_product->get_title(), $cart_item, $cart_item_key ) . '&nbsp;';
+										} else { 
+											echo apply_filters( 'woocommerce_cart_item_name', sprintf( '<a href="%s">%s </a>', $_product->get_permalink( $cart_item ), $_product->get_title() ), $cart_item, $cart_item_key );
+										}
+										// Meta data
+										echo $woocommerce->cart->get_item_data( $cart_item );
+									echo '</td>';
+									echo '<td class="product-price kco-centeralign"><span class="amount">';
+										echo apply_filters( 'woocommerce_cart_item_price', $woocommerce->cart->get_product_price( $_product ), $cart_item, $cart_item_key );
+									echo '</span></td>';
+									echo '<td class="product-quantity kco-centeralign" data-cart_item_key="' . $cart_item_key .'">';
+										if ( $_product->is_sold_individually() ) {
+											$product_quantity = sprintf( '1 <input type="hidden" name="cart[%s][qty]" value="1" />', $cart_item_key );
+										} else {
+											$product_quantity = woocommerce_quantity_input( array(
+												'input_name'  => "cart[{$cart_item_key}][qty]",
+												'input_value' => $cart_item['quantity'],
+												'max_value'   => $_product->backorders_allowed() ? '' : $_product->get_stock_quantity(),
+												'min_value'   => '1'
+											), $_product, false );
+										}
+										echo apply_filters( 'woocommerce_cart_item_quantity', $product_quantity, $cart_item_key );
+									echo '</td>';
+									echo '<td class="product-total kco-rightalign"><span class="amount">';
+										echo apply_filters( 'woocommerce_cart_item_subtotal', $woocommerce->cart->get_product_subtotal( $_product, $cart_item['quantity'] ), $cart_item, $cart_item_key );
+									echo '</span></td>';
+								echo '</tr>';
+							}
+							?>
+						</tbody>
+					</table>
+					</div>
 
-						<tr id="kco-page-total">
-							<td class="kco-rightalign kco-bold">Total</a></td>
-							<td id="kco-page-total-amount" class="kco-rightalign kco-bold"><span class="amount"><?php echo $woocommerce->cart->get_total(); ?></span></td>
-						</tr>
-					</tbody>
-				</table>
+					<?php
+					if ( ! defined( 'WOOCOMMERCE_CART' ) ) {
+						define( 'WOOCOMMERCE_CART', true );
+					}
+					$woocommerce->cart->calculate_shipping();
+					$woocommerce->cart->calculate_totals();
+					?>
+					<div>
+					<table id="kco-totals">
+						<tbody>
+							<tr id="kco-page-subtotal">
+								<td class="kco-column-desc kco-rightalign">Subtotal</td>
+								<td id="kco-page-subtotal-amount" class="kco-column-number kco-rightalign"><span class="amount"><?php echo $woocommerce->cart->get_cart_subtotal(); ?></span></td>
+							</tr>
+							
+							<?php echo $this->klarna_checkout_get_shipping_options_row_html(); ?>
+							
+							<?php foreach ( $woocommerce->cart->get_applied_coupons() as $coupon ) { ?>
+								<tr class="kco-applied-coupon">
+									<td class="kco-rightalign">
+										Coupon: <?php echo $coupon; ?> 
+										<a class="kco-remove-coupon" data-coupon="<?php echo $coupon; ?>" href="#">(remove)</a>
+									</td>
+									<td class="kco-rightalign">-<?php echo wc_price( $woocommerce->cart->get_coupon_discount_amount( $coupon, $woocommerce->cart->display_cart_ex_tax ) ); ?></td>
+								</tr>
+							<?php }	?>
+
+							<tr id="kco-page-total">
+								<td class="kco-rightalign kco-bold">Total</a></td>
+								<td id="kco-page-total-amount" class="kco-rightalign kco-bold"><span class="amount"><?php echo $woocommerce->cart->get_total(); ?></span></td>
+							</tr>
+						</tbody>
+					</table>
+					</div>
+
+					<div>
+						<form>
+							<div class="form-row">
+								<textarea id="klarna-checkout-order-note" class="input-text" name="klarna-checkout-order-note" placeholder="<?php _e( 'Notes about your order, e.g. special notes for delivery.', 'klarna' ); ?>"></textarea>
+							</div>
+						</form>
+					</div>
+
 				</div>
 
-				<div>
-					<form>
-						<div class="form-row">
-							<textarea id="klarna-checkout-order-note" class="input-text" name="klarna-checkout-order-note" placeholder="<?php _e( 'Notes about your order, e.g. special notes for delivery.', 'klarna' ); ?>"></textarea>
-						</div>
-					</form>
-				</div>
-
-			</div>
-
-		<?php return ob_get_clean();
+			<?php return ob_get_clean();
+		}
 	}
 
 

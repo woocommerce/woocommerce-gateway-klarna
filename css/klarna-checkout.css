@@ -3,7 +3,7 @@
 		float: left;
 		width: 40%;
 	}
-	.klarna_checkout {
+	#klarna-checkout-widget + .klarna_checkout {
 		float: right;
 		width: 55%;
 	}
