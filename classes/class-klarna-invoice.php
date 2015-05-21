@@ -720,23 +720,12 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 			echo '<p>' . apply_filters( 'klarna_invoice_description', $klarna_description ) . '</p>';
 		}
 			
-		if ( 'NO' == $this->klarna_helper->get_klarna_country() ) {
-
-			// Use Klarna PMS for Norway
-			$payment_method_group = 'invoice';
-			$payment_method_select_id = 'klarna_invoice_pclass';
-			include( KLARNA_DIR . 'views/public/payment-fields-pms.php' );
-
-		} else {
-
-			// For countries other than NO do the old thing
-			$pclass_type = $this->pclass_type;
-			$klarna_select_pclass_element = $this->id . '_pclass';
-			$klarna_dob_element = $this->id . '_pno';
-			include( KLARNA_DIR . 'views/public/payment-fields-invoice.php' );
-		
-		}
-	
+		// For countries other than NO do the old thing
+		$pclass_type = $this->pclass_type;
+		$klarna_select_pclass_element = $this->id . '_pclass';
+		$klarna_dob_element = $this->id . '_pno';
+		include( KLARNA_DIR . 'views/public/payment-fields-invoice.php' );
+			
 	}
 	
 	
