@@ -26,14 +26,11 @@ try {
 	}
 
 	// Reset session if the country in the store has changed since last time the checkout was loaded
-	if ( ! $this->is_rest() ) {
-		if ( strtolower( $this->klarna_country ) != strtolower( $klarna_order_as_array['purchase_country'] ) ) {
-			// Reset session
-			$klarna_order = null;
-			WC()->session->__unset( 'klarna_checkout' );
-		}	
+	if ( strtolower( $this->klarna_country ) != strtolower( $klarna_order_as_array['purchase_country'] ) ) {
+		// Reset session
+		$klarna_order = null;
+		WC()->session->__unset( 'klarna_checkout' );
 	} else {
-
 		/**
 		 * Update Klarna order
 		 */

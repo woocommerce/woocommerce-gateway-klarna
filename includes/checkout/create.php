@@ -154,3 +154,4 @@ if ( $this->is_rest() ) {
 }
 
 $klarna_order->create( apply_filters( 'kco_create_order', $create ) );
+$klarna_order->fetch();

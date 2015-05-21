@@ -97,9 +97,9 @@ if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 
 	// Store location of checkout session
 	$sessionId = $klarna_order->getLocation();
-	WC()->session->set( 'klarna_checkout', $sessionId );
-
-	$klarna_order->fetch();
+	if ( null === WC()->session->get( 'klarna_checkout' ) ) {
+		WC()->session->set( 'klarna_checkout', $sessionId );
+	}
 
 	// Display checkout
 	do_action( 'klarna_before_kco_checkout' );
