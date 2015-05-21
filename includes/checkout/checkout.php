@@ -78,6 +78,8 @@ if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 		);
 	} else {
 		require_once( KLARNA_LIB . '/src/Klarna/Checkout.php' );
+		Klarna_Checkout_Order::$baseUri = $this->klarna_server;
+		Klarna_Checkout_Order::$contentType = 'application/vnd.klarna.checkout.aggregated-order-v2+json';
 		$connector = Klarna_Checkout_Connector::create( $sharedSecret );
 	}
 	$klarna_order = null;
