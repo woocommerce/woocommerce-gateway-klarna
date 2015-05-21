@@ -470,11 +470,23 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 
 		// Klarna warning banner - used for NL only
 		$klarna_wb['img_checkout'] = 
-			'http://www.afm.nl/~/media/Images/wetten-regels/kredietwaarschuwing/balk_afm1-jpg.ashx';
+			apply_filters(
+				'klarna_nl_banner',
+				'http://www.afm.nl/~/media/Images/wetten-regels/kredietwaarschuwing/balk_afm6-jpg.ashx',
+				'checkout'
+			);
 		$klarna_wb['img_single_product'] = 
-			'http://www.afm.nl/~/media/Images/wetten-regels/kredietwaarschuwing/balk_afm2-jpg.ashx';
+			apply_filters(
+				'klarna_nl_banner',
+				'http://www.afm.nl/~/media/Images/wetten-regels/kredietwaarschuwing/balk_afm6-jpg.ashx',
+				'single_product'
+			);
 		$klarna_wb['img_product_list'] = 
-			'http://www.afm.nl/~/media/Images/wetten-regels/kredietwaarschuwing/balk_afm2-jpg.ashx';
+			apply_filters(
+				'klarna_nl_banner',
+				'http://www.afm.nl/~/media/Images/wetten-regels/kredietwaarschuwing/balk_afm6-jpg.ashx',
+				'product_list'
+			);
 
 		return $klarna_wb;
 

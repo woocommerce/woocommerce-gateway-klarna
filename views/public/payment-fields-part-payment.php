@@ -11,7 +11,7 @@
 
 // Show klarna_warning_banner if NL
 if ( $this->klarna_helper->get_klarna_country() == 'NL' ) {
-	echo '<p><img src="' . $this->klarna_wb_img_checkout . '" class="klarna-wb" style="max-width: 100%;"/></p>';	
+	echo '<p><img src="' . $this->klarna_wb_img_checkout . '" class="klarna-wb" style="max-width:100%;float:none;max-height:none"/></p>';	
 }
 
 // Mobile or desktop browser

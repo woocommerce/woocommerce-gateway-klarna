@@ -178,7 +178,7 @@ jQuery(document).ready(function($) {
 	});
 
 	// Remove cart item
-	$('td.product-remove a').click( function( event ) {
+	$('td.kco-product-remove a').click( function( event ) {
 		event.preventDefault();
 
 		window._klarnaCheckout(function (api) {

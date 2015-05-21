@@ -207,7 +207,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 								$_product = $cart_item['data'];
 								$cart_item_product = wc_get_product( $cart_item['product_id'] );
 								echo '<tr>';
-									echo '<td class="product-remove kco-centeralign"><a href="#">x</a></td>';
+									echo '<td class="kco-product-remove kco-centeralign"><a href="#">x</a></td>';
 									echo '<td class="product-name kco-leftalign">';
 										if ( ! $_product->is_visible() ) {
 											echo apply_filters( 'woocommerce_cart_item_name', $_product->get_title(), $cart_item, $cart_item_key ) . '&nbsp;';
