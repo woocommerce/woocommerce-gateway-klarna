@@ -160,6 +160,9 @@ class WC_Gateway_Klarna_K2WC {
 			// Create order in WooCommerce
 			$order = $this->create_order();
 
+			// Change order currency
+			$this->change_order_currency( $order, $klarna_order );
+
 			// Add order items
 			$this->add_order_items( $order, $klarna_order );
 
@@ -277,7 +280,7 @@ class WC_Gateway_Klarna_K2WC {
 	}
 
 	/**
-	 * Fetch KCO order.
+	 * Create WC order.
 	 *
 	 * @since  2.0.0
 	 * @access public
@@ -291,7 +294,8 @@ class WC_Gateway_Klarna_K2WC {
 		// Order data
 		$order_data = array(
 			'status'        => apply_filters( 'woocommerce_default_order_status', 'pending' ),
-			'customer_id'   => $customer_id
+			'customer_id'   => $customer_id,
+			'created_via'   => 'klarna_checkout'
 		);
 
 		// Create the order
@@ -303,6 +307,23 @@ class WC_Gateway_Klarna_K2WC {
 		$this->klarna_log->add( 'klarna', 'Local order created, order ID: ' . $order->id );	
 
 		return $order;
+	}
+
+	/**
+	 * Changes local order currency.
+	 * 
+	 * When Aelia currency switcher is used, default store currency is always saved.
+	 *
+	 * @since  2.0.0
+	 * @access public
+	 */
+	public function change_order_currency( $order, $klarna_order ) {
+		$this->klarna_log->add( 'klarna', 'Maybe fixing order currency...' );
+
+		if ( $order->get_order_currency != strtoupper( $klarna_order['purchase_currency'] ) ) {
+			$this->klarna_log->add( 'klarna', 'Fixing order currency...' );
+			update_post_meta( $order->id, '_order_currency', strtoupper( $klarna_order['purchase_currency'] ) );
+		}
 	}
 
 	/**
