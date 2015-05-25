@@ -9,6 +9,12 @@
 if ( ! defined( 'ABSPATH' ) )
 	exit;
 
+// Maybe create order
+$wcchck = new WC_Checkout();
+$ordr = $wcchck->create_order();
+print_r( $ordr );
+
+
 // Check if iframe needs to be displayed
 if ( ! $this->show_kco() )
 	return;
@@ -58,11 +64,12 @@ if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 	$sharedSecret = $this->klarna_secret;
 
 	// Store WC object as transient
-	$klarna_wc = WC();
+	$klarna_wc = $woocommerce;
 	$klarna_transient = md5( time() . rand( 1000, 1000000 ) );
 	set_transient( $klarna_transient, $klarna_wc, 48 * 60 * 60 );
+	set_transient( $klarna_transient . '_shipping', $klarna_wc->shipping, 48 * 60 * 60 );
 	WC()->session->set( 'klarna_sid', $klarna_transient );
-	
+
 	// Process cart contents and prepare them for Klarna
 	include_once( KLARNA_DIR . 'classes/class-wc-to-klarna.php' );
 	$wc_to_klarna = new WC_Gateway_Klarna_WC2K( $this->is_rest() );

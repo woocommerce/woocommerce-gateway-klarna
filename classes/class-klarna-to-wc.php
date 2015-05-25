@@ -157,6 +157,10 @@ class WC_Gateway_Klarna_K2WC {
 				return;
 			}
 
+		$klarna_transient = sanitize_key( $_GET['sid'] );
+		$klarna_wc = get_transient( $klarna_transient );
+		$this->klarna_log->add( 'klarna', 'transient - ' . $klarna_transient . ' - ' . var_export( $klarna_wc, true ) );
+
 			// Create order in WooCommerce
 			$order = $this->create_order();
 
@@ -350,9 +354,9 @@ class WC_Gateway_Klarna_K2WC {
 				array(
 					'variation' => $values['variation'],
 					'totals'    => array(
-						'subtotal'     => $values['line_subtotal'] + $values['line_subtotal_tax'],
+						'subtotal'     => $values['line_subtotal'],
 						'subtotal_tax' => $values['line_subtotal_tax'],
-						'total'        => $values['line_total'] + $values['line_tax'],
+						'total'        => $values['line_total'],
 						'tax'          => $values['line_tax'],
 						'tax_data'     => $values['line_tax_data'] // Since 2.2
 					)
@@ -410,14 +414,18 @@ class WC_Gateway_Klarna_K2WC {
 	 * @param  object $klarna_order Klarna order.
 	 */
 	public function add_order_shipping( $order, $klarna_order ) {
+		$this->klarna_log->add( 'klarna', 'Adding order shipping...' );
+
 		$klarna_transient = sanitize_key( $_GET['sid'] );
 		$klarna_wc = get_transient( $klarna_transient );
+		$klarna_shipping = get_transient( $klarna_transient . '_shipping' );
 		$order_id = $order->id;
+		$this_shipping_methods = $klarna_wc->session->get( 'chosen_shipping_methods' );
 
 		// Store shipping for all packages
-		foreach ( $klarna_wc->shipping->get_packages() as $package_key => $package ) {
-			if ( isset( $package['rates'][ $this->shipping_methods[ $package_key ] ] ) ) {
-				$item_id = $order->add_shipping( $package['rates'][ $this->shipping_methods[ $package_key ] ] );
+		foreach ( $klarna_shipping->get_packages() as $package_key => $package ) {
+			if ( isset( $package['rates'][ $this_shipping_methods[ $package_key ] ] ) ) {
+				$item_id = $order->add_shipping( $package['rates'][ $this_shipping_methods[ $package_key ] ] );
 
 				if ( ! $item_id ) {
 					$this->klarna_log->add( 'klarna', 'Unable to add shipping item.' );

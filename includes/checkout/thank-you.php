@@ -44,8 +44,8 @@ if ( $this->is_rest() ) {
 	$snippet = "<div>{$klarna_order['html_snippet']}</div>";
 } else {
 	$snippet = '<div class="klarna-thank-you-snippet">' . $klarna_order['gui']['snippet'] . '</div>';	
-
 }
+
 do_action( 'klarna_before_kco_confirmation', $_GET['sid'] );
 echo $snippet;	
 do_action( 'klarna_after_kco_confirmation', $_GET['sid'] );

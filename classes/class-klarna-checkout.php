@@ -77,7 +77,14 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		// Subscription support
 		$this->supports = array( 
 			'products', 
-			'refunds'
+			'refunds',
+			'subscriptions',
+			'subscription_cancellation', 
+			'subscription_suspension', 
+			'subscription_reactivation',
+			'subscription_amount_changes',
+			'subscription_date_changes',
+			'subscription_payment_method_change'
 		);
 
 
@@ -466,7 +473,6 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 * @since  2.0
 	 **/
 	function klarna_checkout_coupons_callback() {
-
 		global $woocommerce;
 
 		if ( ! wp_verify_nonce( $_REQUEST['nonce'], 'klarna_checkout_nonce' ) ) {
@@ -519,7 +525,6 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		wp_send_json_success( $data );
 
 		wp_die();
-	
 	}
 
 
@@ -529,7 +534,6 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 * @since  2.0
 	 **/
 	function klarna_checkout_remove_coupon_callback() {
-
 		if ( ! wp_verify_nonce( $_REQUEST['nonce'], 'klarna_checkout_nonce' ) ) {
 			exit( 'Nonce can not be verified.' );
 		}
@@ -570,7 +574,6 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		wp_send_json_success( $data );
 
 		wp_die();
-	
 	}
 	
 
@@ -580,7 +583,6 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 * @since  2.0
 	 **/
 	function klarna_checkout_shipping_callback() {
-
 		if ( ! wp_verify_nonce( $_REQUEST['nonce'], 'klarna_checkout_nonce' ) ) {
 			exit( 'Nonce can not be verified.' );
 		}
@@ -599,6 +601,12 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		$woocommerce->cart->calculate_fees();
 		$woocommerce->cart->calculate_totals();
 
+		// Update WooCommerce cart and transient order item
+		$klarna_sid = $woocommerce->session->get( 'klarna_sid' );
+		$klarna_wc = $woocommerce;
+		set_transient( $klarna_sid, $klarna_wc, 48 * 60 * 60 );
+		set_transient( $klarna_transient . '_shipping', $klarna_wc->shipping, 48 * 60 * 60 );
+
 		$data['new_method'] = $new_method;
 		$data['cart_total'] = wc_price( $woocommerce->cart->total );
 		$data['cart_shipping_total'] = $woocommerce->cart->get_cart_shipping_total();
@@ -610,7 +618,6 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		wp_send_json_success( $data );
 
 		wp_die();
-		
 	}	
 		
 	

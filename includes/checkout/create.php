@@ -142,6 +142,11 @@ if ( '' != $this->color_link ) {
 	$create['options']['color_link'] = $this->color_link;
 }
 
+// Check if there's a subscription product in cart
+if ( class_exists( 'WC_Subscriptions_Cart' ) && WC_Subscriptions_Cart::cart_contains_subscription() ) {
+	$create['recurring'] = true;
+}
+
 if ( $this->is_rest() ) {
 	$create['order_amount'] = WC()->cart->total * 100;
 	$create['order_tax_amount'] = WC()->cart->get_taxes_total() * 100;
