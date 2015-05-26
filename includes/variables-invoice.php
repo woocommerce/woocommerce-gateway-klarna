@@ -11,6 +11,7 @@ $this->enabled     = $this->get_option( 'enabled' );
 $this->testmode    = $this->get_option( 'testmode' );
 $this->title       = $this->get_option( 'title' );
 $this->description = $this->get_option( 'description' );
+$this->log = new WC_Logger();
 
 // Sweden
 $this->eid_se    = $this->get_option( 'eid_se' );

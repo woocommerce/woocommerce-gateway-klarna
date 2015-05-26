@@ -9,12 +9,6 @@
 if ( ! defined( 'ABSPATH' ) )
 	exit;
 
-// Maybe create order
-$wcchck = new WC_Checkout();
-$ordr = $wcchck->create_order();
-print_r( $ordr );
-
-
 // Check if iframe needs to be displayed
 if ( ! $this->show_kco() )
 	return;

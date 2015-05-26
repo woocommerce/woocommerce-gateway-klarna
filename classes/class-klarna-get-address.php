@@ -17,8 +17,8 @@
  */
  
 class WC_Klarna_Get_Address {
+
 	public function __construct() {
-		
 		$data                     = new WC_Gateway_Klarna_Invoice;
 		$this->testmode           = $data->klarna_helper->get_test_mode();
 		$this->eid                = $data->klarna_helper->get_eid();
@@ -53,8 +53,6 @@ class WC_Klarna_Get_Address {
 		
 		// GetAddresses response above the checkout billing form
 		add_action( 'woocommerce_before_checkout_form', array( $this, 'get_address_response' ) );
-        
-       
 	} // End constructor
 	
 
@@ -76,7 +74,6 @@ class WC_Klarna_Get_Address {
  	 * and in the end use another payment method than Klarna.
  	 */
 	public function checkout_restore_customer_defaults() {
-		
 		if( is_checkout() &&  $this->get_shop_country() == 'SE' && ($this->partpay_enabled || $this->invo_enabled || $this->campaign_enabled) ) {
 		
 			global $woocommerce, $current_user;
@@ -138,7 +135,6 @@ class WC_Klarna_Get_Address {
 			</script>
 			<?php
 		}
-		
 	} // End function
 
 	
@@ -146,8 +142,7 @@ class WC_Klarna_Get_Address {
  	 * JS for fetching the personal identity number before the call to Klarna 
  	 * and populating the checkout fields after the call to Klarna.
  	 */
-	function js() {
-		
+	function js() {	
 		if( is_checkout() && $this->get_shop_country() == 'SE' && ($this->partpay_enabled || $this->invo_enabled || $this->campaign_enabled) ) {
 			?>
 			<script type="text/javascript">
@@ -227,12 +222,12 @@ class WC_Klarna_Get_Address {
 				
 				
 				jQuery(document).on('click','.klarna-push-pno',function() {
-					if( jQuery('#klarna_invo_pno').val() != '' ) {
+					if( jQuery('#klarna_invoice_pno').val() != '' ) {
 						pno_getadress = jQuery('#klarna_invoice_pno').val();
-					} else if( jQuery('#klarna_pno').val() != '' ) {
+					} else if( jQuery('#klarna_part_payment_pno').val() != '' ) {
 						pno_getadress = jQuery('#klarna_part_payment_pno').val();
 					}
-					
+
 					if(pno_getadress == '') {
 					
 						$(".klarna-get-address-message").show();
@@ -332,8 +327,7 @@ class WC_Klarna_Get_Address {
 	/**
  	 * Display the GetAddress fields
  	 */
-	public function get_address_button( $country ) {
-		
+	public function get_address_button( $country ) {	
 		if( ($this->invo_enabled && $this->invo_dob_display == 'description_box') || ($this->partpay_enabled && $this->partpay_dob_display == 'description_box') ) {
 			ob_start();
 
@@ -355,14 +349,12 @@ class WC_Klarna_Get_Address {
  	 * Display the GetAddress response above the billing form on checkout
  	 */
 	public function get_address_response() {
-		
 		if( ($this->invo_enabled && $this->invo_dob_display == 'description_box') || ($this->partpay_enabled && $this->partpay_dob_display == 'description_box') ) {
 			
 			?>
 				<div class="klarna-response"></div>
 			
 			<?php
-			
 		}
 	} // End function
 
@@ -371,7 +363,6 @@ class WC_Klarna_Get_Address {
 	 * Ajax request callback function
 	 */
 	function ajax_request() {
-	
 		// The $_REQUEST contains all the data sent via ajax
 		if ( isset($_REQUEST) ) {
 		
@@ -460,26 +451,22 @@ class WC_Klarna_Get_Address {
 
 	// Helper function - get_country
 	public function get_country() {
-
 		$data = new WC_Gateway_Klarna_Invoice;
 		return $data->klarna_helper->get_klarna_country();
-
 	}
+
 	
 	// Helper function - get_shop_country
 	public function get_shop_country() {
-
 		$data = new WC_Gateway_Klarna_Invoice;
 		return $data->get_klarna_shop_country();
-
 	}
+
 	
 	// Helper function - get_klarna_language
 	public function get_klarna_language( $country ) {
-
 		$data = new WC_Gateway_Klarna_Invoice;
 		return $data->klarna_helper->get_klarna_country( $country );
-
 	}
 	
 } // End Class

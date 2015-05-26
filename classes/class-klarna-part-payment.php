@@ -173,13 +173,11 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 	 * @since  2.0.0
 	 */
 	public function can_refund_order( $order ) {
-
 		if ( get_post_meta( $order->id, '_klarna_invoice_number', true ) ) {
 			return true;
 		}
 
 		return false;
-
 	}
 
 
@@ -193,29 +191,31 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 	 * @since  2.0.0
 	 */
 	public function process_refund( $orderid, $amount = NULL, $reason = '' ) {
+		// Check if order was created using this method
+		if ( $this->id == get_post_meta( $orderid, '_payment_method', true ) ) {
+			$order = wc_get_order( $orderid );
 
-		$order = wc_get_order( $orderid );
-		if ( ! $this->can_refund_order( $order ) ) {
-			$this->log->add( 'klarna', 'Refund Failed: No Klarna invoice ID.' );
-			$order->add_order_note( __( 'This order cannot be refunded. Please make sure it is activated.', 'klarna' ) );
-			return false;
-		}
+			if ( ! $this->can_refund_order( $order ) ) {
+				$this->log->add( 'klarna', 'Refund Failed: No Klarna invoice ID.' );
+				$order->add_order_note( __( 'This order cannot be refunded. Please make sure it is activated.', 'klarna' ) );
+				return false;
+			}
 
-		$country = get_post_meta( $orderid, '_billing_country', true );
+			$country = get_post_meta( $orderid, '_billing_country', true );
 
-		$klarna = new Klarna();
-		$this->configure_klarna( $klarna, $country );
-		$invNo = get_post_meta( $order->id, '_klarna_invoice_number', true );
+			$klarna = new Klarna();
+			$this->configure_klarna( $klarna, $country );
+			$invNo = get_post_meta( $order->id, '_klarna_invoice_number', true );
 
-		$klarna_order = new WC_Gateway_Klarna_Order( $order, $klarna );
-		$refund_order = $klarna_order->refund_order( $amount, $reason = '', $invNo );
+			$klarna_order = new WC_Gateway_Klarna_Order( $order, $klarna );
+			$refund_order = $klarna_order->refund_order( $amount, $reason = '', $invNo );
 
-		if ( $refund_order ) {
-			return true;
+			if ( $refund_order ) {
+				return true;
+			}
 		}
 
 		return false;
-
 	}
 
 
@@ -226,28 +226,25 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 	 * @since  2.0.0
 	 */
 	function activate_klarna_order( $orderid ) {
+		// Check if order was created using this method
+		if ( $this->id == get_post_meta( $orderid, '_payment_method', true ) ) {
+			// Klarna reservation number and billing country must be set
+			if ( get_post_meta( $orderid, '_klarna_order_reservation', true ) && get_post_meta( $orderid, '_billing_country', true ) ) {
+				// Check if this order hasn't been activated already
+				if ( ! get_post_meta( $orderid, '_klarna_invoice_number', true ) ) {
+					$rno = get_post_meta( $orderid, '_klarna_order_reservation', true );
+					$country = get_post_meta( $orderid, '_billing_country', true );
 
-		// Klarna reservation number and billing country must be set
-		if ( get_post_meta( $orderid, '_klarna_order_reservation', true ) && get_post_meta( $orderid, '_billing_country', true ) ) {
+					$order = wc_get_order( $orderid );
 
-			// Check if this order hasn't been activated already
-			if ( ! get_post_meta( $orderid, '_klarna_invoice_number', true ) ) {
+					$klarna = new Klarna();
+					$this->configure_klarna( $klarna, $country );
 
-				$rno = get_post_meta( $orderid, '_klarna_order_reservation', true );
-				$country = get_post_meta( $orderid, '_billing_country', true );
-
-				$order = wc_get_order( $orderid );
-
-				$klarna = new Klarna();
-				$this->configure_klarna( $klarna, $country );
-
-				$klarna_order = new WC_Gateway_Klarna_Order( $order, $klarna );
-				$klarna_order->activate_order( $rno );
-
+					$klarna_order = new WC_Gateway_Klarna_Order( $order, $klarna );
+					$klarna_order->activate_order( $rno );
+				}
 			}
-
-		}	
-
+		}
 	}
 
 
@@ -258,28 +255,25 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 	 * @since  2.0.0
 	 */
 	function cancel_klarna_order( $orderid ) {
+		// Check if order was created using this method
+		if ( $this->id == get_post_meta( $orderid, '_payment_method', true ) ) {
+			// Klarna reservation number and billing country must be set
+			if ( get_post_meta( $orderid, '_klarna_order_reservation', true ) && get_post_meta( $orderid, '_billing_country', true ) ) {
+				// Check if this order hasn't been cancelled already
+				if ( ! get_post_meta( $orderid, '_klarna_order_cancelled', true ) ) {
+					$rno = get_post_meta( $orderid, '_klarna_order_reservation', true );
+					$country = get_post_meta( $orderid, '_billing_country', true );
 
-		// Klarna reservation number and billing country must be set
-		if ( get_post_meta( $orderid, '_klarna_order_reservation', true ) && get_post_meta( $orderid, '_billing_country', true ) ) {
+					$order = wc_get_order( $orderid );
 
-			// Check if this order hasn't been cancelled already
-			if ( ! get_post_meta( $orderid, '_klarna_order_cancelled', true ) ) {
+					$klarna = new Klarna();
+					$this->configure_klarna( $klarna, $country );
 
-				$rno = get_post_meta( $orderid, '_klarna_order_reservation', true );
-				$country = get_post_meta( $orderid, '_billing_country', true );
-
-				$order = wc_get_order( $orderid );
-
-				$klarna = new Klarna();
-				$this->configure_klarna( $klarna, $country );
-
-				$klarna_order = new WC_Gateway_Klarna_Order( $order, $klarna );
-				$klarna_order->cancel_order( $rno );
-
+					$klarna_order = new WC_Gateway_Klarna_Order( $order, $klarna );
+					$klarna_order->cancel_order( $rno );
+				}
 			}
-
 		}	
-
 	}
 
 
@@ -289,9 +283,7 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 	 * @since 1.0.0
 	 */
 	function init_form_fields() {
-
-		$this->form_fields = include( KLARNA_DIR . 'includes/settings-part-payment.php' );
-	    
+		$this->form_fields = include( KLARNA_DIR . 'includes/settings-part-payment.php' );    
 	}
 
 
@@ -301,7 +293,6 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 	 * @since 1.0.0
 	 */
 	public function admin_options() { ?>
-
 		<h3>
 			<?php echo ( ! empty( $this->method_title ) ) ? $this->method_title : __( 'Settings', 'klarna' ) ; ?>
 		</h3>
@@ -323,7 +314,6 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 		<table class="form-table">
 			<?php $this->generate_settings_html(); // Generate the HTML For the settings form. ?>
 		</table>
-
 	<?php }
 
 

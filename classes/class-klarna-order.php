@@ -1,6 +1,6 @@
 <?php
 /**
- * Klarna orders
+ * Klarna orders management
  *
  * @link http://www.woothemes.com/products/klarna/
  * @since 1.0.0
@@ -425,6 +425,42 @@ class WC_Gateway_Klarna_Order {
 				__( 'Klarna order cancellation completed.', 'klarna' )
 			);
 			add_post_meta( $orderid, '_klarna_order_cancelled', time() );
+		} catch( Exception $e ) {
+			$order->add_order_note(
+				sprintf(
+					__( 'Klarna order cancellation failed. Error code %s. Error message %s', 'klarna' ),
+					$e->getCode(),
+					utf8_encode( $e->getMessage() )
+				)					
+			);
+		}
+	}
+
+	/**
+	 * Cancels a Klarna order
+	 * 
+	 * @since  2.0
+	 **/
+	function add_item_to_order( $rno ) {
+		$order = $this->order;
+		$klarna = $this->klarna;
+		$orderid = $order->id;
+
+		try {
+			$flags = KlarnaFlags::INC_VAT | KlarnaFlags::IS_HANDLING;
+			$klarna->addArticle(
+				4,              // Quantity
+				"HANDLING",     // Article number
+				"Handling fee", // Article name/title
+				50.99,          // Price
+				25,             // 25% VAT
+				0,              // Discount
+				$flags          // Flags
+			);
+			$klarna->update( $rno );
+			$order->add_order_note(
+				__( 'Klarna order update completed.', 'klarna' )
+			);
 		} catch( Exception $e ) {
 			$order->add_order_note(
 				sprintf(

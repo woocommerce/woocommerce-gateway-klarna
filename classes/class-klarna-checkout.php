@@ -124,7 +124,6 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		add_action( 'wp_ajax_klarna_checkout_order_note_callback', array( $this, 'klarna_checkout_order_note_callback' ) );
 		add_action( 'wp_ajax_nopriv_klarna_checkout_order_note_callback', array( $this, 'klarna_checkout_order_note_callback' ) );
 
-
 		/**
 		 * Checkout page shortcodes
 		 */ 
@@ -134,7 +133,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		add_shortcode( 'woocommerce_klarna_country', array( $this, 'klarna_checkout_country') );
 
     }
-
+    
 
 	/**
 	 * Enqueue Klarna Checkout javascript.
