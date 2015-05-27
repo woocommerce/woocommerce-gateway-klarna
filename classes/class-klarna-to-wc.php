@@ -292,6 +292,13 @@ class WC_Gateway_Klarna_K2WC {
 	public function create_order() {
 		$this->klarna_log->add( 'klarna', 'Creating local order...' );
 
+		$klarna_transient = sanitize_key( $_GET['sid'] );
+		$this->klarna_log->add( 'klarna', 'transient - ' . $klarna_transient );
+		$klarna_wc = get_transient( $klarna_transient );
+
+		global $woocommerce;
+		$woocommerce = $klarna_wc;
+
 		// Customer accounts
 		$customer_id = apply_filters( 'woocommerce_checkout_customer_id', get_current_user_id() );
 

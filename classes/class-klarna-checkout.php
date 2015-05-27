@@ -124,6 +124,18 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		add_action( 'wp_ajax_klarna_checkout_order_note_callback', array( $this, 'klarna_checkout_order_note_callback' ) );
 		add_action( 'wp_ajax_nopriv_klarna_checkout_order_note_callback', array( $this, 'klarna_checkout_order_note_callback' ) );
 
+		// Add order item
+		// Need to use this hook, because in woocommerce_new_order_item item meta is not populated
+		add_action( 'woocommerce_ajax_add_order_item_meta', array( $this, 'update_klarna_order_add_item' ), 10, 3 );
+
+		// Remove order item
+		// This must be done BEFORE deletion, because otherwise we can't tie order item to an order
+		add_action( 'woocommerce_before_delete_order_item', array( $this, 'update_klarna_order_delete_item' ) );
+
+		// Edit an order item and save
+		add_action( 'woocommerce_saved_order_items', array( $this, 'update_klarna_order_edit_item' ), 10, 2 );
+
+
 		/**
 		 * Checkout page shortcodes
 		 */ 
@@ -133,7 +145,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		add_shortcode( 'woocommerce_klarna_country', array( $this, 'klarna_checkout_country') );
 
     }
-    
+
 
 	/**
 	 * Enqueue Klarna Checkout javascript.
@@ -1501,13 +1513,11 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 * @since  2.0.0
 	 */
 	public function can_refund_order( $order ) {
-
 		if ( get_post_meta( $order->id, '_klarna_invoice_number', true ) ) {
 			return true;
 		}
 
 		return false;
-
 	}
 
 
@@ -1521,29 +1531,30 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 * @since  2.0.0
 	 */
 	public function process_refund( $orderid, $amount = NULL, $reason = '' ) {
+		// Check if order was created using this method
+		if ( $this->id == get_post_meta( $orderid, '_payment_method', true ) ) {
+			$order = wc_get_order( $orderid );
+			if ( ! $this->can_refund_order( $order ) ) {
+				$this->log->add( 'klarna', 'Refund Failed: No Klarna invoice ID.' );
+				$order->add_order_note( __( 'This order cannot be refunded. Please make sure it is activated.', 'klarna' ) );
+				return false;
+			}
 
-		$order = wc_get_order( $orderid );
-		if ( ! $this->can_refund_order( $order ) ) {
-			$this->log->add( 'klarna', 'Refund Failed: No Klarna invoice ID.' );
-			$order->add_order_note( __( 'This order cannot be refunded. Please make sure it is activated.', 'klarna' ) );
-			return false;
-		}
+			$country = get_post_meta( $orderid, '_billing_country', true );
 
-		$country = get_post_meta( $orderid, '_billing_country', true );
+			$klarna = new Klarna();
+			$this->configure_klarna( $klarna, $country );
+			$invNo = get_post_meta( $order->id, '_klarna_invoice_number', true );
 
-		$klarna = new Klarna();
-		$this->configure_klarna( $klarna, $country );
-		$invNo = get_post_meta( $order->id, '_klarna_invoice_number', true );
+			$klarna_order = new WC_Gateway_Klarna_Order( $order, $klarna );
+			$refund_order = $klarna_order->refund_order( $amount, $reason = '', $invNo );
 
-		$klarna_order = new WC_Gateway_Klarna_Order( $order, $klarna );
-		$refund_order = $klarna_order->refund_order( $amount, $reason = '', $invNo );
-
-		if ( $refund_order ) {
-			return true;
+			if ( $refund_order ) {
+				return true;
+			}
 		}
 
 		return false;
-
 	}
 
 
@@ -1554,28 +1565,25 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 * @since  2.0.0
 	 */
 	function activate_klarna_order( $orderid ) {
+		// Check if order was created using this method
+		if ( $this->id == get_post_meta( $orderid, '_payment_method', true ) ) {
+			// Klarna reservation number and billing country must be set
+			if ( get_post_meta( $orderid, '_klarna_order_reservation', true ) && get_post_meta( $orderid, '_billing_country', true ) ) {
+				// Check if this order hasn't been activated already
+				if ( ! get_post_meta( $orderid, '_klarna_invoice_number', true ) ) {
+					$rno = get_post_meta( $orderid, '_klarna_order_reservation', true );
+					$country = get_post_meta( $orderid, '_billing_country', true );
 
-		// Klarna reservation number and billing country must be set
-		if ( get_post_meta( $orderid, '_klarna_order_reservation', true ) && get_post_meta( $orderid, '_billing_country', true ) ) {
+					$order = wc_get_order( $orderid );
 
-			// Check if this order hasn't been activated already
-			if ( ! get_post_meta( $orderid, '_klarna_invoice_number', true ) ) {
+					$klarna = new Klarna();
+					$this->configure_klarna( $klarna, $country );
 
-				$rno = get_post_meta( $orderid, '_klarna_order_reservation', true );
-				$country = get_post_meta( $orderid, '_billing_country', true );
-
-				$order = wc_get_order( $orderid );
-
-				$klarna = new Klarna();
-				$this->configure_klarna( $klarna, $country );
-
-				$klarna_order = new WC_Gateway_Klarna_Order( $order, $klarna );
-				$klarna_order->activate_order( $rno );
-
+					$klarna_order = new WC_Gateway_Klarna_Order( $order, $klarna );
+					$klarna_order->activate_order( $rno );
+				}
 			}
-
-		}	
-
+		}
 	}
 
 
@@ -1586,10 +1594,88 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 * @since  2.0.0
 	 */
 	function cancel_klarna_order( $orderid ) {
-		// Klarna reservation number and billing country must be set
-		if ( get_post_meta( $orderid, '_klarna_order_reservation', true ) && get_post_meta( $orderid, '_billing_country', true ) ) {
-			// Check if this order hasn't been cancelled already
-			if ( ! get_post_meta( $orderid, '_klarna_order_cancelled', true ) ) {
+		// Check if order was created using this method
+		if ( $this->id == get_post_meta( $orderid, '_payment_method', true ) ) {
+			// Klarna reservation number and billing country must be set
+			if ( get_post_meta( $orderid, '_klarna_order_reservation', true ) && get_post_meta( $orderid, '_billing_country', true ) ) {
+				// Check if this order hasn't been cancelled already
+				if ( ! get_post_meta( $orderid, '_klarna_order_cancelled', true ) ) {
+					$rno = get_post_meta( $orderid, '_klarna_order_reservation', true );
+					$country = get_post_meta( $orderid, '_billing_country', true );
+
+					$order = wc_get_order( $orderid );
+
+					$klarna = new Klarna();
+					$this->configure_klarna( $klarna, $country );
+
+					$klarna_order = new WC_Gateway_Klarna_Order( $order, $klarna );
+					$klarna_order->cancel_order( $rno );
+				}
+			}	
+		}
+	}
+
+
+	/**
+	 * Update order in Klarna system, add new item
+	 * 
+	 * @param  integer $orderid
+	 * @since  2.0.0
+	 */
+	function update_klarna_order_add_item( $itemid, $item ) {
+		// Get item row from the database table, needed for order id
+		global $wpdb;
+		$item_row = $wpdb->get_row( $wpdb->prepare( "
+			SELECT      order_id
+			FROM        {$wpdb->prefix}woocommerce_order_items
+			WHERE       order_item_id = %d
+		", $itemid ) );
+
+		$orderid = $item_row->order_id;
+
+		// Check if order was created using this method
+		if ( $this->id == get_post_meta( $orderid, '_payment_method', true ) ) {
+			// Check if this order hasn't been cancelled or activated
+			if ( ! get_post_meta( $orderid, '_klarna_order_cancelled', true ) && ! get_post_meta( $orderid, '_klarna_order_activated', true ) ) {
+				$rno = get_post_meta( $orderid, '_klarna_order_reservation', true );
+				$country = get_post_meta( $orderid, '_billing_country', true );
+
+				$order = wc_get_order( $orderid );
+				$_product = $order->get_product_from_item( $item );
+				$this->log->add( 'klarna', 'Product: ' . var_export( $_product, true ) );
+
+				$klarna = new Klarna();
+				$this->configure_klarna( $klarna, $country );
+
+				$klarna_order = new WC_Gateway_Klarna_Order( $order, $klarna );
+				$klarna_order->process_cart_contents();
+				$klarna_order->update_order_items( $rno );
+			}		
+		}		
+	}
+
+
+	/**
+	 * Update order in Klarna system, add new item
+	 * 
+	 * @param  integer $orderid
+	 * @since  2.0.0
+	 */
+	function update_klarna_order_delete_item( $itemid ) {
+		// Get item row from the database table, needed for order id
+		global $wpdb;
+		$item_row = $wpdb->get_row( $wpdb->prepare( "
+			SELECT      order_id
+			FROM        {$wpdb->prefix}woocommerce_order_items
+			WHERE       order_item_id = %d
+		", $itemid ) );
+
+		$orderid = $item_row->order_id;
+
+		// Check if order was created using this method
+		if ( $this->id == get_post_meta( $orderid, '_payment_method', true ) ) {
+			// Check if this order hasn't been cancelled or activated
+			if ( ! get_post_meta( $orderid, '_klarna_order_cancelled', true ) && ! get_post_meta( $orderid, '_klarna_order_activated', true ) ) {
 				$rno = get_post_meta( $orderid, '_klarna_order_reservation', true );
 				$country = get_post_meta( $orderid, '_billing_country', true );
 
@@ -1599,9 +1685,37 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 				$this->configure_klarna( $klarna, $country );
 
 				$klarna_order = new WC_Gateway_Klarna_Order( $order, $klarna );
-				$klarna_order->cancel_order( $rno );
-			}
-		}	
+				$klarna_order->process_cart_contents( $itemid );
+				$klarna_order->update_order_items( $rno );
+			}		
+		}		
+	}
+
+
+	/**
+	 * Update order in Klarna system, add new item
+	 * 
+	 * @param  integer $orderid
+	 * @since  2.0.0
+	 */
+	function update_klarna_order_edit_item( $orderid, $items ) {
+		// Check if order was created using this method
+		if ( $this->id == get_post_meta( $orderid, '_payment_method', true ) ) {
+			// Check if this order hasn't been cancelled or activated
+			if ( ! get_post_meta( $orderid, '_klarna_order_cancelled', true ) && ! get_post_meta( $orderid, '_klarna_order_activated', true ) ) {
+				$rno = get_post_meta( $orderid, '_klarna_order_reservation', true );
+				$country = get_post_meta( $orderid, '_billing_country', true );
+
+				$order = wc_get_order( $orderid );
+
+				$klarna = new Klarna();
+				$this->configure_klarna( $klarna, $country );
+
+				$klarna_order = new WC_Gateway_Klarna_Order( $order, $klarna );
+				$klarna_order->process_cart_contents();
+				$klarna_order->update_order_items( $rno );
+			}		
+		}		
 	}
 
 

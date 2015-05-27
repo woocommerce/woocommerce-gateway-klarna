@@ -45,49 +45,52 @@ class WC_Gateway_Klarna_Order {
 	/**
 	 * Process cart contents.
 	 * 
+	 * @param  $skip_item Item ID to skip from adding
 	 * @since  2.0
 	 **/
-	function process_cart_contents() {
+	function process_cart_contents( $skip_item = null ) {
 		$order = $this->order;
 		$klarna = $this->klarna;
 
 		if ( sizeof( $order->get_items() ) > 0 ) {
-			foreach ( $order->get_items() as $item ) {
-				$_product = $order->get_product_from_item( $item );
-				if ( $_product->exists() && $item['qty'] ) {
-				
-					// We manually calculate the tax percentage here
-					if ( $order->get_line_tax( $item ) !== 0 ) {
-						// Calculate tax percentage
-						$item_tax_percentage = @number_format( ( $order->get_line_tax( $item ) / $order->get_line_total( $item, false ) ) * 100, 2, '.', '' );
-					} else {
-						$item_tax_percentage = 0.00;
-					}
+			foreach ( $order->get_items() as $item_key => $item ) {
+				// Check if an item has been removed
+				if ( $item_key != $skip_item ) {
+					$_product = $order->get_product_from_item( $item );
+					if ( $_product->exists() && $item['qty'] ) {
 					
-					// apply_filters to item price so we can filter this if needed
-					$klarna_item_price_including_tax = $order->get_item_total( $item, true );
-					$item_price = apply_filters( 'klarna_item_price_including_tax', $klarna_item_price_including_tax );
+						// We manually calculate the tax percentage here
+						if ( $order->get_line_tax( $item ) !== 0 ) {
+							// Calculate tax percentage
+							$item_tax_percentage = @number_format( ( $order->get_line_tax( $item ) / $order->get_line_total( $item, false ) ) * 100, 2, '.', '' );
+						} else {
+							$item_tax_percentage = 0.00;
+						}
 						
-					// Get SKU or product id
-					$reference = '';
-					if ( $_product->get_sku() ) {
-						$reference = $_product->get_sku();
-					} elseif ( $_product->variation_id ) {
-						$reference = $_product->variation_id;
-					} else {
-						$reference = $_product->id;
+						// apply_filters to item price so we can filter this if needed
+						$klarna_item_price_including_tax = $order->get_item_total( $item, true );
+						$item_price = apply_filters( 'klarna_item_price_including_tax', $klarna_item_price_including_tax );
+							
+						// Get SKU or product id
+						$reference = '';
+						if ( $_product->get_sku() ) {
+							$reference = $_product->get_sku();
+						} elseif ( $_product->variation_id ) {
+							$reference = $_product->variation_id;
+						} else {
+							$reference = $_product->id;
+						}
+						
+						$klarna->addArticle(
+							$qty      = $item['qty'],                  // Quantity
+							$artNo    = strval( $reference ),          // Article number
+							$title    = utf8_decode ($item['name']),   // Article name/title
+							$price    = $item_price,                   // Price including tax
+							$vat      = round( $item_tax_percentage ), // Tax
+							$discount = 0,                             // Discount is applied later
+							$flags    = KlarnaFlags::INC_VAT           // Price is including VAT.
+						);						
 					}
-					
-					$klarna->addArticle(
-						$qty      = $item['qty'],                  // Quantity
-						$artNo    = strval( $reference ),          // Article number
-						$title    = utf8_decode ($item['name']),   // Article name/title
-						$price    = $item_price,                   // Price including tax
-						$vat      = round( $item_tax_percentage ), // Tax
-						$discount = 0,                             // Discount is applied later
-						$flags    = KlarnaFlags::INC_VAT           // Price is including VAT.
-					);
-										
 				}
 			}
 		}
@@ -441,30 +444,28 @@ class WC_Gateway_Klarna_Order {
 	 * 
 	 * @since  2.0
 	 **/
-	function add_item_to_order( $rno ) {
+	function update_order_items( $rno ) {
 		$order = $this->order;
 		$klarna = $this->klarna;
 		$orderid = $order->id;
 
 		try {
-			$flags = KlarnaFlags::INC_VAT | KlarnaFlags::IS_HANDLING;
-			$klarna->addArticle(
-				4,              // Quantity
-				"HANDLING",     // Article number
-				"Handling fee", // Article name/title
-				50.99,          // Price
-				25,             // 25% VAT
-				0,              // Discount
-				$flags          // Flags
-			);
-			$klarna->update( $rno );
-			$order->add_order_note(
-				__( 'Klarna order update completed.', 'klarna' )
-			);
+			$result = $klarna->update( $rno );
+			/*
+			if ( $result ) {
+				$order->add_order_note(
+					sprintf(
+						__( 'Klarna order updated.', 'klarna' ),
+						$invNo,
+						$risk
+					)
+				);
+			}
+			*/
 		} catch( Exception $e ) {
 			$order->add_order_note(
 				sprintf(
-					__( 'Klarna order cancellation failed. Error code %s. Error message %s', 'klarna' ),
+					__( 'Klarna order update failed. Error code %s. Error message %s', 'klarna' ),
 					$e->getCode(),
 					utf8_encode( $e->getMessage() )
 				)					

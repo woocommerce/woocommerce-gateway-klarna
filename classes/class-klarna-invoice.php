@@ -102,8 +102,17 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 		add_action( 'wp_print_footer_scripts', array(  $this, 'footer_scripts' ) );
 		add_action( 'woocommerce_order_status_cancelled', array( $this, 'cancel_klarna_order' ) );
 		add_action( 'woocommerce_order_status_completed', array( $this, 'activate_klarna_order' ) );
-		// Update Klarna order
+		
+		// Add order item
+		// Need to use this hook, because in woocommerce_new_order_item item meta is not populated
 		add_action( 'woocommerce_ajax_add_order_item_meta', array( $this, 'update_klarna_order_add_item' ), 10, 3 );
+
+		// Remove order item
+		// This must be done BEFORE deletion, because otherwise we can't tie order item to an order
+		add_action( 'woocommerce_before_delete_order_item', array( $this, 'update_klarna_order_delete_item' ) );
+
+		// Edit an order item and save
+		add_action( 'woocommerce_saved_order_items', array( $this, 'update_klarna_order_edit_item' ), 10, 2 );
 
 		// Add Klarna shipping info to order confirmation page and email
 		add_filter( 'woocommerce_thankyou_order_received_text', array( $this, 'output_klarna_details_confirmation'), 20, 2 );
@@ -426,8 +435,8 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 
 		// Check if order was created using this method
 		if ( $this->id == get_post_meta( $orderid, '_payment_method', true ) ) {
-			// Check if this order hasn't been cancelled
-			if ( ! get_post_meta( $orderid, '_klarna_order_cancelled', true ) ) {
+			// Check if this order hasn't been cancelled or activated
+			if ( ! get_post_meta( $orderid, '_klarna_order_cancelled', true ) && ! get_post_meta( $orderid, '_klarna_order_activated', true ) ) {
 				$rno = get_post_meta( $orderid, '_klarna_order_reservation', true );
 				$country = get_post_meta( $orderid, '_billing_country', true );
 
@@ -439,10 +448,76 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 				$this->configure_klarna( $klarna, $country );
 
 				$klarna_order = new WC_Gateway_Klarna_Order( $order, $klarna );
-				$klarna_order->add_item_to_order( $rno );
+				$klarna_order->process_cart_contents();
+				$klarna_order->update_order_items( $rno );
 			}		
 		}		
 	}
+
+
+	/**
+	 * Update order in Klarna system, add new item
+	 * 
+	 * @param  integer $orderid
+	 * @since  2.0.0
+	 */
+	function update_klarna_order_delete_item( $itemid ) {
+		// Get item row from the database table, needed for order id
+		global $wpdb;
+		$item_row = $wpdb->get_row( $wpdb->prepare( "
+			SELECT      order_id
+			FROM        {$wpdb->prefix}woocommerce_order_items
+			WHERE       order_item_id = %d
+		", $itemid ) );
+
+		$orderid = $item_row->order_id;
+
+		// Check if order was created using this method
+		if ( $this->id == get_post_meta( $orderid, '_payment_method', true ) ) {
+			// Check if this order hasn't been cancelled or activated
+			if ( ! get_post_meta( $orderid, '_klarna_order_cancelled', true ) && ! get_post_meta( $orderid, '_klarna_order_activated', true ) ) {
+				$rno = get_post_meta( $orderid, '_klarna_order_reservation', true );
+				$country = get_post_meta( $orderid, '_billing_country', true );
+
+				$order = wc_get_order( $orderid );
+
+				$klarna = new Klarna();
+				$this->configure_klarna( $klarna, $country );
+
+				$klarna_order = new WC_Gateway_Klarna_Order( $order, $klarna );
+				$klarna_order->process_cart_contents( $itemid );
+				$klarna_order->update_order_items( $rno );
+			}		
+		}		
+	}
+
+
+	/**
+	 * Update order in Klarna system, add new item
+	 * 
+	 * @param  integer $orderid
+	 * @since  2.0.0
+	 */
+	function update_klarna_order_edit_item( $orderid, $items ) {
+		// Check if order was created using this method
+		if ( $this->id == get_post_meta( $orderid, '_payment_method', true ) ) {
+			// Check if this order hasn't been cancelled or activated
+			if ( ! get_post_meta( $orderid, '_klarna_order_cancelled', true ) && ! get_post_meta( $orderid, '_klarna_order_activated', true ) ) {
+				$rno = get_post_meta( $orderid, '_klarna_order_reservation', true );
+				$country = get_post_meta( $orderid, '_billing_country', true );
+
+				$order = wc_get_order( $orderid );
+
+				$klarna = new Klarna();
+				$this->configure_klarna( $klarna, $country );
+
+				$klarna_order = new WC_Gateway_Klarna_Order( $order, $klarna );
+				$klarna_order->process_cart_contents();
+				$klarna_order->update_order_items( $rno );
+			}		
+		}		
+	}
+
 
 	/**
 	 * Initialise Gateway Settings Form Fields.
@@ -712,7 +787,6 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 	 * @since  2.0
 	 **/
 	function configure_klarna( $klarna, $country ) {
-
 		$klarna->config(
 			$this->klarna_helper->get_eid(),                         // EID
 			$this->klarna_helper->get_secret(),                      // Secret
@@ -723,7 +797,6 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 			$pcStorage = 'jsondb',                                   // PClass storage
 			$pcURI = 'klarna_pclasses_' . $country                   // PClass storage URI path
 		);
-
 	}
 
 	
