@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * File containing the Klarna_Checkout_Digester class
+ * File containing the Klarna_Checkout_Resource interface
  *
  * PHP version 5.3
  *
@@ -27,27 +27,23 @@
  */
 
 /**
- * Class to handle the digesting of hash string
+ * Interface for updateable resource objects
  *
  * @category  Payment
  * @package   Klarna_Checkout
- * @author    Rickard D. <rickard.dybeck@klarna.com>
- * @author    Christer G. <christer.gustavsson@klarna.com>
+ * @author    Matthias Feist <matthias.feist@klarna.com>
  * @copyright 2015 Klarna AB
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache license v2.0
  * @link      http://developers.klarna.com/
  */
-class Klarna_Checkout_Digest
+interface Klarna_Checkout_ResourceUpdateableInterface
 {
     /**
-     * Create a digest from a supplied string
+     * Update resource data
      *
-     * @param string $digestString string to hash
+     * @param array $data data to update the resource with
      *
-     * @return string Base64 and SHA256 hashed string
+     * @return void
      */
-    public function create($digestString)
-    {
-        return base64_encode(hash('sha256', $digestString, true));
-    }
+    public function update(array $data);
 }

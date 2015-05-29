@@ -688,9 +688,9 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 				
 				$sharedSecret = $this->klarna_secret;
 				require_once( KLARNA_LIB . '/src/Klarna/Checkout.php' );
-				Klarna_Checkout_Order::$baseUri = $this->klarna_server;
-				Klarna_Checkout_Order::$contentType = 'application/vnd.klarna.checkout.aggregated-order-v2+json';
-				$connector = Klarna_Checkout_Connector::create( $sharedSecret );
+				// Klarna_Checkout_Order::$baseUri = $this->klarna_server;
+				// Klarna_Checkout_Order::$contentType = 'application/vnd.klarna.checkout.aggregated-order-v2+json';
+				$connector = Klarna_Checkout_Connector::create( $sharedSecret, $this->klarna_server );
 	
 				// Resume session
 				$klarna_order = new Klarna_Checkout_Order(
@@ -748,9 +748,9 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			);
 		} else {
 			require_once( KLARNA_LIB . '/src/Klarna/Checkout.php' );
-			Klarna_Checkout_Order::$baseUri = $this->klarna_server;
-			Klarna_Checkout_Order::$contentType = 'application/vnd.klarna.checkout.aggregated-order-v2+json';
-			$connector = Klarna_Checkout_Connector::create( $sharedSecret );
+			// Klarna_Checkout_Order::$baseUri = $this->klarna_server;
+			// Klarna_Checkout_Order::$contentType = 'application/vnd.klarna.checkout.aggregated-order-v2+json';
+			$connector = Klarna_Checkout_Connector::create( $sharedSecret, $this->klarna_server );
 	
 			$klarna_order = new Klarna_Checkout_Order(
 				$connector,

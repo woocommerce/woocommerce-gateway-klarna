@@ -153,9 +153,9 @@ if ( $this->is_rest() ) {
 
 	$klarna_order = new \Klarna\Rest\Checkout\Order( $connector );
 } else  {
-	Klarna_Checkout_Order::$baseUri = $this->klarna_server;
-	Klarna_Checkout_Order::$contentType = 'application/vnd.klarna.checkout.aggregated-order-v2+json';
-	$klarna_order = new Klarna_Checkout_Order( $connector );
+	// Klarna_Checkout_Order::$baseUri = $this->klarna_server;
+	// Klarna_Checkout_Order::$contentType = 'application/vnd.klarna.checkout.aggregated-order-v2+json';
+	$klarna_order = new Klarna_Checkout_Order( $connector, $this->klarna_server );
 }
 
 $klarna_order->create( apply_filters( 'kco_create_order', $create ) );

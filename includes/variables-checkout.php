@@ -69,9 +69,9 @@ if ( empty($this->terms_url) )
 	
 	// Check if this is test mode or not
 if ( $this->testmode == 'yes' ):
-	$this->klarna_server = 'https://checkout.testdrive.klarna.com/checkout/orders';	
+	$this->klarna_server = 'https://checkout.testdrive.klarna.com';	
 else :
-	$this->klarna_server = 'https://checkout.klarna.com/checkout/orders';
+	$this->klarna_server = 'https://checkout.klarna.com';
 endif;
 
 // Set current country based on used currency

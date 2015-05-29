@@ -1,7 +1,6 @@
 <?php
-
 /**
- * Copyright 2012 Klarna AB
+ * Copyright 2015 Klarna AB
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,9 +21,9 @@
  * @category  Payment
  * @package   Klarna_Checkout
  * @author    Klarna <support@klarna.com>
- * @copyright 2012 Klarna AB
+ * @copyright 2015 Klarna AB
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache license v2.0
- * @link      http://integration.klarna.com/
+ * @link      http://developers.klarna.com/
  */
 
 /**
@@ -34,9 +33,9 @@
  * @package   Klarna_Checkout
  * @author    Majid G. <majid.garmaroudi@klarna.com>
  * @author    David K. <david.keijser@klarna.com>
- * @copyright 2012 Klarna AB
+ * @copyright 2015 Klarna AB
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache license v2.0
- * @link      http://integration.klarna.com/
+ * @link      http://developers.klarna.com/
  */
 interface Klarna_Checkout_ConnectorInterface
 {
@@ -54,4 +53,18 @@ interface Klarna_Checkout_ConnectorInterface
         Klarna_Checkout_ResourceInterface $resource,
         array $options = null
     );
+
+    /**
+     * Gets the underlying transport object
+     *
+     * @return Klarna_Checkout_HTTP_TransportInterface Transport object
+     */
+    public function getTransport();
+
+    /**
+     * Get the current domain
+     *
+     * @return string
+     */
+    public function getDomain();
 }

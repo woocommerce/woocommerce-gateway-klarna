@@ -266,8 +266,11 @@ class WC_Gateway_Klarna_K2WC {
 			);				
 		} else {
 			require_once( KLARNA_LIB . '/src/Klarna/Checkout.php' );  
-			Klarna_Checkout_Order::$contentType = "application/vnd.klarna.checkout.aggregated-order-v2+json";
-			$connector    = Klarna_Checkout_Connector::create( $this->secret );  			
+			// Klarna_Checkout_Order::$contentType = "application/vnd.klarna.checkout.aggregated-order-v2+json";
+			$connector    = Klarna_Checkout_Connector::create(
+				$this->secret,
+				$this->klarna_server
+			);  			
 			$checkoutId   = $this->klarna_order_uri;  
 			$klarna_order = new Klarna_Checkout_Order( $connector, $checkoutId );  
 		}

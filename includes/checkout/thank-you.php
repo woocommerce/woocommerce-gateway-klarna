@@ -28,7 +28,7 @@ if ( $this->is_rest() ) {
 	);
 	$klarna_order = new \Klarna\Rest\Checkout\Order( $connector, $orderUri );
 } else {
-	Klarna_Checkout_Order::$contentType = 'application/vnd.klarna.checkout.aggregated-order-v2+json';  
+	// Klarna_Checkout_Order::$contentType = 'application/vnd.klarna.checkout.aggregated-order-v2+json';  
 	$connector = Klarna_Checkout_Connector::create( $sharedSecret );  
 	$klarna_order = new Klarna_Checkout_Order( $connector, $orderUri );
 }
