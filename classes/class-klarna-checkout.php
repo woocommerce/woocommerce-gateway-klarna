@@ -91,6 +91,9 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		// Enqueue scripts and styles
 		add_action( 'wp_enqueue_scripts', array( $this, 'klarna_checkout_enqueuer' ) );
 
+		// Cancel and activate the order
+		add_action( 'woocommerce_order_status_cancelled', array( $this, 'cancel_klarna_order' ) );
+		add_action( 'woocommerce_order_status_completed', array( $this, 'activate_klarna_order' ) );
 	
 		/**
 		 * Checkout page AJAX
@@ -957,7 +960,6 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		 * Process shipping
 		 */
 		if ( $woocommerce->cart->shipping_total > 0 ) {
-	
 			// We manually calculate the tax percentage here
 			if ( $woocommerce->cart->shipping_tax_total > 0 ) {
 				// Calculate tax percentage
@@ -980,9 +982,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 							$klarna_shipping_method = $rate_value->label;
 						}
 					}
-	
 				}
-	
 			}
 			if ( ! isset( $klarna_shipping_method ) ) {
 				$klarna_shipping_method = __( 'Shipping', 'klarna' );
@@ -1004,41 +1004,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	
 		}
 	
-		/**
-		 * Process discounts
-		 */
-		/*
-		if ( ! empty( $woocommerce->cart->coupon_discount_amounts ) ) {
-	
-			$discount_amounts = $woocommerce->cart->coupon_discount_amounts;
-			$discount_tax_amounts = $woocommerce->cart->coupon_discount_tax_amounts;
-			
-			foreach ( $discount_amounts as $code => $amount ) {
-				$amount = (int) number_format( $amount, 2, '', '' );
-				
-				if ( isset( $discount_tax_amounts[ $code ] ) ) {
-					// Calculate tax percentage
-					$discount_tax_percentage = round( $discount_tax_amounts[ $code ] / $amount, 2 ) * 100;
-				} else {
-					$discount_tax_percentage = 00;
-				}
-		
-				$cart[] = array(    
-					'reference'   => 'DISCOUNT',  
-					'name'        => $code,  
-					'quantity'    => 1,  
-					'unit_price'  => -$amount,  
-					'tax_rate'    => $discount_tax_percentage 
-				);
-			}
-	
-		}
-		*/
-
-		// echo '<pre style="font-size:9px;">'; print_r( $cart ); echo '</pre>';		
-		// echo '<pre style="font-size:9px;">'; print_r( WC()->cart ); echo '</pre>';		
-		return $cart;
-		
+		return $cart;		
 	}
 
 
@@ -1048,10 +1014,8 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 *
 	 * @since 1.0.0
 	 */
-	function init_form_fields() {
-    
+	function init_form_fields() {    
 		$this->form_fields = include( KLARNA_DIR . 'includes/settings-checkout.php' );
-    
 	}
 	
 	
@@ -1384,126 +1348,6 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 
  	}
  	
- 	
-	/**
-	 * Activate the order/reservation in Klarnas system and return the result
-	 *
-	 * @since 1.0.0
-	 */
-	function activate_reservation() {
-
-		global $woocommerce;
-
-		$order_id = $_GET['post'];
-		$order = wc_get_order( $order_id );
-
-		require_once( KLARNA_LIB . 'Klarna.php' );
-		if ( ! function_exists('xmlrpc_encode_entitites') && ! class_exists('xmlrpcresp' ) ) {
-			require_once( KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc.inc' );
-			require_once( KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc_wrappers.inc' );
-		}
-
-		// Split address into House number and House extension for NL & DE customers
-		if ( $this->shop_country == 'NL' || $this->shop_country == 'DE' ) {
-		
-			require_once('split-address.php');
-			
-			$klarna_billing_address				= $order->billing_address_1;
-			$splitted_address 					= splitAddress($klarna_billing_address);
-			
-			$klarna_billing_address				= $splitted_address[0];
-			$klarna_billing_house_number		= $splitted_address[1];
-			$klarna_billing_house_extension		= $splitted_address[2];
-			
-			$klarna_shipping_address			= $order->shipping_address_1;
-			$splitted_address 					= splitAddress($klarna_shipping_address);
-			
-			$klarna_shipping_address			= $splitted_address[0];
-			$klarna_shipping_house_number		= $splitted_address[1];
-			$klarna_shipping_house_extension	= $splitted_address[2];
-		
-		} else {
-			
-			$klarna_billing_address				= $order->billing_address_1;
-			$klarna_billing_house_number		= '';
-			$klarna_billing_house_extension		= '';
-			
-			$klarna_shipping_address			= $order->shipping_address_1;
-			$klarna_shipping_house_number		= '';
-			$klarna_shipping_house_extension	= '';
-			
-		}
-				
-		$klarna = new Klarna();
-
-		/**
-		 * Setup Klarna configuration
-		 */
-		$country = $this->klarna_helper->get_klarna_country();
-		$this->configure_klarna( $klarna, $country );
-		
-		Klarna::$xmlrpcDebug = false;
-		Klarna::$debug = false;
-		
-		/**
-		 * Setup Klarna configuration
-		 */
-		$country = $this->klarna_helper->get_klarna_country();
-		$this->configure_klarna( $klarna, $country );
-
-		$klarna_order = new WC_Gateway_Klarna_Order( $order, $klarna );
-		$klarna_order->prepare_order(
-			$klarna_billing,
-			$klarna_shipping,
-			$this->ship_to_billing_address
-		);
-
-		// Set store specific information so you can e.g. search and associate invoices with order numbers.
-		$k->setEstoreInfo(
-		    $orderid1 = $order_id,         // Maybe the estore's order number/id.
-		    $orderid2 = $order->order_key, // Could an order number from another system?
-		    $user = ''                     // Username, email or identifier for the user?
-		);
-		
-		try {
-
-			// Transmit all the specified data, from the steps above, to Klarna.
-			$result = $k->activateReservation(
-			    null,           // PNO (Date of birth for DE and NL).
-			    get_post_meta( $order_id, 'klarna_order_reservation', true ),           // Reservation to activate
-			    null,           // Gender.
-			    '',             // OCR number to use if you have reserved one.
-			    KlarnaFlags::NO_FLAG, //No specific behaviour like RETURN_OCR or TEST_MODE.
-			    -1 // Get the pclass object that the customer has choosen.
-			);
-			
-			// Retreive response
-			$risk = $result[0]; // ok or no_risk
-			$invno = $result[1];
-			
-			// Invoice created
-			if ( $risk == 'ok' ) {
-	    		update_post_meta( $order_id, 'klarna_order_status', 'activated' );
-				update_post_meta( $order_id, 'klarna_order_invoice', $invno );
-				$order->add_order_note(sprintf(__('Klarna payment reservation has been activated. Invoice number: %s.', 'klarna'), $invno));
-			}
-			echo "risk: {$risk}\ninvno: {$invno}\n";
-			// Reservation is activated, proceed accordingly.
-
-	    } catch( Exception $e ) {
-
-	    	// Something went wrong, print the message:
-	    	$order->add_order_note(
-	    		sprintf(
-	    			__( 'Klarna reservation activation error: %s. Error code: $e->getCode()', 'klarna'),
-	    			$e->getMessage(),
-	    			$e->getCode()
-	    		)
-	    	);
-
-	    }
-
-	} // End function activate_reservation
 
 	/**
 	 * Can the order be refunded via Klarna?

@@ -114,7 +114,7 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 
 		// Add Klarna shipping info to order confirmation page and email
 		add_filter( 'woocommerce_thankyou_order_received_text', array( $this, 'output_klarna_details_confirmation' ), 20, 2 );
-		add_action( 'woocommerce_email_footer', array( $this, 'output_klarna_details_confirmation_email' ) );
+		// add_action( 'woocommerce_email_after_order_table', array( $this, 'output_klarna_details_confirmation_email' ), 10, 3 );
 
 	}
 
@@ -126,13 +126,12 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 	 * @since  2.0.0
 	 */
 	public function output_klarna_details_confirmation( $text, $order ) {
-
-		if( 'klarna_part_payment' == $order->payment_method ) {
+		if ( $this->id == $order->payment_method && ! WC()->session->get( 'klarna_order_note_shown', false ) ) {
+			WC()->session->set( 'klarna_order_note_shown', true );
 			return $text . $this->get_klarna_shipping_info();
 		} else {
 			return $text;
 		}
-
 	}
 
 
@@ -141,10 +140,11 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 	 * 
 	 * @since  2.0.0
 	 */
-	public function output_klarna_details_confirmation_email() {
-
-		echo $this->get_klarna_shipping_info();
-
+	public function output_klarna_details_confirmation_email( $order, $sent_to_admin, $plain_text ) {
+		if ( $this->id == $order->payment_method && ! WC()->session->get( 'klarna_order_note_email_shown', false ) ) {
+			WC()->session->set( 'klarna_order_note_email_shown', true );
+			echo $this->get_klarna_shipping_info();
+		}
 	}
 
 
@@ -154,7 +154,6 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 	 * @since  2.0.0
 	 */
 	public function get_klarna_shipping_info() {
-
 		$klarna_locale = $this->klarna_helper->get_klarna_locale( get_locale() );
 		
 		// Information not available for en_se, switching to sv_se instead
@@ -172,7 +171,6 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 		}
 
 		return '';
-
 	}
 
 
@@ -934,9 +932,7 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 	 * @since 1.0.0
 	 **/
 	function receipt_page( $order ) {
-	
-		echo '<p>'.__('Thank you for your order.', 'klarna').'</p>';
-		
+		echo '<p>'.__('Thank you for your order.', 'klarna').'</p>';		
 	}
 
 

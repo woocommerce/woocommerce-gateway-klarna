@@ -116,7 +116,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 
 		// Add Klarna shipping info to order confirmation page and email
 		add_filter( 'woocommerce_thankyou_order_received_text', array( $this, 'output_klarna_details_confirmation'), 20, 2 );
-		add_action( 'woocommerce_email_footer', array( $this, 'output_klarna_details_confirmation_email' ) );
+		// add_action( 'woocommerce_email_after_order_table', array( $this, 'output_klarna_details_confirmation_email' ), 10, 3 );
 		
 	}
 
@@ -127,14 +127,13 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 	 * @param  $text  Default order confirmation text
 	 * @since  2.0.0
 	 */
-	public function output_klarna_details_confirmation( $text = false, $order ) {
-		
-		if( 'klarna_invoice' == $order->payment_method ) {
+	public function output_klarna_details_confirmation( $text = false, $order ) {		
+		if ( $this->id == $order->payment_method && ! WC()->session->get( 'klarna_order_note_shown', false ) ) {
+			WC()->session->set( 'klarna_order_note_shown', true );
 			return $text . $this->get_klarna_shipping_info();
 		} else {
 			return $text;
 		}
-
 	}
 
 
@@ -143,10 +142,11 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 	 * 
 	 * @since  2.0.0
 	 */
-	public function output_klarna_details_confirmation_email() {
-
-		echo $this->get_klarna_shipping_info();
-
+	public function output_klarna_details_confirmation_email( $order, $sent_to_admin, $plain_text ) {
+		if ( $this->id == $order->payment_method && ! WC()->session->get( 'klarna_order_note_email_shown', false ) ) {
+			WC()->session->set( 'klarna_order_note_email_shown', true );
+			echo $this->get_klarna_shipping_info();
+		}
 	}
 
 
@@ -156,7 +156,6 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 	 * @since  2.0.0
 	 */
 	public function get_klarna_shipping_info() {
-
 		$klarna_locale = $this->klarna_helper->get_klarna_locale( get_locale() );
 		
 		// Information not available for en_se, switching to sv_se instead
@@ -176,7 +175,6 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 		}
 
 		return '';
-
 	}
 	
 	//
@@ -1069,9 +1067,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 	 * @since 1.0.0
 	 **/
 	function receipt_page( $order ) {
-	
-		echo '<p>'.__('Thank you for your order.', 'klarna').'</p>';
-		
+		echo '<p>'.__('Thank you for your order.', 'klarna').'</p>';		
 	}
 
 
@@ -1080,8 +1076,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 	 *
 	 * @since 1.0.0
 	 **/ 
-	function print_product_monthly_cost() {
-		
+	function print_product_monthly_cost() {		
 		if ( $this->enabled!="yes" || $this->klarna_helper->get_klarna_locale(get_locale()) == 'nl_nl' )
 			return;
 			
@@ -1097,14 +1092,11 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 		$sum = trim( $sum );
 		
 	 	// Only execute this if the feature is activated in the gateway settings
-		if ( $this->show_monthly_cost == 'yes' ) {
-
-	    		
+		if ( $this->show_monthly_cost == 'yes' ) {    		
     		// Monthly cost threshold check. This is done after apply_filters to product price ($sum).
 	    	if ( $this->lower_threshold_monthly_cost < $sum && $this->upper_threshold_monthly_cost > $sum ) {
 	    		$data = new WC_Gateway_Klarna_Invoice;
-	    		$invoice_fee = $data->get_invoice_fee_price();
-	    		
+	    		$invoice_fee = $data->get_invoice_fee_price();	    		
 	    		?>
 				<div style="width:220px; height:70px" 
 				     class="klarna-widget klarna-invoice"
@@ -1115,17 +1107,13 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 				     data-invoice-fee="<?php echo $invoice_fee;?>">
 				</div>
 		
-				<?php
-	    		
+				<?php	    		
 	    		// Show klarna_warning_banner if NL
 				if ( $this->shop_country == 'NL' ) {
 					echo '<img src="' . $this->klarna_wb_img_single_product . '" class="klarna-wb" style="max-width: 100%;"/>';	
-				}
-	    				    	
+				}			    	
 	    	}
-		
-		}
-		
+		}	
 	}
 	
 	
@@ -1136,8 +1124,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 	 * @since 1.0.0
 	 * @todo  move to separate JS file?
 	 **/
-	function footer_scripts () {
-			
+	function footer_scripts () {			
 		if ( is_checkout() && 'yes' == $this->enabled ) { ?>
 			<script type="text/javascript">
 				//<![CDATA[
@@ -1159,7 +1146,6 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 				//]]>
 			</script>
 		<?php }
-	
 	}
 	
 	
@@ -1169,9 +1155,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 	 * @since 1.0.0
 	 **/
 	function get_monthly_cost_prio() {
-
 		return $this->show_monthly_cost_prio;
-
 	}
 
 	
@@ -1181,9 +1165,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 	 * @since 1.0.0
 	 **/
 	function get_monthly_cost_shop_prio() {
-
 		return $this->show_monthly_cost_shop_prio;
-
 	}
 
 	
@@ -1193,9 +1175,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 	 * @since 1.0.0
 	 **/
 	function get_enabled() {
-
 		return $this->enabled;
-
 	}
 
 
@@ -1205,9 +1185,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 	 * @since 1.0.0
 	 **/
 	function get_klarna_shop_country() {
-
 		return $this->shop_country;
-
 	}	
 
 
@@ -1217,9 +1195,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 	 * @since 1.0.0
 	 **/
 	function get_invoice_fee_id() {
-
 		return $this->invoice_fee_id;
-
 	}
 
 	
@@ -1229,7 +1205,6 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 	 * @since 1.0.0
 	 **/
 	function get_invoice_fee_name() {
-
 		if ( $this->invoice_fee_id > 0 ) {
 			$product = wc_get_product( $this->invoice_fee_id );			
 			if ( $product ) {
@@ -1240,7 +1215,6 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 		} else {
 			return '';
 		}
-		
 	}
 	
 	
@@ -1250,7 +1224,6 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 	 * @since 1.0.0
 	 **/
 	function get_invoice_fee_price() {
-
 		if ( $this->invoice_fee_id > 0 ) {
 			$product = wc_get_product( $this->invoice_fee_id );
 			if ( $product ) {
@@ -1261,7 +1234,6 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 		} else {		
 			return '';
 		}
-		
 	}
 
 } // End class WC_Gateway_Klarna_invoice
