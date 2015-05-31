@@ -138,17 +138,163 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		// Edit an order item and save
 		add_action( 'woocommerce_saved_order_items', array( $this, 'update_klarna_order_edit_item' ), 10, 2 );
 
+		// Process subscription payment
+		add_action( 'scheduled_subscription_payment_klarna_checkout', array( $this, 'scheduled_subscription_payment' ), 10, 3 );
 
 		/**
 		 * Checkout page shortcodes
 		 */ 
-
 		add_shortcode( 'woocommerce_klarna_checkout_widget', array( $this, 'klarna_checkout_widget' ) );
 		add_shortcode( 'woocommerce_klarna_login', array( $this, 'klarna_checkout_login') );
 		add_shortcode( 'woocommerce_klarna_country', array( $this, 'klarna_checkout_country') );
 
     }
 
+
+	/**
+	 * Enqueue Klarna Checkout javascript.
+	 * 
+	 * @since  2.0
+	 **/
+	function scheduled_subscription_payment( $amount_to_charge, $order, $product_id ) {
+		// Check if order was created using this method
+		if ( $this->id == get_post_meta( $order->id, '_payment_method', true ) ) {
+
+			$result = $this->process_subscription_payment( $amount_to_charge, $order, $product_id );
+
+			if ( is_wp_error( $result ) ) {
+				WC_Subscriptions_Manager::process_subscription_payment_failure_on_order( $order, $product_id );
+			} else {
+				WC_Subscriptions_Manager::process_subscription_payments_on_order( $order );
+			}
+		}
+	}
+
+
+	/**
+	 * Enqueue Klarna Checkout javascript.
+	 * 
+	 * @since  2.0
+	 **/
+	function process_subscription_payment( $amount_to_charge, $order, $product_id ) {
+		$subscriptions_in_order = WC_Subscriptions_Order::get_recurring_items( $order );
+		$subscription_item      = array_pop( $subscriptions_in_order );
+		$subscription_key       = WC_Subscriptions_Manager::get_subscription_key( $order->id, $subscription_item['id'] );
+		$subscription           = WC_Subscriptions_Manager::get_subscription( $subscription_key, $order->customer_user );
+
+		$product = wc_get_product( $product_id );
+
+		if ( 0 == $amount_to_charge ) {
+			// Payment complete
+			$order->payment_complete();
+			return true;
+		}
+
+		$klarna_recurring_token = get_post_meta( $order->id, '_klarna_recurring_token', true );
+		$klarna_currency = get_post_meta( $order->id, '_order_currency', true );
+		$klarna_country = get_post_meta( $order->id, '_billing_country', true );
+		$klarna_locale = get_post_meta( $order->id, '_klarna_locale', true );
+		$klarna_eid = $this->klarna_eid;
+		$klarna_secret = $this->klarna_secret;
+
+		$klarna_billing  = array(
+			'postal_code'     => get_post_meta( $order->id, '_billing_postcode', true ),
+			'email'           => get_post_meta( $order->id, '_billing_email', true ),
+			'country'         => get_post_meta( $order->id, '_billing_country', true ),
+			'city'            => get_post_meta( $order->id, '_billing_city', true ),
+			'family_name'     => get_post_meta( $order->id, '_billing_last_name', true ),
+			'given_name'      => get_post_meta( $order->id, '_billing_first_name', true ),
+			'street_address'  => get_post_meta( $order->id, '_billing_address_1', true ),
+			'phone'           => get_post_meta( $order->id, '_billing_phone', true )
+		);
+		$shipping_email = get_post_meta( $order->id, '_shipping_email', true ) ? get_post_meta( $order->id, '_shipping_email', true ) : get_post_meta( $order->id, '_billing_email', true );
+		$shipping_phone = get_post_meta( $order->id, '_shipping_phone', true ) ? get_post_meta( $order->id, '_shipping_phone', true ) : get_post_meta( $order->id, '_billing_phone', true );
+		$klarna_shipping  = array(
+			'postal_code'     => get_post_meta( $order->id, '_shipping_postcode', true ),
+			'email'           => $shipping_email,
+			'country'         => get_post_meta( $order->id, '_shipping_country', true ),
+			'city'            => get_post_meta( $order->id, '_shipping_city', true ),
+			'family_name'     => get_post_meta( $order->id, '_shipping_last_name', true ),
+			'given_name'      => get_post_meta( $order->id, '_shipping_first_name', true ),
+			'street_address'  => get_post_meta( $order->id, '_shipping_address_1', true ),
+			'phone'           => $shipping_phone
+		);
+
+		$cart = array();
+
+		$recurring_price = ( $subscription_item['recurring_line_total'] + $subscription_item['recurring_line_tax'] ) * 100;
+		$recurring_tax_rate = ( $subscription_item['recurring_line_tax'] / $subscription_item['recurring_line_total'] ) * 10000;
+		$cart[] = array(
+			'reference'     => strval( $product->id ),
+			'name'          => $product->post->post_title,
+			'quantity'      => (int) $subscription_item['qty'],
+			'unit_price'    => (int) $recurring_price,
+			'discount_rate' => 0,
+			'tax_rate'      => (int) $recurring_tax_rate			
+		);
+
+		if ( $order->get_total_shipping() > 0 ) {
+			$shipping_price = ( $order->get_total_shipping() + $order->get_shipping_tax() ) * 100;
+			$shipping_tax_rate = ( $order->get_shipping_tax() / $order->get_total_shipping() ) * 10000;
+			$cart[] = array(
+				'type'       => 'shipping_fee',
+				'reference'  => 'SHIPPING',
+				'name'       => 'Shipping Fee',
+				'quantity'   => 1,
+				'unit_price' => (int) $shipping_price,
+				'tax_rate'   => (int) $shipping_tax_rate
+			);
+		}
+
+		$create = array();
+		$create['activate'] = true;
+		$create['purchase_currency'] = 'SEK';
+		$create['purchase_country'] = 'SE';
+		$create['locale'] = 'sv-se';
+		$create['merchant']['id'] = $klarna_eid;
+		$create['billing_address'] = $klarna_billing;
+		$create['shipping_address'] = $klarna_shipping;
+		$create['merchant_reference'] = array(
+			'orderid1' => $order->id . '_' . $product_id . '_' . time()
+		);
+		$create['cart'] = array();
+		foreach ( $cart as $item ) {
+			$create['cart']['items'][] = $item;
+		}
+
+		$this->log->add( 'klarna', 'BILLING::: ' . var_export( $klarna_billing, true ) );
+
+		require_once( KLARNA_LIB . '/src/Klarna/Checkout.php' );
+		$connector = Klarna_Checkout_Connector::create(
+			$klarna_secret,
+			$this->klarna_server
+		);
+		$klarna_order = new Klarna_Checkout_RecurringOrder( $connector, $klarna_recurring_token );
+
+		try {
+			$klarna_order->create( $create );
+			if ( isset( $klarna_order['invoice'] ) ) {
+				$order->add_order_note(
+					__( 'Klarna subscription payment invoice number: ', 'klarna' ) . $klarna_order['invoice']
+				);
+			} elseif ( isset( $klarna_order['reservation'] ) ) {
+				$order->add_order_note(
+					__( 'Klarna subscription payment reservation number: ', 'klarna' ) . $klarna_order['reservation']
+				);
+			}
+			return true;
+		} catch ( Klarna_Checkout_ApiErrorException $e ) {
+			$order->add_order_note(
+				sprintf(
+					__( 'Klarna subscription payment failed. Error code %s. Error message %s', 'klarna' ),
+					$e->getCode(),
+					utf8_encode( $e->getMessage() )
+				)					
+			);
+			return false;
+		}
+
+	}
 
 	/**
 	 * Enqueue Klarna Checkout javascript.
@@ -1652,51 +1798,25 @@ class WC_Gateway_Klarna_Checkout_Extra {
 		
 	}
 
-
-	// Klarna Checkout page coupons
-	function klarna_checkout_coupons_js_2() { ?>
-		
-		<script>
-		jQuery(document).ready(function($){
-			jQuery('#klarna-suspend').toggle(function ( event ) {
-				event.preventDefault();
-				window._klarnaCheckout(function (api) {
-					api.suspend();
-				});
-			}, function( event ) {
-				event.preventDefault();
-				window._klarnaCheckout(function (api) {
-					api.resume();
-				});
-			});
-		});
-		</script>
-	
-	<?php }
-
-
 		
 	// Set session
 	function start_session() {		
-		
 		$data = new WC_Gateway_Klarna_Checkout;
 		$enabled = $data->get_enabled();
 		
-    	if ( ! session_id() && $enabled == 'yes' ) {
+    	if ( ! session_id() && 'yes' == $enabled ) {
         	session_start();
         }
     }
-    
+
+
 	// Shortcode KCO page
 	function klarna_checkout_page() {
-
 		$data = new WC_Gateway_Klarna_Checkout;
 		return '<div class="klarna_checkout">' . $data->get_klarna_checkout_page() . '</div>';
-
 	}
 	
 	function klarna_checkout_css() {
-
 		global $post;
 		global $klarna_checkout_thanks_url;
 
@@ -1705,12 +1825,10 @@ class WC_Gateway_Klarna_Checkout_Extra {
 		if ( $post->ID == $checkout_page_id ) { ?>
 			<style type="text/css">.wc-proceed-to-checkout{display:none !important;}.woocommerce .cart-collaterals .cart_totals{width:100%;float:none;}</style>
 		<?php }
-
 	}
 
 
 	function set_cart_constant() {
-
 		global $post;
 		global $klarna_checkout_thanks_url;
 
@@ -1730,7 +1848,6 @@ class WC_Gateway_Klarna_Checkout_Extra {
 			}
 
 		}
-
 	}
 
 	
@@ -1742,7 +1859,6 @@ class WC_Gateway_Klarna_Checkout_Extra {
 	 *
 	 **/	 
 	function change_checkout_url( $url ) {
-
 		global $woocommerce;
 
 		$data = new WC_Gateway_Klarna_Checkout;
@@ -1763,7 +1879,6 @@ class WC_Gateway_Klarna_Checkout_Extra {
 		}
 		
 		return $url;
-
 	}
 	
 	/**
@@ -1775,18 +1890,15 @@ class WC_Gateway_Klarna_Checkout_Extra {
 	 *
 	 **/
 	public function add_account_signup_text() {
-
 		global $woocommerce;
 		$data = new WC_Gateway_Klarna_Checkout;
 		$account_signup_text = '';
-		$account_signup_text = $data->get_account_signup_text();
-		
+		$account_signup_text = $data->get_account_signup_text();	
 
 		// Change the Checkout URL if this is enabled in the settings
 		if( ! empty( $account_signup_text ) ) {
 			echo $account_signup_text;
 		}
-
 	}
 	
 	
@@ -1798,7 +1910,6 @@ class WC_Gateway_Klarna_Checkout_Extra {
 	 *  Useful for legal text for German stores. See documentation for more information. Leave blank to disable.
 	 **/
 	public function add_account_login_text() {
-
 		global $woocommerce;
 		$data = new WC_Gateway_Klarna_Checkout;
 		$account_login_text = '';
@@ -1809,14 +1920,12 @@ class WC_Gateway_Klarna_Checkout_Extra {
 		if ( !empty($account_login_text) ) {
 			echo $account_login_text;
 		}
-
 	}
 
 	/**
 	 * Change checkout page ID to Klarna Thank You page, when in Klarna Thank You page only
 	 */
 	public function change_checkout_page_id( $checkout_page_id ) {
-
 		global $post;
 		global $klarna_checkout_thanks_url;
 
@@ -1829,7 +1938,6 @@ class WC_Gateway_Klarna_Checkout_Extra {
 		}
 
 		return $checkout_page_id;
-
 	}
 		
 

@@ -199,6 +199,11 @@ class WC_Gateway_Klarna_K2WC {
 					
 			// Confirm the order in Klarnas system
 			$klarna_order = $this->confirm_klarna_order( $order, $klarna_order );
+
+			// Check if order was recurring
+			if ( isset( $klarna_order['recurring_token'] ) ) {
+				update_post_meta( $order->id, '_klarna_recurring_token', $klarna_order['recurring_token'] );
+			}
 			
 			// Check if order is not already completed or processing
 			// To avoid triggering of multiple payment_complete() callbacks
@@ -505,6 +510,9 @@ class WC_Gateway_Klarna_K2WC {
 			update_post_meta( $order_id, '_shipping_city', $klarna_order['billing_address']['city'] );
 			update_post_meta( $order_id, '_shipping_country', strtoupper( $klarna_order['billing_address']['country'] ) );
 		}
+
+		// Store Klarna locale
+		update_post_meta( $order_id, '_klarna_locale', $klarna_order['locale'] );
 	}
 
 	/**
