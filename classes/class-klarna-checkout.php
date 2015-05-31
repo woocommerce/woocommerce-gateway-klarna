@@ -141,6 +141,9 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		// Process subscription payment
 		add_action( 'scheduled_subscription_payment_klarna_checkout', array( $this, 'scheduled_subscription_payment' ), 10, 3 );
 
+		// Add activate settings field for recurring orders
+		add_filter( 'klarna_checkout_form_fields', array( $this, 'add_activate_recurring_option' ) );
+
 		/**
 		 * Checkout page shortcodes
 		 */ 
@@ -150,6 +153,24 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 
     }
 
+
+	/**
+	 * Enqueue Klarna Checkout javascript.
+	 * 
+	 * @since  2.0
+	 **/
+	function add_activate_recurring_option( $settings ) {
+		if ( class_exists( 'WC_Subscriptions_Manager' ) ) {
+			$settings['activate_recurring'] = array(
+				'title' => __( 'Automatically activate recurring orders', 'klarna' ), 
+				'type' => 'checkbox', 
+				'label' => __( 'If this option is checked recurring orders will be activated automatically', 'klarna' ),
+				'default' => 'yes'
+			);
+		}
+
+		return $settings;
+	}
 
 	/**
 	 * Enqueue Klarna Checkout javascript.
@@ -247,7 +268,11 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		}
 
 		$create = array();
-		$create['activate'] = true;
+		if ( 'yes' == $this->activate_recurring ) {
+			$create['activate'] = true;
+		} else {
+			$create['activate'] = false;			
+		}
 		$create['purchase_currency'] = 'SEK';
 		$create['purchase_country'] = 'SE';
 		$create['locale'] = 'sv-se';

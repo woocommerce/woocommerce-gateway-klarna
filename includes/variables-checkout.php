@@ -64,6 +64,8 @@ $this->color_checkbox_checkmark = ( isset( $this->settings['color_checkbox_check
 $this->color_header = ( isset( $this->settings['color_header'] ) ) ? $this->settings['color_header'] : '';
 $this->color_link = ( isset( $this->settings['color_link'] ) ) ? $this->settings['color_link'] : '';
 
+$this->activate_recurring = ( isset( $this->settings['activate_recurring'] ) ) ? $this->settings['activate_recurring'] : '';
+
 if ( empty($this->terms_url) ) 
 	$this->terms_url = esc_url( get_permalink(woocommerce_get_page_id('terms')) );
 	
