@@ -304,14 +304,14 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	function klarna_checkout_enqueuer() {
 		wp_register_script( 'klarna_checkout', KLARNA_URL . 'js/klarna-checkout.js' );
 		wp_localize_script( 'klarna_checkout', 'kcoAjax', array( 'ajaxurl' => admin_url( 'admin-ajax.php' ), 'klarna_checkout_nonce' => wp_create_nonce( 'klarna_checkout_nonce' ) ) );        
-		wp_enqueue_script( 'jquery' );
-		wp_enqueue_script( 'klarna_checkout' );
 
 		wp_register_style( 'klarna_checkout', KLARNA_URL . 'css/klarna-checkout.css' );	
 		if ( is_page() ) {
 			global $post;
 			$klarna_checkout_page_id = url_to_postid( $this->klarna_checkout_url );
 			if ( $post->ID == $klarna_checkout_page_id ) {
+				wp_enqueue_script( 'jquery' );
+				wp_enqueue_script( 'klarna_checkout' );
 				wp_enqueue_style( 'klarna_checkout' );
 			}
 		}
