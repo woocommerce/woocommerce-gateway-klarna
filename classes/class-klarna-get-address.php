@@ -236,7 +236,7 @@ class WC_Klarna_Get_Address {
 					} else {
 											
 						jQuery.post(
-							'<?php echo get_option('siteurl') . '/wp-admin/admin-ajax.php' ?>',
+							'<?php echo site_url() . '/wp-admin/admin-ajax.php' ?>',
 							{
 								action			: 'ajax_request',
 								pno_getadress	: pno_getadress,
