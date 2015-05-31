@@ -147,6 +147,43 @@ return apply_filters( 'klarna_checkout_form_fields', array(
 		'default' => 'no'
 	),
 
+	'eid_at' => array(
+		'title' => __( 'Eid - Austria', 'klarna' ), 
+		'type' => 'text', 
+		'description' => __( 'Please enter your Klarna Eid for Austria. Leave blank to disable.', 'klarna' ), 
+		'default' => ''
+	),
+	'secret_at' => array(
+		'title' => __( 'Shared Secret - Austria', 'klarna' ), 
+		'type' => 'text', 
+		'description' => __( 'Please enter your Klarna Shared Secret for Austria.', 'klarna' ), 
+		'default' => ''
+	),
+	'klarna_checkout_url_at' => array(
+		'title' => __( 'Custom Checkout Page - Austria', 'klarna' ), 
+		'type' => 'text', 
+		'description' => __( 'Please enter the URL to the page that acts as Checkout Page for Klarna Checkout Austria. This page must contain the shortcode [woocommerce_klarna_checkout].', 'klarna' ), 
+		'default' => ''
+	),
+	'klarna_checkout_thanks_url_at' => array(
+		'title' => __( 'Custom Thanks Page - Austria', 'klarna' ), 
+		'type' => 'text', 
+		'description' => __( 'Enter the URL to the page that acts as Thanks Page for Klarna Checkout Austria. This page must contain the shortcode [woocommerce_klarna_checkout]. Leave blank to use the Custom Checkout Page as Thanks Page.', 'klarna' ), 
+		'default' => ''
+	),
+	'phone_mandatory_at' => array(
+		'title' => __( 'Phone Number Mandatory - Austria', 'klarna' ), 
+		'type' => 'checkbox', 
+		'label' => __( 'Phone number is not mandatory for Klarna Checkout in Austria by default. Check this box to make it mandatory.', 'klarna' ), 
+		'default' => 'no'
+	),
+	'dhl_packstation_at' => array(
+		'title' => __( 'DHL Packstation Functionality - Austria', 'klarna' ), 
+		'type' => 'checkbox', 
+		'label' => __( 'Enable DHL packstation functionality for Austrian customers.', 'klarna' ),
+		'default' => 'no'
+	),
+
 	'eid_uk' => array(
 		'title' => __( 'Eid - UK', 'klarna' ), 
 		'type' => 'text', 
@@ -175,7 +212,11 @@ return apply_filters( 'klarna_checkout_form_fields', array(
 	'default_eur_contry' => array(
 		'title' => __( 'Default Checkout Country', 'klarna' ),
 		'type' => 'select',
-		'options' => array('DE'=>__( 'Germany', 'klarna' ), 'FI'=>__( 'Finland', 'klarna' )),
+		'options' => array(
+			'DE' => __( 'Germany', 'klarna' ), 
+			'FI' => __( 'Finland', 'klarna' ),
+			'AT' => __( 'Austria', 'klarna' ) 
+		),
 		'description' => __( 'Used by the payment gateway to determine which country should be the default Checkout country if Euro is the selected currency, you as a merchant has an agreement with multiple countries that use Euro and the selected language cant be of help for this decision.', 'klarna' ),
 		'default' => 'DE'
 	),
