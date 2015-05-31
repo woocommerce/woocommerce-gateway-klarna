@@ -154,8 +154,6 @@ class WC_Gateway_Klarna_Order {
 				$klarna_item_price_including_tax = $item['line_total'] + $item['line_tax'];
 				$item_price = apply_filters( 'klarna_fee_price_including_tax', $klarna_item_price_including_tax );
 				
-				$item_loop++;
-
 				$klarna->addArticle(
 					$qty = 1,
 					$artNo = '',
