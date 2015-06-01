@@ -177,12 +177,6 @@ return apply_filters( 'klarna_checkout_form_fields', array(
 		'label' => __( 'Phone number is not mandatory for Klarna Checkout in Austria by default. Check this box to make it mandatory.', 'klarna' ), 
 		'default' => 'no'
 	),
-	'dhl_packstation_at' => array(
-		'title' => __( 'DHL Packstation Functionality - Austria', 'klarna' ), 
-		'type' => 'checkbox', 
-		'label' => __( 'Enable DHL packstation functionality for Austrian customers.', 'klarna' ),
-		'default' => 'no'
-	),
 
 	'eid_uk' => array(
 		'title' => __( 'Eid - UK', 'klarna' ), 

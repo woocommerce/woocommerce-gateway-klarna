@@ -157,9 +157,8 @@ class WC_Gateway_Klarna_K2WC {
 				return;
 			}
 
-		$klarna_transient = sanitize_key( $_GET['sid'] );
-		$klarna_wc = get_transient( $klarna_transient );
-		$this->klarna_log->add( 'klarna', 'transient - ' . $klarna_transient . ' - ' . var_export( $klarna_wc, true ) );
+			$klarna_transient = sanitize_key( $_GET['sid'] );
+			$klarna_wc = get_transient( $klarna_transient );
 
 			// Create order in WooCommerce
 			$order = $this->create_order();
@@ -228,6 +227,10 @@ class WC_Gateway_Klarna_K2WC {
 				
 				// Empty cart
 				$woocommerce->cart->empty_cart();
+
+				// Delete transients
+				delete_transient( $klarna_transient );
+				delete_transient( $klarna_transient . '_shipping' );
 			}
 
 			// Store which KCO API was used
