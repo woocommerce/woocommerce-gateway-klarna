@@ -10,18 +10,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 return apply_filters( 'klarna_checkout_form_fields', array(
 
-	'paymentaction' => array(
-		'title'       => __( 'Payment Action', 'woocommerce' ),
-		'type'        => 'select',
-		'class'       => 'wc-enhanced-select',
-		'description' => __( 'Choose whether you wish to capture funds immediately or authorize payment only.', 'woocommerce' ),
-		'default'     => 'sale',
-		'desc_tip'    => true,
-		'options'     => array(
-			'sale'          => __( 'Capture', 'woocommerce' ),
-			'authorization' => __( 'Authorize', 'woocommerce' )
-		)
-	),
 	'enabled' => array(
 		'title' => __( 'Enable/Disable', 'klarna' ), 
 		'type' => 'checkbox', 
@@ -34,6 +22,36 @@ return apply_filters( 'klarna_checkout_form_fields', array(
 		'description' => __( 'This controls the title which the user sees during checkout.', 'klarna' ), 
 		'default' => __( 'Klarna Checkout', 'klarna' )
 	),
+	'paymentaction' => array(
+		'title'       => __( 'Payment Action', 'woocommerce' ),
+		'type'        => 'select',
+		'class'       => 'wc-enhanced-select',
+		'description' => __( 'Choose whether you wish to capture funds immediately or authorize payment only.', 'woocommerce' ),
+		'default'     => 'sale',
+		'desc_tip'    => true,
+		'options'     => array(
+			'sale'          => __( 'Capture', 'woocommerce' ),
+			'authorization' => __( 'Authorize', 'woocommerce' )
+		)
+	),
+	'push_completion' => array(
+		'title' => __( 'On order completion', 'klarna' ), 
+		'type' => 'checkbox', 
+		'label' => __( 'Activate Klarna order automatically when WooCommerce order is marked complete.', 'klarna' ), 
+		'default' => 'no'
+	), 
+	'push_cancellation' => array(
+		'title' => __( 'On order cancellation', 'klarna' ), 
+		'type' => 'checkbox', 
+		'label' => __( 'Cancel Klarna order automatically when WooCommerce order is cancelled', 'klarna' ), 
+		'default' => 'no'
+	), 
+	'push_update' => array(
+		'title' => __( 'On order update', 'klarna' ), 
+		'type' => 'checkbox', 
+		'label' => __( 'Update Klarna order automatically when WooCoommerce line items are updated.', 'klarna' ), 
+		'default' => 'no'
+	), 
 
 	'eid_se' => array(
 		'title' => __( 'Eid - Sweden', 'klarna' ), 

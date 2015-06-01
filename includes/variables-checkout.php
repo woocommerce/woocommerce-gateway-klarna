@@ -13,6 +13,10 @@ $this->enabled = ( isset( $this->settings['enabled'] ) ) ? $this->settings['enab
 $this->title = ( isset( $this->settings['title'] ) ) ? $this->settings['title'] : '';
 $this->log = new WC_Logger();
 
+$this->push_completion = ( isset( $this->settings['push_completion'] ) ) ? $this->settings['push_completion'] : '';
+$this->push_cancellation = ( isset( $this->settings['push_cancellation'] ) ) ? $this->settings['push_cancellation'] : '';
+$this->push_update = ( isset( $this->settings['push_update'] ) ) ? $this->settings['push_update'] : '';
+
 $this->eid_se = ( isset( $this->settings['eid_se'] ) ) ? $this->settings['eid_se'] : '';
 $this->secret_se = ( isset( $this->settings['secret_se'] ) ) ? $this->settings['secret_se'] : '';
 $this->klarna_checkout_url_se = ( isset( $this->settings['klarna_checkout_url_se'] ) ) ? $this->settings['klarna_checkout_url_se'] : '';
