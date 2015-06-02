@@ -1773,7 +1773,6 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 * @since  2.0.0
 	 */
 	function show_kco() {
-
 		// Don't render the Klarna Checkout form if the payment gateway isn't enabled.
 		if ( $this->enabled != 'yes' ) {
 			return false;
@@ -1797,8 +1796,12 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		$checkout = $woocommerce->checkout();
 		if ( ! $checkout->enable_guest_checkout && ! is_user_logged_in() ) {
 			echo apply_filters( 
-				'woocommerce_checkout_must_be_logged_in_message',
-				__( 'You must be logged in to checkout.', 'woocommerce' ) 
+				'klarna_checkout_must_be_logged_in_message',
+				sprintf(
+					__( 'You must be logged in to checkout. %s or %s.', 'woocommerce' ),
+					'<a href="' . wp_login_url() . '" title="Login">Login</a>',
+					'<a href="' . wp_registration_url() . '" title="Create an account">create an account</a>'
+				)
 			);
 			return false;
 		}
@@ -1811,7 +1814,6 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		}
 
 		return true;
-
 	}
 
     
