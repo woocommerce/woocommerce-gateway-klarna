@@ -506,17 +506,27 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 **/
 	function klarna_checkout_country() {
 		
-		var_dump(WC()->session->get( 'klarna_country' ));
-		
 		if ( sizeof( WC()->cart->get_cart() ) > 0 && 'EUR' == get_woocommerce_currency() ) {
 			ob_start();
 			
 			// Get array of Euro Klarna Checkout countries with Eid and secret defined
+			$klarna_checkout_countries = array();
+			if( in_array( 'FI', $this->authorized_countries )  ) {
+				$klarna_checkout_countries['FI'] = __( 'Finland', 'klarna' );
+			}
+			if( in_array( 'DE', $this->authorized_countries )  ) {
+				$klarna_checkout_countries['DE'] = __( 'Germany', 'klarna' );
+			}
+			if( in_array( 'AT', $this->authorized_countries )  ) {
+				$klarna_checkout_countries['AT'] = __( 'Austria', 'klarna' );
+			}
+			/*
 			$klarna_checkout_countries = array(
 				'FI' => __( 'Finland', 'klarna' ),
 				'DE' => __( 'Germany', 'klarna' ),
 				'AT' => __( 'Austria', 'klarna' )
 			);
+			*/
 			$klarna_checkout_enabled_countries = array();
 			foreach( $klarna_checkout_countries as $klarna_checkout_country_code => $klarna_checkout_country ) {
 				$lowercase_country_code = strtolower( $klarna_checkout_country_code );
