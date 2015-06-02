@@ -1333,6 +1333,10 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 				$klarna_secret = $this->secret_de;
 				$klarna_eid = $this->eid_de;
 				break;
+			case 'AT' :
+				$klarna_secret = $this->secret_at;
+				$klarna_eid = $this->eid_at;
+				break;
 			case 'gb' :
 				$klarna_secret = $this->secret_uk;
 				$klarna_eid = $this->eid_uk;

@@ -15,6 +15,8 @@ $kco_session_locale = '';
 if ( '' != $kco_session_country ) {
 	if ( 'DE' == $kco_session_country ) {
 		$kco_session_locale = 'de-de';
+	} elseif ( 'AT' == $kco_session_country ) {
+		$kco_session_locale = 'de-at';
 	} elseif ( 'FI' == $kco_session_country ) {
 		// Check if WPML is used and determine if Finnish or Swedish is used as language
 		if ( class_exists( 'woocommerce_wpml' ) && defined( 'ICL_LANGUAGE_CODE' ) && strtoupper( ICL_LANGUAGE_CODE ) == 'SV' ) {
