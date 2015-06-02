@@ -89,6 +89,8 @@ switch ( get_woocommerce_currency() ) {
 			$klarna_country = 'FI';
 		} elseif ( get_locale() == 'de_AT' ) {
 			$klarna_country = 'AT';
+		} else {
+			$klarna_country = $this->default_eur_contry;
 		}
 		break;
 	case 'SEK' :
@@ -101,7 +103,11 @@ switch ( get_woocommerce_currency() ) {
 		$klarna_country = '';
 }
 
-$this->shop_country	= $klarna_country;
+if ( WC()->session->get( 'klarna_country' ) ) {
+	$this->shop_country = WC()->session->get( 'klarna_country' );
+} else {
+	$this->shop_country	= $klarna_country;
+}
 
 // Country and language
 switch ( $this->shop_country ) {
