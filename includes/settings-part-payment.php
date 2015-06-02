@@ -136,40 +136,6 @@ return apply_filters( 'klarna_invoice_form_fields', array(
 		'default' => ''
 	),
 
-	'show_monthly_cost' => array(
-		'title' => __( 'Display monthly cost - product page', 'klarna' ), 
-		'type' => 'checkbox',
-		'label' => __( 'Display monthly cost on single products page.', 'klarna' ), 
-		'default' => 'yes'
-	),
-	'show_monthly_cost_prio' => array(
-		'title' => __( 'Placement of monthly cost - product page', 'klarna' ), 
-		'type' => 'select',
-		'options' => array(
-			'4' => __( 'Above Title', 'klarna' ),
-			'7' => __( 'Between Title and Price', 'klarna'),
-			'15' => __( 'Between Price and Excerpt', 'klarna'), 
-			'25' => __( 'Between Excerpt and Add to cart-button', 'klarna'), 
-			'35' => __( 'Between Add to cart-button and Product meta', 'klarna'), 
-			'45' => __( 'Between Product meta and Product sharing-buttons', 'klarna'), 
-			'55' => __( 'After Product sharing-buttons', 'klarna' )
-		),
-		'description' => __( 'Select where on the products page the Monthly cost information should be displayed.', 'klarna' ), 
-		'default' => '15'
-	),
-	'lower_threshold_monthly_cost' => array(
-		'title' => __( 'Lower threshold for monthly cost', 'klarna' ), 
-		'type' => 'text', 
-		'description' => __( 'Disable the monthly cost feature if <i>Product price</i> is lower than the specified value. Leave blank to disable.', 'klarna' ), 
-		'default' => ''
-	),
-	'upper_threshold_monthly_cost' => array(
-		'title' => __( 'Upper threshold for monthly cost', 'klarna' ), 
-		'type' => 'text', 
-		'description' => __( 'Disable the monthly cost feature if <i>Product price</i> is higher than the specified value. Leave blank to disable.', 'klarna' ), 
-		'default' => ''
-	),
-
 	'ship_to_billing_address' => array(
 		'title' => __( 'Send billing address as shipping address', 'klarna' ), 
 		'type' => 'checkbox', 

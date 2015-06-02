@@ -125,51 +125,42 @@ class WC_Klarna_Payment_Method_Widget {
 
 	
 	function get_lower_threshold() {
-
 		$lower_threshold = get_option( 'klarna_display_monthly_price_lower_threshold' );
 		if ( is_numeric( $lower_threshold ) ) {
 			return $lower_threshold;
 		}
 
 		return false;
-
 	}
 
 
 	function get_upper_threshold() {
-
 		$upper_threshold = get_option( 'klarna_display_monthly_price_upper_threshold' );
 		if ( is_numeric( $upper_threshold ) ) {
 			return $upper_threshold;
 		}
 
 		return false;
-
 	}
 
 	function get_enabled() {
-
 		$enabled = get_option( 'klarna_display_monthly_price' );
 		if ( 'yes' == $enabled ) {
 			return true;
 		}
 
 		return false;
-
 	}
 
 
 	function get_priority() {
-
 		$priority = get_option( 'klarna_display_monthly_price_prio' );
 
 		return $priority;
-
 	}
 
 
 	function display_widget() {
-
 		if ( ! $this->get_enabled() )
 			return false;
 
@@ -211,12 +202,10 @@ class WC_Klarna_Payment_Method_Widget {
 			data-layout="pale">
 		</div>
 		<?php
-
 	}
 
 
 	function get_customer_locale() {
-
 		$locale = get_locale();
 
 		switch ( $locale ) {
@@ -255,7 +244,6 @@ class WC_Klarna_Payment_Method_Widget {
 		}
 
 		return $klarna_locale;
-
 	}
 
 
@@ -263,7 +251,6 @@ class WC_Klarna_Payment_Method_Widget {
  	 * Register and Enqueue Klarna scripts
  	 */
 	function enqueue_scripts() {
-		
 		//$this->show_monthly_cost = 'yes';
 		//$this->enabled = 'yes';
 		
@@ -288,11 +275,9 @@ class WC_Klarna_Payment_Method_Widget {
 	 * @return array
 	 */
 	public function add_section( $sections ) {
-
 		$sections['klarna'] = __( 'Klarna Payment Method (Monthly Cost) Widget', 'klarna' );
 
 		return $sections;
-
 	}
 
 
@@ -302,7 +287,6 @@ class WC_Klarna_Payment_Method_Widget {
 	 * @return array
 	 */
 	public function add_settings( $settings, $current_section ) {
-
 		if ( 'klarna' == $current_section ) {
 
 			$settings = apply_filters( 'woocommerce_klarna_payment_method_widget_settings', array(
@@ -369,9 +353,7 @@ class WC_Klarna_Payment_Method_Widget {
 		}
 
 		return $settings;
-
 	}
 	
 } // End class
-
 $wc_klarna_partpayment_widget = new WC_Klarna_Payment_Method_Widget;
