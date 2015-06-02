@@ -102,6 +102,8 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 		add_action( 'wp_print_footer_scripts', array(  $this, 'footer_scripts' ) );
 		add_action( 'woocommerce_order_status_cancelled', array( $this, 'cancel_klarna_order' ) );
 		add_action( 'woocommerce_order_status_completed', array( $this, 'activate_klarna_order' ) );
+		// Check Klarna pending order
+		add_action( 'check_klarna_pending', array( $this, 'check_klarna_pending_callback' ) );
 		
 		// Add order item
 		// Need to use this hook, because in woocommerce_new_order_item item meta is not populated
@@ -1026,10 +1028,12 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 					break;
 
 				case KlarnaFlags::PENDING :
+					update_post_meta( $order_id, '_klarna_order_reservation', $invno );
+					wp_schedule_single_event( time() + 7200, 'check_klarna_pending', array( $order_id ) );
 					$order->add_order_note(
-						__( 'Order is PENDING APPROVAL by Klarna. Please visit Klarna Online for the latest status on this order. Klarna Invoice number: ', 'klarna' ) . $invno
+						__( 'Order is PENDING APPROVAL by Klarna. Please visit Klarna Online for the latest status on this order. Klarna reservation number: ', 'klarna' ) . $invno
 					);
-					$order->payment_complete(); // Payment complete					
+					// $order->payment_complete(); // Payment complete					
 					$woocommerce->cart->empty_cart(); // Remove cart
 					// Return thank you redirect
 					return array(
@@ -1075,7 +1079,39 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 		}
 
 	}
+
 	
+	/**
+	 * Runs scheduled action to check Klarna pending order.
+	 *
+	 * @since 1.0.0
+	 **/
+	function check_klarna_pending_callback( $order_id ) {
+		/**
+		 * Setup Klarna configuration
+		 */
+		$klarna = new Klarna();
+		$country = get_post_meta( $order_id, '_billing_country', true );
+		$rno = get_post_meta( $order_id, '_klarna_order_reservation', true );
+		$this->configure_klarna( $klarna, $country );
+		$result = $klarna->checkOrderStatus( $rno );
+		$this->log->add( 'klarna', 'RESULT:' . $result );
+		$order = wc_get_order( $order_id );
+
+		if ( $result == KlarnaFlags::ACCEPTED ) {
+			// Status changed, you can now activate your invoice/reservation.
+			$order->add_order_note( __( 'Klarna payment completed. You can now activate Klarna order.', 'klarna' ) );
+			$order->payment_complete();
+		} elseif ( $result == KlarnaFlags::DENIED ) {
+			// Status changed, it is now denied, proceed accordingly.
+			$order->update_status( 'cancelled' );
+		} else {
+			// Order is still pending, try again in two hours.
+			wp_schedule_single_event( time() + 7200, 'check_klarna_pending', array( $order_id ) );
+		}
+	}
+
+
 	/**
 	 * Adds note in receipt page.
 	 *
