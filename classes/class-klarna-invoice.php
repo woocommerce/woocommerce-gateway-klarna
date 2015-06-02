@@ -1033,7 +1033,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 					$order->add_order_note(
 						__( 'Order is PENDING APPROVAL by Klarna. Please visit Klarna Online for the latest status on this order. Klarna reservation number: ', 'klarna' ) . $invno
 					);
-					// $order->payment_complete(); // Payment complete					
+					$order->update_status( 'on-hold' ); // Change order status to On Hold					
 					$woocommerce->cart->empty_cart(); // Remove cart
 					// Return thank you redirect
 					return array(
@@ -1095,7 +1095,6 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 		$rno = get_post_meta( $order_id, '_klarna_order_reservation', true );
 		$this->configure_klarna( $klarna, $country );
 		$result = $klarna->checkOrderStatus( $rno );
-		$this->log->add( 'klarna', 'RESULT:' . $result );
 		$order = wc_get_order( $order_id );
 
 		if ( $result == KlarnaFlags::ACCEPTED ) {
@@ -1104,6 +1103,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 			$order->payment_complete();
 		} elseif ( $result == KlarnaFlags::DENIED ) {
 			// Status changed, it is now denied, proceed accordingly.
+			$order->add_order_note( __( 'Klarna payment denied.', 'klarna' ) );
 			$order->update_status( 'cancelled' );
 		} else {
 			// Order is still pending, try again in two hours.

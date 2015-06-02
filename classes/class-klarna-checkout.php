@@ -273,12 +273,12 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		} else {
 			$create['activate'] = false;			
 		}
-		$create['purchase_currency'] = 'SEK';
-		$create['purchase_country'] = 'SE';
-		$create['locale'] = 'sv-se';
-		$create['merchant']['id'] = $klarna_eid;
-		$create['billing_address'] = $klarna_billing;
-		$create['shipping_address'] = $klarna_shipping;
+		$create['purchase_currency']  = $klarna_currency;
+		$create['purchase_country']   = $klarna_country;
+		$create['locale']             = $klarna_locale;
+		$create['merchant']['id']     = $klarna_eid;
+		$create['billing_address']    = $klarna_billing;
+		$create['shipping_address']   = $klarna_shipping;
 		$create['merchant_reference'] = array(
 			'orderid1' => $order->id . '_' . $product_id . '_' . time()
 		);

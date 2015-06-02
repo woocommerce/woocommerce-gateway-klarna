@@ -44,6 +44,7 @@ return apply_filters( 'klarna_invoice_form_fields', array(
 		'label' => __( 'Update Klarna order automatically when WooCoommerce line items are updated.', 'klarna' ), 
 		'default' => 'no'
 	), 
+	
 	'eid_se' => array(
 		'title' => __( 'Eid - Sweden', 'klarna' ), 
 		'type' => 'text', 
