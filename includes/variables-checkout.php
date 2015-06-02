@@ -102,9 +102,13 @@ switch ( get_woocommerce_currency() ) {
 	default:
 		$klarna_country = '';
 }
-var_dump(WC()->session->get( 'klarna_country' ));
-if ( isset( WC()->session->get( 'klarna_country' ) ) ) {
-	$this->shop_country = WC()->session->get( 'klarna_country' );
+
+if( !is_admin() ){
+	if ( null !== WC()->session->get( 'klarna_country' ) ) {
+		$this->shop_country = WC()->session->get( 'klarna_country' );
+	} else {
+		$this->shop_country	= $klarna_country;
+	}
 } else {
 	$this->shop_country	= $klarna_country;
 }
@@ -229,6 +233,9 @@ if ( ! empty( $this->eid_fi ) ) {
 }
 if ( ! empty( $this->eid_de ) ) {
 	$this->authorized_countries[] = 'DE';
+}
+if ( ! empty( $this->eid_at ) ) {
+	$this->authorized_countries[] = 'AT';
 }
 if ( ! empty( $this->eid_uk ) ) {
 	$this->authorized_countries[] = 'GB';
