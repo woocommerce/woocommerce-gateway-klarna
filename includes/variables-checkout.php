@@ -102,8 +102,8 @@ switch ( get_woocommerce_currency() ) {
 	default:
 		$klarna_country = '';
 }
-
-if ( WC()->session->get( 'klarna_country' ) ) {
+var_dump(WC()->session->get( 'klarna_country' ));
+if ( isset( WC()->session->get( 'klarna_country' ) ) ) {
 	$this->shop_country = WC()->session->get( 'klarna_country' );
 } else {
 	$this->shop_country	= $klarna_country;
