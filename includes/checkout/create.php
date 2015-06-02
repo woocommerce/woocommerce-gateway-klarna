@@ -78,10 +78,10 @@ if ( $this->is_rest() ) {
 // Different format for V3 and V2
 if ( $this->is_rest() ) {
 	$merchantUrls = array(
-		'terms' =>        $merchant_terms_uri,
-		'checkout' =>     $merchant_checkout_uri,
+		'terms'        => $merchant_terms_uri,
+		'checkout'     => $merchant_checkout_uri,
 		'confirmation' => $merchant_confirmation_uri,
-		'push' =>         $merchant_push_uri
+		'push'         => $merchant_push_uri
 	);
 	$create['merchant_urls'] = $merchantUrls;
 } else {

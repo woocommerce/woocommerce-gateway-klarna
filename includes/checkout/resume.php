@@ -98,8 +98,7 @@ try {
 		}
 
 		// Customer info if logged in
-		if ( is_user_logged_in() ) {
-
+		if ( $this->testmode !== 'yes' && is_user_logged_in() ) {
 			if ( $current_user->user_email ) {
 				$update['shipping_address']['email'] = $current_user->user_email;
 			}
@@ -107,7 +106,6 @@ try {
 			if ( $woocommerce->customer->get_shipping_postcode() ) {
 				$update['shipping_address']['postal_code'] = $woocommerce->customer->get_shipping_postcode();
 			}
-			
 		}
 
 		if ( $this->is_rest() ) {
