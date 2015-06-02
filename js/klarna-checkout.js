@@ -252,7 +252,7 @@ jQuery(document).ready(function($) {
 				type     : 'POST',
 				dataType : 'json',
 				data     : {
-					action : 'klarna_checkout_coupons_callback_update', 
+					action : 'klarna_checkout_coupons_callback', 
 					coupon : coupon,
 					nonce  : kcoAjax.klarna_checkout_nonce
 				},
@@ -298,7 +298,6 @@ jQuery(document).ready(function($) {
 	
 	// Remove coupon
 	$('table#kco-totals').on( 'click', '.kco-remove-coupon', function( event ) {
-
 		event.preventDefault();
 
 		window._klarnaCheckout(function (api) {
@@ -344,7 +343,6 @@ jQuery(document).ready(function($) {
 				}
 			}
 		);
-
 	});
 
 
