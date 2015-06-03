@@ -420,24 +420,8 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 	 * @since 1.0.0
 	 */
 	public function admin_options() { ?>
-		<h3>
-			<?php echo ( ! empty( $this->method_title ) ) ? $this->method_title : __( 'Settings', 'klarna' ) ; ?>
-		</h3>
+		<h3><?php echo ( ! empty( $this->method_title ) ) ? $this->method_title : __( 'Settings', 'klarna' ) ; ?></h3>
 		<?php echo ( ! empty( $this->method_description ) ) ? wpautop( $this->method_description ) : ''; ?>
-
-		<?php
-		if ( ! empty( $this->authorized_countries ) && $this->enabled == 'yes' ) {
-			echo '<h4>' . __( 'Active PClasses', 'klarna' ) . '</h4>';
-			foreach( $this->authorized_countries as $key => $country ) {
-				$klarna = new Klarna();
-				$this->configure_klarna( $klarna, $country );
-
-				$pclasses = new WC_Gateway_Klarna_PClasses( $klarna, $this->pclass_type, $country );
-				$pclasses->display_pclasses_for_country_and_type();
-			}   
-		}
-		?>
-
 		<table class="form-table">
 			<?php $this->generate_settings_html(); // Generate the HTML For the settings form. ?>
 		</table>
