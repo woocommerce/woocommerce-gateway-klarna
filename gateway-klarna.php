@@ -150,15 +150,19 @@ function init_klarna_gateway() {
 	require_once 'classes/class-wc-klarna-compatibility.php';
 	
 	// Include our Klarna classes
-	// require_once 'classes/class-klarna-invoice.php'; // Invoice
-	// require_once 'classes/class-klarna-account.php'; // Account
-	// require_once 'classes/class-klarna-campaign.php'; // Special campaign
 	require_once 'classes/class-klarna-part-payment.php'; // KPM Part Payment
 	require_once 'classes/class-klarna-invoice.php'; // KPM Part Payment
 	require_once 'classes/class-klarna-payment-method-widget.php'; // Partpayment widget
 	require_once 'classes/class-klarna-get-address.php'; // Get address 
 	require_once 'classes/class-klarna-pms.php'; // PMS
 	require_once 'classes/class-klarna-order.php'; // Handles Klarna orders
+	require_once 'classes/class-klarna-payment-method-display-widget.php'; // WordPress widget
+
+	// register Foo_Widget widget
+	function register_klarna_pmd_widget() {
+		register_widget( 'WC_Klarna_Payment_Method_Display_Widget' );
+	}
+	add_action( 'widgets_init', 'register_klarna_pmd_widget' );
 
 	// Klarna Checkout class
 	$klarna_shop_country = get_option( 'woocommerce_default_country' );
