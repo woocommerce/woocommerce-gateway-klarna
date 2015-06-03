@@ -684,11 +684,9 @@ class WC_Gateway_Klarna_K2WC {
 	 */
 	public function add_order_customer_info( $order, $klarna_order ) {
 		$order_id = $order->id;
-		$this->klarna_log->add( 'klarna', 'BEFORECREATING' );
 
 		// Store user id in order so the user can keep track of track it in My account
 		if ( email_exists( $klarna_order['billing_address']['email'] ) ) {		
-			$this->klarna_log->add( 'klarna', 'NOTCREATING' );
 			if ( $this->klarna_debug == 'yes' ) {
 				$this->klarna_log->add( 'klarna', 'Billing email: ' . $klarna_order['billing_address']['email'] );
 			}
@@ -703,7 +701,6 @@ class WC_Gateway_Klarna_K2WC {
 			
 			update_post_meta( $order->id, '_customer_user', $this->customer_id );
 		} else {
-			$this->klarna_log->add( 'klarna', 'YESCREATING' );
 			// Create new user
 			$checkout_settings = get_option( 'woocommerce_klarna_checkout_settings' );
 			if ( 'yes' == $checkout_settings['create_customer_account'] ) {
