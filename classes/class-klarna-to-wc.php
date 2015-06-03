@@ -612,6 +612,68 @@ class WC_Gateway_Klarna_K2WC {
 	}
 
 	/**
+	 * Create a new customer
+	 *
+	 * @param  string $email
+	 * @param  string $username
+	 * @param  string $password
+	 * @return WP_Error on failure, Int (user ID) on success
+	 *
+	 * @since 1.0.0
+	 */
+	function create_new_customer( $email, $username = '', $password = '' ) {
+    	// Check the e-mail address
+		if ( empty( $email ) || ! is_email( $email ) )
+            return new WP_Error( "registration-error", __( "Please provide a valid email address.", "woocommerce" ) );
+
+		if ( email_exists( $email ) )
+            return new WP_Error( "registration-error", __( "An account is already registered with your email address. Please login.", "woocommerce" ) );
+
+
+		// Handle username creation
+		$username = sanitize_user( current( explode( '@', $email ) ) );
+
+		// Ensure username is unique
+		$append     = 1;
+		$o_username = $username;
+
+		while ( username_exists( $username ) ) {
+			$username = $o_username . $append;
+			$append ++;
+		}
+
+		// Handle password creation
+		$password = wp_generate_password();
+		$password_generated = true;
+
+		// WP Validation
+		$validation_errors = new WP_Error();
+		do_action( 'woocommerce_register_post', $username, $email, $validation_errors );
+		$validation_errors = apply_filters( 'woocommerce_registration_errors', $validation_errors, $username, $email );
+		if ( $validation_errors->get_error_code() )
+            return $validation_errors;
+
+		$new_customer_data = apply_filters( 'woocommerce_new_customer_data', array(
+        	'user_login' => $username,
+			'user_pass'  => $password,
+			'user_email' => $email,
+			'role'       => 'customer'
+		) );
+
+		$customer_id = wp_insert_user( $new_customer_data );
+
+		if ( is_wp_error( $customer_id ) )
+        	return new WP_Error( "registration-error", '<strong>' . __( 'ERROR', 'woocommerce' ) . '</strong>: ' . __( 'Couldn&#8217;t register you&hellip; please contact us if you continue to have problems.', 'woocommerce' ) );
+	
+		// Send New account creation email to customer?
+		if( $this->send_new_account_email == 'yes' ) {
+        	do_action( 'woocommerce_created_customer', $customer_id, $new_customer_data, $password_generated );
+		}
+	
+		return $customer_id;
+	}
+
+	/**
 	 * Adds customer info to local order.
 	 *
 	 * @since  2.0.0
@@ -622,9 +684,11 @@ class WC_Gateway_Klarna_K2WC {
 	 */
 	public function add_order_customer_info( $order, $klarna_order ) {
 		$order_id = $order->id;
+		$this->klarna_log->add( 'klarna', 'BEFORECREATING' );
 
 		// Store user id in order so the user can keep track of track it in My account
 		if ( email_exists( $klarna_order['billing_address']['email'] ) ) {		
+			$this->klarna_log->add( 'klarna', 'NOTCREATING' );
 			if ( $this->klarna_debug == 'yes' ) {
 				$this->klarna_log->add( 'klarna', 'Billing email: ' . $klarna_order['billing_address']['email'] );
 			}
@@ -639,8 +703,10 @@ class WC_Gateway_Klarna_K2WC {
 			
 			update_post_meta( $order->id, '_customer_user', $this->customer_id );
 		} else {
+			$this->klarna_log->add( 'klarna', 'YESCREATING' );
 			// Create new user
-			if ( $this->create_customer_account == 'yes' ) {
+			$checkout_settings = get_option( 'woocommerce_klarna_checkout_settings' );
+			if ( 'yes' == $checkout_settings['create_customer_account'] ) {
 				$password = '';
 				$new_customer = $this->create_new_customer( $klarna_order['billing_address']['email'], $klarna_order['billing_address']['email'], $password );
 				$order->add_order_note( sprintf( __( 'New customer created (user ID %s).', 'klarna' ), $new_customer, $klarna_order['id'] ) );
