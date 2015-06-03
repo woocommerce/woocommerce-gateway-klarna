@@ -46,16 +46,10 @@ $this->eid_at    = $this->get_option( 'eid_at' );
 $this->secret_at = $this->get_option( 'secret_at' );
 
 // Lower and upper treshold
-$this->lower_threshold = $this->get_option( 'lower_threshold' );
-$this->upper_threshold = $this->get_option( 'upper_threshold' );
+$this->lower_threshold = $this->get_option( 'lower_threshold', '' );
+$this->upper_threshold = $this->get_option( 'upper_threshold', '' );
 
-// Monthly cost widget
-$this->show_monthly_cost            = $this->get_option( 'show_monthly_cost' );
-$this->show_monthly_cost_prio       = $this->get_option( 'show_monthly_cost_prio', 15 );
-$this->lower_threshold_monthly_cost = $this->get_option( 'lower_threshold_monthly_cost', 0 );
-$this->upper_threshold_monthly_cost = $this->get_option( 'upper_threshold_monthly_cost', 10000000 );
-
-$this->invoice_fee_id = $this->get_option( 'invoice_fee_id', 0 );
+$this->invoice_fee_id = $this->get_option( 'invoice_fee_id', '' );
 
 $this->de_consent_terms        = $this->get_option( 'de_consent_terms' );
 $this->ship_to_billing_address = $this->get_option( 'ship_to_billing_address' );
