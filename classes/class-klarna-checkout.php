@@ -869,36 +869,12 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			
 			$new_country = sanitize_text_field( $_REQUEST['new_country'] );
 
-			//if ( WC()->session->get( 'klarna_checkout' ) ) {
-				
-				$sharedSecret = $this->klarna_secret;
-				require_once( KLARNA_LIB . '/src/Klarna/Checkout.php' );
-				// Klarna_Checkout_Order::$baseUri = $this->klarna_server;
-				// Klarna_Checkout_Order::$contentType = 'application/vnd.klarna.checkout.aggregated-order-v2+json';
-				$connector = Klarna_Checkout_Connector::create( $sharedSecret, $this->klarna_server );
-	
-				// Resume session
-				$klarna_order = new Klarna_Checkout_Order(
-					$connector,
-					WC()->session->get( 'klarna_checkout' )
-				);
-	
-				$klarna_order->fetch();
-				$klarna_order_as_array = $klarna_order->marshal();
+			// Reset session
+			$klarna_order = null;
+			WC()->session->__unset( 'klarna_checkout' );
 
-				// Reset session if the country in the store has changed since last time the checkout was loaded
-				if ( strtolower( $new_country ) != strtolower( $klarna_order_as_array['purchase_country'] ) ) {
-
-					// Reset session
-					$klarna_order = null;
-					WC()->session->__unset( 'klarna_checkout' );
-
-					// Store new country as WC session value
-					WC()->session->set( 'klarna_country', $new_country );
-
-				}
-				
-			//}
+			// Store new country as WC session value
+			WC()->session->set( 'klarna_country', $new_country );
 			
 		}
 		
