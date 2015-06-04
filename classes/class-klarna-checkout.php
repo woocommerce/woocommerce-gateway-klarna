@@ -154,6 +154,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		// Register new order status
 		add_action( 'init', array( $this, 'register_klarna_incomplete_order_status' ) );
 		add_filter( 'wc_order_statuses', array( $this, 'add_kco_incomplete_to_order_statuses' ) );
+		add_filter( 'woocommerce_valid_order_statuses_for_payment_complete', array( $this, 'kco_incomplete_payment_complete' ) );
     }
 
 
@@ -181,6 +182,17 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 **/
 	function add_kco_incomplete_to_order_statuses( $order_statuses ) {
 		$order_statuses['wc-kco-incomplete'] = 'Incomplete Klarna Checkout';
+
+		return $order_statuses;
+	}
+
+	/**
+	 * Allows $order->payment_complete to work for KCO incomplete orders
+	 * 
+	 * @since  2.0
+	 **/
+	function kco_incomplete_payment_complete( $order_statuses ) {
+		$order_statuses[] = 'kco-incomplete';
 
 		return $order_statuses;
 	}
@@ -610,8 +622,17 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		$klarna_sid = $woocommerce->session->get( 'klarna_sid' );
 		$woocommerce->cart->set_quantity( $updated_item_key, $new_quantity );
 		$woocommerce->cart->calculate_totals();
-		$klarna_wc = $woocommerce;
-		set_transient( $klarna_sid, $klarna_wc, 48 * 60 * 60 );
+
+		// Update the local order
+		include_once( KLARNA_DIR . 'classes/class-klarna-to-wc.php' );
+		$klarna_to_wc = new WC_Gateway_Klarna_K2WC();
+		$klarna_to_wc->set_rest( $this->is_rest() );
+		$klarna_to_wc->set_eid( $this->klarna_eid );
+		$klarna_to_wc->set_secret( $this->klarna_secret );
+		$klarna_to_wc->set_klarna_log( $this->log );
+		$klarna_to_wc->set_klarna_debug( $this->debug );
+		$klarna_to_wc->set_klarna_server( $this->klarna_server );
+		$klarna_to_wc->prepare_wc_order();
 		
 		$data['cart_total'] = wc_price( $woocommerce->cart->total );
 		$data['cart_subtotal'] = $woocommerce->cart->get_cart_subtotal();
@@ -660,10 +681,24 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 
 		$woocommerce->cart->remove_cart_item( $removed_item_key );
 
-		$klarna_sid = $woocommerce->session->get( 'klarna_sid' );
-		$woocommerce->cart->calculate_totals();
-		$klarna_wc = $woocommerce;
-		set_transient( $klarna_sid, $klarna_wc, 48 * 60 * 60 );
+		if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
+			$woocommerce->cart->calculate_totals();
+
+			// Update the local order
+			include_once( KLARNA_DIR . 'classes/class-klarna-to-wc.php' );
+			$klarna_to_wc = new WC_Gateway_Klarna_K2WC();
+			$klarna_to_wc->set_rest( $this->is_rest() );
+			$klarna_to_wc->set_eid( $this->klarna_eid );
+			$klarna_to_wc->set_secret( $this->klarna_secret );
+			$klarna_to_wc->set_klarna_log( $this->log );
+			$klarna_to_wc->set_klarna_debug( $this->debug );
+			$klarna_to_wc->set_klarna_server( $this->klarna_server );
+			$klarna_to_wc->prepare_wc_order();
+		} else {
+			if ( $woocommerce->session->get( 'ongoing_klarna_order' ) ) {
+				$woocommerce->session->__unset( 'ongoing_klarna_order' );
+			}
+		}
 		
 		// This needs to be sent back to JS, so cart widget can be updated
 		$data['cart_total'] = wc_price( $woocommerce->cart->total );
@@ -707,19 +742,6 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			$woocommerce->cart->calculate_totals();
 			wc_clear_notices(); // This notice handled by Klarna plugin	
 
-			$klarna_sid = $woocommerce->session->get( 'klarna_sid' );
-			$woocommerce->cart->calculate_totals();
-			$klarna_wc = $woocommerce;
-			set_transient( $klarna_sid, $klarna_wc, 48 * 60 * 60 );
-			
-			$coupon_object = new WC_Coupon( $coupon );
-	
-			$amount = wc_price( $woocommerce->cart->get_coupon_discount_amount( $coupon, $woocommerce->cart->display_cart_ex_tax ) );
-			$data['amount'] = $amount;
-				
-			$data['coupon_success'] = $coupon_success;
-			$data['coupon'] = $coupon;
-
 			if ( ! defined( 'WOOCOMMERCE_CART' ) ) {
 				define( 'WOOCOMMERCE_CART', true );
 			}
@@ -727,6 +749,28 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			$woocommerce->cart->calculate_shipping();
 			$woocommerce->cart->calculate_fees();
 			$woocommerce->cart->calculate_totals();
+
+			// Update the local order
+			include_once( KLARNA_DIR . 'classes/class-klarna-to-wc.php' );
+			$klarna_to_wc = new WC_Gateway_Klarna_K2WC();
+			$klarna_to_wc->set_rest( $this->is_rest() );
+			$klarna_to_wc->set_eid( $this->klarna_eid );
+			$klarna_to_wc->set_secret( $this->klarna_secret );
+			$klarna_to_wc->set_klarna_log( $this->log );
+			$klarna_to_wc->set_klarna_debug( $this->debug );
+			$klarna_to_wc->set_klarna_server( $this->klarna_server );
+			$klarna_to_wc->prepare_wc_order();
+			
+			$coupon_object = new WC_Coupon( $coupon );
+	
+			$amount = wc_price( $woocommerce->cart->get_coupon_discount_amount( $coupon, $woocommerce->cart->display_cart_ex_tax ) );
+			$data['amount'] = $amount;			
+			$data['coupon_success'] = $coupon_success;
+			$data['coupon'] = $coupon;
+
+			if ( ! defined( 'WOOCOMMERCE_CART' ) ) {
+				define( 'WOOCOMMERCE_CART', true );
+			}
 
 			$data['cart_total'] = wc_price( $woocommerce->cart->total );
 			$data['cart_subtotal'] = $woocommerce->cart->get_cart_subtotal();
@@ -776,6 +820,17 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			$woocommerce->cart->calculate_shipping();
 			$woocommerce->cart->calculate_fees();
 			$woocommerce->cart->calculate_totals();
+
+			// Update the local order
+			include_once( KLARNA_DIR . 'classes/class-klarna-to-wc.php' );
+			$klarna_to_wc = new WC_Gateway_Klarna_K2WC();
+			$klarna_to_wc->set_rest( $this->is_rest() );
+			$klarna_to_wc->set_eid( $this->klarna_eid );
+			$klarna_to_wc->set_secret( $this->klarna_secret );
+			$klarna_to_wc->set_klarna_log( $this->log );
+			$klarna_to_wc->set_klarna_debug( $this->debug );
+			$klarna_to_wc->set_klarna_server( $this->klarna_server );
+			$klarna_to_wc->prepare_wc_order();
 	
 			$data['cart_total'] = wc_price( $woocommerce->cart->total );
 			$data['cart_subtotal'] = $woocommerce->cart->get_cart_subtotal();
@@ -817,11 +872,16 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		$woocommerce->cart->calculate_fees();
 		$woocommerce->cart->calculate_totals();
 
-		// Update WooCommerce cart and transient order item
-		$klarna_sid = $woocommerce->session->get( 'klarna_sid' );
-		$klarna_wc = $woocommerce;
-		set_transient( $klarna_sid, $klarna_wc, 48 * 60 * 60 );
-		set_transient( $klarna_transient . '_shipping', $klarna_wc->shipping, 48 * 60 * 60 );
+		// Update the local order
+		include_once( KLARNA_DIR . 'classes/class-klarna-to-wc.php' );
+		$klarna_to_wc = new WC_Gateway_Klarna_K2WC();
+		$klarna_to_wc->set_rest( $this->is_rest() );
+		$klarna_to_wc->set_eid( $this->klarna_eid );
+		$klarna_to_wc->set_secret( $this->klarna_secret );
+		$klarna_to_wc->set_klarna_log( $this->log );
+		$klarna_to_wc->set_klarna_debug( $this->debug );
+		$klarna_to_wc->set_klarna_server( $this->klarna_server );
+		$klarna_to_wc->prepare_wc_order();
 
 		$data['new_method'] = $new_method;
 		$data['cart_total'] = wc_price( $woocommerce->cart->total );

@@ -17,18 +17,6 @@ if ( ! $this->show_kco() )
 if ( ! defined( 'WOOCOMMERCE_CHECKOUT' ) )
 	define( 'WOOCOMMERCE_CHECKOUT', true );
 
-echo '<pre>';
-print_r( WC()->cart );
-echo '</pre>';
-
-WC()->cart->calculate_shipping();
-WC()->cart->calculate_fees();
-WC()->cart->calculate_totals();
-
-echo '<pre>';
-print_r( WC()->cart );
-echo '</pre>';
-
 // Set Klarna Checkout as the choosen payment method in the WC session
 WC()->session->set( 'chosen_payment_method', 'klarna_checkout' );
 
@@ -97,11 +85,12 @@ if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 	include_once( KLARNA_DIR . 'classes/class-klarna-to-wc.php' );
 	$klarna_to_wc = new WC_Gateway_Klarna_K2WC();
 	$klarna_to_wc->set_rest( $this->is_rest() );
-	$klarna_to_wc->set_eid( $klarna_eid );
-	$klarna_to_wc->set_secret( $klarna_secret );
-	$klarna_to_wc->set_klarna_order_uri( $_GET['klarna_order'] );
+	$klarna_to_wc->set_eid( $this->klarna_eid );
+	$klarna_to_wc->set_secret( $this->klarna_secret );
 	$klarna_to_wc->set_klarna_log( $this->log );
 	$klarna_to_wc->set_klarna_debug( $this->debug );
+	$klarna_to_wc->set_klarna_server( $this->klarna_server );
+
 	$klarna_to_wc->prepare_wc_order();
 
 	
