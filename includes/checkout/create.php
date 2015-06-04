@@ -10,6 +10,7 @@
 // Check if country was set in WC session
 // Used when changing countries in KCO page
 $kco_session_country = WC()->session->get( 'klarna_country', '' );
+$local_order_id = WC()->session->get( 'ongoing_klarna_order' );
 $kco_session_locale = '';
 
 if ( '' != $kco_session_country ) {
@@ -48,8 +49,8 @@ $merchant_checkout_uri = esc_url_raw( add_query_arg(
 $merchant_confirmation_uri = add_query_arg ( 
 	array(
 		'klarna_order' => '{checkout.order.uri}', 
-		'sid' => $klarna_transient, 
-		'order-received' => $klarna_transient 
+		'sid' => $local_order_id, 
+		'order-received' => $local_order_id 
 	),
 	$this->klarna_checkout_thanks_url
 );
@@ -57,7 +58,7 @@ $push_uri_base = get_site_url() . '/wc-api/WC_Gateway_Klarna_Checkout/';
 if ( $this->is_rest() ) {
 	$merchant_push_uri = add_query_arg( 
 		array(
-			'sid' => $klarna_transient, 
+			'sid' => $local_order_id, 
 			'scountry' => $this->klarna_country, 
 			'klarna_order' => '{checkout.order.id}', 
 			'wc-api' => 'WC_Gateway_Klarna_Checkout'
@@ -67,7 +68,7 @@ if ( $this->is_rest() ) {
 } else {
 	$merchant_push_uri = add_query_arg( 
 		array(
-			'sid' => $klarna_transient, 
+			'sid' => $local_order_id, 
 			'scountry' => $this->klarna_country, 
 			'klarna_order' => '{checkout.order.uri}', 
 		),

@@ -151,11 +151,42 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		add_shortcode( 'woocommerce_klarna_login', array( $this, 'klarna_checkout_login') );
 		add_shortcode( 'woocommerce_klarna_country', array( $this, 'klarna_checkout_country') );
 
+		// Register new order status
+		add_action( 'init', array( $this, 'register_klarna_incomplete_order_status' ) );
+		add_filter( 'wc_order_statuses', array( $this, 'add_kco_incomplete_to_order_statuses' ) );
     }
 
 
 	/**
-	 * Enqueue Klarna Checkout javascript.
+	 * Register KCO Incomplete order status
+	 * 
+	 * @since  2.0
+	 **/
+	function register_klarna_incomplete_order_status() {
+		register_post_status( 'wc-kco-incomplete', array(
+			'label'                     => 'KCO incomplete',
+			'public'                    => false,
+			'exclude_from_search'       => false,
+			'show_in_admin_all_list'    => false,
+			'show_in_admin_status_list' => true,
+			'label_count'               => _n_noop( 'KCO incomplete <span class="count">(%s)</span>', 'KCO incomplete <span class="count">(%s)</span>' ),
+		) );
+   	}
+
+
+	/**
+	 * Add KCO Incomplete to list of order status
+	 * 
+	 * @since  2.0
+	 **/
+	function add_kco_incomplete_to_order_statuses( $order_statuses ) {
+		$order_statuses['wc-kco-incomplete'] = 'Incomplete Klarna Checkout';
+
+		return $order_statuses;
+	}
+
+	/**
+	 * Add options for recurring order activation.
 	 * 
 	 * @since  2.0
 	 **/
@@ -1330,14 +1361,13 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		// Process cart contents and prepare them for Klarna
 		if ( isset( $_GET['klarna_order'] ) ) {
 			include_once( KLARNA_DIR . 'classes/class-klarna-to-wc.php' );
-			$klarna_to_wc = new WC_Gateway_Klarna_K2WC(
-				$this->is_rest(),
-				$klarna_eid,
-				$klarna_secret,
-				$_GET['klarna_order'],
-				$this->log,
-				$this->debug
-			);
+			$klarna_to_wc = new WC_Gateway_Klarna_K2WC();
+			$klarna_to_wc->set_rest( $this->is_rest() );
+			$klarna_to_wc->set_eid( $klarna_eid );
+			$klarna_to_wc->set_secret( $klarna_secret );
+			$klarna_to_wc->set_klarna_order_uri( $_GET['klarna_order'] );
+			$klarna_to_wc->set_klarna_log( $this->log );
+			$klarna_to_wc->set_klarna_debug( $this->debug );
 			$klarna_to_wc->listener();
 		}
 	} // End function check_checkout_listener

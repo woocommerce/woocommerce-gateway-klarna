@@ -18,6 +18,8 @@ if ( $this->is_rest() ) {
 	);
 }
 
+$local_order_id = WC()->session->get( 'ongoing_klarna_order' );
+
 try {
 
 	$klarna_order->fetch();
@@ -66,14 +68,14 @@ try {
 		$merchant_confirmation_uri = add_query_arg ( 
 			array(
 				'klarna_order' => '{checkout.order.uri}', 
-				'sid' => $klarna_transient, 
-				'order-received' => $klarna_transient 
+				'sid' => $local_order_id, 
+				'order-received' => $local_order_id 
 			),
 			$this->klarna_checkout_thanks_url
 		);
 		$merchant_push_uri = add_query_arg( 
 			array(
-				'sid' => $klarna_transient, 
+				'sid' => $local_order_id, 
 				'scountry' => $this->klarna_country, 
 				'klarna_order' => '{checkout.order.uri}', 
 				'wc-api' => 'WC_Gateway_Klarna_Checkout'

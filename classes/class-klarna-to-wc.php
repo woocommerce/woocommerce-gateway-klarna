@@ -88,17 +88,117 @@ class WC_Gateway_Klarna_K2WC {
 	public $klarna_debug;
 
 	/**
-	 * Constructor
+	 * Set is_rest value
 	 *
 	 * @since 2.0.0
 	 */
-	public function __construct( $is_rest = false, $eid, $secret, $klarna_order_uri, $klarna_log, $klarna_debug ) {
+	public function set_rest( $is_rest ) {
 		$this->is_rest = $is_rest;
+	}
+
+	/**
+	 * Set eid
+	 *
+	 * @since 2.0.0
+	 */
+	public function set_eid( $eid ) {
 		$this->eid = $eid;
+	}
+
+	/**
+	 * Set secret
+	 *
+	 * @since 2.0.0
+	 */
+	public function set_secret( $secret ) {
 		$this->secret = $secret;
+	}
+
+	/**
+	 * Set klarna_order_uri
+	 *
+	 * @since 2.0.0
+	 */
+	public function set_klarna_order_uri( $klarna_order_uri ) {
 		$this->klarna_order_uri = $klarna_order_uri;
+	}
+
+	/**
+	 * Set klarna_log
+	 *
+	 * @since 2.0.0
+	 */
+	public function set_klarna_log( $klarna_log ) {
 		$this->klarna_log = $klarna_log;
+	}
+
+	/**
+	 * Set klarna_debug
+	 *
+	 * @since 2.0.0
+	 */
+	public function set_klarna_debug( $klarna_debug ) {
 		$this->klarna_debug = $klarna_debug;
+	}
+
+	/**
+	 * KCO listener function.
+	 * 
+	 * Creates local order on Klarna's push notification.
+	 *
+	 * @since  2.0.0
+	 * @access public
+	 * 
+	 * @param  integer $eid    Klarna Eid.
+	 * @param  integer $secret Klarna secret.
+	 * @param  object  $log    WooCommerce log object.
+	 * @param  string  $debug  Debug yes/no.
+	 */
+	public function prepare_wc_order() {
+		$this->klarna_log->add( 'klarna', 'Listener triggered' );
+
+		global $woocommerce;
+
+		if ( $woocommerce->session->get( 'ongoing_klarna_order' ) ) {
+			$orderid = $woocommerce->session->get( 'ongoing_klarna_order' );
+			$order = wc_get_order( $orderid );
+			$order->remove_order_items();
+		} else {
+			// Create order in WooCommerce
+			$order = $this->create_order();
+			$woocommerce->session->set( 'ongoing_klarna_order', $order->id );
+		}
+
+		// Add order items
+		$this->add_order_items( $order );
+
+		// Add order fees
+		$this->add_order_fees( $order );
+
+		// Add order shipping
+		$this->add_order_shipping( $order );				
+
+		// Add order taxes
+		$this->add_order_tax_rows( $order );
+
+		// Store coupons
+		$this->add_order_coupons( $order );
+
+		// Store payment method
+		$this->add_order_payment_method( $order );
+
+		// Calculate order totals
+		$this->set_order_totals( $order );
+				
+		// Let plugins add meta
+		do_action( 'woocommerce_checkout_update_order_meta', $order->id, array() );
+				
+		// Store which KCO API was used
+		if ( $this->is_rest ) {
+			update_post_meta( $order->id, '_klarna_api', 'rest' );
+		} else {
+			update_post_meta( $order->id, '_klarna_api', 'v2' );
+		}
 	}
 
 	/**
@@ -125,70 +225,17 @@ class WC_Gateway_Klarna_K2WC {
 		// Check if order has been completed by Klarna, for V2 and Rest
 		if ( $klarna_order['status'] == 'checkout_complete' || $klarna_order['status'] == 'AUTHORIZED' ) { 
 
-			// Check if local order has already been created
-			if ( $this->is_rest ) {
-				$klarna_ref = $klarna_order['order_id'];
-				$args = array(
-					'post_type'   => 'shop_order',
-					'meta_query'  => array(
-						array(
-							'key'   => '_klarna_order_id',
-							'value' => $klarna_ref
-						)
-					)
-				);
-				$order_query = new WP_Query( $args );
-			} else {
-				$klarna_ref = $klarna_order['reservation'];
-				$args = array(
-					'post_type'   => 'shop_order',
-					'meta_query'  => array(
-						array(
-							'key'   => '_klarna_order_reservation',
-							'value' => $klarna_ref
-						)
-					)
-				);
-				$order_query = new WP_Query( $args );
-			}
-
-			if ( $order_query->have_posts() ) {
-				$this->klarna_log->add( 'klarna', 'Order already created' );
-				return;
-			}
-
-			$klarna_transient = sanitize_key( $_GET['sid'] );
-			$klarna_wc = get_transient( $klarna_transient );
-
-			// Create order in WooCommerce
-			$order = $this->create_order();
+			$local_order_id = sanitize_key( $_GET['sid'] );
+			$order = wc_get_order( $local_order_id );
 
 			// Change order currency
 			$this->change_order_currency( $order, $klarna_order );
-
-			// Add order items
-			$this->add_order_items( $order, $klarna_order );
-
-			// Add order fees
-			$this->add_order_fees( $order, $klarna_order );
-
-			// Add order shipping
-			$this->add_order_shipping( $order, $klarna_order );				
 			
 			// Add order addresses
 			$this->add_order_addresses( $order, $klarna_order );
 
-			// Add order taxes
-			$this->add_order_tax_rows( $order, $klarna_order );
-
-			// Store coupons
-			$this->add_order_coupons( $order, $klarna_order );
-
 			// Store payment method
 			$this->add_order_payment_method( $order, $klarna_order );
-
-			// Calculate order totals
-			$this->set_order_totals( $order, $klarna_order );
 					
 			// Let plugins add meta
 			do_action( 'woocommerce_checkout_update_order_meta', $order->id, array() );
@@ -227,10 +274,6 @@ class WC_Gateway_Klarna_K2WC {
 				
 				// Empty cart
 				$woocommerce->cart->empty_cart();
-
-				// Delete transients
-				delete_transient( $klarna_transient );
-				delete_transient( $klarna_transient . '_shipping' );
 			}
 
 			// Store which KCO API was used
@@ -302,20 +345,14 @@ class WC_Gateway_Klarna_K2WC {
 	 */
 	public function create_order() {
 		$this->klarna_log->add( 'klarna', 'Creating local order...' );
-
-		$klarna_transient = sanitize_key( $_GET['sid'] );
-		$this->klarna_log->add( 'klarna', 'transient - ' . $klarna_transient );
-		$klarna_wc = get_transient( $klarna_transient );
-
 		global $woocommerce;
-		$woocommerce = $klarna_wc;
 
 		// Customer accounts
 		$customer_id = apply_filters( 'woocommerce_checkout_customer_id', get_current_user_id() );
 
 		// Order data
 		$order_data = array(
-			'status'        => apply_filters( 'woocommerce_default_order_status', 'pending' ),
+			'status'        => apply_filters( 'klarna_checkout_incomplete_order_status', 'kco-incomplete' ),
 			'customer_id'   => $customer_id,
 			'created_via'   => 'klarna_checkout'
 		);
@@ -355,33 +392,27 @@ class WC_Gateway_Klarna_K2WC {
 	 * @access public
 	 * 
 	 * @param  object $order        Local WC order.
-	 * @param  object $klarna_order Klarna order.
 	 */
-	public function add_order_items( $order, $klarna_order ) {
+	public function add_order_items( $order ) {
 		$this->klarna_log->add( 'klarna', 'Adding order items...' );
-
-		$klarna_transient = sanitize_key( $_GET['sid'] );
-		$this->klarna_log->add( 'klarna', 'transient - ' . $klarna_transient );
-		$klarna_wc = get_transient( $klarna_transient );
+		global $woocommerce;
 		$order_id = $order->id;
 
-		foreach ( $klarna_wc->cart->get_cart() as $cart_item_key => $values ) {
+		foreach ( $woocommerce->cart->get_cart() as $cart_item_key => $values ) {
 			$item_id = $order->add_product(
 				$values['data'],
 				$values['quantity'],
 				array(
 					'variation' => $values['variation'],
 					'totals'    => array(
-						'subtotal'     => $values['line_subtotal'],
+						'subtotal'     => $values['line_subtotal'] + $values['line_subtotal_tax'],
 						'subtotal_tax' => $values['line_subtotal_tax'],
-						'total'        => $values['line_total'],
+						'total'        => $values['line_total'] + $values['line_tax'],
 						'tax'          => $values['line_tax'],
 						'tax_data'     => $values['line_tax_data'] // Since 2.2
 					)
 				)
 			);
-
-			$this->klarna_log->add( 'klarna', 'Added item - ' . var_export( $values, true ) );
 
 			if ( ! $item_id ) {
 				$this->klarna_log->add( 'klarna', 'Unable to add order item.' );
@@ -400,16 +431,13 @@ class WC_Gateway_Klarna_K2WC {
 	 * @access public
 	 * 
 	 * @param  object $order        Local WC order.
-	 * @param  object $klarna_order Klarna order.
 	 */
-	public function add_order_fees( $order, $klarna_order ) {
+	public function add_order_fees( $order ) {
 		$this->klarna_log->add( 'klarna', 'Adding order fees...' );
-
-		$klarna_transient = sanitize_key( $_GET['sid'] );
-		$klarna_wc = get_transient( $klarna_transient );
+		global $woocommerce;
 		$order_id = $order->id;
 		
-		foreach ( $klarna_wc->cart->get_fees() as $fee_key => $fee ) {
+		foreach ( $woocommerce->cart->get_fees() as $fee_key => $fee ) {
 			$item_id = $order->add_fee( $fee );
 
 			if ( ! $item_id ) {
@@ -431,19 +459,17 @@ class WC_Gateway_Klarna_K2WC {
 	 * @param  object $order        Local WC order.
 	 * @param  object $klarna_order Klarna order.
 	 */
-	public function add_order_shipping( $order, $klarna_order ) {
+	public function add_order_shipping( $order ) {
 		$this->klarna_log->add( 'klarna', 'Adding order shipping...' );
-
-		$klarna_transient = sanitize_key( $_GET['sid'] );
-		$klarna_wc = get_transient( $klarna_transient );
-		$klarna_shipping = get_transient( $klarna_transient . '_shipping' );
+		global $woocommerce;
 		$order_id = $order->id;
-		$this_shipping_methods = $klarna_wc->session->get( 'chosen_shipping_methods' );
+		$this_shipping_methods = $woocommerce->session->get( 'chosen_shipping_methods' );
 
 		// Store shipping for all packages
-		foreach ( $klarna_shipping->get_packages() as $package_key => $package ) {
+		foreach ( $woocommerce->shipping->get_packages() as $package_key => $package ) {
 			if ( isset( $package['rates'][ $this_shipping_methods[ $package_key ] ] ) ) {
 				$item_id = $order->add_shipping( $package['rates'][ $this_shipping_methods[ $package_key ] ] );
+				print_r( $package['rates'][ $this_shipping_methods[ $package_key ] ] );
 
 				if ( ! $item_id ) {
 					$this->klarna_log->add( 'klarna', 'Unable to add shipping item.' );
@@ -476,7 +502,7 @@ class WC_Gateway_Klarna_K2WC {
 
 		if ( $_GET['scountry'] == 'DE' ) {
 			$received__billing_address_1 = $klarna_order['billing_address']['street_name'] . ' ' . $klarna_order['billing_address']['street_number'];
-			$received__shipping_address_1 = $klarna_order['shipping_address']['street_name'] . ' ' . $klarna_order['shipping_address']['street_number'];							
+			$received__shipping_address_1 = $klarna_order['shipping_address']['street_name'] . ' ' . $klarna_order['shipping_address']['street_number'];
 		} else {		
 			$received__billing_address_1 	= $klarna_order['billing_address']['street_address'];
 			$received__shipping_address_1 	= $klarna_order['shipping_address']['street_address'];		
@@ -525,18 +551,14 @@ class WC_Gateway_Klarna_K2WC {
 	 * @access public
 	 * 
 	 * @param  object $order        Local WC order.
-	 * @param  object $klarna_order Klarna order.
 	 */
-	public function add_order_tax_rows( $order, $klarna_order ) {
+	public function add_order_tax_rows( $order ) {
 		$this->klarna_log->add( 'klarna', 'Adding order tax...' );
-
-		$klarna_transient = sanitize_key( $_GET['sid'] );
-		$klarna_wc = get_transient( $klarna_transient );
 
 		global $woocommerce;
 
-		foreach ( array_keys( $klarna_wc->cart->taxes + $klarna_wc->cart->shipping_taxes ) as $tax_rate_id ) {
-			if ( ! $order->add_tax( $tax_rate_id, $klarna_wc->cart->get_tax_amount( $tax_rate_id ), $woocommerce->cart->get_shipping_tax_amount( $tax_rate_id ) ) ) {
+		foreach ( array_keys( $woocommerce->cart->taxes + $woocommerce->cart->shipping_taxes ) as $tax_rate_id ) {
+			if ( ! $order->add_tax( $tax_rate_id, $woocommerce->cart->get_tax_amount( $tax_rate_id ), $woocommerce->cart->get_shipping_tax_amount( $tax_rate_id ) ) ) {
 				$this->klarna_log->add( 'klarna', 'Unable to add taxes.' );
 				throw new Exception( __( 'Error: Unable to create order. Please try again.', 'woocommerce' ) );
 			}
@@ -550,16 +572,14 @@ class WC_Gateway_Klarna_K2WC {
 	 * @access public
 	 * 
 	 * @param  object $order        Local WC order.
-	 * @param  object $klarna_order Klarna order.
 	 */
-	public function add_order_coupons( $order, $klarna_order ) {
+	public function add_order_coupons( $order ) {
 		$this->klarna_log->add( 'klarna', 'Adding order coupons...' );
 
-		$klarna_transient = sanitize_key( $_GET['sid'] );
-		$klarna_wc = get_transient( $klarna_transient );
+		global $woocommerce;
 
-		foreach ( $klarna_wc->cart->get_coupons() as $code => $coupon ) {
-			if ( ! $order->add_coupon( $code, $klarna_wc->cart->get_coupon_discount_amount( $code ) ) ) {
+		foreach ( $woocommerce->cart->get_coupons() as $code => $coupon ) {
+			if ( ! $order->add_coupon( $code, $woocommerce->cart->get_coupon_discount_amount( $code ) ) ) {
 				$this->klarna_log->add( 'klarna', 'Unable to add coupons.' );
 				throw new Exception( __( 'Error: Unable to create order. Please try again.', 'woocommerce' ) );
 			}
@@ -575,13 +595,12 @@ class WC_Gateway_Klarna_K2WC {
 	 * @param  object $order        Local WC order.
 	 * @param  object $klarna_order Klarna order.
 	 */
-	public function add_order_payment_method( $order, $klarna_order ) {
+	public function add_order_payment_method( $order ) {
 		$this->klarna_log->add( 'klarna', 'Adding order payment method...' );
 
-		$klarna_transient = sanitize_key( $_GET['sid'] );
-		$klarna_wc = get_transient( $klarna_transient );
+		global $woocommerce;
 
-		$available_gateways = $klarna_wc->payment_gateways->payment_gateways();
+		$available_gateways = $woocommerce->payment_gateways->payment_gateways();
 		$payment_method = $available_gateways[ 'klarna_checkout' ];
 	
 		$order->set_payment_method( $payment_method );
@@ -594,18 +613,16 @@ class WC_Gateway_Klarna_K2WC {
 	 * @access public
 	 * 
 	 * @param  object $order        Local WC order.
-	 * @param  object $klarna_order Klarna order.
 	 */
-	public function set_order_totals( $order, $klarna_order ) {
-		$klarna_transient = sanitize_key( $_GET['sid'] );
-		$klarna_wc = get_transient( $klarna_transient );
+	public function set_order_totals( $order ) {
+		global $woocommerce;
 
-		$order->set_total( $klarna_wc->cart->shipping_total, 'shipping' );
-		$order->set_total( $klarna_wc->cart->get_cart_discount_total(), 'order_discount' );
-		$order->set_total( $klarna_wc->cart->get_cart_discount_total(), 'cart_discount' );
-		$order->set_total( $klarna_wc->cart->tax_total, 'tax' );
-		$order->set_total( $klarna_wc->cart->shipping_tax_total, 'shipping_tax' );
-		$order->set_total( $klarna_wc->cart->total );
+		$order->set_total( $woocommerce->cart->shipping_total, 'shipping' );
+		$order->set_total( $woocommerce->cart->get_cart_discount_total(), 'order_discount' );
+		$order->set_total( $woocommerce->cart->get_cart_discount_total(), 'cart_discount' );
+		$order->set_total( $woocommerce->cart->tax_total, 'tax' );
+		$order->set_total( $woocommerce->cart->shipping_tax_total, 'shipping_tax' );
+		$order->set_total( $woocommerce->cart->total );
 		$order->calculate_shipping();
 		$order->calculate_taxes();
 		$order->calculate_totals();		

@@ -17,6 +17,18 @@ if ( ! $this->show_kco() )
 if ( ! defined( 'WOOCOMMERCE_CHECKOUT' ) )
 	define( 'WOOCOMMERCE_CHECKOUT', true );
 
+echo '<pre>';
+print_r( WC()->cart );
+echo '</pre>';
+
+WC()->cart->calculate_shipping();
+WC()->cart->calculate_fees();
+WC()->cart->calculate_totals();
+
+echo '<pre>';
+print_r( WC()->cart );
+echo '</pre>';
+
 // Set Klarna Checkout as the choosen payment method in the WC session
 WC()->session->set( 'chosen_payment_method', 'klarna_checkout' );
 
@@ -57,13 +69,6 @@ if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 	$eid = $this->klarna_eid;
 	$sharedSecret = $this->klarna_secret;
 
-	// Store WC object as transient
-	$klarna_wc = $woocommerce;
-	$klarna_transient = md5( time() . rand( 1000, 1000000 ) );
-	set_transient( $klarna_transient, $klarna_wc, 48 * 60 * 60 );
-	set_transient( $klarna_transient . '_shipping', $klarna_wc->shipping, 48 * 60 * 60 );
-	WC()->session->set( 'klarna_sid', $klarna_transient );
-
 	// Process cart contents and prepare them for Klarna
 	include_once( KLARNA_DIR . 'classes/class-wc-to-klarna.php' );
 	$wc_to_klarna = new WC_Gateway_Klarna_WC2K( $this->is_rest() );
@@ -84,11 +89,25 @@ if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 		$connector = Klarna_Checkout_Connector::create( $sharedSecret, $this->klarna_server );
 	}
 	$klarna_order = null;
+
+
+	/**
+	 * Create WooCommerce order
+	 */
+	include_once( KLARNA_DIR . 'classes/class-klarna-to-wc.php' );
+	$klarna_to_wc = new WC_Gateway_Klarna_K2WC();
+	$klarna_to_wc->set_rest( $this->is_rest() );
+	$klarna_to_wc->set_eid( $klarna_eid );
+	$klarna_to_wc->set_secret( $klarna_secret );
+	$klarna_to_wc->set_klarna_order_uri( $_GET['klarna_order'] );
+	$klarna_to_wc->set_klarna_log( $this->log );
+	$klarna_to_wc->set_klarna_debug( $this->debug );
+	$klarna_to_wc->prepare_wc_order();
+
 	
 	/**
 	 * Check if Klarna order already exists
 	 */
-		
 	// If it does, see if it needs to be updated
 	if ( WC()->session->get( 'klarna_checkout' ) ) {
 		include( KLARNA_DIR . 'includes/checkout/resume.php' );
