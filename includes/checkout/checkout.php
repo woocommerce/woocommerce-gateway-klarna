@@ -90,10 +90,8 @@ if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 	$klarna_to_wc->set_klarna_log( $this->log );
 	$klarna_to_wc->set_klarna_debug( $this->debug );
 	$klarna_to_wc->set_klarna_server( $this->klarna_server );
-
 	$klarna_to_wc->prepare_wc_order();
 
-	
 	/**
 	 * Check if Klarna order already exists
 	 */

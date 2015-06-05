@@ -507,7 +507,7 @@ class WC_Gateway_Klarna_K2WC {
 		$received__billing_address_1  = '';
 		$received__shipping_address_1 = '';
 
-		if ( $_GET['scountry'] == 'DE' ) {
+		if ( $_GET['scountry'] == 'DE' && $_GET['scountry'] == 'AT' ) {
 			$received__billing_address_1 = $klarna_order['billing_address']['street_name'] . ' ' . $klarna_order['billing_address']['street_number'];
 			$received__shipping_address_1 = $klarna_order['shipping_address']['street_name'] . ' ' . $klarna_order['shipping_address']['street_number'];
 		} else {		
@@ -529,7 +529,7 @@ class WC_Gateway_Klarna_K2WC {
 		// Add customer shipping address - retrieved from callback from Klarna
 		$allow_separate_shipping = ( isset( $klarna_order['options']['allow_separate_shipping_address'] ) ) ? $klarna_order['options']['allow_separate_shipping_address'] : '';
 		
-		if ( $allow_separate_shipping == 'true' || $_GET['scountry'] == 'DE' ) {		
+		if ( $allow_separate_shipping == 'true' || $_GET['scountry'] == 'DE' || $_GET['scountry'] == 'AT' ) {		
 			update_post_meta( $order_id, '_shipping_first_name', $klarna_order['shipping_address']['given_name'] );
 			update_post_meta( $order_id, '_shipping_last_name', $klarna_order['shipping_address']['family_name'] );
 			update_post_meta( $order_id, '_shipping_address_1', $received__shipping_address_1 );
@@ -757,7 +757,7 @@ class WC_Gateway_Klarna_K2WC {
 					// Add customer shipping address - retrieved from callback from Klarna
 					$allow_separate_shipping = ( isset( $klarna_order['options']['allow_separate_shipping_address'] ) ) ? $klarna_order['options']['allow_separate_shipping_address'] : '';
 					
-					if ( $allow_separate_shipping == 'true' || $_GET['scountry'] == 'DE' ) {
+					if ( $allow_separate_shipping == 'true' || $_GET['scountry'] == 'DE' || $_GET['scountry'] == 'AT' ) {
 						update_user_meta( $new_customer, 'shipping_first_name', $klarna_order['shipping_address']['given_name'] );
 						update_user_meta( $new_customer, 'shipping_last_name', $klarna_order['shipping_address']['family_name'] );
 						update_user_meta( $new_customer, 'shipping_address_1', $received__shipping_address_1 );

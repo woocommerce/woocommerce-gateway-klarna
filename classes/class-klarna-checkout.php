@@ -547,20 +547,19 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 * 
 	 * @since  2.0
 	 **/
-	function klarna_checkout_country() {
-		
+	function klarna_checkout_country() {	
 		if ( sizeof( WC()->cart->get_cart() ) > 0 && 'EUR' == get_woocommerce_currency() ) {
 			ob_start();
 			
 			// Get array of Euro Klarna Checkout countries with Eid and secret defined
 			$klarna_checkout_countries = array();
-			if( in_array( 'FI', $this->authorized_countries )  ) {
+			if ( in_array( 'FI', $this->authorized_countries )  ) {
 				$klarna_checkout_countries['FI'] = __( 'Finland', 'klarna' );
 			}
-			if( in_array( 'DE', $this->authorized_countries )  ) {
+			if ( in_array( 'DE', $this->authorized_countries )  ) {
 				$klarna_checkout_countries['DE'] = __( 'Germany', 'klarna' );
 			}
-			if( in_array( 'AT', $this->authorized_countries )  ) {
+			if ( in_array( 'AT', $this->authorized_countries )  ) {
 				$klarna_checkout_countries['AT'] = __( 'Austria', 'klarna' );
 			}
 			/*
@@ -593,7 +592,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			echo '<br />';
 			echo '<select id="klarna-checkout-euro-country" name="klarna-checkout-euro-country">';
 			foreach( $klarna_checkout_enabled_countries as $klarna_checkout_enabled_country_code => $klarna_checkout_enabled_country ) {
-				echo '<option value="' . $klarna_checkout_enabled_country_code . '"' . selected( $klarna_checkout_enabled_country_code, $kco_session_country ) . '>' . $klarna_checkout_enabled_country . '</option>';
+				echo '<option value="' . $klarna_checkout_enabled_country_code . '"' . selected( $klarna_checkout_enabled_country_code, $kco_session_country, false ) . '>' . $klarna_checkout_enabled_country . '</option>';
 			}
 			echo '</select>';
 			echo '</label>';
@@ -948,16 +947,13 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 * @since  2.0
 	 **/
 	function klarna_checkout_country_callback() {
-
 		if ( ! wp_verify_nonce( $_REQUEST['nonce'], 'klarna_checkout_nonce' ) ) {
 			exit( 'Nonce can not be verified.' );
 		}
 
 		$data = array();
 		
-		// Adding coupon
 		if ( isset( $_REQUEST['new_country'] ) && is_string( $_REQUEST['new_country'] ) ) {
-			
 			$new_country = sanitize_text_field( $_REQUEST['new_country'] );
 
 			// Reset session
@@ -965,14 +961,12 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			WC()->session->__unset( 'klarna_checkout' );
 
 			// Store new country as WC session value
-			WC()->session->set( 'klarna_country', $new_country );
-			
+			WC()->session->set( 'klarna_country', $new_country );	
 		}
 		
 		wp_send_json_success( $data );
 
 		wp_die();
-	
 	}
 
 	/**

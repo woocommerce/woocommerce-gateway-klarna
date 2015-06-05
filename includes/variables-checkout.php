@@ -93,14 +93,19 @@ switch ( get_woocommerce_currency() ) {
 		$klarna_country = 'NO';
 		break;
 	case 'EUR' :
-		if ( get_locale() == 'de_DE' ) {
-			$klarna_country = 'DE';
-		} elseif ( get_locale() == 'fi' ) {
-			$klarna_country = 'FI';
-		} elseif ( get_locale() == 'de_AT' ) {
-			$klarna_country = 'AT';
+		// Check if Ajax country switcher set session value
+		if ( WC()->session->get( 'klarna_country' ) ) {
+			$klarna_country = WC()->session->get( 'klarna_country' );
 		} else {
-			$klarna_country = $this->default_eur_contry;
+			if ( get_locale() == 'de_DE' ) {
+				$klarna_country = 'DE';
+			} elseif ( get_locale() == 'fi' ) {
+				$klarna_country = 'FI';
+			} elseif ( get_locale() == 'de_AT' ) {
+				$klarna_country = 'AT';
+			} else {
+				$klarna_country = $this->default_eur_contry;
+			}
 		}
 		break;
 	case 'SEK' :
