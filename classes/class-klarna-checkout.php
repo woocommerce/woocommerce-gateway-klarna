@@ -1751,8 +1751,6 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 
 		// Check if auto cancellation is enabled and order is on hold so it can be edited
 		if ( 'yes' == $this->push_update && 'on-hold' == $order->get_status() ) {
-			$this->log->add( 'klarna', 'AAAAAA' );
-
 			// Check if order was created using this method
 			if ( $this->id == get_post_meta( $orderid, '_payment_method', true ) ) {
 				// Check if this order hasn't been cancelled or activated
