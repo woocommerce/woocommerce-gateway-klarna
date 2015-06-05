@@ -181,17 +181,17 @@ class WC_Gateway_Klarna_Order {
 
 		if ( $order->get_total_shipping() > 0 ) {
 			// We manually calculate the shipping tax percentage here
-			$calculated_shipping_tax_percentage = ($order->order_shipping_tax/$order->get_total_shipping())*100; //25.00
-			$calculated_shipping_tax_decimal = ($order->order_shipping_tax/$order->get_total_shipping())+1; //0.25
+			$calculated_shipping_tax_percentage = ( $order->order_shipping_tax/$order->get_total_shipping() ) * 100; //25.00
+			$calculated_shipping_tax_decimal = ( $order->order_shipping_tax/$order->get_total_shipping() ) + 1; //0.25
 			
 			// apply_filters to Shipping so we can filter this if needed
-			$klarna_shipping_price_including_tax = $order->get_total_shipping()*$calculated_shipping_tax_decimal;
+			$klarna_shipping_price_including_tax = $order->get_total_shipping() * $calculated_shipping_tax_decimal;
 			$shipping_price = apply_filters( 'klarna_shipping_price_including_tax', $klarna_shipping_price_including_tax );
 			
 			$klarna->addArticle(
 				$qty = 1,
-				$artNo = '',
-				$title = __( 'Shipping cost', 'klarna' ),
+				$artNo = 'SHIPPING',
+				$title = $order->get_shipping_method(),
 				$price = $shipping_price,
 				$vat = round( $calculated_shipping_tax_percentage ),
 				$discount = 0,

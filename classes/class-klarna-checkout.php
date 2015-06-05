@@ -1747,8 +1747,12 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 * @since  2.0.0
 	 */
 	function update_klarna_order_edit_item( $orderid, $items ) {
-		// Check if auto cancellation is enabled
-		if ( 'yes' == $this->push_update ) {
+		$order = wc_get_order( $orderid );
+
+		// Check if auto cancellation is enabled and order is on hold so it can be edited
+		if ( 'yes' == $this->push_update && 'on-hold' == $order->get_status() ) {
+			$this->log->add( 'klarna', 'AAAAAA' );
+
 			// Check if order was created using this method
 			if ( $this->id == get_post_meta( $orderid, '_payment_method', true ) ) {
 				// Check if this order hasn't been cancelled or activated
@@ -1756,13 +1760,12 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 					$rno = get_post_meta( $orderid, '_klarna_order_reservation', true );
 					$country = get_post_meta( $orderid, '_billing_country', true );
 
-					$order = wc_get_order( $orderid );
-
 					$klarna = new Klarna();
 					$this->configure_klarna( $klarna, $country );
 
 					$klarna_order = new WC_Gateway_Klarna_Order( $order, $klarna );
 					$klarna_order->process_cart_contents();
+					$klarna_order->process_shipping();
 					$klarna_order->update_order_items( $rno );
 				}		
 			}	
