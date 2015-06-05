@@ -548,19 +548,33 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 * @since  2.0
 	 **/
 	function klarna_checkout_country() {
-		if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
+		
+		if ( sizeof( WC()->cart->get_cart() ) > 0 && 'EUR' == get_woocommerce_currency() ) {
 			ob_start();
-
+			
 			// Get array of Euro Klarna Checkout countries with Eid and secret defined
+			$klarna_checkout_countries = array();
+			if( in_array( 'FI', $this->authorized_countries )  ) {
+				$klarna_checkout_countries['FI'] = __( 'Finland', 'klarna' );
+			}
+			if( in_array( 'DE', $this->authorized_countries )  ) {
+				$klarna_checkout_countries['DE'] = __( 'Germany', 'klarna' );
+			}
+			if( in_array( 'AT', $this->authorized_countries )  ) {
+				$klarna_checkout_countries['AT'] = __( 'Austria', 'klarna' );
+			}
+			/*
 			$klarna_checkout_countries = array(
 				'FI' => __( 'Finland', 'klarna' ),
-				'DE' => __( 'Germany', 'klarna' )
+				'DE' => __( 'Germany', 'klarna' ),
+				'AT' => __( 'Austria', 'klarna' )
 			);
+			*/
 			$klarna_checkout_enabled_countries = array();
 			foreach( $klarna_checkout_countries as $klarna_checkout_country_code => $klarna_checkout_country ) {
 				$lowercase_country_code = strtolower( $klarna_checkout_country_code );
 				if ( isset( $this->settings["eid_$lowercase_country_code"] ) && isset( $this->settings["secret_$lowercase_country_code"] ) ) {
-					if ( array_key_exists( $klarna_checkout_country_code, $woocommerce->countries->get_allowed_countries() ) ) {
+					if ( array_key_exists( $klarna_checkout_country_code, WC()->countries->get_allowed_countries() ) ) {
 						$klarna_checkout_enabled_countries[ $klarna_checkout_country_code ] = $klarna_checkout_country;
 					}
 				}
@@ -571,7 +585,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 				return;
 			}
 
-			$kco_session_country = $woocommerce->session->get( 'klarna_country', '' );
+			$kco_session_country = WC()->session->get( 'klarna_country' );
 
 			echo '<div class="woocommerce">';
 			echo '<label for="klarna-checkout-euro-country">';
@@ -946,36 +960,12 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			
 			$new_country = sanitize_text_field( $_REQUEST['new_country'] );
 
-			if ( WC()->session->get( 'klarna_checkout' ) ) {
-				
-				$sharedSecret = $this->klarna_secret;
-				require_once( KLARNA_LIB . '/src/Klarna/Checkout.php' );
-				// Klarna_Checkout_Order::$baseUri = $this->klarna_server;
-				// Klarna_Checkout_Order::$contentType = 'application/vnd.klarna.checkout.aggregated-order-v2+json';
-				$connector = Klarna_Checkout_Connector::create( $sharedSecret, $this->klarna_server );
-	
-				// Resume session
-				$klarna_order = new Klarna_Checkout_Order(
-					$connector,
-					WC()->session->get( 'klarna_checkout' )
-				);
-	
-				$klarna_order->fetch();
-				$klarna_order_as_array = $klarna_order->marshal();
+			// Reset session
+			$klarna_order = null;
+			WC()->session->__unset( 'klarna_checkout' );
 
-				// Reset session if the country in the store has changed since last time the checkout was loaded
-				if ( strtolower( $new_country ) != strtolower( $klarna_order_as_array['purchase_country'] ) ) {
-
-					// Reset session
-					$klarna_order = null;
-					WC()->session->__unset( 'klarna_checkout' );
-
-					// Store new country as WC session value
-					$woocommerce->session->set( 'klarna_country', $new_country );
-
-				}
-				
-			}
+			// Store new country as WC session value
+			WC()->session->set( 'klarna_country', $new_country );
 			
 		}
 		
@@ -1410,6 +1400,10 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 				$klarna_secret = $this->secret_de;
 				$klarna_eid = $this->eid_de;
 				break;
+			case 'AT' :
+				$klarna_secret = $this->secret_at;
+				$klarna_eid = $this->eid_at;
+				break;
 			case 'gb' :
 				$klarna_secret = $this->secret_uk;
 				$klarna_eid = $this->eid_uk;
@@ -1473,7 +1467,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 * @since 1.0.0
 	 */
 	function get_klarna_country() {
-
+		
 		return $this->klarna_country;
 
 	}

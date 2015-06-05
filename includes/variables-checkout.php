@@ -39,12 +39,18 @@ $this->klarna_checkout_thanks_url_de = ( isset( $this->settings['klarna_checkout
 $this->phone_mandatory_de = ( isset( $this->settings['phone_mandatory_de'] ) ) ? $this->settings['phone_mandatory_de'] : '';
 $this->dhl_packstation_de = ( isset( $this->settings['dhl_packstation_de'] ) ) ? $this->settings['dhl_packstation_de'] : '';
 
-$this->default_eur_contry = ( isset( $this->settings['default_eur_contry'] ) ) ? $this->settings['default_eur_contry'] : '';
+$this->eid_at = ( isset( $this->settings['eid_at'] ) ) ? $this->settings['eid_at'] : '';
+$this->secret_at = ( isset( $this->settings['secret_at'] ) ) ? $this->settings['secret_at'] : '';
+$this->klarna_checkout_url_at = ( isset( $this->settings['klarna_checkout_url_at'] ) ) ? $this->settings['klarna_checkout_url_at'] : '';
+$this->klarna_checkout_thanks_url_at = ( isset( $this->settings['klarna_checkout_thanks_url_at'] ) ) ? $this->settings['klarna_checkout_thanks_url_at'] : '';
+$this->phone_mandatory_at = ( isset( $this->settings['phone_mandatory_at'] ) ) ? $this->settings['phone_mandatory_at'] : '';
 
 $this->eid_uk = ( isset( $this->settings['eid_uk'] ) ) ? $this->settings['eid_uk'] : '';
 $this->secret_uk = ( isset( $this->settings['secret_uk'] ) ) ? $this->settings['secret_uk'] : '';
 $this->klarna_checkout_url_uk = ( isset( $this->settings['klarna_checkout_url_uk'] ) ) ? $this->settings['klarna_checkout_url_uk'] : '';
 $this->klarna_checkout_thanks_url_uk = ( isset( $this->settings['klarna_checkout_thanks_url_uk'] ) ) ? $this->settings['klarna_checkout_thanks_url_uk'] : '';
+
+$this->default_eur_contry = ( isset( $this->settings['default_eur_contry'] ) ) ? $this->settings['default_eur_contry'] : '';
 
 $this->terms_url = ( isset( $this->settings['terms_url'] ) ) ? $this->settings['terms_url'] : '';
 $this->testmode = ( isset( $this->settings['testmode'] ) ) ? $this->settings['testmode'] : '';
@@ -93,6 +99,8 @@ switch ( get_woocommerce_currency() ) {
 			$klarna_country = 'FI';
 		} elseif ( get_locale() == 'de_AT' ) {
 			$klarna_country = 'AT';
+		} else {
+			$klarna_country = $this->default_eur_contry;
 		}
 		break;
 	case 'SEK' :
@@ -105,7 +113,15 @@ switch ( get_woocommerce_currency() ) {
 		$klarna_country = '';
 }
 
-$this->shop_country	= $klarna_country;
+if( !is_admin() ){
+	if ( null !== WC()->session->get( 'klarna_country' ) ) {
+		$this->shop_country = WC()->session->get( 'klarna_country' );
+	} else {
+		$this->shop_country	= $klarna_country;
+	}
+} else {
+	$this->shop_country	= $klarna_country;
+}
 
 // Country and language
 switch ( $this->shop_country ) {
@@ -227,6 +243,9 @@ if ( ! empty( $this->eid_fi ) ) {
 }
 if ( ! empty( $this->eid_de ) ) {
 	$this->authorized_countries[] = 'DE';
+}
+if ( ! empty( $this->eid_at ) ) {
+	$this->authorized_countries[] = 'AT';
 }
 if ( ! empty( $this->eid_uk ) ) {
 	$this->authorized_countries[] = 'GB';
