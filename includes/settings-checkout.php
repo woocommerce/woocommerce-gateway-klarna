@@ -251,6 +251,18 @@ return apply_filters( 'klarna_checkout_form_fields', array(
 		'description' => __( 'Please enter the text for the button that links to the standard checkout page from the Klarna Checkout form.', 'klarna' ), 
 		'default' => ''
 	),
+	'add_klarna_checkout_button' => array(
+		'title' => __( 'Button to Klarna Checkout', 'klarna' ), 
+		'type' => 'checkbox', 
+		'label' => __( 'Add a button in standard checkout page that links to the Klarna checkout page.', 'klarna' ), 
+		'default' => 'no'
+	),
+	'klarna_checkout_button_label' => array(
+		'title' => __( 'Label for Standard Checkout Button', 'klarna' ), 
+		'type' => 'text', 
+		'description' => __( 'Please enter the text for the button that links to the Klarna checkout page from the standard checkout page.', 'klarna' ), 
+		'default' => ''
+	),
 
 	'terms_url' => array(
 		'title' => __( 'Terms Page', 'klarna' ), 

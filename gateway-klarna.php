@@ -245,8 +245,7 @@ add_action( 'plugins_loaded', 'init_klarna_gateway', 2 );
  * @param  array $methods 
  * @return array $methods
  */
-function add_klarna_gateway( $methods ) {
-	
+function add_klarna_gateway( $methods ) {	
 	$klarna_shop_country = get_option( 'woocommerce_default_country' );
 
 	$available_countries = array( 'SE', 'NO', 'FI', 'DK', 'DE', 'NL' );
@@ -262,6 +261,5 @@ function add_klarna_gateway( $methods ) {
 	}
 	
 	return $methods;
-
 }
 add_filter( 'woocommerce_payment_gateways', 'add_klarna_gateway' );

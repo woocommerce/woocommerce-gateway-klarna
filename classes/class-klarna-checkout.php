@@ -94,6 +94,8 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		// Cancel and activate the order
 		add_action( 'woocommerce_order_status_cancelled', array( $this, 'cancel_klarna_order' ) );
 		add_action( 'woocommerce_order_status_completed', array( $this, 'activate_klarna_order' ) );
+
+		// Add link to KCO page in standard checkout
 	
 		/**
 		 * Checkout page AJAX
@@ -156,7 +158,6 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		add_filter( 'wc_order_statuses', array( $this, 'add_kco_incomplete_to_order_statuses' ) );
 		add_filter( 'woocommerce_valid_order_statuses_for_payment_complete', array( $this, 'kco_incomplete_payment_complete' ) );
     }
-
 
 	/**
 	 * Register KCO Incomplete order status
@@ -1427,9 +1428,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 * @since 1.0.0
 	 */	 
 	function get_enabled() {
-
 		return $this->enabled;
-
 	}
 	
 	/**
@@ -1438,9 +1437,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 * @since 1.0.0
 	 */
 	function get_modify_standard_checkout_url() {
-
 		return $this->modify_standard_checkout_url;
-
 	}
 
 	/**
@@ -1449,9 +1446,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 * @since 1.0.0
 	 */
 	function get_klarna_checkout_url() {
-
  		return $this->klarna_checkout_url;
-
  	}
  	
  	
@@ -1461,9 +1456,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 * @since 1.0.0
 	 */
 	function get_klarna_country() {
-		
 		return $this->klarna_country;
-
 	}
 	
 	
@@ -1472,8 +1465,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 *
 	 * @since 1.0.0
 	 */
-	function get_currency_for_country( $country ) {
-				
+	function get_currency_for_country( $country ) {		
 		switch ( $country ) {
 			case 'DK':
 				$currency = 'DKK';
@@ -1501,7 +1493,6 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		}
 		
 		return $currency;
-
 	}
 	
 	
@@ -1511,9 +1502,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 * @since 1.0.0
 	 */
  	public function get_account_signup_text() {
-
 	 	return $this->account_signup_text;
-
  	}
 
 
@@ -1523,9 +1512,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 * @since 1.0.0
 	 */
  	public function get_account_login_text() {
-
 	 	return $this->account_login_text;
-
  	}
  	
 
@@ -1843,11 +1830,34 @@ class WC_Gateway_Klarna_Checkout_Extra {
 		
 		add_action( 'woocommerce_register_form_start', array( $this, 'add_account_signup_text' ) );
 		add_action( 'woocommerce_login_form_start', array( $this, 'add_account_login_text' ) );
+
+		add_action( 'woocommerce_checkout_after_order_review', array( $this, 'klarna_add_link_to_kco_page' ) );		
 		
 		// Filter Checkout page ID, so WooCommerce Google Analytics integration can
 		// output Ecommerce tracking code on Klarna Thank You page
 		add_filter( 'woocommerce_get_checkout_page_id', array( $this, 'change_checkout_page_id' ) );
 		
+	}
+
+
+	/**
+	 * Add link to KCO page from standard checkout page.
+	 * Initiated here because KCO class is instantiated multiple times
+	 * making the hook fire multiple times as well.
+	 * 
+	 * @since  2.0
+	 */
+	function klarna_add_link_to_kco_page() {
+		$data                = new WC_Gateway_Klarna_Checkout;
+		$enabled             = $data->get_enabled();
+		$klarna_checkout_url = $data->get_klarna_checkout_url();
+		$checkout_settings   = get_option( 'woocommerce_klarna_checkout_settings' );
+
+		if ( 'yes' == $data->get_enabled() && 
+			'' != $checkout_settings['klarna_checkout_button_label'] && 
+			'yes' == $checkout_settings['add_klarna_checkout_button'] ) {
+			echo '<div class="woocommerce"><a style="margin-top:1em" href="' . $data->get_klarna_checkout_url() . '" class="button std-checkout-button">' . $checkout_settings['klarna_checkout_button_label'] . '</a></div>';
+		}
 	}
 
 		
