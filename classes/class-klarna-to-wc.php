@@ -796,14 +796,14 @@ class WC_Gateway_Klarna_K2WC {
 		$this->klarna_log->add( 'klarna', 'Updating Klarna order status to "created"' );
 		if ( $this->is_rest ) {
 			$order->add_order_note( sprintf( 
-				__( 'Klarna Checkout payment completed. Klarna reference number: %s.', 'klarna' ),
+				__( 'Klarna Checkout payment created. Klarna reference number: %s.', 'klarna' ),
 				$klarna_order['klarna_reference']
 			) );
 			$klarna_order->acknowledge();
 			$order->payment_complete( $klarna_order['klarna_reference'] );
 		} else {
 			$order->add_order_note( sprintf( 
-				__( 'Klarna Checkout payment completed. Reservation number: %s.  Klarna order number: %s', 'klarna' ),
+				__( 'Klarna Checkout payment created. Reservation number: %s.  Klarna order number: %s', 'klarna' ),
 				$klarna_order['reservation'], 
 				$klarna_order['id'] 
 			) );
