@@ -23,9 +23,7 @@ class WC_Gateway_Klarna_Helper {
 	 * @since 1.0.0
 	 **/
 	function get_test_mode() {
-
 		return $this->parent->testmode;
-
 	}
 	
 	/**
@@ -34,9 +32,7 @@ class WC_Gateway_Klarna_Helper {
 	 * @since 1.0.0
 	 **/
 	function get_enabled() {
-
 		return $this->parent->enabled;
-
 	}
 
 
@@ -49,7 +45,6 @@ class WC_Gateway_Klarna_Helper {
 	 * @return string $klarna_locale
 	 **/
 	function get_klarna_locale( $locale ) {
-
 		switch ( $locale ) {
 			case 'da_DK':
 				$klarna_locale = 'da_dk';
@@ -86,7 +81,6 @@ class WC_Gateway_Klarna_Helper {
 		}
 		
 		return $klarna_locale;
-
 	}
 	
 	
@@ -99,7 +93,6 @@ class WC_Gateway_Klarna_Helper {
 	 * @return integer $current_eid
 	 **/
 	function get_eid( $country = false ) {
-
 		global $woocommerce;
 	
 		if ( empty( $country ) ) {
@@ -135,7 +128,6 @@ class WC_Gateway_Klarna_Helper {
 		}
 		
 		return $current_eid;
-
 	}
 	
 	
@@ -148,7 +140,6 @@ class WC_Gateway_Klarna_Helper {
 	 * @return string $current_secret
 	 **/
 	function get_secret( $country = false ) {
-
 		global $woocommerce;
 	
 		if ( empty( $country ) ) {
@@ -184,7 +175,6 @@ class WC_Gateway_Klarna_Helper {
 		}
 		
 		return $current_secret;
-
 	}
 	
 	
@@ -196,8 +186,7 @@ class WC_Gateway_Klarna_Helper {
 	 * @param string $country
 	 * @return string $currency
 	 **/
-	function get_currency_for_country( $country ) {
-				
+	function get_currency_for_country( $country ) {	
 		switch ( $country )	{
 			case 'DK' :
 				$currency = 'DKK';
@@ -225,7 +214,6 @@ class WC_Gateway_Klarna_Helper {
 		}
 		
 		return $currency;
-
 	}
 	
 	
@@ -237,8 +225,7 @@ class WC_Gateway_Klarna_Helper {
 	 * @param  string $country
 	 * @return string $language
 	 **/
-	function get_klarna_language( $country ) {
-				
+	function get_klarna_language( $country ) {		
 		switch ( $country )	{
 			case 'DK' :
 				$language = 'DA';
@@ -266,7 +253,6 @@ class WC_Gateway_Klarna_Helper {
 		}
 		
 		return $language;
-
 	}
 	
 	
@@ -278,7 +264,6 @@ class WC_Gateway_Klarna_Helper {
 	 * @return string $klarna_country
 	 **/
 	function get_klarna_country() {
-
 		global $woocommerce;
 
 		if ( $woocommerce->customer->get_country() ) {
@@ -301,7 +286,6 @@ class WC_Gateway_Klarna_Helper {
 		} else {
 			return $klarna_country;
 		}
-
 	}
 	
 	
@@ -311,7 +295,6 @@ class WC_Gateway_Klarna_Helper {
 	 * @since 1.0.0
 	 **/
 	function get_account_icon() {
-		
 		global $woocommerce;
 
 		$country = ( isset( $woocommerce->customer->country ) ) ? $woocommerce->customer->country : '';
@@ -349,7 +332,6 @@ class WC_Gateway_Klarna_Helper {
 		}
 		
 		return $klarna_part_payment_icon;
-
 	}	
 
 }
