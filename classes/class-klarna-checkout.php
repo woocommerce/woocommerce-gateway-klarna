@@ -921,28 +921,41 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 * @since  2.0
 	 **/
 	function klarna_checkout_order_note_callback() {
-
 		if ( ! wp_verify_nonce( $_REQUEST['nonce'], 'klarna_checkout_nonce' ) ) {
 			exit( 'Nonce can not be verified.' );
 		}
+
+		global $woocommerce;
 
 		$data = array();
 		
 		// Adding coupon
 		if ( isset( $_REQUEST['order_note'] ) && is_string( $_REQUEST['order_note'] ) ) {
-			
 			$order_note = sanitize_text_field( $_REQUEST['order_note'] );
 	
 			if ( WC()->session->get( 'klarna_checkout' ) ) {
+				$woocommerce->cart->calculate_shipping();
+				$woocommerce->cart->calculate_fees();
+				$woocommerce->cart->calculate_totals();
+
+				// Update the local order
+				include_once( KLARNA_DIR . 'classes/class-klarna-to-wc.php' );
+				$klarna_to_wc = new WC_Gateway_Klarna_K2WC();
+				$klarna_to_wc->set_rest( $this->is_rest() );
+				$klarna_to_wc->set_eid( $this->klarna_eid );
+				$klarna_to_wc->set_secret( $this->klarna_secret );
+				$klarna_to_wc->set_klarna_log( $this->log );
+				$klarna_to_wc->set_klarna_debug( $this->debug );
+				$klarna_to_wc->set_klarna_server( $this->klarna_server );
+				$klarna_to_wc->prepare_wc_order();
+
 				$this->ajax_update_klarna_order();				
 			}
-			
 		}
 		
 		wp_send_json_success( $data );
 
 		wp_die();
-	
 	}
 	
 
@@ -1745,6 +1758,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 					$klarna_order = new WC_Gateway_Klarna_Order( $order, $klarna );
 					$klarna_order->process_cart_contents();
 					$klarna_order->process_shipping();
+					// $klarna_order->set_estore_info();
 					$klarna_order->update_order( $rno );
 				}		
 			}	

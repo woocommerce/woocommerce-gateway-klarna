@@ -44,6 +44,55 @@ class WC_Gateway_Klarna_Order {
 
 
 	/**
+	 * Add shipping and billing address to Klarna update order.
+	 * 
+	 * @since  2.0
+	 **/
+	function add_addresses() {
+		$order = $this->order;
+		$klarna = $this->klarna;
+
+		$billing_addr = new KlarnaAddr(
+			get_post_meta( $order->id, '_billing_email', true ), // Email address
+			'', // Telephone number, only one phone number is needed
+			get_post_meta( $order->id, '_billing_phone', true ), // Cell phone number 
+			get_post_meta( $order->id, '_billing_first_name', true ), // First name (given name)
+			get_post_meta( $order->id, '_billing_last_name', true ), // Last name (family name)
+			'', // No care of, C/O
+			get_post_meta( $order->id, '_billing_address_1', true ), // Street address
+			get_post_meta( $order->id, '_billing_postcode', true ), // Zip code
+			get_post_meta( $order->id, '_billing_city', true ), // City
+			get_post_meta( $order->id, '_billing_country', true ), // Country
+			null, // House number (AT/DE/NL only)
+			null // House extension (NL only)
+		);
+
+		$shipping_addr = new KlarnaAddr(
+			get_post_meta( $order->id, '_shipping_email', true ), // Email address
+			'', // Telephone number, only one phone number is needed
+			get_post_meta( $order->id, '_shipping_phone', true ), // Cell phone number 
+			get_post_meta( $order->id, '_shipping_first_name', true ), // First name (given name)
+			get_post_meta( $order->id, '_shipping_last_name', true ), // Last name (family name)
+			'', // No care of, C/O
+			get_post_meta( $order->id, '_shipping_address_1', true ), // Street address
+			get_post_meta( $order->id, '_shipping_postcode', true ), // Zip code
+			get_post_meta( $order->id, '_shipping_city', true ), // City
+			get_post_meta( $order->id, '_shipping_country', true ), // Country
+			null, // House number (AT/DE/NL only)
+			null // House extension (NL only)
+		);
+
+		$klarna->setAddress( KlarnaFlags::IS_BILLING, $billing_addr );
+		$klarna->setAddress( KlarnaFlags::IS_SHIPPING, $shipping_addr );
+
+		$klarna->setEstoreInfo(
+		    $orderid1 = ltrim( $order->get_order_number(), '#' ),
+		    $orderid2 = $order_id
+		);
+	}
+
+
+	/**
 	 * Process cart contents.
 	 * 
 	 * @param  $skip_item Item ID to skip from adding, used when item is removed from cart widget
