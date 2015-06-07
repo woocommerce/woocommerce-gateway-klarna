@@ -1033,30 +1033,6 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 	
 	
 	/**
-	 * Get Monthly cost execution priority, used in product page.
-	 *
-	 * @since 1.0.0
-	 **/
-	function get_monthly_cost_prio() {
-
-		return $this->show_monthly_cost_prio;
-
-	}
-
-	
-	/**
-	 * Get Monthly cost execution priority, used in shop base page and archives.
-	 *
-	 * @since 1.0.0
-	 **/
-	function get_monthly_cost_shop_prio() {
-
-		return $this->show_monthly_cost_shop_prio;
-
-	}
-
-	
-	/**
 	 * Helper function, checks if payment method is enabled.
 	 *
 	 * @since 1.0.0
