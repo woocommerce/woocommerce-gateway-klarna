@@ -1756,6 +1756,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 					$this->configure_klarna( $klarna, $country );
 
 					$klarna_order = new WC_Gateway_Klarna_Order( $order, $klarna );
+					$klarna_order->add_addresses( $this->klarna_secret, $this->klarna_server );
 					$klarna_order->process_cart_contents();
 					$klarna_order->process_shipping();
 					// $klarna_order->set_estore_info();
