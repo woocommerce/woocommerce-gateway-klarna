@@ -807,6 +807,16 @@ class WC_Gateway_Klarna_K2WC {
 				$klarna_order['reservation'], 
 				$klarna_order['id'] 
 			) );
+
+			// Add order expiration date
+			$expiration_time = date( get_option( 'date_format' ) . ' - ' . get_option( 'time_format' ), strtotime( $klarna_order['expires_at'] ) );
+			$order->add_order_note( 
+				sprintf( 
+					__( 'Klarna authorization expires at %s.', 'klarna' ), 
+					$expiration_time
+				)
+			);
+
 			$update['status'] = 'created';
 			$update['merchant_reference'] = array( 'orderid1' => ltrim( $order->get_order_number(), '#' ) );
 			$klarna_order->update( $update );

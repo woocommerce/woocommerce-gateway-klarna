@@ -55,3 +55,5 @@ do_action( 'woocommerce_thankyou', $_GET['sid'] );
 WC()->session->__unset( 'klarna_checkout' );
 WC()->session->__unset( 'ongoing_klarna_order' );
 $woocommerce->cart->empty_cart(); // Remove cart
+
+echo date( get_option( 'date_format' ) . ' - ' . get_option( 'time_format' ), strtotime( '2015-06-22T00:20:38-22:00' ) );
