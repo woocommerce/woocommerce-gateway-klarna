@@ -585,7 +585,11 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 				return;
 			}
 
-			$kco_session_country = WC()->session->get( 'klarna_euro_country' );
+			if ( WC()->session->get( 'klarna_euro_country' ) ) {
+				$kco_euro_country = WC()->session->get( 'klarna_euro_country' );
+			} else {
+				$kco_euro_country = $this->shop_country;
+			}
 
 			echo '<div class="woocommerce">';
 			echo '<label for="klarna-checkout-euro-country">';
@@ -593,7 +597,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			echo '<br />';
 			echo '<select id="klarna-checkout-euro-country" name="klarna-checkout-euro-country">';
 			foreach( $klarna_checkout_enabled_countries as $klarna_checkout_enabled_country_code => $klarna_checkout_enabled_country ) {
-				echo '<option value="' . $klarna_checkout_enabled_country_code . '"' . selected( $klarna_checkout_enabled_country_code, $kco_session_country, false ) . '>' . $klarna_checkout_enabled_country . '</option>';
+				echo '<option value="' . $klarna_checkout_enabled_country_code . '"' . selected( $klarna_checkout_enabled_country_code, $kco_euro_country, false ) . '>' . $klarna_checkout_enabled_country . '</option>';
 			}
 			echo '</select>';
 			echo '</label>';

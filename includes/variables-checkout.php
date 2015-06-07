@@ -97,11 +97,11 @@ switch ( get_woocommerce_currency() ) {
 		if ( ! is_admin() && WC()->session->get( 'klarna_euro_country' ) ) {
 			$klarna_country = WC()->session->get( 'klarna_euro_country' );
 		} else {
-			if ( get_locale() == 'de_DE' ) {
+			if ( get_locale() == 'de_DE' && '' != $this->eid_de && '' != $this->secret_de ) {
 				$klarna_country = 'DE';
-			} elseif ( get_locale() == 'fi' ) {
+			} elseif ( get_locale() == 'fi' && '' != $this->eid_fi && '' != $this->secret_fi  ) {
 				$klarna_country = 'FI';
-			} elseif ( get_locale() == 'de_AT' ) {
+			} elseif ( get_locale() == 'de_AT' && '' != $this->eid_at && '' != $this->secret_at  ) {
 				$klarna_country = 'AT';
 			} else {
 				$klarna_country = $this->default_eur_contry;
@@ -118,7 +118,7 @@ switch ( get_woocommerce_currency() ) {
 		$klarna_country = '';
 }
 
-if( !is_admin() ){
+if( ! is_admin() ){
 	if ( null !== WC()->session->get( 'klarna_country' ) ) {
 		$this->shop_country = WC()->session->get( 'klarna_country' );
 	} else {
