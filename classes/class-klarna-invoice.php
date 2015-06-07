@@ -466,7 +466,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 
 					$klarna_order = new WC_Gateway_Klarna_Order( $order, $klarna );
 					$klarna_order->process_cart_contents();
-					$klarna_order->update_order_items( $rno );
+					$klarna_order->update_order( $rno );
 				}		
 			}
 		}
@@ -506,7 +506,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 
 					$klarna_order = new WC_Gateway_Klarna_Order( $order, $klarna );
 					$klarna_order->process_cart_contents( $itemid );
-					$klarna_order->update_order_items( $rno );
+					$klarna_order->update_order( $rno );
 				}		
 			}
 		}	
@@ -536,7 +536,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 
 					$klarna_order = new WC_Gateway_Klarna_Order( $order, $klarna );
 					$klarna_order->process_cart_contents();
-					$klarna_order->update_order_items( $rno );
+					$klarna_order->update_order( $rno );
 				}		
 			}
 		}

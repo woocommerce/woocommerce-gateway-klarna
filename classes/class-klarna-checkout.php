@@ -585,7 +585,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 				return;
 			}
 
-			$kco_session_country = WC()->session->get( 'klarna_country' );
+			$kco_session_country = WC()->session->get( 'klarna_euro_country' );
 
 			echo '<div class="woocommerce">';
 			echo '<label for="klarna-checkout-euro-country">';
@@ -962,7 +962,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			WC()->session->__unset( 'klarna_checkout' );
 
 			// Store new country as WC session value
-			WC()->session->set( 'klarna_country', $new_country );	
+			WC()->session->set( 'klarna_euro_country', $new_country );	
 		}
 		
 		wp_send_json_success( $data );
@@ -1668,7 +1668,8 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 
 					$klarna_order = new WC_Gateway_Klarna_Order( $order, $klarna );
 					$klarna_order->process_cart_contents();
-					$klarna_order->update_order_items( $rno );
+					$klarna_order->process_shipping();
+					$klarna_order->update_order( $rno );
 				}		
 			}
 		}	
@@ -1708,7 +1709,8 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 
 					$klarna_order = new WC_Gateway_Klarna_Order( $order, $klarna );
 					$klarna_order->process_cart_contents( $itemid );
-					$klarna_order->update_order_items( $rno );
+					$klarna_order->process_shipping();
+					$klarna_order->update_order( $rno );
 				}		
 			}
 		}
@@ -1739,7 +1741,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 					$klarna_order = new WC_Gateway_Klarna_Order( $order, $klarna );
 					$klarna_order->process_cart_contents();
 					$klarna_order->process_shipping();
-					$klarna_order->update_order_items( $rno );
+					$klarna_order->update_order( $rno );
 				}		
 			}	
 		}	
@@ -1753,13 +1755,11 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 * @since  2.0.0
 	 */
 	function is_rest() {
-
 		if ( 'GB' == strtoupper( $this->klarna_country ) ) {
 			return true;
 		}
 
 		return false;
-
 	}
 
 

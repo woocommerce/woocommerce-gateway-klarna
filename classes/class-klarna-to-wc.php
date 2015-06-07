@@ -507,7 +507,7 @@ class WC_Gateway_Klarna_K2WC {
 		$received__billing_address_1  = '';
 		$received__shipping_address_1 = '';
 
-		if ( $_GET['scountry'] == 'DE' && $_GET['scountry'] == 'AT' ) {
+		if ( $_GET['scountry'] == 'DE' || $_GET['scountry'] == 'AT' ) {
 			$received__billing_address_1 = $klarna_order['billing_address']['street_name'] . ' ' . $klarna_order['billing_address']['street_number'];
 			$received__shipping_address_1 = $klarna_order['shipping_address']['street_name'] . ' ' . $klarna_order['shipping_address']['street_number'];
 		} else {		

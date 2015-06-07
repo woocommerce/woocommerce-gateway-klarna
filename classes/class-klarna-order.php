@@ -42,10 +42,11 @@ class WC_Gateway_Klarna_Order {
 		);
 	}
 
+
 	/**
 	 * Process cart contents.
 	 * 
-	 * @param  $skip_item Item ID to skip from adding
+	 * @param  $skip_item Item ID to skip from adding, used when item is removed from cart widget
 	 * @since  2.0
 	 **/
 	function process_cart_contents( $skip_item = null ) {
@@ -442,7 +443,7 @@ class WC_Gateway_Klarna_Order {
 	 * 
 	 * @since  2.0
 	 **/
-	function update_order_items( $rno ) {
+	function update_order( $rno ) {
 		$order = $this->order;
 		$klarna = $this->klarna;
 		$orderid = $order->id;
