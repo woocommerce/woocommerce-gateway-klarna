@@ -22,6 +22,7 @@ return apply_filters( 'klarna_checkout_form_fields', array(
 		'description' => __( 'This controls the title which the user sees during checkout.', 'klarna' ), 
 		'default' => __( 'Klarna Checkout', 'klarna' )
 	),
+	/*
 	'paymentaction' => array(
 		'title'       => __( 'Payment Action', 'woocommerce' ),
 		'type'        => 'select',
@@ -34,6 +35,7 @@ return apply_filters( 'klarna_checkout_form_fields', array(
 			'authorization' => __( 'Authorize', 'woocommerce' )
 		)
 	),
+	*/
 	'push_completion' => array(
 		'title' => __( 'On order completion', 'klarna' ), 
 		'type' => 'checkbox', 

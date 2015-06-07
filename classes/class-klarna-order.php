@@ -499,17 +499,13 @@ class WC_Gateway_Klarna_Order {
 
 		try {
 			$result = $klarna->update( $rno );
-			/*
 			if ( $result ) {
 				$order->add_order_note(
 					sprintf(
-						__( 'Klarna order updated.', 'klarna' ),
-						$invNo,
-						$risk
+						__( 'Klarna order updated.', 'klarna' )
 					)
 				);
 			}
-			*/
 		} catch( Exception $e ) {
 			$order->add_order_note(
 				sprintf(
