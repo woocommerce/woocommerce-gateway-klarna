@@ -160,7 +160,7 @@ class WC_Gateway_Klarna_K2WC {
 	}
 
 	/**
-	 * KCO listener function.
+	 * Prepares local order.
 	 * 
 	 * Creates local order on Klarna's push notification.
 	 *
@@ -177,7 +177,7 @@ class WC_Gateway_Klarna_K2WC {
 
 		global $woocommerce;
 
-		if ( $woocommerce->session->get( 'ongoing_klarna_order' ) ) {
+		if ( $woocommerce->session->get( 'ongoing_klarna_order' ) && wc_get_order( $woocommerce->session->get( 'ongoing_klarna_order' ) ) ) {
 			$orderid = $woocommerce->session->get( 'ongoing_klarna_order' );
 			$order = wc_get_order( $orderid );
 			$order->remove_order_items();
@@ -255,10 +255,7 @@ class WC_Gateway_Klarna_K2WC {
 			// Store payment method
 			$this->add_order_payment_method( $order, $klarna_order );
 					
-			// Let plugins add meta
-			do_action( 'woocommerce_checkout_update_order_meta', $order->id, array() );
-
-			// Calculate order totals
+			// Add order customer info
 			$this->add_order_customer_info( $order, $klarna_order );
 					
 			// Confirm the order in Klarnas system
@@ -603,7 +600,7 @@ class WC_Gateway_Klarna_K2WC {
 	 * @param  object $klarna_order Klarna order.
 	 */
 	public function add_order_payment_method( $order ) {
-		$this->klarna_log->add( 'klarna', 'Adding order payment method...' );
+		$this->klarna_log->add( 'klarna', 'Befire adding order payment method...' );
 
 		global $woocommerce;
 
@@ -611,6 +608,8 @@ class WC_Gateway_Klarna_K2WC {
 		$payment_method = $available_gateways[ 'klarna_checkout' ];
 	
 		$order->set_payment_method( $payment_method );
+
+		$this->klarna_log->add( 'klarna', 'After adding order payment method...' );
 	}
 
 	/**
@@ -622,6 +621,8 @@ class WC_Gateway_Klarna_K2WC {
 	 * @param  object $order        Local WC order.
 	 */
 	public function set_order_totals( $order ) {
+		$this->klarna_log->add( 'klarna', 'Before set order total...' );
+		
 		global $woocommerce;
 
 		if ( ! defined( 'WOOCOMMERCE_CHECKOUT' ) ) {
@@ -638,6 +639,8 @@ class WC_Gateway_Klarna_K2WC {
 		$order->set_total( $woocommerce->cart->tax_total, 'tax' );
 		$order->set_total( $woocommerce->cart->shipping_tax_total, 'shipping_tax' );
 		$order->set_total( $woocommerce->cart->total );
+
+		$this->klarna_log->add( 'klarna', 'After set order total...' );
 	}
 
 	/**

@@ -170,7 +170,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			'public'                    => false,
 			'exclude_from_search'       => false,
 			'show_in_admin_all_list'    => false,
-			'show_in_admin_status_list' => false,
+			'show_in_admin_status_list' => true,
 			'label_count'               => _n_noop( 'KCO incomplete <span class="count">(%s)</span>', 'KCO incomplete <span class="count">(%s)</span>' ),
 		) );
    	}
@@ -217,7 +217,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	}
 
 	/**
-	 * Enqueue Klarna Checkout javascript.
+	 * Scheduled subscription payment.
 	 * 
 	 * @since  2.0
 	 **/
@@ -237,7 +237,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 
 
 	/**
-	 * Enqueue Klarna Checkout javascript.
+	 * Process subscription payment.
 	 * 
 	 * @since  2.0
 	 **/
