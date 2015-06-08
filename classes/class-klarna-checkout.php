@@ -1668,15 +1668,15 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			", $itemid ) );
 
 			$orderid = $item_row->order_id;
+			$order = wc_get_order( $orderid );
 
 			// Check if order was created using this method
-			if ( $this->id == get_post_meta( $orderid, '_payment_method', true ) ) {
+			if ( $this->id == get_post_meta( $orderid, '_payment_method', true ) && 'on-hold' == $order->get_status() ) {
 				// Check if this order hasn't been cancelled or activated
 				if ( ! get_post_meta( $orderid, '_klarna_order_cancelled', true ) && ! get_post_meta( $orderid, '_klarna_order_activated', true ) ) {
 					$rno = get_post_meta( $orderid, '_klarna_order_reservation', true );
 					$country = get_post_meta( $orderid, '_billing_country', true );
 
-					$order = wc_get_order( $orderid );
 					$_product = $order->get_product_from_item( $item );
 					$this->log->add( 'klarna', 'Product: ' . var_export( $_product, true ) );
 
@@ -1684,6 +1684,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 					$this->configure_klarna( $klarna, $country );
 
 					$klarna_order = new WC_Gateway_Klarna_Order( $order, $klarna );
+					$klarna_order->add_addresses( $this->klarna_secret, $this->klarna_server );
 					$klarna_order->process_cart_contents();
 					$klarna_order->process_shipping();
 					$klarna_order->update_order( $rno );
@@ -1711,20 +1712,20 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			", $itemid ) );
 
 			$orderid = $item_row->order_id;
+			$order = wc_get_order( $orderid );
 
 			// Check if order was created using this method
-			if ( $this->id == get_post_meta( $orderid, '_payment_method', true ) ) {
+			if ( $this->id == get_post_meta( $orderid, '_payment_method', true ) && 'on-hold' == $order->get_status() ) {
 				// Check if this order hasn't been cancelled or activated
 				if ( ! get_post_meta( $orderid, '_klarna_order_cancelled', true ) && ! get_post_meta( $orderid, '_klarna_order_activated', true ) ) {
 					$rno = get_post_meta( $orderid, '_klarna_order_reservation', true );
 					$country = get_post_meta( $orderid, '_billing_country', true );
 
-					$order = wc_get_order( $orderid );
-
 					$klarna = new Klarna();
 					$this->configure_klarna( $klarna, $country );
 
 					$klarna_order = new WC_Gateway_Klarna_Order( $order, $klarna );
+					$klarna_order->add_addresses( $this->klarna_secret, $this->klarna_server );
 					$klarna_order->process_cart_contents( $itemid );
 					$klarna_order->process_shipping();
 					$klarna_order->update_order( $rno );
@@ -1761,7 +1762,6 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 						$klarna_order->add_addresses( $this->klarna_secret, $this->klarna_server );
 						$klarna_order->process_cart_contents();
 						$klarna_order->process_shipping();
-						// $klarna_order->set_estore_info();
 						$klarna_order->update_order( $rno );
 					}		
 				}	
