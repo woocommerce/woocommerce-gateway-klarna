@@ -88,7 +88,6 @@ endif;
 
 // Set current country based on used currency
 switch ( get_woocommerce_currency() ) {
-	
 	case 'NOK' :
 		$klarna_country = 'NO';
 		break;
