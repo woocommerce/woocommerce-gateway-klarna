@@ -119,7 +119,7 @@ switch ( get_woocommerce_currency() ) {
 
 if ( ! is_admin() && null !== WC() ) {
 	global $woocommerce;
-	if ( WC()->session->get( 'klarna_country' ) ) {
+	if ( class_exists( 'WC_Session' ) && WC()->session->get( 'klarna_country' ) ) {
 		$this->shop_country = WC()->session->get( 'klarna_country' );
 	} else {
 		$this->shop_country	= $klarna_country;
