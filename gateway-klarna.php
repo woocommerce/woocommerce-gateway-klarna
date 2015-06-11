@@ -156,6 +156,7 @@ function init_klarna_gateway() {
 	require_once 'classes/class-klarna-get-address.php'; // Get address 
 	require_once 'classes/class-klarna-pms.php'; // PMS
 	require_once 'classes/class-klarna-order.php'; // Handles Klarna orders
+	// require_once 'classes/class-klarna-validate.php'; // Validates Klarna orders
 	require_once 'classes/class-klarna-payment-method-display-widget.php'; // WordPress widget
 
 	// register Foo_Widget widget
@@ -170,71 +171,6 @@ function init_klarna_gateway() {
 	if ( in_array( $klarna_shop_country, $available_countries ) ) {
 		require_once 'classes/class-klarna-checkout.php';
 	}
-
-	/**
-	 * WooCommerce update notice class
-	 * 
-	 * @class   WC_Gateway_Klarna_Update_Notice
-	 * @package WC_Gateway_Klarna
-	 */
-	class WC_Gateway_Klarna_Update_Notice {
-		
-		/**
-		 * Constructor
-		 */
-		public function __construct() {
-
-			add_action( 'admin_notices', array( $this, 'krokedil_admin_notice' ) );
-			add_action( 'admin_init', array( $this, 'krokedil_nag_ignore' ) );
-
-		}
-	
-		/**
-		 * Display invoice fee handling changes on update to 1.8
-		 */
-		function krokedil_admin_notice() {
-			
-			global $current_user;
-			$user_id = $current_user->ID;
-		
-			// Check that the user hasn't already clicked to ignore the message
-			if ( ! get_user_meta($user_id, 'klarna_callback_change_notice_18') && current_user_can( 'manage_options' ) ) {
-				echo '<div class="updated fade">';
-					echo '<p class="alignleft">';
-						printf( __(
-							'Version 1.8 of the Klarna payment gateway is a major release. The plugin now uses Klarnas Advanced integration for all payment methods. You will need to update and save the settings for Klarna Invoice, Account & Campaign before these payment methods can be used. Please visit <a target="_blank" href="%1$s"> the payment gateway documentation</a> for more info.', 'klarna'),
-							'http://docs.woothemes.com/document/klarna/'
-						);
-					echo '</p>';
-					echo '<p class="alignright">';
-						printf( __(
-							'<a class="submitdelete" href="%1$s">Hide this message</a>', 'klarna'),
-							'?klarna_nag_ignore=0'
-						);
-					echo '</p>';
-					echo '<br class="clear">';
-				echo '</div>';
-			}
-		
-		}
-
-		/**
-		 * Hide invoice fee handling notice when link is clicked
-		 */
-		function krokedil_nag_ignore() {
-
-			global $current_user;
-			$user_id = $current_user->ID;
-
-			// If user clicks to ignore the notice, add that to their user meta
-			if ( isset( $_GET['klarna_nag_ignore'] ) && '0' == $_GET['klarna_nag_ignore'] ) {
-				add_user_meta( $user_id, 'klarna_callback_change_notice_18', 'true', true );
-			}
-
-		}
-
-	}
-	$wc_klarna_update_notice = new WC_Gateway_Klarna_Update_Notice;
 
 }
 add_action( 'plugins_loaded', 'init_klarna_gateway', 2 );
