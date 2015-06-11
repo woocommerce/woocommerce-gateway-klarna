@@ -59,8 +59,9 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 
 		// Actions
 		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
+		// Push listener
 		add_action( 'woocommerce_api_wc_gateway_klarna_checkout', array( $this, 'check_checkout_listener' ) );
-			
+
 		// We execute the woocommerce_thankyou hook when the KCO Thank You page is rendered,
 		// because other plugins use this, but we don't want to display the actual WC Order
 		// details table in KCO Thank You page. This action is removed here, but only when
@@ -165,12 +166,17 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 * @since  2.0
 	 **/
 	function register_klarna_incomplete_order_status() {
+		if ( $this->debug ) {
+			$show_in_admin_status_list = true;
+		} else {
+			$show_in_admin_status_list = false;
+		}
 		register_post_status( 'wc-kco-incomplete', array(
 			'label'                     => 'KCO incomplete',
 			'public'                    => false,
 			'exclude_from_search'       => false,
 			'show_in_admin_all_list'    => false,
-			'show_in_admin_status_list' => false,
+			'show_in_admin_status_list' => $show_in_admin_status_list,
 			'label_count'               => _n_noop( 'KCO incomplete <span class="count">(%s)</span>', 'KCO incomplete <span class="count">(%s)</span>' ),
 		) );
    	}
@@ -224,13 +230,18 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	function scheduled_subscription_payment( $amount_to_charge, $order, $product_id ) {
 		// Check if order was created using this method
 		if ( $this->id == get_post_meta( $order->id, '_payment_method', true ) ) {
+			// Prevent hook from firing twice
+			if ( ! get_post_meta( $order->id, '_schedule_klarna_subscription_payment', true ) ) {
+				$result = $this->process_subscription_payment( $amount_to_charge, $order, $product_id );
 
-			$result = $this->process_subscription_payment( $amount_to_charge, $order, $product_id );
-
-			if ( is_wp_error( $result ) ) {
-				WC_Subscriptions_Manager::process_subscription_payment_failure_on_order( $order, $product_id );
+				if ( is_wp_error( $result ) ) {
+					WC_Subscriptions_Manager::process_subscription_payment_failure_on_order( $order, $product_id );
+				} else {
+					WC_Subscriptions_Manager::process_subscription_payments_on_order( $order );
+				}
+				add_post_meta( $order->id, '_schedule_klarna_subscription_payment', 'no', true );
 			} else {
-				WC_Subscriptions_Manager::process_subscription_payments_on_order( $order );
+				delete_post_meta( $order->id, '_schedule_klarna_subscription_payment', 'no' );
 			}
 		}
 	}
@@ -331,8 +342,6 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			$create['cart']['items'][] = $item;
 		}
 
-		$this->log->add( 'klarna', 'BILLING::: ' . var_export( $klarna_billing, true ) );
-
 		require_once( KLARNA_LIB . '/src/Klarna/Checkout.php' );
 		$connector = Klarna_Checkout_Connector::create(
 			$klarna_secret,
@@ -415,6 +424,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 				
 				<div id="klarna-checkout-widget" class="woocommerce">
 
+					<?php if ( WC()->cart->coupons_enabled() ) { ?>
 					<div id="klarna-checkout-coupons">
 						<form class="klarna_checkout_coupon" method="post">
 							<p class="form-row form-row-first">
@@ -426,6 +436,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 							<div class="clear"></div>
 						</form>
 					</div>
+					<?php } ?>
 
 					<div>
 					<table id="klarna-checkout-cart">
@@ -515,9 +526,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 
 					<div>
 						<form>
-							<div class="form-row">
-								<textarea id="klarna-checkout-order-note" class="input-text" name="klarna-checkout-order-note" placeholder="<?php _e( 'Notes about your order, e.g. special notes for delivery.', 'klarna' ); ?>"></textarea>
-							</div>
+							<textarea id="klarna-checkout-order-note" class="input-text" name="klarna-checkout-order-note" placeholder="<?php _e( 'Notes about your order, e.g. special notes for delivery.', 'klarna' ); ?>"></textarea>
 						</form>
 					</div>
 
@@ -1394,6 +1403,10 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 * @since 1.0.0
      */
 	function check_checkout_listener() {
+		if ( isset( $_GET['validate'] ) ) { 
+			exit;
+		}
+
 		switch ( $_GET['scountry'] ) {
 			case 'SE':
 				$klarna_secret = $this->secret_se;
@@ -1592,7 +1605,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 * @since  2.0.0
 	 */
 	function activate_klarna_order( $orderid ) {
-		// Check if auto cancellation is enabled
+		// Check if auto activation is enabled
 		if ( 'yes' == $this->push_completion ) {
 			// Check if order was created using this method
 			if ( $this->id == get_post_meta( $orderid, '_payment_method', true ) ) {
