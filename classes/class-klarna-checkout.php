@@ -406,6 +406,10 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 * @since  2.0
 	 **/
 	function klarna_checkout_widget() {
+		// Don't show on thank you page
+		if ( isset( $_GET['thankyou'] ) && 'yes' == $_GET['thankyou'] )
+			return;
+
 		// Check if iframe needs to be displayed
 		if ( ! $this->show_kco() )
 			return;

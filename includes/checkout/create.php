@@ -52,11 +52,13 @@ $merchant_confirmation_uri = add_query_arg (
 	array(
 		'klarna_order' => '{checkout.order.uri}', 
 		'sid' => $local_order_id, 
-		'order-received' => $local_order_id 
+		'order-received' => $local_order_id,
+		'thankyou' => 'yes'
 	),
 	$this->klarna_checkout_thanks_url
 );
 $push_uri_base = get_site_url() . '/wc-api/WC_Gateway_Klarna_Checkout/';
+$validation_uri_base = get_site_url( null, '', 'https' ) . '/wc-api/WC_Gateway_Klarna_Order_Validate/';
 if ( $this->is_rest() ) {
 	$merchant_push_uri = add_query_arg( 
 		array(
@@ -77,6 +79,13 @@ if ( $this->is_rest() ) {
 		$push_uri_base 
 	);
 }
+$merchant_validation_uri = add_query_arg( 
+	array(
+		'orderid' => $local_order_id, 
+		'validate' => 'yes'
+	),
+	$validation_uri_base 
+);
 
 // Different format for V3 and V2
 if ( $this->is_rest() ) {
@@ -92,6 +101,7 @@ if ( $this->is_rest() ) {
 	$create['merchant']['checkout_uri'] =     $merchant_checkout_uri;
 	$create['merchant']['confirmation_uri'] = $merchant_confirmation_uri;
 	$create['merchant']['push_uri'] =         $merchant_push_uri;
+	// $create['merchant']['validation_uri'] =   $merchant_validation_uri;
 }
 
 // Make phone a mandatory field for German stores?

@@ -59,6 +59,8 @@ try {
 		//
 		// Merchant URIs
 		//
+		$push_uri_base = get_site_url() . '/wc-api/WC_Gateway_Klarna_Checkout/';
+		$validation_uri_base = get_site_url( null, '', 'https' ) . '/wc-api/WC_Gateway_Klarna_Order_Validate/';
 		$merchant_terms_uri = $this->terms_url;
 		$merchant_checkout_uri = esc_url_raw( add_query_arg( 
 			'klarnaListener', 
@@ -69,18 +71,25 @@ try {
 			array(
 				'klarna_order' => '{checkout.order.uri}', 
 				'sid' => $local_order_id, 
-				'order-received' => $local_order_id 
+				'order-received' => $local_order_id,
+				'thankyou' => 'yes'
 			),
 			$this->klarna_checkout_thanks_url
+		);
+		$merchant_validation_uri = add_query_arg( 
+			array(
+				'orderid' => $local_order_id, 
+				'validate' => 'yes',
+			),
+			$validation_uri_base
 		);
 		$merchant_push_uri = add_query_arg( 
 			array(
 				'sid' => $local_order_id, 
 				'scountry' => $this->klarna_country, 
 				'klarna_order' => '{checkout.order.uri}', 
-				'wc-api' => 'WC_Gateway_Klarna_Checkout'
 			),
-			$this->klarna_checkout_url 
+			$push_uri_base
 		);
 
 		// Different format for V3 and V2
@@ -97,6 +106,7 @@ try {
 			$update['merchant']['checkout_uri'] =     $merchant_checkout_uri;
 			$update['merchant']['confirmation_uri'] = $merchant_confirmation_uri;
 			$update['merchant']['push_uri'] =         $merchant_push_uri;
+			// $update['merchant']['validation_uri'] =   $merchant_validation_uri;
 		}
 
 		// Customer info if logged in
