@@ -324,21 +324,21 @@ class WC_Klarna_Payment_Method_Widget {
 					),
 				),
 				array(
-					'title'    => __( 'Lower thershold', 'klarna' ),
+					'title'    => __( 'Lower threshold', 'klarna' ),
 					'desc'     => __( 'Lower threshold for monthly cost', 'klarna' ),
 					'id'       => 'klarna_display_monthly_price_lower_threshold',
 					'default'  => '',
 					'type'     => 'number',
-					'desc_tip' =>  __( 'Monthly cost widget will not be displayed in product pages if product costs less than this value.', 'klarna' ),
+					'desc_tip' =>  __( 'Monthly cost widget will not be displayed in product pages if product price is less than this value.', 'klarna' ),
 					'autoload' => false
 				),
 				array(
-					'title'    => __( 'Upper thershold', 'klarna' ),
+					'title'    => __( 'Upper threshold', 'klarna' ),
 					'desc'     => __( 'Upper threshold for monthly cost', 'klarna' ),
 					'id'       => 'klarna_display_monthly_price_upper_threshold',
 					'default'  => '',
 					'type'     => 'text',
-					'desc_tip' =>  __( 'Monthly cost widget will not be displayed in product pages if product costs more than this value.', 'klarna' ),
+					'desc_tip' =>  __( 'Monthly cost widget will not be displayed in product pages if product price is more than this value.', 'klarna' ),
 					'autoload' => false
 				),
 
