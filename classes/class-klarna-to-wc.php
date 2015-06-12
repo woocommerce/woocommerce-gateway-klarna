@@ -167,55 +167,65 @@ class WC_Gateway_Klarna_K2WC {
 	 * @since  2.0.0
 	 * @access public
 	 * 
-	 * @param  integer $eid    Klarna Eid.
-	 * @param  integer $secret Klarna secret.
-	 * @param  object  $log    WooCommerce log object.
-	 * @param  string  $debug  Debug yes/no.
+	 * @param  $customer_email KCO incomplete customer email
 	 */
-	public function prepare_wc_order() {
-		$this->klarna_log->add( 'klarna', 'Listener triggered' );
-
+	public function prepare_wc_order( $customer_email ) {
 		global $woocommerce;
+
+		if ( ! defined( 'WOOCOMMERCE_CART' ) ) {
+			define( 'WOOCOMMERCE_CART', true );
+		}
 
 		if ( $woocommerce->session->get( 'ongoing_klarna_order' ) && wc_get_order( $woocommerce->session->get( 'ongoing_klarna_order' ) ) ) {
 			$orderid = $woocommerce->session->get( 'ongoing_klarna_order' );
 			$order = wc_get_order( $orderid );
 			$order->remove_order_items();
 		} else {
-			// Create order in WooCommerce
+			// Create order in WooCommerce if we have an email
 			$order = $this->create_order();
+			update_post_meta( $order->id, '_kco_incomplete_customer_email', $customer_email, true );
 			$woocommerce->session->set( 'ongoing_klarna_order', $order->id );
 		}
 
-		// Add order items
-		$this->add_order_items( $order );
+		// If there's an order at this point, proceed
+		if ( isset( $order ) ) {
+			// Add order items
+			$this->add_order_items( $order );
 
-		// Add order fees
-		$this->add_order_fees( $order );
+			// Add order fees
+			$this->add_order_fees( $order );
 
-		// Add order shipping
-		$this->add_order_shipping( $order );				
+			// Add order shipping
+			$this->add_order_shipping( $order );				
 
-		// Add order taxes
-		$this->add_order_tax_rows( $order );
+			// Add order taxes
+			$this->add_order_tax_rows( $order );
 
-		// Store coupons
-		$this->add_order_coupons( $order );
+			// Store coupons
+			$this->add_order_coupons( $order );
 
-		// Store payment method
-		$this->add_order_payment_method( $order );
+			// Store payment method
+			$this->add_order_payment_method( $order );
 
-		// Calculate order totals
-		$this->set_order_totals( $order );
+			// Calculate order totals
+			$this->set_order_totals( $order );
 
-		// Let plugins add meta
-		do_action( 'woocommerce_checkout_update_order_meta', $order->id, array() );
-				
-		// Store which KCO API was used
-		if ( $this->is_rest ) {
-			update_post_meta( $order->id, '_klarna_api', 'rest' );
-		} else {
-			update_post_meta( $order->id, '_klarna_api', 'v2' );
+			// Tie this order to a user
+			if ( email_exists( $customer_email ) ) {		
+				$user = get_user_by( 'email', $customer_email );
+				$user_id = $user->ID;
+				update_post_meta( $order->id, '_customer_user', $user_id );
+			}
+
+			// Let plugins add meta
+			do_action( 'woocommerce_checkout_update_order_meta', $order->id, array() );
+					
+			// Store which KCO API was used
+			if ( $this->is_rest ) {
+				update_post_meta( $order->id, '_klarna_api', 'rest' );
+			} else {
+				update_post_meta( $order->id, '_klarna_api', 'v2' );
+			}
 		}
 	}
 
@@ -226,11 +236,6 @@ class WC_Gateway_Klarna_K2WC {
 	 *
 	 * @since  2.0.0
 	 * @access public
-	 * 
-	 * @param  integer $eid    Klarna Eid.
-	 * @param  integer $secret Klarna secret.
-	 * @param  object  $log    WooCommerce log object.
-	 * @param  string  $debug  Debug yes/no.
 	 */
 	public function listener() {
 		$this->klarna_log->add( 'klarna', 'Listener triggered' );
@@ -241,10 +246,10 @@ class WC_Gateway_Klarna_K2WC {
 		$klarna_order = $this->retrieve_klarna_order();
 
 		// Check if order has been completed by Klarna, for V2 and Rest
-		if ( $klarna_order['status'] == 'checkout_complete' || $klarna_order['status'] == 'AUTHORIZED' ) { 
-
+		if ( $klarna_order['status'] == 'checkout_complete' || $klarna_order['status'] == 'AUTHORIZED' ) { 			
 			$local_order_id = sanitize_key( $_GET['sid'] );
 			$order = wc_get_order( $local_order_id );
+			$this->klarna_log->add( 'klarna', 'Order before listener: ' . var_export( $order, true ) );
 
 			// Change order currency
 			$this->change_order_currency( $order, $klarna_order );
@@ -253,7 +258,7 @@ class WC_Gateway_Klarna_K2WC {
 			$this->add_order_addresses( $order, $klarna_order );
 
 			// Store payment method
-			$this->add_order_payment_method( $order, $klarna_order );
+			$this->add_order_payment_method( $order );
 					
 			// Add order customer info
 			$this->add_order_customer_info( $order, $klarna_order );
@@ -264,6 +269,8 @@ class WC_Gateway_Klarna_K2WC {
 			$order->calculate_shipping();	
 			$order->calculate_taxes();	
 			$order->calculate_totals();		
+
+			$this->klarna_log->add( 'klarna', 'Order after listener: ' . var_export( $order, true ) );
 
 			// Check if order was recurring
 			if ( isset( $klarna_order['recurring_token'] ) ) {
@@ -301,11 +308,7 @@ class WC_Gateway_Klarna_K2WC {
 	 */
 	public function retrieve_klarna_order() {
 		if ( $this->klarna_debug == 'yes' ) {
-			$this->klarna_log->add( 'klarna', 'IPN callback from Klarna' );
 			$this->klarna_log->add( 'klarna', 'Klarna order: ' . $this->klarna_order_uri );
-			$this->klarna_log->add( 'klarna', 'GET: ' . json_encode($_GET) );
-			$this->klarna_log->add( 'klarna', 'Fetching Klarna order...' );
-			$this->klarna_log->add( 'klarna', 'Klarna order URI - ' . $this->klarna_order_uri );
 		}
 
 		if ( $this->is_rest ) {
@@ -469,6 +472,7 @@ class WC_Gateway_Klarna_K2WC {
 		global $woocommerce;
 		$order_id = $order->id;
 		$this_shipping_methods = $woocommerce->session->get( 'chosen_shipping_methods' );
+		$this->klarna_log->add( 'klarna', 'Chosen shipping method: ' . var_export( $this_shipping_methods, true ) );
 
 		// Store shipping for all packages
 		foreach ( $woocommerce->shipping->get_packages() as $package_key => $package ) {
@@ -600,7 +604,7 @@ class WC_Gateway_Klarna_K2WC {
 	 * @param  object $klarna_order Klarna order.
 	 */
 	public function add_order_payment_method( $order ) {
-		$this->klarna_log->add( 'klarna', 'Befire adding order payment method...' );
+		$this->klarna_log->add( 'klarna', 'Before adding order payment method...' );
 
 		global $woocommerce;
 
@@ -632,6 +636,10 @@ class WC_Gateway_Klarna_K2WC {
 		if ( ! defined( 'WOOCOMMERCE_CART' ) ) {
 			define( 'WOOCOMMERCE_CART', true );
 		}
+
+		$woocommerce->cart->calculate_shipping();
+		$woocommerce->cart->calculate_fees();
+		$woocommerce->cart->calculate_totals();
 
 		$order->set_total( $woocommerce->cart->shipping_total, 'shipping' );
 		$order->set_total( $woocommerce->cart->get_cart_discount_total(), 'order_discount' );

@@ -82,15 +82,7 @@ if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 	/**
 	 * Create WooCommerce order
 	 */
-	include_once( KLARNA_DIR . 'classes/class-klarna-to-wc.php' );
-	$klarna_to_wc = new WC_Gateway_Klarna_K2WC();
-	$klarna_to_wc->set_rest( $this->is_rest() );
-	$klarna_to_wc->set_eid( $this->klarna_eid );
-	$klarna_to_wc->set_secret( $this->klarna_secret );
-	$klarna_to_wc->set_klarna_log( $this->log );
-	$klarna_to_wc->set_klarna_debug( $this->debug );
-	$klarna_to_wc->set_klarna_server( $this->klarna_server );
-	$klarna_to_wc->prepare_wc_order();
+	$this->update_or_create_local_order();
 
 	/**
 	 * Check if Klarna order already exists

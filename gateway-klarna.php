@@ -191,7 +191,7 @@ function add_klarna_gateway( $methods ) {
 	}
 	
 	// Only add the Klarna Checkout method if Sweden, Norway or Finland is set as the base country
-	$available_countries = array( 'SE', 'NO', 'FI', 'DE', 'GB' );
+	$available_countries = array( 'SE', 'NO', 'FI', 'DE', 'GB', 'AT' );
 	if ( in_array( $klarna_shop_country, $available_countries ) ) {
 		$methods[] = 'WC_Gateway_Klarna_Checkout';
 	}

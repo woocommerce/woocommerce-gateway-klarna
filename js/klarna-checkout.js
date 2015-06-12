@@ -345,5 +345,42 @@ jQuery(document).ready(function($) {
 		);
 	});
 
+	/*
+	window._klarnaCheckout(function (api) {
+		api.on( {
+			'change': function(data) {
+				// console.log(data);
+				if ( '' != data.email ) {
+					window._klarnaCheckout(function (api) {
+						api.suspend();
+					});
+
+					$.ajax(
+						kcoAjax.ajaxurl,
+						{
+							type     : 'POST',
+							dataType : 'json',
+							data     : {
+								action : 'klarna_checkout_iframe_update_callback',
+								email  : data.email,
+								nonce  : kcoAjax.klarna_checkout_nonce
+							},
+							success: function( response ) {
+								// location.reload();
+							},
+							error: function( response ) {
+
+							}
+						}
+					);
+
+					window._klarnaCheckout(function (api) {
+						api.resume();
+					});
+				}
+			}
+		} );
+	});
+	*/
 
 });
