@@ -991,6 +991,25 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			$klarna_order->update( $update );
 		}
 
+		if ( isset( $_REQUEST['postal_code'] ) && is_string( $_REQUEST['postal_code'] ) && WC_Validation::is_postcode( $_REQUEST['postal_code'], $this->klarna_country ) ) {
+			global $woocommerce;
+
+			$woocommerce->customer->set_shipping_postcode( $_REQUEST['postal_code'] );
+
+			$woocommerce->cart->calculate_shipping();
+			$woocommerce->cart->calculate_totals();
+
+			$this->update_or_create_local_order();
+
+			$data['cart_total'] = wc_price( $woocommerce->cart->total );
+			$data['cart_shipping_total'] = $woocommerce->cart->get_cart_shipping_total();
+			$data['shipping_row'] = $this->klarna_checkout_get_shipping_options_row_html();
+
+			if ( WC()->session->get( 'klarna_checkout' ) ) {
+				$this->ajax_update_klarna_order();				
+			}
+		}
+
 		wp_send_json_success( $data );
 
 		wp_die();

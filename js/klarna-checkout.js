@@ -348,11 +348,15 @@ jQuery(document).ready(function($) {
 	window._klarnaCheckout(function (api) {
 		api.on( {
 			'change': function(data) {
+				window._klarnaCheckout(function (api) {
+					api.suspend();
+				});
+
 				// console.log(data);
 				if ( '' != data.email ) {
-					window._klarnaCheckout(function (api) {
-						api.suspend();
-					});
+					shipping_total_field = $( '#kco-page-shipping-total' );
+					total_field = $( '#kco-page-total-amount' );
+					shipping_row = $( 'tr#kco-page-shipping' );
 
 					$.ajax(
 						kcoAjax.ajaxurl,
@@ -360,23 +364,29 @@ jQuery(document).ready(function($) {
 							type     : 'POST',
 							dataType : 'json',
 							data     : {
-								action : 'klarna_checkout_iframe_update_callback',
-								email  : data.email,
-								nonce  : kcoAjax.klarna_checkout_nonce
+								action      : 'klarna_checkout_iframe_update_callback',
+								email       : data.email,
+								postal_code : data.postal_code,
+								nonce       : kcoAjax.klarna_checkout_nonce
 							},
 							success: function( response ) {
 								// location.reload();
 								// console.log( response.data );
+								$( total_field ).html( response.data.cart_total );
+								// $( shipping_total_field ).html( response.data.cart_shipping_total );
+								$( shipping_row ).replaceWith( response.data.shipping_row );
+								window._klarnaCheckout(function (api) {
+									api.resume();
+								});
 							},
 							error: function( response ) {
-
+								window._klarnaCheckout(function (api) {
+									api.resume();
+								});
 							}
 						}
 					);
 
-					window._klarnaCheckout(function (api) {
-						api.resume();
-					});
 				}
 			}
 		} );
