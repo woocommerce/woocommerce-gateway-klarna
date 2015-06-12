@@ -962,7 +962,33 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		$data = array();
 
 		if ( isset( $_REQUEST['email'] ) && is_string( $_REQUEST['email'] ) && ! is_user_logged_in() ) {
+			global $woocommerce;
 			$this->update_or_create_local_order( $_REQUEST['email'] );
+			$orderid = $woocommerce->session->get( 'ongoing_klarna_order' );
+			$data['orderid'] = $orderid;
+
+			require_once( KLARNA_LIB . '/src/Klarna/Checkout.php' );
+			$connector = Klarna_Checkout_Connector::create( $this->klarna_secret, $this->klarna_server );		
+			$klarna_order = new Klarna_Checkout_Order(
+				$connector,
+				WC()->session->get( 'klarna_checkout' )
+			);
+			$klarna_order->fetch();
+
+			$update['merchant']['push_uri'] = add_query_arg(
+				array(
+					'sid' => $orderid
+				),
+				$klarna_order['merchant']['push_uri']
+			);
+			$update['merchant']['confirmation_uri'] = add_query_arg(
+				array(
+					'sid' => $orderid,
+					'order-received' => $orderid
+				),
+				$klarna_order['merchant']['confirmation_uri']
+			);
+			$klarna_order->update( $update );
 		}
 
 		wp_send_json_success( $data );
@@ -1377,7 +1403,6 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 * @since 1.0.0
 	 */
 	function update_or_create_local_order( $customer_email = null ) {
-		/*
 		if ( is_user_logged_in() ) {
 			global $current_user;
 			$customer_email = $current_user->user_email;
@@ -1385,7 +1410,6 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 
 		if ( ! is_email( $customer_email ) )
 			return;
-		*/
 
 		// Check quantities
 		global $woocommerce;

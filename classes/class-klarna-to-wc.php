@@ -249,7 +249,6 @@ class WC_Gateway_Klarna_K2WC {
 		if ( $klarna_order['status'] == 'checkout_complete' || $klarna_order['status'] == 'AUTHORIZED' ) { 			
 			$local_order_id = sanitize_key( $_GET['sid'] );
 			$order = wc_get_order( $local_order_id );
-			$this->klarna_log->add( 'klarna', 'Order before listener: ' . var_export( $order, true ) );
 
 			// Change order currency
 			$this->change_order_currency( $order, $klarna_order );
@@ -270,8 +269,6 @@ class WC_Gateway_Klarna_K2WC {
 			$order->calculate_taxes();	
 			$order->calculate_totals();		
 
-			$this->klarna_log->add( 'klarna', 'Order after listener: ' . var_export( $order, true ) );
-
 			// Check if order was recurring
 			if ( isset( $klarna_order['recurring_token'] ) ) {
 				update_post_meta( $order->id, '_klarna_recurring_token', $klarna_order['recurring_token'] );
@@ -281,18 +278,6 @@ class WC_Gateway_Klarna_K2WC {
 				update_post_meta( $order->id, '_klarna_order_id', $klarna_order['order_id'] );
 			} else {
 				update_post_meta( $order->id, '_klarna_order_reservation', $klarna_order['reservation'] );
-			}
-				
-			// Debug
-			if ( $this->klarna_debug == 'yes') {
-				$this->klarna_log->add( 'klarna', 'Payment complete action triggered' );
-			}
-
-			// Store which KCO API was used
-			if ( $this->is_rest ) {
-				update_post_meta( $order->id, '_klarna_api', 'rest' );
-			} else {
-				update_post_meta( $order->id, '_klarna_api', 'v2' );
 			}
 			
 			// Other plugins and themes can hook into here
@@ -470,14 +455,26 @@ class WC_Gateway_Klarna_K2WC {
 	public function add_order_shipping( $order ) {
 		$this->klarna_log->add( 'klarna', 'Adding order shipping...' );
 		global $woocommerce;
+
+		if ( ! defined( 'WOOCOMMERCE_CART' ) ) {
+			define( 'WOOCOMMERCE_CART', true );
+		}
+		$woocommerce->cart->calculate_shipping();
+		$woocommerce->cart->calculate_fees();
+		$woocommerce->cart->calculate_totals();
+
 		$order_id = $order->id;
 		$this_shipping_methods = $woocommerce->session->get( 'chosen_shipping_methods' );
 		$this->klarna_log->add( 'klarna', 'Chosen shipping method: ' . var_export( $this_shipping_methods, true ) );
+
+		$this->klarna_log->add( 'klarna', 'SHIPPING: ' . var_export( $woocommerce->shipping, true ) );
+		$this->klarna_log->add( 'klarna', 'SHIPPINGGETPACKAGES: ' . var_export( $woocommerce->shipping->get_packages(), true ) );
 
 		// Store shipping for all packages
 		foreach ( $woocommerce->shipping->get_packages() as $package_key => $package ) {
 			if ( isset( $package['rates'][ $this_shipping_methods[ $package_key ] ] ) ) {
 				$item_id = $order->add_shipping( $package['rates'][ $this_shipping_methods[ $package_key ] ] );
+				$this->klarna_log->add( 'klarna', 'ITEMIDITEMID: ' . var_export( $item_id, true ) );
 
 				if ( ! $item_id ) {
 					$this->klarna_log->add( 'klarna', 'Unable to add shipping item.' );
@@ -812,6 +809,7 @@ class WC_Gateway_Klarna_K2WC {
 			) );
 			$klarna_order->acknowledge();
 			$order->payment_complete( $klarna_order['klarna_reference'] );
+			delete_post_meta( $order->id, '_kco_incomplete_customer_email' );
 		} else {
 			$order->add_order_note( sprintf( 
 				__( 'Klarna Checkout payment created. Reservation number: %s.  Klarna order number: %s', 'klarna' ),
@@ -832,6 +830,7 @@ class WC_Gateway_Klarna_K2WC {
 			$update['merchant_reference'] = array( 'orderid1' => ltrim( $order->get_order_number(), '#' ) );
 			$klarna_order->update( $update );
 			$order->payment_complete( $klarna_order['reservation'] );
+			delete_post_meta( $order->id, '_kco_incomplete_customer_email' );
 		}
 
 		return $klarna_order;

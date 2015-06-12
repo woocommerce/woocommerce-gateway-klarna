@@ -345,7 +345,6 @@ jQuery(document).ready(function($) {
 		);
 	});
 
-	/*
 	window._klarnaCheckout(function (api) {
 		api.on( {
 			'change': function(data) {
@@ -367,6 +366,7 @@ jQuery(document).ready(function($) {
 							},
 							success: function( response ) {
 								// location.reload();
+								// console.log( response.data );
 							},
 							error: function( response ) {
 
@@ -381,6 +381,5 @@ jQuery(document).ready(function($) {
 			}
 		} );
 	});
-	*/
 
 });
