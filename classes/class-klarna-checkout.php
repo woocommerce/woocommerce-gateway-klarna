@@ -409,7 +409,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 * 
 	 * @since  2.0
 	 **/
-	function klarna_checkout_widget() {
+	function klarna_checkout_widget( $atts ) {
 		// Don't show on thank you page
 		if ( isset( $_GET['thankyou'] ) && 'yes' == $_GET['thankyou'] )
 			return;
@@ -419,6 +419,18 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			return;
 
 		global $woocommerce;
+
+		$atts = shortcode_atts(
+			array(
+				'twocol' => 'no',
+			),
+			$atts
+		);
+		if ( 'yes' == $atts['twocol'] ) {
+			$widget_class = 'kco-two-col';
+		} else {
+			$widget_class = 'kco-one-col';			
+		}
 
 		// Recheck cart items so that they are in stock
 		$result = $woocommerce->cart->check_cart_item_stock();
@@ -430,7 +442,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 			ob_start(); ?>
 				
-				<div id="klarna-checkout-widget" class="woocommerce">
+				<div id="klarna-checkout-widget" class="woocommerce <?php echo $widget_class; ?>">
 
 					<?php if ( WC()->cart->coupons_enabled() ) { ?>
 					<div id="klarna-checkout-coupons">
@@ -439,7 +451,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 								<input type="text" name="coupon_code" class="input-text" placeholder="Coupon Code" id="coupon_code" value="" />
 							</p>
 							<p class="form-row form-row-last" style="text-align:right">
-								<input type="submit" class="button" name="apply_coupon" value="Apply Coupon" />
+								<input type="submit" class="button" name="apply_coupon" value="<?php _e( 'Apply Coupon', 'klarna' ); ?>" />
 							</p>
 							<div class="clear"></div>
 						</form>
@@ -451,10 +463,10 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 						<tbody>
 							<tr>
 								<th class="kco-column-remove kco-centeralign"></th>
-								<th class="kco-column-product kco-leftalign">Product</th>
-								<th class="kco-column-price kco-centeralign">Price</th>
-								<th class="kco-column-quantity kco-centeralign">Quantity</th>
-								<th class="kco-column-total kco-rightalign">Total</th>
+								<th class="kco-column-product kco-leftalign"><?php _e( 'Product', 'klarna' ); ?></th>
+								<th class="kco-column-price kco-centeralign"><?php _e( 'Price', 'klarna' ); ?></th>
+								<th class="kco-column-quantity kco-centeralign"><?php _e( 'Quantity', 'klarna' ); ?></th>
+								<th class="kco-column-total kco-rightalign"><?php _e( 'Total', 'klarna' ); ?></th>
 							</tr>
 							<?php
 							foreach ( $woocommerce->cart->get_cart() as $cart_item_key => $cart_item ) {
@@ -508,7 +520,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 					<table id="kco-totals">
 						<tbody>
 							<tr id="kco-page-subtotal">
-								<td class="kco-column-desc kco-rightalign">Subtotal</td>
+								<td class="kco-column-desc kco-rightalign"><?php _e( 'Subtotal', 'klarna' ); ?></td>
 								<td id="kco-page-subtotal-amount" class="kco-column-number kco-rightalign"><span class="amount"><?php echo $woocommerce->cart->get_cart_subtotal(); ?></span></td>
 							</tr>
 							
@@ -525,7 +537,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 							<?php }	?>
 
 							<tr id="kco-page-total">
-								<td class="kco-rightalign kco-bold">Total</a></td>
+								<td class="kco-rightalign kco-bold"><?php _e( 'Total', 'klarna' ); ?></a></td>
 								<td id="kco-page-total-amount" class="kco-rightalign kco-bold"><span class="amount"><?php echo $woocommerce->cart->get_total(); ?></span></td>
 							</tr>
 						</tbody>
@@ -1111,7 +1123,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 
 		?>
 		<tr id="kco-page-shipping">
-			<td style="text-align:right">
+			<td class="kco-rightalign">
 				<?php
 					$woocommerce->cart->calculate_shipping();
 					$packages = $woocommerce->shipping->get_packages();
@@ -1133,8 +1145,8 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 									<ul id="shipping_method">
 										<?php foreach ( $available_methods as $method ) : ?>
 											<li>
-												<input type="radio" name="shipping_method[<?php echo $index; ?>]" data-index="<?php echo $index; ?>" id="shipping_method_<?php echo $index; ?>_<?php echo sanitize_title( $method->id ); ?>" value="<?php echo esc_attr( $method->id ); ?>" <?php checked( $method->id, $chosen_method ); ?> class="shipping_method" />
 												<label for="shipping_method_<?php echo $index; ?>_<?php echo sanitize_title( $method->id ); ?>"><?php echo wp_kses_post( wc_cart_totals_shipping_method_label( $method ) ); ?></label>
+												<input style="margin-left:3px" type="radio" name="shipping_method[<?php echo $index; ?>]" data-index="<?php echo $index; ?>" id="shipping_method_<?php echo $index; ?>_<?php echo sanitize_title( $method->id ); ?>" value="<?php echo esc_attr( $method->id ); ?>" <?php checked( $method->id, $chosen_method ); ?> class="shipping_method" />
 											</li>
 										<?php endforeach; ?>
 									</ul>
@@ -1974,9 +1986,21 @@ class WC_Gateway_Klarna_Checkout_Extra {
 
 
 	// Shortcode KCO page
-	function klarna_checkout_page() {
+	function klarna_checkout_page( $atts ) {
+		$atts = shortcode_atts(
+			array(
+				'twocol' => 'no',
+			),
+			$atts
+		);
+		if ( 'yes' == $atts['twocol'] ) {
+			$widget_class = 'kco-two-col';
+		} else {
+			$widget_class = 'kco-one-col';			
+		}
+
 		$data = new WC_Gateway_Klarna_Checkout;
-		return '<div class="klarna_checkout">' . $data->get_klarna_checkout_page() . '</div>';
+		return '<div class="klarna_checkout ' . $widget_class . '">' . $data->get_klarna_checkout_page() . '</div>';
 	}
 	
 	function klarna_checkout_css() {
