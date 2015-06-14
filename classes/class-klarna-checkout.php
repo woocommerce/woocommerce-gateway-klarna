@@ -423,8 +423,8 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		// Recheck cart items so that they are in stock
 		$result = $woocommerce->cart->check_cart_item_stock();
 		if ( is_wp_error( $result ) ) {
-			return $result->get_error_message();
-			exit();
+			echo '<p>' . $result->get_error_message() . '</p>';
+			// exit();
 		}
 
 		if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
@@ -959,10 +959,17 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			exit( 'Nonce can not be verified.' );
 		}
 
+		global $woocommerce;
 		$data = array();
 
+    	// Check stock
+		if ( is_wp_error( $woocommerce->cart->check_cart_item_stock() ) ) {
+			wp_send_json_error();
+			wp_die();
+		}
+
+		// Capture email
 		if ( isset( $_REQUEST['email'] ) && is_string( $_REQUEST['email'] ) && ! is_user_logged_in() ) {
-			global $woocommerce;
 			$this->update_or_create_local_order( $_REQUEST['email'] );
 			$orderid = $woocommerce->session->get( 'ongoing_klarna_order' );
 			$data['orderid'] = $orderid;
@@ -991,6 +998,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			$klarna_order->update( $update );
 		}
 
+		// Capture postal code
 		if ( isset( $_REQUEST['postal_code'] ) && is_string( $_REQUEST['postal_code'] ) && WC_Validation::is_postcode( $_REQUEST['postal_code'], $this->klarna_country ) ) {
 			global $woocommerce;
 

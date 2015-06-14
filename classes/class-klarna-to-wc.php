@@ -409,7 +409,7 @@ class WC_Gateway_Klarna_K2WC {
 
 			if ( ! $item_id ) {
 				$this->klarna_log->add( 'klarna', 'Unable to add order item.' );
-				throw new Exception( __( 'Error: Unable to create order. Please try again.', 'woocommerce' ) );
+				throw new Exception( __( 'Error: Unable to add order item. Please try again.', 'woocommerce' ) );
 			}
 
 			// Allow plugins to add order item meta

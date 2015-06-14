@@ -39,6 +39,7 @@ a.std-checkout-button {
 #klarna-checkout-widget input[type=number] {
 	display: block;
 	max-width: 100%;
+	width: 100%;
 	margin: 0 auto;
 	box-sizing: border-box;
 	text-align: center;

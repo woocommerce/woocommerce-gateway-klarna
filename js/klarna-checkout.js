@@ -3,9 +3,11 @@ jQuery(document).ready(function($) {
 	// Update country
 	$('select#klarna-checkout-euro-country').change( function() {
 		
+		if ( typeof window._klarnaCheckout == 'function') { 
 		window._klarnaCheckout(function (api) {
 			api.suspend();
 		});
+		}
 		
 		new_country = $(this).val();
 
@@ -23,9 +25,11 @@ jQuery(document).ready(function($) {
 					// console.log( 'success' );
 					// console.log( response.data );
 					
+					if ( typeof window._klarnaCheckout == 'function') { 
 					window._klarnaCheckout(function (api) {
 						api.resume();
 					});
+					}
 
 					location.reload();
 				},
@@ -33,9 +37,11 @@ jQuery(document).ready(function($) {
 					console.log( 'error' );
 					console.log( response );
 
+					if ( typeof window._klarnaCheckout == 'function') { 
 					window._klarnaCheckout(function (api) {
 						api.resume();
 					});
+					}
 				}
 			}
 		);
@@ -45,9 +51,11 @@ jQuery(document).ready(function($) {
 	// Update order note
 	$('textarea#klarna-checkout-order-note').change( function() {
 		
+		if ( typeof window._klarnaCheckout == 'function') { 
 		window._klarnaCheckout(function (api) {
 			api.suspend();
 		});
+		}
 		
 		order_note = $(this).val();
 
@@ -65,17 +73,21 @@ jQuery(document).ready(function($) {
 					// console.log( 'success' );
 					// console.log( response.data );
 					
+					if ( typeof window._klarnaCheckout == 'function') { 
 					window._klarnaCheckout(function (api) {
 						api.resume();
 					});
+					}
 				},
 				error: function( response ) {
 					console.log( 'error' );
 					console.log( response );
 
+					if ( typeof window._klarnaCheckout == 'function') { 
 					window._klarnaCheckout(function (api) {
 						api.resume();
 					});
+					}
 				}
 			}
 		);
@@ -85,9 +97,11 @@ jQuery(document).ready(function($) {
 	// Update shipping
 	$('table#kco-totals').on( 'change', '#kco-page-shipping input[type="radio"]', function( event ) {
 		
+		if ( typeof window._klarnaCheckout == 'function') { 
 		window._klarnaCheckout(function (api) {
 			api.suspend();
 		});
+		}
 		
 		new_method = $(this).val();
 		shipping_total_field = $( '#kco-page-shipping-total' );
@@ -110,17 +124,21 @@ jQuery(document).ready(function($) {
 					$( total_field ).html( response.data.cart_total );
 					$( shipping_total_field ).html( response.data.cart_shipping_total );
 					
+					if ( typeof window._klarnaCheckout == 'function') { 
 					window._klarnaCheckout(function (api) {
 						api.resume();
 					});
+					}
 				},
 				error: function( response ) {
 					console.log( 'error' );
 					console.log( response );
 
+					if ( typeof window._klarnaCheckout == 'function') { 
 					window._klarnaCheckout(function (api) {
 						api.resume();
 					});
+					}
 				}
 			}
 		);
@@ -129,9 +147,11 @@ jQuery(document).ready(function($) {
 
 	// Update cart
 	$('td.product-quantity input[type=number]').change( function( event ) {
+		if ( typeof window._klarnaCheckout == 'function') { 
 		window._klarnaCheckout(function (api) {
 			api.suspend();
 		});
+		}
 		
 		ancestor         = $( this ).closest( 'td.product-quantity' );
 		total_field      = $( 'td#kco-page-total-amount' );
@@ -161,17 +181,21 @@ jQuery(document).ready(function($) {
 					$( line_total_field ).html( response.data.line_total );
 					$( shipping_row ).replaceWith( response.data.shipping_row );
 					
+					if ( typeof window._klarnaCheckout == 'function') { 
 					window._klarnaCheckout(function (api) {
 						api.resume();
 					});
+					}
 				},
 				error: function( response ) {
 					console.log( 'error' );
 					console.log( response );
 
+					if ( typeof window._klarnaCheckout == 'function') { 
 					window._klarnaCheckout(function (api) {
 						api.resume();
 					});
+					}
 				}
 			}
 		);
@@ -181,9 +205,11 @@ jQuery(document).ready(function($) {
 	$('td.kco-product-remove a').click( function( event ) {
 		event.preventDefault();
 
+		if ( typeof window._klarnaCheckout == 'function') { 
 		window._klarnaCheckout(function (api) {
 			api.suspend();
 		});
+		}
 		
 		ancestor             = $( this ).closest( 'tr' ).find( 'td.product-quantity' );
 		total_field          = $( 'td#kco-page-total-amount' );
@@ -203,9 +229,6 @@ jQuery(document).ready(function($) {
 					nonce : kcoAjax.klarna_checkout_nonce
 				},
 				success: function( response ) {
-					console.log( 'success' );
-					console.log( response.data );
-
 					if ( 0 == response.data.item_count ) {
 						window.location.href = response.data.cart_url;
 					} else {
@@ -214,18 +237,21 @@ jQuery(document).ready(function($) {
 						$( shipping_row ).replaceWith( response.data.shipping_row );
 						$( item_row ).remove();
 						
+						if ( typeof window._klarnaCheckout == 'function') { 
 						window._klarnaCheckout(function (api) {
 							api.resume();
 						});
+						} else {
+							location.reload();
+						}
 					}
 				},
 				error: function( response ) {
-					console.log( 'error' );
-					console.log( response );
-
+					if ( typeof window._klarnaCheckout == 'function') { 
 					window._klarnaCheckout(function (api) {
 						api.resume();
 					});
+					}
 				}
 			}
 		);
@@ -233,12 +259,13 @@ jQuery(document).ready(function($) {
 
 	// Add coupon
 	$('.klarna_checkout_coupon').submit( function( event ) {
-
 		event.preventDefault();
 
+		if ( typeof window._klarnaCheckout == 'function') { 
 		window._klarnaCheckout(function (api) {
 			api.suspend();
 		});
+		}
 
 		coupon = $( '.klarna_checkout_coupon .input-text' ).val();		
 		input_field = $( this ).find( '.input-text' );
@@ -257,12 +284,11 @@ jQuery(document).ready(function($) {
 					nonce  : kcoAjax.klarna_checkout_nonce
 				},
 				success: function( response ) {
-					// console.log( 'success' );
-					// console.log( response.data );
-										
+					if ( typeof window._klarnaCheckout == 'function') { 
 					window._klarnaCheckout(function (api) {
 						api.resume();
 					});
+					}
 					
 					if ( response.data.coupon_success ) {
 						$( '#klarna_checkout_coupon_result' ).html( '<p>Coupon added.</p>' );
@@ -281,14 +307,13 @@ jQuery(document).ready(function($) {
 					}
 				},
 				error: function( response ) {
-					console.log( 'error' );
-					console.log( response );
-
 					$( '#klarna_checkout_coupon_result' ).html( '<p>Coupon could not be added.</p>' );
 					
+					if ( typeof window._klarnaCheckout == 'function') { 
 					window._klarnaCheckout(function (api) {
 						api.resume();
 					});
+					}
 				}
 			}
 		);
@@ -300,9 +325,11 @@ jQuery(document).ready(function($) {
 	$('table#kco-totals').on( 'click', '.kco-remove-coupon', function( event ) {
 		event.preventDefault();
 
+		if ( typeof window._klarnaCheckout == 'function') { 
 		window._klarnaCheckout(function (api) {
 			api.suspend();
 		});
+		}
 
 		remove_coupon = $( this ).data( 'coupon' );
 		clicked_el = $( this );
@@ -329,22 +356,27 @@ jQuery(document).ready(function($) {
 					$( subtotal_field ).html( response.data.cart_subtotal );
 					$( shipping_row ).replaceWith( response.data.shipping_row );
 										
+					if ( typeof window._klarnaCheckout == 'function') { 
 					window._klarnaCheckout(function (api) {
 						api.resume();
 					});
+					}
 				},
 				error: function( response ) {
 					console.log( 'remove-error' );
 					console.log( response );
 					
+					if ( typeof window._klarnaCheckout == 'function') { 
 					window._klarnaCheckout(function (api) {
 						api.resume();
 					});
+					}
 				}
 			}
 		);
 	});
 
+	if ( typeof window._klarnaCheckout == 'function') { 
 	window._klarnaCheckout(function (api) {
 		api.on( {
 			'change': function(data) {
@@ -370,10 +402,14 @@ jQuery(document).ready(function($) {
 								nonce       : kcoAjax.klarna_checkout_nonce
 							},
 							success: function( response ) {
-								// location.reload();
-								// console.log( response.data );
+								// Check if a product is out of stock
+								if ( false === response.success ) {
+									console.log( 'false' );
+									location.reload();
+									return;
+								}
+
 								$( total_field ).html( response.data.cart_total );
-								// $( shipping_total_field ).html( response.data.cart_shipping_total );
 								$( shipping_row ).replaceWith( response.data.shipping_row );
 								window._klarnaCheckout(function (api) {
 									api.resume();
@@ -391,5 +427,6 @@ jQuery(document).ready(function($) {
 			}
 		} );
 	});
+	}
 
 });
