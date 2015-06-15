@@ -324,7 +324,7 @@ class WC_Gateway_Klarna_K2WC {
 			$this->klarna_log->add( 'klarna', 'ID: ' . $klarna_order['id'] );
 			$this->klarna_log->add( 'klarna', 'Billing: ' . $klarna_order['billing_address']['given_name'] );
 			$this->klarna_log->add( 'klarna', 'Reference: ' . $klarna_order['reservation'] );
-			$this->klarna_log->add( 'klarna', 'Fetched order from Klarna: ' . var_export( $klarna_order, true ) );
+			// $this->klarna_log->add( 'klarna', 'Fetched order from Klarna: ' . var_export( $klarna_order, true ) );
 		}
 
 		return $klarna_order;
@@ -465,16 +465,11 @@ class WC_Gateway_Klarna_K2WC {
 
 		$order_id = $order->id;
 		$this_shipping_methods = $woocommerce->session->get( 'chosen_shipping_methods' );
-		$this->klarna_log->add( 'klarna', 'Chosen shipping method: ' . var_export( $this_shipping_methods, true ) );
-
-		$this->klarna_log->add( 'klarna', 'SHIPPING: ' . var_export( $woocommerce->shipping, true ) );
-		$this->klarna_log->add( 'klarna', 'SHIPPINGGETPACKAGES: ' . var_export( $woocommerce->shipping->get_packages(), true ) );
 
 		// Store shipping for all packages
 		foreach ( $woocommerce->shipping->get_packages() as $package_key => $package ) {
 			if ( isset( $package['rates'][ $this_shipping_methods[ $package_key ] ] ) ) {
 				$item_id = $order->add_shipping( $package['rates'][ $this_shipping_methods[ $package_key ] ] );
-				$this->klarna_log->add( 'klarna', 'ITEMIDITEMID: ' . var_export( $item_id, true ) );
 
 				if ( ! $item_id ) {
 					$this->klarna_log->add( 'klarna', 'Unable to add shipping item.' );

@@ -389,7 +389,15 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		wp_register_style( 'klarna_checkout', KLARNA_URL . 'css/klarna-checkout.css' );	
 		if ( is_page() ) {
 			global $post;
-			$klarna_checkout_page_id = url_to_postid( $this->klarna_checkout_url );
+
+			// Need to check for HTTPS on non-HTTPS websites
+			$explode = explode( '://', $this->klarna_checkout_url );
+			if ( url_to_postid( 'https://' . $explode[1] ) ) {
+				$klarna_checkout_page_id = url_to_postid( 'https://' . $explode[1] );
+			} elseif ( url_to_postid( 'http://' . $explode[1] ) ) {
+				$klarna_checkout_page_id = url_to_postid( 'http://' . $explode[1] );
+			}
+
 			if ( $post->ID == $klarna_checkout_page_id ) {
 				wp_enqueue_script( 'jquery' );
 				wp_enqueue_script( 'klarna_checkout' );
@@ -724,6 +732,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			$this->update_or_create_local_order();
 		} else {
 			if ( $woocommerce->session->get( 'ongoing_klarna_order' ) ) {
+				wp_delete_post( $woocommerce->session->get( 'ongoing_klarna_order' ) );
 				$woocommerce->session->__unset( 'ongoing_klarna_order' );
 			}
 		}
@@ -1145,8 +1154,8 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 									<ul id="shipping_method">
 										<?php foreach ( $available_methods as $method ) : ?>
 											<li>
-												<label for="shipping_method_<?php echo $index; ?>_<?php echo sanitize_title( $method->id ); ?>"><?php echo wp_kses_post( wc_cart_totals_shipping_method_label( $method ) ); ?></label>
 												<input style="margin-left:3px" type="radio" name="shipping_method[<?php echo $index; ?>]" data-index="<?php echo $index; ?>" id="shipping_method_<?php echo $index; ?>_<?php echo sanitize_title( $method->id ); ?>" value="<?php echo esc_attr( $method->id ); ?>" <?php checked( $method->id, $chosen_method ); ?> class="shipping_method" />
+												<label for="shipping_method_<?php echo $index; ?>_<?php echo sanitize_title( $method->id ); ?>"><?php echo wp_kses_post( wc_cart_totals_shipping_method_label( $method ) ); ?></label>
 											</li>
 										<?php endforeach; ?>
 									</ul>
@@ -1385,12 +1394,71 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 * @since  2.0
 	 **/
 	function configure_klarna( $klarna, $country ) {
+		// Country and language
+		switch ( $country ) {
+			case 'NO' :
+			case 'NB' :
+				$klarna_country = 'NO';
+				$klarna_language = 'nb-no';
+				$klarna_currency = 'NOK';
+				$klarna_eid = $this->eid_no;
+				$klarna_secret = $this->secret_no;
+				break;
+			case 'FI' :
+				$klarna_country 			= 'FI';
+				// Check if WPML is used and determine if Finnish or Swedish is used as language
+				if ( class_exists( 'woocommerce_wpml' ) && defined('ICL_LANGUAGE_CODE') && strtoupper(ICL_LANGUAGE_CODE) == 'SV') {
+					$klarna_language = 'sv-fi'; // Swedish
+				} else {
+					$klarna_language = 'fi-fi'; // Finnish
+				}				
+				$klarna_currency = 'EUR';
+				$klarna_eid = $this->eid_fi;
+				$klarna_secret = $this->secret_fi;
+				break;
+			case 'SE' :
+			case 'SV' :
+				$klarna_country = 'SE';
+				$klarna_language = 'sv-se';
+				$klarna_currency = 'SEK';
+				$klarna_eid = $this->eid_se;
+				$klarna_secret = $this->secret_se;
+				break;
+			case 'DE' :
+				$klarna_country = 'DE';
+				$klarna_language = 'de-de';
+				$klarna_currency = 'EUR';
+				$klarna_eid = $this->eid_de;
+				$klarna_secret = $this->secret_de;
+				break;
+			case 'AT' :
+				$klarna_country = 'AT';
+				$klarna_language = 'de-at';
+				$klarna_currency = 'EUR';
+				$klarna_eid = $this->eid_at;
+				$klarna_secret = $this->secret_at;
+				break;
+			case 'GB' :
+				$klarna_country = 'gb';
+				$klarna_language = 'en-gb';
+				$klarna_currency = 'gbp';
+				$klarna_eid = $this->eid_uk;
+				$klarna_secret = $this->secret_uk;
+				break;
+			default:
+				$klarna_country = '';
+				$klarna_language = '';
+				$klarna_currency = '';
+				$klarna_eid = '';
+				$klarna_secret = '';
+		}
+
 		$klarna->config(
-			$eid = $this->klarna_eid,
-			$secret = $this->klarna_secret,
-			$country = $this->klarna_country,
-			$language = $this->klarna_language,
-			$currency = $this->klarna_currency,
+			$eid = $klarna_eid,
+			$secret = $klarna_secret,
+			$country = $country,
+			$language = $klarna_language,
+			$currency = $klarna_currency,
 			$mode = $this->klarna_mode,
 			$pcStorage = 'json',
 			$pcURI = '/srv/pclasses.json',
@@ -1729,6 +1797,8 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 
 						$klarna = new Klarna();
 						$this->configure_klarna( $klarna, $country );
+
+						$this->log->add( 'klarna', 'CANCELKLARNA: ' . var_export( $klarna, true ) );
 
 						$klarna_order = new WC_Gateway_Klarna_Order( $order, $klarna );
 						$klarna_order->cancel_order( $rno );
