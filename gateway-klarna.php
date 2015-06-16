@@ -172,15 +172,17 @@ function init_klarna_gateway() {
 	}
 
 	// Send customer and merchant emails for KCO Incomplete > Processing status change
-	add_filter( 'woocommerce_email_actions', 'kco_test_add_kco_incomplete_email_actions' );
-	function kco_test_add_kco_incomplete_email_actions( $email_actions ) {
+	
+	// Add kco-incomplete_to_processing to statuses that can send email 
+	add_filter( 'woocommerce_email_actions', 'wc_klarna_kco_add_kco_incomplete_email_actions' );
+	function wc_klarna_kco_add_kco_incomplete_email_actions( $email_actions ) {
 		$email_actions[] = 'woocommerce_order_status_kco-incomplete_to_processing';
 		return $email_actions;
 	}
 
 	// Triggers the email
-	add_action( 'woocommerce_order_status_kco-incomplete_to_processing_notification', 'kco_test_trigger' );
-	function kco_test_trigger( $orderid ) {
+	add_action( 'woocommerce_order_status_kco-incomplete_to_processing_notification', 'wc_klarna_kco_incomplete_trigger' );
+	function wc_klarna_kco_incomplete_trigger( $orderid ) {
 		$kco_mailer = WC()->mailer();
 		$kco_mails = $kco_mailer->get_emails();
 		foreach ( $kco_mails as $kco_mail ) {
