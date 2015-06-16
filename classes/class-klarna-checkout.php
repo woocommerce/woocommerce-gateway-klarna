@@ -432,14 +432,15 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 
 		$atts = shortcode_atts(
 			array(
-				'twocol' => 'no',
+				'col' => '',
 			),
 			$atts
 		);
-		if ( 'yes' == $atts['twocol'] ) {
-			$widget_class = 'kco-two-col';
-		} else {
-			$widget_class = 'kco-one-col';			
+
+		if ( 'left' == $atts['col'] ) {
+			$widget_class .= ' kco-left-col';
+		} elseif ( 'right' == $atts['col'] ) {
+			$widget_class .= ' kco-right-col';			
 		}
 
 		// Recheck cart items so that they are in stock
@@ -2064,14 +2065,15 @@ class WC_Gateway_Klarna_Checkout_Extra {
 	function klarna_checkout_page( $atts ) {
 		$atts = shortcode_atts(
 			array(
-				'twocol' => 'no',
+				'col' => '',
 			),
 			$atts
 		);
-		if ( 'yes' == $atts['twocol'] ) {
-			$widget_class = 'kco-two-col';
-		} else {
-			$widget_class = 'kco-one-col';			
+
+		if ( 'left' == $atts['col'] ) {
+			$widget_class .= ' kco-left-col';
+		} elseif ( 'right' == $atts['col'] ) {
+			$widget_class .= ' kco-right-col';			
 		}
 
 		$data = new WC_Gateway_Klarna_Checkout;

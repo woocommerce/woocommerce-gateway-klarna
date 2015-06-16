@@ -1,11 +1,20 @@
 @media all and (min-width: 800px) {
-	#klarna-checkout-widget.kco-two-col {
-		float: left;
+	#klarna-checkout-widget.kco-left-col,
+	#klarna-checkout-widget.kco-right-col {
 		width: 40%;
 	}
-	#klarna-checkout-widget.kco-two-col + .klarna_checkout.kco-two-col {
-		float: right;
+	.klarna_checkout.kco-left-col,
+	.klarna_checkout.kco-right-col {
 		width: 55%;
+	}
+
+	#klarna-checkout-widget.kco-left-col,
+	.klarna_checkout.kco-left-col {
+		float: left;
+	}
+	#klarna-checkout-widget.kco-right-col,
+	.klarna_checkout.kco-right-col {
+		float: right;
 	}
 }
 

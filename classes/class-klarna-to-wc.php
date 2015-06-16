@@ -827,6 +827,7 @@ class WC_Gateway_Klarna_K2WC {
 			$order->payment_complete( $klarna_order['reservation'] );
 			delete_post_meta( $order->id, '_kco_incomplete_customer_email' );
 		}
+		$this->klarna_log->add( 'klarna', 'Updated Klarna order status to "created"' );
 
 		return $klarna_order;
 	}

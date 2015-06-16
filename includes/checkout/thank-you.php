@@ -54,4 +54,4 @@ do_action( 'woocommerce_thankyou', $_GET['sid'] );
 // Clear session and empty cart
 WC()->session->__unset( 'klarna_checkout' );
 WC()->session->__unset( 'ongoing_klarna_order' );
-$woocommerce->cart->empty_cart(); // Remove cart
+WC()->cart->empty_cart(); // Remove cart
