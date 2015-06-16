@@ -99,7 +99,6 @@ function init_klarna_gateway() {
 
 		}
 
-
 	 	/**
 	 	 * Register and enqueue Klarna scripts
 	 	 */
@@ -167,9 +166,29 @@ function init_klarna_gateway() {
 
 	// Klarna Checkout class
 	$klarna_shop_country = get_option( 'woocommerce_default_country' );
-	$available_countries = array( 'SE', 'NO', 'FI', 'DE', 'GB' );
+	$available_countries = array( 'SE', 'NO', 'FI', 'DE', 'GB', 'AT' );
 	if ( in_array( $klarna_shop_country, $available_countries ) ) {
 		require_once 'classes/class-klarna-checkout.php';
+	}
+
+	// Send customer and merchant emails for KCO Incomplete > Processing status change
+	add_filter( 'woocommerce_email_actions', 'kco_test_add_kco_incomplete_email_actions' );
+	function kco_test_add_kco_incomplete_email_actions( $email_actions ) {
+		$email_actions[] = 'woocommerce_order_status_kco-incomplete_to_processing';
+		return $email_actions;
+	}
+
+	// Triggers the email
+	add_action( 'woocommerce_order_status_kco-incomplete_to_processing_notification', 'kco_test_trigger' );
+	function kco_test_trigger( $orderid ) {
+		$kco_mailer = WC()->mailer();
+		$kco_mails = $kco_mailer->get_emails();
+		foreach ( $kco_mails as $kco_mail ) {
+			$order =  new WC_Order( $orderid );
+			if ( 'new_order' == $kco_mail->id ) {
+				$kco_mail->trigger( $order->id );
+			}
+		}
 	}
 
 }
@@ -199,3 +218,23 @@ function add_klarna_gateway( $methods ) {
 	return $methods;
 }
 add_filter( 'woocommerce_payment_gateways', 'add_klarna_gateway' );
+
+
+// add_action( 'woocommerce_init', 'slbd_test' );
+function slbd_test() {
+
+	$kco_mailer = WC()->mailer();
+	$kco_mails = $kco_mailer->get_emails();
+	foreach ( $kco_mails as $kco_mail ) {
+		/*
+		echo '<pre>';
+		print_r( $kco_mail );
+		echo '</pre>';
+		*/
+		$order =  new WC_Order( 2753 );
+		if ( 'new_order' == $kco_mail->id ) {
+			$kco_mail->trigger( $order->id );
+		}
+	}
+
+}

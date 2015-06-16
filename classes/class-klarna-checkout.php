@@ -162,7 +162,9 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		add_action( 'init', array( $this, 'register_klarna_incomplete_order_status' ) );
 		add_filter( 'wc_order_statuses', array( $this, 'add_kco_incomplete_to_order_statuses' ) );
 		add_filter( 'woocommerce_valid_order_statuses_for_payment_complete', array( $this, 'kco_incomplete_payment_complete' ) );
+
     }
+
 
 	/**
 	 * Register KCO Incomplete order status
