@@ -61,7 +61,7 @@ if ( wp_is_mobile() ) {
 <div class="clear"></div>
 				
 <fieldset>
-	<p class="form-row form-row-first">
+	<p class="form-row form-row-wide">
 		<?php
 		// Check if we have any PClasses
 		require_once( KLARNA_LIB . 'pclasses/storage.intf.php' );
@@ -171,7 +171,7 @@ if ( wp_is_mobile() ) {
 	</p>
 	<div class="clear"></div>
 	
-	<p class="form-row form-row-first">
+	<p class="form-row form-row-wide">
 	<?php if ( $this->klarna_helper->get_klarna_country() == 'NL' || $this->klarna_helper->get_klarna_country() == 'DE' ) { ?>
 		<label for="<?php echo $klarna_dob_element; ?>">
 			<?php echo __("Date of Birth", 'klarna') ?> <span class="required">*</span>
@@ -321,7 +321,7 @@ if ( wp_is_mobile() ) {
 	</p>
 	
 	<?php if ( $this->klarna_helper->get_klarna_country() == 'NL' || $this->klarna_helper->get_klarna_country() == 'DE' ) { ?>
-		<p class="form-row form-row-last">
+		<p class="form-row form-row-wide">
 			<label for="klarna_part_payment_gender">
 				<?php echo __("Gender", 'klarna') ?> <span class="required">*</span>
 			</label>
@@ -335,7 +335,7 @@ if ( wp_is_mobile() ) {
 	<div class="clear"></div>
 
 	<?php if ( ( $this->klarna_helper->get_klarna_country() == 'DE' || $this->klarna_helper->get_klarna_country() == 'AT' ) && $this->de_consent_terms == 'yes' ) { // Consent terms for German & Austrian shops ?>
-		<p class="form-row">
+		<p class="form-row form-row-wide">
 			<label for="klarna_de_terms"></label>
 			<input type="checkbox" class="input-checkbox" value="yes" name="klarna_de_consent_terms" />
 			<?php echo sprintf(__('Mit der Übermittlung der für die Abwicklungdes Rechnungskaufes und einer Identitäts-und Bonitätsprüfung erforderlichen Daten an Klarna bin ich einverstanden. Meine <a href="%s" target="_blank">Einwilligung</a> kann ich jederzeit mit Wirkung für die Zukunft widerrufen. Es gelten die AGB des Händlers.', 'klarna'), 'https://online.klarna.com/consent_de.yaws') ?>
