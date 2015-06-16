@@ -220,23 +220,3 @@ function add_klarna_gateway( $methods ) {
 	return $methods;
 }
 add_filter( 'woocommerce_payment_gateways', 'add_klarna_gateway' );
-
-
-// add_action( 'woocommerce_init', 'slbd_test' );
-function slbd_test() {
-
-	$kco_mailer = WC()->mailer();
-	$kco_mails = $kco_mailer->get_emails();
-	foreach ( $kco_mails as $kco_mail ) {
-		/*
-		echo '<pre>';
-		print_r( $kco_mail );
-		echo '</pre>';
-		*/
-		$order =  new WC_Order( 2753 );
-		if ( 'new_order' == $kco_mail->id ) {
-			$kco_mail->trigger( $order->id );
-		}
-	}
-
-}

@@ -37,6 +37,11 @@ $create['purchase_country'] = $kco_country;
 $create['purchase_currency'] = $this->klarna_currency;
 $create['locale'] = $kco_locale;
 
+// Set Euro country session value
+if ( 'eur' == strtolower( $create['purchase_currency'] ) ) {
+	WC()->session->set( 'klarna_euro_country', $create['purchase_country'] );	
+}
+
 if ( ! $this->is_rest() ) {
 	$create['merchant']['id'] = $eid; // Only needed in V2 of API
 }

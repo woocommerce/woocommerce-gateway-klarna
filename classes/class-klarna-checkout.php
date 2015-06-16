@@ -1054,8 +1054,15 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	function ajax_update_klarna_order() {
 		global $woocommerce;
 
-		$eid = $this->klarna_eid;
-		$sharedSecret = $this->klarna_secret;
+		// Check if Euro is selected, get correct country
+		if ( WC()->session->get( 'aelia_cs_selected_currency' ) && 'EUR' == WC()->session->get( 'aelia_cs_selected_currency' ) && WC()->session->get( 'klarna_euro_country' ) ) {
+			$klarna_c = strtolower( WC()->session->get( 'klarna_euro_country' ) );
+			$eid = $this->settings["eid_$klarna_c"];
+			$sharedSecret = $this->settings["secret_$klarna_c"];
+		} else {
+			$eid = $this->klarna_eid;
+			$sharedSecret = $this->klarna_secret;
+		}
 
 		if ( $this->is_rest() ) {
 			require_once( KLARNA_LIB . 'vendor/autoload.php' );
@@ -1071,8 +1078,6 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			);
 		} else {
 			require_once( KLARNA_LIB . '/src/Klarna/Checkout.php' );
-			// Klarna_Checkout_Order::$baseUri = $this->klarna_server;
-			// Klarna_Checkout_Order::$contentType = 'application/vnd.klarna.checkout.aggregated-order-v2+json';
 			$connector = Klarna_Checkout_Connector::create( $sharedSecret, $this->klarna_server );
 	
 			$klarna_order = new Klarna_Checkout_Order(
@@ -1384,9 +1389,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 * @since 1.0.0
 	 */
 	function is_available() {
-
 		 return false;
-
 	}
 
 

@@ -54,6 +54,11 @@ try {
 		$update['purchase_currency'] = $this->klarna_currency;
 		$update['locale'] = $kco_locale;
 
+		// Set Euro country session value
+		if ( 'eur' == strtolower( $update['purchase_currency'] ) ) {
+			WC()->session->set( 'klarna_euro_country', $update['purchase_country'] );	
+		}
+
 		$update['merchant']['id']= $eid;
 
 		//
