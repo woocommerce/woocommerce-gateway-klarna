@@ -1024,11 +1024,14 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 
 		// Capture postal code
 		if ( isset( $_REQUEST['postal_code'] ) && is_string( $_REQUEST['postal_code'] ) && WC_Validation::is_postcode( $_REQUEST['postal_code'], $this->klarna_country ) ) {
-			global $woocommerce;
-
 			$woocommerce->customer->set_shipping_postcode( $_REQUEST['postal_code'] );
 
+			if ( ! defined( 'WOOCOMMERCE_CART' ) ) {
+				define( 'WOOCOMMERCE_CART', true );
+			}
+
 			$woocommerce->cart->calculate_shipping();
+			$woocommerce->cart->calculate_fees();
 			$woocommerce->cart->calculate_totals();
 
 			$this->update_or_create_local_order();
