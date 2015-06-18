@@ -163,8 +163,9 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		add_filter( 'wc_order_statuses', array( $this, 'add_kco_incomplete_to_order_statuses' ) );
 		add_filter( 'woocommerce_valid_order_statuses_for_payment_complete', array( $this, 'kco_incomplete_payment_complete' ) );
 
+		// Do not copy invoice number to recurring orders
+		add_filter( 'woocommerce_subscriptions_renewal_order_meta_query', array( $this, 'kco_recurring_do_not_copy_meta_data' ), 10, 4 );
     }
-
 
 	/**
 	 * Register KCO Incomplete order status
@@ -261,7 +262,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	function process_subscription_payment( $amount_to_charge, $order, $product_id ) {
 		$subscriptions_in_order = WC_Subscriptions_Order::get_recurring_items( $order );
 		$subscription_item      = array_pop( $subscriptions_in_order );
-		$subscription_key       = WC_Subscriptions_Manager::get_subscription_key( $order->id, $subscription_item['id'] );
+		$subscription_key       = WC_Subscriptions_Manager::get_subscription_key( $order->id, $subscription_item['product_id'] );
 		$subscription           = WC_Subscriptions_Manager::get_subscription( $subscription_key, $order->customer_user );
 
 		$product = wc_get_product( $product_id );
@@ -358,10 +359,12 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		try {
 			$klarna_order->create( $create );
 			if ( isset( $klarna_order['invoice'] ) ) {
+				add_post_meta( $order->id, '_klarna_order_invoice_recurring', $klarna_order['invoice'], true );
 				$order->add_order_note(
 					__( 'Klarna subscription payment invoice number: ', 'klarna' ) . $klarna_order['invoice']
 				);
 			} elseif ( isset( $klarna_order['reservation'] ) ) {
+				add_post_meta( $order->id, '_klarna_order_reservation_recurring', $klarna_order['reservation'], true );
 				$order->add_order_note(
 					__( 'Klarna subscription payment reservation number: ', 'klarna' ) . $klarna_order['reservation']
 				);
@@ -377,6 +380,16 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			);
 			return false;
 		}
+	}
+
+	/**
+	 * Do not copy Klarna invoice number from completed subscription order to its renewal orders.
+	 * 
+	 * @since  2.0
+	 **/
+	function kco_recurring_do_not_copy_meta_data( $order_meta_query, $original_order_id, $renewal_order_id, $new_order_role ) {
+		$order_meta_query .= " AND `meta_key` NOT IN ('_klarna_invoice_number')";
+		return $order_meta_query;
 	}
 
 	/**
@@ -1763,14 +1776,27 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		if ( 'yes' == $this->push_completion ) {
 			// Check if order was created using this method
 			if ( $this->id == get_post_meta( $orderid, '_payment_method', true ) ) {
+				$order = wc_get_order( $orderid );
+
+				if ( class_exists( 'WC_Subscriptions_Renewal_Order' ) && WC_Subscriptions_Renewal_Order::is_renewal( $order ) ) {
+					if ( get_post_meta( $orderid, '_klarna_order_reservation_recurring', true ) && get_post_meta( $orderid, '_billing_country', true ) ) {
+						if ( ! get_post_meta( $orderid, '_klarna_invoice_number', true ) ) {
+							$rno = get_post_meta( $orderid, '_klarna_order_reservation_recurring', true );
+							$country = get_post_meta( $orderid, '_billing_country', true );
+
+							$klarna = new Klarna();
+							$this->configure_klarna( $klarna, $country );
+
+							$klarna_order = new WC_Gateway_Klarna_Order( $order, $klarna );
+							$klarna_order->activate_order( $rno );
+						}
+					}
 				// Klarna reservation number and billing country must be set
-				if ( get_post_meta( $orderid, '_klarna_order_reservation', true ) && get_post_meta( $orderid, '_billing_country', true ) ) {
+				} elseif ( get_post_meta( $orderid, '_klarna_order_reservation', true ) && get_post_meta( $orderid, '_billing_country', true ) ) {
 					// Check if this order hasn't been activated already
 					if ( ! get_post_meta( $orderid, '_klarna_invoice_number', true ) ) {
 						$rno = get_post_meta( $orderid, '_klarna_order_reservation', true );
 						$country = get_post_meta( $orderid, '_billing_country', true );
-
-						$order = wc_get_order( $orderid );
 
 						$klarna = new Klarna();
 						$this->configure_klarna( $klarna, $country );
