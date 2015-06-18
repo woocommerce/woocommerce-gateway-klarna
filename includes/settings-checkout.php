@@ -198,6 +198,7 @@ return apply_filters( 'klarna_checkout_form_fields', array(
 		'default' => 'no'
 	),
 
+	/*
 	'eid_uk' => array(
 		'title' => __( 'Eid - UK', 'klarna' ), 
 		'type' => 'text', 
@@ -222,6 +223,7 @@ return apply_filters( 'klarna_checkout_form_fields', array(
 		'description' => __( 'Enter the URL to the page that acts as Thanks Page for Klarna Checkout UK. This page must contain the shortcode [woocommerce_klarna_checkout]. Leave blank to use the Custom Checkout Page as Thanks Page.', 'klarna' ), 
 		'default' => ''
 	),
+	*/
 
 	'default_eur_contry' => array(
 		'title' => __( 'Default Checkout Country', 'klarna' ),
