@@ -2,16 +2,16 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce Klarna Gateway v1.8.8\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-08-28 10:31+0100\n"
-"PO-Revision-Date: 2015-02-04 09:30+0100\n"
-"Last-Translator: Slobodan Manic <slobodan.manic@gmail.com>\n"
+"POT-Creation-Date: 2015-06-18 11:35+0100\n"
+"PO-Revision-Date: 2015-06-18 11:35+0100\n"
+"Last-Translator: Niklas Högefjord <info@krokedil.se>\n"
 "Language-Team: \n"
 "Language: de_DE\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Poedit 1.5.5\n"
+"X-Generator: Poedit 1.7.6\n"
 "X-Poedit-SourceCharset: utf-8\n"
 "X-Poedit-KeywordsList: __;_e;__ngettext:1,2;_n:1,2;__ngettext_noop:1,2;"
 "_n_noop:1,2;_c,_nc:4c,1,2;_x:1,2c;_ex:1,2c;_nx:4c,1,2;_nx_noop:4c,1,2\n"
@@ -20,180 +20,170 @@ msgstr ""
 "X-Poedit-SearchPath-0: ..\n"
 
 # @ klarna
-#: classes/class-klarna-account.php:16 classes/class-klarna-account.php:292
-msgid "Klarna Account"
-msgstr "Klarna Ratenkauf"
+#: ../classes/class-klarna-checkout.php:26
+#: ../classes/class-klarna-checkout.php:1362
+#: ../includes/settings-checkout.php:23
+msgid "Klarna Checkout"
+msgstr "Klarna Checkout"
 
-# @ klarna
-#: classes/class-klarna-account.php:134 classes/class-klarna-campaign.php:117
-#: classes/class-klarna-checkout.php:234 classes/class-klarna-invoice.php:82
-msgid "Enable/Disable"
-msgstr "Aktivieren / Deaktivieren"
+#: ../classes/class-klarna-checkout.php:186
+#, php-format
+msgid "KCO incomplete <span class=\"count\">(%s)</span>"
+msgid_plural "KCO incomplete <span class=\"count\">(%s)</span>"
+msgstr[0] ""
+msgstr[1] ""
 
-# @ klarna
-#: classes/class-klarna-account.php:136
-msgid "Enable Klarna Account"
-msgstr "Klarna Ratenkauf aktivieren"
-
-# @ klarna
-#: classes/class-klarna-account.php:140 classes/class-klarna-campaign.php:123
-#: classes/class-klarna-checkout.php:240 classes/class-klarna-invoice.php:88
-msgid "Title"
-msgstr "Titel"
-
-# @ klarna
-#: classes/class-klarna-account.php:142 classes/class-klarna-campaign.php:125
-#: classes/class-klarna-checkout.php:242 classes/class-klarna-invoice.php:90
-msgid "This controls the title which the user sees during checkout."
-msgstr "Dies bestimmt den Titel, den der Benutzer bei der Kasse sieht."
-
-# @ klarna
-#: classes/class-klarna-account.php:146 classes/class-klarna-campaign.php:135
-#: classes/class-klarna-invoice.php:94
-msgid "Description"
-msgstr "Beschreibung"
-
-# @ klarna
-#: classes/class-klarna-account.php:148 classes/class-klarna-campaign.php:137
-msgid "This controls the description which the user sees during checkout. "
-msgstr "Dies bestimmt die Beschreibung, die der Benutzer bei der Kasse sieht."
-
-# @ klarna
-#: classes/class-klarna-account.php:224 classes/class-klarna-campaign.php:231
-#: classes/class-klarna-invoice.php:184
-msgid "Lower threshold"
-msgstr "Unterer Grenzwert"
-
-# @ klarna
-#: classes/class-klarna-account.php:226
-msgid ""
-"Disable Klarna Account if Cart Total is lower than the specified value. "
-"Leave blank to disable this feature."
+#: ../classes/class-klarna-checkout.php:221
+msgid "Automatically activate recurring orders"
 msgstr ""
-"Klarna Ratenkauf deaktivieren, wenn der Gesamtpreis des Warenkorbs unter dem "
-"angegebenen Wert liegt. Leer lassen, um dieses Feature zu deaktivieren."
 
-# @ klarna
-#: classes/class-klarna-account.php:230 classes/class-klarna-campaign.php:237
-#: classes/class-klarna-invoice.php:190
-msgid "Upper threshold"
-msgstr "Oberer Grenzwert"
-
-# @ klarna
-#: classes/class-klarna-account.php:232
+#: ../classes/class-klarna-checkout.php:223
 msgid ""
-"Disable Klarna Account if Cart Total is higher than the specified value. "
-"Leave blank to disable this feature."
+"If this option is checked recurring orders will be activated automatically"
 msgstr ""
-"Klarna Ratenkauf deaktivieren, wenn der Gesamtpreis des Warenkorbs über dem "
-"angegebenen Wert liegt. Leer lassen, um dieses Feature zu deaktivieren."
 
-# @ klarna
-#: classes/class-klarna-account.php:236
-msgid "Display monthly cost - product page"
-msgstr "Monatliche Kosten anzeigen - Produktseite"
-
-# @ klarna
-#: classes/class-klarna-account.php:238
-msgid "Display monthly cost on single products page."
-msgstr "Monatliche Kosten auf der Produktseite anzeigen."
-
-# @ klarna
-#: classes/class-klarna-account.php:242
-msgid "Placement of monthly cost - product page"
-msgstr "Platzierung der monatlichen Kosten - Produktseite"
-
-# @ klarna
-#: classes/class-klarna-account.php:244
-msgid "Above Title"
-msgstr "Über dem Titel"
-
-# @ klarna
-#: classes/class-klarna-account.php:244
-msgid "Between Title and Price"
-msgstr "Zwischen Titel und Preis"
-
-# @ klarna
-#: classes/class-klarna-account.php:244
-msgid "Between Price and Excerpt"
-msgstr "Zwischen Preis und Auszug"
-
-# @ klarna
-#: classes/class-klarna-account.php:244
-msgid "Between Excerpt and Add to cart-button"
-msgstr "Zwischen Auszug und \"In den Warenkorb\"-Button"
-
-# @ klarna
-#: classes/class-klarna-account.php:244
-msgid "Between Add to cart-button and Product meta"
-msgstr "Zwischen \"In den Warenkorb\"-Button und Produkt-Metadaten"
-
-# @ klarna
-#: classes/class-klarna-account.php:244
-msgid "Between Product meta and Product sharing-buttons"
-msgstr "Zwischen Produkt-Metadaten und \"Produkt Teilen\"-Buttons"
-
-# @ klarna
-#: classes/class-klarna-account.php:244
-msgid "After Product sharing-buttons"
-msgstr "Nach \"Produkt Teilen\"-Buttons"
-
-# @ klarna
-#: classes/class-klarna-account.php:245
-msgid ""
-"Select where on the products page the Monthly cost information should be "
-"displayed."
+#: ../classes/class-klarna-checkout.php:362
+msgid "Klarna subscription payment invoice number: "
 msgstr ""
-"Wählen Sie aus wo auf der Produktseite die monatlichen Kosten angezeigt "
-"werden sollen."
 
-# @ klarna
-#: classes/class-klarna-account.php:249
-msgid "Lower threshold for monthly cost"
-msgstr "Unterer Grenzwert für monaltiche Kosten"
-
-# @ klarna
-#: classes/class-klarna-account.php:251
-msgid ""
-"Disable the monthly cost feature if <i>Product price</i> is lower than the "
-"specified value. Leave blank to disable."
+#: ../classes/class-klarna-checkout.php:366
+msgid "Klarna subscription payment reservation number: "
 msgstr ""
-"Monatliches Kosten-Feature deaktivieren, wenn der <i>Produktpreis</i> unter "
-"dem angegebenen Wert liegt. Leer lassen, um dieses Feature zu deaktivieren."
 
-# @ klarna
-#: classes/class-klarna-account.php:255
-msgid "Upper threshold for monthly cost"
-msgstr "Oberer Grenzwert für monatliche Kosten"
-
-# @ klarna
-#: classes/class-klarna-account.php:257
-msgid ""
-"Disable the monthly cost feature if <i>Product price</i> is higher than the "
-"specified value. Leave blank to disable."
+#: ../classes/class-klarna-checkout.php:373
+#, php-format
+msgid "Klarna subscription payment failed. Error code %s. Error message %s"
 msgstr ""
-"Monatliches Kosten-Feature deaktivieren, wenn der <i>Produktpreis</i> über "
-"dem angegebenen Wert liegt. Leer lassen, um dieses Feature zu deaktivieren."
 
-# @ klarna
-#: classes/class-klarna-account.php:273 classes/class-klarna-campaign.php:255
-#: classes/class-klarna-checkout.php:410 classes/class-klarna-invoice.php:214
-msgid "Test Mode"
-msgstr "Test-Modus"
+#: ../classes/class-klarna-checkout.php:465
+msgid "Apply Coupon"
+msgstr ""
 
-# @ klarna
-#: classes/class-klarna-account.php:275 classes/class-klarna-campaign.php:257
-#: classes/class-klarna-invoice.php:216
-msgid ""
-"Enable Klarna Test Mode. This will only work if you have a Klarna test "
-"account. For test purchases with a live account, <a href=\"http://"
-"integration.klarna.com/en/testing/test-persons\" target=\"_blank\">follow "
-"these instructions</a>."
+#: ../classes/class-klarna-checkout.php:477
+msgid "Product"
+msgstr ""
+
+#: ../classes/class-klarna-checkout.php:478
+msgid "Price"
+msgstr ""
+
+#: ../classes/class-klarna-checkout.php:479
+msgid "Quantity"
+msgstr ""
+
+#: ../classes/class-klarna-checkout.php:480
+#: ../classes/class-klarna-checkout.php:551
+msgid "Total"
+msgstr ""
+
+#: ../classes/class-klarna-checkout.php:534
+msgid "Subtotal"
+msgstr ""
+
+#: ../classes/class-klarna-checkout.php:560
+msgid "Notes about your order, e.g. special notes for delivery."
 msgstr ""
 
 # @ klarna
-#: classes/class-klarna-account.php:293 classes/class-klarna-campaign.php:275
-#: classes/class-klarna-invoice.php:236
+#: ../classes/class-klarna-checkout.php:597
+#: ../includes/settings-checkout.php:231
+msgid "Finland"
+msgstr "Finnland"
+
+# @ klarna
+#: ../classes/class-klarna-checkout.php:600
+#: ../includes/settings-checkout.php:230
+msgid "Germany"
+msgstr "Deutschland"
+
+#: ../classes/class-klarna-checkout.php:603
+#: ../includes/settings-checkout.php:232
+msgid "Austria"
+msgstr ""
+
+#: ../classes/class-klarna-checkout.php:635
+msgid "Country:"
+msgstr ""
+
+#: ../classes/class-klarna-checkout.php:1320
+#: ../classes/class-wc-to-klarna.php:364
+msgid "Shipping"
+msgstr ""
+
+# @ klarna
+#: ../classes/class-klarna-checkout.php:1365
+#, php-format
+msgid ""
+"With Klarna Checkout your customers can pay by invoice or credit card. "
+"Klarna Checkout works by replacing the standard WooCommerce checkout form. "
+"Documentation <a href=\"%s\" target=\"_blank\">can be found here</a>."
+msgstr ""
+
+# @ klarna
+#: ../classes/class-klarna-checkout.php:1372
+msgid ""
+"You need to specify a Terms Page in the WooCommerce settings or in the "
+"Klarna Checkout settings in order to enable the Klarna Checkout payment "
+"method."
+msgstr ""
+
+# @ klarna
+#: ../classes/class-klarna-checkout.php:1379
+msgid ""
+"The PHP library cURL does not seem to be installed on your server. Klarna "
+"Checkout will not work without it."
+msgstr ""
+
+#: ../classes/class-klarna-checkout.php:1733
+#: ../classes/class-klarna-invoice.php:360
+#: ../classes/class-klarna-part-payment.php:230
+msgid "This order cannot be refunded. Please make sure it is activated."
+msgstr ""
+
+#: ../classes/class-klarna-checkout.php:1973
+#, php-format
+msgid ""
+"Sorry, you can not buy via Klarna Checkout from your country or currency. "
+"Please <a href=\"%s\">use another payment method</a>. "
+msgstr ""
+
+#: ../classes/class-klarna-checkout.php:1988
+#, php-format
+msgid "You must be logged in to checkout. %s or %s."
+msgstr ""
+
+# @ klarna
+#: ../classes/class-klarna-get-address.php:234
+msgid "Be kind and enter a date of birth!"
+msgstr ""
+
+#: ../classes/class-klarna-get-address.php:262
+msgid "Address found and added to the checkout form."
+msgstr ""
+
+#: ../classes/class-klarna-get-address.php:270
+msgid ""
+"Multiple addresses found. Select one address to add it to the checkout form."
+msgstr ""
+
+# @ klarna
+#: ../classes/class-klarna-get-address.php:336
+msgid "Fetch"
+msgstr ""
+
+# @ klarna
+#: ../classes/class-klarna-get-address.php:434
+msgid "No address found"
+msgstr ""
+
+# @ klarna
+#: ../classes/class-klarna-invoice.php:29
+msgid "Klarna Invoice"
+msgstr "Klarna Rechnung"
+
+# @ klarna
+#: ../classes/class-klarna-invoice.php:30
+#: ../classes/class-klarna-part-payment.php:30
 #, php-format
 msgid ""
 "With Klarna your customers can pay by invoice. Klarna works by adding extra "
@@ -206,356 +196,442 @@ msgstr ""
 "Überprüfung. Die Dokumentation ist <a href=\"%s\" target=\"_blank\">hier "
 "einsehbar</a>."
 
+# @ woocommerce
+#: ../classes/class-klarna-invoice.php:32
+#: ../classes/class-klarna-part-payment.php:32
+msgid "Place order"
+msgstr ""
+
+#: ../classes/class-klarna-invoice.php:305
+#: ../classes/class-klarna-order.php:505
+msgid "Klarna order updated."
+msgstr ""
+
+#: ../classes/class-klarna-invoice.php:313
+#: ../classes/class-klarna-order.php:512
+#, php-format
+msgid "Klarna order update failed. Error code %s. Error message %s"
+msgstr ""
+
+#: ../classes/class-klarna-invoice.php:574
+#: ../classes/class-klarna-part-payment.php:444
+msgid "Settings"
+msgstr ""
+
 # @ klarna
-#: classes/class-klarna-account.php:401 classes/class-klarna-campaign.php:448
-#: classes/class-klarna-invoice.php:302
+#: ../classes/class-klarna-invoice.php:829
+#: ../classes/class-klarna-part-payment.php:700
 msgid "TEST MODE ENABLED"
 msgstr "TEST-MODUS AKTIVIERT"
 
 # @ klarna
-#: classes/class-klarna-account.php:575 classes/class-klarna-campaign.php:601
-#: classes/class-klarna-pms.php:181
+#: ../classes/class-klarna-invoice.php:1018
+#: ../classes/class-klarna-part-payment.php:885
+msgid "Klarna payment completed. Klarna Invoice number: "
+msgstr "Klarna Ratenkauf abgeschlossen. Klarna Rechnungsnummer: "
+
+#: ../classes/class-klarna-invoice.php:1035
+msgid ""
+"Order is PENDING APPROVAL by Klarna. Please visit Klarna Online for the "
+"latest status on this order. Klarna reservation number: "
+msgstr ""
+
+# @ klarna
+#: ../classes/class-klarna-invoice.php:1048
+#: ../classes/class-klarna-invoice.php:1051
+#: ../classes/class-klarna-invoice.php:1107
+#: ../classes/class-klarna-part-payment.php:913
+#: ../classes/class-klarna-part-payment.php:916
+msgid "Klarna payment denied."
+msgstr "Klarna Ratenkauf abgelehnt."
+
+# @ klarna
+#: ../classes/class-klarna-invoice.php:1059
+#: ../classes/class-klarna-invoice.php:1062
+#: ../classes/class-klarna-part-payment.php:924
+#: ../classes/class-klarna-part-payment.php:927
+msgid "Unknown response from Klarna."
+msgstr "Unbekannte Antwort von Klarna."
+
+# @ klarna
+#: ../classes/class-klarna-invoice.php:1073
+#: ../classes/class-klarna-part-payment.php:938
+#, php-format
+msgid "%s (Error code: %s)"
+msgstr "%s (Fehlercode: %s)"
+
+#: ../classes/class-klarna-invoice.php:1103
+msgid "Klarna payment completed. You can now activate Klarna order."
+msgstr ""
+
+# @ klarna
+#: ../classes/class-klarna-invoice.php:1122
+#: ../classes/class-klarna-part-payment.php:955
+msgid "Thank you for your order."
+msgstr "Vielen Dank für Ihre Bestellung."
+
+# @ klarna
+#: ../classes/class-klarna-order.php:167
+msgid "Discount"
+msgstr "Rabatt"
+
+#: ../classes/class-klarna-order.php:347
+msgid "Klarna order fully refunded."
+msgstr ""
+
+#: ../classes/class-klarna-order.php:357 ../classes/class-klarna-order.php:400
+#, php-format
+msgid "Klarna order refund failed. Error code %s. Error message %s"
+msgstr ""
+
+#: ../classes/class-klarna-order.php:390
+#, php-format
+msgid "Klarna order partially refunded. Refund amount: %s."
+msgstr ""
+
+#: ../classes/class-klarna-order.php:412
+msgid ""
+"Refund failed. WooCommerce Klarna partial refund not possible for orders "
+"containing items with different tax rates."
+msgstr ""
+
+#: ../classes/class-klarna-order.php:443
+#, php-format
+msgid "Klarna order activated. Invoice number %s - risk status %s."
+msgstr ""
+
+#: ../classes/class-klarna-order.php:454
+#, php-format
+msgid "Klarna order activation failed. Error code %s. Error message %s"
+msgstr ""
+
+#: ../classes/class-klarna-order.php:476
+msgid "Klarna order cancellation completed."
+msgstr ""
+
+#: ../classes/class-klarna-order.php:482
+#, php-format
+msgid "Klarna order cancellation failed. Error code %s. Error message %s"
+msgstr ""
+
+#: ../classes/class-klarna-part-payment.php:29
+msgid "Klarna Part Payment"
+msgstr ""
+
+# @ klarna
+#: ../classes/class-klarna-part-payment.php:900
+msgid ""
+"Order is PENDING APPROVAL by Klarna. Please visit Klarna Online for the "
+"latest status on this order. Klarna Invoice number: "
+msgstr ""
+
+#: ../classes/class-klarna-payment-method-display-widget.php:24
+msgid "Klarna Payment Method Display Widget"
+msgstr ""
+
+#: ../classes/class-klarna-payment-method-display-widget.php:25
+msgid ""
+"Displays an image that informs the consumer about the payment methods that "
+"are available in your store."
+msgstr ""
+
+#: ../classes/class-klarna-payment-method-display-widget.php:87
+msgid "Design:"
+msgstr ""
+
+#: ../classes/class-klarna-payment-method-display-widget.php:94
+msgid "Color:"
+msgstr ""
+
+#: ../classes/class-klarna-payment-method-display-widget.php:101
+msgid "Width (px):"
+msgstr ""
+
+#: ../classes/class-klarna-payment-method-widget.php:278
+msgid "Klarna Payment Method (Monthly Cost) Widget"
+msgstr ""
+
+#: ../classes/class-klarna-payment-method-widget.php:296
+msgid "Klarna Payment Method Widget Settings"
+msgstr ""
+
+#: ../classes/class-klarna-payment-method-widget.php:302
+msgid "Monthly cost"
+msgstr ""
+
+#: ../classes/class-klarna-payment-method-widget.php:303
+msgid "Display monthly cost in product pages"
+msgstr ""
+
+#: ../classes/class-klarna-payment-method-widget.php:304
+msgid ""
+"If enabled, this option will display Klarna partpayment widget in product "
+"pages"
+msgstr ""
+
+#: ../classes/class-klarna-payment-method-widget.php:310
+msgid "Monthly cost placement"
+msgstr ""
+
+#: ../classes/class-klarna-payment-method-widget.php:311
+msgid "Select where to display the widget in your product pages"
+msgstr ""
+
+# @ klarna
+#: ../classes/class-klarna-payment-method-widget.php:317
+msgid "Above Title"
+msgstr "Über dem Titel"
+
+# @ klarna
+#: ../classes/class-klarna-payment-method-widget.php:318
+msgid "Between Title and Price"
+msgstr "Zwischen Titel und Preis"
+
+# @ klarna
+#: ../classes/class-klarna-payment-method-widget.php:319
+msgid "Between Price and Excerpt"
+msgstr "Zwischen Preis und Auszug"
+
+#: ../classes/class-klarna-payment-method-widget.php:320
+msgid "Between Excerpt and Add to cart button"
+msgstr ""
+
+#: ../classes/class-klarna-payment-method-widget.php:321
+msgid "Between Add to cart button and Product meta"
+msgstr ""
+
+#: ../classes/class-klarna-payment-method-widget.php:322
+msgid "Between Product meta and Product sharing buttons"
+msgstr ""
+
+# @ klarna
+#: ../classes/class-klarna-payment-method-widget.php:323
+msgid "After Product sharing-buttons"
+msgstr "Nach \"Produkt Teilen\"-Buttons"
+
+# @ klarna
+#: ../classes/class-klarna-payment-method-widget.php:327
+#: ../includes/settings-invoice.php:133
+#: ../includes/settings-part-payment.php:127
+msgid "Lower threshold"
+msgstr "Unterer Grenzwert"
+
+# @ klarna
+#: ../classes/class-klarna-payment-method-widget.php:328
+msgid "Lower threshold for monthly cost"
+msgstr "Unterer Grenzwert für monaltiche Kosten"
+
+#: ../classes/class-klarna-payment-method-widget.php:332
+msgid ""
+"Monthly cost widget will not be displayed in product pages if product price "
+"is less than this value."
+msgstr ""
+
+# @ klarna
+#: ../classes/class-klarna-payment-method-widget.php:336
+#: ../includes/settings-invoice.php:139
+#: ../includes/settings-part-payment.php:133
+msgid "Upper threshold"
+msgstr "Oberer Grenzwert"
+
+# @ klarna
+#: ../classes/class-klarna-payment-method-widget.php:337
+msgid "Upper threshold for monthly cost"
+msgstr "Oberer Grenzwert für monatliche Kosten"
+
+#: ../classes/class-klarna-payment-method-widget.php:341
+msgid ""
+"Monthly cost widget will not be displayed in product pages if product price "
+"is more than this value."
+msgstr ""
+
+# @ klarna
+#: ../classes/class-klarna-pms.php:194
+#: ../views/public/payment-fields-invoice.php:84
+#: ../views/public/payment-fields-part-payment.php:84
 msgid "Payment plan"
 msgstr "Zahlungsplan"
 
+# @ woocommerce
+#: ../classes/class-klarna-to-wc.php:356 ../classes/class-klarna-to-wc.php:438
+#: ../classes/class-klarna-to-wc.php:476 ../classes/class-klarna-to-wc.php:563
+#: ../classes/class-klarna-to-wc.php:584
+msgid "Error: Unable to create order. Please try again."
+msgstr ""
+"Fehler: Die Bestellung konnte nicht erstellt werden. Bitte versuchen Sie es "
+"noch einmal."
+
+#: ../classes/class-klarna-to-wc.php:412
+msgid "Error: Unable to add order item. Please try again."
+msgstr ""
+
+# @ woocommerce
+#: ../classes/class-klarna-to-wc.php:659
+msgid "Please provide a valid email address."
+msgstr "Bitte geben Sie eine gültige E-Mail-Adresse an."
+
+# @ woocommerce
+#: ../classes/class-klarna-to-wc.php:662
+msgid "An account is already registered with your email address. Please login."
+msgstr ""
+
+# @ woocommerce
+#: ../classes/class-klarna-to-wc.php:698
+msgid "ERROR"
+msgstr "FEHLER"
+
+# @ woocommerce
+#: ../classes/class-klarna-to-wc.php:698
+msgid ""
+"Couldn&#8217;t register you&hellip; please contact us if you continue to "
+"have problems."
+msgstr ""
+
 # @ klarna
-#: classes/class-klarna-account.php:606 classes/class-klarna-account.php:614
+#: ../classes/class-klarna-to-wc.php:741 ../classes/class-klarna-to-wc.php:747
 #, php-format
-msgid "%s - %s %s/month - %s%s"
-msgstr ""
+msgid "New customer created (user ID %s)."
+msgstr "Neuer Kunde erstellt (Benutzer ID %s)."
 
 # @ klarna
-#: classes/class-klarna-account.php:609
+#: ../classes/class-klarna-to-wc.php:744
 #, php-format
-msgid "%s - %s %s/month - %s%s - Start %s - Tot %s %s"
-msgstr ""
+msgid "Customer creation failed. Error: %s."
+msgstr "Erstellung des Kunden fehlgeschlagen. Fehler: %s."
 
-# @ klarna
-#: classes/class-klarna-account.php:617
+#: ../classes/class-klarna-to-wc.php:802
 #, php-format
-msgid "%s - %s %s/month - %s%s - Start %s"
+msgid "Klarna Checkout payment created. Klarna reference number: %s."
+msgstr ""
+
+#: ../classes/class-klarna-to-wc.php:810
+#, php-format
+msgid ""
+"Klarna Checkout payment created. Reservation number: %s.  Klarna order "
+"number: %s"
+msgstr ""
+
+#: ../classes/class-klarna-to-wc.php:819
+#, php-format
+msgid "Klarna authorization expires at %s."
 msgstr ""
 
 # @ klarna
-#: classes/class-klarna-account.php:633
-msgid "Klarna PClasses seem to be missing. Klarna Account does not work."
-msgstr ""
-"Klarna PClasses scheinen zu fehlen. Klarna Ratenkauf funktioniert nicht."
+#: ../includes/checkout-field-process.php:24
+#: ../includes/checkout-field-process.php:49
+msgid "<strong>Date of birth</strong> is a required field."
+msgstr "<strong>Geburtsdatum</strong> ist ein Pflichtfeld."
 
 # @ klarna
-#: classes/class-klarna-account.php:475 classes/class-klarna-account.php:667
-#: classes/class-klarna-account.php:809 classes/class-klarna-campaign.php:481
-#: classes/class-klarna-campaign.php:675 classes/class-klarna-campaign.php:817
-#: classes/class-klarna-invoice.php:337 classes/class-klarna-invoice.php:424
-#: classes/class-klarna-invoice.php:568
-msgid "Date of Birth"
-msgstr "Geburtsdatum"
+#: ../includes/checkout-field-process.php:41
+msgid "<strong>Gender</strong> is a required field."
+msgstr "<strong>Geschlecht</strong> ist ein Pflichtfeld."
 
 # @ klarna
-#: classes/class-klarna-account.php:670 classes/class-klarna-campaign.php:678
-#: classes/class-klarna-invoice.php:428
-msgid "Day"
-msgstr "Tag"
-
-# @ klarna
-#: classes/class-klarna-account.php:706 classes/class-klarna-campaign.php:714
-#: classes/class-klarna-invoice.php:464
-msgid "Month"
-msgstr "Monat"
-
-# @ klarna
-#: classes/class-klarna-account.php:708 classes/class-klarna-campaign.php:716
-#: classes/class-klarna-invoice.php:466
-msgid "Jan"
-msgstr "Jan"
-
-# @ klarna
-#: classes/class-klarna-account.php:709 classes/class-klarna-campaign.php:717
-#: classes/class-klarna-invoice.php:467
-msgid "Feb"
-msgstr "Feb"
-
-# @ klarna
-#: classes/class-klarna-account.php:710 classes/class-klarna-campaign.php:718
-#: classes/class-klarna-invoice.php:468
-msgid "Mar"
-msgstr "Mrz"
-
-# @ klarna
-#: classes/class-klarna-account.php:711 classes/class-klarna-campaign.php:719
-#: classes/class-klarna-invoice.php:469
-msgid "Apr"
-msgstr "Apr"
-
-# @ klarna
-#: classes/class-klarna-account.php:712 classes/class-klarna-campaign.php:720
-#: classes/class-klarna-invoice.php:470
-msgid "May"
-msgstr "Mai"
-
-# @ klarna
-#: classes/class-klarna-account.php:713 classes/class-klarna-campaign.php:721
-#: classes/class-klarna-invoice.php:471
-msgid "Jun"
-msgstr "Jun"
-
-# @ klarna
-#: classes/class-klarna-account.php:714 classes/class-klarna-campaign.php:722
-#: classes/class-klarna-invoice.php:472
-msgid "Jul"
-msgstr "Jul"
-
-# @ klarna
-#: classes/class-klarna-account.php:715 classes/class-klarna-campaign.php:723
-#: classes/class-klarna-invoice.php:473
-msgid "Aug"
-msgstr "Aug"
-
-# @ klarna
-#: classes/class-klarna-account.php:716 classes/class-klarna-campaign.php:724
-#: classes/class-klarna-invoice.php:474
-msgid "Sep"
-msgstr "Sep"
-
-# @ klarna
-#: classes/class-klarna-account.php:717 classes/class-klarna-campaign.php:725
-#: classes/class-klarna-invoice.php:475
-msgid "Oct"
-msgstr "Okt"
-
-# @ klarna
-#: classes/class-klarna-account.php:718 classes/class-klarna-campaign.php:726
-#: classes/class-klarna-invoice.php:476
-msgid "Nov"
-msgstr "Nov"
-
-# @ klarna
-#: classes/class-klarna-account.php:719 classes/class-klarna-campaign.php:727
-#: classes/class-klarna-invoice.php:477
-msgid "Dec"
-msgstr "Dez"
-
-# @ klarna
-#: classes/class-klarna-account.php:723 classes/class-klarna-campaign.php:731
-#: classes/class-klarna-invoice.php:481
-msgid "Year"
-msgstr "Jahr"
-
-# @ klarna
-#: classes/class-klarna-account.php:821 classes/class-klarna-campaign.php:829
-#: classes/class-klarna-invoice.php:583
-msgid "Gender"
-msgstr "Geschlecht"
-
-# @ klarna
-#: classes/class-klarna-account.php:823 classes/class-klarna-campaign.php:831
-#: classes/class-klarna-invoice.php:585
-msgid "Select gender"
-msgstr "Auswählen"
-
-# @ klarna
-#: classes/class-klarna-account.php:824 classes/class-klarna-campaign.php:832
-#: classes/class-klarna-invoice.php:586
-msgid "Female"
-msgstr "Weiblich"
-
-# @ klarna
-#: classes/class-klarna-account.php:825 classes/class-klarna-campaign.php:833
-#: classes/class-klarna-invoice.php:587
-msgid "Male"
-msgstr "Männlich"
-
-# @ klarna
-#: classes/class-klarna-account.php:869 classes/class-klarna-account.php:883
-#: classes/class-klarna-invoice.php:1527 classes/class-klarna-invoice.php:1541
-msgid "<strong>Date of birth</strong> is a required field"
-msgstr "<strong>Geburtsdatum</strong> ist ein Pflichtfeld"
-
-# @ klarna
-#: classes/class-klarna-account.php:879 classes/class-klarna-invoice.php:1536
-msgid "<strong>Gender</strong> is a required field"
-msgstr "<strong>Geschlecht</strong> ist ein Pflichtfeld"
-
-# @ klarna
-#: classes/class-klarna-account.php:895 classes/class-klarna-account.php:898
-#: classes/class-klarna-account.php:901 classes/class-klarna-account.php:904
-#: classes/class-klarna-account.php:907 classes/class-klarna-campaign.php:898
-#: classes/class-klarna-campaign.php:901 classes/class-klarna-campaign.php:904
-#: classes/class-klarna-campaign.php:907 classes/class-klarna-campaign.php:910
-#: classes/class-klarna-invoice.php:1553
+#: ../includes/checkout-field-process.php:63
+#: ../includes/checkout-field-process.php:70
+#: ../includes/checkout-field-process.php:77
+#: ../includes/checkout-field-process.php:84
+#: ../includes/checkout-field-process.php:91
 msgid "Shipping and billing address must be the same when paying via Klarna."
 msgstr ""
 "Die Versand- und die Rechnungsadresse müssen identisch sein, wenn mit Klarna "
 "bezahlt wird."
 
 # @ klarna
-#: classes/class-klarna-invoice.php:1556 classes/class-klarna-invoice.php:1559
-#: classes/class-klarna-invoice.php:1562 classes/class-klarna-invoice.php:1565
-msgid "Shipping and billing address must be the same when paying via Klarna"
-msgstr ""
-"Die Versand- und die Rechnungsadresse müssen identisch sein, wenn mit Klarna "
-"bezahlt wird"
-
-# @ klarna
-#: classes/class-klarna-account.php:914 classes/class-klarna-campaign.php:917
-#: classes/class-klarna-invoice.php:1573
+#: ../includes/checkout-field-process.php:107
 msgid "You must accept the Klarna consent terms."
 msgstr "Sie müssen die Nutzungsbedingungen von Klarna akzeptieren."
 
 # @ klarna
-#: classes/class-klarna-account.php:1068
-#: classes/class-klarna-campaign.php:1071
-#: classes/class-klarna-checkout.php:708
-#: classes/class-klarna-checkout.php:1931 classes/class-klarna-invoice.php:781
-msgid "Discount"
-msgstr "Rabatt"
+#: ../includes/settings-checkout.php:14 ../includes/settings-invoice.php:12
+#: ../includes/settings-part-payment.php:12
+msgid "Enable/Disable"
+msgstr "Aktivieren / Deaktivieren"
 
 # @ klarna
-#: classes/class-klarna-account.php:1126
-#: classes/class-klarna-campaign.php:1129
-#: classes/class-klarna-checkout.php:1953 classes/class-klarna-invoice.php:847
-msgid "Shipping cost"
-msgstr "Versandkosten"
-
-# @ klarna
-#: classes/class-klarna-account.php:1233
-#: classes/class-klarna-campaign.php:1234
-msgid "Klarna payment completed. Klarna Invoice number: "
-msgstr "Klarna Ratenkauf abgeschlossen. Klarna Rechnungsnummer: "
-
-# @ klarna
-#: classes/class-klarna-account.php:1250
-#: classes/class-klarna-campaign.php:1251
-msgid ""
-"Order is PENDING APPROVAL by Klarna. Please visit Klarna Online for the "
-"latest status on this order. Klarna Invoice number: "
-msgstr ""
-
-# @ klarna
-#: classes/class-klarna-account.php:1267 classes/class-klarna-account.php:1268
-#: classes/class-klarna-campaign.php:1268
-#: classes/class-klarna-campaign.php:1269
-#: classes/class-klarna-invoice.php:1004 classes/class-klarna-invoice.php:1005
-msgid "Klarna payment denied."
-msgstr "Klarna Ratenkauf abgelehnt."
-
-# @ klarna
-#: classes/class-klarna-account.php:1273 classes/class-klarna-account.php:1274
-#: classes/class-klarna-campaign.php:1275
-#: classes/class-klarna-campaign.php:1276
-#: classes/class-klarna-invoice.php:1011 classes/class-klarna-invoice.php:1012
-msgid "Unknown response from Klarna."
-msgstr "Unbekannte Antwort von Klarna."
-
-# @ klarna
-#: classes/class-klarna-account.php:1284
-#: classes/class-klarna-campaign.php:1286
-#: classes/class-klarna-invoice.php:1022
-#, php-format
-msgid "%s (Error code: %s)"
-msgstr "%s (Fehlercode: %s)"
-
-# @ klarna
-#: classes/class-klarna-account.php:1296
-#: classes/class-klarna-campaign.php:1298
-#: classes/class-klarna-invoice.php:1033
-msgid "Thank you for your order."
-msgstr "Vielen Dank für Ihre Bestellung."
-
-# @ klarna
-#: classes/class-klarna-campaign.php:16 classes/class-klarna-campaign.php:274
-msgid "Klarna Special Campaign"
-msgstr ""
-
-# @ klarna
-#: classes/class-klarna-campaign.php:119
-msgid "Enable Klarna Special Campaigns"
-msgstr ""
-
-# @ klarna
-#: classes/class-klarna-campaign.php:126
-msgid "Klarna Special Campaigns"
-msgstr ""
-
-# @ klarna
-#: classes/class-klarna-campaign.php:129
-msgid "Icon URL"
-msgstr ""
-
-# @ klarna
-#: classes/class-klarna-campaign.php:131
-msgid "Enter URL to the icon image. Leave blank to disable."
-msgstr ""
-
-# @ klarna
-#: classes/class-klarna-campaign.php:233
-msgid ""
-"Disable Klarna Special Campaigns if Cart Total is lower than the specified "
-"value. Leave blank to disable this feature."
-msgstr ""
-
-# @ klarna
-#: classes/class-klarna-campaign.php:239
-msgid ""
-"Disable Klarna Special Campaigns if Cart Total is higher than the specified "
-"value. Leave blank to disable this feature."
-msgstr ""
-
-# @ klarna
-#: classes/class-klarna-campaign.php:627
-#, php-format
-msgid "%s - Start %s"
-msgstr ""
-
-# @ klarna
-#: classes/class-klarna-campaign.php:491 classes/class-klarna-campaign.php:641
-msgid "Klarna PClasses seem to be missing. Klarna Campaign does not work."
-msgstr ""
-
-# @ klarna
-#: classes/class-klarna-checkout.php:12 classes/class-klarna-checkout.php:243
-#: classes/class-klarna-checkout.php:436
-msgid "Klarna Checkout"
-msgstr "Klarna Checkout"
-
-# @ klarna
-#: classes/class-klarna-checkout.php:236
+#: ../includes/settings-checkout.php:16
 msgid "Enable Klarna Checkout"
 msgstr "Klarna Checkout aktivieren."
 
 # @ klarna
-#: classes/class-klarna-account.php:152 classes/class-klarna-campaign.php:141
-#: classes/class-klarna-checkout.php:246 classes/class-klarna-invoice.php:100
+#: ../includes/settings-checkout.php:20 ../includes/settings-invoice.php:18
+#: ../includes/settings-part-payment.php:18
+msgid "Title"
+msgstr "Titel"
+
+# @ klarna
+#: ../includes/settings-checkout.php:22 ../includes/settings-invoice.php:20
+#: ../includes/settings-part-payment.php:20
+msgid "This controls the title which the user sees during checkout."
+msgstr "Dies bestimmt den Titel, den der Benutzer bei der Kasse sieht."
+
+#: ../includes/settings-checkout.php:40 ../includes/settings-invoice.php:30
+#: ../includes/settings-part-payment.php:30
+msgid "On order completion"
+msgstr ""
+
+#: ../includes/settings-checkout.php:42 ../includes/settings-invoice.php:32
+#: ../includes/settings-part-payment.php:32
+msgid ""
+"Activate Klarna order automatically when WooCommerce order is marked "
+"complete."
+msgstr ""
+
+#: ../includes/settings-checkout.php:46 ../includes/settings-invoice.php:36
+#: ../includes/settings-part-payment.php:36
+msgid "On order cancellation"
+msgstr ""
+
+#: ../includes/settings-checkout.php:48 ../includes/settings-invoice.php:38
+#: ../includes/settings-part-payment.php:38
+msgid "Cancel Klarna order automatically when WooCommerce order is cancelled"
+msgstr ""
+
+#: ../includes/settings-checkout.php:52 ../includes/settings-invoice.php:42
+#: ../includes/settings-part-payment.php:42
+msgid "On order update"
+msgstr ""
+
+#: ../includes/settings-checkout.php:54 ../includes/settings-invoice.php:44
+#: ../includes/settings-part-payment.php:44
+msgid ""
+"Update Klarna order automatically when WooCoommerce line items are updated."
+msgstr ""
+
+# @ klarna
+#: ../includes/settings-checkout.php:59 ../includes/settings-invoice.php:49
+#: ../includes/settings-part-payment.php:49
 msgid "Eid - Sweden"
 msgstr "Eid - Schweden"
 
 # @ klarna
-#: classes/class-klarna-account.php:154 classes/class-klarna-campaign.php:143
-#: classes/class-klarna-checkout.php:248 classes/class-klarna-invoice.php:102
+#: ../includes/settings-checkout.php:61 ../includes/settings-invoice.php:51
+#: ../includes/settings-part-payment.php:51
 msgid "Please enter your Klarna Eid for Sweden. Leave blank to disable."
 msgstr ""
 "Bitte geben Sie Ihre Händler ID (eid) für Schweden ein. Leer lassen, um zu "
 "deaktivieren."
 
 # @ klarna
-#: classes/class-klarna-account.php:158 classes/class-klarna-campaign.php:147
-#: classes/class-klarna-checkout.php:252 classes/class-klarna-invoice.php:106
+#: ../includes/settings-checkout.php:65 ../includes/settings-invoice.php:55
+#: ../includes/settings-part-payment.php:55
 msgid "Shared Secret - Sweden"
 msgstr "Shared Secret - Schweden"
 
 # @ klarna
-#: classes/class-klarna-account.php:160 classes/class-klarna-campaign.php:149
-#: classes/class-klarna-checkout.php:254 classes/class-klarna-invoice.php:108
+#: ../includes/settings-checkout.php:67 ../includes/settings-invoice.php:57
+#: ../includes/settings-part-payment.php:57
 msgid "Please enter your Klarna Shared Secret for Sweden."
 msgstr "Bitte geben Sie Ihr Shared Secret für Schweden ein."
 
 # @ klarna
-#: classes/class-klarna-checkout.php:258
+#: ../includes/settings-checkout.php:71
 msgid "Custom Checkout Page - Sweden"
 msgstr "Individuelle Kassenseite - Schweden"
 
 # @ klarna
-#: classes/class-klarna-checkout.php:260
+#: ../includes/settings-checkout.php:73
 msgid ""
 "Please enter the URL to the page that acts as Checkout Page for Klarna "
 "Checkout Sweden. This page must contain the shortcode "
@@ -566,12 +642,12 @@ msgstr ""
 "[woocommerce_klarna_checkout] enthalten."
 
 # @ klarna
-#: classes/class-klarna-checkout.php:264
+#: ../includes/settings-checkout.php:77
 msgid "Custom Thanks Page - Sweden"
 msgstr "Individuelle Danke-Seite - Schweden"
 
 # @ klarna
-#: classes/class-klarna-checkout.php:266
+#: ../includes/settings-checkout.php:79
 msgid ""
 "Enter the URL to the page that acts as Thanks Page for Klarna Checkout "
 "Sweden. This page must contain the shortcode [woocommerce_klarna_checkout]. "
@@ -583,38 +659,38 @@ msgstr ""
 "Kassenseite als Danke-Seite zu verwenden."
 
 # @ klarna
-#: classes/class-klarna-account.php:164 classes/class-klarna-campaign.php:159
-#: classes/class-klarna-checkout.php:270 classes/class-klarna-invoice.php:112
+#: ../includes/settings-checkout.php:84 ../includes/settings-invoice.php:61
+#: ../includes/settings-part-payment.php:62
 msgid "Eid - Norway"
 msgstr "Eid - Norwegen"
 
 # @ klarna
-#: classes/class-klarna-account.php:166 classes/class-klarna-campaign.php:161
-#: classes/class-klarna-checkout.php:272 classes/class-klarna-invoice.php:114
+#: ../includes/settings-checkout.php:86 ../includes/settings-invoice.php:63
+#: ../includes/settings-part-payment.php:64
 msgid "Please enter your Klarna Eid for Norway. Leave blank to disable."
 msgstr ""
 "Bitte geben Sie Ihre Händler ID (eid) für Norwegen ein. Leer lassen, um zu "
 "deaktivieren."
 
 # @ klarna
-#: classes/class-klarna-account.php:170 classes/class-klarna-campaign.php:165
-#: classes/class-klarna-checkout.php:276 classes/class-klarna-invoice.php:118
+#: ../includes/settings-checkout.php:90 ../includes/settings-invoice.php:67
+#: ../includes/settings-part-payment.php:68
 msgid "Shared Secret - Norway"
 msgstr "Shared Secret - Norwegen"
 
 # @ klarna
-#: classes/class-klarna-account.php:172 classes/class-klarna-campaign.php:167
-#: classes/class-klarna-checkout.php:278 classes/class-klarna-invoice.php:120
+#: ../includes/settings-checkout.php:92 ../includes/settings-invoice.php:69
+#: ../includes/settings-part-payment.php:70
 msgid "Please enter your Klarna Shared Secret for Norway."
 msgstr "Bitte geben Sie Ihr Shared Secret für Norwegen ein."
 
 # @ klarna
-#: classes/class-klarna-checkout.php:282
+#: ../includes/settings-checkout.php:96
 msgid "Custom Checkout Page - Norway"
 msgstr "Individuelle Kassenseite - Norwegen"
 
 # @ klarna
-#: classes/class-klarna-checkout.php:284
+#: ../includes/settings-checkout.php:98
 msgid ""
 "Please enter the URL to the page that acts as Checkout Page for Klarna "
 "Checkout Norway. This page must contain the shortcode "
@@ -622,12 +698,12 @@ msgid ""
 msgstr ""
 
 # @ klarna
-#: classes/class-klarna-checkout.php:288
+#: ../includes/settings-checkout.php:102
 msgid "Custom Thanks Page - Norway"
 msgstr "Individuelle Danke-Seite - Norwegen"
 
 # @ klarna
-#: classes/class-klarna-checkout.php:290
+#: ../includes/settings-checkout.php:104
 msgid ""
 "Enter the URL to the page that acts as Thanks Page for Klarna Checkout "
 "Norway. This page must contain the shortcode [woocommerce_klarna_checkout]. "
@@ -635,38 +711,38 @@ msgid ""
 msgstr ""
 
 # @ klarna
-#: classes/class-klarna-account.php:176 classes/class-klarna-campaign.php:177
-#: classes/class-klarna-checkout.php:295 classes/class-klarna-invoice.php:124
+#: ../includes/settings-checkout.php:109 ../includes/settings-invoice.php:73
+#: ../includes/settings-part-payment.php:75
 msgid "Eid - Finland"
 msgstr "Eid - Finnland"
 
 # @ klarna
-#: classes/class-klarna-account.php:178 classes/class-klarna-campaign.php:179
-#: classes/class-klarna-checkout.php:297 classes/class-klarna-invoice.php:126
+#: ../includes/settings-checkout.php:111 ../includes/settings-invoice.php:75
+#: ../includes/settings-part-payment.php:77
 msgid "Please enter your Klarna Eid for Finland. Leave blank to disable."
 msgstr ""
 "Bitte geben Sie Ihre Händler ID (eid) für Finnland ein. Leer lassen, um zu "
 "deaktivieren."
 
 # @ klarna
-#: classes/class-klarna-account.php:182 classes/class-klarna-campaign.php:183
-#: classes/class-klarna-checkout.php:301 classes/class-klarna-invoice.php:130
+#: ../includes/settings-checkout.php:115 ../includes/settings-invoice.php:79
+#: ../includes/settings-part-payment.php:81
 msgid "Shared Secret - Finland"
 msgstr "Shared Secret - Finnland"
 
 # @ klarna
-#: classes/class-klarna-account.php:184 classes/class-klarna-campaign.php:185
-#: classes/class-klarna-checkout.php:303 classes/class-klarna-invoice.php:132
+#: ../includes/settings-checkout.php:117 ../includes/settings-invoice.php:81
+#: ../includes/settings-part-payment.php:83
 msgid "Please enter your Klarna Shared Secret for Finland."
 msgstr "Bitte geben Sie Ihr Shared Secret für Finnland ein."
 
 # @ klarna
-#: classes/class-klarna-checkout.php:307
+#: ../includes/settings-checkout.php:121
 msgid "Custom Checkout Page - Finland"
 msgstr "Individuelle Kassenseite - Finnland"
 
 # @ klarna
-#: classes/class-klarna-checkout.php:309
+#: ../includes/settings-checkout.php:123
 msgid ""
 "Please enter the URL to the page that acts as Checkout Page for Klarna "
 "Checkout Finland. This page must contain the shortcode "
@@ -674,12 +750,12 @@ msgid ""
 msgstr ""
 
 # @ klarna
-#: classes/class-klarna-checkout.php:313
+#: ../includes/settings-checkout.php:127
 msgid "Custom Thanks Page - Finland"
 msgstr "Individuelle Danke-Seite - Finnland"
 
 # @ klarna
-#: classes/class-klarna-checkout.php:315
+#: ../includes/settings-checkout.php:129
 msgid ""
 "Enter the URL to the page that acts as Thanks Page for Klarna Checkout "
 "Finland. This page must contain the shortcode [woocommerce_klarna_checkout]. "
@@ -687,12 +763,192 @@ msgid ""
 msgstr ""
 
 # @ klarna
-#: classes/class-klarna-checkout.php:362
+#: ../includes/settings-checkout.php:134 ../includes/settings-invoice.php:97
+#: ../includes/settings-part-payment.php:101
+msgid "Eid - Germany"
+msgstr "Eid - Deutschland"
+
+# @ klarna
+#: ../includes/settings-checkout.php:136 ../includes/settings-invoice.php:99
+#: ../includes/settings-part-payment.php:103
+msgid "Please enter your Klarna Eid for Germany. Leave blank to disable."
+msgstr ""
+"Bitte geben Sie Ihre Händler ID (eid) für Deutschland ein. Leer lassen, um "
+"zu deaktivieren."
+
+# @ klarna
+#: ../includes/settings-checkout.php:140 ../includes/settings-invoice.php:103
+#: ../includes/settings-part-payment.php:107
+msgid "Shared Secret - Germany"
+msgstr "Shared Secret - Deutschland"
+
+# @ klarna
+#: ../includes/settings-checkout.php:142 ../includes/settings-invoice.php:105
+#: ../includes/settings-part-payment.php:109
+msgid "Please enter your Klarna Shared Secret for Germany."
+msgstr "Bitte geben Sie Ihr Shared Secret für Deutschland ein."
+
+# @ klarna
+#: ../includes/settings-checkout.php:146
+msgid "Custom Checkout Page - Germany"
+msgstr "Individuelle Kassenseite - Deutschland"
+
+# @ klarna
+#: ../includes/settings-checkout.php:148
+msgid ""
+"Please enter the URL to the page that acts as Checkout Page for Klarna "
+"Checkout Germany. This page must contain the shortcode "
+"[woocommerce_klarna_checkout]."
+msgstr ""
+
+# @ klarna
+#: ../includes/settings-checkout.php:152
+msgid "Custom Thanks Page - Germany"
+msgstr "Individuelle Danke-Seite - Deutschland"
+
+# @ klarna
+#: ../includes/settings-checkout.php:154
+msgid ""
+"Enter the URL to the page that acts as Thanks Page for Klarna Checkout "
+"Germany. This page must contain the shortcode [woocommerce_klarna_checkout]. "
+"Leave blank to use the Custom Checkout Page as Thanks Page."
+msgstr ""
+
+# @ klarna
+#: ../includes/settings-checkout.php:158
+msgid "Phone Number Mandatory - Germany"
+msgstr ""
+
+# @ klarna
+#: ../includes/settings-checkout.php:160
+msgid ""
+"Phone number is not mandatory for Klarna Checkout in Germany by default. "
+"Check this box to make it mandatory."
+msgstr ""
+
+# @ klarna
+#: ../includes/settings-checkout.php:164
+msgid "DHL Packstation Functionality - Germany"
+msgstr ""
+
+# @ klarna
+#: ../includes/settings-checkout.php:166
+msgid "Enable DHL packstation functionality for German customers."
+msgstr ""
+
+# @ klarna
+#: ../includes/settings-checkout.php:171 ../includes/settings-invoice.php:121
+msgid "Eid - Austria"
+msgstr "Eid - Österreich"
+
+# @ klarna
+#: ../includes/settings-checkout.php:173 ../includes/settings-invoice.php:123
+msgid "Please enter your Klarna Eid for Austria. Leave blank to disable."
+msgstr ""
+"Bitte geben Sie Ihre Händler ID (eid) für Österreich ein. Leer lassen, um zu "
+"deaktivieren."
+
+# @ klarna
+#: ../includes/settings-checkout.php:177 ../includes/settings-invoice.php:127
+msgid "Shared Secret - Austria"
+msgstr "Shared Secret - Österreich"
+
+# @ klarna
+#: ../includes/settings-checkout.php:179 ../includes/settings-invoice.php:129
+msgid "Please enter your Klarna Shared Secret for Austria."
+msgstr "Bitte geben Sie Ihr Shared Secret für Österreich ein."
+
+#: ../includes/settings-checkout.php:183
+msgid "Custom Checkout Page - Austria"
+msgstr ""
+
+#: ../includes/settings-checkout.php:185
+msgid ""
+"Please enter the URL to the page that acts as Checkout Page for Klarna "
+"Checkout Austria. This page must contain the shortcode "
+"[woocommerce_klarna_checkout]."
+msgstr ""
+
+#: ../includes/settings-checkout.php:189
+msgid "Custom Thanks Page - Austria"
+msgstr ""
+
+#: ../includes/settings-checkout.php:191
+msgid ""
+"Enter the URL to the page that acts as Thanks Page for Klarna Checkout "
+"Austria. This page must contain the shortcode [woocommerce_klarna_checkout]. "
+"Leave blank to use the Custom Checkout Page as Thanks Page."
+msgstr ""
+
+#: ../includes/settings-checkout.php:195
+msgid "Phone Number Mandatory - Austria"
+msgstr ""
+
+#: ../includes/settings-checkout.php:197
+msgid ""
+"Phone number is not mandatory for Klarna Checkout in Austria by default. "
+"Check this box to make it mandatory."
+msgstr ""
+
+#: ../includes/settings-checkout.php:202
+msgid "Eid - UK"
+msgstr ""
+
+#: ../includes/settings-checkout.php:204
+msgid "Please enter your Klarna Eid for UK. Leave blank to disable."
+msgstr ""
+
+#: ../includes/settings-checkout.php:208
+msgid "Shared Secret - UK"
+msgstr ""
+
+#: ../includes/settings-checkout.php:210
+msgid "Please enter your Klarna Shared Secret for UK."
+msgstr ""
+
+#: ../includes/settings-checkout.php:214
+msgid "Custom Checkout Page - UK"
+msgstr ""
+
+#: ../includes/settings-checkout.php:216
+msgid ""
+"Please enter the URL to the page that acts as Checkout Page for Klarna "
+"Checkout UK. This page must contain the shortcode "
+"[woocommerce_klarna_checkout]."
+msgstr ""
+
+#: ../includes/settings-checkout.php:220
+msgid "Custom Thanks Page - UK"
+msgstr ""
+
+#: ../includes/settings-checkout.php:222
+msgid ""
+"Enter the URL to the page that acts as Thanks Page for Klarna Checkout UK. "
+"This page must contain the shortcode [woocommerce_klarna_checkout]. Leave "
+"blank to use the Custom Checkout Page as Thanks Page."
+msgstr ""
+
+# @ klarna
+#: ../includes/settings-checkout.php:227
+msgid "Default Checkout Country"
+msgstr ""
+
+# @ klarna
+#: ../includes/settings-checkout.php:234
+msgid ""
+"Used by the payment gateway to determine which country should be the default "
+"Checkout country if Euro is the selected currency, you as a merchant has an "
+"agreement with multiple countries that use Euro and the selected language "
+"cant be of help for this decision."
+msgstr ""
+
+# @ klarna
+#: ../includes/settings-checkout.php:239
 msgid "Modify Standard Checkout"
 msgstr "Standard-Kasse ändern"
 
 # @ klarna
-#: classes/class-klarna-checkout.php:364
+#: ../includes/settings-checkout.php:241
 msgid ""
 "Make the Custom Checkout Page for Klarna Checkout the default checkout page "
 "(i.e. changing the url of the checkout buttons in Cart and the Widget mini "
@@ -703,12 +959,12 @@ msgstr ""
 "Warenkorb-Widget)."
 
 # @ klarna
-#: classes/class-klarna-checkout.php:368
+#: ../includes/settings-checkout.php:245
 msgid "Button to Standard Checkout"
 msgstr "Button zur Standard-Kasse"
 
 # @ klarna
-#: classes/class-klarna-checkout.php:370
+#: ../includes/settings-checkout.php:247
 msgid ""
 "Add a button when the Klarna Checkout form is displayed that links to the "
 "standard checkout page."
@@ -717,31 +973,98 @@ msgstr ""
 "Checkout Formular angezeigt wird."
 
 # @ klarna
-#: classes/class-klarna-checkout.php:374
+#: ../includes/settings-checkout.php:251 ../includes/settings-checkout.php:263
 msgid "Label for Standard Checkout Button"
 msgstr "Beschriftung für den Standard-Kassen-Button"
 
 # @ klarna
-#: classes/class-klarna-checkout.php:376
+#: ../includes/settings-checkout.php:253
 msgid ""
 "Please enter the text for the button that links to the standard checkout "
 "page from the Klarna Checkout form."
 msgstr ""
 
+#: ../includes/settings-checkout.php:257
+msgid "Button to Klarna Checkout"
+msgstr ""
+
+#: ../includes/settings-checkout.php:259
+msgid ""
+"Add a button in standard checkout page that links to the Klarna checkout "
+"page."
+msgstr ""
+
+#: ../includes/settings-checkout.php:265
+msgid ""
+"Please enter the text for the button that links to the Klarna checkout page "
+"from the standard checkout page."
+msgstr ""
+
 # @ klarna
-#: classes/class-klarna-checkout.php:380
+#: ../includes/settings-checkout.php:270
 msgid "Terms Page"
 msgstr ""
 
 # @ klarna
-#: classes/class-klarna-checkout.php:382
+#: ../includes/settings-checkout.php:272
 msgid ""
 "Please enter the URL to the page that acts as Terms Page for Klarna "
 "Checkout. Leave blank to use the defined WooCommerce Terms Page."
 msgstr ""
 
 # @ klarna
-#: classes/class-klarna-checkout.php:412
+#: ../includes/settings-checkout.php:277
+msgid "Create customer account"
+msgstr ""
+
+# @ klarna
+#: ../includes/settings-checkout.php:279
+msgid "Automatically create an account for new customers."
+msgstr ""
+
+# @ klarna
+#: ../includes/settings-checkout.php:283
+msgid "Send New account email when creating new accounts."
+msgstr ""
+
+# @ klarna
+#: ../includes/settings-checkout.php:285
+msgid "Send New account email"
+msgstr ""
+
+# @ klarna
+#: ../includes/settings-checkout.php:289
+msgid "Account Signup Text"
+msgstr ""
+
+# @ klarna
+#: ../includes/settings-checkout.php:291
+msgid ""
+"Add text above the Account Registration Form. Useful for legal text for "
+"German stores. See documentation for more information. Leave blank to "
+"disable."
+msgstr ""
+
+# @ klarna
+#: ../includes/settings-checkout.php:295
+msgid "Account Login Text"
+msgstr ""
+
+# @ klarna
+#: ../includes/settings-checkout.php:297
+msgid ""
+"Add text above the Account Login Form. Useful for legal text for German "
+"stores. See documentation for more information. Leave blank to disable."
+msgstr ""
+
+# @ klarna
+#: ../includes/settings-checkout.php:302 ../includes/settings-invoice.php:163
+#: ../includes/settings-part-payment.php:154
+msgid "Test Mode"
+msgstr "Test-Modus"
+
+# @ klarna
+#: ../includes/settings-checkout.php:304
 msgid ""
 "Enable Klarna Test Mode. This will only work if you have a Klarna test "
 "account."
@@ -750,572 +1073,504 @@ msgstr ""
 "Klarna Test-Account haben."
 
 # @ klarna
-#: classes/class-klarna-checkout.php:416
+#: ../includes/settings-checkout.php:308
 msgid "Debug"
 msgstr "Debug"
 
 # @ klarna
-#: classes/class-klarna-checkout.php:418
+#: ../includes/settings-checkout.php:310
 msgid "Enable logging (<code>woocommerce/logs/klarna.txt</code>)"
 msgstr "Logging aktivieren (<code>woocommerce/logs/klarna.txt</code>)"
 
-# @ klarna
-#: classes/class-klarna-checkout.php:438
-#, php-format
-msgid ""
-"With Klarna Checkout your customers can pay by invoice or credit card. "
-"Klarna Checkout works by replacing the standard WooCommerce checkout form. "
-"Documentation <a href=\"%s\" target=\"_blank\">can be found here</a>."
+#: ../includes/settings-checkout.php:315
+msgid "Checkout button color"
+msgstr ""
+
+#: ../includes/settings-checkout.php:317
+msgid "Checkout page button color"
+msgstr ""
+
+#: ../includes/settings-checkout.php:321
+msgid "Checkout button text color"
+msgstr ""
+
+#: ../includes/settings-checkout.php:323
+msgid "Checkout page button text color"
+msgstr ""
+
+#: ../includes/settings-checkout.php:327
+msgid "Checkout checkbox color"
+msgstr ""
+
+#: ../includes/settings-checkout.php:329
+msgid "Checkout page checkbox color"
+msgstr ""
+
+#: ../includes/settings-checkout.php:333
+msgid "Checkout checkbox checkmark color"
+msgstr ""
+
+#: ../includes/settings-checkout.php:335
+msgid "Checkout page checkbox checkmark color"
+msgstr ""
+
+#: ../includes/settings-checkout.php:339
+msgid "Checkout header color"
+msgstr ""
+
+#: ../includes/settings-checkout.php:341
+msgid "Checkout page header color"
+msgstr ""
+
+#: ../includes/settings-checkout.php:345
+msgid "Checkout link color"
+msgstr ""
+
+#: ../includes/settings-checkout.php:347
+msgid "Checkout page link color"
 msgstr ""
 
 # @ klarna
-#: classes/class-klarna-checkout.php:444
-msgid ""
-"You need to specify a Terms Page in the WooCommerce settings or in the "
-"Klarna Checkout settings in order to enable the Klarna Checkout payment "
-"method."
-msgstr ""
-
-# @ klarna
-#: classes/class-klarna-checkout.php:1019
-#, php-format
-msgid ""
-"Klarna Checkout payment completed. Reservation number: %s.  Klarna order "
-"number: %s"
-msgstr ""
-"Klarna Checkout Zahlung abgeschlossen. Reservierungsnummer: %s. Klarna "
-"Bestellnummer: %s"
-
-# @ klarna
-#: classes/class-klarna-checkout.php:1093
-#: classes/class-klarna-checkout.php:1293
-#, php-format
-msgid ""
-"Sorry, your session has expired. <a href=\"%s\">Return to homepage &rarr;</a>"
-msgstr ""
-"Entschuldigung, Ihre Sitzung ist abgelaufen. <a href=\"%s\">Zurück zur "
-"Startseite &rarr;</a>"
-
-# @ woocommerce
-#: classes/class-klarna-checkout.php:1316
-#, php-format
-msgid "Order &ndash; %s"
-msgstr "Bestellung &ndash; %s"
-
-# @ woocommerce
-#: classes/class-klarna-checkout.php:1316
-#, php-format
-msgctxt "Order date parsed by strftime"
-msgid "%b %d, %Y @ %I:%M %p"
-msgstr ""
-
-# @ woocommerce
-#: classes/class-klarna-checkout.php:1397
-msgid "Backordered"
-msgstr ""
-
-# @ klarna
-#: classes/class-klarna-checkout.php:2057
-#, php-format
-msgid "Klarna payment reservation has been activated. Invoice number: %s."
-msgstr "Klarna Zahlungs-Reservierung wurde aktiviert. Rechnungsnummer: %s."
-
-# @ klarna
-#: classes/class-klarna-checkout.php:2063
-#, php-format
-msgid "Klarna reservation activation error: %s. Error code: $e->getCode()"
-msgstr ""
-"Fehler bei der Aktivierung der Klarna-Reservierung: %s. Fehlercode: $e-"
-">getCode()"
-
-# @ klarna
-#: classes/class-klarna-invoice.php:16 classes/class-klarna-invoice.php:234
-msgid "Klarna Invoice"
-msgstr "Klarna Rechnung"
-
-# @ klarna
-#: classes/class-klarna-invoice.php:84
+#: ../includes/settings-invoice.php:14
 msgid "Enable Klarna Invoice"
 msgstr "Klarna Rechnung aktivieren"
 
+#: ../includes/settings-invoice.php:21
+msgid "Invoice"
+msgstr ""
+
 # @ klarna
-#: classes/class-klarna-invoice.php:96
+#: ../includes/settings-invoice.php:24
+#: ../includes/settings-part-payment.php:24
+msgid "Description"
+msgstr "Beschreibung"
+
+# @ klarna
+#: ../includes/settings-invoice.php:26
 msgid "This controls the description which the user sees during checkout."
 msgstr ""
 
 # @ klarna
-#: classes/class-klarna-invoice.php:186
-msgid ""
-"Disable Klarna Invoice if Cart Total is lower than the specified value. "
-"Leave blank to disable this feature."
-msgstr ""
-
-# @ klarna
-#: classes/class-klarna-invoice.php:192
-msgid ""
-"Disable Klarna Invoice if Cart Total is higher than the specified value. "
-"Leave blank to disable this feature."
-msgstr ""
-
-# @ klarna
-#: classes/class-klarna-invoice.php:196
-msgid "Invoice Fee"
-msgstr ""
-
-# @ klarna
-#: classes/class-klarna-invoice.php:198
-msgid ""
-"Create a hidden (simple) product that acts as the invoice fee. Enter the ID "
-"number in this textfield. Leave blank to disable. "
-msgstr ""
-
-# @ woocommerce
-#: classes/class-klarna-account.php:18 classes/class-klarna-campaign.php:18
-#: classes/class-klarna-invoice.php:18
-msgid "Place order"
-msgstr ""
-
-# @ klarna
-#: classes/class-klarna-account.php:188 classes/class-klarna-campaign.php:195
-#: classes/class-klarna-invoice.php:136
+#: ../includes/settings-invoice.php:85
+#: ../includes/settings-part-payment.php:88
 msgid "Eid - Denmark"
 msgstr "Eid - Dänemark"
 
 # @ klarna
-#: classes/class-klarna-account.php:190 classes/class-klarna-campaign.php:197
-#: classes/class-klarna-invoice.php:138
+#: ../includes/settings-invoice.php:87
+#: ../includes/settings-part-payment.php:90
 msgid "Please enter your Klarna Eid for Denmark. Leave blank to disable."
 msgstr ""
 "Bitte geben Sie Ihre Händler ID (eid) für Dänemark ein. Leer lassen, um zu "
 "deaktivieren."
 
 # @ klarna
-#: classes/class-klarna-account.php:194 classes/class-klarna-campaign.php:201
-#: classes/class-klarna-invoice.php:142
+#: ../includes/settings-invoice.php:91
+#: ../includes/settings-part-payment.php:94
 msgid "Shared Secret - Denmark"
 msgstr "Shared Secret - Dänemark"
 
 # @ klarna
-#: classes/class-klarna-account.php:196 classes/class-klarna-campaign.php:203
-#: classes/class-klarna-invoice.php:144
+#: ../includes/settings-invoice.php:93
+#: ../includes/settings-part-payment.php:96
 msgid "Please enter your Klarna Shared Secret for Denmark."
 msgstr "Bitte geben Sie Ihr Shared Secret für Dänemark ein."
 
 # @ klarna
-#: classes/class-klarna-account.php:200 classes/class-klarna-campaign.php:207
-#: classes/class-klarna-checkout.php:319 classes/class-klarna-invoice.php:148
-msgid "Eid - Germany"
-msgstr "Eid - Deutschland"
-
-# @ klarna
-#: classes/class-klarna-account.php:202 classes/class-klarna-campaign.php:209
-#: classes/class-klarna-checkout.php:321 classes/class-klarna-invoice.php:150
-msgid "Please enter your Klarna Eid for Germany. Leave blank to disable."
-msgstr ""
-"Bitte geben Sie Ihre Händler ID (eid) für Deutschland ein. Leer lassen, um "
-"zu deaktivieren."
-
-# @ klarna
-#: classes/class-klarna-account.php:206 classes/class-klarna-campaign.php:213
-#: classes/class-klarna-checkout.php:325 classes/class-klarna-invoice.php:154
-msgid "Shared Secret - Germany"
-msgstr "Shared Secret - Deutschland"
-
-# @ klarna
-#: classes/class-klarna-account.php:208 classes/class-klarna-campaign.php:215
-#: classes/class-klarna-checkout.php:327 classes/class-klarna-invoice.php:156
-msgid "Please enter your Klarna Shared Secret for Germany."
-msgstr "Bitte geben Sie Ihr Shared Secret für Deutschland ein."
-
-# @ klarna
-#: classes/class-klarna-account.php:212 classes/class-klarna-campaign.php:219
-#: classes/class-klarna-invoice.php:160
+#: ../includes/settings-invoice.php:109
+#: ../includes/settings-part-payment.php:114
 msgid "Eid - Netherlands"
 msgstr "Eid - Niederlande"
 
 # @ klarna
-#: classes/class-klarna-account.php:214 classes/class-klarna-campaign.php:221
-#: classes/class-klarna-invoice.php:162
+#: ../includes/settings-invoice.php:111
+#: ../includes/settings-part-payment.php:116
 msgid "Please enter your Klarna Eid for Netherlands. Leave blank to disable."
 msgstr ""
 "Bitte geben Sie Ihre Händler ID (eid) für die Niederlande ein. Leer lassen, "
 "um zu deaktivieren."
 
 # @ klarna
-#: classes/class-klarna-account.php:218 classes/class-klarna-campaign.php:225
-#: classes/class-klarna-invoice.php:166
+#: ../includes/settings-invoice.php:115
+#: ../includes/settings-part-payment.php:120
 msgid "Shared Secret - Netherlands"
 msgstr "Shared Secret - Niederlande"
 
 # @ klarna
-#: classes/class-klarna-account.php:220 classes/class-klarna-campaign.php:227
-#: classes/class-klarna-invoice.php:168
+#: ../includes/settings-invoice.php:117
+#: ../includes/settings-part-payment.php:122
 msgid "Please enter your Klarna Shared Secret for Netherlands."
 msgstr "Bitte geben Sie Ihr Shared Secret für die Niederlande ein."
 
 # @ klarna
-#: classes/class-klarna-account.php:261 classes/class-klarna-campaign.php:243
-#: classes/class-klarna-invoice.php:202
+#: ../includes/settings-invoice.php:135
+msgid ""
+"Disable Klarna Invoice if Cart Total is lower than the specified value. "
+"Leave blank to disable this feature."
+msgstr ""
+
+# @ klarna
+#: ../includes/settings-invoice.php:141
+msgid ""
+"Disable Klarna Invoice if Cart Total is higher than the specified value. "
+"Leave blank to disable this feature."
+msgstr ""
+
+# @ klarna
+#: ../includes/settings-invoice.php:145
+msgid "Invoice Fee"
+msgstr ""
+
+# @ klarna
+#: ../includes/settings-invoice.php:147
+msgid ""
+"Create a hidden (simple) product that acts as the invoice fee. Enter the ID "
+"number in this textfield. Leave blank to disable. "
+msgstr ""
+
+# @ klarna
+#: ../includes/settings-invoice.php:151
+#: ../includes/settings-part-payment.php:140
 msgid "Send billing address as shipping address"
 msgstr ""
 
 # @ klarna
-#: classes/class-klarna-account.php:263 classes/class-klarna-campaign.php:245
-#: classes/class-klarna-invoice.php:204
+#: ../includes/settings-invoice.php:153
+#: ../includes/settings-part-payment.php:142
 msgid ""
 "Send the entered billing address in WooCommerce checkout as shipping address "
 "to Klarna."
 msgstr ""
 
 # @ klarna
-#: classes/class-klarna-account.php:267 classes/class-klarna-campaign.php:249
-#: classes/class-klarna-invoice.php:208
+#: ../includes/settings-invoice.php:157
+#: ../includes/settings-part-payment.php:147
 msgid "Klarna consent terms (DE & AT only)"
 msgstr ""
 
 # @ klarna
-#: classes/class-klarna-account.php:269 classes/class-klarna-invoice.php:210
+#: ../includes/settings-invoice.php:159
+#: ../includes/settings-part-payment.php:149
 msgid ""
 "Enable Klarna consent terms checkbox in checkout. This only apply to German "
 "and Austrian merchants."
 msgstr ""
 
 # @ klarna
-#: classes/class-klarna-account.php:306 classes/class-klarna-campaign.php:288
-msgid "Active PClasses"
-msgstr "Aktive PClasses"
-
-# @ klarna
-#: classes/class-klarna-account.php:840 classes/class-klarna-campaign.php:846
-#: classes/class-klarna-invoice.php:601
-#, php-format
+#: ../includes/settings-invoice.php:165
+#: ../includes/settings-part-payment.php:156
 msgid ""
-"Mit der Übermittlung der für die Abwicklungdes Rechnungskaufes und einer "
-"Identitäts-und Bonitätsprüfung erforderlichen Daten an Klarna bin ich "
-"einverstanden. Meine <a href=\"%s\" target=\"_blank\">Einwilligung</a> kann "
-"ich jederzeit mit Wirkung für die Zukunft widerrufen. Es gelten die AGB des "
-"Händlers."
+"Enable Klarna Test Mode. This will only work if you have a Klarna test "
+"account. For test purchases with a live account, <a href=\"http://"
+"integration.klarna.com/en/testing/test-persons\" target=\"_blank\">follow "
+"these instructions</a>."
 msgstr ""
 
-# @ klarna
-#: classes/class-klarna-campaign.php:251
-msgid ""
-"Enable Klarna consent terms checkbox in checkout. This only apply to German "
-"& Austrian merchants."
+#: ../includes/settings-part-payment.php:14
+msgid "Enable Klarna Part Payment"
 msgstr ""
 
-# @ klarna
-#: classes/class-klarna-campaign.php:873 classes/class-klarna-campaign.php:887
-msgid "<strong>Date of birth</strong> is a required field."
-msgstr "<strong>Geburtsdatum</strong> ist ein Pflichtfeld."
-
-# @ klarna
-#: classes/class-klarna-campaign.php:883
-msgid "<strong>Gender</strong> is a required field."
-msgstr "<strong>Geschlecht</strong> ist ein Pflichtfeld."
-
-# @ klarna
-#: classes/class-klarna-checkout.php:331
-msgid "Custom Checkout Page - Germany"
-msgstr "Individuelle Kassenseite - Deutschland"
-
-# @ klarna
-#: classes/class-klarna-checkout.php:333
-msgid ""
-"Please enter the URL to the page that acts as Checkout Page for Klarna "
-"Checkout Germany. This page must contain the shortcode "
-"[woocommerce_klarna_checkout]."
-msgstr ""
-
-# @ klarna
-#: classes/class-klarna-checkout.php:337
-msgid "Custom Thanks Page - Germany"
-msgstr "Individuelle Danke-Seite - Deutschland"
-
-# @ klarna
-#: classes/class-klarna-checkout.php:339
-msgid ""
-"Enter the URL to the page that acts as Thanks Page for Klarna Checkout "
-"Germany. This page must contain the shortcode [woocommerce_klarna_checkout]. "
-"Leave blank to use the Custom Checkout Page as Thanks Page."
-msgstr ""
-
-# @ klarna
-#: classes/class-klarna-checkout.php:343
-msgid "Phone Number Mandatory - Germany"
-msgstr ""
-
-# @ klarna
-#: classes/class-klarna-checkout.php:345
-msgid ""
-"Phone number is not mandatory for Klarna Checkout in Germany by default. "
-"Check this box to make it mandatory."
-msgstr ""
-
-# @ klarna
-#: classes/class-klarna-checkout.php:349
-msgid "DHL Packstation Functionality - Germany"
-msgstr ""
-
-# @ klarna
-#: classes/class-klarna-checkout.php:351
-msgid "Enable DHL packstation functionality for German customers."
-msgstr ""
-
-# @ klarna
-#: classes/class-klarna-checkout.php:355
-msgid "Default Checkout Country"
-msgstr ""
-
-# @ klarna
-#: classes/class-klarna-checkout.php:357
-msgid "Germany"
-msgstr "Deutschland"
-
-# @ klarna
-#: classes/class-klarna-checkout.php:357
-msgid "Finland"
-msgstr "Finnland"
-
-# @ klarna
-#: classes/class-klarna-checkout.php:358
-msgid ""
-"Used by the payment gateway to determine which country should be the default "
-"Checkout country if Euro is the selected currency, you as a merchant has an "
-"agreement with multiple countries that use Euro and the selected language "
-"cant be of help for this decision."
-msgstr ""
-
-# @ klarna
-#: classes/class-klarna-checkout.php:386
-msgid "Create customer account"
-msgstr ""
-
-# @ klarna
-#: classes/class-klarna-checkout.php:388
-msgid "Automatically create an account for new customers."
-msgstr ""
-
-# @ klarna
-#: classes/class-klarna-checkout.php:392
-msgid "Send New account email when creating new accounts."
-msgstr ""
-
-# @ klarna
-#: classes/class-klarna-checkout.php:394
-msgid "Send New account email"
-msgstr ""
-
-# @ klarna
-#: classes/class-klarna-checkout.php:398
-msgid "Account Signup Text"
-msgstr ""
-
-# @ klarna
-#: classes/class-klarna-checkout.php:400
-msgid ""
-"Add text above the Account Registration Form. Useful for legal text for "
-"German stores. See documentation for more information. Leave blank to "
-"disable."
-msgstr ""
-
-# @ klarna
-#: classes/class-klarna-checkout.php:404
-msgid "Account Login Text"
-msgstr ""
-
-# @ klarna
-#: classes/class-klarna-checkout.php:406
-msgid ""
-"Add text above the Account Login Form. Useful for legal text for German "
-"stores. See documentation for more information. Leave blank to disable."
-msgstr ""
-
-# @ klarna
-#: classes/class-klarna-checkout.php:451
-msgid ""
-"The PHP library cURL does not seem to be installed on your server. Klarna "
-"Checkout will not work without it."
-msgstr ""
-
-# @ klarna
-#: classes/class-klarna-checkout.php:562
-#, php-format
-msgid ""
-"Sorry, you can not buy via Klarna Checkout from your country or currency. "
-"Please <a href=\"%s\">use another payment method</a>."
-msgstr ""
-
-# @ woocommerce
-#: classes/class-klarna-checkout.php:571
-msgid "You must be logged in to checkout."
-msgstr ""
-
-# @ klarna
-#: classes/class-klarna-checkout.php:1004
-#, php-format
-msgid "Customer creation failed. Error: %s."
-msgstr "Erstellung des Kunden fehlgeschlagen. Fehler: %s."
-
-# @ klarna
-#: classes/class-klarna-checkout.php:1008
-#, php-format
-msgid "New customer created (user ID %s)."
-msgstr "Neuer Kunde erstellt (Benutzer ID %s)."
-
-# @ woocommerce
-#: classes/class-klarna-checkout.php:1134
-#: classes/class-klarna-checkout.php:1145
-#: classes/class-klarna-checkout.php:1170
-#: classes/class-klarna-checkout.php:1182
-#: classes/class-klarna-checkout.php:1195
-#: classes/class-klarna-checkout.php:1206
-#: classes/class-klarna-checkout.php:1213
-msgid "Error: Unable to create order. Please try again."
-msgstr ""
-"Fehler: Die Bestellung konnte nicht erstellt werden. Bitte versuchen Sie es "
-"noch einmal."
-
-# @ woocommerce
-#: classes/class-klarna-checkout.php:1547
-msgid "Please provide a valid email address."
-msgstr "Bitte geben Sie eine gültige E-Mail-Adresse an."
-
-# @ woocommerce
-#: classes/class-klarna-checkout.php:1550
-msgid "An account is already registered with your email address. Please login."
-msgstr ""
-
-# @ woocommerce
-#: classes/class-klarna-checkout.php:1590
-msgid "ERROR"
-msgstr "FEHLER"
-
-# @ woocommerce
-#: classes/class-klarna-checkout.php:1590
-msgid ""
-"Couldn&#8217;t register you&hellip; please contact us if you continue to "
-"have problems."
-msgstr ""
-
-# @ klarna
-#: classes/class-klarna-get-address.php:238
-msgid "Be kind and enter a date of birth!"
-msgstr ""
-
-# @ klarna
-#: classes/class-klarna-get-address.php:343
-msgid "Fetch"
-msgstr ""
-
-# @ klarna
-#: classes/class-klarna-get-address.php:451
-msgid "No address found"
-msgstr ""
-
-# @ klarna
-#: classes/class-klarna-invoice.php:172
-msgid "Eid - Austria"
-msgstr "Eid - Österreich"
-
-# @ klarna
-#: classes/class-klarna-invoice.php:174
-msgid "Please enter your Klarna Eid for Austria. Leave blank to disable."
-msgstr ""
-"Bitte geben Sie Ihre Händler ID (eid) für Österreich ein. Leer lassen, um zu "
-"deaktivieren."
-
-# @ klarna
-#: classes/class-klarna-invoice.php:178
-msgid "Shared Secret - Austria"
-msgstr "Shared Secret - Österreich"
-
-# @ klarna
-#: classes/class-klarna-invoice.php:180
-msgid "Please enter your Klarna Shared Secret for Austria."
-msgstr "Bitte geben Sie Ihr Shared Secret für Österreich ein."
-
-# @ klarna
-#: classes/class-klarna-invoice.php:968
-msgid "Klarna payment completed. Klarna reservation number: "
-msgstr "Klarna Zahlung abgeschlossen. Klarna Reservierungsnummer: "
-
-# @ klarna
-#: classes/class-klarna-invoice.php:986
-msgid ""
-"Order is PENDING APPROVAL by Klarna. Please visit Klarna Online for the "
-"latest status on this order. Klarna reservarion number: "
-msgstr ""
-
-# @ klarna
-#: gateway-klarna.php:191
-#, php-format
-msgid ""
-"Version 1.8 of the Klarna payment gateway is a major release. The plugin now "
-"uses Klarnas Advanced integration for all payment methods. You will need to "
-"update and save the settings for Klarna Invoice, Account & Campaign before "
-"these payment methods can be used. Please visit <a target=\"_blank\" href="
-"\"%1$s\"> the payment gateway documentation</a> for more info."
-msgstr ""
-
-# @ klarna
-#: gateway-klarna.php:193
-#, php-format
-msgid "<a class=\"submitdelete\" href=\"%1$s\"> Hide this message</a>"
-msgstr ""
-
-#: classes/class-klarna-account.php:143
+#: ../includes/settings-part-payment.php:21
 msgid "Part payments"
 msgstr ""
 
-#: classes/class-klarna-campaign.php:153
-msgid "Terms URL - Sweden"
-msgstr ""
+# @ klarna
+#: ../includes/settings-part-payment.php:26
+msgid "This controls the description which the user sees during checkout. "
+msgstr "Dies bestimmt die Beschreibung, die der Benutzer bei der Kasse sieht."
 
-#: classes/class-klarna-campaign.php:155
+#: ../includes/settings-part-payment.php:129
 msgid ""
-"Please enter the URL to the Terms page for Sweden (for specific campaigns). "
-"Leave blank to use Klarna Account standard terms."
+"Disable Klarna Part Payment if Cart Total is lower than the specified value. "
+"Leave blank to disable this feature."
 msgstr ""
 
-#: classes/class-klarna-campaign.php:171
-msgid "Terms URL - Norway"
-msgstr ""
-
-#: classes/class-klarna-campaign.php:173
+#: ../includes/settings-part-payment.php:135
 msgid ""
-"Please enter the URL to the Terms page for Norway (for specific campaigns). "
-"Leave blank to use Klarna Account standard terms."
+"Disable Klarna Part Payment if Cart Total is higher than the specified "
+"value. Leave blank to disable this feature."
 msgstr ""
 
-#: classes/class-klarna-campaign.php:189
-msgid "Terms URL - Finland"
+#: ../views/public/payment-fields-invoice.php:105
+msgid "Pay in 14 days"
 msgstr ""
 
-#: classes/class-klarna-campaign.php:191
-msgid ""
-"Please enter the URL to the Terms page for Finland (for specific campaigns). "
-"Leave blank to use Klarna Account standard terms."
+# @ klarna
+#: ../views/public/payment-fields-invoice.php:133
+#: ../views/public/payment-fields-part-payment.php:148
+#, php-format
+msgid "%s - %s %s/month - %s%s - Start %s"
 msgstr ""
 
-#: classes/class-klarna-checkout.php:2179
-msgid "Order Notes"
+# @ klarna
+#: ../views/public/payment-fields-invoice.php:158
+#: ../views/public/payment-fields-invoice.php:295
+#: ../views/public/payment-fields-part-payment.php:177
+#: ../views/public/payment-fields-part-payment.php:314
+msgid "Date of Birth"
+msgstr "Geburtsdatum"
+
+# @ klarna
+#: ../views/public/payment-fields-invoice.php:161
+#: ../views/public/payment-fields-part-payment.php:180
+msgid "Day"
+msgstr "Tag"
+
+# @ klarna
+#: ../views/public/payment-fields-invoice.php:195
+#: ../views/public/payment-fields-part-payment.php:214
+msgid "Month"
+msgstr "Monat"
+
+# @ klarna
+#: ../views/public/payment-fields-invoice.php:196
+#: ../views/public/payment-fields-part-payment.php:215
+msgid "Jan"
+msgstr "Jan"
+
+# @ klarna
+#: ../views/public/payment-fields-invoice.php:197
+#: ../views/public/payment-fields-part-payment.php:216
+msgid "Feb"
+msgstr "Feb"
+
+# @ klarna
+#: ../views/public/payment-fields-invoice.php:198
+#: ../views/public/payment-fields-part-payment.php:217
+msgid "Mar"
+msgstr "Mrz"
+
+# @ klarna
+#: ../views/public/payment-fields-invoice.php:199
+#: ../views/public/payment-fields-part-payment.php:218
+msgid "Apr"
+msgstr "Apr"
+
+# @ klarna
+#: ../views/public/payment-fields-invoice.php:200
+#: ../views/public/payment-fields-part-payment.php:219
+msgid "May"
+msgstr "Mai"
+
+# @ klarna
+#: ../views/public/payment-fields-invoice.php:201
+#: ../views/public/payment-fields-part-payment.php:220
+msgid "Jun"
+msgstr "Jun"
+
+# @ klarna
+#: ../views/public/payment-fields-invoice.php:202
+#: ../views/public/payment-fields-part-payment.php:221
+msgid "Jul"
+msgstr "Jul"
+
+# @ klarna
+#: ../views/public/payment-fields-invoice.php:203
+#: ../views/public/payment-fields-part-payment.php:222
+msgid "Aug"
+msgstr "Aug"
+
+# @ klarna
+#: ../views/public/payment-fields-invoice.php:204
+#: ../views/public/payment-fields-part-payment.php:223
+msgid "Sep"
+msgstr "Sep"
+
+# @ klarna
+#: ../views/public/payment-fields-invoice.php:205
+#: ../views/public/payment-fields-part-payment.php:224
+msgid "Oct"
+msgstr "Okt"
+
+# @ klarna
+#: ../views/public/payment-fields-invoice.php:206
+#: ../views/public/payment-fields-part-payment.php:225
+msgid "Nov"
+msgstr "Nov"
+
+# @ klarna
+#: ../views/public/payment-fields-invoice.php:207
+#: ../views/public/payment-fields-part-payment.php:226
+msgid "Dec"
+msgstr "Dez"
+
+# @ klarna
+#: ../views/public/payment-fields-invoice.php:210
+#: ../views/public/payment-fields-part-payment.php:229
+msgid "Year"
+msgstr "Jahr"
+
+# @ klarna
+#: ../views/public/payment-fields-invoice.php:307
+#: ../views/public/payment-fields-part-payment.php:326
+msgid "Gender"
+msgstr "Geschlecht"
+
+# @ klarna
+#: ../views/public/payment-fields-invoice.php:310
+#: ../views/public/payment-fields-part-payment.php:329
+msgid "Select gender"
+msgstr "Auswählen"
+
+# @ klarna
+#: ../views/public/payment-fields-invoice.php:311
+#: ../views/public/payment-fields-part-payment.php:330
+msgid "Female"
+msgstr "Weiblich"
+
+# @ klarna
+#: ../views/public/payment-fields-invoice.php:312
+#: ../views/public/payment-fields-part-payment.php:331
+msgid "Male"
+msgstr "Männlich"
+
+# @ klarna
+#: ../views/public/payment-fields-part-payment.php:113
+#: ../views/public/payment-fields-part-payment.php:138
+#, php-format
+msgid "%s - %s %s/month - %s%s"
 msgstr ""
 
-#: classes/class-klarna-checkout.php:2180
-msgctxt "placeholder"
-msgid "Notes about your order, e.g. special notes for delivery."
+# @ klarna
+#: ../views/public/payment-fields-part-payment.php:123
+#, php-format
+msgid "%s - %s %s/month - %s%s - Start %s - Tot %s %s"
 msgstr ""
 
-#: classes/class-klarna-get-address.php:266
-msgid "Address found and added to the checkout form."
+# @ klarna
+#: ../views/public/payment-fields-part-payment.php:169
+msgid "Klarna PClasses seem to be missing. Klarna Account does not work."
 msgstr ""
+"Klarna PClasses scheinen zu fehlen. Klarna Ratenkauf funktioniert nicht."
 
-#: classes/class-klarna-get-address.php:274
-msgid ""
-"Multiple addresses found. Select one address to add it to the checkout form."
-msgstr ""
+# @ klarna
+#~ msgid "Klarna Account"
+#~ msgstr "Klarna Ratenkauf"
 
-#: classes/class-klarna-invoice.php:91
-msgid "Invoice"
-msgstr ""
+# @ klarna
+#~ msgid "Enable Klarna Account"
+#~ msgstr "Klarna Ratenkauf aktivieren"
+
+# @ klarna
+#~ msgid ""
+#~ "Disable Klarna Account if Cart Total is lower than the specified value. "
+#~ "Leave blank to disable this feature."
+#~ msgstr ""
+#~ "Klarna Ratenkauf deaktivieren, wenn der Gesamtpreis des Warenkorbs unter "
+#~ "dem angegebenen Wert liegt. Leer lassen, um dieses Feature zu "
+#~ "deaktivieren."
+
+# @ klarna
+#~ msgid ""
+#~ "Disable Klarna Account if Cart Total is higher than the specified value. "
+#~ "Leave blank to disable this feature."
+#~ msgstr ""
+#~ "Klarna Ratenkauf deaktivieren, wenn der Gesamtpreis des Warenkorbs über "
+#~ "dem angegebenen Wert liegt. Leer lassen, um dieses Feature zu "
+#~ "deaktivieren."
+
+# @ klarna
+#~ msgid "Display monthly cost - product page"
+#~ msgstr "Monatliche Kosten anzeigen - Produktseite"
+
+# @ klarna
+#~ msgid "Display monthly cost on single products page."
+#~ msgstr "Monatliche Kosten auf der Produktseite anzeigen."
+
+# @ klarna
+#~ msgid "Placement of monthly cost - product page"
+#~ msgstr "Platzierung der monatlichen Kosten - Produktseite"
+
+# @ klarna
+#~ msgid "Between Excerpt and Add to cart-button"
+#~ msgstr "Zwischen Auszug und \"In den Warenkorb\"-Button"
+
+# @ klarna
+#~ msgid "Between Add to cart-button and Product meta"
+#~ msgstr "Zwischen \"In den Warenkorb\"-Button und Produkt-Metadaten"
+
+# @ klarna
+#~ msgid "Between Product meta and Product sharing-buttons"
+#~ msgstr "Zwischen Produkt-Metadaten und \"Produkt Teilen\"-Buttons"
+
+# @ klarna
+#~ msgid ""
+#~ "Select where on the products page the Monthly cost information should be "
+#~ "displayed."
+#~ msgstr ""
+#~ "Wählen Sie aus wo auf der Produktseite die monatlichen Kosten angezeigt "
+#~ "werden sollen."
+
+# @ klarna
+#~ msgid ""
+#~ "Disable the monthly cost feature if <i>Product price</i> is lower than "
+#~ "the specified value. Leave blank to disable."
+#~ msgstr ""
+#~ "Monatliches Kosten-Feature deaktivieren, wenn der <i>Produktpreis</i> "
+#~ "unter dem angegebenen Wert liegt. Leer lassen, um dieses Feature zu "
+#~ "deaktivieren."
+
+# @ klarna
+#~ msgid ""
+#~ "Disable the monthly cost feature if <i>Product price</i> is higher than "
+#~ "the specified value. Leave blank to disable."
+#~ msgstr ""
+#~ "Monatliches Kosten-Feature deaktivieren, wenn der <i>Produktpreis</i> "
+#~ "über dem angegebenen Wert liegt. Leer lassen, um dieses Feature zu "
+#~ "deaktivieren."
+
+# @ klarna
+#~ msgid "<strong>Date of birth</strong> is a required field"
+#~ msgstr "<strong>Geburtsdatum</strong> ist ein Pflichtfeld"
+
+# @ klarna
+#~ msgid "<strong>Gender</strong> is a required field"
+#~ msgstr "<strong>Geschlecht</strong> ist ein Pflichtfeld"
+
+# @ klarna
+#~ msgid "Shipping and billing address must be the same when paying via Klarna"
+#~ msgstr ""
+#~ "Die Versand- und die Rechnungsadresse müssen identisch sein, wenn mit "
+#~ "Klarna bezahlt wird"
+
+# @ klarna
+#~ msgid "Shipping cost"
+#~ msgstr "Versandkosten"
+
+# @ klarna
+#~ msgid ""
+#~ "Klarna Checkout payment completed. Reservation number: %s.  Klarna order "
+#~ "number: %s"
+#~ msgstr ""
+#~ "Klarna Checkout Zahlung abgeschlossen. Reservierungsnummer: %s. Klarna "
+#~ "Bestellnummer: %s"
+
+# @ klarna
+#~ msgid ""
+#~ "Sorry, your session has expired. <a href=\"%s\">Return to homepage &rarr;"
+#~ "</a>"
+#~ msgstr ""
+#~ "Entschuldigung, Ihre Sitzung ist abgelaufen. <a href=\"%s\">Zurück zur "
+#~ "Startseite &rarr;</a>"
+
+# @ woocommerce
+#~ msgid "Order &ndash; %s"
+#~ msgstr "Bestellung &ndash; %s"
+
+# @ klarna
+#~ msgid "Klarna payment reservation has been activated. Invoice number: %s."
+#~ msgstr "Klarna Zahlungs-Reservierung wurde aktiviert. Rechnungsnummer: %s."
+
+# @ klarna
+#~ msgid "Klarna reservation activation error: %s. Error code: $e->getCode()"
+#~ msgstr ""
+#~ "Fehler bei der Aktivierung der Klarna-Reservierung: %s. Fehlercode: $e-"
+#~ ">getCode()"
+
+# @ klarna
+#~ msgid "Active PClasses"
+#~ msgstr "Aktive PClasses"
+
+# @ klarna
+#~ msgid "Klarna payment completed. Klarna reservation number: "
+#~ msgstr "Klarna Zahlung abgeschlossen. Klarna Reservierungsnummer: "
