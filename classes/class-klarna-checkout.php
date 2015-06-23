@@ -786,7 +786,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		$data = array();
 		
 		// Adding coupon
-		if ( isset( $_REQUEST['coupon'] ) && is_string( $_REQUEST['coupon'] ) ) {
+		if ( !empty( $_REQUEST['coupon'] ) && is_string( $_REQUEST['coupon'] ) ) {
 			
 			$coupon = $_REQUEST['coupon'];
 			$coupon_success = $woocommerce->cart->add_discount( $coupon );
