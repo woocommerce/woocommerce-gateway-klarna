@@ -241,7 +241,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			if ( ! get_post_meta( $order->id, '_schedule_klarna_subscription_payment', true ) ) {
 				$result = $this->process_subscription_payment( $amount_to_charge, $order, $product_id );
 
-				if ( is_wp_error( $result ) ) {
+				if ( false == $result ) {
 					WC_Subscriptions_Manager::process_subscription_payment_failure_on_order( $order, $product_id );
 				} else {
 					WC_Subscriptions_Manager::process_subscription_payments_on_order( $order );
