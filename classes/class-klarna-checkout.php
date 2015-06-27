@@ -1711,6 +1711,26 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 	return $this->account_login_text;
  	}
  	
+ 	
+ 	/**
+	 * Helper function - get Subscription Product ID
+	 *
+	 * @since 2.0.0
+	 */
+ 	public function get_subscription_product_id() {
+		global $woocommerce;
+		$subscription_product_id = false;
+		if ( ! empty( $woocommerce->cart->cart_contents ) ) {
+			foreach ( $woocommerce->cart->cart_contents as $cart_item ) {
+				if ( WC_Subscriptions_Product::is_subscription( $cart_item['product_id'] ) ) {
+					$subscription_product_id = $cart_item['product_id'];
+					break;
+				}
+			}
+		}
+		return $subscription_product_id;
+	}
+ 	
 
 	/**
 	 * Can the order be refunded via Klarna?

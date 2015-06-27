@@ -163,6 +163,37 @@ if ( '' != $this->color_link ) {
 // Check if there's a subscription product in cart
 if ( class_exists( 'WC_Subscriptions_Cart' ) && WC_Subscriptions_Cart::cart_contains_subscription() ) {
 	$create['recurring'] = true;
+	
+	// Extra merchant data
+	$fetched_subscription_product_id = $this->get_subscription_product_id();
+	if( $fetched_subscription_product_id ) {
+		$subscription_expiration_time = WC_Subscriptions_Product::get_expiration_date($fetched_subscription_product_id);
+		if( 0 !== $subscription_expiration_time ) {
+			$end_time = date('Y-m-d\TH:i', strtotime($subscription_expiration_time));
+		} else {
+			$end_time = date('Y-m-d\TH:i', strtotime('+50 year'));
+		}
+		
+		$attachment['subscription'] = array(array(
+			'subscription_name' => 'Subscription: ' . get_the_title( $fetched_subscription_product_id ),
+			'start_time' => date('Y-m-d\TH:i'),
+			'end_time' => $end_time,
+			'auto_renewal_of_subscription' => true
+		));
+		
+		if(get_current_user_id()) {
+			$attachment['customer_account_info'] = array(array(
+				'unique_account_identifier' => (string) get_current_user_id()
+			));
+		}
+		
+		if ($attachment) {
+			$create['attachment']['content_type'] = 'application/vnd.klarna.internal.emd-v2+json';
+			$create['attachment']['body'] = json_encode($attachment);
+		}
+
+	}
+
 }
 
 if ( $this->is_rest() ) {
