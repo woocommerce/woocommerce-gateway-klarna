@@ -77,10 +77,6 @@ th.product-total {
 	padding: 5px;
 	border: none;
 }
-#klarna-checkout-widget .product-total,
-#kco-page-total-amount {
-	white-space: nowrap;
-}
 #klarna-checkout-widget #shipping_method li {
 	list-style: none;
 }
