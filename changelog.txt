@@ -1,5 +1,28 @@
 *** Klarna Changelog ***
 
+2015.06.30	- version 2.0
+* Feature	- Added Klarna order activation from WooCommerce.
+* Feature	- Added Klarna order cancelation from WooCommerce.
+* Feature	- Added Klarna order update from WooCommerce.
+* Feature	- Added Klarna order refund from WooCommerce.
+* Feature	- Added support for subscription payments via Klarna Checkout (SE, NO, FI).
+* Feature	- Added support for KCO Austria.
+* Feature	- Added Cart to the Klarna Checkout page (via the new KCO cart widget).
+* Feature	- Added Shipping to the Klarna Checkout page (via the new KCO cart widget).
+* Feature	- Added Coupon management to the Klarna Checkout page (via the new KCO cart widget).
+* Feature	- Added a country selector to the Klarna Checkout page (via the new KCO cart widget), when selling to multiple EUR countries.
+* Feature	- Moved customer order note field into the new KCO cart widget.
+* Feature	- Updated flow for orders that are marked *Needs pending approval from Klarna* (KPM). Order status is now set to On Hold and a cronjob is checking the orderstatus with Klarna every 2 hours.
+* Feature	- Added Shipping and payment info from Klarna in order confirmation (on thank you page for KPM and in order emails sent from WC).
+* Feature	- Started implementing Klarnas Remarketing feature for KCO. All local WC orders (when selecting KCO as payment method but not finalizing the purchase) does now include the customers email address.
+* Feature	- Added setting in KCO to make it possible to display a button with a link back to the KCO page in WooCommerce standard checkout. 
+* Tweak		- Code refactoring.
+* Tweak		- Change Klarna Invoice, Account and Special campaign to two payment methods instead of three different. They are now called Invoice and Part payment.
+* Tweak		- Add customer info from Klarna to WooCommerce (name, phone etc) when creating users automatically with KCO.
+* Tweak		- Change how and when order in WooCommerce is created when customer pays with Klarna Checkout. WooCommerce order is now only created on rendering of the KCO page if customer is logged in. Otherwise the local order is created when customer enters email address in KCO form. WooCommerce orderstatus is set to KCO incomplete until the order is confirmed from Klarna. This way incomplete orders won't clutter up the order list view and product stock isn't reserved until the order actually is finalized.
+* Tweak		- Updated translation files and updated Swedish and Norwegian translations.
+* Fix		- Fixed Get Address class so it doesn’t instantiate other classes and optimized company flow.
+
 2015.05.05	- version 1.9.8.1
 * Feature	- Added filter klarna_checkout_billing_phone() for returned phone number in KCO.
 * Fix       - Fixes how Klarna customer billing details are handled in session.
