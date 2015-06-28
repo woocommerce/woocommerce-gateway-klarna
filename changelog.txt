@@ -15,7 +15,9 @@
 * Feature	- Updated flow for orders that are marked *Needs pending approval from Klarna* (KPM). Order status is now set to On Hold and a cronjob is checking the orderstatus with Klarna every 2 hours.
 * Feature	- Added Shipping and payment info from Klarna in order confirmation (on thank you page for KPM and in order emails sent from WC).
 * Feature	- Started implementing Klarnas Remarketing feature for KCO. All local WC orders (when selecting KCO as payment method but not finalizing the purchase) does now include the customers email address.
-* Feature	- Added setting in KCO to make it possible to display a button with a link back to the KCO page in WooCommerce standard checkout. 
+* Feature	- Added setting in KCO to make it possible to display a button with a link back to the KCO page in WooCommerce standard checkout.
+* Feature	- Added a new WP widget for displaying Klarna as an available payment option in the store.
+* Feature	- Added Klarna's Part payment widget (display monthly cost on product pages) even for KCO (previous only KPM).
 * Tweak		- Code refactoring.
 * Tweak		- Change Klarna Invoice, Account and Special campaign to two payment methods instead of three different. They are now called Invoice and Part payment.
 * Tweak		- Add customer info from Klarna to WooCommerce (name, phone etc) when creating users automatically with KCO.
