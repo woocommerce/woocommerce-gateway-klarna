@@ -486,11 +486,11 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 					<table id="klarna-checkout-cart">
 						<tbody>
 							<tr>
-								<th class="kco-column-remove kco-centeralign"></th>
-								<th class="kco-column-product kco-leftalign"><?php _e( 'Product', 'klarna' ); ?></th>
-								<th class="kco-column-price kco-centeralign"><?php _e( 'Price', 'klarna' ); ?></th>
-								<th class="kco-column-quantity kco-centeralign"><?php _e( 'Quantity', 'klarna' ); ?></th>
-								<th class="kco-column-total kco-rightalign"><?php _e( 'Total', 'klarna' ); ?></th>
+								<th class="product-remove kco-centeralign"></th>
+								<th class="product-name kco-leftalign"><?php _e( 'Product', 'klarna' ); ?></th>
+								<th class="product-price kco-centeralign"><?php _e( 'Price', 'klarna' ); ?></th>
+								<th class="product-quantity kco-centeralign"><?php _e( 'Quantity', 'klarna' ); ?></th>
+								<th class="product-total kco-rightalign"><?php _e( 'Total', 'klarna' ); ?></th>
 							</tr>
 							<?php
 							foreach ( $woocommerce->cart->get_cart() as $cart_item_key => $cart_item ) {
@@ -544,8 +544,8 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 					<table id="kco-totals">
 						<tbody>
 							<tr id="kco-page-subtotal">
-								<td class="kco-column-desc kco-rightalign"><?php _e( 'Subtotal', 'klarna' ); ?></td>
-								<td id="kco-page-subtotal-amount" class="kco-column-number kco-rightalign"><span class="amount"><?php echo $woocommerce->cart->get_cart_subtotal(); ?></span></td>
+								<td class="kco-col-desc kco-rightalign"><?php _e( 'Subtotal', 'klarna' ); ?></td>
+								<td id="kco-page-subtotal-amount" class="kco-col-number kco-rightalign"><span class="amount"><?php echo $woocommerce->cart->get_cart_subtotal(); ?></span></td>
 							</tr>
 							
 							<?php echo $this->klarna_checkout_get_shipping_options_row_html(); ?>

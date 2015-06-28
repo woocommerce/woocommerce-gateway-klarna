@@ -28,30 +28,29 @@ a.std-checkout-button {
 #klarna-checkout-widget table {
 	table-layout: fixed;
 	border: none;
+	width: 100%;
 }
-.kco-column-product {
+th.product-name {
 	width: 35%;
 }
-.kco-column-price {
+th.product-price {
 	width: 20%;
 }
-.kco-column-quantity {
+th.product-quantity {
 	width: 20%;
 }
-.kco-column-total {
+th.product-total {
 	width: 20%;
 }
-.kco-column-desc {
+.kco-col-desc {
 	width: 80%;
 }
-.kco-column-number {
+.kco-col-number {
 	width: 20%;
 }
 
 #klarna-checkout-widget input[type=number] {
 	display: block;
-	max-width: 100%;
-	width: 100%;
 	margin: 0 auto;
 	box-sizing: border-box;
 	text-align: center;
@@ -77,6 +76,13 @@ a.std-checkout-button {
 	font-size: 11px;
 	padding: 5px;
 	border: none;
+}
+#klarna-checkout-widget .product-total,
+#kco-page-total-amount {
+	white-space: nowrap;
+}
+#klarna-checkout-widget #shipping_method li {
+	list-style: none;
 }
 #klarna-checkout-widget #kco-page-shipping li span.amount {
 	font-weight: normal;
