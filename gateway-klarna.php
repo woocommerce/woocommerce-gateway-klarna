@@ -187,7 +187,7 @@ function init_klarna_gateway() {
 		$kco_mails = $kco_mailer->get_emails();
 		foreach ( $kco_mails as $kco_mail ) {
 			$order =  new WC_Order( $orderid );
-			if ( 'new_order' == $kco_mail->id ) {
+			if ( 'new_order' == $kco_mail->id || 'customer_processing_order' == $kco_mail->id ) {
 				$kco_mail->trigger( $order->id );
 			}
 		}
