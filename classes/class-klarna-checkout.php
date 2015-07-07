@@ -2059,6 +2059,7 @@ class WC_Gateway_Klarna_Checkout_Extra {
 	public function __construct() {
 
 		add_action( 'init', array( $this, 'start_session' ), 1 );
+		// add_action( 'wp_head', array( $this, 'klarna_checkout_css' ) );
 		
 		add_shortcode( 'woocommerce_klarna_checkout', array( $this, 'klarna_checkout_page') );
 
@@ -2131,13 +2132,23 @@ class WC_Gateway_Klarna_Checkout_Extra {
 	
 	function klarna_checkout_css() {
 		global $post;
-		global $klarna_checkout_thanks_url;
+		global $klarna_checkout_url;
 
-		$checkout_page_id = url_to_postid( $klarna_checkout_thanks_url );
+		$checkout_page_id   = url_to_postid( $klarna_checkout_url );
+		$checkout_settings  = get_option( 'woocommerce_klarna_checkout_settings' );
 
-		if ( $post->ID == $checkout_page_id ) { ?>
-			<style type="text/css">.wc-proceed-to-checkout{display:none !important;}.woocommerce .cart-collaterals .cart_totals{width:100%;float:none;}</style>
-		<?php }
+		if ( $post->ID == $checkout_page_id ) {
+			if ( '' != $checkout_settings['color_button'] || '' != $checkout_settings['color_button_text'] ) { ?>
+				<style>
+					a.std-checkout-button,
+					.klarna_checkout_coupon input[type="submit"] { 
+						background: <?php echo $checkout_settings['color_button']; ?> !important;
+						border: none !important;
+						color: <?php echo $checkout_settings['color_button_text']; ?> !important; 
+					}
+				</style>
+			<?php }
+		}
 	}
 
 
@@ -2230,7 +2241,7 @@ class WC_Gateway_Klarna_Checkout_Extra {
 		
 	
 		// Change the Checkout URL if this is enabled in the settings
-		if ( !empty($account_login_text) ) {
+		if ( ! empty( $account_login_text ) ) {
 			echo $account_login_text;
 		}
 	}

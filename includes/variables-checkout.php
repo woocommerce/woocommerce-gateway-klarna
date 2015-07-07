@@ -266,5 +266,7 @@ $this->klarna_secret				= apply_filters( 'klarna_secret', $klarna_secret );
 $this->klarna_checkout_url			= apply_filters( 'klarna_checkout_url', $klarna_checkout_url );
 $this->klarna_checkout_thanks_url	= apply_filters( 'klarna_checkout_thanks_url', $klarna_checkout_thanks_url );
 
+global $klarna_checkout_url;
+$klarna_checkout_url = $this->klarna_checkout_url;
 global $klarna_checkout_thanks_url;
 $klarna_checkout_thanks_url = $this->klarna_checkout_thanks_url;
