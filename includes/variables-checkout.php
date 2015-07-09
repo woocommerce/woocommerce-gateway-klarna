@@ -93,7 +93,7 @@ switch ( get_woocommerce_currency() ) {
 		break;
 	case 'EUR' :
 		// Check if Ajax country switcher set session value
-		if ( ! is_admin() && WC()->session->get( 'klarna_euro_country' ) ) {
+		if ( null !== WC()->session && ! is_admin() && WC()->session->get( 'klarna_euro_country' ) ) {
 			$klarna_country = WC()->session->get( 'klarna_euro_country' );
 		} else {
 			if ( get_locale() == 'de_DE' && '' != $this->eid_de && '' != $this->secret_de ) {
