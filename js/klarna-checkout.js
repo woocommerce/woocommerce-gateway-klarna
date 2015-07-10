@@ -258,7 +258,7 @@ jQuery(document).ready(function($) {
 	});
 
 	// Add coupon
-	$('.klarna_checkout_coupon').submit( function( event ) {
+	$('#klarna-checkout-widget .checkout_coupon').submit( function( event ) {
 		event.preventDefault();
 
 		if ( typeof window._klarnaCheckout == 'function') { 
@@ -267,8 +267,8 @@ jQuery(document).ready(function($) {
 		});
 		}
 
-		coupon = $( '.klarna_checkout_coupon .input-text' ).val();		
-		input_field = $( this ).find( '.input-text' );
+		coupon = $( '#klarna-checkout-widget #coupon_code' ).val();		
+		input_field = $( this ).find( '#coupon_code' );
 		total_field = $( 'td#kco-page-total-amount' );
 		subtotal_field = $( 'td#kco-page-subtotal-amount' );
 		shipping_row = $( 'tr#kco-page-shipping' );

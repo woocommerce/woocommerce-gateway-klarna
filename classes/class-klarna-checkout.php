@@ -398,6 +398,12 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 * @since  2.0
 	 **/
 	function klarna_checkout_enqueuer() {
+		global $woocommerce;
+
+		$suffix               = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
+		$assets_path          = str_replace( array( 'http:', 'https:' ), '', WC()->plugin_url() ) . '/assets/';
+		$frontend_script_path = $assets_path . 'js/frontend/';
+
 		wp_register_script( 'klarna_checkout', KLARNA_URL . 'js/klarna-checkout.js' );
 		wp_localize_script( 'klarna_checkout', 'kcoAjax', array( 'ajaxurl' => admin_url( 'admin-ajax.php' ), 'klarna_checkout_nonce' => wp_create_nonce( 'klarna_checkout_nonce' ) ) );        
 
@@ -415,6 +421,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 
 			if ( $post->ID == $klarna_checkout_page_id ) {
 				wp_enqueue_script( 'jquery' );
+				wp_enqueue_script( 'wc-checkout', $frontend_script_path . 'checkout' . $suffix . '.js', array( 'jquery', 'woocommerce', 'wc-country-select', 'wc-address-i18n' ) );
 				wp_enqueue_script( 'klarna_checkout' );
 				wp_enqueue_style( 'klarna_checkout' );
 			}
@@ -469,6 +476,9 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 				
 				<div id="klarna-checkout-widget" class="woocommerce <?php echo $widget_class; ?>">
 
+					<?php woocommerce_checkout_coupon_form(); ?>
+
+					<?php /*
 					<?php if ( WC()->cart->coupons_enabled() ) { ?>
 					<div id="klarna-checkout-coupons">
 						<form class="klarna_checkout_coupon" method="post">
@@ -482,6 +492,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 						</form>
 					</div>
 					<?php } ?>
+					*/ ?>
 
 					<div>
 					<table id="klarna-checkout-cart">
@@ -569,7 +580,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 					</table>
 					</div>
 
-					<?php if ( 'hide' != $atts['order_note'] ) { ?>
+					<?php if ( 'false' != $atts['order_note'] ) { ?>
 					<div>
 						<form>
 							<textarea id="klarna-checkout-order-note" class="input-text" name="klarna-checkout-order-note" placeholder="<?php _e( 'Notes about your order, e.g. special notes for delivery.', 'klarna' ); ?>"></textarea>
@@ -2076,6 +2087,9 @@ class WC_Gateway_Klarna_Checkout_Extra {
 		// Filter Checkout page ID, so WooCommerce Google Analytics integration can
 		// output Ecommerce tracking code on Klarna Thank You page
 		add_filter( 'woocommerce_get_checkout_page_id', array( $this, 'change_checkout_page_id' ) );
+
+		// Change is_checkout to true on KCO page
+		add_filter( 'woocommerce_is_checkout', array( $this, 'change_is_checkout_value' ) );
 		
 	}
 
@@ -2265,6 +2279,25 @@ class WC_Gateway_Klarna_Checkout_Extra {
 		}
 
 		return $checkout_page_id;
+	}
+
+
+	/**
+	 * Set is_checkout to true on KCO page
+	 */
+	function change_is_checkout_value( $bool ) {
+		global $post;
+		global $klarna_checkout_url;
+
+		if ( is_page() ) {
+			$current_page_url = get_permalink( $post->ID );
+			// Compare Klarna Checkout page URL to current page URL
+			if ( esc_url( trailingslashit( $klarna_checkout_url ) ) == esc_url( trailingslashit( $current_page_url ) ) ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 		
 
