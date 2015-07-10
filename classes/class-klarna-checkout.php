@@ -446,6 +446,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		$atts = shortcode_atts(
 			array(
 				'col' => '',
+				'order_note' => '',
 			),
 			$atts
 		);
@@ -568,11 +569,13 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 					</table>
 					</div>
 
+					<?php if ( 'hide' != $atts['order_note'] ) { ?>
 					<div>
 						<form>
 							<textarea id="klarna-checkout-order-note" class="input-text" name="klarna-checkout-order-note" placeholder="<?php _e( 'Notes about your order, e.g. special notes for delivery.', 'klarna' ); ?>"></textarea>
 						</form>
 					</div>
+					<?php } ?>
 
 				</div>
 
