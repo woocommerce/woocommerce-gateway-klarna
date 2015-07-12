@@ -437,6 +437,11 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	/**
 	 * Klarna Checkout widget shortcode callback.
 	 * 
+	 * Parameters:
+	 * col            - whether to show it as left or right column in two column layout, options: 'left' and 'right'
+	 * order_note     - whether to show order note or not, option: 'false' (to hide it)
+	 * 'hide_columns' - select columns to hide, comma separated string, options: 'remove', 'price'
+	 * 
 	 * @since  2.0
 	 **/
 	function klarna_checkout_widget( $atts ) {
@@ -454,9 +459,14 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			array(
 				'col' => '',
 				'order_note' => '',
+				'hide_columns' => ''
 			),
 			$atts
 		);
+
+		if ( '' != $atts['hide_columns'] ) {
+			$hide_columns = explode( ',', $atts['hide_columns'] );
+		}
 
 		if ( 'left' == $atts['col'] ) {
 			$widget_class .= ' kco-left-col';
@@ -498,9 +508,13 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 					<table id="klarna-checkout-cart">
 						<tbody>
 							<tr>
+								<?php if ( ! in_array( 'remove', $hide_columns ) ) { ?>
 								<th class="product-remove kco-centeralign"></th>
+								<?php } ?>
 								<th class="product-name kco-leftalign"><?php _e( 'Product', 'klarna' ); ?></th>
+								<?php if ( ! in_array( 'price', $hide_columns ) ) { ?>
 								<th class="product-price kco-centeralign"><?php _e( 'Price', 'klarna' ); ?></th>
+								<?php } ?>
 								<th class="product-quantity kco-centeralign"><?php _e( 'Quantity', 'klarna' ); ?></th>
 								<th class="product-total kco-rightalign"><?php _e( 'Total', 'klarna' ); ?></th>
 							</tr>
@@ -509,7 +523,9 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 								$_product = $cart_item['data'];
 								$cart_item_product = wc_get_product( $cart_item['product_id'] );
 								echo '<tr>';
+									if ( ! in_array( 'remove', $hide_columns ) ) {
 									echo '<td class="kco-product-remove kco-centeralign"><a href="#">x</a></td>';
+									}
 									echo '<td class="product-name kco-leftalign">';
 										if ( ! $_product->is_visible() ) {
 											echo apply_filters( 'woocommerce_cart_item_name', $_product->get_title(), $cart_item, $cart_item_key ) . '&nbsp;';
@@ -519,9 +535,11 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 										// Meta data
 										echo $woocommerce->cart->get_item_data( $cart_item );
 									echo '</td>';
+									if ( ! in_array( 'price', $hide_columns ) ) {
 									echo '<td class="product-price kco-centeralign"><span class="amount">';
 										echo apply_filters( 'woocommerce_cart_item_price', $woocommerce->cart->get_product_price( $_product ), $cart_item, $cart_item_key );
 									echo '</span></td>';
+									}
 									echo '<td class="product-quantity kco-centeralign" data-cart_item_key="' . $cart_item_key .'">';
 										if ( $_product->is_sold_individually() ) {
 											$product_quantity = sprintf( '1 <input type="hidden" name="cart[%s][qty]" value="1" />', $cart_item_key );
