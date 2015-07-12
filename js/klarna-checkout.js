@@ -355,6 +355,9 @@ jQuery(document).ready(function($) {
 					$( total_field ).html( response.data.cart_total );
 					$( subtotal_field ).html( response.data.cart_subtotal );
 					$( shipping_row ).replaceWith( response.data.shipping_row );
+
+					// Remove WooCommerce notification
+					$( '#klarna-checkout-widget .woocommerce-info + .woocommerce-message' ).remove();
 										
 					if ( typeof window._klarnaCheckout == 'function') { 
 					window._klarnaCheckout(function (api) {
