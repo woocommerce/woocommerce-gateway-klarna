@@ -2094,8 +2094,6 @@ class WC_Gateway_Klarna_Checkout_Extra {
 		add_action( 'init', array( $this, 'start_session' ), 1 );
 		// add_action( 'wp_head', array( $this, 'klarna_checkout_css' ) );
 		
-		add_shortcode( 'woocommerce_klarna_checkout', array( $this, 'klarna_checkout_page') );
-
 		add_filter( 'woocommerce_get_checkout_url', array( $this, 'change_checkout_url' ), 20 );
 		
 		add_action( 'woocommerce_register_form_start', array( $this, 'add_account_signup_text' ) );
@@ -2145,25 +2143,6 @@ class WC_Gateway_Klarna_Checkout_Extra {
     	// }
     }
 
-
-	// Shortcode KCO page
-	function klarna_checkout_page( $atts ) {
-		$atts = shortcode_atts(
-			array(
-				'col' => '',
-			),
-			$atts
-		);
-
-		if ( 'left' == $atts['col'] ) {
-			$widget_class .= ' kco-left-col';
-		} elseif ( 'right' == $atts['col'] ) {
-			$widget_class .= ' kco-right-col';			
-		}
-
-		$data = new WC_Gateway_Klarna_Checkout;
-		return '<div class="klarna_checkout ' . $widget_class . '">' . $data->get_klarna_checkout_page() . '</div>';
-	}
 	
 	function klarna_checkout_css() {
 		global $post;
@@ -2249,10 +2228,8 @@ class WC_Gateway_Klarna_Checkout_Extra {
 	 *
 	 **/
 	public function add_account_signup_text() {
-		global $woocommerce;
-		$data = new WC_Gateway_Klarna_Checkout;
-		$account_signup_text = '';
-		$account_signup_text = $data->get_account_signup_text();	
+		$checkout_settings = get_option( 'woocommerce_klarna_checkout_settings' );
+		$account_signup_text = ( isset( $checkout_settings['account_signup_text'] ) ) ? $checkout_settings['account_signup_text'] : '';
 
 		// Change the Checkout URL if this is enabled in the settings
 		if( ! empty( $account_signup_text ) ) {
@@ -2269,11 +2246,8 @@ class WC_Gateway_Klarna_Checkout_Extra {
 	 *  Useful for legal text for German stores. See documentation for more information. Leave blank to disable.
 	 **/
 	public function add_account_login_text() {
-		global $woocommerce;
-		$data = new WC_Gateway_Klarna_Checkout;
-		$account_login_text = '';
-		$account_login_text = $data->get_account_login_text();
-		
+		$checkout_settings = get_option( 'woocommerce_klarna_checkout_settings' );
+		$account_login_text = ( isset( $checkout_settings['account_login_text'] ) ) ? $checkout_settings['account_login_text'] : '';
 	
 		// Change the Checkout URL if this is enabled in the settings
 		if ( ! empty( $account_login_text ) ) {

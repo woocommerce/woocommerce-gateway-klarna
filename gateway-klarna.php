@@ -169,6 +169,7 @@ function init_klarna_gateway() {
 	$available_countries = array( 'SE', 'NO', 'FI', 'DE', 'GB', 'AT' );
 	if ( in_array( $klarna_shop_country, $available_countries ) ) {
 		require_once 'classes/class-klarna-checkout.php';
+		require_once 'classes/class-klarna-shortcodes.php';
 	}
 
 	// Send customer and merchant emails for KCO Incomplete > Processing status change
