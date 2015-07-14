@@ -165,6 +165,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 
 		// Do not copy invoice number to recurring orders
 		add_filter( 'woocommerce_subscriptions_renewal_order_meta_query', array( $this, 'kco_recurring_do_not_copy_meta_data' ), 10, 4 );
+
     }
 
 	/**
@@ -2120,15 +2121,14 @@ class WC_Gateway_Klarna_Checkout_Extra {
 	 * @since  2.0
 	 */
 	function klarna_add_link_to_kco_page() {
-		$data                = new WC_Gateway_Klarna_Checkout;
-		$enabled             = $data->get_enabled();
-		$klarna_checkout_url = $data->get_klarna_checkout_url();
+		global $klarna_checkout_url;
+
 		$checkout_settings   = get_option( 'woocommerce_klarna_checkout_settings' );
 
-		if ( 'yes' == $data->get_enabled() && 
+		if ( 'yes' == $checkout_settings['enabled'] && 
 			'' != $checkout_settings['klarna_checkout_button_label'] && 
 			'yes' == $checkout_settings['add_klarna_checkout_button'] ) {
-			echo '<div class="woocommerce"><a style="margin-top:1em" href="' . $data->get_klarna_checkout_url() . '" class="button std-checkout-button">' . $checkout_settings['klarna_checkout_button_label'] . '</a></div>';
+			echo '<div class="woocommerce"><a style="margin-top:1em" href="' . $klarna_checkout_url . '" class="button std-checkout-button">' . $checkout_settings['klarna_checkout_button_label'] . '</a></div>';
 		}
 	}
 
