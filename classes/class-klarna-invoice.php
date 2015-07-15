@@ -1121,52 +1121,6 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 	function receipt_page( $order ) {
 		echo '<p>'.__('Thank you for your order.', 'klarna').'</p>';		
 	}
-
-
-	/**
-	 * Calc monthly cost on single Product page and print it out
-	 *
-	 * @since 1.0.0
-	 **/ 
-	function print_product_monthly_cost() {		
-		if ( $this->enabled!="yes" || $this->klarna_helper->get_klarna_locale(get_locale()) == 'nl_nl' )
-			return;
-			
-		global $woocommerce, $product, $klarna_invoice_shortcode_currency, $klarna_invoice_shortcode_price, $klarna_shortcode_img, $klarna_invoice_country;
-		
-		$klarna_product_total = $product->get_price();
-		
-		// Product with no price - do nothing
-		if ( empty( $klarna_product_total ) )
-			return;
-		
-		$sum = apply_filters( 'klarna_product_total', $klarna_product_total ); // Product price.
-		$sum = trim( $sum );
-		
-	 	// Only execute this if the feature is activated in the gateway settings
-		if ( $this->show_monthly_cost == 'yes' ) {    		
-    		// Monthly cost threshold check. This is done after apply_filters to product price ($sum).
-	    	if ( $this->lower_threshold_monthly_cost < $sum && $this->upper_threshold_monthly_cost > $sum ) {
-	    		$data = new WC_Gateway_Klarna_Invoice;
-	    		$invoice_fee = $data->get_invoice_fee_price();	    		
-	    		?>
-				<div style="width:220px; height:70px" 
-				     class="klarna-widget klarna-invoice"
-				     data-eid="<?php echo $this->klarna_helper->get_eid(); ?>" 
-				     data-locale="<?php echo $this->klarna_helper->get_klarna_locale(get_locale());?>"
-				     data-price="<?php echo $sum;?>"
-				     data-layout="pale"
-				     data-invoice-fee="<?php echo $invoice_fee;?>">
-				</div>
-		
-				<?php	    		
-	    		// Show klarna_warning_banner if NL
-				if ( $this->shop_country == 'NL' ) {
-					echo '<img src="' . $this->klarna_wb_img_single_product . '" class="klarna-wb" style="max-width: 100%;"/>';	
-				}			    	
-	    	}
-		}	
-	}
 	
 	
 	/**
@@ -1177,6 +1131,21 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 	 * @todo  move to separate JS file?
 	 **/
 	function footer_scripts () {			
+		global $woocommerce;
+		if ( is_checkout() && $this->enabled=="yes" && $this->invoice_fee_id > 0 ) {
+			?>
+			<script type="text/javascript">
+				//<![CDATA[
+				jQuery(document).ready(function($){
+					$(document.body).on('change', 'input[name="payment_method"]', function() {
+						$('body').trigger('update_checkout');
+					});
+				});
+				//]]>
+			</script>
+			<?php
+		}
+
 		if ( is_checkout() && 'yes' == $this->enabled ) { ?>
 			<script type="text/javascript">
 				//<![CDATA[
@@ -1269,3 +1238,72 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 	}
 
 } // End class WC_Gateway_Klarna_invoice
+
+
+/**
+ * Class WC_Gateway_Klarna_Invoice_Extra
+ * Extra class for functions that needs to be executed outside the payment gateway class.
+ * Since version 1.5.4 (WooCommerce version 2.0)
+ */
+class WC_Gateway_Klarna_Invoice_Extra {
+	
+	public function __construct() {
+		
+		// Add Invoice fee via the new Fees API
+		add_action( 'woocommerce_cart_calculate_fees', array( $this, 'calculate_fees' ));
+		
+	}
+	
+	/**
+	 * Calculate fees on checkout form.
+	 */
+	public function calculate_fees( $cart ) {
+		global $woocommerce;
+		$current_gateway = '';
+		
+    	if ( is_checkout() || defined( 'WOOCOMMERCE_CHECKOUT' ) ) {
+    		
+    		$available_gateways = $woocommerce->payment_gateways->get_available_payment_gateways();
+			
+    		if ( ! empty( $available_gateways ) ) {
+				// Chosen Method
+				if ( $woocommerce->session->get( 'chosen_payment_method' ) && isset( $available_gateways[ $woocommerce->session->get( 'chosen_payment_method' ) ] ) ) {
+					$current_gateway = $available_gateways[ $woocommerce->session->get( 'chosen_payment_method' ) ];
+				} elseif ( isset( $available_gateways[ get_option( 'woocommerce_default_gateway' ) ] ) ) {
+            		$current_gateway = $available_gateways[ get_option( 'woocommerce_default_gateway' ) ];
+				} else {
+            		$current_gateway = current( $available_gateways );
+				}
+			}
+			if ( is_object( $current_gateway ) ) {
+				if ( 'klarna_invoice' === $current_gateway->id ) {
+	        		$this->add_fee_to_cart( $cart );
+				}
+			}
+		}
+	}
+	
+	/**
+	 * Add the fee to the cart if Klarna is selected payment method and if a fee is used.
+	 */
+	public function add_fee_to_cart( $cart ) {
+		$invoice_fee          = new WC_Gateway_Klarna_Invoice;
+		$this->invoice_fee_id = $invoice_fee->get_invoice_fee_id();
+		if ( $this->invoice_fee_id > 0 ) {
+			$product = wc_get_product( $this->invoice_fee_id );
+				 	
+		 	if ( $product ) {
+		 		// Is this a taxable product?
+		 		if ( $product->is_taxable() ) {
+		 			$product_tax = true;
+		 		} else {
+			 		$product_tax = false;
+			 	}
+			 	
+			 	$cart->add_fee( $product->get_title(), $product->get_price_excluding_tax(), $product_tax,$product->get_tax_class() );
+			}
+		}
+	}
+
+}
+$wc_klarna_invoice_extra = new WC_Gateway_Klarna_Invoice_Extra;

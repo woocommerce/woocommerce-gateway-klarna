@@ -955,60 +955,6 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 		echo '<p>'.__('Thank you for your order.', 'klarna').'</p>';		
 	}
 
-
-	/**
-	 * Calc monthly cost on single Product page and print it out
-	 *
-	 * @since 1.0.0
-	 **/ 
-	function print_product_monthly_cost() {
-		
-		if ( $this->enabled != "yes" || $this->klarna_helper->get_klarna_locale(get_locale()) == 'nl_nl' )
-			return;
-			
-		global $woocommerce, $product, $klarna_part_payment_shortcode_currency, $klarna_part_payment_shortcode_price, $klarna_shortcode_img, $klarna_part_payment_country;
-		
-		$klarna_product_total = $product->get_price();
-		
-		// Product with no price - do nothing
-		if ( empty( $klarna_product_total ) )
-			return;
-		
-		$sum = apply_filters( 'klarna_product_total', $klarna_product_total ); // Product price.
-		$sum = trim( $sum );
-		
-	 	// Only execute this if the feature is activated in the gateway settings
-		if ( $this->show_monthly_cost == 'yes' ) {
-
-	    		
-    		// Monthly cost threshold check. This is done after apply_filters to product price ($sum).
-	    	if ( $this->lower_threshold_monthly_cost < $sum && $this->upper_threshold_monthly_cost > $sum ) {
-	    		$data = new WC_Gateway_Klarna_Invoice;
-	    		$invoice_fee = $data->get_invoice_fee_price();
-	    		
-	    		?>
-				<div style="width:220px; height:70px" 
-				     class="klarna-widget klarna-part-payment"
-				     data-eid="<?php echo $this->klarna_helper->get_eid();?>" 
-				     data-locale="<?php echo $this->klarna_helper->get_klarna_locale(get_locale());?>"
-				     data-price="<?php echo $sum;?>"
-				     data-layout="pale"
-				     data-invoice-fee="<?php echo $invoice_fee;?>">
-				</div>
-		
-				<?php
-	    		
-	    		// Show klarna_warning_banner if NL
-				if ( $this->shop_country == 'NL' ) {
-					echo '<img src="' . $this->klarna_wb_img_single_product . '" class="klarna-wb" style="max-width: 100%;"/>';	
-				}
-	    				    	
-	    	}
-		
-		}
-		
-	}
-	
 	
 	/**
 	 * Disable the radio button for the Klarna Part Payment payment method if Company name
