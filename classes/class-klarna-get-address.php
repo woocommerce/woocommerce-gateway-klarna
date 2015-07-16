@@ -36,11 +36,7 @@ class WC_Klarna_Get_Address {
 			$this->secret                  = $data->klarna_helper->get_secret();
 			$this->order_type_partpayment  = 'yes';
 		}
-		
-		$data                    = new WC_Gateway_Klarna_Invoice;
-		$this->campaign_enabled  = $data->get_enabled();
-		
-		
+				
 		add_action( 'wp_ajax_ajax_request', array( $this, 'ajax_request' ) );
 		add_action( 'wp_ajax_nopriv_ajax_request', array($this, 'ajax_request') );
 		
