@@ -19,24 +19,20 @@
 class WC_Klarna_Get_Address {
 
 	public function __construct() {
-		$data                     = new WC_Gateway_Klarna_Invoice;
-		$this->testmode           = $data->klarna_helper->get_test_mode();
-		$this->eid                = $data->klarna_helper->get_eid();
-		$this->secret             = $data->klarna_helper->get_secret();
-		$this->invo_enabled       = $data->klarna_helper->get_enabled();
-		$this->invo_dob_display	  = 'description_box';
-		
-		$data                        = new WC_Gateway_Klarna_Part_Payment;
-		$this->partpay_enabled       = $data->klarna_helper->get_enabled();
-		$this->partpay_dob_display   = 'description_box';
+		$invo_settings = get_option( 'woocommerce_klarna_invoice_settings' );
+		$this->invo_eid = $invo_settings['eid_se'];
+		$this->invo_secret = $invo_settings['secret_se'];
+		$this->invo_testmode = $invo_settings['testmode'];
+		$this->invo_enabled = $invo_settings['enabled'];
+		$this->invo_dob_display	= 'description_box';
 
-		// If Invoice payment isn't activated by the merchant, use Part payment credentials for getAddresses instead
-		if ( empty( $this->eid ) ) {
-			$this->eid                     = $data->klarna_helper->get_eid();
-			$this->secret                  = $data->klarna_helper->get_secret();
-			$this->order_type_partpayment  = 'yes';
-		}
-				
+		$partpay_settings = get_option( 'woocommerce_klarna_part_payment_settings' );
+		$this->partpay_eid = $partpay_settings['eid_se'];
+		$this->partpay_secret = $partpay_settings['secret_se'];
+		$this->partpay_testmode = $partpay_settings['testmode'];
+		$this->partpay_enabled = $partpay_settings['enabled'];
+		$this->partpay_dob_display = 'description_box';
+
 		add_action( 'wp_ajax_ajax_request', array( $this, 'ajax_request' ) );
 		add_action( 'wp_ajax_nopriv_ajax_request', array($this, 'ajax_request') );
 		
@@ -56,8 +52,8 @@ class WC_Klarna_Get_Address {
  	 * CSS for Get Addresses form
  	 */
 	function enqueue_scripts() {
-		if( is_checkout() && ($this->partpay_enabled || $this->invo_enabled || $this->campaign_enabled ) ) {
-			wp_enqueue_style('klarna-style', KLARNA_URL . 'assets/css/style.css');
+		if ( is_checkout() && ( $this->partpay_enabled || $this->invo_enabled ) ) {
+			wp_enqueue_style( 'klarna-style', KLARNA_URL . 'assets/css/style.css' );
 		}
 	}
 	
@@ -70,7 +66,7 @@ class WC_Klarna_Get_Address {
  	 * and in the end use another payment method than Klarna.
  	 */
 	public function checkout_restore_customer_defaults() {
-		if( is_checkout() &&  $this->get_shop_country() == 'SE' && ($this->partpay_enabled || $this->invo_enabled || $this->campaign_enabled) ) {
+		if ( is_checkout() && 'SE' == $this->get_shop_country() && ( $this->partpay_enabled || $this->invo_enabled ) ) {
 		
 			global $woocommerce, $current_user;
 		
@@ -139,7 +135,7 @@ class WC_Klarna_Get_Address {
  	 * and populating the checkout fields after the call to Klarna.
  	 */
 	function js() {	
-		if( is_checkout() && $this->get_shop_country() == 'SE' && ($this->partpay_enabled || $this->invo_enabled || $this->campaign_enabled) ) {
+		if( is_checkout() && $this->get_shop_country() == 'SE' && ($this->partpay_enabled || $this->invo_enabled ) ) {
 			?>
 			<script type="text/javascript">
 			jQuery(document).ready(function($){
@@ -360,7 +356,7 @@ class WC_Klarna_Get_Address {
 	 */
 	function ajax_request() {
 		// The $_REQUEST contains all the data sent via ajax
-		if ( isset($_REQUEST) ) {
+		if ( isset( $_REQUEST ) ) {
 		
 			// Klarna settings
 			require_once(KLARNA_LIB . 'Klarna.php');
@@ -369,9 +365,19 @@ class WC_Klarna_Get_Address {
 				require_once(KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc.inc');
 				require_once(KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc_wrappers.inc');
 			}
+
+			if ( 'klarna_part_payment' == WC()->session->get( 'chosen_payment_method' ) ) {
+				$klarna_eid = $this->partpay_eid;
+				$klarna_secret = $this->partpay_secret;
+				$klarna_testmode = $this->partpay_testmode;
+			} elseif ( 'klarna_invoice' == WC()->session->get( 'chosen_payment_method' ) ) {
+				$klarna_eid = $this->invo_eid;
+				$klarna_secret = $this->invo_secret;
+				$klarna_testmode = $this->invo_testmode;
+			}
 			
 			// Test mode or Live mode		
-			if ( $this->testmode == 'yes' ) {
+			if ( $klarna_testmode == 'yes' ) {
 				// Disable SSL if in testmode
 				$klarna_ssl = 'false';
 				$klarna_mode = Klarna::BETA;
@@ -385,13 +391,13 @@ class WC_Klarna_Get_Address {
 				$klarna_mode = Klarna::LIVE;
 			}
 				
-			$k = new Klarna();		
+			$k = new Klarna();
 	
 			$k->config(
-			    $this->eid, 											// EID
-			    $this->secret, 											// Secret
-			    $this->get_country(), 									// Country
-			    $this->get_klarna_language($this->get_country()), 		// Language
+			    $klarna_eid, 											// EID
+			    $klarna_secret, 										// Secret
+			    'SE', 									                // Country
+			    'SE', 	                                                // Language
 			    get_woocommerce_currency(), 							// Currency
 			    $klarna_mode, 											// Live or test
 			    $pcStorage = 'json', 									// PClass storage
@@ -401,41 +407,41 @@ class WC_Klarna_Get_Address {
 			$pno_getadress = $_REQUEST['pno_getadress'];
 			$return = array();
 			
-			$k->setCountry('se'); // Sweden only
+			$k->setCountry( 'SE' ); // Sweden only
 			try {
-			    $addrs = $k->getAddresses($pno_getadress);
+			    $addrs = $k->getAddresses( $pno_getadress );
 			    
-			    foreach($addrs as $addr) {
+			    foreach ( $addrs as $addr ) {
 			    
 		    		//$return[] = $addr->toArray();
 		    		$return[] = array(
-			            'email' 		=> 	utf8_encode($addr->getEmail()),
-			            'telno' 		=> 	utf8_encode($addr->getTelno()),
-			            'cellno' 		=> 	utf8_encode($addr->getCellno()),
-			            'fname' 		=> 	utf8_encode($addr->getFirstName()),
-			            'lname' 		=> 	utf8_encode($addr->getLastName()),
-			            'company' 		=> 	utf8_encode($addr->getCompanyName()),
-			            'careof' 		=> 	utf8_encode($addr->getCareof()),
-			            'street' 		=> 	utf8_encode($addr->getStreet()),
-			            'zip' 			=> 	utf8_encode($addr->getZipCode()),
-			            'city' 			=> 	utf8_encode($addr->getCity()),
-			            'country' 		=> 	utf8_encode($addr->getCountry()),
+			            'email' 		=> 	utf8_encode( $addr->getEmail() ),
+			            'telno' 		=> 	utf8_encode( $addr->getTelno() ),
+			            'cellno' 		=> 	utf8_encode( $addr->getCellno() ),
+			            'fname' 		=> 	utf8_encode( $addr->getFirstName() ),
+			            'lname' 		=> 	utf8_encode( $addr->getLastName() ),
+			            'company' 		=> 	utf8_encode( $addr->getCompanyName() ),
+			            'careof' 		=> 	utf8_encode( $addr->getCareof() ),
+			            'street' 		=> 	utf8_encode( $addr->getStreet() ),
+			            'zip' 			=> 	utf8_encode( $addr->getZipCode() ),
+			            'city' 			=> 	utf8_encode( $addr->getCity() ),
+			            'country' 		=> 	utf8_encode( $addr->getCountry() ),
 			        );
 		    		
 				}
 			
-			} catch(Exception $e) {
-				//$message = "{$e->getMessage()} (#{$e->getCode()})\n";
+			} catch( Exception $e ) {
+				// $message = "{$e->getMessage()} (#{$e->getCode()})\n";
 				$return = array(
-					'get_address_message' => __('No address found', 'klarna')
+					'get_address_message' => __( 'No address found', 'klarna' )
 				);
 				
 			}
-			
-			wp_send_json($return);
+
+			wp_send_json( $return );
 			
 			// If you're debugging, it might be useful to see what was sent in the $_REQUEST
-			//print_r($_REQUEST);
+			// print_r($_REQUEST);
 		} else {
 			echo '';
 			die();
@@ -444,25 +450,18 @@ class WC_Klarna_Get_Address {
 		die();
 	} // End function
 	
-
-	// Helper function - get_country
-	public function get_country() {
-		$data = new WC_Gateway_Klarna_Invoice;
-		return $data->klarna_helper->get_klarna_country();
-	}
-
-	
 	// Helper function - get_shop_country
 	public function get_shop_country() {
-		$data = new WC_Gateway_Klarna_Invoice;
-		return $data->get_klarna_shop_country();
-	}
+		$klarna_default_country = get_option( 'woocommerce_default_country' );
 
-	
-	// Helper function - get_klarna_language
-	public function get_klarna_language( $country ) {
-		$data = new WC_Gateway_Klarna_Invoice;
-		return $data->klarna_helper->get_klarna_country( $country );
+		// Check if woocommerce_default_country includes state as well. If it does, remove state
+		if ( strstr( $klarna_default_country, ':' ) ) {
+			$klarna_shop_country = current( explode( ':', $klarna_default_country ) );
+		} else {
+			$klarna_shop_country = $klarna_default_country;
+		}
+
+		return apply_filters( 'klarna_shop_country', $klarna_shop_country );
 	}
 	
 } // End Class
