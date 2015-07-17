@@ -214,13 +214,15 @@ class WC_Klarna_Get_Address {
 				
 				
 				jQuery(document).on('click','.klarna-push-pno',function() {
-					if( jQuery('#klarna_invoice_pno').val() != '' ) {
+					pno_getadress = '';
+
+					if ( jQuery('#klarna_invoice_pno').length && jQuery('#klarna_invoice_pno').val() != '' ) {
 						pno_getadress = jQuery('#klarna_invoice_pno').val();
-					} else if( jQuery('#klarna_part_payment_pno').val() != '' ) {
+					} else if ( jQuery('#klarna_part_payment_pno').length && jQuery('#klarna_part_payment_pno').val() != '' ) {
 						pno_getadress = jQuery('#klarna_part_payment_pno').val();
 					}
 
-					if(pno_getadress == '') {
+					if( pno_getadress == '' ) {
 					
 						$(".klarna-get-address-message").show();
 						$(".klarna-get-address-message").html('<span style="clear:both; margin: 5px 2px; padding: 4px 8px; background:#ffecec"><?php _e('Be kind and enter a date of birth!', 'klarna');?></span>');
@@ -361,9 +363,9 @@ class WC_Klarna_Get_Address {
 			// Klarna settings
 			require_once(KLARNA_LIB . 'Klarna.php');
 			
-			if(!function_exists('xmlrpc_encode_entitites') && !class_exists('xmlrpcresp')) {
-				require_once(KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc.inc');
-				require_once(KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc_wrappers.inc');
+			if ( ! function_exists( 'xmlrpc_encode_entitites' ) && ! class_exists( 'xmlrpcresp' ) ) {
+				require_once( KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc.inc' );
+				require_once( KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc_wrappers.inc' );
 			}
 
 			if ( 'klarna_part_payment' == WC()->session->get( 'chosen_payment_method' ) ) {
@@ -432,6 +434,7 @@ class WC_Klarna_Get_Address {
 			
 			} catch( Exception $e ) {
 				// $message = "{$e->getMessage()} (#{$e->getCode()})\n";
+				$return = $e;
 				$return = array(
 					'get_address_message' => __( 'No address found', 'klarna' )
 				);
