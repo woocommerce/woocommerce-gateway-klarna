@@ -1287,8 +1287,9 @@ class WC_Gateway_Klarna_Invoice_Extra {
 	 * Add the fee to the cart if Klarna is selected payment method and if a fee is used.
 	 */
 	public function add_fee_to_cart( $cart ) {
-		$invoice_fee          = new WC_Gateway_Klarna_Invoice;
-		$this->invoice_fee_id = $invoice_fee->get_invoice_fee_id();
+		$invo_settings = get_option( 'woocommerce_klarna_invoice_settings' );
+		$this->invoice_fee_id = $invo_settings['invoice_fee_id'];
+
 		if ( $this->invoice_fee_id > 0 ) {
 			$product = wc_get_product( $this->invoice_fee_id );
 				 	
