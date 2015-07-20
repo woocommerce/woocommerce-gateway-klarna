@@ -155,7 +155,29 @@ class WC_Gateway_Klarna_Order {
 	function process_discount() {
 		$order = $this->order;
 		$klarna = $this->klarna;
+		
+		if ( WC()->cart->applied_coupons ) {
 
+			foreach ( WC()->cart->applied_coupons as $code ) {
+		
+				$smart_coupon = new WC_Coupon( $code );
+				//var_dump(WC()->cart->coupon_discount_amounts);
+				//var_dump(WC()->cart->coupon_discount_amounts[$code]);
+				if ( $smart_coupon->is_valid() && $smart_coupon->discount_type == 'smart_coupon' ) {
+				$klarna->addArticle(
+				    $qty = 1,
+				    $artNo = '',
+				    $title = __( 'Discount', 'klarna' ),
+				    $price = - WC()->cart->coupon_discount_amounts[$code],
+				    $vat = 0,
+				    $discount = 0,
+				    $flags = KlarnaFlags::INC_VAT
+				);
+					
+				}
+			}
+		}
+		/*
 		if ( $order->order_discount > 0 ) {
 			// apply_filters to order discount so we can filter this if needed
 			$klarna_order_discount = $order->order_discount;
@@ -171,6 +193,7 @@ class WC_Gateway_Klarna_Order {
 			    $flags = KlarnaFlags::INC_VAT
 			);
 		}
+		*/
 	}
 
 
