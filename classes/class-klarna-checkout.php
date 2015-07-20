@@ -2179,7 +2179,7 @@ class WC_Gateway_Klarna_Checkout_Extra {
 				remove_action( 'woocommerce_cart_collaterals', 'woocommerce_cross_sell_display' );
 				remove_action( 'woocommerce_proceed_to_checkout', 'woocommerce_button_proceed_to_checkout', 10 );
 
-				if ( ! defined('WOOCOMMERCE_CART') ) {
+				if ( ! defined( 'WOOCOMMERCE_CART' ) ) {
 					define( 'WOOCOMMERCE_CART', true );
 				}
 
@@ -2198,11 +2198,15 @@ class WC_Gateway_Klarna_Checkout_Extra {
 	 **/	 
 	function change_checkout_url( $url ) {
 		global $woocommerce;
+		global $klarna_checkout_url;
 
 		$data = new WC_Gateway_Klarna_Checkout;
-		$enabled = $data->get_enabled();
-		$klarna_checkout_url = $data->get_klarna_checkout_url();
-		$modify_standard_checkout_url = $data->get_modify_standard_checkout_url();
+
+		$checkout_settings = get_option( 'woocommerce_klarna_checkout_settings' );
+		$enabled = $checkout_settings['enabled'];
+		$modify_standard_checkout_url = $checkout_settings['modify_standard_checkout_url'];
+		// $klarna_checkout_url = $data->get_klarna_checkout_url();
+		// $modify_standard_checkout_url = $data->get_modify_standard_checkout_url();
 		$klarna_country = $data->get_klarna_country();
 		$available_countries = $data->authorized_countries;
 
