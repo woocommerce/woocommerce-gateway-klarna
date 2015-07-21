@@ -1528,8 +1528,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 *
 	 * @since 1.0.0
 	 */
-	function get_klarna_checkout_page() {
-			
+	function get_klarna_checkout_page() {	
 		global $woocommerce;
 		global $current_user;
 		get_currentuserinfo();
