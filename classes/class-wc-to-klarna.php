@@ -157,7 +157,27 @@ class WC_Gateway_Klarna_WC2K {
 				);
 			}
 			$cart[] = $shipping;
-	
+
+			// Process discounts
+			if ( WC()->cart->applied_coupons ) {
+				foreach ( WC()->cart->applied_coupons as $code ) {
+					$smart_coupon = new WC_Coupon( $code );
+
+					if ( $smart_coupon->is_valid() && $smart_coupon->discount_type == 'smart_coupon' ) {
+						$coupon_name     = $this->get_coupon_name( $smart_coupon );
+						$coupon_amount   = $this->get_coupon_amount( $smart_coupon );
+
+						$cart[] = array(
+							'type'       => 'discount',
+							'reference'  => 'DISCOUNT',
+							'name'       => $coupon_name,
+							'quantity'   => 1,
+							'unit_price' => - $coupon_amount,
+							'tax_rate'  => 0,
+						);
+					}
+				}
+			}
 		}
 
 		return $cart;
@@ -417,6 +437,54 @@ class WC_Gateway_Klarna_WC2K {
 		$shipping_tax_amount = $woocommerce->cart->shipping_tax_total * 100;
 
 		return (int) $shipping_tax_amount;
+	}
+
+	/**
+	 * Get coupon method name.
+	 *
+	 * @since  2.0.0
+	 * @access public
+	 *
+	 * @return string $coupon_name Name for selected coupon method.
+	 */
+	public function get_coupon_name( $smart_coupon ) {
+		$coupon_name = $smart_coupon->code;
+
+		return $coupon_name;
+	}
+
+	/**
+	 * Get coupon method amount.
+	 *
+	 * @since  2.0.0
+	 * @access public
+	 *
+	 * @return integer $coupon_amount Amount for selected coupon method.
+	 */
+	public function get_coupon_amount( $smart_coupon ) {
+		$coupon_amount = (int) number_format( ( $smart_coupon->coupon_amount ) * 100, 0, '', '' );
+
+		return (int) $coupon_amount;
+	}
+
+	/**
+	 * Get coupon method tax rate.
+	 *
+	 * @since  2.0.0
+	 * @access public
+	 *
+	 * @return integer $coupon_tax_rate Tax rate for selected coupon method.
+	 */
+	public function get_coupon_tax_rate( $smart_coupon ) {
+		global $woocommerce;
+
+		if ( $woocommerce->cart->coupon_tax_total > 0 ) {
+			$coupon_tax_rate = round( $woocommerce->cart->coupon_tax_total / $woocommerce->cart->coupon_total, 2 ) * 100;
+		} else {
+			$coupon_tax_rate = 00;
+		}
+
+		return intval( $coupon_tax_rate . '00' );
 	}
 
 }
