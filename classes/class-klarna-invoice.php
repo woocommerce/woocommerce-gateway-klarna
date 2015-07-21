@@ -130,8 +130,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 	 * @since  2.0.0
 	 */
 	public function output_klarna_details_confirmation( $text = false, $order ) {		
-		if ( $this->id == $order->payment_method && ! WC()->session->get( 'klarna_order_note_shown_' . $order->id, false ) ) {
-			WC()->session->set( 'klarna_order_note_shown_' . $order->id, true );
+		if ( $this->id == $order->payment_method ) {
 			return $text . $this->get_klarna_shipping_info( $order->id );
 		} else {
 			return $text;
@@ -145,8 +144,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 	 * @since  2.0.0
 	 */
 	public function output_klarna_details_confirmation_email( $order, $sent_to_admin, $plain_text ) {
-		if ( $this->id == $order->payment_method && ! WC()->session->get( 'klarna_order_note_email_shown_' . $order->id, false ) ) {
-			WC()->session->set( 'klarna_order_note_email_shown_' . $order->id, true );
+		if ( $this->id == $order->payment_method ) {
 			echo $this->get_klarna_shipping_info( $order->id );
 		}
 	}
