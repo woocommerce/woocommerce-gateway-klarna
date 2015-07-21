@@ -1528,8 +1528,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 *
 	 * @since 1.0.0
 	 */
-	function get_klarna_checkout_page() {
-			
+	function get_klarna_checkout_page() {	
 		global $woocommerce;
 		global $current_user;
 		get_currentuserinfo();
@@ -2138,13 +2137,13 @@ class WC_Gateway_Klarna_Checkout_Extra {
 	// Set session
 	function start_session() {		
 		// if ( ! is_admin() || defined( 'DOING_AJAX' ) ) {
-			$data = new WC_Gateway_Klarna_Checkout;
-			$enabled = $data->get_enabled();
-			
-	    	if ( ! session_id() && 'yes' == $enabled ) {
-	        	session_start();
-	        }
-    	// }
+		$data = new WC_Gateway_Klarna_Checkout;
+		$enabled = $data->get_enabled();
+
+		if ( ! session_id() && 'yes' == $enabled ) {
+		session_start();
+		}
+		// }
     }
 
 	

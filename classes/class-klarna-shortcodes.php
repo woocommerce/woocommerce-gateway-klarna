@@ -192,7 +192,6 @@ class WC_Gateway_Klarna_Shortcodes {
 
 	// Shortcode KCO page
 	function klarna_checkout_page( $atts ) {
-		
 		$atts = shortcode_atts(
 			array(
 				'col' => '',
@@ -206,9 +205,12 @@ class WC_Gateway_Klarna_Shortcodes {
 			$widget_class .= ' kco-right-col';			
 		}
 
-		$data = new WC_Gateway_Klarna_Checkout;
-		return '<div class="klarna_checkout ' . $widget_class . '">' . $data->get_klarna_checkout_page() . '</div>';
-
+		$checkout = WC()->checkout();
+		if ( ! $checkout->enable_guest_checkout && ! is_user_logged_in() ) {
+		} else {
+			$data = new WC_Gateway_Klarna_Checkout;
+			return '<div class="klarna_checkout ' . $widget_class . '">' . $data->get_klarna_checkout_page() . '</div>';
+		}
 	}
 
 }
