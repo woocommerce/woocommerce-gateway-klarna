@@ -1934,6 +1934,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 					$klarna_order->add_addresses( $this->klarna_secret, $this->klarna_server );
 					$klarna_order->process_cart_contents();
 					$klarna_order->process_shipping();
+					$klarna_order->process_discount();
 					$klarna_order->update_order( $rno );
 				}		
 			}
@@ -1975,6 +1976,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 					$klarna_order->add_addresses( $this->klarna_secret, $this->klarna_server );
 					$klarna_order->process_cart_contents( $itemid );
 					$klarna_order->process_shipping();
+					$klarna_order->process_discount();
 					$klarna_order->update_order( $rno );
 				}		
 			}
@@ -2009,7 +2011,9 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 						$klarna_order->add_addresses( $this->klarna_secret, $this->klarna_server );
 						$klarna_order->process_cart_contents();
 						$klarna_order->process_shipping();
+						$klarna_order->process_discount();
 						$klarna_order->update_order( $rno );
+						
 					}		
 				}	
 			}
