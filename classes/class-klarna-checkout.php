@@ -2138,13 +2138,13 @@ class WC_Gateway_Klarna_Checkout_Extra {
 	// Set session
 	function start_session() {		
 		// if ( ! is_admin() || defined( 'DOING_AJAX' ) ) {
-			$data = new WC_Gateway_Klarna_Checkout;
-			$enabled = $data->get_enabled();
-			
-	    	if ( ! session_id() && 'yes' == $enabled ) {
-	        	session_start();
-	        }
-    	// }
+		$data = new WC_Gateway_Klarna_Checkout;
+		$enabled = $data->get_enabled();
+
+		if ( ! session_id() && 'yes' == $enabled ) {
+		session_start();
+		}
+		// }
     }
 
 	
