@@ -70,7 +70,8 @@ if ( $this->is_rest() ) {
 			'sid' => $local_order_id, 
 			'scountry' => $this->klarna_country, 
 			'klarna_order' => '{checkout.order.id}', 
-			'wc-api' => 'WC_Gateway_Klarna_Checkout'
+			'wc-api' => 'WC_Gateway_Klarna_Checkout',
+			'klarna-api' => 'rest'
 		),
 		$push_uri_base
 	);			

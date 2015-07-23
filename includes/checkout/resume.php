@@ -93,6 +93,7 @@ try {
 				'sid' => $local_order_id, 
 				'scountry' => $this->klarna_country, 
 				'klarna_order' => '{checkout.order.uri}', 
+				'klarna-api' => 'rest'
 			),
 			$push_uri_base
 		);

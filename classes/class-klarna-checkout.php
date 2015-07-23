@@ -2027,7 +2027,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 * @since  2.0.0
 	 */
 	function is_rest() {
-		if ( 'GB' == strtoupper( $this->klarna_country ) ) {
+		if ( 'GB' == $this->klarna_country || 'gb' == $this->klarna_country ) {
 			return true;
 		}
 

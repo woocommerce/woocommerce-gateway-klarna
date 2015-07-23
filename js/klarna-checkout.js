@@ -146,7 +146,7 @@ jQuery(document).ready(function($) {
 	});
 
 	// Update cart
-	$('td.product-quantity input[type=number]').change( function( event ) {
+	$('td.product-quantity input[type=number]').on( 'change', function( event ) {
 		if ( typeof window._klarnaCheckout == 'function') { 
 		window._klarnaCheckout(function (api) {
 			api.suspend();
@@ -386,6 +386,12 @@ jQuery(document).ready(function($) {
 				window._klarnaCheckout(function (api) {
 					api.suspend();
 				});
+
+				// Check if email is not defined (AT and DE only) and set it to this value
+				// For AT and DE, email field is not captured inside data object
+				if ( data.email === undefined ) {
+					data.email = 'guest_checkout@klarna.com';
+				}
 
 				// console.log(data);
 				if ( '' != data.email ) {

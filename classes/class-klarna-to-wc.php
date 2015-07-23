@@ -293,7 +293,9 @@ class WC_Gateway_Klarna_K2WC {
 	 */
 	public function retrieve_klarna_order() {
 		if ( $this->klarna_debug == 'yes' ) {
-			$this->klarna_log->add( 'klarna', 'Klarna order: ' . $this->klarna_order_uri );
+			$this->klarna_log->add( 'klarna', 'Klarna order - ' . $this->klarna_order_uri );
+			$this->klarna_log->add( 'klarna', 'Eid - ' . $this->eid );
+			$this->klarna_log->add( 'klarna', 'Rest - ' . $this->is_rest );
 		}
 
 		if ( $this->is_rest ) {
@@ -307,7 +309,9 @@ class WC_Gateway_Klarna_K2WC {
 			$klarna_order = new \Klarna\Rest\OrderManagement\Order(
 				$connector,
 				$this->klarna_order_uri
-			);				
+			);
+
+			$this->klarna_log->add( 'klarna', 'Klarna order 2: ' . var_export( $klarna_order, true ) );
 		} else {
 			require_once( KLARNA_LIB . '/src/Klarna/Checkout.php' );  
 			// Klarna_Checkout_Order::$contentType = "application/vnd.klarna.checkout.aggregated-order-v2+json";
