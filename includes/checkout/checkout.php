@@ -20,6 +20,11 @@ if ( ! defined( 'WOOCOMMERCE_CHECKOUT' ) )
 // Set Klarna Checkout as the choosen payment method in the WC session
 WC()->session->set( 'chosen_payment_method', 'klarna_checkout' );
 
+// Set customer country so taxes and shipping can be calculated properly
+WC()->customer->set_country( $this->get_klarna_country() );
+WC()->customer->set_shipping_country( $this->get_klarna_country() );
+
+
 // Debug
 if ( $this->debug == 'yes' )
 	$this->log->add( 'klarna', 'Rendering Checkout page...' );

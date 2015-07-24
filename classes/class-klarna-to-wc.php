@@ -274,7 +274,7 @@ class WC_Gateway_Klarna_K2WC {
 				update_post_meta( $order->id, '_klarna_recurring_token', $klarna_order['recurring_token'] );
 			}
 			
-			if ( $this->is_rest ) {
+			if ( sanitize_key( $_GET['klarna-api'] ) && 'rest' == sanitize_key( $_GET['klarna-api'] ) ) {
 				update_post_meta( $order->id, '_klarna_order_id', $klarna_order['order_id'] );
 			} else {
 				update_post_meta( $order->id, '_klarna_order_reservation', $klarna_order['reservation'] );
@@ -294,11 +294,11 @@ class WC_Gateway_Klarna_K2WC {
 	public function retrieve_klarna_order() {
 		if ( $this->klarna_debug == 'yes' ) {
 			$this->klarna_log->add( 'klarna', 'Klarna order - ' . $this->klarna_order_uri );
-			$this->klarna_log->add( 'klarna', 'Eid - ' . $this->eid );
-			$this->klarna_log->add( 'klarna', 'Rest - ' . $this->is_rest );
 		}
 
-		if ( $this->is_rest ) {
+		if ( sanitize_key( $_GET['klarna-api'] ) && 'rest' == sanitize_key( $_GET['klarna-api'] ) ) {
+			$this->klarna_log->add( 'klarna', 'Klarna order 2: ' . var_export( $klarna_order, true ) );
+
 			require_once( KLARNA_LIB . 'vendor/autoload.php' );
 			$connector = \Klarna\Rest\Transport\Connector::create(
 				$this->eid,
@@ -311,8 +311,10 @@ class WC_Gateway_Klarna_K2WC {
 				$this->klarna_order_uri
 			);
 
-			$this->klarna_log->add( 'klarna', 'Klarna order 2: ' . var_export( $klarna_order, true ) );
+			$this->klarna_log->add( 'klarna', 'Klarna order 2-2: ' . var_export( $klarna_order, true ) );
 		} else {
+			$this->klarna_log->add( 'klarna', 'Klarna order 3: ' . var_export( $klarna_order, true ) );
+
 			require_once( KLARNA_LIB . '/src/Klarna/Checkout.php' );  
 			// Klarna_Checkout_Order::$contentType = "application/vnd.klarna.checkout.aggregated-order-v2+json";
 			$connector    = Klarna_Checkout_Connector::create(
@@ -801,7 +803,7 @@ class WC_Gateway_Klarna_K2WC {
 	 */
 	public function confirm_klarna_order( $order, $klarna_order ) {
 		$this->klarna_log->add( 'klarna', 'Updating Klarna order status to "created"' );
-		if ( $this->is_rest ) {
+		if ( sanitize_key( $_GET['klarna-api'] ) && 'rest' == sanitize_key( $_GET['klarna-api'] ) ) {
 			$order->add_order_note( sprintf( 
 				__( 'Klarna Checkout payment created. Klarna reference number: %s.', 'klarna' ),
 				$klarna_order['klarna_reference']
