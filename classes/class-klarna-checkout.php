@@ -469,6 +469,8 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			$hide_columns = explode( ',', $atts['hide_columns'] );
 		}
 
+		$widget_class = '';
+
 		if ( 'left' == $atts['col'] ) {
 			$widget_class .= ' kco-left-col';
 		} elseif ( 'right' == $atts['col'] ) {
@@ -1602,8 +1604,6 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 * @since 1.0.0
      */
 	function check_checkout_listener() {
-		$this->log->add( 'klarna', 'Before listener call..' );
-
 		if ( isset( $_GET['validate'] ) ) { 
 			exit;
 		}

@@ -250,6 +250,17 @@ class WC_Gateway_Klarna_K2WC {
 			$local_order_id = sanitize_key( $_GET['sid'] );
 			$order = wc_get_order( $local_order_id );
 
+			// Check if order was recurring
+			if ( isset( $klarna_order['recurring_token'] ) ) {
+				update_post_meta( $order->id, '_klarna_recurring_token', $klarna_order['recurring_token'] );
+			}
+			
+			if ( sanitize_key( $_GET['klarna-api'] ) && 'rest' == sanitize_key( $_GET['klarna-api'] ) ) {
+				update_post_meta( $order->id, '_klarna_order_id', $klarna_order['order_id'] );
+			} else {
+				update_post_meta( $order->id, '_klarna_order_reservation', $klarna_order['reservation'] );
+			}
+
 			// Change order currency
 			$this->change_order_currency( $order, $klarna_order );
 			
@@ -261,7 +272,7 @@ class WC_Gateway_Klarna_K2WC {
 					
 			// Add order customer info
 			$this->add_order_customer_info( $order, $klarna_order );
-					
+								
 			// Confirm the order in Klarnas system
 			$klarna_order = $this->confirm_klarna_order( $order, $klarna_order );
 
@@ -269,17 +280,6 @@ class WC_Gateway_Klarna_K2WC {
 			$order->calculate_taxes();	
 			$order->calculate_totals();		
 
-			// Check if order was recurring
-			if ( isset( $klarna_order['recurring_token'] ) ) {
-				update_post_meta( $order->id, '_klarna_recurring_token', $klarna_order['recurring_token'] );
-			}
-			
-			if ( sanitize_key( $_GET['klarna-api'] ) && 'rest' == sanitize_key( $_GET['klarna-api'] ) ) {
-				update_post_meta( $order->id, '_klarna_order_id', $klarna_order['order_id'] );
-			} else {
-				update_post_meta( $order->id, '_klarna_order_reservation', $klarna_order['reservation'] );
-			}
-			
 			// Other plugins and themes can hook into here
 			do_action( 'klarna_after_kco_push_notification', $order->id );
 		}
@@ -310,11 +310,7 @@ class WC_Gateway_Klarna_K2WC {
 				$connector,
 				$this->klarna_order_uri
 			);
-
-			$this->klarna_log->add( 'klarna', 'Klarna order 2-2: ' . var_export( $klarna_order, true ) );
 		} else {
-			$this->klarna_log->add( 'klarna', 'Klarna order 3: ' . var_export( $klarna_order, true ) );
-
 			require_once( KLARNA_LIB . '/src/Klarna/Checkout.php' );  
 			// Klarna_Checkout_Order::$contentType = "application/vnd.klarna.checkout.aggregated-order-v2+json";
 			$connector    = Klarna_Checkout_Connector::create(
@@ -802,15 +798,18 @@ class WC_Gateway_Klarna_K2WC {
 	 * @param  object $klarna_order Klarna order.
 	 */
 	public function confirm_klarna_order( $order, $klarna_order ) {
-		$this->klarna_log->add( 'klarna', 'Updating Klarna order status to "created"' );
-		if ( sanitize_key( $_GET['klarna-api'] ) && 'rest' == sanitize_key( $_GET['klarna-api'] ) ) {
+		// Rest API
+		if ( isset( $_GET['klarna-api'] ) && 'rest' == sanitize_key( $_GET['klarna-api'] ) ) {
 			$order->add_order_note( sprintf( 
 				__( 'Klarna Checkout payment created. Klarna reference number: %s.', 'klarna' ),
 				$klarna_order['klarna_reference']
 			) );
 			$klarna_order->acknowledge();
-			$order->payment_complete( $klarna_order['klarna_reference'] );
+
+			$order->payment_complete( $klarna_order['reservation'] );
+
 			delete_post_meta( $order->id, '_kco_incomplete_customer_email' );
+		// V2 API
 		} else {
 			$order->add_order_note( sprintf( 
 				__( 'Klarna Checkout payment created. Reservation number: %s.  Klarna order number: %s', 'klarna' ),
@@ -830,10 +829,12 @@ class WC_Gateway_Klarna_K2WC {
 			$update['status'] = 'created';
 			$update['merchant_reference'] = array( 'orderid1' => ltrim( $order->get_order_number(), '#' ) );
 			$klarna_order->update( $update );
+
+			// Confirm local order
 			$order->payment_complete( $klarna_order['reservation'] );
+
 			delete_post_meta( $order->id, '_kco_incomplete_customer_email' );
 		}
-		$this->klarna_log->add( 'klarna', 'Updated Klarna order status to "created"' );
 
 		return $klarna_order;
 	}

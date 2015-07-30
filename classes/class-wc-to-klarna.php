@@ -88,6 +88,9 @@ class WC_Gateway_Klarna_WC2K {
 		$woocommerce->cart->calculate_totals();
 		$cart = array();
 
+		// We need to keep track of order total, in case a smart coupon exceeds it
+		$order_total = 0;
+
 		foreach ( $woocommerce->cart->get_cart() as $cart_item ) {
 			if ( $cart_item['quantity'] ) {
 				$_product = wc_get_product( $cart_item['product_id'] );
@@ -125,6 +128,7 @@ class WC_Gateway_Klarna_WC2K {
 				}
 
 				$cart[] = $klarna_item;
+				$order_total += $item_quantity * $item_price;
 			}
 		}
 
@@ -157,25 +161,31 @@ class WC_Gateway_Klarna_WC2K {
 				);
 			}
 			$cart[] = $shipping;
+			$order_total += $shipping_amount;
+		}
 
-			// Process discounts
-			if ( WC()->cart->applied_coupons ) {
-				foreach ( WC()->cart->applied_coupons as $code ) {
-					$smart_coupon = new WC_Coupon( $code );
+		// Process discounts
+		if ( WC()->cart->applied_coupons ) {
+			foreach ( WC()->cart->applied_coupons as $code ) {
+				$smart_coupon = new WC_Coupon( $code );
 
-					if ( $smart_coupon->is_valid() && $smart_coupon->discount_type == 'smart_coupon' ) {
-						$coupon_name     = $this->get_coupon_name( $smart_coupon );
-						$coupon_amount   = $this->get_coupon_amount( $smart_coupon );
+				if ( $smart_coupon->is_valid() && $smart_coupon->discount_type == 'smart_coupon' ) {
+					$coupon_name     = $this->get_coupon_name( $smart_coupon );
+					$coupon_amount   = $this->get_coupon_amount( $smart_coupon );
 
-						$cart[] = array(
-							'type'       => 'discount',
-							'reference'  => 'DISCOUNT',
-							'name'       => $coupon_name,
-							'quantity'   => 1,
-							'unit_price' => - $coupon_amount,
-							'tax_rate'  => 0,
-						);
+					// Check if coupon amount exceeds order total
+					if ( $order_total < $coupon_amount ) {
+						$coupon_amount = $order_total;
 					}
+
+					$cart[] = array(
+						'type'       => 'discount',
+						'reference'  => 'DISCOUNT',
+						'name'       => $coupon_name,
+						'quantity'   => 1,
+						'unit_price' => -$coupon_amount,
+						'tax_rate'  => 0,
+					);
 				}
 			}
 		}

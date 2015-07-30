@@ -116,6 +116,4 @@ if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 	echo '<div>' . apply_filters( 'klarna_kco_checkout', $snippet ) . '</div>';
 	do_action( 'klarna_after_kco_checkout' );
 
-	echo WC()->session->get( 'klarna_checkout' );
-
 } // End if sizeof cart 
