@@ -1602,6 +1602,8 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 * @since 1.0.0
      */
 	function check_checkout_listener() {
+		$this->log->add( 'klarna', 'Before listener call..' );
+
 		if ( isset( $_GET['validate'] ) ) { 
 			exit;
 		}
@@ -1830,6 +1832,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			if ( $this->id == get_post_meta( $orderid, '_payment_method', true ) ) {
 				$order = wc_get_order( $orderid );
 
+				// If this is a subscription order
 				if ( class_exists( 'WC_Subscriptions_Renewal_Order' ) && WC_Subscriptions_Renewal_Order::is_renewal( $order ) ) {
 					if ( get_post_meta( $orderid, '_klarna_order_reservation_recurring', true ) && get_post_meta( $orderid, '_billing_country', true ) ) {
 						if ( ! get_post_meta( $orderid, '_klarna_invoice_number', true ) ) {
@@ -1844,17 +1847,35 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 						}
 					}
 				// Klarna reservation number and billing country must be set
-				} elseif ( get_post_meta( $orderid, '_klarna_order_reservation', true ) && get_post_meta( $orderid, '_billing_country', true ) ) {
-					// Check if this order hasn't been activated already
-					if ( ! get_post_meta( $orderid, '_klarna_invoice_number', true ) ) {
-						$rno = get_post_meta( $orderid, '_klarna_order_reservation', true );
-						$country = get_post_meta( $orderid, '_billing_country', true );
+				} else {
+					// Check if order was created using old API
+					if ( 'v2' == get_post_meta( $order->id, '_klarna_api', true ) ) {
+						if ( get_post_meta( $orderid, '_klarna_order_reservation', true ) && get_post_meta( $orderid, '_billing_country', true ) ) {
+							// Check if this order hasn't been activated already
+							if ( ! get_post_meta( $orderid, '_klarna_invoice_number', true ) ) {
+								$rno = get_post_meta( $orderid, '_klarna_order_reservation', true );
+								$country = get_post_meta( $orderid, '_billing_country', true );
 
-						$klarna = new Klarna();
-						$this->configure_klarna( $klarna, $country );
+								$klarna = new Klarna();
+								$this->configure_klarna( $klarna, $country );
 
-						$klarna_order = new WC_Gateway_Klarna_Order( $order, $klarna );
-						$klarna_order->activate_order( $rno );
+								$klarna_order = new WC_Gateway_Klarna_Order( $order, $klarna );
+								$klarna_order->activate_order( $rno );
+							}
+						}
+					// Check if order was created using Rest API
+					} elseif ( 'rest' == get_post_meta( $order->id, '_klarna_api', true ) ) {
+						// Check if this order hasn't been activated already
+						if ( ! get_post_meta( $orderid, '_klarna_invoice_number', true ) ) {
+							$rno = get_post_meta( $orderid, '_klarna_order_reservation', true );
+							$country = get_post_meta( $orderid, '_billing_country', true );
+
+							$klarna = new Klarna();
+							$this->configure_klarna( $klarna, $country );
+
+							$klarna_order = new WC_Gateway_Klarna_Order( $order, $klarna );
+							$klarna_order->activate_order_rest( $rno );
+						}
 					}
 				}
 			}

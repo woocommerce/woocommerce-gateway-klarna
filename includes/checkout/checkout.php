@@ -21,9 +21,8 @@ if ( ! defined( 'WOOCOMMERCE_CHECKOUT' ) )
 WC()->session->set( 'chosen_payment_method', 'klarna_checkout' );
 
 // Set customer country so taxes and shipping can be calculated properly
-WC()->customer->set_country( $this->get_klarna_country() );
-WC()->customer->set_shipping_country( $this->get_klarna_country() );
-
+WC()->customer->set_country( strtoupper( $this->get_klarna_country() ) );
+WC()->customer->set_shipping_country( strtoupper( $this->get_klarna_country() ) );
 
 // Debug
 if ( $this->debug == 'yes' )
@@ -116,5 +115,7 @@ if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 	}
 	echo '<div>' . apply_filters( 'klarna_kco_checkout', $snippet ) . '</div>';
 	do_action( 'klarna_after_kco_checkout' );
+
+	echo WC()->session->get( 'klarna_checkout' );
 
 } // End if sizeof cart 

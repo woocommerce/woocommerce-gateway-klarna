@@ -199,6 +199,8 @@ class WC_Gateway_Klarna_Shortcodes {
 			$atts
 		);
 
+		$widget_class = '';
+
 		if ( 'left' == $atts['col'] ) {
 			$widget_class .= ' kco-left-col';
 		} elseif ( 'right' == $atts['col'] ) {

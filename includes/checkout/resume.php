@@ -21,14 +21,10 @@ if ( $this->is_rest() ) {
 $local_order_id = WC()->session->get( 'ongoing_klarna_order' );
 
 try {
-
 	$klarna_order->fetch();
-	if ( ! $this->is_rest() ) {
-		$klarna_order_as_array = $klarna_order->marshal();
-	}
 
 	// Reset session if the country in the store has changed since last time the checkout was loaded
-	if ( strtolower( $this->klarna_country ) != strtolower( $klarna_order_as_array['purchase_country'] ) ) {
+	if ( strtolower( $this->klarna_country ) != strtolower( $klarna_order['purchase_country'] ) ) {
 		// Reset session
 		$klarna_order = null;
 		WC()->session->__unset( 'klarna_checkout' );
@@ -134,7 +130,6 @@ try {
 		$klarna_order->update( apply_filters( 'kco_update_order', $update ) );
 
 	} // End if country change
-
 } catch ( Exception $e ) {
 	// Reset session
 	$klarna_order = null;

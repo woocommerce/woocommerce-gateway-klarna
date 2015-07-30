@@ -454,10 +454,10 @@ class WC_Gateway_Klarna_Order {
 
 		try {
 			$result = $klarna->activate(
-		    	$rno,
+				$rno,
 				null, // OCR Number
 				KlarnaFlags::RSRV_SEND_BY_EMAIL
-		    );
+			);
 			$risk  = $result[0]; // "ok" or "no_risk"
 			$invNo = $result[1]; // "9876451"
 
@@ -480,6 +480,23 @@ class WC_Gateway_Klarna_Order {
 				)					
 			);
 		}
+	}
+
+
+	/**
+	 * Activates a Klarna order for Rest API
+	 * 
+	 * @since  2.0
+	 **/
+	function activate_order_rest( $connector ) {
+		$order = $this->order;
+		$klarna = $this->klarna;
+		$orderid = $order->id;
+
+		$klarna_order = new \Klarna\Rest\Checkout\Order(
+			$connector,
+			WC()->session->get( 'klarna_checkout' )
+		);
 	}
 
 
