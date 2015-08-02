@@ -55,3 +55,24 @@ do_action( 'woocommerce_thankyou', $_GET['sid'] );
 WC()->session->__unset( 'klarna_checkout' );
 WC()->session->__unset( 'ongoing_klarna_order' );
 WC()->cart->empty_cart(); // Remove cart
+
+
+
+
+
+
+$orderid = $_GET['sid'];
+$klarna_order_id = get_post_meta( $orderid, '_klarna_order_id', true );
+$connector = Klarna\Rest\Transport\Connector::create(
+	$this->eid_uk,
+	$this->secret_uk,
+	Klarna\Rest\Transport\ConnectorInterface::TEST_BASE_URL
+);
+$k_order = new Klarna\Rest\OrderManagement\Order(
+	$connector,
+	$klarna_order_id
+);
+$k_order->fetch();							
+echo '<pre>';
+print_r( $k_order );
+echo '</pre>';

@@ -17,9 +17,12 @@ class WC_Gateway_Klarna_Order {
 	/**
 	 * Class constructor.
 	 *
-	 * @since 1.0.0
+	 * @since 2.0.0
+	 * 
+	 * @param  $order  WooCoommerce order object
+	 * @param  $klarna Klarna object in V2, not needed for Rest
 	 */
-	public function __construct( $order, $klarna ) {
+	public function __construct( $order, $klarna = false ) {
 		$this->order = $order;
 		$this->klarna = $klarna;
 	}
@@ -443,7 +446,7 @@ class WC_Gateway_Klarna_Order {
 
 
 	/**
-	 * Activates a Klarna order
+	 * Activates a Klarna order for V2 API
 	 * 
 	 * @since  2.0
 	 **/
@@ -488,20 +491,33 @@ class WC_Gateway_Klarna_Order {
 	 * 
 	 * @since  2.0
 	 **/
-	function activate_order_rest( $connector ) {
+	function activate_order_rest( $k_order ) {
 		$order = $this->order;
-		$klarna = $this->klarna;
 		$orderid = $order->id;
 
-		$klarna_order = new \Klarna\Rest\Checkout\Order(
-			$connector,
-			WC()->session->get( 'klarna_checkout' )
+		// Capture full order amount on WooCommerce order completion
+		$data = array(
+			'captured_amount' => $k_order['order_amount'],
+			'description'     => __( 'WooCommerce order marked complete', 'klarna' ),
+			'order_lines'     => $k_order['order_lines'],
 		);
+
+		try {
+			$k_order->createCapture( $data );
+		} catch( Exception $e ) {
+			$order->add_order_note(
+				sprintf(
+					__( 'Klarna order activation failed. Error code %s. Error message %s', 'klarna' ),
+					$e->getCode(),
+					utf8_encode( $e->getMessage() )
+				)					
+			);
+		}
 	}
 
 
 	/**
-	 * Cancels a Klarna order
+	 * Cancels a Klarna order for V2 API
 	 * 
 	 * @since  2.0
 	 **/
@@ -528,7 +544,34 @@ class WC_Gateway_Klarna_Order {
 	}
 
 	/**
-	 * Cancels a Klarna order
+	 * Cancels a Klarna order for Rest API
+	 * 
+	 * @since  2.0
+	 **/
+	function cancel_order_rest( $k_order ) {
+		$order = $this->order;
+		$orderid = $order->id;
+
+		try {
+			$k_order->cancel();
+			$order->add_order_note(
+				__( 'Klarna order cancellation completed.', 'klarna' )
+			);
+			add_post_meta( $orderid, '_klarna_order_cancelled', time() );
+		} catch( Exception $e ) {
+			$order->add_order_note(
+				sprintf(
+					__( 'Klarna order cancelation failed. Error code %s. Error message %s', 'klarna' ),
+					$e->getCode(),
+					utf8_encode( $e->getMessage() )
+				)					
+			);
+		}
+
+	}
+
+	/**
+	 * Updates a Klarna order
 	 * 
 	 * @since  2.0
 	 **/

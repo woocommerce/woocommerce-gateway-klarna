@@ -1867,14 +1867,26 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 					} elseif ( 'rest' == get_post_meta( $order->id, '_klarna_api', true ) ) {
 						// Check if this order hasn't been activated already
 						if ( ! get_post_meta( $orderid, '_klarna_invoice_number', true ) ) {
-							$rno = get_post_meta( $orderid, '_klarna_order_reservation', true );
-							$country = get_post_meta( $orderid, '_billing_country', true );
+							/**
+							 * Need to send local order to constructor and Klarna order to method
+							 */
+							require_once( KLARNA_LIB . 'vendor/autoload.php' );
+							$connector = Klarna\Rest\Transport\Connector::create(
+								$this->eid_uk,
+								$this->secret_uk,
+								Klarna\Rest\Transport\ConnectorInterface::TEST_BASE_URL
+							);
+							$klarna_order_id = get_post_meta( $orderid, '_klarna_order_id', true );
+							$k_order = new Klarna\Rest\OrderManagement\Order(
+								$connector,
+								$klarna_order_id
+							);
+							$k_order->fetch();
 
-							$klarna = new Klarna();
-							$this->configure_klarna( $klarna, $country );
+							// $this->log->add( 'klarna', var_export( $k_order, true ) );
 
-							$klarna_order = new WC_Gateway_Klarna_Order( $order, $klarna );
-							$klarna_order->activate_order_rest( $rno );
+							$klarna_order = new WC_Gateway_Klarna_Order( $order );
+							$klarna_order->activate_order_rest( $k_order );
 						}
 					}
 				}
@@ -1892,26 +1904,58 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	function cancel_klarna_order( $orderid ) {
 		// Check if auto cancellation is enabled
 		if ( 'yes' == $this->push_cancellation ) {
+			$order = wc_get_order( $orderid );
+
+			$this->log->add( 'klarna', 'BEFORE' );
 			// Check if order was created using this method
 			if ( $this->id == get_post_meta( $orderid, '_payment_method', true ) ) {
-				// Klarna reservation number and billing country must be set
-				if ( get_post_meta( $orderid, '_klarna_order_reservation', true ) && get_post_meta( $orderid, '_billing_country', true ) ) {
+				$this->log->add( 'klarna', 'AFTER' );
+				// Check if order was created using old API
+				if ( 'v2' == get_post_meta( $order->id, '_klarna_api', true ) ) {
+					// Klarna reservation number and billing country must be set
+					if ( get_post_meta( $orderid, '_klarna_order_reservation', true ) && get_post_meta( $orderid, '_billing_country', true ) ) {
+						// Check if this order hasn't been cancelled already
+						if ( ! get_post_meta( $orderid, '_klarna_order_cancelled', true ) ) {
+							$rno = get_post_meta( $orderid, '_klarna_order_reservation', true );
+							$country = get_post_meta( $orderid, '_billing_country', true );
+
+							$order = wc_get_order( $orderid );
+
+							$klarna = new Klarna();
+							$this->configure_klarna( $klarna, $country );
+
+							// $this->log->add( 'klarna', 'CANCELKLARNA: ' . var_export( $klarna, true ) );
+
+							$klarna_order = new WC_Gateway_Klarna_Order( $order, $klarna );
+							$klarna_order->cancel_order( $rno );
+						}
+					}
+				// Check if order was created using Rest API
+				} elseif ( 'rest' == get_post_meta( $order->id, '_klarna_api', true ) ) {
 					// Check if this order hasn't been cancelled already
 					if ( ! get_post_meta( $orderid, '_klarna_order_cancelled', true ) ) {
-						$rno = get_post_meta( $orderid, '_klarna_order_reservation', true );
-						$country = get_post_meta( $orderid, '_billing_country', true );
+						/**
+						 * Need to send local order to constructor and Klarna order to method
+						 */
+						require_once( KLARNA_LIB . 'vendor/autoload.php' );
+						$connector = Klarna\Rest\Transport\Connector::create(
+							$this->eid_uk,
+							$this->secret_uk,
+							Klarna\Rest\Transport\ConnectorInterface::TEST_BASE_URL
+						);
+						$klarna_order_id = get_post_meta( $orderid, '_klarna_order_id', true );
+						$k_order = new Klarna\Rest\OrderManagement\Order(
+							$connector,
+							$klarna_order_id
+						);
+						$k_order->fetch();
 
-						$order = wc_get_order( $orderid );
+						$this->log->add( 'klarna', var_export( $k_order, true ) );
 
-						$klarna = new Klarna();
-						$this->configure_klarna( $klarna, $country );
-
-						$this->log->add( 'klarna', 'CANCELKLARNA: ' . var_export( $klarna, true ) );
-
-						$klarna_order = new WC_Gateway_Klarna_Order( $order, $klarna );
-						$klarna_order->cancel_order( $rno );
+						$klarna_order = new WC_Gateway_Klarna_Order( $order );
+						$klarna_order->cancel_order_rest( $k_order );
 					}
-				}	
+				}
 			}
 		}
 	}
