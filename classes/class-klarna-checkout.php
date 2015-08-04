@@ -1853,6 +1853,14 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 						if ( get_post_meta( $orderid, '_klarna_order_reservation', true ) && get_post_meta( $orderid, '_billing_country', true ) ) {
 							// Check if this order hasn't been activated already
 							if ( ! get_post_meta( $orderid, '_klarna_invoice_number', true ) ) {
+								// Klarna settings
+								require_once(KLARNA_LIB . 'Klarna.php');
+								
+								if ( ! function_exists( 'xmlrpc_encode_entitites' ) && ! class_exists( 'xmlrpcresp' ) ) {
+									require_once( KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc.inc' );
+									require_once( KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc_wrappers.inc' );
+								}
+
 								$rno = get_post_meta( $orderid, '_klarna_order_reservation', true );
 								$country = get_post_meta( $orderid, '_billing_country', true );
 

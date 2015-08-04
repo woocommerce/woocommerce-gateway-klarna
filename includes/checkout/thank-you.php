@@ -60,7 +60,7 @@ WC()->cart->empty_cart(); // Remove cart
 
 
 
-
+/*
 $orderid = $_GET['sid'];
 $klarna_order_id = get_post_meta( $orderid, '_klarna_order_id', true );
 $connector = Klarna\Rest\Transport\Connector::create(
@@ -76,3 +76,4 @@ $k_order->fetch();
 echo '<pre>';
 print_r( $k_order );
 echo '</pre>';
+*/

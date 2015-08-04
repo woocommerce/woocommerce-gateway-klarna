@@ -34,9 +34,13 @@ try {
 		 */
 		
 		// Reset cart
+		$klarna_order_total = 0;
+		$klarna_tax_total = 0;
 		foreach ( $cart as $item ) {
 			if ( $this->is_rest() ) {
 				$update['order_lines'][] = $item;				
+				$klarna_order_total += $item['total_amount'];
+				$klarna_tax_total += $item['total_tax_amount'];			
 			} else {
 				$update['cart']['items'][] = $item;				
 			}
@@ -84,15 +88,27 @@ try {
 			),
 			$validation_uri_base
 		);
-		$merchant_push_uri = add_query_arg( 
-			array(
-				'sid' => $local_order_id, 
-				'scountry' => $this->klarna_country, 
-				'klarna_order' => '{checkout.order.uri}', 
-				'klarna-api' => 'rest'
-			),
-			$push_uri_base
-		);
+		if ( $this->is_rest() ) {
+			$merchant_push_uri = add_query_arg( 
+				array(
+					'sid' => $local_order_id, 
+					'scountry' => $this->klarna_country, 
+					'klarna_order' => '{checkout.order.id}', 
+					'wc-api' => 'WC_Gateway_Klarna_Checkout',
+					'klarna-api' => 'rest'
+				),
+				$push_uri_base
+			);			
+		} else {
+			$merchant_push_uri = add_query_arg( 
+				array(
+					'sid' => $local_order_id, 
+					'scountry' => $this->klarna_country, 
+					'klarna_order' => '{checkout.order.uri}', 
+				),
+				$push_uri_base 
+			);
+		}
 
 		// Different format for V3 and V2
 		if ( $this->is_rest() ) {
@@ -123,8 +139,8 @@ try {
 		}
 
 		if ( $this->is_rest() ) {
-			$update['order_amount'] = WC()->cart->total * 100;
-			$update['order_tax_amount'] = WC()->cart->get_taxes_total() * 100;
+			$update['order_amount'] = $klarna_order_total;
+			$update['order_tax_amount'] = $klarna_tax_total;
 		}
 
 		$klarna_order->update( apply_filters( 'kco_update_order', $update ) );
@@ -135,3 +151,8 @@ try {
 	$klarna_order = null;
 	WC()->session->__unset( 'klarna_checkout' );
 }
+
+
+echo '<pre>';
+print_r( $update );
+echo '</pre>';

@@ -133,9 +133,13 @@ if ( $this->testmode !== 'yes' ) {
 
 $create['gui']['layout'] = $klarna_checkout_layout;
 
+$klarna_order_total = 0;
+$klarna_tax_total = 0;
 foreach ( $cart as $item ) {
 	if ( $this->is_rest() ) {
-		$create['order_lines'][] = $item;				
+		$create['order_lines'][] = $item;	
+		$klarna_order_total += $item['total_amount'];
+		$klarna_tax_total += $item['total_tax_amount'];			
 	} else {
 		$create['cart']['items'][] = $item;				
 	}
@@ -203,8 +207,8 @@ if ( class_exists( 'WC_Subscriptions_Cart' ) && WC_Subscriptions_Cart::cart_cont
 }
 
 if ( $this->is_rest() ) {
-	$create['order_amount'] = WC()->cart->total * 100;
-	$create['order_tax_amount'] = WC()->cart->get_taxes_total() * 100;
+	$create['order_amount'] = $klarna_order_total;
+	$create['order_tax_amount'] = $klarna_tax_total;
 
 	$klarna_order = new \Klarna\Rest\Checkout\Order( $connector );
 } else  {
@@ -215,3 +219,8 @@ if ( $this->is_rest() ) {
 
 $klarna_order->create( apply_filters( 'kco_create_order', $create ) );
 $klarna_order->fetch();
+
+
+echo '<pre>';
+print_r( $create );
+echo '</pre>';

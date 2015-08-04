@@ -320,7 +320,9 @@ class WC_Gateway_Klarna_K2WC {
 			$checkoutId   = $this->klarna_order_uri;  
 			$klarna_order = new Klarna_Checkout_Order( $connector, $checkoutId );  
 		}
+		
 		$klarna_order->fetch();
+		$this->klarna_log->add( 'klarna', 'Klarna order 3: ' . var_export( $klarna_order, true ) );
 
 		if ( $this->klarna_debug == 'yes' ) {
 			$this->klarna_log->add( 'klarna', 'ID: ' . $klarna_order['id'] );
