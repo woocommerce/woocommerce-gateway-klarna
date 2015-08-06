@@ -219,6 +219,10 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 **/
 	function add_activate_recurring_option( $settings ) {
 		if ( class_exists( 'WC_Subscriptions_Manager' ) ) {
+			$settings['activate_recurring_title'] = array(
+				'title' => __( 'Recurring orders', 'klarna' ), 
+				'type' => 'title', 
+			);
 			$settings['activate_recurring'] = array(
 				'title' => __( 'Automatically activate recurring orders', 'klarna' ), 
 				'type' => 'checkbox', 

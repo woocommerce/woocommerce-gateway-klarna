@@ -36,6 +36,11 @@ return apply_filters( 'klarna_checkout_form_fields', array(
 		)
 	),
 	*/
+
+	'order_settings_title' => array(
+		'title' => __( 'Order management settings', 'klarna' ), 
+		'type' => 'title', 
+	), 
 	'push_completion' => array(
 		'title' => __( 'On order completion', 'klarna' ), 
 		'type' => 'checkbox', 
@@ -55,176 +60,231 @@ return apply_filters( 'klarna_checkout_form_fields', array(
 		'default' => 'no'
 	), 
 
+	'sweden_settings_title' => array(
+		'title' => __( 'Sweden', 'klarna' ), 
+		'type' => 'title', 
+	),
 	'eid_se' => array(
 		'title' => __( 'Eid - Sweden', 'klarna' ), 
 		'type' => 'text', 
 		'description' => __( 'Please enter your Klarna Eid for Sweden. Leave blank to disable.', 'klarna' ), 
-		'default' => ''
+		'default' => '',
+		'desc_tip' => true
 	),
 	'secret_se' => array(
 		'title' => __( 'Shared Secret - Sweden', 'klarna' ), 
 		'type' => 'single_select_page', 
 		'description' => __( 'Please enter your Klarna Shared Secret for Sweden.', 'klarna' ), 
-		'default' => ''
+		'default' => '',
+		'desc_tip' => true
 	),
 	'klarna_checkout_url_se' => array(
 		'title' => __( 'Custom Checkout Page - Sweden', 'klarna' ), 
 		'type' => 'text', 
 		'description' => __( 'Please enter the URL to the page that acts as Checkout Page for Klarna Checkout Sweden. This page must contain the shortcode [woocommerce_klarna_checkout].', 'klarna' ), 
-		'default' => ''
+		'default' => '',
+		'desc_tip' => true
 	),
 	'klarna_checkout_thanks_url_se' => array(
 		'title' => __( 'Custom Thanks Page - Sweden', 'klarna' ), 
 		'type' => 'text', 
 		'description' => __( 'Enter the URL to the page that acts as Thanks Page for Klarna Checkout Sweden. This page must contain the shortcode [woocommerce_klarna_checkout]. Leave blank to use the Custom Checkout Page as Thanks Page.', 'klarna' ), 
-		'default' => ''
+		'default' => '',
+		'desc_tip' => true
 	),
 
+	'norway_settings_title' => array(
+		'title' => __( 'Norway', 'klarna' ), 
+		'type' => 'title',
+	),
 	'eid_no' => array(
 		'title' => __( 'Eid - Norway', 'klarna' ), 
 		'type' => 'text', 
 		'description' => __( 'Please enter your Klarna Eid for Norway. Leave blank to disable.', 'klarna' ), 
-		'default' => ''
+		'default' => '',
+		'desc_tip' => true
 	),
 	'secret_no' => array(
 		'title' => __( 'Shared Secret - Norway', 'klarna' ), 
 		'type' => 'text', 
 		'description' => __( 'Please enter your Klarna Shared Secret for Norway.', 'klarna' ), 
-		'default' => ''
+		'default' => '',
+		'desc_tip' => true
 	),
 	'klarna_checkout_url_no' => array(
 		'title' => __( 'Custom Checkout Page - Norway', 'klarna' ), 
 		'type' => 'text', 
 		'description' => __( 'Please enter the URL to the page that acts as Checkout Page for Klarna Checkout Norway. This page must contain the shortcode [woocommerce_klarna_checkout].', 'klarna' ), 
-		'default' => ''
+		'default' => '',
+		'desc_tip' => true
 	),
 	'klarna_checkout_thanks_url_no' => array(
 		'title' => __( 'Custom Thanks Page - Norway', 'klarna' ), 
 		'type' => 'text', 
 		'description' => __( 'Enter the URL to the page that acts as Thanks Page for Klarna Checkout Norway. This page must contain the shortcode [woocommerce_klarna_checkout]. Leave blank to use the Custom Checkout Page as Thanks Page.', 'klarna' ), 
-		'default' => ''
+		'default' => '',
+		'desc_tip' => true
 	),
 			
+	'finland_settings_title' => array(
+		'title' => __( 'Finland', 'klarna' ), 
+		'type' => 'title', 
+	),
 	'eid_fi' => array(
 		'title' => __( 'Eid - Finland', 'klarna' ), 
 		'type' => 'text', 
 		'description' => __( 'Please enter your Klarna Eid for Finland. Leave blank to disable.', 'klarna' ), 
-		'default' => ''
+		'default' => '',
+		'desc_tip' => true
 	),
 	'secret_fi' => array(
 		'title' => __( 'Shared Secret - Finland', 'klarna' ), 
 		'type' => 'text', 
 		'description' => __( 'Please enter your Klarna Shared Secret for Finland.', 'klarna' ), 
-		'default' => ''
+		'default' => '',
+		'desc_tip' => true
 	),
 	'klarna_checkout_url_fi' => array(
 		'title' => __( 'Custom Checkout Page - Finland', 'klarna' ), 
 		'type' => 'text', 
 		'description' => __( 'Please enter the URL to the page that acts as Checkout Page for Klarna Checkout Finland. This page must contain the shortcode [woocommerce_klarna_checkout].', 'klarna' ), 
-		'default' => ''
+		'default' => '',
+		'desc_tip' => true
 	),
 	'klarna_checkout_thanks_url_fi' => array(
 		'title' => __( 'Custom Thanks Page - Finland', 'klarna' ), 
 		'type' => 'text', 
 		'description' => __( 'Enter the URL to the page that acts as Thanks Page for Klarna Checkout Finland. This page must contain the shortcode [woocommerce_klarna_checkout]. Leave blank to use the Custom Checkout Page as Thanks Page.', 'klarna' ), 
-		'default' => ''
+		'default' => '',
+		'desc_tip' => true
 	),
 
+	'germany_settings_title' => array(
+		'title' => __( 'Germany', 'klarna' ), 
+		'type' => 'title', 
+	),
 	'eid_de' => array(
 		'title' => __( 'Eid - Germany', 'klarna' ), 
 		'type' => 'text', 
 		'description' => __( 'Please enter your Klarna Eid for Germany. Leave blank to disable.', 'klarna' ), 
-		'default' => ''
+		'default' => '',
+		'desc_tip' => true
 	),
 	'secret_de' => array(
 		'title' => __( 'Shared Secret - Germany', 'klarna' ), 
 		'type' => 'text', 
 		'description' => __( 'Please enter your Klarna Shared Secret for Germany.', 'klarna' ), 
-		'default' => ''
+		'default' => '',
+		'desc_tip' => true
 	),
 	'klarna_checkout_url_de' => array(
 		'title' => __( 'Custom Checkout Page - Germany', 'klarna' ), 
 		'type' => 'text', 
 		'description' => __( 'Please enter the URL to the page that acts as Checkout Page for Klarna Checkout Germany. This page must contain the shortcode [woocommerce_klarna_checkout].', 'klarna' ), 
-		'default' => ''
+		'default' => '',
+		'desc_tip' => true
 	),
 	'klarna_checkout_thanks_url_de' => array(
 		'title' => __( 'Custom Thanks Page - Germany', 'klarna' ), 
 		'type' => 'text', 
 		'description' => __( 'Enter the URL to the page that acts as Thanks Page for Klarna Checkout Germany. This page must contain the shortcode [woocommerce_klarna_checkout]. Leave blank to use the Custom Checkout Page as Thanks Page.', 'klarna' ), 
-		'default' => ''
+		'default' => '',
+		'desc_tip' => true
 	),
 	'phone_mandatory_de' => array(
 		'title' => __( 'Phone Number Mandatory - Germany', 'klarna' ), 
 		'type' => 'checkbox', 
 		'label' => __( 'Phone number is not mandatory for Klarna Checkout in Germany by default. Check this box to make it mandatory.', 'klarna' ), 
-		'default' => 'no'
+		'default' => 'no',
+		'desc_tip' => true
 	),
 	'dhl_packstation_de' => array(
 		'title' => __( 'DHL Packstation Functionality - Germany', 'klarna' ), 
 		'type' => 'checkbox', 
 		'label' => __( 'Enable DHL packstation functionality for German customers.', 'klarna' ),
-		'default' => 'no'
+		'default' => 'no',
+		'desc_tip' => true
 	),
 
+	'austria_settings_title' => array(
+		'title' => __( 'Austria', 'klarna' ), 
+		'type' => 'title', 
+	),
 	'eid_at' => array(
 		'title' => __( 'Eid - Austria', 'klarna' ), 
 		'type' => 'text', 
 		'description' => __( 'Please enter your Klarna Eid for Austria. Leave blank to disable.', 'klarna' ), 
-		'default' => ''
+		'default' => '',
+		'desc_tip' => true
 	),
 	'secret_at' => array(
 		'title' => __( 'Shared Secret - Austria', 'klarna' ), 
 		'type' => 'text', 
 		'description' => __( 'Please enter your Klarna Shared Secret for Austria.', 'klarna' ), 
-		'default' => ''
+		'default' => '',
+		'desc_tip' => true
 	),
 	'klarna_checkout_url_at' => array(
 		'title' => __( 'Custom Checkout Page - Austria', 'klarna' ), 
 		'type' => 'text', 
 		'description' => __( 'Please enter the URL to the page that acts as Checkout Page for Klarna Checkout Austria. This page must contain the shortcode [woocommerce_klarna_checkout].', 'klarna' ), 
-		'default' => ''
+		'default' => '',
+		'desc_tip' => true
 	),
 	'klarna_checkout_thanks_url_at' => array(
 		'title' => __( 'Custom Thanks Page - Austria', 'klarna' ), 
 		'type' => 'text', 
 		'description' => __( 'Enter the URL to the page that acts as Thanks Page for Klarna Checkout Austria. This page must contain the shortcode [woocommerce_klarna_checkout]. Leave blank to use the Custom Checkout Page as Thanks Page.', 'klarna' ), 
-		'default' => ''
+		'default' => '',
+		'desc_tip' => true
 	),
 	'phone_mandatory_at' => array(
 		'title' => __( 'Phone Number Mandatory - Austria', 'klarna' ), 
 		'type' => 'checkbox', 
 		'label' => __( 'Phone number is not mandatory for Klarna Checkout in Austria by default. Check this box to make it mandatory.', 'klarna' ), 
-		'default' => 'no'
+		'default' => 'no',
+		'desc_tip' => true
 	),
 
+	'uk_settings_title' => array(
+		'title' => __( 'UK', 'klarna' ), 
+		'type' => 'title', 
+	),
 	'eid_uk' => array(
 		'title' => __( 'Eid - UK', 'klarna' ), 
 		'type' => 'text', 
 		'description' => __( 'Please enter your Klarna Eid for UK. Leave blank to disable.', 'klarna' ), 
-		'default' => ''
+		'default' => '',
+		'desc_tip' => true
 	),
 	'secret_uk' => array(
 		'title' => __( 'Shared Secret - UK', 'klarna' ), 
 		'type' => 'text', 
 		'description' => __( 'Please enter your Klarna Shared Secret for UK.', 'klarna' ), 
-		'default' => ''
+		'default' => '',
+		'desc_tip' => true
 	),
 	'klarna_checkout_url_uk' => array(
 		'title' => __( 'Custom Checkout Page - UK', 'klarna' ), 
 		'type' => 'text', 
 		'description' => __( 'Please enter the URL to the page that acts as Checkout Page for Klarna Checkout UK. This page must contain the shortcode [woocommerce_klarna_checkout].', 'klarna' ), 
-		'default' => ''
+		'default' => '',
+		'desc_tip' => true
 	),
 	'klarna_checkout_thanks_url_uk' => array(
 		'title' => __( 'Custom Thanks Page - UK', 'klarna' ), 
 		'type' => 'text', 
 		'description' => __( 'Enter the URL to the page that acts as Thanks Page for Klarna Checkout UK. This page must contain the shortcode [woocommerce_klarna_checkout]. Leave blank to use the Custom Checkout Page as Thanks Page.', 'klarna' ), 
-		'default' => ''
+		'default' => '',
+		'desc_tip' => true
 	),
 
+	'checkout_settings_title' => array(
+		'title' => __( 'Checkout settings', 'klarna' ), 
+		'type' => 'title', 
+	),
 	'default_eur_contry' => array(
-		'title' => __( 'Default Checkout Country', 'klarna' ),
+		'title' => __( 'Default Euro Checkout Country', 'klarna' ),
 		'type' => 'select',
 		'options' => array(
 			'DE' => __( 'Germany', 'klarna' ), 
@@ -232,9 +292,9 @@ return apply_filters( 'klarna_checkout_form_fields', array(
 			'AT' => __( 'Austria', 'klarna' ) 
 		),
 		'description' => __( 'Used by the payment gateway to determine which country should be the default Checkout country if Euro is the selected currency, you as a merchant has an agreement with multiple countries that use Euro and the selected language cant be of help for this decision.', 'klarna' ),
-		'default' => 'DE'
+		'default' => 'DE',
+		'desc_tip' => true
 	),
-
 	'modify_standard_checkout_url' => array(
 		'title' => __( 'Modify Standard Checkout', 'klarna' ), 
 		'type' => 'checkbox', 
@@ -251,7 +311,7 @@ return apply_filters( 'klarna_checkout_form_fields', array(
 		'title' => __( 'Label for Standard Checkout Button', 'klarna' ), 
 		'type' => 'text', 
 		'description' => __( 'Please enter the text for the button that links to the standard checkout page from the Klarna Checkout form.', 'klarna' ), 
-		'default' => ''
+		'default' => '',
 	),
 	'add_klarna_checkout_button' => array(
 		'title' => __( 'Button to Klarna Checkout', 'klarna' ), 
@@ -263,14 +323,15 @@ return apply_filters( 'klarna_checkout_form_fields', array(
 		'title' => __( 'Label for Standard Checkout Button', 'klarna' ), 
 		'type' => 'text', 
 		'description' => __( 'Please enter the text for the button that links to the Klarna checkout page from the standard checkout page.', 'klarna' ), 
-		'default' => ''
+		'default' => '',
+		'desc_tip' => true
 	),
-
 	'terms_url' => array(
 		'title' => __( 'Terms Page', 'klarna' ), 
 		'type' => 'text', 
 		'description' => __( 'Please enter the URL to the page that acts as Terms Page for Klarna Checkout. Leave blank to use the defined WooCommerce Terms Page.', 'klarna' ), 
-		'default' => ''
+		'default' => '',
+		'desc_tip' => true
 	),
 
 	'create_customer_account' => array(
@@ -289,15 +350,70 @@ return apply_filters( 'klarna_checkout_form_fields', array(
 		'title' => __( 'Account Signup Text', 'klarna' ), 
 		'type' => 'textarea', 
 		'description' => __( 'Add text above the Account Registration Form. Useful for legal text for German stores. See documentation for more information. Leave blank to disable.', 'klarna' ), 
-		'default' => ''
+		'default' => '',
+		'desc_tip' => true
 	),
 	'account_login_text' => array(
 		'title' => __( 'Account Login Text', 'klarna' ), 
 		'type' => 'textarea', 
 		'description' => __( 'Add text above the Account Login Form. Useful for legal text for German stores. See documentation for more information. Leave blank to disable.', 'klarna' ), 
-		'default' => ''
+		'default' => '',
+		'desc_tip' => true
 	),
 
+	'color_settings_title' => array(
+		'title' => __( 'Color Settings', 'klarna' ), 
+		'type' => 'title', 
+	),
+	'color_button' => array(
+		'title' => __( 'Checkout button color', 'klarna' ), 
+		'type' => 'color', 
+		'desc_tip' => __( 'Checkout page button color', 'klarna' ), 
+		'default' => '',
+		'desc_tip' => true
+	),
+	'color_button_text' => array(
+		'title' => __( 'Checkout button text color', 'klarna' ), 
+		'type' => 'color', 
+		'desc_tip' => __( 'Checkout page button text color', 'klarna' ), 
+		'default' => '',
+		'desc_tip' => true
+	),
+	'color_checkbox' => array(
+		'title' => __( 'Checkout checkbox color', 'klarna' ), 
+		'type' => 'color', 
+		'desc_tip' => __( 'Checkout page checkbox color', 'klarna' ), 
+		'default' => '',
+		'desc_tip' => true
+	),
+	'color_checkbox_checkmark' => array(
+		'title' => __( 'Checkout checkbox checkmark color', 'klarna' ), 
+		'type' => 'color', 
+		'desc_tip' => __( 'Checkout page checkbox checkmark color', 'klarna' ), 
+		'default' => '',
+		'desc_tip' => true
+	),
+	'color_header' => array(
+		'title' => __( 'Checkout header color', 'klarna' ), 
+		'type' => 'color', 
+		'desc_tip' => __( 'Checkout page header color', 'klarna' ), 
+		'default' => '',
+		'desc_tip' => true
+	),
+	'color_link' => array(
+		'title' => __( 'Checkout link color', 'klarna' ), 
+		'type' => 'color', 
+		'desc_tip' => __( 'Checkout page link color', 'klarna' ), 
+		'default' => '',
+		'desc_tip' => true
+	),
+
+
+	
+	'test_mode_settings_title' => array(
+		'title' => __( 'Test Mode Settings', 'klarna' ), 
+		'type' => 'title', 
+	),
 	'testmode' => array(
 		'title' => __( 'Test Mode', 'klarna' ), 
 		'type' => 'checkbox', 
@@ -310,42 +426,5 @@ return apply_filters( 'klarna_checkout_form_fields', array(
 		'label' => __( 'Enable logging (<code>woocommerce/logs/klarna.txt</code>)', 'klarna' ), 
 		'default' => 'no'
 	),
-
-	'color_button' => array(
-		'title' => __( 'Checkout button color', 'klarna' ), 
-		'type' => 'color', 
-		'desc_tip' => __( 'Checkout page button color', 'klarna' ), 
-		'default' => ''
-	),
-	'color_button_text' => array(
-		'title' => __( 'Checkout button text color', 'klarna' ), 
-		'type' => 'color', 
-		'desc_tip' => __( 'Checkout page button text color', 'klarna' ), 
-		'default' => ''
-	),
-	'color_checkbox' => array(
-		'title' => __( 'Checkout checkbox color', 'klarna' ), 
-		'type' => 'color', 
-		'desc_tip' => __( 'Checkout page checkbox color', 'klarna' ), 
-		'default' => ''
-	),
-	'color_checkbox_checkmark' => array(
-		'title' => __( 'Checkout checkbox checkmark color', 'klarna' ), 
-		'type' => 'color', 
-		'desc_tip' => __( 'Checkout page checkbox checkmark color', 'klarna' ), 
-		'default' => ''
-	),
-	'color_header' => array(
-		'title' => __( 'Checkout header color', 'klarna' ), 
-		'type' => 'color', 
-		'desc_tip' => __( 'Checkout page header color', 'klarna' ), 
-		'default' => ''
-	),
-	'color_link' => array(
-		'title' => __( 'Checkout link color', 'klarna' ), 
-		'type' => 'color', 
-		'desc_tip' => __( 'Checkout page link color', 'klarna' ), 
-		'default' => ''
-	)
 
 ) );
