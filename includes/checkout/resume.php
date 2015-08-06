@@ -151,8 +151,3 @@ try {
 	$klarna_order = null;
 	WC()->session->__unset( 'klarna_checkout' );
 }
-
-
-echo '<pre>';
-print_r( $update );
-echo '</pre>';

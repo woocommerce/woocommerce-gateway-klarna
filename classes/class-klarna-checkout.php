@@ -405,7 +405,13 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		$assets_path          = str_replace( array( 'http:', 'https:' ), '', WC()->plugin_url() ) . '/assets/';
 		$frontend_script_path = $assets_path . 'js/frontend/';
 
-		wp_register_script( 'klarna_checkout', KLARNA_URL . 'js/klarna-checkout.js' );
+		wp_register_script(
+			'klarna_checkout', 
+			KLARNA_URL . 'js/klarna-checkout.js',
+			array(),
+			false,
+			true
+		);
 		wp_localize_script( 'klarna_checkout', 'kcoAjax', array( 'ajaxurl' => admin_url( 'admin-ajax.php' ), 'klarna_checkout_nonce' => wp_create_nonce( 'klarna_checkout_nonce' ) ) );        
 
 		wp_register_style( 'klarna_checkout', KLARNA_URL . 'css/klarna-checkout.css' );	
@@ -1565,10 +1571,14 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 *
 	 * @since 1.0.0
 	 */
-	function update_or_create_local_order( $customer_email = null ) {
+	function update_or_create_local_order( $customer_email = '' ) {
 		if ( is_user_logged_in() ) {
 			global $current_user;
 			$customer_email = $current_user->user_email;
+		}
+
+		if ( '' == $customer_email ) {
+			$customer_email = 'guest_checkout@klarna.com';
 		}
 
 		if ( ! is_email( $customer_email ) )
