@@ -386,6 +386,7 @@ jQuery(document).ready(function($) {
 				window._klarnaCheckout(function (api) {
 					api.suspend();
 				});
+				// console.log(data);
 
 				// Check if email is not defined (AT and DE only) and set it to this value
 				// For AT and DE, email field is not captured inside data object
@@ -393,7 +394,6 @@ jQuery(document).ready(function($) {
 					data.email = 'guest_checkout@klarna.com';
 				}
 
-				// console.log(data);
 				if ( '' != data.email ) {
 					shipping_total_field = $( '#kco-page-shipping-total' );
 					total_field = $( '#kco-page-total-amount' );

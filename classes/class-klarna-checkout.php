@@ -148,6 +148,10 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		// Process subscription payment
 		add_action( 'scheduled_subscription_payment_klarna_checkout', array( $this, 'scheduled_subscription_payment' ), 10, 3 );
 
+		// Purge kco_incomplete orders hourly
+		add_action( 'wp', array( $this, 'register_purge_cron_job' ) );
+		add_action( 'klarna_purge_cron_job_hook', array( $this, 'purge_kco_incomplete' ) );
+
 		// Add activate settings field for recurring orders
 		add_filter( 'klarna_checkout_form_fields', array( $this, 'add_activate_recurring_option' ) );
 
@@ -167,6 +171,80 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		add_filter( 'woocommerce_subscriptions_renewal_order_meta_query', array( $this, 'kco_recurring_do_not_copy_meta_data' ), 10, 4 );
 
     }
+
+	/**
+	 * Purge KCO Incomplete orders
+	 * 
+	 * @since  2.0
+	 **/
+	function register_purge_cron_job() {
+		if ( ! wp_next_scheduled( 'klarna_purge_cron_job_hook' ) ) {
+			wp_schedule_event( current_time( 'timestamp' ), 'daily', 'klarna_purge_cron_job_hook' );
+		}
+	}
+
+	/**
+	 * Purge KCO Incomplete orders
+	 * 
+	 * Deletes KCO Incomplete orders that are older than one day and have KCO Incomplete email
+	 * set to guest_checkout@klarna.com indicating customer email was never captured before
+	 * checkout was abandoned and all KCO incomplete orders older than 2 weeks.
+	 * 
+	 * @since  2.0
+	 **/
+	function purge_kco_incomplete() {
+		// Get KCO Incomplete orders that are older than a day and don't have a real customer email captured.
+		$kco_incomplete_args = array(
+			'post_type'      => 'shop_order',
+			'post_status'    => 'wc-kco-incomplete',
+			'posts_per_page' => -1,
+			'date_query'     => array(
+				array(
+					'before' => '1 day ago'
+				)
+			)
+
+		);
+		
+		$kco_incomplete_query = new WP_Query( $kco_incomplete_args );
+		
+		if ( $kco_incomplete_query->have_posts() ) {
+			while ( $kco_incomplete_query->have_posts() ) {
+				$kco_incomplete_query->the_post();
+				global $post;
+				if ( 'guest_checkout@klarna.com' == get_post_meta( $post->ID, '_kco_incomplete_customer_email', true ) ) {
+					wp_delete_post( $post->ID, true );
+				}
+			}
+		}
+
+		wp_reset_postdata();
+
+		// Get all KCO Incomplete orders older than 2 weeks.
+		$kco_incomplete_args_1 = array(
+			'post_type'      => 'shop_order',
+			'post_status'    => 'wc-kco-incomplete',
+			'posts_per_page' => -1,
+			'date_query'     => array(
+				array(
+					'before' => '2 days ago'
+				)
+			)
+
+		);
+		
+		$kco_incomplete_query_1 = new WP_Query( $kco_incomplete_args_1 );
+		
+		if ( $kco_incomplete_query_1->have_posts() ) {
+			while ( $kco_incomplete_query_1->have_posts() ) {
+				$kco_incomplete_query_1->the_post();
+				global $post;
+				wp_delete_post( $post->ID, true );
+			}
+		}
+
+		wp_reset_postdata();
+	}
 
 	/**
 	 * Register KCO Incomplete order status
