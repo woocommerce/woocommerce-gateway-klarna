@@ -118,7 +118,7 @@ if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 
 } else {
 	// If cart is empty, clear these variables
-	WC()->session->__unset( 'klarna_checkout' );
-	WC()->session->__unset( 'ongoing_klarna_order' );
+	WC()->session->__unset( 'klarna_checkout' ); // Klarna order ID
+	WC()->session->__unset( 'ongoing_klarna_order' ); // WooCommerce order ID
 	WC()->session->__unset( 'klarna_order_note' );
 } // End if sizeof cart 
