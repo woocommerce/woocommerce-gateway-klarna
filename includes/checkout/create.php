@@ -137,7 +137,7 @@ $klarna_order_total = 0;
 $klarna_tax_total = 0;
 foreach ( $cart as $item ) {
 	if ( $this->is_rest() ) {
-		$create['order_lines'][] = $item;	
+		$create['order_lines'][] = $item;
 		$klarna_order_total += $item['total_amount'];
 		$klarna_tax_total += $item['total_tax_amount'];			
 	} else {

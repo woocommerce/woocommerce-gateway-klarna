@@ -1239,11 +1239,16 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			// Reset cart
 			if ( $this->is_rest() ) {
 				$update['order_lines'] = array();
+				$klarna_order_total = 0;
+				$klarna_tax_total = 0;
+
 				foreach ( $cart as $item ) {
 					$update['order_lines'][] = $item;
+					$klarna_order_total += $item['total_amount'];
+					$klarna_tax_total += $item['total_tax_amount'];			
 				}
-				$update['order_amount'] = $woocommerce->cart->total * 100;
-				$update['order_tax_amount'] = $woocommerce->cart->get_taxes_total() * 100;
+				$update['order_amount'] = $klarna_order_total;
+				$update['order_tax_amount'] = $klarna_tax_total;
 			} else {
 				$update['cart']['items'] = array();
 				foreach ( $cart as $item ) {
@@ -2068,7 +2073,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 * @since  2.0.0
 	 */
 	function update_klarna_order_add_item( $itemid, $item ) {
-		// Check if auto cancellation is enabled
+		// Check if auto update is enabled
 		if ( 'yes' == $this->push_update ) {
 			// Get item row from the database table, needed for order id
 			global $wpdb;
@@ -2085,21 +2090,46 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			if ( $this->id == get_post_meta( $orderid, '_payment_method', true ) && 'on-hold' == $order->get_status() ) {
 				// Check if this order hasn't been cancelled or activated
 				if ( ! get_post_meta( $orderid, '_klarna_order_cancelled', true ) && ! get_post_meta( $orderid, '_klarna_order_activated', true ) ) {
-					$rno = get_post_meta( $orderid, '_klarna_order_reservation', true );
-					$country = get_post_meta( $orderid, '_billing_country', true );
 
-					$_product = $order->get_product_from_item( $item );
-					$this->log->add( 'klarna', 'Product: ' . var_export( $_product, true ) );
+					if ( 'v2' == get_post_meta( $order->id, '_klarna_api', true ) ) {
 
-					$klarna = new Klarna();
-					$this->configure_klarna( $klarna, $country );
+						$rno = get_post_meta( $orderid, '_klarna_order_reservation', true );
+						$country = get_post_meta( $orderid, '_billing_country', true );
 
-					$klarna_order = new WC_Gateway_Klarna_Order( $order, $klarna );
-					$klarna_order->add_addresses( $this->klarna_secret, $this->klarna_server );
-					$klarna_order->process_cart_contents();
-					$klarna_order->process_shipping();
-					$klarna_order->process_discount();
-					$klarna_order->update_order( $rno );
+						$klarna = new Klarna();
+						$this->configure_klarna( $klarna, $country );
+
+						$klarna_order = new WC_Gateway_Klarna_Order( $order, $klarna );
+						$klarna_order->add_addresses( $this->klarna_secret, $this->klarna_server );
+						$klarna_order->process_order_items();
+						$klarna_order->process_shipping();
+						$klarna_order->process_discount();
+						$klarna_order->update_order( $rno );
+
+					} elseif ( 'rest' == get_post_meta( $order->id, '_klarna_api', true ) ) {
+
+						/**
+						 * Need to send local order to constructor and Klarna order to method
+						 */
+						require_once( KLARNA_LIB . 'vendor/autoload.php' );
+						$connector = Klarna\Rest\Transport\Connector::create(
+							$this->eid_uk,
+							$this->secret_uk,
+							Klarna\Rest\Transport\ConnectorInterface::TEST_BASE_URL
+						);
+						$klarna_order_id = get_post_meta( $orderid, '_klarna_order_id', true );
+						$k_order = new Klarna\Rest\OrderManagement\Order(
+							$connector,
+							$klarna_order_id
+						);
+						$k_order->fetch();
+
+						// $this->log->add( 'klarna', var_export( $k_order, true ) );
+
+						$klarna_order = new WC_Gateway_Klarna_Order( $order );
+						$klarna_order->update_order_rest( $k_order );						
+
+					}
 				}		
 			}
 		}	
@@ -2113,7 +2143,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 * @since  2.0.0
 	 */
 	function update_klarna_order_delete_item( $itemid ) {
-		// Check if auto cancellation is enabled
+		// Check if auto update is enabled
 		if ( 'yes' == $this->push_update ) {
 			// Get item row from the database table, needed for order id
 			global $wpdb;
@@ -2130,18 +2160,46 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			if ( $this->id == get_post_meta( $orderid, '_payment_method', true ) && 'on-hold' == $order->get_status() ) {
 				// Check if this order hasn't been cancelled or activated
 				if ( ! get_post_meta( $orderid, '_klarna_order_cancelled', true ) && ! get_post_meta( $orderid, '_klarna_order_activated', true ) ) {
-					$rno = get_post_meta( $orderid, '_klarna_order_reservation', true );
-					$country = get_post_meta( $orderid, '_billing_country', true );
 
-					$klarna = new Klarna();
-					$this->configure_klarna( $klarna, $country );
+					if ( 'v2' == get_post_meta( $order->id, '_klarna_api', true ) ) {
 
-					$klarna_order = new WC_Gateway_Klarna_Order( $order, $klarna );
-					$klarna_order->add_addresses( $this->klarna_secret, $this->klarna_server );
-					$klarna_order->process_cart_contents( $itemid );
-					$klarna_order->process_shipping();
-					$klarna_order->process_discount();
-					$klarna_order->update_order( $rno );
+						$rno = get_post_meta( $orderid, '_klarna_order_reservation', true );
+						$country = get_post_meta( $orderid, '_billing_country', true );
+
+						$klarna = new Klarna();
+						$this->configure_klarna( $klarna, $country );
+
+						$klarna_order = new WC_Gateway_Klarna_Order( $order, $klarna );
+						$klarna_order->add_addresses( $this->klarna_secret, $this->klarna_server );
+						$klarna_order->process_order_items( $itemid );
+						$klarna_order->process_shipping();
+						$klarna_order->process_discount();
+						$klarna_order->update_order( $rno );
+
+					} elseif ( 'rest' == get_post_meta( $order->id, '_klarna_api', true ) ) {
+
+						/**
+						 * Need to send local order to constructor and Klarna order to method
+						 */
+						require_once( KLARNA_LIB . 'vendor/autoload.php' );
+						$connector = Klarna\Rest\Transport\Connector::create(
+							$this->eid_uk,
+							$this->secret_uk,
+							Klarna\Rest\Transport\ConnectorInterface::TEST_BASE_URL
+						);
+						$klarna_order_id = get_post_meta( $orderid, '_klarna_order_id', true );
+						$k_order = new Klarna\Rest\OrderManagement\Order(
+							$connector,
+							$klarna_order_id
+						);
+						$k_order->fetch();
+
+						// $this->log->add( 'klarna', var_export( $k_order, true ) );
+
+						$klarna_order = new WC_Gateway_Klarna_Order( $order );
+						$klarna_order->update_order_rest( $k_order, $itemid );
+
+					}
 				}		
 			}
 		}
@@ -2157,27 +2215,53 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	function update_klarna_order_edit_item( $orderid, $items ) {
 		$order = wc_get_order( $orderid );
 
-		// Only do this if in an AJAX call (not when saving the entire order)
-		if ( defined( 'DOING_AJAX' ) && DOING_AJAX ) {
-			// Check if auto cancellation is enabled and order is on hold so it can be edited
-			if ( 'yes' == $this->push_update && 'on-hold' == $order->get_status() ) {
+		// Check if auto update is enabled and order is on hold so it can be edited
+		if ( 'yes' == $this->push_update && 'on-hold' == $order->get_status() ) {
+			// Only do this if in an AJAX call (not when saving the entire order)
+			if ( defined( 'DOING_AJAX' ) && DOING_AJAX ) {
 				// Check if order was created using this method
 				if ( $this->id == get_post_meta( $orderid, '_payment_method', true ) ) {
 					// Check if this order hasn't been cancelled or activated
 					if ( ! get_post_meta( $orderid, '_klarna_order_cancelled', true ) && ! get_post_meta( $orderid, '_klarna_order_activated', true ) ) {
-						$rno = get_post_meta( $orderid, '_klarna_order_reservation', true );
-						$country = get_post_meta( $orderid, '_billing_country', true );
+						if ( 'v2' == get_post_meta( $order->id, '_klarna_api', true ) ) {
 
-						$klarna = new Klarna();
-						$this->configure_klarna( $klarna, $country );
+							$rno = get_post_meta( $orderid, '_klarna_order_reservation', true );
+							$country = get_post_meta( $orderid, '_billing_country', true );
 
-						$klarna_order = new WC_Gateway_Klarna_Order( $order, $klarna );
-						$klarna_order->add_addresses( $this->klarna_secret, $this->klarna_server );
-						$klarna_order->process_cart_contents();
-						$klarna_order->process_shipping();
-						$klarna_order->process_discount();
-						$klarna_order->update_order( $rno );
-						
+							$klarna = new Klarna();
+							$this->configure_klarna( $klarna, $country );
+
+							$klarna_order = new WC_Gateway_Klarna_Order( $order, $klarna );
+							$klarna_order->add_addresses( $this->klarna_secret, $this->klarna_server );
+							$klarna_order->process_order_items();
+							$klarna_order->process_shipping();
+							$klarna_order->process_discount();
+							$klarna_order->update_order( $rno );
+
+						} elseif ( 'rest' == get_post_meta( $order->id, '_klarna_api', true ) ) {
+
+							/**
+							 * Need to send local order to constructor and Klarna order to method
+							 */
+							require_once( KLARNA_LIB . 'vendor/autoload.php' );
+							$connector = Klarna\Rest\Transport\Connector::create(
+								$this->eid_uk,
+								$this->secret_uk,
+								Klarna\Rest\Transport\ConnectorInterface::TEST_BASE_URL
+							);
+							$klarna_order_id = get_post_meta( $orderid, '_klarna_order_id', true );
+							$k_order = new Klarna\Rest\OrderManagement\Order(
+								$connector,
+								$klarna_order_id
+							);
+							$k_order->fetch();
+
+							// $this->log->add( 'klarna', var_export( $k_order, true ) );
+
+							$klarna_order = new WC_Gateway_Klarna_Order( $order );
+							$klarna_order->update_order_rest( $k_order );						
+
+						}
 					}		
 				}	
 			}

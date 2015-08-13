@@ -101,7 +101,7 @@ class WC_Gateway_Klarna_Order {
 	 * @param  $skip_item Item ID to skip from adding, used when item is removed from cart widget
 	 * @since  2.0
 	 **/
-	function process_cart_contents( $skip_item = null ) {
+	function process_order_items( $skip_item = null ) {
 		$order = $this->order;
 		$klarna = $this->klarna;
 
@@ -164,8 +164,8 @@ class WC_Gateway_Klarna_Order {
 			foreach ( WC()->cart->applied_coupons as $code ) {
 		
 				$smart_coupon = new WC_Coupon( $code );
-				//var_dump(WC()->cart->coupon_discount_amounts);
-				//var_dump(WC()->cart->coupon_discount_amounts[$code]);
+				// var_dump(WC()->cart->coupon_discount_amounts);
+				// var_dump(WC()->cart->coupon_discount_amounts[$code]);
 				if ( $smart_coupon->is_valid() && $smart_coupon->discount_type == 'smart_coupon' ) {
 				$klarna->addArticle(
 				    $qty = 1,
@@ -589,6 +589,128 @@ class WC_Gateway_Klarna_Order {
 					)
 				);
 			}
+		} catch( Exception $e ) {
+			$order->add_order_note(
+				sprintf(
+					__( 'Klarna order update failed. Error code %s. Error message %s', 'klarna' ),
+					$e->getCode(),
+					utf8_encode( $e->getMessage() )
+				)					
+			);
+		}
+	}
+
+	/**
+	 * Updates a Klarna order for Rest API
+	 * 
+	 * @since  2.0
+	 **/
+	function update_order_rest( $k_order, $itemid = false ) {
+		$order = $this->order;
+		$orderid = $order->id;
+
+		$updated_order_lines = array();
+		$updated_order_total = 0;
+		$updated_tax_total = 0;
+
+		foreach ( $order->get_items() as $item_key => $order_item ) {
+			if ( $order_item['qty'] && isset( $itemid ) && $item_key != $itemid ) {
+				$_product = wc_get_product( $order_item['product_id'] );
+
+				$item_name = $order_item['name'];
+				$item_reference = strval( $order_item['product_id'] );
+
+				$item_price = number_format( ( $order_item['line_subtotal'] + $order_item['line_subtotal_tax'] ) * 100, 0, '', '' ) / $order_item['qty'];
+ 				$item_quantity = (int) $order_item['qty'];
+				$item_total_amount = round( ( $order_item['line_total'] + $order_item['line_tax'] ) * 100 );
+
+				if ( $order_item['line_subtotal'] > $order_item['line_total'] ) {
+					$item_discount_amount = ( $order_item['line_subtotal'] + $order_item['line_subtotal_tax'] - $order_item['line_total'] - $order_item['line_tax'] ) * 100;
+				} else {
+					$item_discount_amount = 0;
+				}
+
+				$item_tax_amount = round( $order_item['line_tax'] * 100 );
+				$item_tax_rate = round( $order_item['line_subtotal_tax'] / $order_item['line_subtotal'], 2 ) * 100 * 100;
+
+				$klarna_item = array(
+					'reference'             => $item_reference,
+					'name'                  => $item_name,
+					'quantity'              => $item_quantity,
+					'unit_price'            => $item_price,
+					'tax_rate'              => $item_tax_rate,
+					'total_amount'          => $item_total_amount,
+					'total_tax_amount'      => $item_tax_amount,
+					'total_discount_amount' => $item_discount_amount
+				);
+
+				$updated_order_lines[] = $klarna_item;
+				$updated_order_total += $item_total_amount;
+				$updated_tax_total += $item_tax_amount;			
+			}
+		}
+
+		// Process shipping
+		if ( $order->get_total_shipping() > 0 ) {
+			$shipping = array(  
+				'type'             => 'shipping_fee',
+				'reference'        => 'SHIPPING',
+				'name'             => $order->get_shipping_method(),
+				'quantity'         => 1,
+				'unit_price'       => ( $order->get_total_shipping() + $order->get_shipping_tax() ) * 100,
+				'tax_rate'         => $order->get_shipping_tax() / $order->get_total_shipping() * 100 * 100,
+				'total_amount'     => ( $order->get_total_shipping() + $order->get_shipping_tax() ) * 100,
+				'total_tax_amount' => $order->get_shipping_tax() * 100
+			);
+
+			$updated_order_lines[] = $shipping;
+			$updated_order_total += ( $order->get_total_shipping() + $order->get_shipping_tax() ) * 100;
+			$updated_tax_total += $order->get_shipping_tax() * 100;			
+		}
+
+		// Process discounts
+		if ( $order->get_used_coupons() ) {
+			foreach ( $order->get_used_coupons() as $code ) {
+				$smart_coupon = new WC_Coupon( $code );
+
+				if ( $smart_coupon->is_valid() && $smart_coupon->discount_type == 'smart_coupon' ) {
+					$coupon_name     = $smart_coupon->code;
+					$coupon_amount   = (int) number_format( ( $smart_coupon->coupon_amount ) * 100, 0, '', '' );
+
+					// Check if coupon amount exceeds order total
+					if ( $updated_order_total < $coupon_amount ) {
+						$coupon_amount = $updated_order_total;
+					}
+
+					$discount = array(
+						'type'             => 'discount',
+						'reference'        => 'DISCOUNT',
+						'name'             => $coupon_name,
+						'quantity'         => 1,
+						'unit_price'       => -$coupon_amount,
+						'total_amount'     => -$coupon_amount,
+						'tax_rate'         => 0,
+						'total_tax_amount' => 0,
+					);
+
+					$updated_order_lines[] = $discount;
+					$updated_order_total = $updated_order_total - $coupon_amount;
+				}
+			}
+		}
+
+		try {
+			$k_order->updateAuthorization( array(
+				'order_amount'     => $updated_order_total,
+				'order_tax_amount' => $updated_tax_total,
+				'description'      => 'Updating WooCommerce order',
+				'order_lines'      => $updated_order_lines
+			) );
+			$order->add_order_note(
+				sprintf(
+					__( 'Klarna order updated.', 'klarna' )
+				)
+			);
 		} catch( Exception $e ) {
 			$order->add_order_note(
 				sprintf(

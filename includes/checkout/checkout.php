@@ -117,3 +117,7 @@ if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 	do_action( 'klarna_after_kco_checkout' );
 
 } // End if sizeof cart 
+
+echo '<pre>';
+print_r( $klarna_order['order_lines'] );
+echo '</pre>';

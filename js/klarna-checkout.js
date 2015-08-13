@@ -386,7 +386,7 @@ jQuery(document).ready(function($) {
 				window._klarnaCheckout(function (api) {
 					api.suspend();
 				});
-				// console.log(data);
+				console.log(data);
 
 				// Check if email is not defined (AT and DE only) and set it to this value
 				// For AT and DE, email field is not captured inside data object
