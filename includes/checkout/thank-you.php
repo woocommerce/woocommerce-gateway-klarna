@@ -54,13 +54,14 @@ do_action( 'woocommerce_thankyou', $_GET['sid'] );
 // Clear session and empty cart
 WC()->session->__unset( 'klarna_checkout' );
 WC()->session->__unset( 'ongoing_klarna_order' );
+WC()->session->__unset( 'klarna_order_note' );
 WC()->cart->empty_cart(); // Remove cart
 
 
 
 
 
-
+/*
 $orderid = $_GET['sid'];
 
 $klarna_order_id = get_post_meta( $orderid, '_klarna_order_id', true );
@@ -86,3 +87,4 @@ echo '<pre>';
 $wc_order = wc_get_order( $orderid );
 print_r( $wc_order->get_items() );
 echo '</pre>';
+*/

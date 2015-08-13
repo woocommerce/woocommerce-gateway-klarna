@@ -42,11 +42,6 @@ if ( wp_is_mobile() ) {
 global $add_klarna_window_size_script;
 $add_klarna_window_size_script = true;
 
-// Add button to Standard Checkout Page if this is enabled in the settings
-if ( $this->add_std_checkout_button == 'yes' ) {
-	echo '<div class="woocommerce"><a href="' . get_permalink( get_option( 'woocommerce_checkout_page_id' ) ) . '" class="button std-checkout-button">' . $this->std_checkout_button_label . '</a></div>';
-}
-
 // Recheck cart items so that they are in stock
 $result = $woocommerce->cart->check_cart_item_stock();
 if ( is_wp_error( $result ) ) {
@@ -56,6 +51,11 @@ if ( is_wp_error( $result ) ) {
 
 // Check if there's anything in the cart
 if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
+
+	// Add button to Standard Checkout Page if this is enabled in the settings
+	if ( $this->add_std_checkout_button == 'yes' ) {
+		echo '<div class="woocommerce"><a href="' . get_permalink( get_option( 'woocommerce_checkout_page_id' ) ) . '" class="button std-checkout-button">' . $this->std_checkout_button_label . '</a></div>';
+	}
 
 	// Get Klarna credentials
 	$eid = $this->klarna_eid;
@@ -116,4 +116,9 @@ if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 	echo '<div>' . apply_filters( 'klarna_kco_checkout', $snippet ) . '</div>';
 	do_action( 'klarna_after_kco_checkout' );
 
+} else {
+	// If cart is empty, clear these variables
+	WC()->session->__unset( 'klarna_checkout' );
+	WC()->session->__unset( 'ongoing_klarna_order' );
+	WC()->session->__unset( 'klarna_order_note' );
 } // End if sizeof cart 

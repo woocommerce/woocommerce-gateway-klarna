@@ -226,6 +226,8 @@ class WC_Gateway_Klarna_K2WC {
 			} else {
 				update_post_meta( $order->id, '_klarna_api', 'v2' );
 			}
+
+			return $order->id;
 		}
 	}
 

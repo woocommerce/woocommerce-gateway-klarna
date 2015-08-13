@@ -692,7 +692,14 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 					<?php if ( 'false' != $atts['order_note'] ) { ?>
 					<div>
 						<form>
-							<textarea id="klarna-checkout-order-note" class="input-text" name="klarna-checkout-order-note" placeholder="<?php _e( 'Notes about your order, e.g. special notes for delivery.', 'klarna' ); ?>"></textarea>
+							<?php
+							if ( WC()->session->get( 'klarna_order_note' ) ) {
+								$order_note = WC()->session->get( 'klarna_order_note' );
+							} else {
+								$order_note = '';
+							}
+							?>
+							<textarea id="klarna-checkout-order-note" class="input-text" name="klarna-checkout-order-note" placeholder="<?php _e( 'Notes about your order, e.g. special notes for delivery.', 'klarna' ); ?>"><?php echo $order_note; ?></textarea>
 						</form>
 					</div>
 					<?php } ?>
@@ -1063,15 +1070,24 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		// Adding coupon
 		if ( isset( $_REQUEST['order_note'] ) && is_string( $_REQUEST['order_note'] ) ) {
 			$order_note = sanitize_text_field( $_REQUEST['order_note'] );
+			$data['order_note'] = $order_note;
 	
 			if ( WC()->session->get( 'klarna_checkout' ) ) {
 				$woocommerce->cart->calculate_shipping();
 				$woocommerce->cart->calculate_fees();
 				$woocommerce->cart->calculate_totals();
 
-				$this->update_or_create_local_order();
+				$orderid = $this->update_or_create_local_order();
+				$order_details = array(
+					'ID'           => $orderid,
+					'post_excerpt' => $order_note
+				);
+				$order_update = wp_update_post( $order_details );
+				$this->log->add( 'klarna', 'ORDERID: ' . $orderid );
 
-				$this->ajax_update_klarna_order();				
+				$this->ajax_update_klarna_order();
+
+				WC()->session->set( 'klarna_order_note', $order_note );
 			}
 		}
 		
@@ -1687,11 +1703,14 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		$klarna_to_wc->set_klarna_log( $this->log );
 		$klarna_to_wc->set_klarna_debug( $this->debug );
 		$klarna_to_wc->set_klarna_server( $this->klarna_server );
+
 		if ( $customer_email ) {
-			$klarna_to_wc->prepare_wc_order( $customer_email );
+			$orderid = $klarna_to_wc->prepare_wc_order( $customer_email );
 		} else {
-			$klarna_to_wc->prepare_wc_order();
+			$orderid = $klarna_to_wc->prepare_wc_order();
 		}
+
+		return $orderid;
 	}
 
 

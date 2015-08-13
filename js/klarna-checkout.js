@@ -49,7 +49,7 @@ jQuery(document).ready(function($) {
 	});
 
 	// Update order note
-	$('textarea#klarna-checkout-order-note').change( function() {
+	$('textarea#klarna-checkout-order-note, #kco_order_note').change( function() {
 		
 		if ( typeof window._klarnaCheckout == 'function') { 
 		window._klarnaCheckout(function (api) {
@@ -70,8 +70,8 @@ jQuery(document).ready(function($) {
 					nonce : kcoAjax.klarna_checkout_nonce
 				},
 				success: function( response ) {
-					// console.log( 'success' );
-					// console.log( response.data );
+					console.log( 'success' );
+					console.log( response.data );
 					
 					if ( typeof window._klarnaCheckout == 'function') { 
 					window._klarnaCheckout(function (api) {
@@ -93,6 +93,36 @@ jQuery(document).ready(function($) {
 		);
 		
 	});
+
+	// Old order note shortcode
+	/* 
+	$('#kco_order_note').blur(function () {
+		var kco_order_note = '';
+		
+		if( $('#kco_order_note').val() != '' ) {
+			var kco_order_note = $('#kco_order_note').val();
+		}
+		
+		if(kco_order_note == '') {
+		
+		} else {
+				
+			$.post(
+				kcoAjax.ajaxurl,
+				{
+					action			: 'customer_update_kco_order_note',
+					kco_order_note	: kco_order_note,
+					kco_order_id	: '<?php echo WC()->session->order_awaiting_payment;?>',
+					_wpnonce		: kcoAjax.klarna_checkout_nonce,
+				},
+				function( response ) {
+					console.log( response );
+				}
+			);
+			
+		}				
+	});
+	*/
 
 	// Update shipping
 	$('table#kco-totals').on( 'change', '#kco-page-shipping input[type="radio"]', function( event ) {

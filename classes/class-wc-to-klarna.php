@@ -262,7 +262,7 @@ class WC_Gateway_Klarna_WC2K {
 		if ( isset( $cart_item['item_meta'] ) ) {
 			$item_meta = new WC_Order_Item_Meta( $cart_item['item_meta'] );
 			if ( $meta = $item_meta->display( true, true ) ) {
-				$item_name .= ' ( ' . $meta . ' )';
+				$item_name .= ' (' . $meta . ')';
 			}
 		}
 

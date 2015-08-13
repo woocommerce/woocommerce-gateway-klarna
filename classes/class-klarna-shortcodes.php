@@ -23,6 +23,7 @@ class WC_Gateway_Klarna_Shortcodes {
 
 		add_shortcode( 'woocommerce_klarna_checkout_widget', array( $this, 'klarna_checkout_widget' ) );
 		add_shortcode( 'woocommerce_klarna_checkout', array( $this, 'klarna_checkout_page') );
+		add_shortcode( 'woocommerce_klarna_checkout_order_note', array( $this, 'klarna_checkout_order_note') );
 
 	}
 
@@ -215,6 +216,32 @@ class WC_Gateway_Klarna_Shortcodes {
 		}
 	}
 
+	// Shortcode Order note
+	function klarna_checkout_order_note() {
+		global $woocommerce;
+
+		$field = array(
+			'type'              => 'textarea',
+			'label'             => __( 'Order Notes', 'woocommerce' ),
+			'placeholder'       => _x('Notes about your order, e.g. special notes for delivery.', 'placeholder', 'woocommerce'),
+			'class'             => array('notes'),
+		);
+		if ( WC()->session->get( 'klarna_order_note' ) ) {
+			$order_note = WC()->session->get( 'klarna_order_note' );
+		} else {
+			$order_note = '';
+		}
+
+		ob_start();
+		
+		if ( sizeof( WC()->cart->get_cart() ) > 0 ) {
+			echo '<div class="woocommerce"><form>';
+			woocommerce_form_field( 'kco_order_note', $field, $order_note );
+			echo '</form></div>';
+		}
+
+		return ob_get_clean();
+	}
 }
 
 $wc_klarna_checkout_shortcodes = new WC_Gateway_Klarna_Shortcodes;
