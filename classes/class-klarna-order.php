@@ -618,6 +618,13 @@ class WC_Gateway_Klarna_Order {
 				$_product = wc_get_product( $order_item['product_id'] );
 
 				$item_name = $order_item['name'];
+				// Append item meta to the title, if it exists
+				if ( isset( $order_item['item_meta'] ) ) {
+					$item_meta = new WC_Order_Item_Meta( $order_item['item_meta'] );
+					if ( $meta = $item_meta->display( true, true ) ) {
+						$item_name .= ' (' . $meta . ')';
+					}
+				}
 				$item_reference = strval( $order_item['product_id'] );
 
 				$item_price = number_format( ( $order_item['line_subtotal'] + $order_item['line_subtotal_tax'] ) * 100, 0, '', '' ) / $order_item['qty'];

@@ -56,6 +56,11 @@ WC()->session->__unset( 'klarna_checkout' );
 WC()->session->__unset( 'ongoing_klarna_order' );
 WC()->cart->empty_cart(); // Remove cart
 
+
+
+
+
+
 $orderid = $_GET['sid'];
 
 $klarna_order_id = get_post_meta( $orderid, '_klarna_order_id', true );
