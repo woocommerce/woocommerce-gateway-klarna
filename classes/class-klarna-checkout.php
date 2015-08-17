@@ -553,6 +553,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			$atts
 		);
 
+		$hide_columns = array();
 		if ( '' != $atts['hide_columns'] ) {
 			$hide_columns = explode( ',', $atts['hide_columns'] );
 		}

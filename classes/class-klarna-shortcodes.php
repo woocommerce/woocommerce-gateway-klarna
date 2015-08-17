@@ -87,7 +87,7 @@ class WC_Gateway_Klarna_Shortcodes {
 						<tbody>
 							<tr>
 								<?php if ( ! in_array( 'remove', $hide_columns ) ) { ?>
-								<th class="product-remove kco-centeralign"></th>
+								<th class="product-remove kco-leftalign"></th>
 								<?php } ?>
 								<th class="product-name kco-leftalign"><?php _e( 'Product', 'klarna' ); ?></th>
 								<?php if ( ! in_array( 'price', $hide_columns ) ) { ?>
@@ -102,7 +102,7 @@ class WC_Gateway_Klarna_Shortcodes {
 								$cart_item_product = wc_get_product( $cart_item['product_id'] );
 								echo '<tr>';
 									if ( ! in_array( 'remove', $hide_columns ) ) {
-									echo '<td class="kco-product-remove kco-centeralign"><a href="#">x</a></td>';
+									echo '<td class="kco-product-remove kco-leftalign"><a href="#">x</a></td>';
 									}
 									echo '<td class="product-name kco-leftalign">';
 										if ( ! $_product->is_visible() ) {
