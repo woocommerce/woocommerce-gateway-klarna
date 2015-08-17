@@ -446,6 +446,43 @@ class WC_Gateway_Klarna_Order {
 
 
 	/**
+	 * Refunds a Klarna order for Rest API
+	 * 
+	 * @since  2.0
+	 **/
+	function refund_order_rest( $amount, $reason = '', $k_order ) {
+		$order = $this->order;
+		$orderid = $order->id;
+
+		try {
+			$k_order->refund( array(
+				'refunded_amount' => $amount * 100,
+				'description'     => $reason,
+			) );
+
+			$order->add_order_note(
+				sprintf(
+					__( 'Klarna order refunded. Refund amount: %s.', 'klarna' ),
+					$amount
+				)
+			);
+
+			return true;
+		} catch( Exception $e ) {
+			$order->add_order_note(
+				sprintf(
+					__( 'Klarna order refund failed. Error code %s. Error message %s', 'klarna' ),
+					$e->getCode(),
+					utf8_encode( $e->getMessage() )
+				)					
+			);
+
+			return false;
+		}
+	}
+
+
+	/**
 	 * Activates a Klarna order for V2 API
 	 * 
 	 * @since  2.0
@@ -504,6 +541,11 @@ class WC_Gateway_Klarna_Order {
 
 		try {
 			$k_order->createCapture( $data );
+			$k_order->fetch();
+
+			update_post_meta( $orderid, '_klarna_order_activated', time() );
+			update_post_meta( $orderid, '_klarna_invoice_number', $k_order['captures'][0]['capture_id'] );
+			update_post_meta( $orderid, '_transaction_id', $k_order['captures'][0]['capture_id'] );
 		} catch( Exception $e ) {
 			$order->add_order_note(
 				sprintf(

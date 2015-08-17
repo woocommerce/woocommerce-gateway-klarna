@@ -217,5 +217,14 @@ if ( $this->is_rest() ) {
 	$klarna_order = new Klarna_Checkout_Order( $connector, $this->klarna_server );
 }
 
-$klarna_order->create( apply_filters( 'kco_create_order', $create ) );
-$klarna_order->fetch();
+try {
+	$klarna_order->create( apply_filters( 'kco_create_order', $create ) );
+	$klarna_order->fetch();
+} catch( Exception $e ) {
+	if ( is_user_logged_in() && $this->debug ) {
+		// The purchase was denied or something went wrong, print the message:
+		echo '<pre>';
+		print_r( $e );
+		echo '</pre>';
+	}
+}

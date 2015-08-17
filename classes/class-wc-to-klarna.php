@@ -282,8 +282,8 @@ class WC_Gateway_Klarna_WC2K {
 		// apply_filters to item price so we can filter this if needed
 		$item_price_including_tax = $cart_item['line_subtotal'] + $cart_item['line_subtotal_tax'];
 		$item_price = apply_filters( 'klarna_item_price_including_tax', $item_price_including_tax );
-		// $item_price = number_format( $item_price * 100, 0, '', '' ) / $cart_item['quantity'];
-		$item_price = $item_price * 100 / $cart_item['quantity'];
+		$item_price = number_format( $item_price * 100, 0, '', '' ) / $cart_item['quantity'];
+		// $item_price = $item_price * 100 / $cart_item['quantity'];
 
 		return $item_price;
 	}

@@ -60,7 +60,6 @@ WC()->cart->empty_cart(); // Remove cart
 
 
 
-
 /*
 $orderid = $_GET['sid'];
 
@@ -76,11 +75,7 @@ $k_order = new Klarna\Rest\OrderManagement\Order(
 );
 $k_order->fetch();							
 echo '<pre>';
-print_r( $k_order['order_lines'] );
-echo '</pre>';
-
-echo '<pre>';
-print_r( $k_order['order_amount'] );
+print_r( $k_order );
 echo '</pre>';
 
 echo '<pre>';

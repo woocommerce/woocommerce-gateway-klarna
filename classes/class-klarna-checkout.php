@@ -1917,14 +1917,47 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 				return false;
 			}
 
-			$country = get_post_meta( $orderid, '_billing_country', true );
+			if ( 'v2' == get_post_meta( $order->id, '_klarna_api', true ) ) {
 
-			$klarna = new Klarna();
-			$this->configure_klarna( $klarna, $country );
-			$invNo = get_post_meta( $order->id, '_klarna_invoice_number', true );
+				$country = get_post_meta( $orderid, '_billing_country', true );
 
-			$klarna_order = new WC_Gateway_Klarna_Order( $order, $klarna );
-			$refund_order = $klarna_order->refund_order( $amount, $reason = '', $invNo );
+				// Klarna settings
+				require_once( KLARNA_LIB . 'Klarna.php' );
+				
+				if ( ! function_exists( 'xmlrpc_encode_entitites' ) && ! class_exists( 'xmlrpcresp' ) ) {
+					require_once( KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc.inc' );
+					require_once( KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc_wrappers.inc' );
+				}
+								
+				$klarna = new Klarna();
+				$this->configure_klarna( $klarna, $country );
+				$invNo = get_post_meta( $order->id, '_klarna_invoice_number', true );
+
+				$klarna_order = new WC_Gateway_Klarna_Order( $order, $klarna );
+				$refund_order = $klarna_order->refund_order( $amount, $reason = '', $invNo );
+
+			} elseif ( 'rest' == get_post_meta( $order->id, '_klarna_api', true ) ) {
+
+				/**
+				 * Need to send local order to constructor and Klarna order to method
+				 */
+				require_once( KLARNA_LIB . 'vendor/autoload.php' );
+				$connector = Klarna\Rest\Transport\Connector::create(
+					$this->eid_uk,
+					$this->secret_uk,
+					Klarna\Rest\Transport\ConnectorInterface::TEST_BASE_URL
+				);
+				$klarna_order_id = get_post_meta( $orderid, '_klarna_order_id', true );
+				$k_order = new Klarna\Rest\OrderManagement\Order(
+					$connector,
+					$klarna_order_id
+				);
+				$k_order->fetch();
+
+				$klarna_order = new WC_Gateway_Klarna_Order( $order );
+				$refund_order = $klarna_order->refund_order_rest( $amount, $reason = '', $k_order );
+
+			}
 
 			if ( $refund_order ) {
 				return true;
@@ -1970,7 +2003,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 							// Check if this order hasn't been activated already
 							if ( ! get_post_meta( $orderid, '_klarna_invoice_number', true ) ) {
 								// Klarna settings
-								require_once(KLARNA_LIB . 'Klarna.php');
+								require_once( KLARNA_LIB . 'Klarna.php' );
 								
 								if ( ! function_exists( 'xmlrpc_encode_entitites' ) && ! class_exists( 'xmlrpcresp' ) ) {
 									require_once( KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc.inc' );
