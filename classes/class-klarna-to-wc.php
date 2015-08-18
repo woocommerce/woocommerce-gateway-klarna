@@ -88,6 +88,15 @@ class WC_Gateway_Klarna_K2WC {
 	public $klarna_debug;
 
 	/**
+	 * Klarna test mode.
+	 *
+	 * @since  2.0.0
+	 * @access public
+	 * @var    string, yes or no
+	 */
+	public $klarna_test_mode;
+
+	/**
 	 * Klarna server URI.
 	 *
 	 * @since  2.0.0
@@ -148,6 +157,15 @@ class WC_Gateway_Klarna_K2WC {
 	 */
 	public function set_klarna_debug( $klarna_debug ) {
 		$this->klarna_debug = $klarna_debug;
+	}
+
+	/**
+	 * Set klarna_debug
+	 *
+	 * @since 2.0.0
+	 */
+	public function set_klarna_test_mode( $klarna_test_mode ) {
+		$this->klarna_test_mode = $klarna_test_mode;
 	}
 
 	/**
@@ -299,13 +317,16 @@ class WC_Gateway_Klarna_K2WC {
 		}
 
 		if ( sanitize_key( $_GET['klarna-api'] ) && 'rest' == sanitize_key( $_GET['klarna-api'] ) ) {
-			$this->klarna_log->add( 'klarna', 'Klarna order 2: ' . var_export( $klarna_order, true ) );
-
 			require_once( KLARNA_LIB . 'vendor/autoload.php' );
-			$connector = \Klarna\Rest\Transport\Connector::create(
+				if ( $this->klarna_test_mode == 'yes' ) {
+					$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_TEST_BASE_URL;
+				} else {
+					$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_BASE_URL;
+				}
+				$connector = \Klarna\Rest\Transport\Connector::create(
 				$this->eid,
 				$this->secret,
-				\Klarna\Rest\Transport\ConnectorInterface::TEST_BASE_URL
+				$klarna_server_url
 			);
 
 			$klarna_order = new \Klarna\Rest\OrderManagement\Order(

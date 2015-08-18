@@ -73,7 +73,6 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 				remove_action( 'woocommerce_thankyou', 'woocommerce_order_details_table', 10 );
 			}
 		}
-		
 
 		// Subscription support
 		$this->supports = array( 
@@ -87,7 +86,6 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			'subscription_date_changes',
 			'subscription_payment_method_change'
 		);
-
 
 		// Enqueue scripts and styles
 		add_action( 'wp_enqueue_scripts', array( $this, 'klarna_checkout_enqueuer' ) );
@@ -601,7 +599,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 						<tbody>
 							<tr>
 								<?php if ( ! in_array( 'remove', $hide_columns ) ) { ?>
-								<th class="product-remove kco-centeralign"></th>
+								<th class="product-remove kco-leftalign"></th>
 								<?php } ?>
 								<th class="product-name kco-leftalign"><?php _e( 'Product', 'klarna' ); ?></th>
 								<?php if ( ! in_array( 'price', $hide_columns ) ) { ?>
@@ -616,7 +614,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 								$cart_item_product = wc_get_product( $cart_item['product_id'] );
 								echo '<tr>';
 									if ( ! in_array( 'remove', $hide_columns ) ) {
-									echo '<td class="kco-product-remove kco-centeralign"><a href="#">x</a></td>';
+									echo '<td class="kco-product-remove kco-leftalign"><a href="#">x</a></td>';
 									}
 									echo '<td class="product-name kco-leftalign">';
 										if ( ! $_product->is_visible() ) {
@@ -1225,10 +1223,15 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 
 		if ( $this->is_rest() ) {
 			require_once( KLARNA_LIB . 'vendor/autoload.php' );
+			if ( $this->testmode == 'yes' ) {
+				$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_TEST_BASE_URL;
+			} else {
+				$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_BASE_URL;
+			}
 			$connector = Klarna\Rest\Transport\Connector::create(
 				$eid,
 				$sharedSecret,
-				Klarna\Rest\Transport\ConnectorInterface::TEST_BASE_URL
+				$klarna_server_url
 			);
 
 			$klarna_order = new \Klarna\Rest\Checkout\Order(
@@ -1705,6 +1708,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		$klarna_to_wc->set_secret( $this->klarna_secret );
 		$klarna_to_wc->set_klarna_log( $this->log );
 		$klarna_to_wc->set_klarna_debug( $this->debug );
+		$klarna_to_wc->set_klarna_test_mode( $this->testmode );		
 		$klarna_to_wc->set_klarna_server( $this->klarna_server );
 
 		if ( $customer_email ) {
@@ -1765,6 +1769,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			$klarna_to_wc->set_secret( $klarna_secret );
 			$klarna_to_wc->set_klarna_order_uri( $_GET['klarna_order'] );
 			$klarna_to_wc->set_klarna_log( $this->log );
+			$klarna_to_wc->set_klarna_test_mode( $this->testmode );		
 			$klarna_to_wc->set_klarna_debug( $this->debug );
 			$klarna_to_wc->listener();
 		}
@@ -1945,10 +1950,15 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 				 * Need to send local order to constructor and Klarna order to method
 				 */
 				require_once( KLARNA_LIB . 'vendor/autoload.php' );
+				if ( $this->testmode == 'yes' ) {
+					$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_TEST_BASE_URL;
+				} else {
+					$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_BASE_URL;
+				}
 				$connector = Klarna\Rest\Transport\Connector::create(
 					$this->eid_uk,
 					$this->secret_uk,
-					Klarna\Rest\Transport\ConnectorInterface::TEST_BASE_URL
+					$klarna_server_url
 				);
 				$klarna_order_id = get_post_meta( $orderid, '_klarna_order_id', true );
 				$k_order = new Klarna\Rest\OrderManagement\Order(
@@ -2031,10 +2041,15 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 							 * Need to send local order to constructor and Klarna order to method
 							 */
 							require_once( KLARNA_LIB . 'vendor/autoload.php' );
+							if ( $this->testmode == 'yes' ) {
+								$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_TEST_BASE_URL;
+							} else {
+								$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_BASE_URL;
+							}
 							$connector = Klarna\Rest\Transport\Connector::create(
 								$this->eid_uk,
 								$this->secret_uk,
-								Klarna\Rest\Transport\ConnectorInterface::TEST_BASE_URL
+								$klarna_server_url
 							);
 							$klarna_order_id = get_post_meta( $orderid, '_klarna_order_id', true );
 							$k_order = new Klarna\Rest\OrderManagement\Order(
@@ -2098,10 +2113,15 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 						 * Need to send local order to constructor and Klarna order to method
 						 */
 						require_once( KLARNA_LIB . 'vendor/autoload.php' );
+						if ( $this->testmode == 'yes' ) {
+							$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_TEST_BASE_URL;
+						} else {
+							$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_BASE_URL;
+						}
 						$connector = Klarna\Rest\Transport\Connector::create(
 							$this->eid_uk,
 							$this->secret_uk,
-							Klarna\Rest\Transport\ConnectorInterface::TEST_BASE_URL
+							$klarna_server_url
 						);
 						$klarna_order_id = get_post_meta( $orderid, '_klarna_order_id', true );
 						$k_order = new Klarna\Rest\OrderManagement\Order(
@@ -2167,10 +2187,15 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 						 * Need to send local order to constructor and Klarna order to method
 						 */
 						require_once( KLARNA_LIB . 'vendor/autoload.php' );
+						if ( $this->testmode == 'yes' ) {
+							$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_TEST_BASE_URL;
+						} else {
+							$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_BASE_URL;
+						}
 						$connector = Klarna\Rest\Transport\Connector::create(
 							$this->eid_uk,
 							$this->secret_uk,
-							Klarna\Rest\Transport\ConnectorInterface::TEST_BASE_URL
+							$klarna_server_url
 						);
 						$klarna_order_id = get_post_meta( $orderid, '_klarna_order_id', true );
 						$k_order = new Klarna\Rest\OrderManagement\Order(
@@ -2237,10 +2262,15 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 						 * Need to send local order to constructor and Klarna order to method
 						 */
 						require_once( KLARNA_LIB . 'vendor/autoload.php' );
+						if ( $this->testmode == 'yes' ) {
+							$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_TEST_BASE_URL;
+						} else {
+							$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_BASE_URL;
+						}
 						$connector = Klarna\Rest\Transport\Connector::create(
 							$this->eid_uk,
 							$this->secret_uk,
-							Klarna\Rest\Transport\ConnectorInterface::TEST_BASE_URL
+							$klarna_server_url
 						);
 						$klarna_order_id = get_post_meta( $orderid, '_klarna_order_id', true );
 						$k_order = new Klarna\Rest\OrderManagement\Order(
@@ -2299,10 +2329,15 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 							 * Need to send local order to constructor and Klarna order to method
 							 */
 							require_once( KLARNA_LIB . 'vendor/autoload.php' );
+							if ( $this->testmode == 'yes' ) {
+								$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_TEST_BASE_URL;
+							} else {
+								$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_BASE_URL;
+							}
 							$connector = Klarna\Rest\Transport\Connector::create(
 								$this->eid_uk,
 								$this->secret_uk,
-								Klarna\Rest\Transport\ConnectorInterface::TEST_BASE_URL
+								$klarna_server_url
 							);
 							$klarna_order_id = get_post_meta( $orderid, '_klarna_order_id', true );
 							$k_order = new Klarna\Rest\OrderManagement\Order(

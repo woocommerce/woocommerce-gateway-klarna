@@ -21,7 +21,7 @@ class WC_Gateway_Klarna_Shortcodes {
 	 */
 	public function __construct() { 
 
-		add_shortcode( 'woocommerce_klarna_checkout_widget', array( $this, 'klarna_checkout_widget' ) );
+		// add_shortcode( 'woocommerce_klarna_checkout_widget', array( $this, 'klarna_checkout_widget' ) );
 		add_shortcode( 'woocommerce_klarna_checkout', array( $this, 'klarna_checkout_page') );
 		add_shortcode( 'woocommerce_klarna_checkout_order_note', array( $this, 'klarna_checkout_order_note') );
 

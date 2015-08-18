@@ -77,10 +77,15 @@ if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 	// Initiate Klarna
 	if ( $this->is_rest() ) {
 		require_once( KLARNA_LIB . 'vendor/autoload.php' );
+		if ( $this->testmode == 'yes' ) {
+			$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_TEST_BASE_URL;
+		} else {
+			$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_BASE_URL;
+		}
 		$connector = Klarna\Rest\Transport\Connector::create(
 		    $eid,
 		    $sharedSecret,
-		    Klarna\Rest\Transport\ConnectorInterface::TEST_BASE_URL
+		    $klarna_server_url
 		);
 	} else {
 		require_once( KLARNA_LIB . '/src/Klarna/Checkout.php' );

@@ -34,7 +34,7 @@ class WC_Gateway_Klarna_Order {
 	 * @since  2.0
 	 **/
 	function prepare_order( $klarna_billing, $klarna_shipping, $ship_to_billing_address ) {
-		$this->process_cart_contents( $this->order, $this->klarna );
+		$this->process_order_items( $this->order, $this->klarna );
 		$this->process_discount( $this->order, $this->klarna );
 		$this->process_fees( $this->order, $this->klarna );
 		$this->process_shipping( $this->order, $this->klarna );

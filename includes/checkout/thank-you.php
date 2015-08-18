@@ -21,18 +21,33 @@ $orderUri     = $_GET['klarna_order'];
 // Connect to Klarna
 if ( $this->is_rest() ) {
 	require_once( KLARNA_LIB . 'vendor/autoload.php' );
+	if ( $this->testmode == 'yes' ) {
+		$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_TEST_BASE_URL;
+	} else {
+		$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_BASE_URL;
+	}
 	$connector = \Klarna\Rest\Transport\Connector::create(
-	    $merchantId,
-	    $sharedSecret,
-	    \Klarna\Rest\Transport\ConnectorInterface::TEST_BASE_URL
+		$merchantId,
+		$sharedSecret,
+		$klarna_server_url
 	);
-	$klarna_order = new \Klarna\Rest\Checkout\Order( $connector, $orderUri );
+	$klarna_order = new Klarna\Rest\Checkout\Order( $connector, '520ee1b3-ca5a-5e42-b563-9a1c00a2e616' );
 } else {
 	// Klarna_Checkout_Order::$contentType = 'application/vnd.klarna.checkout.aggregated-order-v2+json';  
 	$connector = Klarna_Checkout_Connector::create( $sharedSecret );  
 	$klarna_order = new Klarna_Checkout_Order( $connector, $orderUri );
 }
-$klarna_order->fetch();
+
+try {
+	$klarna_order->fetch();
+} catch( Exception $e ) {
+	if ( is_user_logged_in() && $this->debug ) {
+		// The purchase was denied or something went wrong, print the message:
+		echo '<div>';
+		print_r( $e->getMessage() );
+		echo '</div>';
+	}
+}
 
 if ( $klarna_order['status'] == 'checkout_incomplete' ) {
 	wp_redirect( $this->klarna_checkout_url );
@@ -59,27 +74,27 @@ WC()->cart->empty_cart(); // Remove cart
 
 
 
-
 /*
 $orderid = $_GET['sid'];
 
 $klarna_order_id = get_post_meta( $orderid, '_klarna_order_id', true );
+if ( $this->testmode == 'yes' ) {
+	$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_TEST_BASE_URL;
+} else {
+	$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_BASE_URL;
+}
 $connector = Klarna\Rest\Transport\Connector::create(
 	$this->eid_uk,
 	$this->secret_uk,
-	Klarna\Rest\Transport\ConnectorInterface::TEST_BASE_URL
+	$klarna_server_url
 );
 $k_order = new Klarna\Rest\OrderManagement\Order(
 	$connector,
 	$klarna_order_id
 );
-$k_order->fetch();							
 echo '<pre>';
 print_r( $k_order );
 echo '</pre>';
 
-echo '<pre>';
-$wc_order = wc_get_order( $orderid );
-print_r( $wc_order->get_items() );
-echo '</pre>';
-*/
+$k_order->fetch();
+*/	
