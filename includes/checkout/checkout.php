@@ -21,6 +21,17 @@ if ( ! array_key_exists( strtoupper( $this->get_klarna_country() ), WC()->countr
 	exit;
 }
 
+// Check if there are any recurring items in the cart and if it's a "recurring" country
+if ( class_exists( 'WC_Subscriptions_Cart' ) && WC_Subscriptions_Cart::cart_contains_subscription() ) {
+	if ( ! in_array( strtoupper( $this->get_klarna_country() ), array( 'SE', 'FI', 'NO' ) ) ) {
+		global $woocommerce;
+		$checkout_url = $woocommerce->cart->get_checkout_url();
+		wp_safe_redirect( $checkout_url );
+		exit;
+	}
+}
+
+
 // Process order via Klarna Checkout page
 if ( ! defined( 'WOOCOMMERCE_CHECKOUT' ) )
 	define( 'WOOCOMMERCE_CHECKOUT', true );

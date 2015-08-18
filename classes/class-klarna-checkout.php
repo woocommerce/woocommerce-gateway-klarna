@@ -2560,8 +2560,17 @@ class WC_Gateway_Klarna_Checkout_Extra {
 			in_array( strtoupper( $klarna_country ), $available_countries ) &&
 			array_key_exists( strtoupper( $klarna_country ), WC()->countries->get_allowed_countries() )
 		) {
-			$url = $klarna_checkout_url;
+			if ( class_exists( 'WC_Subscriptions_Cart' ) && WC_Subscriptions_Cart::cart_contains_subscription() ) {
+				if ( in_array( strtoupper( $klarna_country ), array( 'SE', 'FI', 'NO' ) ) ) {
+					$url = $klarna_checkout_url;
+				} else {
+					return $url;
+				}
+			} else {
+				$url = $klarna_checkout_url;
+			}
 		}
+
 		
 		return $url;
 	}
