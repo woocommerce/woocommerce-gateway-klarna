@@ -223,8 +223,8 @@ try {
 } catch( Exception $e ) {
 	if ( is_user_logged_in() && $this->debug ) {
 		// The purchase was denied or something went wrong, print the message:
-		echo '<pre>';
+		echo '<div>';
 		print_r( $e->getMessage() );
-		echo '</pre>';
+		echo '</div>';
 	}
 }

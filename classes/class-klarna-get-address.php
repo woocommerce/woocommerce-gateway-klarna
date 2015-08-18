@@ -346,8 +346,7 @@ class WC_Klarna_Get_Address {
 		if( ($this->invo_enabled && $this->invo_dob_display == 'description_box') || ($this->partpay_enabled && $this->partpay_dob_display == 'description_box') ) {
 			
 			?>
-				<div class="klarna-response"></div>
-			
+				<div class="klarna-response"></div>		
 			<?php
 		}
 	} // End function
@@ -368,11 +367,11 @@ class WC_Klarna_Get_Address {
 				require_once( KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc_wrappers.inc' );
 			}
 
-			if ( 'klarna_part_payment' == WC()->session->get( 'chosen_payment_method' ) ) {
+			if ( '' != $this->partpay_eid && '' != $this->partpay_secret ) {
 				$klarna_eid = $this->partpay_eid;
 				$klarna_secret = $this->partpay_secret;
 				$klarna_testmode = $this->partpay_testmode;
-			} elseif ( 'klarna_invoice' == WC()->session->get( 'chosen_payment_method' ) ) {
+			} elseif ('' != $this->invo_eid && '' != $this->invo_secret ) {
 				$klarna_eid = $this->invo_eid;
 				$klarna_secret = $this->invo_secret;
 				$klarna_testmode = $this->invo_testmode;
