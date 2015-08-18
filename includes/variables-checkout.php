@@ -76,7 +76,7 @@ $this->color_link = ( isset( $this->settings['color_link'] ) ) ? $this->settings
 
 $this->activate_recurring = ( isset( $this->settings['activate_recurring'] ) ) ? $this->settings['activate_recurring'] : '';
 
-if ( empty($this->terms_url) ) 
+if ( empty( $this->terms_url) ) 
 	$this->terms_url = esc_url( get_permalink(woocommerce_get_page_id('terms')) );
 	
 	// Check if this is test mode or not
@@ -139,7 +139,7 @@ switch ( $this->shop_country ) {
 		$klarna_eid 				= $this->eid_no;
 		$klarna_secret 				= $this->secret_no;
 		$klarna_checkout_url 		= $this->klarna_checkout_url_no;
-		if ($this->klarna_checkout_thanks_url_no == '' ) {
+		if ( $this->klarna_checkout_thanks_url_no == '' ) {
 			$klarna_checkout_thanks_url 	= $this->klarna_checkout_url_no;
 		} else {
 			$klarna_checkout_thanks_url 	= $this->klarna_checkout_thanks_url_no;
@@ -162,7 +162,7 @@ switch ( $this->shop_country ) {
 		$klarna_eid 				= $this->eid_fi;
 		$klarna_secret 				= $this->secret_fi;
 		$klarna_checkout_url 		= $this->klarna_checkout_url_fi;
-		if ($this->klarna_checkout_thanks_url_fi == '' ) {
+		if ( $this->klarna_checkout_thanks_url_fi == '' ) {
 			$klarna_checkout_thanks_url 	= $this->klarna_checkout_url_fi;
 		} else {
 			$klarna_checkout_thanks_url 	= $this->klarna_checkout_thanks_url_fi;
@@ -179,7 +179,7 @@ switch ( $this->shop_country ) {
 		$klarna_eid 				= $this->eid_se;
 		$klarna_secret 				= $this->secret_se;
 		$klarna_checkout_url 		= $this->klarna_checkout_url_se;
-		if ($this->klarna_checkout_thanks_url_se == '' ) {
+		if ( $this->klarna_checkout_thanks_url_se == '' ) {
 			$klarna_checkout_thanks_url 	= $this->klarna_checkout_url_se;
 		} else {
 			$klarna_checkout_thanks_url 	= $this->klarna_checkout_thanks_url_se;
@@ -192,7 +192,7 @@ switch ( $this->shop_country ) {
 		$klarna_eid 				= $this->eid_de;
 		$klarna_secret 				= $this->secret_de;
 		$klarna_checkout_url 		= $this->klarna_checkout_url_de;
-		if ($this->klarna_checkout_thanks_url_de == '' ) {
+		if ( $this->klarna_checkout_thanks_url_de == '' ) {
 			$klarna_checkout_thanks_url 	= $this->klarna_checkout_url_de;
 		} else {
 			$klarna_checkout_thanks_url 	= $this->klarna_checkout_thanks_url_de;
@@ -205,7 +205,7 @@ switch ( $this->shop_country ) {
 		$klarna_eid 				= $this->eid_at;
 		$klarna_secret 				= $this->secret_at;
 		$klarna_checkout_url 		= $this->klarna_checkout_url_at;
-		if ($this->klarna_checkout_thanks_url_at == '' ) {
+		if ( $this->klarna_checkout_thanks_url_at == '' ) {
 			$klarna_checkout_thanks_url 	= $this->klarna_checkout_url_at;
 		} else {
 			$klarna_checkout_thanks_url 	= $this->klarna_checkout_thanks_url_at;
@@ -218,7 +218,7 @@ switch ( $this->shop_country ) {
 		$klarna_eid 				= $this->eid_uk;
 		$klarna_secret 				= $this->secret_uk;
 		$klarna_checkout_url 		= $this->klarna_checkout_url_uk;
-		if ($this->klarna_checkout_thanks_url_uk == '' ) {
+		if ( $this->klarna_checkout_thanks_url_uk == '' ) {
 			$klarna_checkout_thanks_url 	= $this->klarna_checkout_url_uk;
 		} else {
 			$klarna_checkout_thanks_url 	= $this->klarna_checkout_thanks_url_uk;

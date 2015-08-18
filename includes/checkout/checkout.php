@@ -13,6 +13,14 @@ if ( ! defined( 'ABSPATH' ) )
 if ( ! $this->show_kco() )
 	return;
 
+// Check if selected Klarna country is in WooCommerce allowed countries
+if ( ! array_key_exists( strtoupper( $this->get_klarna_country() ), WC()->countries->get_allowed_countries() ) ) {
+	global $woocommerce;
+	$checkout_url = $woocommerce->cart->get_checkout_url();
+	wp_safe_redirect( $checkout_url );
+	exit;
+}
+
 // Process order via Klarna Checkout page
 if ( ! defined( 'WOOCOMMERCE_CHECKOUT' ) )
 	define( 'WOOCOMMERCE_CHECKOUT', true );

@@ -746,6 +746,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			if ( in_array( 'AT', $this->authorized_countries )  ) {
 				$klarna_checkout_countries['AT'] = __( 'Austria', 'klarna' );
 			}
+
 			/*
 			$klarna_checkout_countries = array(
 				'FI' => __( 'Finland', 'klarna' ),
@@ -753,6 +754,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 				'AT' => __( 'Austria', 'klarna' )
 			);
 			*/
+		
 			$klarna_checkout_enabled_countries = array();
 			foreach( $klarna_checkout_countries as $klarna_checkout_country_code => $klarna_checkout_country ) {
 				$lowercase_country_code = strtolower( $klarna_checkout_country_code );
@@ -2520,7 +2522,8 @@ class WC_Gateway_Klarna_Checkout_Extra {
 			$modify_standard_checkout_url == 'yes' && 
 			$enabled == 'yes' && 
 			! empty( $klarna_checkout_url ) && 
-			in_array( strtoupper( $klarna_country ), $available_countries ) 
+			in_array( strtoupper( $klarna_country ), $available_countries ) &&
+			array_key_exists( strtoupper( $klarna_country ), WC()->countries->get_allowed_countries() )
 		) {
 			$url = $klarna_checkout_url;
 		}
