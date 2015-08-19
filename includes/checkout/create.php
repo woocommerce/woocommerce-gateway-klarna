@@ -55,7 +55,7 @@ $merchant_checkout_uri = esc_url_raw( add_query_arg(
 ) );
 $merchant_confirmation_uri = add_query_arg ( 
 	array(
-		'klarna_order' => '{checkout.order.id}', 
+		'klarna_order' => '{checkout.order.uri}', 
 		'sid' => $local_order_id, 
 		'order-received' => $local_order_id,
 		'thankyou' => 'yes'
