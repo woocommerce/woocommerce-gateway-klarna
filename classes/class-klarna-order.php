@@ -310,6 +310,11 @@ class WC_Gateway_Klarna_Order {
 			$houseExt = utf8_decode( $klarna_billing_house_extension ) // Only required for NL.
 		);
 		
+		// Add Company if one is set
+		if($order->billing_company) {
+			$addr_billing->setCompanyName(utf8_decode($order->billing_company));
+		}
+		
 		// Shipping address
 		if ( $order->get_shipping_method() == '' || $ship_to_billing_address == 'yes' ) {
 			// Use billing address if Shipping is disabled in Woocommerce
@@ -327,6 +332,12 @@ class WC_Gateway_Klarna_Order {
 				$houseNo   = utf8_decode( $klarna_billing_house_number ), // For DE and NL we need to specify houseNo.
 				$houseExt  = utf8_decode( $klarna_billing_house_extension ) // Only required for NL.
 			);
+			
+			// Add Company if one is set
+			if($order->billing_company) {
+				$addr_shipping->setCompanyName(utf8_decode($order->billing_company));
+			}
+			
 		} else {
 			$addr_shipping = new KlarnaAddr(
 				$email     = $order->billing_email,
@@ -342,6 +353,11 @@ class WC_Gateway_Klarna_Order {
 				$houseNo   = utf8_decode( $klarna_shipping_house_number ), // For DE and NL we need to specify houseNo.
 				$houseExt  = utf8_decode( $klarna_shipping_house_extension ) // Only required for NL.
 			);
+			
+			// Add Company if one is set
+			if($order->shipping_company) {
+				$addr_shipping->setCompanyName(utf8_decode($order->shipping_company));
+			}
 		}
 
 		// Next we tell the Klarna instance to use the address in the next order.
