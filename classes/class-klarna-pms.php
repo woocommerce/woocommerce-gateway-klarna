@@ -209,7 +209,7 @@ class WC_Klarna_PMS {
 		if ( ! empty( $payment_options ) ) {
 			$payment_methods_output = '<p class="form-row">';
 				$payment_methods_output .= '<label for="' . $select_id . '">' . __( 'Payment plan', 'klarna') . ' <span class="required">*</span></label>';
-				$payment_methods_output .= '<select id="' . $select_id . '" name="' . $select_id . '" class="woocommerce-select klarna_pms_select" style="font-size:30px;max-width:100%;width:100% !important;">';
+				$payment_methods_output .= '<select id="' . $select_id . '" name="' . $select_id . '" class="woocommerce-select klarna_pms_select" style="max-width:100%;width:100% !important;">';
 
 					$payment_methods_output .= implode( '', $payment_options );
 

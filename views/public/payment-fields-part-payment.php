@@ -125,7 +125,7 @@ if ( 'NO' == $this->klarna_helper->get_klarna_country() ) { ?>
 					<?php echo __("Payment plan", 'klarna') ?> <span class="required">*</span>
 				</label>
 
-				<select id="<?php echo $klarna_select_pclass_element; ?>" name="<?php echo $klarna_select_pclass_element; ?>" class="woocommerce-select" style="font-size:30px;max-width:100%;width:100% !important;">
+				<select id="<?php echo $klarna_select_pclass_element; ?>" name="<?php echo $klarna_select_pclass_element; ?>" class="woocommerce-select" style="max-width:100%;width:100% !important;">
 
 				<?php foreach ( $pclasses as $pclass ) { // Loop through the available PClasses stored in the file srv/pclasses.json
 
