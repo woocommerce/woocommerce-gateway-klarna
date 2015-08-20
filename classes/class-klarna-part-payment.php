@@ -492,12 +492,12 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 
 		if ( ! $this->check_enabled() ) return false;
 		if ( ! $this->check_required_fields() ) return false;
-		if ( ! $this->check_pclasses() ) return false;
+		if ( ! $this->check_customer_country() ) return false;
+		if ( ! $this->check_customer_currency() ) return false;
 		if ( ! $this->check_cart_total() ) return false;
 		if ( ! $this->check_lower_threshold() ) return false;
 		if ( ! $this->check_upper_threshold() ) return false;
-		if ( ! $this->check_customer_country() ) return false;
-		if ( ! $this->check_customer_currency() ) return false;
+		if ( ! $this->check_pclasses() ) return false;
 
 		return true;
 
