@@ -150,7 +150,7 @@ class WC_Klarna_PMS {
 				$payment_options_details_output = '<div class="klarna-pms-details ' . $extra_class . '" data-pclass="' . $payment_method['pclass_id'] . '" ' . $inline_style . '>';
 
 					if ( isset( $payment_method['logo']['uri'] ) && '' != $payment_method['logo']['uri'] ) {
-						$payment_options_details_output .= '<div class="klarna-pms-logo"><img src="' . $payment_method['logo']['uri'] . '?width=100" /></div>';
+						$payment_options_details_output .= '<img class="klarna-pms-logo" style="display:none" src="' . $payment_method['logo']['uri'] . '?width=100" />';
 					}
 
 					$payment_options_details_output .= '<div>';
