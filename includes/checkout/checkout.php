@@ -125,7 +125,11 @@ if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 	}
 
 	// Store location of checkout session
-	$sessionId = $klarna_order->getLocation();
+	if ( $this->is_rest() ) {
+		$sessionId = $klarna_order['order_id'];
+	} else {
+		$klarna_order->getLocation();
+	}
 	if ( null === WC()->session->get( 'klarna_checkout' ) ) {
 		WC()->session->set( 'klarna_checkout', $sessionId );
 	}
@@ -139,7 +143,6 @@ if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 	}
 	echo '<div>' . apply_filters( 'klarna_kco_checkout', $snippet ) . '</div>';
 	do_action( 'klarna_after_kco_checkout' );
-
 } else {
 	// If cart is empty, clear these variables
 	WC()->session->__unset( 'klarna_checkout' ); // Klarna order ID

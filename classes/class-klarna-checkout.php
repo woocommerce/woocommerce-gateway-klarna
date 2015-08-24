@@ -578,22 +578,6 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 
 					<?php woocommerce_checkout_coupon_form(); ?>
 
-					<?php /*
-					<?php if ( WC()->cart->coupons_enabled() ) { ?>
-					<div id="klarna-checkout-coupons">
-						<form class="klarna_checkout_coupon" method="post">
-							<p class="form-row form-row-first">
-								<input type="text" name="coupon_code" class="input-text" placeholder="Coupon Code" id="coupon_code" value="" />
-							</p>
-							<p class="form-row form-row-last" style="text-align:right">
-								<input type="submit" class="button" name="apply_coupon" value="<?php _e( 'Apply Coupon', 'klarna' ); ?>" />
-							</p>
-							<div class="clear"></div>
-						</form>
-					</div>
-					<?php } ?>
-					*/ ?>
-
 					<div>
 					<table id="klarna-checkout-cart">
 						<tbody>
@@ -627,7 +611,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 									echo '</td>';
 									if ( ! in_array( 'price', $hide_columns ) ) {
 									echo '<td class="product-price kco-centeralign"><span class="amount">';
-										echo apply_filters( 'woocommerce_cart_item_price', $woocommerce->cart->get_product_price( $_product ), $cart_item, $cart_item_key );
+										echo $woocommerce->cart->get_product_price( $_product );
 									echo '</span></td>';
 									}
 									echo '<td class="product-quantity kco-centeralign" data-cart_item_key="' . $cart_item_key .'">';
@@ -1277,8 +1261,12 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 					$update['cart']['items'][] = $item;
 				}			
 			}
-			
-			$klarna_order->update( apply_filters( 'kco_update_order', $update ) );
+
+			try {
+				$klarna_order->update( apply_filters( 'kco_update_order', $update ) );
+			} catch ( Exception $e ) {
+				$this->log->add( 'klarna', 'KCO ERROR: ' . var_export( $e ) );
+			}
 		}
 	}
 

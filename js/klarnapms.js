@@ -10,13 +10,11 @@
 	});
 
 	$( document ).on( 'updated_checkout', function() {
-		// $('.visible-pms .klarna-pms-logo img').insertAfter('ul.payment_methods li').show();
 		$('.visible-pms img.klarna-pms-logo').each( function( index ) {
 			li_el = $(this).closest('ul.payment_methods > li');
 			label = $(li_el).children('label');
 			$(this).insertAfter(label);
 			$(this).show();
-			// console.log( $(li_el).text() );
 		});
 	});
 

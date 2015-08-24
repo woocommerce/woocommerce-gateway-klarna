@@ -29,6 +29,7 @@ class WC_Gateway_Klarna_Shortcodes {
 
 	/**
 	 * Klarna Checkout widget shortcode callback.
+	 * NOT USED ATM
 	 * 
 	 * Parameters:
 	 * col            - whether to show it as left or right column in two column layout, options: 'left' and 'right'
