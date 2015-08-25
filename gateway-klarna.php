@@ -22,7 +22,6 @@
 
 
 
-
 	// Round Aelia prices
 	// add_filter( 'wc_aelia_cs_converted_amount', 'my_custom_rounding', 1, 5 );
 	function my_custom_rounding( $converted_amount, $original_amount, $from_currency, $to_currency, $decimals ) {
@@ -170,7 +169,7 @@ function init_klarna_gateway() {
 	
 	// Include our Klarna classes
 	require_once 'classes/class-klarna-part-payment.php'; // KPM Part Payment
-	require_once 'classes/class-klarna-invoice.php'; // KPM Part Payment
+	require_once 'classes/class-klarna-invoice.php'; // KPM Invoice
 	require_once 'classes/class-klarna-payment-method-widget.php'; // Partpayment widget
 	require_once 'classes/class-klarna-get-address.php'; // Get address 
 	require_once 'classes/class-klarna-pms.php'; // PMS

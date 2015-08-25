@@ -100,13 +100,13 @@ try {
 				array(
 					'sid'          => $local_order_id, 
 					'scountry'     => $this->klarna_country, 
-					'klarna_order' => '{checkout.order.id}', 
+					'klarna_order' => '{checkout.order.uri}', 
 				),
 				$push_uri_base 
 			);
 			$merchant_confirmation_uri = add_query_arg ( 
 				array(
-					'klarna_order'   => '{checkout.order.id}', 
+					'klarna_order'   => '{checkout.order.uri}', 
 					'sid'            => $local_order_id, 
 					'order-received' => $local_order_id,
 					'thankyou'       => 'yes'

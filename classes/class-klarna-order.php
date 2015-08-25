@@ -22,9 +22,24 @@ class WC_Gateway_Klarna_Order {
 	 * @param  $order  WooCoommerce order object
 	 * @param  $klarna Klarna object in V2, not needed for Rest
 	 */
-	public function __construct( $order, $klarna = false ) {
+	public function __construct( $order = false, $klarna = false ) {
 		$this->order = $order;
 		$this->klarna = $klarna;
+
+		// Cancel order
+		add_action( 'woocommerce_order_status_cancelled', array( $this, 'cancel_klarna_order' ) );
+
+		// Capture an order
+		add_action( 'woocommerce_order_status_completed', array( $this, 'activate_klarna_order' ) );
+
+		// Add order item
+		add_action( 'woocommerce_ajax_add_order_item_meta', array( $this, 'update_klarna_order_add_item' ), 10, 3 );
+
+		// Remove order item
+		add_action( 'woocommerce_before_delete_order_item', array( $this, 'update_klarna_order_delete_item' ) );
+
+		// Edit an order item and save
+		add_action( 'woocommerce_saved_order_items', array( $this, 'update_klarna_order_edit_item' ), 10, 2 );
 	}
 
 
@@ -34,10 +49,10 @@ class WC_Gateway_Klarna_Order {
 	 * @since  2.0
 	 **/
 	function prepare_order( $klarna_billing, $klarna_shipping, $ship_to_billing_address ) {
-		$this->process_order_items( $this->order, $this->klarna );
-		$this->process_discount( $this->order, $this->klarna );
-		$this->process_fees( $this->order, $this->klarna );
-		$this->process_shipping( $this->order, $this->klarna );
+		$this->process_order_items();
+		$this->process_discount();
+		$this->process_fees();
+		$this->process_shipping();
 		$this->set_addresses(
 			$klarna_billing,
 			$klarna_shipping,
@@ -52,7 +67,7 @@ class WC_Gateway_Klarna_Order {
 	 * @since  2.0
 	 **/
 	function add_addresses() {
-		$order = $this->order;
+		$order  = $this->order;
 		$klarna = $this->klarna;
 
 		$billing_addr = new KlarnaAddr(
@@ -90,7 +105,7 @@ class WC_Gateway_Klarna_Order {
 
 		$klarna->setEstoreInfo(
 		    $orderid1 = ltrim( $order->get_order_number(), '#' ),
-		    $orderid2 = $order_id
+		    $orderid2 = $order->id
 		);
 	}
 
@@ -499,42 +514,186 @@ class WC_Gateway_Klarna_Order {
 
 
 	/**
+	 * Set up Klarna configuration.
+	 * 
+	 * @since  2.0
+	 **/
+	function configure_klarna( $klarna, $country, $payment_method ) {
+		if ( 'klarna_invoice' == $payment_method ) {
+			$klarna_settings = get_option( 'woocommerce_klarna_invoice_settings' );
+		} elseif ( 'klarna_part_payment' == $payment_method ) {
+			$klarna_settings = get_option( 'woocommerce_klarna_part_payment_settings' );
+		} elseif ( 'klarna_checkout' == $payment_method ) {
+			$klarna_settings = get_option( 'woocommerce_klarna_checkout_settings' );
+		}
+
+		// Country and language
+		switch ( $country ) {
+			case 'NO' :
+			case 'NB' :
+				$klarna_country  = 'NO';
+				$klarna_language = 'nb-no';
+				$klarna_currency = 'NOK';
+				$klarna_eid      = $klarna_settings['eid_no'];
+				$klarna_secret   = $klarna_settings['secret_no'];
+				break;
+			case 'FI' :
+				$klarna_country = 'FI';
+				// Check if WPML is used and determine if Finnish or Swedish is used as language
+				if ( class_exists( 'woocommerce_wpml' ) && defined('ICL_LANGUAGE_CODE') && strtoupper(ICL_LANGUAGE_CODE) == 'SV') {
+					$klarna_language = 'sv-fi'; // Swedish
+				} else {
+					$klarna_language = 'fi-fi'; // Finnish
+				}				
+				$klarna_currency = 'EUR';
+				$klarna_eid      = $klarna_settings['eid_fi'];
+				$klarna_secret   = $klarna_settings['secret_fi'];
+				break;
+			case 'SE' :
+			case 'SV' :
+				$klarna_country  = 'SE';
+				$klarna_language = 'sv-se';
+				$klarna_currency = 'SEK';
+				$klarna_eid      = $klarna_settings['eid_se'];
+				$klarna_secret   = $klarna_settings['secret_se'];
+				break;
+			case 'DE' :
+				$klarna_country  = 'DE';
+				$klarna_language = 'de-de';
+				$klarna_currency = 'EUR';
+				$klarna_eid      = $klarna_settings['eid_de'];
+				$klarna_secret   = $klarna_settings['secret_de'];
+				break;
+			case 'AT' :
+				$klarna_country  = 'AT';
+				$klarna_language = 'de-at';
+				$klarna_currency = 'EUR';
+				$klarna_eid      = $klarna_settings['eid_at'];
+				$klarna_secret   = $klarna_settings['secret_at'];
+				break;
+			case 'GB' :
+				$klarna_country  = 'gb';
+				$klarna_language = 'en-gb';
+				$klarna_currency = 'gbp';
+				$klarna_eid      = $klarna_settings['eid_uk'];
+				$klarna_secret   = $klarna_settings['secret_uk'];
+				break;
+			default:
+				$klarna_country  = '';
+				$klarna_language = '';
+				$klarna_currency = '';
+				$klarna_eid      = '';
+				$klarna_secret   = '';
+		}
+
+		// Test mode or Live mode		
+		if ( $klarna_settings['testmode'] == 'yes' ) {
+			// Disable SSL if in testmode
+			$klarna_ssl = 'false';
+			$klarna_mode = Klarna::BETA;
+		} else {
+			// Set SSL if used in webshop
+			if ( is_ssl() ) {
+				$klarna_ssl = 'true';
+			} else {
+				$klarna_ssl = 'false';
+			}
+			$klarna_mode = Klarna::LIVE;
+		}
+
+		$klarna->config(
+			$eid       = $klarna_eid,
+			$secret    = $klarna_secret,
+			$country   = $country,
+			$language  = $klarna_language,
+			$currency  = $klarna_currency,
+			$mode      = $klarna_mode,
+			$pcStorage = 'json',
+			$pcURI     = '/srv/pclasses.json',
+			$ssl       = $klarna_ssl,
+			$candice   = false
+		);
+	}
+
+
+	/**
+	 * Order activation wrapper function
+	 * 
+	 * @since  2.0
+	 **/
+	function activate_klarna_order( $orderid ) {
+		$order = wc_get_order( $orderid );
+
+		// Check if this order hasn't been activated already
+		if ( ! get_post_meta( $orderid, '_klarna_invoice_number', true ) ) {
+			// Activation for orders created with KCO Rest
+			if ( 'rest' == get_post_meta( $order->id, '_klarna_api', true ) ) {
+				$this->activate_order_rest( $orderid );		
+			// Activation for KCO V2 and KPM orders		
+			} else {
+				$this->activate_order( $orderid );
+			}
+		}
+	}
+
+
+	/**
 	 * Activates a Klarna order for V2 API
 	 * 
 	 * @since  2.0
 	 **/
-	function activate_order( $rno ) {
-		$order = $this->order;
-		$klarna = $this->klarna;
-		$orderid = $order->id;
+	function activate_order( $orderid ) {
+		$order = wc_get_order( $orderid );
 
-		try {
-			$result = $klarna->activate(
-				$rno,
-				null, // OCR Number
-				KlarnaFlags::RSRV_SEND_BY_EMAIL
-			);
-			$risk  = $result[0]; // "ok" or "no_risk"
-			$invNo = $result[1]; // "9876451"
+		if ( get_post_meta( $orderid, '_klarna_order_reservation', true ) && get_post_meta( $orderid, '_billing_country', true ) ) {
+			// Check if this is a subscription order
+			if ( class_exists( 'WC_Subscriptions_Renewal_Order' ) && WC_Subscriptions_Renewal_Order::is_renewal( $order ) ) {
+				if ( ! get_post_meta( $orderid, '_klarna_order_reservation_recurring', true ) ) {
+					return;
+				}
+			}
 
-			$order->add_order_note(
-				sprintf(
-					__( 'Klarna order activated. Invoice number %s - risk status %s.', 'klarna' ),
-					$invNo,
-					$risk
-				)
-			);
-			update_post_meta( $orderid, '_klarna_order_activated', time() );
-			update_post_meta( $orderid, '_klarna_invoice_number', $invNo );
-			update_post_meta( $orderid, '_transaction_id', $invNo );
-		} catch( Exception $e ) {
-			$order->add_order_note(
-				sprintf(
-					__( 'Klarna order activation failed. Error code %s. Error message %s', 'klarna' ),
-					$e->getCode(),
-					utf8_encode( $e->getMessage() )
-				)					
-			);
+			$rno            = get_post_meta( $orderid, '_klarna_order_reservation', true );
+			$country        = get_post_meta( $orderid, '_billing_country', true );
+			$payment_method = get_post_meta( $orderid, '_payment_method', true );
+
+			// Klarna settings
+			require_once( KLARNA_LIB . 'Klarna.php' );			
+			if ( ! function_exists( 'xmlrpc_encode_entitites' ) && ! class_exists( 'xmlrpcresp' ) ) {
+				require_once( KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc.inc' );
+				require_once( KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc_wrappers.inc' );
+			}
+			$klarna = new Klarna();
+			$this->configure_klarna( $klarna, $country, $payment_method );
+
+			try {
+				$result = $klarna->activate(
+					$rno,
+					null, // OCR Number
+					KlarnaFlags::RSRV_SEND_BY_EMAIL
+				);
+				$risk  = $result[0]; // returns 'ok' or 'no_risk'
+				$invNo = $result[1]; // returns invoice number
+
+				$order->add_order_note(
+					sprintf(
+						__( 'Klarna order activated. Invoice number %s - risk status %s.', 'klarna' ),
+						$invNo,
+						$risk
+					)
+				);
+				update_post_meta( $orderid, '_klarna_order_activated', time() );
+				update_post_meta( $orderid, '_klarna_invoice_number', $invNo );
+				update_post_meta( $orderid, '_transaction_id', $invNo );
+			} catch( Exception $e ) {
+				$order->add_order_note(
+					sprintf(
+						__( 'Klarna order activation failed. Error code %s. Error message %s', 'klarna' ),
+						$e->getCode(),
+						utf8_encode( $e->getMessage() )
+					)					
+				);
+			}
 		}
 	}
 
@@ -544,9 +703,30 @@ class WC_Gateway_Klarna_Order {
 	 * 
 	 * @since  2.0
 	 **/
-	function activate_order_rest( $k_order ) {
-		$order = $this->order;
-		$orderid = $order->id;
+	function activate_order_rest( $orderid ) {
+		$order           = wc_get_order( $orderid );
+		$klarna_settings = get_option( 'woocommerce_klarna_checkout_settings' );
+
+		/**
+		 * Need to send local order to constructor and Klarna order to method
+		 */
+		require_once( KLARNA_LIB . 'vendor/autoload.php' );
+		if ( $klarna_settings['testmode'] == 'yes' ) {
+			$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_TEST_BASE_URL;
+		} else {
+			$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_BASE_URL;
+		}
+		$connector = Klarna\Rest\Transport\Connector::create(
+			$klarna_settings['eid_uk'],
+			$klarna_settings['secret_uk'],
+			$klarna_server_url
+		);
+		$klarna_order_id = get_post_meta( $orderid, '_klarna_order_id', true );
+		$k_order = new Klarna\Rest\OrderManagement\Order(
+			$connector,
+			$klarna_order_id
+		);
+		$k_order->fetch();
 
 		// Capture full order amount on WooCommerce order completion
 		$data = array(
@@ -575,29 +755,64 @@ class WC_Gateway_Klarna_Order {
 
 
 	/**
+	 * Order cancellation wrapper function
+	 * 
+	 * @since  2.0
+	 **/
+	function cancel_klarna_order( $orderid ) {
+		$order = wc_get_order( $orderid );
+
+		// Check if this order hasn't been activated already
+		if ( ! get_post_meta( $orderid, '_klarna_order_cancelled', true ) ) {
+			// Activation for orders created with KCO Rest
+			if ( 'rest' == get_post_meta( $order->id, '_klarna_api', true ) ) {
+				$this->cancel_order_rest( $orderid );		
+			// Activation for KCO V2 and KPM orders		
+			} else {
+				$this->cancel_order( $orderid );
+			}
+		}
+	}
+
+
+	/**
 	 * Cancels a Klarna order for V2 API
 	 * 
 	 * @since  2.0
 	 **/
-	function cancel_order( $rno ) {
-		$order = $this->order;
-		$klarna = $this->klarna;
-		$orderid = $order->id;
+	function cancel_order( $orderid ) {
+		$order = wc_get_order( $orderid );
 
-		try {
-		    $klarna->cancelReservation( $rno );
-			$order->add_order_note(
-				__( 'Klarna order cancellation completed.', 'klarna' )
-			);
-			add_post_meta( $orderid, '_klarna_order_cancelled', time() );
-		} catch( Exception $e ) {
-			$order->add_order_note(
-				sprintf(
-					__( 'Klarna order cancellation failed. Error code %s. Error message %s', 'klarna' ),
-					$e->getCode(),
-					utf8_encode( $e->getMessage() )
-				)					
-			);
+		// Klarna reservation number and billing country must be set
+		if ( get_post_meta( $orderid, '_klarna_order_reservation', true ) && get_post_meta( $orderid, '_billing_country', true ) ) {
+			$rno            = get_post_meta( $orderid, '_klarna_order_reservation', true );
+			$country        = get_post_meta( $orderid, '_billing_country', true );
+			$payment_method = get_post_meta( $orderid, '_payment_method', true );
+
+			// Klarna settings
+			require_once( KLARNA_LIB . 'Klarna.php' );			
+			if ( ! function_exists( 'xmlrpc_encode_entitites' ) && ! class_exists( 'xmlrpcresp' ) ) {
+				require_once( KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc.inc' );
+				require_once( KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc_wrappers.inc' );
+			}
+			$klarna = new Klarna();
+			$this->configure_klarna( $klarna, $country, $payment_method );
+
+			try {
+				$klarna->cancelReservation( $rno );
+				$order->add_order_note(
+					__( 'Klarna order cancellation completed.', 'klarna' )
+				);
+				add_post_meta( $orderid, '_klarna_order_cancelled', time() );
+			} catch( Exception $e ) {
+				$order->add_order_note(
+					sprintf(
+						__( 'Klarna order cancellation failed. Error code %s. Error message %s', 'klarna' ),
+						$e->getCode(),
+						utf8_encode( $e->getMessage() )
+					)					
+				);
+			}
 		}
 	}
 
@@ -606,9 +821,30 @@ class WC_Gateway_Klarna_Order {
 	 * 
 	 * @since  2.0
 	 **/
-	function cancel_order_rest( $k_order ) {
-		$order = $this->order;
-		$orderid = $order->id;
+	function cancel_order_rest( $orderid ) {
+		$order           = wc_get_order( $orderid );
+		$klarna_settings = get_option( 'woocommerce_klarna_checkout_settings' );
+
+		/**
+		 * Need to send local order to constructor and Klarna order to method
+		 */
+		require_once( KLARNA_LIB . 'vendor/autoload.php' );
+		if ( $klarna_settings['testmode'] == 'yes' ) {
+			$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_TEST_BASE_URL;
+		} else {
+			$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_BASE_URL;
+		}
+		$connector = Klarna\Rest\Transport\Connector::create(
+			$klarna_settings['eid_uk'],
+			$klarna_settings['secret_uk'],
+			$klarna_server_url
+		);
+		$klarna_order_id = get_post_meta( $orderid, '_klarna_order_id', true );
+		$k_order = new Klarna\Rest\OrderManagement\Order(
+			$connector,
+			$klarna_order_id
+		);
+		$k_order->fetch();
 
 		try {
 			$k_order->cancel();
@@ -628,15 +864,120 @@ class WC_Gateway_Klarna_Order {
 
 	}
 
+
+	/**
+	 * Order update wrapper function
+	 * 
+	 * @since  2.0
+	 **/
+	function update_klarna_order_add_item( $itemid, $item ) {
+		// Get item row from the database table, needed for order id
+		global $wpdb;
+		$item_row = $wpdb->get_row( $wpdb->prepare( "
+			SELECT      order_id
+			FROM        {$wpdb->prefix}woocommerce_order_items
+			WHERE       order_item_id = %d
+		", $itemid ) );
+
+		$orderid = $item_row->order_id;
+		$order = wc_get_order( $orderid );
+
+		// Check if auto update is enabled and order is on hold so it can be edited, 
+		// and if it hasn't been captured or cancelled
+		if ( 'on-hold' == $order->get_status() && ! get_post_meta( $orderid, '_klarna_order_cancelled', true ) && ! get_post_meta( $orderid, '_klarna_order_activated', true ) ) {
+			if ( 'rest' == get_post_meta( $order->id, '_klarna_api', true ) ) {
+				$this->update_order_rest( $orderid );		
+			// Activation for KCO V2 and KPM orders		
+			} else {
+				$this->update_order( $orderid );
+			}
+		}
+	}
+
+
+	/**
+	 * Update order in Klarna system, add new item
+	 * 
+	 * @since  2.0.0
+	 */
+	function update_klarna_order_delete_item( $itemid ) {
+		// Get item row from the database table, needed for order id
+		global $wpdb;
+		$item_row = $wpdb->get_row( $wpdb->prepare( "
+			SELECT      order_id
+			FROM        {$wpdb->prefix}woocommerce_order_items
+			WHERE       order_item_id = %d
+		", $itemid ) );
+
+		$orderid = $item_row->order_id;
+		$order = wc_get_order( $orderid );
+
+		// Check if auto update is enabled and order is on hold so it can be edited, 
+		// and if it hasn't been captured or cancelled
+		if ( 'on-hold' == $order->get_status() && ! get_post_meta( $orderid, '_klarna_order_cancelled', true ) && ! get_post_meta( $orderid, '_klarna_order_activated', true ) ) {
+			if ( 'rest' == get_post_meta( $order->id, '_klarna_api', true ) ) {
+				$this->update_order_rest( $orderid, $itemid );		
+			// Activation for KCO V2 and KPM orders		
+			} else {
+				$this->update_order( $orderid, $itemid );
+			}
+		}
+	}
+
+
+	/**
+	 * Update order in Klarna system, add new item
+	 * 
+	 * @since  2.0.0
+	 */
+	function update_klarna_order_edit_item( $orderid, $items ) {
+		$order = wc_get_order( $orderid );
+
+		// Check if auto update is enabled and order is on hold so it can be edited, 
+		// and if it hasn't been captured or cancelled
+		if ( 'on-hold' == $order->get_status() && ! get_post_meta( $orderid, '_klarna_order_cancelled', true ) && ! get_post_meta( $orderid, '_klarna_order_activated', true ) ) {
+			if ( defined( 'DOING_AJAX' ) && DOING_AJAX ) {
+				// Check if order was created using this method
+				if ( 'on-hold' == $order->get_status() ) {
+					if ( 'rest' == get_post_meta( $order->id, '_klarna_api', true ) ) {
+						$this->update_order_rest( $orderid );		
+					// Activation for KCO V2 and KPM orders		
+					} else {
+						$this->update_order( $orderid );
+					}
+				}
+			}
+		}
+	}
+
+
 	/**
 	 * Updates a Klarna order
 	 * 
 	 * @since  2.0
 	 **/
-	function update_order( $rno ) {
-		$order = $this->order;
-		$klarna = $this->klarna;
-		$orderid = $order->id;
+	function update_order( $orderid, $itemid = false ) {
+		$order = wc_get_order( $orderid );
+		$this->order = $order;
+
+		$rno            = get_post_meta( $orderid, '_klarna_order_reservation', true );
+		$country        = get_post_meta( $orderid, '_billing_country', true );
+		$payment_method = get_post_meta( $orderid, '_payment_method', true );
+
+		require_once( KLARNA_LIB . 'Klarna.php' );			
+		if ( ! function_exists( 'xmlrpc_encode_entitites' ) && ! class_exists( 'xmlrpcresp' ) ) {
+			require_once( KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc.inc' );
+			require_once( KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc_wrappers.inc' );
+		}
+		$klarna = new Klarna();
+		$this->configure_klarna( $klarna, $country, $payment_method );
+		$this->klarna = $klarna;
+
+		$this->add_addresses();
+		$this->process_order_items( $itemid );
+		$this->process_fees();
+		$this->process_shipping();
+		$this->process_discount();
 
 		try {
 			$result = $klarna->update( $rno );
@@ -663,9 +1004,9 @@ class WC_Gateway_Klarna_Order {
 	 * 
 	 * @since  2.0
 	 **/
-	function update_order_rest( $k_order, $itemid = false ) {
-		$order = $this->order;
-		$orderid = $order->id;
+	function update_order_rest( $orderid, $itemid = false ) {
+		$order           = wc_get_order( $orderid );
+		$klarna_settings = get_option( 'woocommerce_klarna_checkout_settings' );
 
 		$updated_order_lines = array();
 		$updated_order_total = 0;
@@ -710,11 +1051,12 @@ class WC_Gateway_Klarna_Order {
 				);
 
 				$updated_order_lines[] = $klarna_item;
-				$updated_order_total += $item_total_amount;
-				$updated_tax_total += $item_tax_amount;			
+				$updated_order_total = $updated_order_total + $item_total_amount;
+				$updated_tax_total = $updated_tax_total + $item_tax_amount;			
 			}
 		}
 
+/*
 		// Process shipping
 		if ( $order->get_total_shipping() > 0 ) {
 			$shipping = array(  
@@ -763,6 +1105,28 @@ class WC_Gateway_Klarna_Order {
 				}
 			}
 		}
+*/
+
+		/**
+		 * Need to send local order to constructor and Klarna order to method
+		 */
+		require_once( KLARNA_LIB . 'vendor/autoload.php' );
+		if ( $klarna_settings['testmode'] == 'yes' ) {
+			$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_TEST_BASE_URL;
+		} else {
+			$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_BASE_URL;
+		}
+		$connector = Klarna\Rest\Transport\Connector::create(
+			$klarna_settings['eid_uk'],
+			$klarna_settings['secret_uk'],
+			$klarna_server_url
+		);
+		$klarna_order_id = get_post_meta( $orderid, '_klarna_order_id', true );
+		$k_order = new Klarna\Rest\OrderManagement\Order(
+			$connector,
+			$klarna_order_id
+		);
+		$k_order->fetch();
 
 		try {
 			$k_order->updateAuthorization( array(
@@ -788,3 +1152,4 @@ class WC_Gateway_Klarna_Order {
 	}
 
 }
+$wc_gateway_klarna_order = new WC_Gateway_Klarna_Order;

@@ -314,6 +314,9 @@ jQuery(document).ready(function($) {
 					nonce  : kcoAjax.klarna_checkout_nonce
 				},
 				success: function( response ) {
+					// console.log( 'success' );
+					// console.log( response.data );
+
 					if ( typeof window._klarnaCheckout == 'function') { 
 					window._klarnaCheckout(function (api) {
 						api.resume();
