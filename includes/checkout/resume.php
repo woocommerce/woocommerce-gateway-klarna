@@ -61,7 +61,7 @@ try {
 		$update['merchant']['id'] = $eid;
 
 		// Merchant URIs
-		$push_uri_base = get_site_url() . '/wc-api/WC_Gateway_Klarna_Checkout/';
+		$push_uri_base = get_home_url() . '/wc-api/WC_Gateway_Klarna_Checkout/';
 		// REST
 		if ( $this->is_rest() ) {
 			$merchant_terms_uri = $this->terms_url;
