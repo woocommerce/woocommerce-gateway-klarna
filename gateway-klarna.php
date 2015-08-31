@@ -21,25 +21,6 @@
  */
 
 
-
-	// Round Aelia prices
-	// add_filter( 'wc_aelia_cs_converted_amount', 'my_custom_rounding', 1, 5 );
-	function my_custom_rounding( $converted_amount, $original_amount, $from_currency, $to_currency, $decimals ) {
-		// var_dump( $decimals );
-		/* Sample roundings
-		*
-		* Round to closest 0.5
-		* $converted_amount = round($converted_amount * 2, 0) / 2;
-		*
-		* Round price so that it ends with .99
-		* $converted_amount = round($converted_amount, 0) - 0.01;
-		*
-		* Round price to nearest 5
-		* $converted_amount = round($converted_amount * 5, 0) / 5;
-		*/
-		$converted_amount = round($converted_amount * 2, 0) / 2;
-		return 10;
-	}
 /**
  * Required functions
  */
@@ -71,7 +52,14 @@ function init_klarna_gateway() {
 	define( 'KLARNA_DIR', dirname(__FILE__) . '/' );         // Root dir
 	define( 'KLARNA_LIB', dirname(__FILE__) . '/library/' ); // Klarna library dir
 	define( 'KLARNA_URL', plugin_dir_url( __FILE__ ) );      // Plugin folder URL
-	
+
+	// Set CURLOPT_SSL_VERIFYPEER via constant in library/src/Klarna/Checkout/HTTP/CURLTransport.php.
+	// No need to set it to true if the store doesn't use https. 
+	if( is_ssl() ) {
+		define( 'KLARNA_WC_SSL_VERIFYPEER', true );
+	} else {
+		define( 'KLARNA_WC_SSL_VERIFYPEER', false );
+	}	
 	
 	/**
 	 * WooCommerce Klarna Gateway class
