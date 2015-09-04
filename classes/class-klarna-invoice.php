@@ -397,7 +397,6 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 	 * @return $klarna_wb array
 	 */		
 	function get_klarna_wb() {
-		
 		$klarna_wb = array();
 
 		// Klarna warning banner - used for NL only
@@ -421,7 +420,6 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 			);
 
 		return $klarna_wb;
-
 	}
 
 
@@ -431,7 +429,6 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 	 * @since 1.0.0
 	 */		
 	function is_available() {
-		
 		if ( ! $this->check_enabled() ) return false;
 		if ( ! $this->check_required_fields() ) return false;
 		// if ( ! $this->check_pclasses() ) return false;
@@ -442,7 +439,6 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 		if ( ! $this->check_customer_currency() ) return false;
 
 		return true;
-
 	}
 
 
@@ -452,13 +448,11 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 	 * @since  2.0
 	 **/
 	function check_enabled() {
-
 		if ( 'yes' != $this->enabled ) {
 			return false; 
 		}
 
 		return true;
-
 	}	
 
 
@@ -468,14 +462,12 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 	 * @since  2.0
 	 **/
 	function check_required_fields() {
-
 		// Required fields check
 		if ( ! $this->klarna_helper->get_eid() || ! $this->klarna_helper->get_secret() ) {
 			return false;
 		}
 
 		return true;
-
 	}	
 
 
@@ -485,7 +477,6 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 	 * @since  2.0
 	 **/
 	function check_pclasses() {
-
 		$country = $this->klarna_helper->get_klarna_country();
 		$klarna = new Klarna();
 		$this->configure_klarna( $klarna, $country );
@@ -497,7 +488,6 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 		}
 
 		return true;
-
 	}	
 
 
@@ -507,7 +497,6 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 	 * @since  2.0
 	 **/
 	function check_cart_total() {
-
 		global $woocommerce;
 
 		if ( ! isset( $woocommerce->cart->total ) ) {
@@ -515,7 +504,6 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 		}
 
 		return true;
-
 	}	
 
 
@@ -525,18 +513,16 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 	 * @since  2.0
 	 **/
 	function check_lower_threshold() {
-
 		global $woocommerce;
 
 		// Cart totals check - Lower threshold
-		if ( $this->lower_threshold !== '' ) {
+		if ( $this->lower_threshold !== '' && $woocommerce->cart->total > 0 ) {
 			if ( $woocommerce->cart->total < $this->lower_threshold ) {
 				return false;
 			}
 		}
 
 		return true;
-
 	}	
 
 
@@ -546,18 +532,16 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 	 * @since  2.0
 	 **/
 	function check_upper_threshold() {
-
 		global $woocommerce;
 		
 		// Cart totals check - Upper threshold
-		if ( $this->upper_threshold !== '' ) {
+		if ( $this->upper_threshold !== '' && $woocommerce->cart->total > 0 ) {
 			if ( $woocommerce->cart->total > $this->upper_threshold ) {
 				return false;
 			} 
 		}
 
 		return true;
-
 	}	
 
 
@@ -567,7 +551,6 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 	 * @since  2.0
 	 **/
 	function check_customer_country() {
-
 		global $woocommerce;
 		
 		// Only activate the payment gateway if the customers country is the same as 
@@ -582,7 +565,6 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 		}
 
 		return true;
-
 	}	
 
 
@@ -592,7 +574,6 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 	 * @since  2.0
 	 **/
 	function check_customer_currency() {
-
 		global $woocommerce;
 		
 		// Currency check
@@ -603,7 +584,6 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 		}
 
 		return true;
-
 	}	
 
 
