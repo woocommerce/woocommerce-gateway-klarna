@@ -1050,11 +1050,17 @@ class WC_Gateway_Klarna_Invoice_Extra {
 	public function calculate_fees( $cart ) {
 		global $woocommerce;
 		$current_gateway = '';
-		
+
     	if ( is_checkout() || defined( 'WOOCOMMERCE_CHECKOUT' ) ) {
     		
     		$available_gateways = $woocommerce->payment_gateways->get_available_payment_gateways();
-			
+				
+			// Need to make this check so invoice fee is not added for KCO orders when Invoice
+			// is the default payment method in standard checkout page
+			if ( null !== $woocommerce->session->get( 'chosen_payment_method' ) && 'klarna_checkout' == $woocommerce->session->get( 'chosen_payment_method' ) ) {
+				return false;
+			} 
+
     		if ( ! empty( $available_gateways ) ) {
 				// Chosen Method
 				if ( $woocommerce->session->get( 'chosen_payment_method' ) && isset( $available_gateways[ $woocommerce->session->get( 'chosen_payment_method' ) ] ) ) {
@@ -1065,6 +1071,7 @@ class WC_Gateway_Klarna_Invoice_Extra {
             		$current_gateway = current( $available_gateways );
 				}
 			}
+
 			if ( is_object( $current_gateway ) ) {
 				if ( 'klarna_invoice' === $current_gateway->id ) {
 	        		$this->add_fee_to_cart( $cart );

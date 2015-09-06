@@ -1529,7 +1529,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 * @since 1.0.0
 	 */
 	function is_available() {
-		 return false;
+		return false;
 	}
 
 
