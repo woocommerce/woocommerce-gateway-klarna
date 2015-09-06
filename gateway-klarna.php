@@ -33,7 +33,36 @@ if ( ! function_exists( 'woothemes_queue_update' ) )
 woothemes_queue_update( plugin_basename( __FILE__ ), '4edd8b595d6d4b76f31b313ba4e4f3f6', '18624' );
 
 /**
- * Init Klarna Gateway after WooCommerce has loaded.
+ * Check if update is from 1.x to 2.x
+ * 
+ * Names for these two options for changed, for better naming standards, so option values
+ * need to be copied from old options.
+ */
+function klarna_2_update() {
+	// Invoice
+	if ( false == get_option( 'woocommerce_klarna_invoice_settings' ) ) {
+		if ( get_option( 'woocommerce_klarna_settings' ) ) {
+			add_option(
+				'woocommerce_klarna_invoice_settings',
+				get_option( 'woocommerce_klarna_settings' )
+			);
+		}
+	}
+
+	// Partpayment
+	if ( false == get_option( 'woocommerce_klarna_part_payment_settings' ) ) {
+		if ( get_option( 'woocommerce_klarna_account_settings' ) ) {
+			add_option(
+				'woocommerce_klarna_part_payment_settings',
+				get_option( 'woocommerce_klarna_account_settings' )
+			);
+		}
+	}
+}
+add_action( 'plugins_loaded', 'klarna_2_update' );
+
+
+/** Init Klarna Gateway after WooCommerce has loaded.
  * 
  * Hooks into 'plugins_loaded'.
  */
