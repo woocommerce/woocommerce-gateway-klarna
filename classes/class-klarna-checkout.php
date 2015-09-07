@@ -2058,7 +2058,7 @@ class WC_Gateway_Klarna_Checkout_Extra {
 	function klarna_add_link_to_kco_page() {
 		global $klarna_checkout_url;
 
-		$checkout_settings   = get_option( 'woocommerce_klarna_checkout_settings' );
+		$checkout_settings = get_option( 'woocommerce_klarna_checkout_settings' );
 
 		if ( 'yes' == $checkout_settings['enabled'] && 
 			'' != $checkout_settings['klarna_checkout_button_label'] && 

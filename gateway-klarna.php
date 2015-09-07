@@ -49,7 +49,7 @@ function klarna_2_update() {
 		}
 	}
 
-	// Partpayment
+	// Part Payment
 	if ( false == get_option( 'woocommerce_klarna_part_payment_settings' ) ) {
 		if ( get_option( 'woocommerce_klarna_account_settings' ) ) {
 			add_option(
@@ -60,6 +60,75 @@ function klarna_2_update() {
 	}
 }
 add_action( 'plugins_loaded', 'klarna_2_update' );
+
+
+/**
+ * Update all options for order completion, cancellation and refund.
+ * 
+ * These functions sync these three options across all three payment methods.
+ * For example, when you activate auto order completion for Klarna Invoice, it will
+ * be automatically activated for Part Payment and Checkout too.
+ */
+function pre_update_options_klarna_invoice( $new_value, $old_value ) {
+	$checkout_settings     = get_option( 'woocommerce_klarna_checkout_settings' );
+	$part_payment_settings = get_option( 'woocommerce_klarna_part_payment_settings' );
+
+	$part_payment_settings['push_completion']   = $new_value['push_completion'];
+	$part_payment_settings['push_cancellation'] = $new_value['push_cancellation'];
+	$part_payment_settings['push_update']       = $new_value['push_update'];
+	update_option( 'woocommerce_klarna_part_payment_settings', $part_payment_settings );
+
+	$checkout_settings['push_cancellation']     = $new_value['push_cancellation'];
+	$checkout_settings['push_completion']       = $new_value['push_completion'];
+	$checkout_settings['push_update']           = $new_value['push_update'];
+	update_option( 'woocommerce_klarna_checkout_settings', $checkout_settings );
+
+	return $new_value;
+}
+
+function pre_update_options_klarna_part_payment( $new_value, $old_value ) {
+	$invoice_settings  = get_option( 'woocommerce_klarna_invoice_settings' );
+	$checkout_settings = get_option( 'woocommerce_klarna_checkout_settings' );
+
+	$invoice_settings['push_completion']    = $new_value['push_completion'];
+	$invoice_settings['push_cancellation']  = $new_value['push_cancellation'];
+	$invoice_settings['push_update']        = $new_value['push_update'];
+	update_option( 'woocommerce_klarna_invoice_settings', $invoice_settings );
+
+	$checkout_settings['push_completion']   = $new_value['push_completion'];
+	$checkout_settings['push_cancellation'] = $new_value['push_cancellation'];
+	$checkout_settings['push_update']       = $new_value['push_update'];
+	update_option( 'woocommerce_klarna_checkout_settings', $checkout_settings );
+
+	return $new_value;
+}
+
+function pre_update_options_klarna_checkout( $new_value, $old_value ) {
+	$invoice_settings      = get_option( 'woocommerce_klarna_invoice_settings' );
+	$part_payment_settings = get_option( 'woocommerce_klarna_part_payment_settings' );
+
+	$invoice_settings['push_completion']        = $new_value['push_completion'];
+	$invoice_settings['push_cancellation']      = $new_value['push_cancellation'];
+	$invoice_settings['push_update']            = $new_value['push_update'];
+	update_option( 'woocommerce_klarna_invoice_settings', $invoice_settings );
+
+	$part_payment_settings['push_cancellation'] = $new_value['push_cancellation'];
+	$part_payment_settings['push_completion']   = $new_value['push_completion'];
+	$part_payment_settings['push_update']       = $new_value['push_update'];
+	update_option( 'woocommerce_klarna_part_payment_settings', $part_payment_settings );
+
+	return $new_value;
+}
+
+/**
+ * Register pre update option hooks for Klarna settings.
+ */
+function register_klarna_update_options_hook() {
+	// add_filter( 'pre_update_option_woocommerce_klarna_invoice_settings', 'pre_update_options_klarna_invoice', 10, 2 );
+	// add_filter( 'pre_update_option_woocommerce_klarna_part_payment_settings', 'pre_update_options_klarna_part_payment', 10, 2 );
+	// add_filter( 'pre_update_option_woocommerce_klarna_checkout_settings', 'pre_update_options_klarna_checkout', 10, 2 );
+}
+// add_action( 'init', 'register_klarna_update_options_hook' );
 
 
 /** Init Klarna Gateway after WooCommerce has loaded.

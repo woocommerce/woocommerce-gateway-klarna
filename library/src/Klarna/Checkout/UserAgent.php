@@ -52,7 +52,7 @@ class Klarna_Checkout_UserAgent
     {
         $this->_fields = array(
             'Library' => array(
-                'name' => 'Klarna.ApiWrapper',
+                'name' => 'Krokedil',
                 'version' => '3.0.0',
             ),
             'OS' => array(
