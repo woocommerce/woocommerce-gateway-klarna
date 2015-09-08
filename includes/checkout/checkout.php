@@ -89,9 +89,17 @@ if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 	if ( $this->is_rest() ) {
 		require_once( KLARNA_LIB . 'vendor/autoload.php' );
 		if ( $this->testmode == 'yes' ) {
-			$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_TEST_BASE_URL;
+			if ( 'gb' == $this->klarna_country ) {
+				$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_TEST_BASE_URL;
+			} elseif ( 'us' == $this->klarna_country ) {
+				$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::NA_TEST_BASE_URL;
+			}
 		} else {
-			$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_BASE_URL;
+			if ( 'gb' == $this->klarna_country ) {
+				$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_BASE_URL;
+			} elseif ( 'us' == $this->klarna_country ) {
+				$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::NA_BASE_URL;
+			}
 		}
 		$connector = Klarna\Rest\Transport\Connector::create(
 		    $eid,

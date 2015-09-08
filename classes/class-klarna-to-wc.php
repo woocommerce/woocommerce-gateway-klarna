@@ -317,13 +317,24 @@ class WC_Gateway_Klarna_K2WC {
 		}
 
 		if ( sanitize_key( $_GET['klarna-api'] ) && 'rest' == sanitize_key( $_GET['klarna-api'] ) ) {
+			$klarna_country = sanitize_key( $_GET['scountry'] );
+
 			require_once( KLARNA_LIB . 'vendor/autoload.php' );
-				if ( $this->klarna_test_mode == 'yes' ) {
+			if ( $this->klarna_test_mode == 'yes' ) {
+				if ( 'gb' == $klarna_country ) {
 					$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_TEST_BASE_URL;
-				} else {
-					$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_BASE_URL;
+				} elseif ( 'us' == $klarna_country ) {
+					$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::NA_TEST_BASE_URL;
 				}
-				$connector = \Klarna\Rest\Transport\Connector::create(
+			} else {
+				if ( 'gb' == $klarna_country ) {
+					$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_BASE_URL;
+				} elseif ( 'us' == $klarna_country ) {
+					$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::NA_BASE_URL;
+				}
+			}
+
+			$connector = \Klarna\Rest\Transport\Connector::create(
 				$this->eid,
 				$this->secret,
 				$klarna_server_url

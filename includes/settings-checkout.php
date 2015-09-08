@@ -279,6 +279,39 @@ return apply_filters( 'klarna_checkout_form_fields', array(
 		'desc_tip' => true
 	),
 
+	'us_settings_title' => array(
+		'title' => __( 'USA', 'klarna' ), 
+		'type' => 'title', 
+	),
+	'eid_us' => array(
+		'title' => __( 'Eid - USA', 'klarna' ), 
+		'type' => 'text', 
+		'description' => __( 'Please enter your Klarna Eid for USA. Leave blank to disable.', 'klarna' ), 
+		'default' => '',
+		'desc_tip' => true
+	),
+	'secret_us' => array(
+		'title' => __( 'Shared Secret - USA', 'klarna' ), 
+		'type' => 'text', 
+		'description' => __( 'Please enter your Klarna Shared Secret for USA.', 'klarna' ), 
+		'default' => '',
+		'desc_tip' => true
+	),
+	'klarna_checkout_url_us' => array(
+		'title' => __( 'Custom Checkout Page - USA', 'klarna' ), 
+		'type' => 'text', 
+		'description' => __( 'Please enter the URL to the page that acts as Checkout Page for Klarna Checkout USA. This page must contain the shortcode [woocommerce_klarna_checkout].', 'klarna' ), 
+		'default' => '',
+		'desc_tip' => true
+	),
+	'klarna_checkout_thanks_url_us' => array(
+		'title' => __( 'Custom Thanks Page - USA', 'klarna' ), 
+		'type' => 'text', 
+		'description' => __( 'Enter the URL to the page that acts as Thanks Page for Klarna Checkout USA. This page must contain the shortcode [woocommerce_klarna_checkout]. Leave blank to use the Custom Checkout Page as Thanks Page.', 'klarna' ), 
+		'default' => '',
+		'desc_tip' => true
+	),
+
 	'checkout_settings_title' => array(
 		'title' => __( 'Checkout settings', 'klarna' ), 
 		'type' => 'title', 

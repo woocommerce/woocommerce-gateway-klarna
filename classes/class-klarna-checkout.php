@@ -1193,9 +1193,17 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		if ( $this->is_rest() ) {
 			require_once( KLARNA_LIB . 'vendor/autoload.php' );
 			if ( $this->testmode == 'yes' ) {
-				$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_TEST_BASE_URL;
+				if ( 'gb' == $this->klarna_country ) {
+					$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_TEST_BASE_URL;
+				} elseif ( 'us' == $this->klarna_country ) {
+					$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::NA_TEST_BASE_URL;
+				}
 			} else {
-				$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_BASE_URL;
+				if ( 'gb' == $this->klarna_country ) {
+					$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_BASE_URL;
+				} elseif ( 'us' == $this->klarna_country ) {
+					$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::NA_BASE_URL;
+				}
 			}
 			$connector = Klarna\Rest\Transport\Connector::create(
 				$eid,
@@ -1729,6 +1737,10 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 				$klarna_secret = $this->secret_uk;
 				$klarna_eid = $this->eid_uk;
 				break;
+			case 'us' :
+				$klarna_secret = $this->secret_us;
+				$klarna_eid = $this->eid_us;
+				break;
 			default:
 				$klarna_secret = '';
 		}
@@ -1924,10 +1936,19 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 				 */
 				require_once( KLARNA_LIB . 'vendor/autoload.php' );
 				if ( $this->testmode == 'yes' ) {
-					$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_TEST_BASE_URL;
+					if ( 'gb' == $this->klarna_country ) {
+						$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_TEST_BASE_URL;
+					} elseif ( 'us' == $this->klarna_country ) {
+						$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::NA_TEST_BASE_URL;
+					}
 				} else {
-					$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_BASE_URL;
+					if ( 'gb' == $this->klarna_country ) {
+						$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_BASE_URL;
+					} elseif ( 'us' == $this->klarna_country ) {
+						$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::NA_BASE_URL;
+					}
 				}
+
 				$connector = Klarna\Rest\Transport\Connector::create(
 					$this->eid_uk,
 					$this->secret_uk,
@@ -1961,7 +1982,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 * @since  2.0.0
 	 */
 	function is_rest() {
-		if ( 'GB' == $this->klarna_country || 'gb' == $this->klarna_country ) {
+		if ( 'GB' == $this->klarna_country || 'gb' == $this->klarna_country || 'US' == $this->klarna_country || 'us' == $this->klarna_country ) {
 			return true;
 		}
 

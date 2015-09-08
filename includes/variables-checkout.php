@@ -50,6 +50,11 @@ $this->secret_uk = ( isset( $this->settings['secret_uk'] ) ) ? $this->settings['
 $this->klarna_checkout_url_uk = ( isset( $this->settings['klarna_checkout_url_uk'] ) ) ? $this->settings['klarna_checkout_url_uk'] : '';
 $this->klarna_checkout_thanks_url_uk = ( isset( $this->settings['klarna_checkout_thanks_url_uk'] ) ) ? $this->settings['klarna_checkout_thanks_url_uk'] : '';
 
+$this->eid_us = ( isset( $this->settings['eid_us'] ) ) ? $this->settings['eid_us'] : '';
+$this->secret_us = ( isset( $this->settings['secret_us'] ) ) ? $this->settings['secret_us'] : '';
+$this->klarna_checkout_url_us = ( isset( $this->settings['klarna_checkout_url_us'] ) ) ? $this->settings['klarna_checkout_url_us'] : '';
+$this->klarna_checkout_thanks_url_us = ( isset( $this->settings['klarna_checkout_thanks_url_us'] ) ) ? $this->settings['klarna_checkout_thanks_url_us'] : '';
+
 $this->default_eur_contry = ( isset( $this->settings['default_eur_contry'] ) ) ? $this->settings['default_eur_contry'] : '';
 
 $this->terms_url = ( isset( $this->settings['terms_url'] ) ) ? $this->settings['terms_url'] : '';
@@ -112,6 +117,9 @@ switch ( get_woocommerce_currency() ) {
 		break;
 	case 'GBP' :
 		$klarna_country = 'GB';
+		break;
+	case 'USD' :
+		$klarna_country = 'US';
 		break;
 	default:
 		$klarna_country = '';
@@ -222,6 +230,19 @@ switch ( $this->shop_country ) {
 			$klarna_checkout_thanks_url 	= $this->klarna_checkout_url_uk;
 		} else {
 			$klarna_checkout_thanks_url 	= $this->klarna_checkout_thanks_url_uk;
+		}
+		break;
+	case 'US' :
+		$klarna_country 			= 'us';
+		$klarna_language 			= 'en-us';
+		$klarna_currency 			= 'usd';
+		$klarna_eid 				= $this->eid_us;
+		$klarna_secret 				= $this->secret_us;
+		$klarna_checkout_url 		= $this->klarna_checkout_url_us;
+		if ( $this->klarna_checkout_thanks_url_uk == '' ) {
+			$klarna_checkout_thanks_url 	= $this->klarna_checkout_url_us;
+		} else {
+			$klarna_checkout_thanks_url 	= $this->klarna_checkout_thanks_url_us;
 		}
 		break;
 	default:
