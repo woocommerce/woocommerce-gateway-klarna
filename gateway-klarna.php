@@ -32,6 +32,38 @@ if ( ! function_exists( 'woothemes_queue_update' ) )
  */
 woothemes_queue_update( plugin_basename( __FILE__ ), '4edd8b595d6d4b76f31b313ba4e4f3f6', '18624' );
 
+
+/**
+ * Rounds product prices to an arbitrary precision.
+ *
+ * @param float converted_amount The amount calculated by the Currency Switcher.
+ * @param float original_amount  The original amount, before conversion.
+ * @param string from_currency The source currency.
+ * @param string to_currency The target currency.
+ * @param int decimals The amount of decimals configured for the target currency.
+ * @return float The rounded amount.
+ * @author Aelia <support@aelia.co>
+ */
+function woocommerce_klarna_custom_rounding( $converted_amount, $original_amount, $from_currency, $to_currency, $decimals ) {
+	/**
+	 * Sample roundings
+	 *
+	 * Round to closest 0.5
+	 * $converted_amount = round($converted_amount * 2, 0) / 2;
+	 *
+	 * Round price so that it ends with .99
+	 * $converted_amount = round($converted_amount, 0) - 0.01;
+	 *
+	 * Round price to nearest 5
+	 * $converted_amount = round($converted_amount * 5, 0) / 5;
+	 */
+  
+	$converted_amount = round( $converted_amount, 2 );
+	return $converted_amount;
+}
+// add_filter( 'wc_aelia_cs_converted_amount', 'woocommerce_klarna_custom_rounding', 10, 5 );
+
+
 /**
  * Check if update is from 1.x to 2.x
  * 

@@ -285,7 +285,7 @@ class WC_Gateway_Klarna_WC2K {
 		$item_price = number_format( $item_price * 100, 0, '', '' ) / $cart_item['quantity'];
 		// $item_price = $item_price * 100 / $cart_item['quantity'];
 
-		return $item_price;
+		return round( $item_price );
 	}
 
 	/**
