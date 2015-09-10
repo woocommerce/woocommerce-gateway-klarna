@@ -133,9 +133,10 @@ jQuery(document).ready(function($) {
 		});
 		}
 		
-		new_method = $(this).val();
+		new_method           = $(this).val();
 		shipping_total_field = $( '#kco-page-shipping-total' );
-		total_field = $( '#kco-page-total-amount' );
+		total_field          = $( '#kco-page-total-amount' );
+		coupon_row           = $( 'tr.kco-applied-coupon' );
 
 		$.ajax(
 			kcoAjax.ajaxurl,
@@ -153,6 +154,7 @@ jQuery(document).ready(function($) {
 					
 					$( total_field ).html( response.data.cart_total );
 					$( shipping_total_field ).html( response.data.cart_shipping_total );
+					$( coupon_row ).replaceWith( response.data.coupon_row );
 					
 					if ( typeof window._klarnaCheckout == 'function') { 
 					window._klarnaCheckout(function (api) {
@@ -188,6 +190,7 @@ jQuery(document).ready(function($) {
 		subtotal_field   = $( 'td#kco-page-subtotal-amount' );
 		line_total_field = $( this ).closest( 'tr' ).find( 'td.product-total' );
 		shipping_row     = $( 'tr#kco-page-shipping' );
+		coupon_row       = $( 'tr.kco-applied-coupon' );
 		cart_item_key    = $( ancestor ).data( 'cart_item_key' );
 		new_quantity     = $( this ).val();
 		
@@ -210,6 +213,7 @@ jQuery(document).ready(function($) {
 					$( subtotal_field ).html( response.data.cart_subtotal );
 					$( line_total_field ).html( response.data.line_total );
 					$( shipping_row ).replaceWith( response.data.shipping_row );
+					$( coupon_row ).replaceWith( response.data.coupon_row );
 					
 					if ( typeof window._klarnaCheckout == 'function') { 
 					window._klarnaCheckout(function (api) {
@@ -246,6 +250,7 @@ jQuery(document).ready(function($) {
 		subtotal_field       = $( 'td#kco-page-subtotal-amount' );
 		item_row             = $( this ).closest( 'tr' );
 		shipping_row         = $( 'tr#kco-page-shipping' );
+		coupon_row           = $( 'tr.kco-applied-coupon' );
 		cart_item_key_remove = $( ancestor ).data( 'cart_item_key' );
 		
 		$.ajax(
@@ -265,6 +270,7 @@ jQuery(document).ready(function($) {
 						$( total_field ).html( response.data.cart_total );
 						$( subtotal_field ).html( response.data.cart_subtotal );
 						$( shipping_row ).replaceWith( response.data.shipping_row );
+						$( coupon_row ).replaceWith( response.data.coupon_row );
 						$( item_row ).remove();
 						
 						if ( typeof window._klarnaCheckout == 'function') { 

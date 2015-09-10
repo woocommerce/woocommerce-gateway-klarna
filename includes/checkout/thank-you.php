@@ -82,27 +82,37 @@ WC()->session->__unset( 'klarna_order_note' );
 WC()->cart->empty_cart(); // Remove cart
 
 /*
+DEBUG CODE
 $orderid = $_GET['sid'];
-
+$billing_country = get_post_meta( $orderid, '_billing_country', true );
 $klarna_order_id = get_post_meta( $orderid, '_klarna_order_id', true );
 if ( $this->testmode == 'yes' ) {
-	if ( 'gb' == $this->klarna_country ) {
+	if ( 'gb' == strtolower( $billing_country ) ) {
 		$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_TEST_BASE_URL;
-	} elseif ( 'us' == $this->klarna_country ) {
+	} elseif ( 'us' == strtolower( $billing_country ) ) {
 		$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::NA_TEST_BASE_URL;
 	}
 } else {
-	if ( 'gb' == $this->klarna_country ) {
+	if ( 'gb' == strtolower( $billing_country ) ) {
 		$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_BASE_URL;
-	} elseif ( 'us' == $this->klarna_country ) {
+	} elseif ( 'us' == strtolower( $billing_country ) ) {
 		$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::NA_BASE_URL;
 	}
 }
-$connector = Klarna\Rest\Transport\Connector::create(
-	$this->eid_uk,
-	$this->secret_uk,
-	$klarna_server_url
-);
+
+if ( 'gb' == strtolower( $billing_country ) ) {
+	$connector = Klarna\Rest\Transport\Connector::create(
+		$this->eid_uk,
+		$this->secret_uk,
+		$klarna_server_url
+	);
+} elseif ( 'us' == strtolower( $billing_country ) ) {
+	$connector = Klarna\Rest\Transport\Connector::create(
+		$this->eid_us,
+		$this->secret_us,
+		$klarna_server_url
+	);
+}
 $k_order = new Klarna\Rest\OrderManagement\Order(
 	$connector,
 	$klarna_order_id

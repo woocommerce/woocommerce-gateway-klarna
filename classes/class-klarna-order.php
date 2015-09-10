@@ -445,7 +445,7 @@ class WC_Gateway_Klarna_Order {
 						$order->add_order_note(
 							sprintf(
 								__( 'Klarna order partially refunded. Refund amount: %s.', 'klarna' ),
-								$amount
+								wc_price( $amount, array( 'currency' => $order->get_order_currency() ) )
 							)
 						);
 
@@ -485,6 +485,10 @@ class WC_Gateway_Klarna_Order {
 		$order = $this->order;
 		$orderid = $order->id;
 
+			$order->add_order_note(
+				'Klarna Order: ' . var_export( $k_order, true )					
+			);
+
 		try {
 			$k_order->refund( array(
 				'refunded_amount' => $amount * 100,
@@ -494,7 +498,7 @@ class WC_Gateway_Klarna_Order {
 			$order->add_order_note(
 				sprintf(
 					__( 'Klarna order refunded. Refund amount: %s.', 'klarna' ),
-					$amount
+					wc_price( $amount, array( 'currency' => $order->get_order_currency() ) )
 				)
 			);
 
@@ -725,11 +729,21 @@ class WC_Gateway_Klarna_Order {
 				$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::NA_BASE_URL;
 			}
 		}
-		$connector = Klarna\Rest\Transport\Connector::create(
-			$klarna_settings['eid_uk'],
-			$klarna_settings['secret_uk'],
-			$klarna_server_url
-		);
+
+		if ( 'gb' == strtolower( $billing_country ) ) {
+			$connector = Klarna\Rest\Transport\Connector::create(
+				$klarna_settings['eid_uk'],
+				$klarna_settings['secret_uk'],
+				$klarna_server_url
+			);
+		} elseif ( 'us' == strtolower( $billing_country ) ) {
+			$connector = Klarna\Rest\Transport\Connector::create(
+				$klarna_settings['eid_us'],
+				$klarna_settings['secret_us'],
+				$klarna_server_url
+			);
+		}
+
 		$klarna_order_id = get_post_meta( $orderid, '_klarna_order_id', true );
 		$k_order = new Klarna\Rest\OrderManagement\Order(
 			$connector,
@@ -747,6 +761,14 @@ class WC_Gateway_Klarna_Order {
 		try {
 			$k_order->createCapture( $data );
 			$k_order->fetch();
+
+			$order->add_order_note(
+				sprintf(
+					__( 'Klarna order captured.', 'klarna' ),
+					$invNo,
+					$risk
+				)
+			);
 
 			update_post_meta( $orderid, '_klarna_order_activated', time() );
 			update_post_meta( $orderid, '_klarna_invoice_number', $k_order['captures'][0]['capture_id'] );
@@ -852,11 +874,21 @@ class WC_Gateway_Klarna_Order {
 				$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::NA_BASE_URL;
 			}
 		}
-		$connector = Klarna\Rest\Transport\Connector::create(
-			$klarna_settings['eid_uk'],
-			$klarna_settings['secret_uk'],
-			$klarna_server_url
-		);
+
+		if ( 'gb' == strtolower( $billing_country ) ) {
+			$connector = Klarna\Rest\Transport\Connector::create(
+				$klarna_settings['eid_uk'],
+				$klarna_settings['secret_uk'],
+				$klarna_server_url
+			);
+		} elseif ( 'us' == strtolower( $billing_country ) ) {
+			$connector = Klarna\Rest\Transport\Connector::create(
+				$klarna_settings['eid_us'],
+				$klarna_settings['secret_us'],
+				$klarna_server_url
+			);
+		}
+
 		$klarna_order_id = get_post_meta( $orderid, '_klarna_order_id', true );
 		$k_order = new Klarna\Rest\OrderManagement\Order(
 			$connector,
@@ -867,7 +899,7 @@ class WC_Gateway_Klarna_Order {
 		try {
 			$k_order->cancel();
 			$order->add_order_note(
-				__( 'Klarna order cancellation completed.', 'klarna' )
+				__( 'Klarna order cancelled.', 'klarna' )
 			);
 			add_post_meta( $orderid, '_klarna_order_cancelled', time() );
 		} catch( Exception $e ) {
@@ -1143,12 +1175,21 @@ class WC_Gateway_Klarna_Order {
 				$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::NA_BASE_URL;
 			}
 		}
-		
-		$connector = Klarna\Rest\Transport\Connector::create(
-			$klarna_settings['eid_uk'],
-			$klarna_settings['secret_uk'],
-			$klarna_server_url
-		);
+
+		if ( 'gb' == strtolower( $billing_country ) ) {
+			$connector = Klarna\Rest\Transport\Connector::create(
+				$klarna_settings['eid_uk'],
+				$klarna_settings['secret_uk'],
+				$klarna_server_url
+			);
+		} elseif ( 'us' == strtolower( $billing_country ) ) {
+			$connector = Klarna\Rest\Transport\Connector::create(
+				$klarna_settings['eid_us'],
+				$klarna_settings['secret_us'],
+				$klarna_server_url
+			);
+		}
+
 		$klarna_order_id = get_post_meta( $orderid, '_klarna_order_id', true );
 		$k_order = new Klarna\Rest\OrderManagement\Order(
 			$connector,

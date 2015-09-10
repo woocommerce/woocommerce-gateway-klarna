@@ -638,16 +638,8 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 							</tr>
 							
 							<?php echo $this->klarna_checkout_get_shipping_options_row_html(); ?>
-							
-							<?php foreach ( $woocommerce->cart->get_applied_coupons() as $coupon ) { ?>
-								<tr class="kco-applied-coupon">
-									<td class="kco-rightalign">
-										Coupon: <?php echo $coupon; ?> 
-										<a class="kco-remove-coupon" data-coupon="<?php echo $coupon; ?>" href="#">(remove)</a>
-									</td>
-									<td class="kco-rightalign">-<?php echo wc_price( $woocommerce->cart->get_coupon_discount_amount( $coupon, $woocommerce->cart->display_cart_ex_tax ) ); ?></td>
-								</tr>
-							<?php }	?>
+
+							<?php echo $this->klarna_checkout_get_coupon_rows_html(); ?>
 
 							<tr id="kco-page-total">
 								<td class="kco-rightalign kco-bold"><?php _e( 'Total', 'klarna' ); ?></a></td>
@@ -798,6 +790,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		$data['cart_total'] = wc_price( $woocommerce->cart->total );
 		$data['cart_subtotal'] = $woocommerce->cart->get_cart_subtotal();
 		$data['shipping_row'] = $this->klarna_checkout_get_shipping_options_row_html();
+		$data['coupon_row'] = $this->klarna_checkout_get_coupon_rows_html();
 
 		// Update Klarna order line item
 		$data['line_total'] = apply_filters( 
@@ -857,6 +850,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		$data['cart_total'] = wc_price( $woocommerce->cart->total );
 		$data['cart_subtotal'] = $woocommerce->cart->get_cart_subtotal();
 		$data['shipping_row'] = $this->klarna_checkout_get_shipping_options_row_html();
+		$data['coupon_row'] = $this->klarna_checkout_get_coupon_rows_html();
 		$data['item_count'] = $woocommerce->cart->get_cart_contents_count();
 		$data['cart_url'] = $woocommerce->cart->get_cart_url();
 
@@ -1012,6 +1006,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		$data['new_method'] = $new_method;
 		$data['cart_total'] = wc_price( $woocommerce->cart->total );
 		$data['cart_shipping_total'] = $woocommerce->cart->get_cart_shipping_total();
+		$data['coupon_row'] = $this->klarna_checkout_get_coupon_rows_html();
 
 		if ( WC()->session->get( 'klarna_checkout' ) ) {
 			$this->ajax_update_klarna_order();				
@@ -1332,14 +1327,35 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 
 
 	/**
+	 * Gets coupons as formatted HTML.
+	 * 
+	 * @since  2.0
+	 **/
+	function klarna_checkout_get_coupon_rows_html() {
+		global $woocommerce;
+
+		ob_start();
+		foreach ( $woocommerce->cart->get_applied_coupons() as $coupon ) { ?>
+			<tr class="kco-applied-coupon">
+				<td class="kco-rightalign">
+					Coupon: <?php echo $coupon; ?> 
+					<a class="kco-remove-coupon" data-coupon="<?php echo $coupon; ?>" href="#">(remove)</a>
+				</td>
+				<td class="kco-rightalign">-<?php echo wc_price( $woocommerce->cart->get_coupon_discount_amount( $coupon, $woocommerce->cart->display_cart_ex_tax ) ); ?></td>
+			</tr>
+		<?php }
+		return ob_get_clean();
+	}
+
+
+	/**
 	 * WooCommerce cart to Klarna cart items.
 	 *
 	 * Helper functions that format WooCommerce cart items for Klarna order items.
 	 * 
 	 * @since  2.0
 	 **/
-	function cart_to_klarna() {
-				
+	function cart_to_klarna() {	
 		global $woocommerce;
 		
 		$woocommerce->cart->calculate_shipping();
@@ -1949,11 +1965,20 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 					}
 				}
 
-				$connector = Klarna\Rest\Transport\Connector::create(
-					$this->eid_uk,
-					$this->secret_uk,
-					$klarna_server_url
-				);
+				if ( 'gb' == strtolower( $this->klarna_country ) ) {
+					$connector = Klarna\Rest\Transport\Connector::create(
+						$this->eid_uk,
+						$this->secret_uk,
+						$klarna_server_url
+					);
+				} elseif ( 'us' == strtolower( $this->klarna_country ) ) {
+					$connector = Klarna\Rest\Transport\Connector::create(
+						$this->eid_us,
+						$this->secret_us,
+						$klarna_server_url
+					);
+				}
+
 				$klarna_order_id = get_post_meta( $orderid, '_klarna_order_id', true );
 				$k_order = new Klarna\Rest\OrderManagement\Order(
 					$connector,
