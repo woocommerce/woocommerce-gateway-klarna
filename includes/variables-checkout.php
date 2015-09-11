@@ -276,6 +276,9 @@ if ( ! empty( $this->eid_at ) ) {
 if ( ! empty( $this->eid_uk ) ) {
 	$this->authorized_countries[] = 'GB';
 }
+if ( ! empty( $this->eid_us ) ) {
+	$this->authorized_countries[] = 'US';
+}
 
 
 // Apply filters to Country and language

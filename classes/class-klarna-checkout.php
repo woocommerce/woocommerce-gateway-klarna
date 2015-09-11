@@ -2211,8 +2211,7 @@ class WC_Gateway_Klarna_Checkout_Extra {
 				$url = $klarna_checkout_url;
 			}
 		}
-
-		
+	
 		return $url;
 	}
 	
