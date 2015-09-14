@@ -4,7 +4,6 @@
  *
  * @package WC_Gateway_Klarna
  */
-
 // Resume session
 if ( $this->is_rest() ) {
 	$klarna_order = new \Klarna\Rest\Checkout\Order(
@@ -20,14 +19,14 @@ if ( $this->is_rest() ) {
 $local_order_id = WC()->session->get( 'ongoing_klarna_order' );
 
 try {
+	$klarna_order->fetch();
+
 	// Reset session if the country in the store has changed since last time the checkout was loaded
 	if ( strtolower( $this->klarna_country ) != strtolower( $klarna_order['purchase_country'] ) ) {
 		// Reset session
 		$klarna_order = null;
 		WC()->session->__unset( 'klarna_checkout' );
 	} else {
-		$klarna_order->fetch();
-
 		/**
 		 * Update Klarna order
 		 */

@@ -1115,28 +1115,82 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			$orderid = $woocommerce->session->get( 'ongoing_klarna_order' );
 			$data['orderid'] = $orderid;
 
-			require_once( KLARNA_LIB . '/src/Klarna/Checkout.php' );
-			$connector = Klarna_Checkout_Connector::create( $this->klarna_secret, $this->klarna_server );		
-			$klarna_order = new Klarna_Checkout_Order(
-				$connector,
-				WC()->session->get( 'klarna_checkout' )
-			);
-			$klarna_order->fetch();
+			if ( $this->is_rest() ) {
+				require_once( KLARNA_LIB . 'vendor/autoload.php' );
+				if ( $this->testmode == 'yes' ) {
+					if ( 'gb' == $this->klarna_country ) {
+						$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_TEST_BASE_URL;
+					} elseif ( 'us' == $this->klarna_country ) {
+						$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::NA_TEST_BASE_URL;
+					}
+				} else {
+					if ( 'gb' == $this->klarna_country ) {
+						$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_BASE_URL;
+					} elseif ( 'us' == $this->klarna_country ) {
+						$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::NA_BASE_URL;
+					}
+				}
 
-			$update['merchant']['push_uri'] = add_query_arg(
-				array(
-					'sid' => $orderid
-				),
-				$klarna_order['merchant']['push_uri']
-			);
-			$update['merchant']['confirmation_uri'] = add_query_arg(
-				array(
-					'sid' => $orderid,
-					'order-received' => $orderid
-				),
-				$klarna_order['merchant']['confirmation_uri']
-			);
-			$klarna_order->update( $update );
+				$eid = $this->klarna_eid;
+				$sharedSecret = $this->klarna_secret;
+
+				$connector = Klarna\Rest\Transport\Connector::create(
+					$eid,
+					$sharedSecret,
+					$klarna_server_url
+				);
+
+				$klarna_order = new \Klarna\Rest\Checkout\Order(
+					$connector,
+					WC()->session->get( 'klarna_checkout' )
+				);
+
+				$klarna_order->fetch();
+
+				$merchant_urls = $klarna_order['merchant_urls'];
+				$merchant_urls['push'] = add_query_arg(
+					array(
+						'sid' => $orderid
+					),
+					$merchant_urls['push']
+				);
+				$merchant_urls['confirmation'] = add_query_arg(
+					array(
+						'sid' => $orderid,
+						'order-received' => $orderid
+					),
+					$merchant_urls['confirmation']
+				);
+
+				$klarna_order->update( array(
+					'merchant_urls' => $merchant_urls
+				) );
+			} else {
+				require_once( KLARNA_LIB . '/src/Klarna/Checkout.php' );
+				$connector = Klarna_Checkout_Connector::create( $this->klarna_secret, $this->klarna_server );		
+				$klarna_order = new Klarna_Checkout_Order(
+					$connector,
+					WC()->session->get( 'klarna_checkout' )
+				);
+
+				$klarna_order->fetch();
+
+				$update['merchant']['push_uri'] = add_query_arg(
+					array(
+						'sid' => $orderid
+					),
+					$klarna_order['merchant']['push_uri']
+				);
+				$update['merchant']['confirmation_uri'] = add_query_arg(
+					array(
+						'sid' => $orderid,
+						'order-received' => $orderid
+					),
+					$klarna_order['merchant']['confirmation_uri']
+				);
+
+				$klarna_order->update( $update );
+			}
 		}
 
 		// Capture postal code

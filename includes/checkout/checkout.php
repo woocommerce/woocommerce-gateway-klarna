@@ -138,6 +138,7 @@ if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 	} else {
 		$sessionId = $klarna_order->getLocation();
 	}
+
 	if ( null === WC()->session->get( 'klarna_checkout' ) ) {
 		WC()->session->set( 'klarna_checkout', $sessionId );
 	}
