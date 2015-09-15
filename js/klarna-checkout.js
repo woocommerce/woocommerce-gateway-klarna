@@ -131,9 +131,7 @@ jQuery(document).ready(function($) {
 		}
 		
 		new_method           = $(this).val();
-		shipping_total_field = $( '#kco-page-shipping-total' );
-		total_field          = $( '#kco-page-total-amount' );
-		coupon_row           = $( 'tr.kco-applied-coupon' );
+		kco_widget       = $( '#klarna-checkout-widget' );	
 
 		$.ajax(
 			kcoAjax.ajaxurl,
@@ -149,10 +147,8 @@ jQuery(document).ready(function($) {
 					// console.log( 'success' );
 					// console.log( response.data );
 					
-					$( total_field ).html( response.data.cart_total );
-					$( shipping_total_field ).html( response.data.cart_shipping_total );
-					$( coupon_row ).replaceWith( response.data.coupon_row );
-					
+					$( kco_widget ).html( response.data.widget_html );
+
 					if ( typeof window._klarnaCheckout == 'function') { 
 						window._klarnaCheckout(function (api) {
 							api.resume();
@@ -394,6 +390,7 @@ jQuery(document).ready(function($) {
 
 	if ( typeof window._klarnaCheckout == 'function') { 
 	window._klarnaCheckout(function (api) {
+		/* 
 		api.on( {
 			'change': function(data) {
 				window._klarnaCheckout(function (api) {
@@ -431,6 +428,7 @@ jQuery(document).ready(function($) {
 									return;
 								}
 
+								$( kco_widget ).html( response.data.widget_html );
 								$( total_field ).html( response.data.cart_total );
 								$( shipping_row ).replaceWith( response.data.shipping_row );
 								window._klarnaCheckout(function (api) {
@@ -447,18 +445,17 @@ jQuery(document).ready(function($) {
 				}
 			}
 		} );
+		*/
 
 		api.on( {
 			'shipping_address_change': function (data) {
 				// console.log('****** Parent Page Received shipping_address_change DATA ******');
-				// console.log(data);
+				console.log(data);
 
 				// Only do this for USA for now
 				// if ( 'usa' == data.postal_code ) {
 					if ( '' != data.postal_code || '' != data.region ) {
-						shipping_total_field = $( '#kco-page-shipping-total' );
-						total_field = $( '#kco-page-total-amount' );
-						shipping_row = $( 'tr#kco-page-shipping' );
+						kco_widget = $( '#klarna-checkout-widget' );	
 
 						$.ajax(
 							kcoAjax.ajaxurl,
@@ -466,16 +463,14 @@ jQuery(document).ready(function($) {
 								type     : 'POST',
 								dataType : 'json',
 								data     : {
-									action       : 'kco_iframe_shipping_change_cb',
+									action       : 'kco_iframe_change_cb',
 									region       : data.region,
 									postal_code  : data.postal_code,
 									nonce        : kcoAjax.klarna_checkout_nonce
 								},
 								success: function( response ) {
 									// console.log( response.data );
-
-									$( total_field ).html( response.data.cart_total );
-									$( shipping_row ).replaceWith( response.data.shipping_row );
+									$( kco_widget ).html( response.data.widget_html );
 
 									window._klarnaCheckout(function (api) {
 										api.resume();
