@@ -2077,7 +2077,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 				$invNo = get_post_meta( $order->id, '_klarna_invoice_number', true );
 
 				$klarna_order = new WC_Gateway_Klarna_Order( $order, $klarna );
-				$refund_order = $klarna_order->refund_order( $amount, $reason = '', $invNo );
+				$refund_order = $klarna_order->refund_order( $amount, $reason, $invNo );
 
 			} elseif ( 'rest' == get_post_meta( $order->id, '_klarna_api', true ) ) {
 
@@ -2121,7 +2121,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 				$k_order->fetch();
 
 				$klarna_order = new WC_Gateway_Klarna_Order( $order );
-				$refund_order = $klarna_order->refund_order_rest( $amount, $reason = '', $k_order );
+				$refund_order = $klarna_order->refund_order_rest( $amount, $reason, $k_order );
 
 			}
 

@@ -258,12 +258,13 @@ class WC_Gateway_Klarna_WC2K {
 		$cart_item_data = $cart_item['data'];
 		$item_name = $cart_item_data->post->post_title;
 
-		// Append item meta to the title, if it exists
-		if ( isset( $cart_item['item_meta'] ) ) {
-			$item_meta = new WC_Order_Item_Meta( $cart_item['item_meta'] );
-			if ( $meta = $item_meta->display( true, true ) ) {
-				$item_name .= ' (' . $meta . ')';
-			}
+		// Get variations as a string and remove line breaks
+		$item_variations = rtrim( WC()->cart->get_item_data( $cart_item, true ) ); // Removes new line at the end
+		$item_variations = str_replace( "\n", ', ', $item_variations ); // Replaces all other line breaks with commas
+
+		// Add variations to name
+		if ( '' != $item_variations ) {
+			$item_name .= ' [' . $item_variations . ']';
 		}
 
 		return strip_tags( $item_name );

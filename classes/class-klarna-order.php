@@ -104,8 +104,8 @@ class WC_Gateway_Klarna_Order {
 		$klarna->setAddress( KlarnaFlags::IS_SHIPPING, $shipping_addr );
 
 		$klarna->setEstoreInfo(
-		    $orderid1 = ltrim( $order->get_order_number(), '#' ),
-		    $orderid2 = $order->id
+			$orderid1 = ltrim( $order->get_order_number(), '#' ),
+			$orderid2 = $order->id
 		);
 	}
 
@@ -482,12 +482,8 @@ class WC_Gateway_Klarna_Order {
 	 * @since  2.0
 	 **/
 	function refund_order_rest( $amount, $reason = '', $k_order ) {
-		$order = $this->order;
+		$order   = $this->order;
 		$orderid = $order->id;
-
-			$order->add_order_note(
-				'Klarna Order: ' . var_export( $k_order, true )					
-			);
 
 		try {
 			$k_order->refund( array(
