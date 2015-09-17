@@ -356,7 +356,6 @@ class WC_Gateway_Klarna_K2WC {
 		}
 		
 		$klarna_order->fetch();
-		$this->klarna_log->add( 'klarna', 'Klarna order 3: ' . var_export( $klarna_order, true ) );
 
 		if ( $this->klarna_debug == 'yes' ) {
 			$this->klarna_log->add( 'klarna', 'ID: ' . $klarna_order['id'] );
@@ -842,6 +841,10 @@ class WC_Gateway_Klarna_K2WC {
 			) );
 			$klarna_order->acknowledge();
 
+			$klarna_order->updateMerchantReferences( array(
+				'merchant_reference1' => ltrim( $order->get_order_number(), '#' ) 
+			) );
+
 			$order->payment_complete( $klarna_order['reservation'] );
 
 			delete_post_meta( $order->id, '_kco_incomplete_customer_email' );
@@ -863,7 +866,9 @@ class WC_Gateway_Klarna_K2WC {
 			);
 
 			$update['status'] = 'created';
-			$update['merchant_reference'] = array( 'orderid1' => ltrim( $order->get_order_number(), '#' ) );
+			$update['merchant_reference'] = array(
+				'orderid1' => ltrim( $order->get_order_number(), '#' ) 
+			);
 			$klarna_order->update( $update );
 
 			// Confirm local order
