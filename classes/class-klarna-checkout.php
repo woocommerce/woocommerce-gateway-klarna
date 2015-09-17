@@ -545,11 +545,6 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			$atts
 		);
 
-		$hide_columns = array();
-		if ( '' != $atts['hide_columns'] ) {
-			$hide_columns = explode( ',', $atts['hide_columns'] );
-		}
-
 		$widget_class = '';
 
 		if ( 'left' == $atts['col'] ) {
@@ -569,7 +564,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			ob_start(); ?>
 				
 				<div id="klarna-checkout-widget" class="woocommerce <?php echo $widget_class; ?>">
-					<?php echo $this->klarna_checkout_get_kco_widget_html(); ?>
+					<?php echo $this->klarna_checkout_get_kco_widget_html( $atts ); ?>
 				</div>
 
 			<?php return ob_get_clean();
@@ -1255,9 +1250,11 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 * Gets Klarna checkout widget HTML.
 	 * Used in KCO widget.
 	 * 
+	 * @param  $atts Attributes passed to shortcode
+	 * 
 	 * @since  2.0
 	 **/
-	function klarna_checkout_get_kco_widget_html() {
+	function klarna_checkout_get_kco_widget_html( $atts ) {
 		global $woocommerce;
 
 		ob_start();
@@ -1273,7 +1270,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		<?php woocommerce_checkout_coupon_form(); ?>
 
 		<!-- Cart items -->
-		<?php echo $this->klarna_checkout_get_cart_contents_html(); ?>
+		<?php echo $this->klarna_checkout_get_cart_contents_html( $atts ); ?>
 
 		<!-- Totals -->
 		<div>
@@ -1324,7 +1321,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 * 
 	 * @since  2.0
 	 **/
-	function klarna_checkout_get_cart_contents_html() {
+	function klarna_checkout_get_cart_contents_html( $atts ) {
 		global $woocommerce;
 
 		ob_start();
@@ -1335,6 +1332,11 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		$woocommerce->cart->calculate_fees();
 		$woocommerce->cart->calculate_totals();
 
+
+		$hide_columns = array();
+		if ( '' != $atts['hide_columns'] ) {
+			$hide_columns = explode( ',', $atts['hide_columns'] );
+		}
 		?>
 		<div>
 		<table id="klarna-checkout-cart">
