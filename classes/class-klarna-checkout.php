@@ -956,6 +956,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			// Reset session
 			$klarna_order = null;
 			WC()->session->__unset( 'klarna_checkout' );
+			WC()->session->__unset( 'klarna_checkout_country' );
 
 			// Store new country as WC session value
 			WC()->session->set( 'klarna_euro_country', $new_country );	

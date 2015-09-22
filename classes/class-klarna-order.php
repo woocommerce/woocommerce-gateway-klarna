@@ -1211,10 +1211,6 @@ class WC_Gateway_Klarna_Order {
 				)
 			);
 		} catch( Exception $e ) {
-			$order->add_order_note( 'Trace: ' . var_export( $e->getTrace(), true ) );
-			$order->add_order_note( 'Trace as string: ' . var_export( $e->getTraceAsString(), true ) );
-			$order->add_order_note( 'File: ' . var_export( $e->getFile(), true ) );
-			$order->add_order_note( 'Line: ' . var_export( $e->getLine(), true ) );
 			$order->add_order_note(
 				sprintf(
 					__( 'Klarna order update failed. Error code %s. Error message %s', 'klarna' ),

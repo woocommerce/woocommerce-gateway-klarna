@@ -26,6 +26,7 @@ try {
 		// Reset session
 		$klarna_order = null;
 		WC()->session->__unset( 'klarna_checkout' );
+		WC()->session->__unset( 'klarna_checkout_country' );
 	} else {
 		/**
 		 * Update Klarna order
@@ -151,7 +152,7 @@ try {
 	} // End if country change
 } catch ( Exception $e ) {
 	if ( is_user_logged_in() && $this->debug ) {
-		// The purchase was denied or something went wrong, print the message:
+		// Something went wrong, print the message:
 		echo '<div class="woocommerce-error">';
 		print_r( $e->getMessage() );
 		echo '</div>';
@@ -159,4 +160,5 @@ try {
 	// Reset session
 	$klarna_order = null;
 	WC()->session->__unset( 'klarna_checkout' );
+	WC()->session->__unset( 'klarna_checkout_country' );
 }

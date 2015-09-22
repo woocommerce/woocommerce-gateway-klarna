@@ -44,8 +44,9 @@ WC()->customer->set_country( strtoupper( $this->get_klarna_country() ) );
 WC()->customer->set_shipping_country( strtoupper( $this->get_klarna_country() ) );
 
 // Debug
-if ( $this->debug == 'yes' )
+if ( $this->debug == 'yes' ) {
 	$this->log->add( 'klarna', 'Rendering Checkout page...' );
+}
 
 // Mobile or desktop browser
 if ( wp_is_mobile() ) {
@@ -121,10 +122,9 @@ if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 	$this->update_or_create_local_order();
 
 	/**
-	 * Check if Klarna order already exists
+	 * Check if Klarna order already exists and if country was changed
 	 */
-	// If it does, see if it needs to be updated
-	if ( WC()->session->get( 'klarna_checkout' ) ) {
+	if ( WC()->session->get( 'klarna_checkout' ) && WC()->session->get( 'klarna_checkout_country' ) == WC()->customer->get_country() ) {
 		include( KLARNA_DIR . 'includes/checkout/resume.php' );
 	}
 	// If it doesn't, create Klarna order
@@ -141,6 +141,7 @@ if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 
 	if ( null === WC()->session->get( 'klarna_checkout' ) ) {
 		WC()->session->set( 'klarna_checkout', $sessionId );
+		WC()->session->set( 'klarna_checkout_country', WC()->customer->get_country() );
 	}
 
 	// Display checkout
@@ -155,6 +156,7 @@ if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 } else {
 	// If cart is empty, clear these variables
 	WC()->session->__unset( 'klarna_checkout' ); // Klarna order ID
+	WC()->session->__unset( 'klarna_checkout_country' ); // Klarna order ID
 	WC()->session->__unset( 'ongoing_klarna_order' ); // WooCommerce order ID
 	WC()->session->__unset( 'klarna_order_note' );
 } // End if sizeof cart
