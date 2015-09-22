@@ -925,7 +925,9 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 					'post_excerpt' => $order_note
 				);
 				$order_update = wp_update_post( $order_details );
-				$this->log->add( 'klarna', 'ORDERID: ' . $orderid );
+				if ( $this->debug=='yes' ) {
+					$this->log->add( 'klarna', 'ORDERID: ' . $orderid );
+				}
 
 				$this->ajax_update_klarna_order();
 
@@ -1236,7 +1238,9 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			try {
 				$klarna_order->update( apply_filters( 'kco_update_order', $update ) );
 			} catch ( Exception $e ) {
-				$this->log->add( 'klarna', 'KCO ERROR: ' . var_export( $e ) );
+				if ( $this->debug=='yes' ) {
+					$this->log->add( 'klarna', 'KCO ERROR: ' . var_export( $e ) );
+				}
 			}
 		}
 	}
@@ -2058,7 +2062,9 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		if ( $this->id == get_post_meta( $orderid, '_payment_method', true ) ) {
 			$order = wc_get_order( $orderid );
 			if ( ! $this->can_refund_order( $order ) ) {
-				$this->log->add( 'klarna', 'Refund Failed: No Klarna invoice ID.' );
+				if ( $this->debug=='yes' ) {
+					$this->log->add( 'klarna', 'Refund Failed: No Klarna invoice ID.' );
+				}
 				$order->add_order_note( __( 'This order cannot be refunded. Please make sure it is activated.', 'klarna' ) );
 				return false;
 			}

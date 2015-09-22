@@ -258,7 +258,9 @@ class WC_Gateway_Klarna_K2WC {
 	 * @access public
 	 */
 	public function listener() {
-		$this->klarna_log->add( 'klarna', 'Listener triggered' );
+		if ( $this->klarna_debug=='yes' ) {
+			$this->klarna_log->add( 'klarna', 'Listener triggered' );
+		}
 
 		global $woocommerce;
 		
@@ -357,13 +359,6 @@ class WC_Gateway_Klarna_K2WC {
 		
 		$klarna_order->fetch();
 
-		if ( $this->klarna_debug == 'yes' ) {
-			$this->klarna_log->add( 'klarna', 'ID: ' . $klarna_order['id'] );
-			$this->klarna_log->add( 'klarna', 'Billing: ' . $klarna_order['billing_address']['given_name'] );
-			$this->klarna_log->add( 'klarna', 'Reference: ' . $klarna_order['reservation'] );
-			// $this->klarna_log->add( 'klarna', 'Fetched order from Klarna: ' . var_export( $klarna_order, true ) );
-		}
-
 		return $klarna_order;
 	}
 
@@ -374,7 +369,9 @@ class WC_Gateway_Klarna_K2WC {
 	 * @access public
 	 */
 	public function create_order() {
-		$this->klarna_log->add( 'klarna', 'Creating local order...' );
+		if ( $this->klarna_debug=='yes' ) {
+			$this->klarna_log->add( 'klarna', 'Creating local order...' );
+		}
 		global $woocommerce;
 
 		// Customer accounts
@@ -393,7 +390,9 @@ class WC_Gateway_Klarna_K2WC {
 			throw new Exception( __( 'Error: Unable to create order. Please try again.', 'woocommerce' ) );
 		}
 
-		$this->klarna_log->add( 'klarna', 'Local order created, order ID: ' . $order->id );	
+		if ( $this->klarna_debug=='yes' ) {
+			$this->klarna_log->add( 'klarna', 'Local order created, order ID: ' . $order->id );	
+		}
 
 		return $order;
 	}
@@ -407,10 +406,14 @@ class WC_Gateway_Klarna_K2WC {
 	 * @access public
 	 */
 	public function change_order_currency( $order, $klarna_order ) {
-		$this->klarna_log->add( 'klarna', 'Maybe fixing order currency...' );
+		if ( $this->klarna_debug=='yes' ) {
+			$this->klarna_log->add( 'klarna', 'Maybe fixing order currency...' );
+		}
 
 		if ( $order->get_order_currency != strtoupper( $klarna_order['purchase_currency'] ) ) {
-			$this->klarna_log->add( 'klarna', 'Fixing order currency...' );
+			if ( $this->klarna_debug=='yes' ) {
+				$this->klarna_log->add( 'klarna', 'Updating order currency...' );
+			}
 			update_post_meta( $order->id, '_order_currency', strtoupper( $klarna_order['purchase_currency'] ) );
 		}
 	}
@@ -424,7 +427,9 @@ class WC_Gateway_Klarna_K2WC {
 	 * @param  object $order        Local WC order.
 	 */
 	public function add_order_items( $order ) {
-		$this->klarna_log->add( 'klarna', 'Adding order items...' );
+		if ( $this->klarna_debug=='yes' ) {
+			$this->klarna_log->add( 'klarna', 'Adding order items...' );
+		}
 		global $woocommerce;
 		$order_id = $order->id;
 
@@ -445,7 +450,9 @@ class WC_Gateway_Klarna_K2WC {
 			);
 
 			if ( ! $item_id ) {
-				$this->klarna_log->add( 'klarna', 'Unable to add order item.' );
+		 		if ( $this->klarna_debug=='yes' ) {
+					$this->klarna_log->add( 'klarna', 'Unable to add order item.' );
+				}
 				throw new Exception( __( 'Error: Unable to add order item. Please try again.', 'woocommerce' ) );
 			}
 
@@ -463,7 +470,9 @@ class WC_Gateway_Klarna_K2WC {
 	 * @param  object $order        Local WC order.
 	 */
 	public function add_order_fees( $order ) {
-		$this->klarna_log->add( 'klarna', 'Adding order fees...' );
+		if ( $this->klarna_debug=='yes' ) {
+			$this->klarna_log->add( 'klarna', 'Adding order fees...' );
+		}
 		global $woocommerce;
 		$order_id = $order->id;
 		
@@ -471,7 +480,9 @@ class WC_Gateway_Klarna_K2WC {
 			$item_id = $order->add_fee( $fee );
 
 			if ( ! $item_id ) {
-				$this->klarna_log->add( 'klarna', 'Unable to add order fee.' );
+				if ( $this->klarna_debug=='yes' ) {
+					$this->klarna_log->add( 'klarna', 'Unable to add order fee.' );
+				}
 				throw new Exception( __( 'Error: Unable to create order. Please try again.', 'woocommerce' ) );
 			}
 
@@ -490,7 +501,9 @@ class WC_Gateway_Klarna_K2WC {
 	 * @param  object $klarna_order Klarna order.
 	 */
 	public function add_order_shipping( $order ) {
-		$this->klarna_log->add( 'klarna', 'Adding order shipping...' );
+		if ( $this->klarna_debug=='yes' ) {
+			$this->klarna_log->add( 'klarna', 'Adding order shipping...' );
+		}
 		global $woocommerce;
 
 		if ( ! defined( 'WOOCOMMERCE_CART' ) ) {
@@ -509,7 +522,9 @@ class WC_Gateway_Klarna_K2WC {
 				$item_id = $order->add_shipping( $package['rates'][ $this_shipping_methods[ $package_key ] ] );
 
 				if ( ! $item_id ) {
-					$this->klarna_log->add( 'klarna', 'Unable to add shipping item.' );
+					if ( $this->klarna_debug=='yes' ) {
+						$this->klarna_log->add( 'klarna', 'Unable to add shipping item.' );
+					}
 					throw new Exception( __( 'Error: Unable to create order. Please try again.', 'woocommerce' ) );
 				}
 
@@ -529,7 +544,9 @@ class WC_Gateway_Klarna_K2WC {
 	 * @param  object $klarna_order Klarna order.
 	 */
 	public function add_order_addresses( $order, $klarna_order ) {
-		$this->klarna_log->add( 'klarna', 'Adding order addresses...' );
+		if ( $this->klarna_debug=='yes' ) {
+			$this->klarna_log->add( 'klarna', 'Adding order addresses...' );
+		}
 
 		$order_id = $order->id;
 		
@@ -590,13 +607,17 @@ class WC_Gateway_Klarna_K2WC {
 	 * @param  object $order        Local WC order.
 	 */
 	public function add_order_tax_rows( $order ) {
-		$this->klarna_log->add( 'klarna', 'Adding order tax...' );
+		if ( $this->klarna_debug=='yes' ) {
+			$this->klarna_log->add( 'klarna', 'Adding order tax...' );
+		}
 
 		global $woocommerce;
 
 		foreach ( array_keys( $woocommerce->cart->taxes + $woocommerce->cart->shipping_taxes ) as $tax_rate_id ) {
 			if ( ! $order->add_tax( $tax_rate_id, $woocommerce->cart->get_tax_amount( $tax_rate_id ), $woocommerce->cart->get_shipping_tax_amount( $tax_rate_id ) ) ) {
-				$this->klarna_log->add( 'klarna', 'Unable to add taxes.' );
+				if ( $this->klarna_debug=='yes' ) {
+					$this->klarna_log->add( 'klarna', 'Unable to add taxes.' );
+				}
 				throw new Exception( __( 'Error: Unable to create order. Please try again.', 'woocommerce' ) );
 			}
 		}
@@ -611,13 +632,17 @@ class WC_Gateway_Klarna_K2WC {
 	 * @param  object $order        Local WC order.
 	 */
 	public function add_order_coupons( $order ) {
-		$this->klarna_log->add( 'klarna', 'Adding order coupons...' );
+		if ( $this->klarna_debug=='yes' ) {
+			$this->klarna_log->add( 'klarna', 'Adding order coupons...' );
+		}
 
 		global $woocommerce;
 
 		foreach ( $woocommerce->cart->get_coupons() as $code => $coupon ) {
 			if ( ! $order->add_coupon( $code, $woocommerce->cart->get_coupon_discount_amount( $code ) ) ) {
-				$this->klarna_log->add( 'klarna', 'Unable to add coupons.' );
+				if ( $this->klarna_debug=='yes' ) {
+					$this->klarna_log->add( 'klarna', 'Unable to add coupons.' );
+				}
 				throw new Exception( __( 'Error: Unable to create order. Please try again.', 'woocommerce' ) );
 			}
 		}
@@ -633,16 +658,12 @@ class WC_Gateway_Klarna_K2WC {
 	 * @param  object $klarna_order Klarna order.
 	 */
 	public function add_order_payment_method( $order ) {
-		$this->klarna_log->add( 'klarna', 'Before adding order payment method...' );
-
 		global $woocommerce;
 
 		$available_gateways = $woocommerce->payment_gateways->payment_gateways();
 		$payment_method = $available_gateways[ 'klarna_checkout' ];
 	
 		$order->set_payment_method( $payment_method );
-
-		$this->klarna_log->add( 'klarna', 'After adding order payment method...' );
 	}
 
 	/**
@@ -653,9 +674,7 @@ class WC_Gateway_Klarna_K2WC {
 	 * 
 	 * @param  object $order        Local WC order.
 	 */
-	public function set_order_totals( $order ) {
-		$this->klarna_log->add( 'klarna', 'Before set order total...' );
-		
+	public function set_order_totals( $order ) {		
 		global $woocommerce;
 
 		if ( ! defined( 'WOOCOMMERCE_CHECKOUT' ) ) {
@@ -676,8 +695,6 @@ class WC_Gateway_Klarna_K2WC {
 		$order->set_total( $woocommerce->cart->tax_total, 'tax' );
 		$order->set_total( $woocommerce->cart->shipping_tax_total, 'shipping_tax' );
 		$order->set_total( $woocommerce->cart->total );
-
-		$this->klarna_log->add( 'klarna', 'After set order total...' );
 	}
 
 	/**

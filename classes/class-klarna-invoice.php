@@ -342,7 +342,9 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 			$order = wc_get_order( $orderid );
 
 			if ( ! $this->can_refund_order( $order ) ) {
-				$this->log->add( 'klarna', 'Refund Failed: No Klarna invoice ID.' );
+				if ( $this->debug=='yes' ) {
+					$this->log->add( 'klarna', 'Refund Failed: No Klarna invoice ID.' );
+				}
 				$order->add_order_note( __( 'This order cannot be refunded. Please make sure it is activated.', 'klarna' ) );
 				return false;
 			}
