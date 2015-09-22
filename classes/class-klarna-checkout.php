@@ -1254,7 +1254,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 * 
 	 * @since  2.0
 	 **/
-	function klarna_checkout_get_kco_widget_html( $atts ) {
+	function klarna_checkout_get_kco_widget_html( $atts = null ) {
 		global $woocommerce;
 
 		ob_start();

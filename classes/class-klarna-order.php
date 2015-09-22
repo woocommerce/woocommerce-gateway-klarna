@@ -486,10 +486,12 @@ class WC_Gateway_Klarna_Order {
 		$orderid = $order->id;
 
 		try {
-			$k_order->refund( array(
+			$refund = $k_order->refund( array(
 				'refunded_amount' => $amount * 100,
 				'description'     => $reason,
 			) );
+
+			$order->add_order_note( 'Refund: ' . var_export( $refund, true ) );
 
 			$order->add_order_note(
 				sprintf(
@@ -755,7 +757,10 @@ class WC_Gateway_Klarna_Order {
 		);
 
 		try {
-			$k_order->createCapture( $data );
+			$klarna_capture = $k_order->createCapture( $data );
+
+			$order->add_order_note( 'Capture: ' . var_export( $klarna_capture, true ) );
+
 			$k_order->fetch();
 
 			$order->add_order_note(
@@ -1073,7 +1078,7 @@ class WC_Gateway_Klarna_Order {
 				}
 				$item_reference = strval( $order_item['product_id'] );
 
-				$item_price = number_format( ( $order_item['line_subtotal'] + $order_item['line_subtotal_tax'] ) * 100, 0, '', '' ) / $order_item['qty'];
+				$item_price = round( number_format( ( $order_item['line_subtotal'] + $order_item['line_subtotal_tax'] ) * 100, 0, '', '' ) / $order_item['qty'] );
  				$item_quantity = (int) $order_item['qty'];
 				$item_total_amount = round( ( $order_item['line_total'] + $order_item['line_tax'] ) * 100 );
 
@@ -1098,12 +1103,12 @@ class WC_Gateway_Klarna_Order {
 				);
 
 				$updated_order_lines[] = $klarna_item;
-				$updated_order_total = $updated_order_total + $item_total_amount;
-				$updated_tax_total = $updated_tax_total + $item_tax_amount;			
+				$updated_order_total   = $updated_order_total + $item_total_amount;
+				$updated_tax_total     = $updated_tax_total + $item_tax_amount;			
 			}
 		}
 
-/*
+		/*
 		// Process shipping
 		if ( $order->get_total_shipping() > 0 ) {
 			$shipping = array(  
@@ -1152,7 +1157,7 @@ class WC_Gateway_Klarna_Order {
 				}
 			}
 		}
-*/
+		*/
 
 		/**
 		 * Need to send local order to constructor and Klarna order to method
@@ -1206,6 +1211,10 @@ class WC_Gateway_Klarna_Order {
 				)
 			);
 		} catch( Exception $e ) {
+			$order->add_order_note( 'Trace: ' . var_export( $e->getTrace(), true ) );
+			$order->add_order_note( 'Trace as string: ' . var_export( $e->getTraceAsString(), true ) );
+			$order->add_order_note( 'File: ' . var_export( $e->getFile(), true ) );
+			$order->add_order_note( 'Line: ' . var_export( $e->getLine(), true ) );
 			$order->add_order_note(
 				sprintf(
 					__( 'Klarna order update failed. Error code %s. Error message %s', 'klarna' ),

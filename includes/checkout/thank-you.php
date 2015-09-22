@@ -81,8 +81,6 @@ WC()->session->__unset( 'ongoing_klarna_order' );
 WC()->session->__unset( 'klarna_order_note' );
 WC()->cart->empty_cart(); // Remove cart
 
-/*
-DEBUG CODE
 $orderid = $_GET['sid'];
 $billing_country = get_post_meta( $orderid, '_billing_country', true );
 $klarna_order_id = get_post_meta( $orderid, '_klarna_order_id', true );
@@ -122,4 +120,3 @@ $k_order->fetch();
 echo '<pre>';
 print_r( $k_order );
 echo '</pre>';
-*/
