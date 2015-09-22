@@ -2183,6 +2183,7 @@ class WC_Gateway_Klarna_Checkout_Extra {
 	public function __construct() {
 		
 		add_action( 'init', array( $this, 'start_session' ),1 );
+		add_action( 'before_woocommerce_init', array( $this, 'prevent_caching' ) );
 		
 		add_shortcode( 'woocommerce_klarna_checkout', array( $this, 'klarna_checkout_page') );
 		add_shortcode( 'woocommerce_klarna_checkout_order_note', array( $this, 'klarna_checkout_order_note') );
@@ -2199,6 +2200,41 @@ class WC_Gateway_Klarna_Checkout_Extra {
 		add_filter( 'woocommerce_get_checkout_page_id', array( $this, 'change_checkout_page_id' ) );
 
 	}
+
+	// Prevent caching in KCO and KCO thank you pages
+	function prevent_caching() {
+		$data = new WC_Gateway_Klarna_Checkout;
+		$klarna_checkout_url = trailingslashit( $data->klarna_checkout_url );
+
+		global $klarna_checkout_thanks_url;
+		$klarna_checkout_thanks_url = trailingslashit( $klarna_checkout_thanks_url );
+
+		// Clean request URI to remove all parameters
+		$clean_req_uri = explode( '?', $_SERVER['REQUEST_URI'] );
+		$clean_req_uri = $clean_req_uri[0];
+		$clean_req_uri = trailingslashit( $clean_req_uri );
+
+		$length = strlen( $clean_req_uri );
+
+		// Get last $length characters from KCO and KCO thank you URLs
+		$klarna_checkout_compare = substr( $klarna_checkout_url, 0 - $length );
+		$klarna_checkout_compare = trailingslashit( $klarna_checkout_compare );
+
+		$klarna_checkout_thanks_compare = substr( $klarna_checkout_thanks_url, 0 - $length );
+		$klarna_checkout_thanks_compare = trailingslashit( $klarna_checkout_thanks_compare );
+
+		if ( $clean_req_uri == $klarna_checkout_compare || $clean_req_uri == $klarna_checkout_thanks_compare ) {
+			// Prevent caching
+			if ( ! defined( 'DONOTCACHEPAGE' ) )
+				define( "DONOTCACHEPAGE", "true" );
+			if ( ! defined( 'DONOTCACHEOBJECT' ) )
+				define( "DONOTCACHEOBJECT", "true" );
+			if ( ! defined( 'DONOTCACHEDB' ) )
+				define( "DONOTCACHEDB", "true" );
+
+			nocache_headers();
+		}
+	}	
 	
 	// Set session
 	function start_session() {		
