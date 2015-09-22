@@ -1,5 +1,8 @@
 *** Klarna Changelog ***
 
+2015.09.22	- version 1.9.8.2
+* Fix       - Prevents caching of Klarna Checkout and Thank You pages.
+
 2015.05.05	- version 1.9.8.1
 * Feature	- Added filter klarna_checkout_billing_phone() for returned phone number in KCO.
 * Fix       - Fixes how Klarna customer billing details are handled in session.
