@@ -274,35 +274,6 @@ class WC_Gateway_Klarna_Campaign extends WC_Gateway_Klarna {
     	<h3><?php _e('Klarna Special Campaign', 'klarna'); ?></h3>
 	    	<p><?php printf(__('With Klarna your customers can pay by invoice. Klarna works by adding extra personal information fields and then sending the details to Klarna for verification. Documentation <a href="%s" target="_blank">can be found here</a>.', 'klarna'), 'http://docs.woothemes.com/document/klarna/' ); ?></p>
 	    	
-		   <?php
-	    // Get PClasses so that the we can see what classes are active for the merchant.
-		require_once(KLARNA_LIB . 'Klarna.php');
-		require_once(KLARNA_LIB . 'pclasses/storage.intf.php');
-		
-		if(!function_exists('xmlrpc_encode_entitites') && !class_exists('xmlrpcresp')) {
-			require_once(KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc.inc');
-			require_once(KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc_wrappers.inc');
-		}
-		
-		if( !empty($this->authorized_countries) && $this->enabled == 'yes' ) {
-			echo '<h4>' . __('Active PClasses', 'klarna') . '</h4>';
-		    foreach($this->authorized_countries as $key=>$country) {
-		    	$data = new WC_Gateway_Klarna_Account;
-			    $pclasses = $data->fetch_pclasses( $country );
-			    if( $pclasses ) {
-			    	echo '<p>' . $country . '</p>';
-				    foreach( $pclasses as $pclass ) {
-				    	if ( $pclass->getType() == 2 && $pclass->getExpire() >= time() ) {
-					    	echo $pclass->getDescription() . ', ';
-					    }
-				    }
-				    
-				    echo '<br/>';
-			    }   
-		    }
-		} 
-	    ?>
-		    
     	<table class="form-table">
     	<?php
     		// Generate the HTML For the settings form.
