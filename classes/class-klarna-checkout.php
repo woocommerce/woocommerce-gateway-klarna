@@ -2218,7 +2218,7 @@ class WC_Gateway_Klarna_Checkout_Extra {
 	public function __construct() {
 
 		add_action( 'init', array( $this, 'start_session' ), 1 );
-		// add_action( 'wp_head', array( $this, 'klarna_checkout_css' ) );
+		add_action( 'before_woocommerce_init', array( $this, 'prevent_caching' ) );
 		
 		add_filter( 'woocommerce_get_checkout_url', array( $this, 'change_checkout_url' ), 20 );
 		
@@ -2235,6 +2235,46 @@ class WC_Gateway_Klarna_Checkout_Extra {
 		add_filter( 'woocommerce_is_checkout', array( $this, 'change_is_checkout_value' ) );
 		
 	}
+
+
+	/**
+	 * Prevent caching in KCO and KCO thank you pages
+	 *
+	 * @since 1.9.8.2
+	 */
+	function prevent_caching() {
+		$checkout_settings = get_option( 'woocommerce_klarna_checkout_settings' );		
+		$checkout_pages = array();
+		$thank_you_pages = array();
+
+		// Clean request URI to remove all parameters
+		$clean_req_uri = explode( '?', $_SERVER['REQUEST_URI'] );
+		$clean_req_uri = $clean_req_uri[0];
+		$clean_req_uri = trailingslashit( $clean_req_uri );
+		$length = strlen( $clean_req_uri );
+
+		// Get arrays of checkout and thank you pages for all countries
+		foreach ( $checkout_settings as $cs_key => $cs_value ) {
+			if ( strpos( $cs_key, 'klarna_checkout_url_' ) !== false ) {
+				$checkout_pages[ $cs_key ] = substr( $cs_value, 0 - $length );
+			}
+			if ( strpos( $cs_key, 'klarna_checkout_thanks_url_' ) !== false ) {
+				$thank_you_pages[ $cs_key ] = substr( $cs_value, 0 - $length );
+			}
+		}
+
+		if ( in_array( $clean_req_uri, $checkout_pages ) || in_array( $clean_req_uri, $thank_you_pages ) ) {
+			// Prevent caching
+			if ( ! defined( 'DONOTCACHEPAGE' ) )
+				define( "DONOTCACHEPAGE", "true" );
+			if ( ! defined( 'DONOTCACHEOBJECT' ) )
+				define( "DONOTCACHEOBJECT", "true" );
+			if ( ! defined( 'DONOTCACHEDB' ) )
+				define( "DONOTCACHEDB", "true" );
+
+			nocache_headers();
+		}
+	}	
 
 
 	/**
