@@ -303,7 +303,8 @@ function init_klarna_gateway() {
 
 	// Klarna Checkout class
 	$klarna_shop_country = get_option( 'woocommerce_default_country' );
-	$available_countries = array( 'SE', 'NO', 'FI', 'DE', 'GB', 'AT' );
+	$klarna_shop_country = substr( $klarna_shop_country, 0, 2 ); // Get first two characters to remove state
+	$available_countries = array( 'SE', 'NO', 'FI', 'DE', 'GB', 'AT', 'US' );
 	if ( in_array( $klarna_shop_country, $available_countries ) ) {
 		require_once 'classes/class-klarna-checkout.php';
 		require_once 'classes/class-klarna-shortcodes.php';
@@ -342,6 +343,7 @@ add_action( 'plugins_loaded', 'init_klarna_gateway', 2 );
  */
 function add_klarna_gateway( $methods ) {	
 	$klarna_shop_country = get_option( 'woocommerce_default_country' );
+	$klarna_shop_country = substr( $klarna_shop_country, 0, 2 ); // Cut off first two characters to remove state
 
 	$available_countries = array( 'SE', 'NO', 'FI', 'DK', 'DE', 'NL' );
 	if ( in_array( $klarna_shop_country, $available_countries ) ) {
@@ -350,7 +352,7 @@ function add_klarna_gateway( $methods ) {
 	}
 	
 	// Only add the Klarna Checkout method if Sweden, Norway or Finland is set as the base country
-	$available_countries = array( 'SE', 'NO', 'FI', 'DE', 'GB', 'AT' );
+	$available_countries = array( 'SE', 'NO', 'FI', 'DE', 'GB', 'AT', 'US' );
 	if ( in_array( $klarna_shop_country, $available_countries ) ) {
 		$methods[] = 'WC_Gateway_Klarna_Checkout';
 	}
