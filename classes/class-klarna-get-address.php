@@ -68,9 +68,7 @@ class WC_Klarna_Get_Address {
 	public function checkout_restore_customer_defaults() {
 		if ( is_checkout() && 'SE' == $this->get_shop_country() && ( $this->partpay_enabled || $this->invo_enabled ) ) {
 			
-			if ( defined( 'WOOCOMMERCE_KLARNA_CHECKOUT' ) ) {
-				break;
-			}
+			if ( defined( 'WOOCOMMERCE_KLARNA_CHECKOUT' ) ) return;
 
 			global $woocommerce, $current_user;
 		
@@ -140,6 +138,8 @@ class WC_Klarna_Get_Address {
  	 */
 	function js() {	
 		if( is_checkout() && $this->get_shop_country() == 'SE' && ($this->partpay_enabled || $this->invo_enabled ) ) {
+
+			if ( defined( 'WOOCOMMERCE_KLARNA_CHECKOUT' ) ) return;
 			?>
 			<script type="text/javascript">
 			jQuery(document).ready(function($){
