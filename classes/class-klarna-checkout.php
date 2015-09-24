@@ -578,6 +578,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 				// Process order via Klarna Checkout page				
 
 				if ( !defined( 'WOOCOMMERCE_CHECKOUT' ) ) define( 'WOOCOMMERCE_CHECKOUT', true );
+				if ( !defined( 'WOOCOMMERCE_KLARNA_CHECKOUT' ) ) define( 'WOOCOMMERCE_KLARNA_CHECKOUT', true );
 				
 				// Set Klarna Checkout as the choosen payment method in the WC session
 				WC()->session->set( 'chosen_payment_method', 'klarna_checkout' );

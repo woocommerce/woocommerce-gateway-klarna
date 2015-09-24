@@ -1,5 +1,8 @@
 *** Klarna Changelog ***
 
+2015.09.24	- version 1.9.8.3
+* Fix       - Fixes output of JS in Klarna Checkout page.
+
 2015.09.22	- version 1.9.8.2
 * Fix       - Prevents caching of Klarna Checkout and Thank You pages.
 * Update    - Removes display of active PClasses in settings pages.
