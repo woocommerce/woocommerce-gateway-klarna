@@ -32,52 +32,6 @@ if ( ! function_exists( 'woothemes_queue_update' ) )
  */
 woothemes_queue_update( plugin_basename( __FILE__ ), '4edd8b595d6d4b76f31b313ba4e4f3f6', '18624' );
 
-add_filter( 'wc_order_statuses', 'slbd_remove_refunded', 1000 );
-function slbd_remove_refunded( $order_statuses ) {
-	$screen = get_current_screen();
-
-	if ( 'shop_order' == $screen->id ) {
-		if ( absint( $_GET['post'] ) == $_GET['post'] ) {
-			$order_id = $_GET['post'];
-			$order = wc_get_order( $order_id );
-
-			if (
-				false != $order && 
-				'refunded' != $order->get_status() && 
-				'klarna_checkout' == get_post_meta( $order_id, '_created_via', true )
-			) {
-				unset( $order_statuses['wc-refunded'] );
-			}
-
-			// NEVER make it possible to change status to KCO Incomplete
-			if ( false != $order ) {
-				unset( $order_statuses['wc-kco-incomplete'] );
-			}
-		}
-	}
-
-	return $order_statuses;
-}
-
-add_action( 'admin_head', 'slbd_admin_css' );
-function slbd_admin_css() {
-	$screen = get_current_screen();
-
-	if ( 'shop_order' == $screen->id ) {
-		if ( absint( $_GET['post'] ) == $_GET['post'] ) {
-			$order_id = $_GET['post'];
-			$order = wc_get_order( $order_id );
-
-			if (
-				false != $order && 
-				'klarna_checkout' == get_post_meta( $order_id, '_created_via', true )
-			) {
-				echo '<style>.do-manual-refund{display:none !important;}</style>';
-			}
-		}
-	}
-}
-
 /**
  * Rounds product prices to an arbitrary precision.
  *

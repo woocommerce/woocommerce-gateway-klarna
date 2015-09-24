@@ -156,10 +156,70 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		// Do not copy invoice number to recurring orders
 		add_filter( 'woocommerce_subscriptions_renewal_order_meta_query', array( $this, 'kco_recurring_do_not_copy_meta_data' ), 10, 4 );
 
+		// Hide "Refunded" and "KCO Incomplete" statuses for KCO orders
+		add_filter( 'wc_order_statuses', array( $this, 'remove_refunded_and_kco_incomplete' ), 1000 );
+
+		// Hide "Manual Refund" button for KCO orders
+		add_action( 'admin_head', array( $this, 'remove_refund_manually' ) );
+
     }
 
 	/**
-	 * Purge KCO Incomplete orders
+	 * Remove "Refunded" and "KCO Incomplete" statuses from the dropdown for KCO orders
+	 * 
+	 * @since  2.0
+	 **/
+	function remove_refunded_and_kco_incomplete( $order_statuses ) {
+		$screen = get_current_screen();
+
+		if ( 'shop_order' == $screen->id ) {
+			if ( absint( $_GET['post'] ) == $_GET['post'] ) {
+				$order_id = $_GET['post'];
+				$order = wc_get_order( $order_id );
+
+				if (
+					false != $order && 
+					'refunded' != $order->get_status() && 
+					'klarna_checkout' == get_post_meta( $order_id, '_created_via', true )
+				) {
+					unset( $order_statuses['wc-refunded'] );
+				}
+
+				// NEVER make it possible to change status to KCO Incomplete
+				if ( false != $order ) {
+					unset( $order_statuses['wc-kco-incomplete'] );
+				}
+			}
+		}
+
+		return $order_statuses;
+	}
+
+	/**
+	 * Hide "Refund x Manually" for KCO orders
+	 * 
+	 * @since  2.0
+	 **/
+	function remove_refund_manually() {
+		$screen = get_current_screen();
+
+		if ( 'shop_order' == $screen->id ) {
+			if ( absint( $_GET['post'] ) == $_GET['post'] ) {
+				$order_id = $_GET['post'];
+				$order = wc_get_order( $order_id );
+
+				if (
+					false != $order && 
+					'klarna_checkout' == get_post_meta( $order_id, '_created_via', true )
+				) {
+					echo '<style>.do-manual-refund{display:none !important;}</style>';
+				}
+			}
+		}
+	}
+
+	/**
+	 * Register purge KCO Incomplete orders cronjob
 	 * 
 	 * @since  2.0
 	 **/
