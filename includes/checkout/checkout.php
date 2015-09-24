@@ -36,6 +36,10 @@ if ( class_exists( 'WC_Subscriptions_Cart' ) && WC_Subscriptions_Cart::cart_cont
 if ( ! defined( 'WOOCOMMERCE_CHECKOUT' ) )
 	define( 'WOOCOMMERCE_CHECKOUT', true );
 
+// Process order via Klarna Checkout page
+if ( ! defined( 'WOOCOMMERCE_KLARNA_CHECKOUT' ) )
+	define( 'WOOCOMMERCE_KLARNA_CHECKOUT', true );
+
 // Set Klarna Checkout as the choosen payment method in the WC session
 WC()->session->set( 'chosen_payment_method', 'klarna_checkout' );
 

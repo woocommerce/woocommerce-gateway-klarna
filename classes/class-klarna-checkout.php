@@ -1161,7 +1161,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		global $woocommerce;
 
 		// Check if Euro is selected, get correct country
-		if ( WC()->session->get( 'aelia_cs_selected_currency' ) && 'EUR' == WC()->session->get( 'aelia_cs_selected_currency' ) && WC()->session->get( 'klarna_euro_country' ) ) {
+		if ( 'EUR' == get_woocommerce_currency() && WC()->session->get( 'klarna_euro_country' ) ) {
 			$klarna_c = strtolower( WC()->session->get( 'klarna_euro_country' ) );
 			$eid = $this->settings["eid_$klarna_c"];
 			$sharedSecret = $this->settings["secret_$klarna_c"];

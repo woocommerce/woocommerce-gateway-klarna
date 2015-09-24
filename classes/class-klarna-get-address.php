@@ -67,7 +67,11 @@ class WC_Klarna_Get_Address {
  	 */
 	public function checkout_restore_customer_defaults() {
 		if ( is_checkout() && 'SE' == $this->get_shop_country() && ( $this->partpay_enabled || $this->invo_enabled ) ) {
-		
+			
+			if ( defined( 'WOOCOMMERCE_KLARNA_CHECKOUT' ) ) {
+				break;
+			}
+
 			global $woocommerce, $current_user;
 		
 			$original_customer = array();
