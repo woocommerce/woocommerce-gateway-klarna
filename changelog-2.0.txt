@@ -1,2 +1,0 @@
-removes wc_compatibility class
-Moves Klarna part payment widget to Products > Klarna settings page

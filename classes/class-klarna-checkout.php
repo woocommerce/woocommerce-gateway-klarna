@@ -2316,22 +2316,16 @@ class WC_Gateway_Klarna_Checkout_Extra {
 		$length = strlen( $clean_req_uri );
 
 		// Get arrays of checkout and thank you pages for all countries
-		if ( false === ( $wc_klarna_excluded_page_uris = get_transient( 'woocommerce_klarna_cache_excluded_uris' ) ) ) {
-			foreach ( $checkout_settings as $cs_key => $cs_value ) {
-				// All checkout pages
-				if ( strpos( $cs_key, 'klarna_checkout_url_' ) !== false ) {
-					$wc_klarna_excluded_page_uris[ $cs_key ] = substr( $cs_value, 0 - $length );
-				}
-				// All thank you pages
-				if ( strpos( $cs_key, 'klarna_checkout_thanks_url_' ) !== false ) {
-					$wc_klarna_excluded_page_uris[ $cs_key ] = substr( $cs_value, 0 - $length );
-				}
+		foreach ( $checkout_settings as $cs_key => $cs_value ) {
+			if ( strpos( $cs_key, 'klarna_checkout_url_' ) !== false ) {
+				$checkout_pages[ $cs_key ] = substr( $cs_value, 0 - $length );
 			}
-
-			set_transient( 'woocommerce_klarna_cache_excluded_uris', $wc_klarna_excluded_page_uris );
+			if ( strpos( $cs_key, 'klarna_checkout_thanks_url_' ) !== false ) {
+				$thank_you_pages[ $cs_key ] = substr( $cs_value, 0 - $length );
+			}
 		}
 
-		if ( in_array( $clean_req_uri, $wc_klarna_excluded_page_uris ) ) {
+		if ( in_array( $clean_req_uri, $checkout_pages ) || in_array( $clean_req_uri, $thank_you_pages ) ) {
 			// Prevent caching
 			if ( ! defined( 'DONOTCACHEPAGE' ) )
 				define( "DONOTCACHEPAGE", "true" );
