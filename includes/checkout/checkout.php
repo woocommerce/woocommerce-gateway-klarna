@@ -164,3 +164,5 @@ if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 	WC()->session->__unset( 'ongoing_klarna_order' ); // WooCommerce order ID
 	WC()->session->__unset( 'klarna_order_note' );
 } // End if sizeof cart
+
+echo '<pre>'; print_r( $klarna_order->getLocation() ); echo '</pre>';

@@ -1,6 +1,6 @@
 <?php
 /**
- * Klarna orders management
+ * Klarna order management
  *
  * @link http://www.woothemes.com/products/klarna/
  * @since 1.0.0
@@ -486,12 +486,10 @@ class WC_Gateway_Klarna_Order {
 		$orderid = $order->id;
 
 		try {
-			$refund = $k_order->refund( array(
+			$k_order->refund( array(
 				'refunded_amount' => $amount * 100,
 				'description'     => $reason,
 			) );
-
-			$order->add_order_note( 'Refund: ' . var_export( $refund, true ) );
 
 			$order->add_order_note(
 				sprintf(
@@ -757,9 +755,7 @@ class WC_Gateway_Klarna_Order {
 		);
 
 		try {
-			$klarna_capture = $k_order->createCapture( $data );
-
-			$order->add_order_note( 'Capture: ' . var_export( $klarna_capture, true ) );
+			$k_order->createCapture( $data );
 
 			$k_order->fetch();
 

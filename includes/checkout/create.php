@@ -75,6 +75,7 @@ if ( $this->is_rest() ) {
 		),
 		$this->klarna_checkout_thanks_url
 	);
+	$address_update_uri = get_home_url() . '/wc-api/WC_Gateway_Klarna_Checkout_Address/';
 } else { // V2
 	$merchant_terms_uri = $this->terms_url;
 	$merchant_checkout_uri = esc_url_raw( add_query_arg( 
@@ -104,10 +105,11 @@ if ( $this->is_rest() ) {
 // Different format for V3 and V2
 if ( $this->is_rest() ) {
 	$merchantUrls = array(
-		'terms'        => $merchant_terms_uri,
-		'checkout'     => $merchant_checkout_uri,
-		'confirmation' => $merchant_confirmation_uri,
-		'push'         => $merchant_push_uri
+		'terms'          => $merchant_terms_uri,
+		'checkout'       => $merchant_checkout_uri,
+		'confirmation'   => $merchant_confirmation_uri,
+		'push'           => $merchant_push_uri,
+		// 'address_update' => $address_update_uri
 	);
 	$create['merchant_urls'] = $merchantUrls;
 } else {

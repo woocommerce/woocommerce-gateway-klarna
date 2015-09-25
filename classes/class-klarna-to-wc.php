@@ -1,6 +1,6 @@
 <?php
 /**
- * Formats Klarna order data for WC order
+ * Formats WC data for creating/updating Klarna orders
  *
  * @link  http://www.woothemes.com/products/klarna/
  * @since 2.0.0
