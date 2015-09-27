@@ -61,10 +61,10 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
 
 		// Push listener
-		add_action( 'woocommerce_api_wc_gateway_klarna_checkout_address', array( $this, 'address_update_listener' ) );
+		add_action( 'woocommerce_api_wc_gateway_klarna_checkout', array( $this, 'check_checkout_listener' ) );
 
 		// Address update listener
-		// add_action( 'woocommerce_api_wc_gateway_klarna_checkout', array( $this, 'check_checkout_listener' ) );
+		// add_action( 'woocommerce_api_wc_gateway_klarna_checkout_address', array( $this, 'address_update_listener' ) );
 
 		// We execute the woocommerce_thankyou hook when the KCO Thank You page is rendered,
 		// because other plugins use this, but we don't want to display the actual WC Order
@@ -1311,7 +1311,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 				$klarna_order->update( apply_filters( 'kco_update_order', $update ) );
 			} catch ( Exception $e ) {
 				if ( $this->debug=='yes' ) {
-					$this->log->add( 'klarna', 'KCO ERROR: ' . var_export( $e ) );
+					$this->log->add( 'klarna', 'KCO ERROR: ' . var_export( $e, true ) );
 				}
 			}
 		}
@@ -1937,6 +1937,8 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 * @since 1.0.0
      */
 	function check_checkout_listener() {
+		$this->log->add( 'klarna', 'Checkout listener hit.' );
+
 		if ( isset( $_GET['validate'] ) ) { 
 			exit;
 		}
