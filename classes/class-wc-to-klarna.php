@@ -93,7 +93,11 @@ class WC_Gateway_Klarna_WC2K {
 
 		foreach ( $woocommerce->cart->get_cart() as $cart_item ) {
 			if ( $cart_item['quantity'] ) {
-				$_product = wc_get_product( $cart_item['product_id'] );
+				if ( $cart_item['variation_id'] ) {
+					$_product = wc_get_product( $cart_item['variation_id'] );
+				} else {
+					$_product = wc_get_product( $cart_item['product_id'] );
+				}
 
 				$item_name            = $this->get_item_name( $cart_item );
 				$item_price           = $this->get_item_price( $cart_item );
