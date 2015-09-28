@@ -761,8 +761,9 @@ class WC_Gateway_Klarna_K2WC {
         	return new WP_Error( "registration-error", '<strong>' . __( 'ERROR', 'woocommerce' ) . '</strong>: ' . __( 'Couldn&#8217;t register you&hellip; please contact us if you continue to have problems.', 'woocommerce' ) );
 	
 		// Send New account creation email to customer?
-		if( $this->send_new_account_email == 'yes' ) {
-        	do_action( 'woocommerce_created_customer', $customer_id, $new_customer_data, $password_generated );
+		$checkout_settings = get_option( 'woocommerce_klarna_checkout_settings' );
+		if ( 'yes' == $checkout_settings['send_new_account_email'] ) {
+			do_action( 'woocommerce_created_customer', $customer_id, $new_customer_data, $password_generated );
 		}
 	
 		return $customer_id;
