@@ -29,7 +29,7 @@ class UserAgent implements UserAgentInterface
     /**
      * Name of the SDK
      */
-    const NAME = 'Klarna.kco_rest_php';
+    const NAME = 'Krokedil';
 
     /**
      * Version of the SDK.
