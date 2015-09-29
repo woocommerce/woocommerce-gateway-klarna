@@ -180,6 +180,10 @@ function init_klarna_gateway() {
 
 	} // End class WC_Gateway_Klarna
 	
+
+	require_once 'vendor/autoload.php';
+
+
 	// Include the WooCommerce Compatibility Utility class
 	// The purpose of this class is to provide a single point of compatibility functions for dealing with supporting multiple versions of WooCommerce (currently 2.0.x and 2.1)
 	require_once 'classes/class-wc-klarna-compatibility.php';

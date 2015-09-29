@@ -362,15 +362,6 @@ class WC_Klarna_Get_Address {
 	function ajax_request() {
 		// The $_REQUEST contains all the data sent via ajax
 		if ( isset( $_REQUEST ) ) {
-		
-			// Klarna settings
-			require_once(KLARNA_LIB . 'Klarna.php');
-			
-			if ( ! function_exists( 'xmlrpc_encode_entitites' ) && ! class_exists( 'xmlrpcresp' ) ) {
-				require_once( KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc.inc' );
-				require_once( KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc_wrappers.inc' );
-			}
-
 			if ( '' != $this->partpay_eid && '' != $this->partpay_secret ) {
 				$klarna_eid = $this->partpay_eid;
 				$klarna_secret = $this->partpay_secret;

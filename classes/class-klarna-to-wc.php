@@ -321,7 +321,6 @@ class WC_Gateway_Klarna_K2WC {
 		if ( sanitize_key( $_GET['klarna-api'] ) && 'rest' == sanitize_key( $_GET['klarna-api'] ) ) {
 			$klarna_country = sanitize_key( $_GET['scountry'] );
 
-			require_once( KLARNA_LIB . 'vendor/autoload.php' );
 			if ( $this->klarna_test_mode == 'yes' ) {
 				if ( 'gb' == $klarna_country ) {
 					$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_TEST_BASE_URL;
@@ -347,14 +346,15 @@ class WC_Gateway_Klarna_K2WC {
 				$this->klarna_order_uri
 			);
 		} else {
-			require_once( KLARNA_LIB . '/src/Klarna/Checkout.php' );  
-			// Klarna_Checkout_Order::$contentType = "application/vnd.klarna.checkout.aggregated-order-v2+json";
-			$connector    = Klarna_Checkout_Connector::create(
+			$connector = Klarna_Checkout_Connector::create(
 				$this->secret,
 				$this->klarna_server
 			);  			
-			$checkoutId   = $this->klarna_order_uri;  
-			$klarna_order = new Klarna_Checkout_Order( $connector, $checkoutId );  
+			$checkoutId = $this->klarna_order_uri;  
+			$klarna_order = new Klarna_Checkout_Order(
+				$connector,
+				$checkoutId
+			);  
 		}
 		
 		$klarna_order->fetch();

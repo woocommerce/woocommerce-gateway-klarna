@@ -39,9 +39,6 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		include_once( KLARNA_DIR . 'classes/class-klarna-helper.php' );
 		$this->klarna_helper = new WC_Gateway_Klarna_Helper( $this );
 		
-		// Define Klarna object
-		require_once( KLARNA_LIB . 'Klarna.php' );
-
 		// Test mode or Live mode		
 		if ( $this->testmode == 'yes' ) {
 			// Disable SSL if in testmode
@@ -490,7 +487,6 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			$create['cart']['items'][] = $item;
 		}
 
-		require_once( KLARNA_LIB . '/src/Klarna/Checkout.php' );
 		$connector = Klarna_Checkout_Connector::create(
 			$klarna_secret,
 			$this->klarna_server
@@ -1068,7 +1064,6 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			$data['orderid'] = $orderid;
 
 			if ( $this->is_rest() ) {
-				require_once( KLARNA_LIB . 'vendor/autoload.php' );
 				if ( $this->testmode == 'yes' ) {
 					if ( 'gb' == $this->klarna_country ) {
 						$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_TEST_BASE_URL;
@@ -1118,7 +1113,6 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 					'merchant_urls' => $merchant_urls
 				) );
 			} else {
-				require_once( KLARNA_LIB . '/src/Klarna/Checkout.php' );
 				$connector = Klarna_Checkout_Connector::create( $this->klarna_secret, $this->klarna_server );		
 				$klarna_order = new Klarna_Checkout_Order(
 					$connector,
@@ -1243,7 +1237,6 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		}
 
 		if ( $this->is_rest() ) {
-			require_once( KLARNA_LIB . 'vendor/autoload.php' );
 			if ( $this->testmode == 'yes' ) {
 				if ( 'gb' == $this->klarna_country ) {
 					$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_TEST_BASE_URL;
@@ -1268,7 +1261,6 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 				WC()->session->get( 'klarna_checkout' )
 			);
 		} else {
-			require_once( KLARNA_LIB . '/src/Klarna/Checkout.php' );
 			$connector = Klarna_Checkout_Connector::create( $sharedSecret, $this->klarna_server );
 	
 			$klarna_order = new Klarna_Checkout_Order(
@@ -1865,8 +1857,6 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			$this->log->add( 'klarna', 'KCO page about to render...' );
 		}
 
-		require_once( KLARNA_LIB . '/src/Klarna/Checkout.php' );
-
 		// Check if Klarna order exists, if it does display thank you page
 		// otherwise display checkout page
 		if ( isset( $_GET['klarna_order'] ) ) { // Display Order response/thank you page via iframe from Klarna
@@ -1987,6 +1977,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			$klarna_to_wc->set_klarna_log( $this->log );
 			$klarna_to_wc->set_klarna_test_mode( $this->testmode );		
 			$klarna_to_wc->set_klarna_debug( $this->debug );
+			$klarna_to_wc->set_klarna_server( $this->klarna_server );
 			$klarna_to_wc->listener();
 		}
 	} // End function check_checkout_listener
@@ -2146,14 +2137,6 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			if ( 'v2' == get_post_meta( $order->id, '_klarna_api', true ) ) {
 
 				$country = get_post_meta( $orderid, '_billing_country', true );
-
-				// Klarna settings
-				require_once( KLARNA_LIB . 'Klarna.php' );
-				
-				if ( ! function_exists( 'xmlrpc_encode_entitites' ) && ! class_exists( 'xmlrpcresp' ) ) {
-					require_once( KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc.inc' );
-					require_once( KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc_wrappers.inc' );
-				}
 								
 				$klarna = new Klarna();
 				$this->configure_klarna( $klarna, $country );
@@ -2167,7 +2150,6 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 				/**
 				 * Need to send local order to constructor and Klarna order to method
 				 */
-				require_once( KLARNA_LIB . 'vendor/autoload.php' );
 				if ( $this->testmode == 'yes' ) {
 					if ( 'gb' == $this->klarna_country ) {
 						$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_TEST_BASE_URL;

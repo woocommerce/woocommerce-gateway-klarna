@@ -20,7 +20,6 @@ $orderUri     = $_GET['klarna_order'];
 
 // Connect to Klarna
 if ( $this->is_rest() ) {
-	require_once( KLARNA_LIB . 'vendor/autoload.php' );
 	if ( $this->testmode == 'yes' ) {
 		if ( 'gb' == $this->klarna_country ) {
 			$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_TEST_BASE_URL;
@@ -43,8 +42,14 @@ if ( $this->is_rest() ) {
 	$klarna_order = new Klarna\Rest\Checkout\Order( $connector, $orderUri );
 } else {
 	// Klarna_Checkout_Order::$contentType = 'application/vnd.klarna.checkout.aggregated-order-v2+json';  
-	$connector = Klarna_Checkout_Connector::create( $sharedSecret );  
-	$klarna_order = new Klarna_Checkout_Order( $connector, $orderUri );
+	$connector = Klarna_Checkout_Connector::create(
+		$sharedSecret,
+		$this->klarna_server
+	);  
+	$klarna_order = new Klarna_Checkout_Order(
+		$connector, 
+		$orderUri
+	);
 }
 
 try {

@@ -657,12 +657,6 @@ class WC_Gateway_Klarna_Order {
 			$country        = get_post_meta( $orderid, '_billing_country', true );
 			$payment_method = get_post_meta( $orderid, '_payment_method', true );
 
-			// Klarna settings
-			require_once( KLARNA_LIB . 'Klarna.php' );			
-			if ( ! function_exists( 'xmlrpc_encode_entitites' ) && ! class_exists( 'xmlrpcresp' ) ) {
-				require_once( KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc.inc' );
-				require_once( KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc_wrappers.inc' );
-			}
 			$klarna = new Klarna();
 			$this->configure_klarna( $klarna, $country, $payment_method );
 
@@ -711,7 +705,6 @@ class WC_Gateway_Klarna_Order {
 		/**
 		 * Need to send local order to constructor and Klarna order to method
 		 */
-		require_once( KLARNA_LIB . 'vendor/autoload.php' );
 		if ( $klarna_settings['testmode'] == 'yes' ) {
 			if ( 'gb' == strtolower( $billing_country ) ) {
 				$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_TEST_BASE_URL;
@@ -817,12 +810,6 @@ class WC_Gateway_Klarna_Order {
 			$country        = get_post_meta( $orderid, '_billing_country', true );
 			$payment_method = get_post_meta( $orderid, '_payment_method', true );
 
-			// Klarna settings
-			require_once( KLARNA_LIB . 'Klarna.php' );			
-			if ( ! function_exists( 'xmlrpc_encode_entitites' ) && ! class_exists( 'xmlrpcresp' ) ) {
-				require_once( KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc.inc' );
-				require_once( KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc_wrappers.inc' );
-			}
 			$klarna = new Klarna();
 			$this->configure_klarna( $klarna, $country, $payment_method );
 
@@ -857,7 +844,6 @@ class WC_Gateway_Klarna_Order {
 		/**
 		 * Need to send local order to constructor and Klarna order to method
 		 */
-		require_once( KLARNA_LIB . 'vendor/autoload.php' );
 		if ( $klarna_settings['testmode'] == 'yes' ) {
 			if ( 'gb' == strtolower( $billing_country ) ) {
 				$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_TEST_BASE_URL;
@@ -1011,11 +997,6 @@ class WC_Gateway_Klarna_Order {
 		$country        = get_post_meta( $orderid, '_billing_country', true );
 		$payment_method = get_post_meta( $orderid, '_payment_method', true );
 
-		require_once( KLARNA_LIB . 'Klarna.php' );			
-		if ( ! function_exists( 'xmlrpc_encode_entitites' ) && ! class_exists( 'xmlrpcresp' ) ) {
-			require_once( KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc.inc' );
-			require_once( KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc_wrappers.inc' );
-		}
 		$klarna = new Klarna();
 		$this->configure_klarna( $klarna, $country, $payment_method );
 		$this->klarna = $klarna;
@@ -1158,7 +1139,6 @@ class WC_Gateway_Klarna_Order {
 		/**
 		 * Need to send local order to constructor and Klarna order to method
 		 */
-		require_once( KLARNA_LIB . 'vendor/autoload.php' );
 		if ( $klarna_settings['testmode'] == 'yes' ) {
 			if ( 'gb' == strtolower( $billing_country ) ) {
 				$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_TEST_BASE_URL;

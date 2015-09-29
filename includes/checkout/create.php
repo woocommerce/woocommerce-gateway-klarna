@@ -87,13 +87,14 @@ if ( $this->is_rest() ) {
 		array(
 			'sid'          => $local_order_id, 
 			'scountry'     => $this->klarna_country, 
-			'klarna_order' => '{checkout.order.uri}', 
+			'klarna_order' => '{checkout.order.id}', 
+			'klarna-api'   => 'v2'
 		),
 		$push_uri_base 
 	);
 	$merchant_confirmation_uri = add_query_arg ( 
 		array(
-			'klarna_order'   => '{checkout.order.uri}', 
+			'klarna_order'   => '{checkout.order.id}', 
 			'sid'            => $local_order_id, 
 			'order-received' => $local_order_id,
 			'thankyou'       => 'yes'

@@ -52,14 +52,6 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 		// Helper class
 		include_once( KLARNA_DIR . 'classes/class-klarna-helper.php' );
 		$this->klarna_helper = new WC_Gateway_Klarna_Helper( $this );
-		
-		// Load Klarna library
-		require_once( KLARNA_LIB . 'Klarna.php' );
-		require_once( KLARNA_LIB . 'pclasses/storage.intf.php' );
-		if ( ! function_exists( 'xmlrpc_encode_entitites' ) && ! class_exists( 'xmlrpcresp' ) ) {
-			require_once( KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc.inc' );
-			require_once( KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc_wrappers.inc' );
-		}
 
 		// Test mode or Live mode		
 		if ( $this->testmode == 'yes' ) {
@@ -733,8 +725,6 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 		$klarna_billing = array();
 		$klarna_shipping = array();
 		if ( $_POST['billing_country'] == 'NL' || $_POST['billing_country'] == 'DE' ) {
-
-			require_once( KLARNA_DIR . 'split-address.php' );
 			
 			// Set up billing address array
 			$klarna_billing_address             = $order->billing_address_1;

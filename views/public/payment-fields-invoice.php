@@ -100,13 +100,6 @@ if ( 'NO' == $this->klarna_helper->get_klarna_country() ) { ?>
 		<p class="form-row form-row-wide">
 			<?php
 			// Check if we have any PClasses
-			require_once( KLARNA_LIB . 'pclasses/storage.intf.php' );
-
-			if ( ! function_exists( 'xmlrpc_encode_entitites' ) && ! class_exists( 'xmlrpcresp' ) ) {
-				require_once( KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc.inc' );
-				require_once( KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc_wrappers.inc' );
-			}
-
 			$country = $this->klarna_helper->get_klarna_country();
 			$klarna = new Klarna();
 			$this->configure_klarna( $klarna, $country );

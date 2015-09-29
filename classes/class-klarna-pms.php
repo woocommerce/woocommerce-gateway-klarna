@@ -60,13 +60,6 @@ class WC_Klarna_PMS {
 		$invoice_fee = false
 	) {
 
-		require_once( KLARNA_LIB . 'Klarna.php' );
-		
-		if ( ! function_exists( 'xmlrpc_encode_entitites' ) && !class_exists('xmlrpcresp' ) ) {
-			require_once( KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc.inc' );
-			require_once( KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc_wrappers.inc' );
-		}
-
 		$klarna = new Klarna();
 		$config = new KlarnaConfig();
 		

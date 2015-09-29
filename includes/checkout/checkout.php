@@ -92,7 +92,6 @@ if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 
 	// Initiate Klarna
 	if ( $this->is_rest() ) {
-		require_once( KLARNA_LIB . 'vendor/autoload.php' );
 		if ( $this->testmode == 'yes' ) {
 			if ( 'gb' == $this->klarna_country ) {
 				$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_TEST_BASE_URL;
@@ -112,9 +111,6 @@ if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 		    $klarna_server_url
 		);
 	} else {
-		require_once( KLARNA_LIB . '/src/Klarna/Checkout.php' );
-		// Klarna_Checkout_Order::$baseUri = $this->klarna_server;
-		// Klarna_Checkout_Order::$contentType = 'application/vnd.klarna.checkout.aggregated-order-v2+json';
 		$connector = Klarna_Checkout_Connector::create( $sharedSecret, $this->klarna_server );
 	}
 	$klarna_order = null;
@@ -140,7 +136,7 @@ if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 	if ( $this->is_rest() ) {
 		$sessionId = $klarna_order['order_id'];
 	} else {
-		$sessionId = $klarna_order->getLocation();
+		$sessionId = $klarna_order['id'];
 	}
 
 	if ( null === WC()->session->get( 'klarna_checkout' ) ) {
@@ -164,3 +160,7 @@ if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 	WC()->session->__unset( 'ongoing_klarna_order' ); // WooCommerce order ID
 	WC()->session->__unset( 'klarna_order_note' );
 } // End if sizeof cart
+
+echo '<pre>';
+print_r( $klarna_order );
+echo '</pre>';
