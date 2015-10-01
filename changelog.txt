@@ -2,6 +2,8 @@
 
 2015.09.24	- version 1.9.8.3
 * Fix       - Fixes output of JS in Klarna Checkout page.
+* Fix       - Hooks into 'woocommerce_cancel_unpaid_order' to expand it to orders created via Klarna Checkout.
+* Fix       - Fixes get_formatted_legacy deprecated notice.
 
 2015.09.22	- version 1.9.8.2
 * Fix       - Prevents caching of Klarna Checkout and Thank You pages.
