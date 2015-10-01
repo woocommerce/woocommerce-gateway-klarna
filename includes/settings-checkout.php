@@ -73,7 +73,7 @@ return apply_filters( 'klarna_checkout_form_fields', array(
 	),
 	'secret_se' => array(
 		'title' => __( 'Shared Secret - Sweden', 'klarna' ), 
-		'type' => 'single_select_page', 
+		'type' => 'password', 
 		'description' => __( 'Please enter your Klarna Shared Secret for Sweden.', 'klarna' ), 
 		'default' => '',
 		'desc_tip' => true
@@ -106,7 +106,7 @@ return apply_filters( 'klarna_checkout_form_fields', array(
 	),
 	'secret_no' => array(
 		'title' => __( 'Shared Secret - Norway', 'klarna' ), 
-		'type' => 'text', 
+		'type' => 'password', 
 		'description' => __( 'Please enter your Klarna Shared Secret for Norway.', 'klarna' ), 
 		'default' => '',
 		'desc_tip' => true
@@ -139,7 +139,7 @@ return apply_filters( 'klarna_checkout_form_fields', array(
 	),
 	'secret_fi' => array(
 		'title' => __( 'Shared Secret - Finland', 'klarna' ), 
-		'type' => 'text', 
+		'type' => 'password', 
 		'description' => __( 'Please enter your Klarna Shared Secret for Finland.', 'klarna' ), 
 		'default' => '',
 		'desc_tip' => true
@@ -172,7 +172,7 @@ return apply_filters( 'klarna_checkout_form_fields', array(
 	),
 	'secret_de' => array(
 		'title' => __( 'Shared Secret - Germany', 'klarna' ), 
-		'type' => 'text', 
+		'type' => 'password', 
 		'description' => __( 'Please enter your Klarna Shared Secret for Germany.', 'klarna' ), 
 		'default' => '',
 		'desc_tip' => true
@@ -219,7 +219,7 @@ return apply_filters( 'klarna_checkout_form_fields', array(
 	),
 	'secret_at' => array(
 		'title' => __( 'Shared Secret - Austria', 'klarna' ), 
-		'type' => 'text', 
+		'type' => 'password', 
 		'description' => __( 'Please enter your Klarna Shared Secret for Austria.', 'klarna' ), 
 		'default' => '',
 		'desc_tip' => true
@@ -259,7 +259,7 @@ return apply_filters( 'klarna_checkout_form_fields', array(
 	),
 	'secret_uk' => array(
 		'title' => __( 'Shared Secret - UK', 'klarna' ), 
-		'type' => 'text', 
+		'type' => 'password', 
 		'description' => __( 'Please enter your Klarna Shared Secret for UK.', 'klarna' ), 
 		'default' => '',
 		'desc_tip' => true
@@ -292,7 +292,7 @@ return apply_filters( 'klarna_checkout_form_fields', array(
 	),
 	'secret_us' => array(
 		'title' => __( 'Shared Secret - USA', 'klarna' ), 
-		'type' => 'text', 
+		'type' => 'password', 
 		'description' => __( 'Please enter your Klarna Shared Secret for USA.', 'klarna' ), 
 		'default' => '',
 		'desc_tip' => true

@@ -53,7 +53,7 @@ return apply_filters( 'klarna_invoice_form_fields', array(
 	),
 	'secret_se' => array(
 		'title' => __( 'Shared Secret - Sweden', 'klarna' ), 
-		'type' => 'text', 
+		'type' => 'password', 
 		'description' => __( 'Please enter your Klarna Shared Secret for Sweden.', 'klarna' ), 
 		'default' => ''
 	),
@@ -65,7 +65,7 @@ return apply_filters( 'klarna_invoice_form_fields', array(
 	),
 	'secret_no' => array(
 		'title' => __( 'Shared Secret - Norway', 'klarna' ), 
-		'type' => 'text', 
+		'type' => 'password', 
 		'description' => __( 'Please enter your Klarna Shared Secret for Norway.', 'klarna' ), 
 		'default' => ''
 	),
@@ -77,7 +77,7 @@ return apply_filters( 'klarna_invoice_form_fields', array(
 	),
 	'secret_fi' => array(
 		'title' => __( 'Shared Secret - Finland', 'klarna' ), 
-		'type' => 'text', 
+		'type' => 'password', 
 		'description' => __( 'Please enter your Klarna Shared Secret for Finland.', 'klarna' ), 
 		'default' => ''
 	),
@@ -89,7 +89,7 @@ return apply_filters( 'klarna_invoice_form_fields', array(
 	),
 	'secret_dk' => array(
 		'title' => __( 'Shared Secret - Denmark', 'klarna' ), 
-		'type' => 'text', 
+		'type' => 'password', 
 		'description' => __( 'Please enter your Klarna Shared Secret for Denmark.', 'klarna' ), 
 		'default' => ''
 	),
@@ -101,7 +101,7 @@ return apply_filters( 'klarna_invoice_form_fields', array(
 	),
 	'secret_de' => array(
 		'title' => __( 'Shared Secret - Germany', 'klarna' ), 
-		'type' => 'text', 
+		'type' => 'password', 
 		'description' => __( 'Please enter your Klarna Shared Secret for Germany.', 'klarna' ), 
 		'default' => ''
 	),
@@ -113,7 +113,7 @@ return apply_filters( 'klarna_invoice_form_fields', array(
 	),
 	'secret_nl' => array(
 		'title' => __( 'Shared Secret - Netherlands', 'klarna' ), 
-		'type' => 'text', 
+		'type' => 'password', 
 		'description' => __( 'Please enter your Klarna Shared Secret for Netherlands.', 'klarna' ), 
 		'default' => ''
 	),
@@ -125,7 +125,7 @@ return apply_filters( 'klarna_invoice_form_fields', array(
 	),
 	'secret_at' => array(
 		'title' => __( 'Shared Secret - Austria', 'klarna' ), 
-		'type' => 'text', 
+		'type' => 'password', 
 		'description' => __( 'Please enter your Klarna Shared Secret for Austria.', 'klarna' ), 
 		'default' => ''
 	),
