@@ -220,8 +220,11 @@ if ( $this->is_rest() ) {
 	$create['order_amount'] = $klarna_order_total;
 	$create['order_tax_amount'] = $klarna_tax_total;
 
-	// $wc_countries = new WC_Countries();
-	// $create['shipping_countries'] = array_keys( $wc_countries->get_shipping_countries() );
+	$wc_countries = new WC_Countries();
+	$create['shipping_countries'] = array_keys( $wc_countries->get_shipping_countries() );
+	if ( 'billing_only' != get_option( 'woocommerce_ship_to_destination' ) ) {
+		$create['options']['allow_separate_shipping_address'] = true;
+	}
 
 	$klarna_order = new \Klarna\Rest\Checkout\Order( $connector );
 } else  {

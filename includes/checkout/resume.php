@@ -45,6 +45,26 @@ try {
 			}
 		}
 
+		// Colors
+		if ( '' != $this->color_button ) {
+			$update['options']['color_button'] = $this->color_button;
+		}
+		if ( '' != $this->color_button_text ) {
+			$update['options']['color_button_text'] = $this->color_button_text;
+		}
+		if ( '' != $this->color_checkbox ) {
+			$update['options']['color_checkbox'] = $this->color_checkbox;
+		}
+		if ( '' != $this->color_checkbox_checkmark ) {
+			$update['options']['color_checkbox_checkmark'] = $this->color_checkbox_checkmark;
+		}
+		if ( '' != $this->color_header ) {
+			$update['options']['color_header'] = $this->color_header;
+		}
+		if ( '' != $this->color_link ) {
+			$update['options']['color_link'] = $this->color_link;
+		}
+
 		// Update the order WC id
 		$kco_country = $this->klarna_country;
 		$kco_locale = $this->klarna_language;
@@ -148,6 +168,12 @@ try {
 		if ( $this->is_rest() ) {
 			$update['order_amount'] = $klarna_order_total;
 			$update['order_tax_amount'] = $klarna_tax_total;
+
+			$wc_countries = new WC_Countries();
+			$update['shipping_countries'] = array_keys( $wc_countries->get_shipping_countries() );
+			if ( 'billing_only' != get_option( 'woocommerce_ship_to_destination' ) ) {
+				$update['options']['allow_separate_shipping_address'] = true;
+			}
 		}
 
 		$klarna_order->update( apply_filters( 'kco_update_order', $update ) );
