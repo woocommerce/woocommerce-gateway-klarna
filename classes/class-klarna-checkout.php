@@ -163,8 +163,26 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		// Hide "Manual Refund" button for KCO orders
 		add_action( 'admin_head', array( $this, 'remove_refund_manually' ) );
 
+		// Cancel unpaid orders for KCO orders too
+		add_filter( 'woocommerce_cancel_unpaid_order', array( $this, 'cancel_unpaid_kco' ), 10, 2 );
+
     }
 
+
+	/**
+	 * Cancel unpaid KCO orders if the option is enabled
+	 * 
+	 * @param  $cancel 	boolean 	Cancel or not
+	 * @param  $order 	Object  	WooCommerce order object
+	 * @since  2.0
+	 **/
+	function cancel_unpaid_kco( $cancel, $order ) {
+		if ( 'klarna_checkout' == get_post_meta( $order->id, '_created_via', true ) ) {
+			$cancel = true;
+		}
+
+		return $cancel;
+	}
 
     function address_update_listener() {
 
