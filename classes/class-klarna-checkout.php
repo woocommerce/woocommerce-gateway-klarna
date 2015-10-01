@@ -219,8 +219,27 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		add_action( 'wp_ajax_nopriv_customer_update_kco_order_note', array($this, 'customer_update_kco_order_note') );
 		add_action( 'wp_footer', array( $this, 'js_order_note' ) );
 		add_action( 'wp_footer', array( $this, 'ajaxurl'));
+
+		// Cancel unpaid orders for KCO orders too
+		add_filter( 'woocommerce_cancel_unpaid_order', array( $this, 'cancel_unpaid_kco' ), 10, 2 );
        	
     }
+
+
+	/**
+	 * Cancel unpaid KCO orders if the option is enabled
+	 * 
+	 * @param  $cancel 	boolean 	Cancel or not
+	 * @param  $order 	Object  	WooCommerce order object
+	 * @since  1.9.8.3
+	 **/
+	function cancel_unpaid_kco( $cancel, $order ) {
+		if ( 'klarna_checkout' == get_post_meta( $order->id, '_created_via', true ) ) {
+			$cancel = true;
+		}
+
+		return $cancel;
+	}
 
 	 
     /**
@@ -578,6 +597,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 				// Process order via Klarna Checkout page				
 
 				if ( !defined( 'WOOCOMMERCE_CHECKOUT' ) ) define( 'WOOCOMMERCE_CHECKOUT', true );
+				if ( !defined( 'WOOCOMMERCE_KLARNA_CHECKOUT' ) ) define( 'WOOCOMMERCE_KLARNA_CHECKOUT', true );
 				
 				// Set Klarna Checkout as the choosen payment method in the WC session
 				WC()->session->set( 'chosen_payment_method', 'klarna_checkout' );
@@ -643,7 +663,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 
 								$item_name 	= $item['name'];
 								
-								$item_meta = new WC_Order_Item_Meta( $item['item_meta'] );
+								$item_meta = new WC_Order_Item_Meta( $item );
 								if ( $meta = $item_meta->display( true, true ) )
 									$item_name .= ' ( ' . $meta . ' )';
 									
