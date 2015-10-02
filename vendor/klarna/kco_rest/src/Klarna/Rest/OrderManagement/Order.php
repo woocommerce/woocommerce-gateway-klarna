@@ -229,8 +229,13 @@ class Order extends Resource
      */
     public function refund(array $data)
     {
-        $this->post($this->getLocation() . '/refunds', $data)
-            ->status('204');
+        if ( 'US' == strtoupper( $this['purchase_country'] ) ) {
+            $this->post($this->getLocation() . '/refunds', $data)
+                ->status('201');
+        } else {
+            $this->post($this->getLocation() . '/refunds', $data)
+                ->status('204');
+        }
 
         return $this;
     }
