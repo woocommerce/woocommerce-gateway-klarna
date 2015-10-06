@@ -174,6 +174,39 @@ try {
 			if ( 'billing_only' != get_option( 'woocommerce_ship_to_destination' ) ) {
 				$update['options']['allow_separate_shipping_address'] = true;
 			}
+
+			// Add shipping options
+			/* 
+			WC()->cart->calculate_shipping();
+			$packages = WC()->shipping->get_packages();
+			foreach ( $packages as $i => $package ) {
+				$chosen_method = isset( WC()->session->chosen_shipping_methods[ $i ] ) ? WC()->session->chosen_shipping_methods[ $i ] : '';
+				$available_methods = $package['rates'];
+				$show_package_details = sizeof( $packages ) > 1;
+
+				if ( ! empty( $available_methods ) ) {
+					if ( count( $available_methods ) > 1 ) {
+						$shipping_options = array();
+						$method = current( $available_methods );
+
+						foreach ( $available_methods as $method ) {
+							$preselected = ( $method->id == $chosen_method ? true : false );
+
+							$shipping_options[] = array(
+								'id' => $method->id,
+								'name' => $method->label,
+								'price' => round( ( $method->cost + array_sum( $method->taxes ) ) * 100 ),
+								'tax_amount' => round( array_sum( $method->taxes ) * 100 ),
+								'tax_rate' => round( array_sum( $method->taxes ) / $method->cost * 100 * 100 ),
+								'description' => '',
+								'preselected' => $preselected
+							);
+						}
+					}
+				}
+			}
+			$update['shipping_options'] = $shipping_options;
+			*/
 		}
 
 		$klarna_order->update( apply_filters( 'kco_update_order', $update ) );

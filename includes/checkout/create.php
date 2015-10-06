@@ -247,9 +247,9 @@ if ( $this->is_rest() ) {
 					$shipping_options[] = array(
 						'id' => $method->id,
 						'name' => $method->label,
-						'price' => round( $method->cost * 100 ),
+						'price' => round( ( $method->cost + array_sum( $method->taxes ) ) * 100 ),
 						'tax_amount' => round( array_sum( $method->taxes ) * 100 ),
-						'tax_rate' => round( array_sum( $method->taxes ) / ( $method->cost - array_sum( $method->taxes ) ) * 100 ) * 100,
+						'tax_rate' => round( array_sum( $method->taxes ) / $method->cost * 100 ) * 100,
 						'description' => '',
 						'preselected' => $preselected
 					);
