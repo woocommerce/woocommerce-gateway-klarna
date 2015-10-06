@@ -139,10 +139,9 @@ if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 		$sessionId = $klarna_order['id'];
 	}
 
-	if ( null === WC()->session->get( 'klarna_checkout' ) ) {
-		WC()->session->set( 'klarna_checkout', $sessionId );
-		WC()->session->set( 'klarna_checkout_country', WC()->customer->get_country() );
-	}
+	// Set session values for Klarna order ID and Klarna order country
+	WC()->session->set( 'klarna_checkout', $sessionId );
+	WC()->session->set( 'klarna_checkout_country', WC()->customer->get_country() );
 
 	// Display checkout
 	do_action( 'klarna_before_kco_checkout' );

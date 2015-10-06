@@ -220,11 +220,44 @@ if ( $this->is_rest() ) {
 	$create['order_amount'] = $klarna_order_total;
 	$create['order_tax_amount'] = $klarna_tax_total;
 
+	// Add shipping countries
 	$wc_countries = new WC_Countries();
 	$create['shipping_countries'] = array_keys( $wc_countries->get_shipping_countries() );
 	if ( 'billing_only' != get_option( 'woocommerce_ship_to_destination' ) ) {
 		$create['options']['allow_separate_shipping_address'] = true;
 	}
+
+	// Add shipping options
+	WC()->cart->calculate_shipping();
+	$packages = WC()->shipping->get_packages();
+
+	foreach ( $packages as $i => $package ) {
+		$chosen_method = isset( WC()->session->chosen_shipping_methods[ $i ] ) ? WC()->session->chosen_shipping_methods[ $i ] : '';
+		$available_methods = $package['rates'];
+		$show_package_details = sizeof( $packages ) > 1;
+
+		if ( ! empty( $available_methods ) ) {
+			if ( count( $available_methods ) > 1 ) {
+				$shipping_options = array();
+				$method = current( $available_methods );
+
+				foreach ( $available_methods as $method ) {
+					$preselected = ( $method->id == $chosen_method ? true : false );
+
+					$shipping_options[] = array(
+						'id' => $method->id,
+						'name' => $method->label,
+						'price' => round( $method->cost * 100 ),
+						'tax_amount' => round( array_sum( $method->taxes ) * 100 ),
+						'tax_rate' => round( array_sum( $method->taxes ) / ( $method->cost - array_sum( $method->taxes ) ) * 100 ) * 100,
+						'description' => '',
+						'preselected' => $preselected
+					);
+				}
+			}
+		}
+	}
+	$create['shipping_options'] = $shipping_options;
 
 	$klarna_order = new \Klarna\Rest\Checkout\Order( $connector );
 } else  {

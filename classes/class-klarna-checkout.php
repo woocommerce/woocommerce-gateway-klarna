@@ -61,7 +61,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		add_action( 'woocommerce_api_wc_gateway_klarna_checkout', array( $this, 'check_checkout_listener' ) );
 
 		// Address update listener
-		// add_action( 'woocommerce_api_wc_gateway_klarna_checkout_address', array( $this, 'address_update_listener' ) );
+		add_action( 'woocommerce_api_wc_gateway_klarna_checkout_address', array( $this, 'address_update_listener' ) );
 
 		// We execute the woocommerce_thankyou hook when the KCO Thank You page is rendered,
 		// because other plugins use this, but we don't want to display the actual WC Order
@@ -116,6 +116,10 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		// Shipping method selector
 		add_action( 'wp_ajax_klarna_checkout_shipping_callback', array( $this, 'klarna_checkout_shipping_callback' ) );
 		add_action( 'wp_ajax_nopriv_klarna_checkout_shipping_callback', array( $this, 'klarna_checkout_shipping_callback' ) );
+
+		// Shipping option inside KCO iframe
+		add_action( 'wp_ajax_kco_iframe_shipping_option_change_cb', array( $this, 'kco_iframe_shipping_option_change_cb' ) );
+		add_action( 'wp_ajax_nopriv_kco_iframe_shipping_option_change_cb', array( $this, 'kco_iframe_shipping_option_change_cb' ) );
 		
 		// Country selector
 		add_action( 'wp_ajax_klarna_checkout_country_callback', array( $this, 'klarna_checkout_country_callback' ) );
@@ -184,9 +188,18 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		return $cancel;
 	}
 
-    function address_update_listener() {
+	function address_update_listener() {
+		// Read the post body
+		$post_body = file_get_contents('php://input');
 
-    }
+		// Convert post body into native object
+		$data = json_decode( $post_body, true );
+
+		$this->log->add( 'klarna', 'ADDRESS UPDATE LISTENER' );
+		$this->log->add( 'klarna', 'ADDRESS UPDATE LISTENER DECODE - ' . var_export( $data, true ) );
+		$this->log->add( 'klarna', 'ADDRESS UPDATE LISTENER ENCODE - ' . var_export( json_encode( $data ), true ) );
+		$this->log->add( 'klarna', 'Session - ' . var_export( $_SESSION, true ) );
+	}
 
 
 	/**
@@ -1186,7 +1199,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 
 
 	/**
-	 * Klarna order shippin address change callback function.
+	 * Klarna order shipping address change callback function.
 	 * 
 	 * @since  2.0
 	 **/
@@ -1224,6 +1237,45 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 
 		$this->update_or_create_local_order();
 
+		$data['widget_html'] = $this->klarna_checkout_get_kco_widget_html();
+
+		if ( WC()->session->get( 'klarna_checkout' ) ) {
+			$this->ajax_update_klarna_order();				
+		}
+
+		wp_send_json_success( $data );
+
+		wp_die();
+	}
+
+
+	/**
+	 * Klarna order shipping option change callback function.
+	 * 
+	 * @since  2.0
+	 **/
+	function kco_iframe_shipping_option_change_cb() {
+		if ( ! wp_verify_nonce( $_REQUEST['nonce'], 'klarna_checkout_nonce' ) ) {
+			exit( 'Nonce can not be verified.' );
+		}
+	
+		global $woocommerce;
+
+		$new_method = $_REQUEST['new_method'];
+		$chosen_shipping_methods[] = wc_clean( $new_method );
+		$woocommerce->session->set( 'chosen_shipping_methods', $chosen_shipping_methods );
+
+		if ( ! defined( 'WOOCOMMERCE_CART' ) ) {
+			define( 'WOOCOMMERCE_CART', true );
+		}
+
+		$woocommerce->cart->calculate_shipping();
+		$woocommerce->cart->calculate_fees();
+		$woocommerce->cart->calculate_totals();
+
+		$this->update_or_create_local_order();
+
+		$data['new_method']  = $new_method;
 		$data['widget_html'] = $this->klarna_checkout_get_kco_widget_html();
 
 		if ( WC()->session->get( 'klarna_checkout' ) ) {
@@ -1505,44 +1557,49 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		$woocommerce->cart->calculate_totals();
 		?>
 		<tr id="kco-page-shipping">
-			<td class="kco-rightalign">
-				<?php
-					$woocommerce->cart->calculate_shipping();
-					$packages = $woocommerce->shipping->get_packages();
-					foreach ( $packages as $i => $package ) {
-						$chosen_method = isset( $woocommerce->session->chosen_shipping_methods[ $i ] ) ? $woocommerce->session->chosen_shipping_methods[ $i ] : '';
-						$available_methods = $package['rates'];
-						$show_package_details = sizeof( $packages ) > 1;
-						$index = $i;
-						?>
-							<?php if ( ! empty( $available_methods ) ) { ?>
-					
-								<?php if ( 1 === count( $available_methods ) ) {
-									$method = current( $available_methods );
-									echo wp_kses_post( wc_cart_totals_shipping_method_label( $method ) ); ?>
-									<input type="hidden" name="shipping_method[<?php echo $index; ?>]" data-index="<?php echo $index; ?>" id="shipping_method_<?php echo $index; ?>" value="<?php echo esc_attr( $method->id ); ?>" class="shipping_method" />
-					
-								<?php } else { ?>
-					
-									<ul id="shipping_method">
-										<?php foreach ( $available_methods as $method ) : ?>
-											<li>
-												<input style="margin-left:3px" type="radio" name="shipping_method[<?php echo $index; ?>]" data-index="<?php echo $index; ?>" id="shipping_method_<?php echo $index; ?>_<?php echo sanitize_title( $method->id ); ?>" value="<?php echo esc_attr( $method->id ); ?>" <?php checked( $method->id, $chosen_method ); ?> class="shipping_method" />
-												<label for="shipping_method_<?php echo $index; ?>_<?php echo sanitize_title( $method->id ); ?>"><?php echo wp_kses_post( wc_cart_totals_shipping_method_label( $method ) ); ?></label>
-											</li>
-										<?php endforeach; ?>
-									</ul>
-					
-								<?php } ?>
-					
-							<?php } ?>				
-						<?php
-					}
-				?>
-			</td>
-			<td id="kco-page-shipping-total" class="kco-rightalign">
-				<?php echo $woocommerce->cart->get_cart_shipping_total(); ?>
-			</td>
+			<?php if ( $this->is_rest() ) { // Just show shipping cost for Rest ?>
+				<td class="kco-rightalign">
+					<?php _e( 'Shipping', 'klarna' ); ?>
+				</td>
+				<td id="kco-page-shipping-total" class="kco-rightalign">
+					<?php echo $woocommerce->cart->get_cart_shipping_total(); ?>
+				</td>
+			<?php } else { ?>
+				<td class="kco-rightalign">
+					<?php
+						$woocommerce->cart->calculate_shipping();
+						$packages = $woocommerce->shipping->get_packages();
+						foreach ( $packages as $i => $package ) {
+							$chosen_method = isset( $woocommerce->session->chosen_shipping_methods[ $i ] ) ? $woocommerce->session->chosen_shipping_methods[ $i ] : '';
+							$available_methods = $package['rates'];
+							$show_package_details = sizeof( $packages ) > 1;
+							$index = $i;
+							?>
+								<?php if ( ! empty( $available_methods ) ) { ?>
+						
+									<?php if ( 1 === count( $available_methods ) ) {
+										$method = current( $available_methods );
+										echo wp_kses_post( wc_cart_totals_shipping_method_label( $method ) ); ?>
+										<input type="hidden" name="shipping_method[<?php echo $index; ?>]" data-index="<?php echo $index; ?>" id="shipping_method_<?php echo $index; ?>" value="<?php echo esc_attr( $method->id ); ?>" class="shipping_method" />
+									<?php } else { ?>
+										<ul id="shipping_method">
+											<?php foreach ( $available_methods as $method ) : ?>
+												<li>
+													<input style="margin-left:3px" type="radio" name="shipping_method[<?php echo $index; ?>]" data-index="<?php echo $index; ?>" id="shipping_method_<?php echo $index; ?>_<?php echo sanitize_title( $method->id ); ?>" value="<?php echo esc_attr( $method->id ); ?>" <?php checked( $method->id, $chosen_method ); ?> class="shipping_method" />
+													<label for="shipping_method_<?php echo $index; ?>_<?php echo sanitize_title( $method->id ); ?>"><?php echo wp_kses_post( wc_cart_totals_shipping_method_label( $method ) ); ?></label>
+												</li>
+											<?php endforeach; ?>
+										</ul>
+									<?php } ?>
+								<?php } ?>				
+							<?php
+						}
+					?>
+				</td>
+				<td id="kco-page-shipping-total" class="kco-rightalign">
+					<?php echo $woocommerce->cart->get_cart_shipping_total(); ?>
+				</td>
+			<?php } ?>
 		</tr>
 		<?php
 		return ob_get_clean();

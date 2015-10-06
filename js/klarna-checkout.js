@@ -130,7 +130,7 @@ jQuery(document).ready(function($) {
 			});
 		}
 		
-		new_method           = $(this).val();
+		new_method       = $(this).val();
 		kco_widget       = $( '#klarna-checkout-widget' );	
 
 		$.ajax(
@@ -485,6 +485,37 @@ jQuery(document).ready(function($) {
 						);
 					}
 				// }
+			}
+		} );
+
+
+		api.on( {
+			'shipping_option_change': function (data) {
+				new_method       = data.id;
+				kco_widget       = $( '#klarna-checkout-widget' );	
+
+				$.ajax(
+					kcoAjax.ajaxurl,
+					{
+						type     : 'POST',
+						dataType : 'json',
+						data     : {
+							action :    'kco_iframe_shipping_option_change_cb', 
+							new_method : new_method,
+							nonce :      kcoAjax.klarna_checkout_nonce
+						},
+						success: function( response ) {
+							// console.log( 'success' );
+							console.log( response );
+							
+							$( kco_widget ).html( response.data.widget_html );
+						},
+						error: function( response ) {
+							console.log( 'error' );
+							console.log( response );
+						}
+					}
+				);
 			}
 		} );
 	});
