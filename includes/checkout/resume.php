@@ -4,6 +4,11 @@
  *
  * @package WC_Gateway_Klarna
  */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
+
 // Resume session
 if ( $this->is_rest() ) {
 	$klarna_order = new \Klarna\Rest\Checkout\Order(

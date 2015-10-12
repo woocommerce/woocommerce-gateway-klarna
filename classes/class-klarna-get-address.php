@@ -16,6 +16,10 @@
  * @author 		Krokedil
  */
  
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
+
 class WC_Klarna_Get_Address {
 
 	public function __construct() {

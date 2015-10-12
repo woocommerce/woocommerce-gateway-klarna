@@ -15,6 +15,10 @@
  *
  */
  
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
+
 class WC_Klarna_Payment_Method_Widget {
 	
 	public function __construct() {

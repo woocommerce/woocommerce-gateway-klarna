@@ -5,6 +5,10 @@
  * @package WC_Gateway_Klarna
  */
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
+
 // Start new session
 
 // Check if country was set in WC session

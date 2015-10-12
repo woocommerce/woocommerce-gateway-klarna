@@ -8,6 +8,9 @@
  * @package WC_Gateway_Klarna
  */
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
 
 /**
  * Class for Klarna Part Payment.

@@ -8,6 +8,9 @@
  * @package WC_Gateway_Klarna
  */
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
 
 // Use Klarna PMS for Norway
 if ( 'NO' == $this->klarna_helper->get_klarna_country() ) { ?>

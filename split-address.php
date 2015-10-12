@@ -6,6 +6,11 @@
  * @param string $address Address string to split
  * @return array
  */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
+
 function splitAddress( $address ) {
 
 	// Get everything up to the first number with a regex

@@ -8,6 +8,10 @@
  * @package WC_Gateway_Klarna
  */
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
+
 class WC_Gateway_Klarna_Helper {
 
 	public function __construct( $parent ) {

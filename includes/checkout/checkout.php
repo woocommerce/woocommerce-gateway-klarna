@@ -5,9 +5,9 @@
  * @package WC_Gateway_Klarna
  */
 
-// Bail if accessed directly
-if ( ! defined( 'ABSPATH' ) )
-	exit;
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
 
 // Check if iframe needs to be displayed
 if ( ! $this->show_kco() )
