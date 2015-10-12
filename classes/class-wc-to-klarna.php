@@ -412,7 +412,7 @@ class WC_Gateway_Klarna_WC2K {
 		}
 
 		if ( ! isset( $shipping_name ) ) {
-			$shipping_name = __( 'Shipping', 'klarna' );
+			$shipping_name = __( 'Shipping', 'woocommerce-gateway-klarna' );
 		}
 
 		return $shipping_name;

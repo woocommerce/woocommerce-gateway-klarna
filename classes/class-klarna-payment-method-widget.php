@@ -275,7 +275,7 @@ class WC_Klarna_Payment_Method_Widget {
 	 * @return array
 	 */
 	public function add_section( $sections ) {
-		$sections['klarna'] = __( 'Klarna Payment Method (Monthly Cost) Widget', 'klarna' );
+		$sections['klarna'] = __( 'Klarna Payment Method (Monthly Cost) Widget', 'woocommerce-gateway-klarna' );
 
 		return $sections;
 	}
@@ -293,52 +293,52 @@ class WC_Klarna_Payment_Method_Widget {
 
 				// Start partpayment widget section
 				array( 
-					'title' => __( 'Klarna Payment Method Widget Settings', 'klarna' ), 
+					'title' => __( 'Klarna Payment Method Widget Settings', 'woocommerce-gateway-klarna' ), 
 					'type' => 'title', 
 					'id' => 'klarna_payment_method_widget_settings' 
 				),
 
 				array(
-					'title'         => __( 'Monthly cost', 'klarna' ),
-					'desc'          => __( 'Display monthly cost in product pages', 'klarna' ),
-					'desc_tip'      => __( 'If enabled, this option will display Klarna partpayment widget in product pages', 'klarna' ),
+					'title'         => __( 'Monthly cost', 'woocommerce-gateway-klarna' ),
+					'desc'          => __( 'Display monthly cost in product pages', 'woocommerce-gateway-klarna' ),
+					'desc_tip'      => __( 'If enabled, this option will display Klarna partpayment widget in product pages', 'woocommerce-gateway-klarna' ),
 					'id'            => 'klarna_display_monthly_price',
 					'default'       => 'no',
 					'type'          => 'checkbox',
 				),
 				array(
-					'title'         => __( 'Monthly cost placement', 'klarna' ),
-					'desc'          => __( 'Select where to display the widget in your product pages', 'klarna' ),
+					'title'         => __( 'Monthly cost placement', 'woocommerce-gateway-klarna' ),
+					'desc'          => __( 'Select where to display the widget in your product pages', 'woocommerce-gateway-klarna' ),
 					'id'            => 'klarna_display_monthly_price_prio',
 					'class'         => 'wc-enhanced-select',
 					'default'       => '15',
 					'type'          => 'select',
 					'options'  => array(
-						'4'  => __( 'Above Title', 'klarna' ),
-						'7'  => __( 'Between Title and Price', 'klarna' ),
-						'15' => __( 'Between Price and Excerpt', 'klarna' ),
-						'25' => __( 'Between Excerpt and Add to cart button', 'klarna' ),
-						'35' => __( 'Between Add to cart button and Product meta', 'klarna' ),
-						'45' => __( 'Between Product meta and Product sharing buttons', 'klarna' ),
-						'55' => __( 'After Product sharing-buttons', 'klarna' ),
+						'4'  => __( 'Above Title', 'woocommerce-gateway-klarna' ),
+						'7'  => __( 'Between Title and Price', 'woocommerce-gateway-klarna' ),
+						'15' => __( 'Between Price and Excerpt', 'woocommerce-gateway-klarna' ),
+						'25' => __( 'Between Excerpt and Add to cart button', 'woocommerce-gateway-klarna' ),
+						'35' => __( 'Between Add to cart button and Product meta', 'woocommerce-gateway-klarna' ),
+						'45' => __( 'Between Product meta and Product sharing buttons', 'woocommerce-gateway-klarna' ),
+						'55' => __( 'After Product sharing-buttons', 'woocommerce-gateway-klarna' ),
 					),
 				),
 				array(
-					'title'    => __( 'Lower threshold', 'klarna' ),
-					'desc'     => __( 'Lower threshold for monthly cost', 'klarna' ),
+					'title'    => __( 'Lower threshold', 'woocommerce-gateway-klarna' ),
+					'desc'     => __( 'Lower threshold for monthly cost', 'woocommerce-gateway-klarna' ),
 					'id'       => 'klarna_display_monthly_price_lower_threshold',
 					'default'  => '',
 					'type'     => 'number',
-					'desc_tip' =>  __( 'Monthly cost widget will not be displayed in product pages if product price is less than this value.', 'klarna' ),
+					'desc_tip' =>  __( 'Monthly cost widget will not be displayed in product pages if product price is less than this value.', 'woocommerce-gateway-klarna' ),
 					'autoload' => false
 				),
 				array(
-					'title'    => __( 'Upper threshold', 'klarna' ),
-					'desc'     => __( 'Upper threshold for monthly cost', 'klarna' ),
+					'title'    => __( 'Upper threshold', 'woocommerce-gateway-klarna' ),
+					'desc'     => __( 'Upper threshold for monthly cost', 'woocommerce-gateway-klarna' ),
 					'id'       => 'klarna_display_monthly_price_upper_threshold',
 					'default'  => '',
 					'type'     => 'text',
-					'desc_tip' =>  __( 'Monthly cost widget will not be displayed in product pages if product price is more than this value.', 'klarna' ),
+					'desc_tip' =>  __( 'Monthly cost widget will not be displayed in product pages if product price is more than this value.', 'woocommerce-gateway-klarna' ),
 					'autoload' => false
 				),
 

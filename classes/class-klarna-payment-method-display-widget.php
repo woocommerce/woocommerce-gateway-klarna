@@ -21,8 +21,8 @@ class WC_Klarna_Payment_Method_Display_Widget extends WP_Widget {
 	function __construct() {
 		parent::__construct(
 			'klarna_pmd', // Base ID
-			__( 'Klarna Payment Method Display Widget', 'klarna' ), // Name
-			array( 'description' => __( 'Displays an image that informs the consumer about the payment methods that are available in your store.', 'klarna' ), ) // Args
+			__( 'Klarna Payment Method Display Widget', 'woocommerce-gateway-klarna' ), // Name
+			array( 'description' => __( 'Displays an image that informs the consumer about the payment methods that are available in your store.', 'woocommerce-gateway-klarna' ), ) // Args
 		);
 	}
 

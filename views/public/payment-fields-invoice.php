@@ -36,7 +36,7 @@ if ( 'NO' == $this->klarna_helper->get_klarna_country() ) { ?>
 		?>
 
 		<p class="form-row form-row-wide">
-			<label for="klarna_invoice_pno"><?php echo __("Date of Birth", 'klarna') ?> <span class="required">*</span></label>
+			<label for="klarna_invoice_pno"><?php echo __("Date of Birth", 'woocommerce-gateway-klarna' ) ?> <span class="required">*</span></label>
 			<input type="text" class="input-text" name="klarna_invoice_pno" id="klarna_invoice_pno" />
 
 			<?php
@@ -109,7 +109,7 @@ if ( 'NO' == $this->klarna_helper->get_klarna_country() ) { ?>
 			?>
 
 				<label for="<?php echo $klarna_select_pclass_element; ?>">
-					<?php echo __("Payment plan", 'klarna') ?> <span class="required">*</span>
+					<?php echo __("Payment plan", 'woocommerce-gateway-klarna' ) ?> <span class="required">*</span>
 				</label>
 
 				<select id="<?php echo $klarna_select_pclass_element; ?>" name="<?php echo $klarna_select_pclass_element; ?>" class="woocommerce-select" style="max-width:100%;width:100% !important;">
@@ -130,7 +130,7 @@ if ( 'NO' == $this->klarna_helper->get_klarna_country() ) { ?>
 						$invoice_string = 'Betala om 14 dagar';
 						break;
 					default:
-						$invoice_string = __( 'Pay in 14 days', 'klarna' );
+						$invoice_string = __( 'Pay in 14 days', 'woocommerce-gateway-klarna' );
 				}
 				?>
 				<option value="-1"><?php echo $invoice_string; ?></option>
@@ -158,7 +158,7 @@ if ( 'NO' == $this->klarna_helper->get_klarna_country() ) { ?>
 			   					echo '<option value="' . $pclass->getId() . '">';
 									// Sweden, Denmark, Finland, Germany & Netherlands - Don't show total cost
 									echo sprintf(
-										__('%s - %s %s/month - %s%s - Start %s', 'klarna'),
+										__('%s - %s %s/month - %s%s - Start %s', 'woocommerce-gateway-klarna' ),
 										$pclass->getDescription(),
 										$monthly_cost,
 										$this->selected_currency,
@@ -183,10 +183,10 @@ if ( 'NO' == $this->klarna_helper->get_klarna_country() ) { ?>
 		<p class="form-row form-row-wide">
 		<?php if ( $this->klarna_helper->get_klarna_country() == 'NL' || $this->klarna_helper->get_klarna_country() == 'DE' || $this->klarna_helper->get_klarna_country() == 'AT' ) { ?>
 			<label for="<?php echo $klarna_dob_element; ?>">
-				<?php echo __("Date of Birth", 'klarna') ?> <span class="required">*</span>
+				<?php echo __("Date of Birth", 'woocommerce-gateway-klarna' ) ?> <span class="required">*</span>
 			</label>
 			<select class="dob_select dob_day" name="klarna_invoice_date_of_birth_day" style="width:60px;">
-				<option value=""><?php echo __("Day", 'klarna') ?></option>
+				<option value=""><?php echo __("Day", 'woocommerce-gateway-klarna' ) ?></option>
 				<option value="01">01</option>
 				<option value="02">02</option>
 				<option value="03">03</option>
@@ -220,22 +220,22 @@ if ( 'NO' == $this->klarna_helper->get_klarna_country() ) { ?>
 				<option value="31">31</option>
 			</select>
 			<select class="dob_select dob_month" name="klarna_invoice_date_of_birth_month" style="width:80px;">
-				<option value=""><?php echo __("Month", 'klarna') ?></option>
-				<option value="01"><?php echo __("Jan", 'klarna') ?></option>
-				<option value="02"><?php echo __("Feb", 'klarna') ?></option>
-				<option value="03"><?php echo __("Mar", 'klarna') ?></option>
-				<option value="04"><?php echo __("Apr", 'klarna') ?></option>
-				<option value="05"><?php echo __("May", 'klarna') ?></option>
-				<option value="06"><?php echo __("Jun", 'klarna') ?></option>
-				<option value="07"><?php echo __("Jul", 'klarna') ?></option>
-				<option value="08"><?php echo __("Aug", 'klarna') ?></option>
-				<option value="09"><?php echo __("Sep", 'klarna') ?></option>
-				<option value="10"><?php echo __("Oct", 'klarna') ?></option>
-				<option value="11"><?php echo __("Nov", 'klarna') ?></option>
-				<option value="12"><?php echo __("Dec", 'klarna') ?></option>
+				<option value=""><?php echo __("Month", 'woocommerce-gateway-klarna' ) ?></option>
+				<option value="01"><?php echo __("Jan", 'woocommerce-gateway-klarna' ) ?></option>
+				<option value="02"><?php echo __("Feb", 'woocommerce-gateway-klarna' ) ?></option>
+				<option value="03"><?php echo __("Mar", 'woocommerce-gateway-klarna' ) ?></option>
+				<option value="04"><?php echo __("Apr", 'woocommerce-gateway-klarna' ) ?></option>
+				<option value="05"><?php echo __("May", 'woocommerce-gateway-klarna' ) ?></option>
+				<option value="06"><?php echo __("Jun", 'woocommerce-gateway-klarna' ) ?></option>
+				<option value="07"><?php echo __("Jul", 'woocommerce-gateway-klarna' ) ?></option>
+				<option value="08"><?php echo __("Aug", 'woocommerce-gateway-klarna' ) ?></option>
+				<option value="09"><?php echo __("Sep", 'woocommerce-gateway-klarna' ) ?></option>
+				<option value="10"><?php echo __("Oct", 'woocommerce-gateway-klarna' ) ?></option>
+				<option value="11"><?php echo __("Nov", 'woocommerce-gateway-klarna' ) ?></option>
+				<option value="12"><?php echo __("Dec", 'woocommerce-gateway-klarna' ) ?></option>
 			</select>
 			<select class="dob_select dob_year" name="klarna_invoice_date_of_birth_year" style="width:60px;">
-				<option value=""><?php echo __("Year", 'klarna') ?></option>
+				<option value=""><?php echo __("Year", 'woocommerce-gateway-klarna' ) ?></option>
 				<option value="1920">1920</option>
 				<option value="1921">1921</option>
 				<option value="1922">1922</option>
@@ -320,7 +320,7 @@ if ( 'NO' == $this->klarna_helper->get_klarna_country() ) { ?>
 			</select>
 				
 		<?php } else { ?>
-			<label for="<?php echo $klarna_dob_element; ?>"><?php echo __("Date of Birth", 'klarna') ?> <span class="required">*</span></label>
+			<label for="<?php echo $klarna_dob_element; ?>"><?php echo __("Date of Birth", 'woocommerce-gateway-klarna' ) ?> <span class="required">*</span></label>
 			<input type="text" class="input-text" id="<?php echo $klarna_dob_element; ?>" name="<?php echo $klarna_dob_element; ?>" />
 		<?php }
 		// Button/form for getAddress
@@ -332,12 +332,12 @@ if ( 'NO' == $this->klarna_helper->get_klarna_country() ) { ?>
 		<?php if ( $this->klarna_helper->get_klarna_country() == 'NL' || $this->klarna_helper->get_klarna_country() == 'DE' || $this->klarna_helper->get_klarna_country() == 'AT' ) { ?>
 			<p class="form-row form-row-wide">
 				<label for="klarna_invoice_gender">
-					<?php echo __("Gender", 'klarna') ?> <span class="required">*</span>
+					<?php echo __("Gender", 'woocommerce-gateway-klarna' ) ?> <span class="required">*</span>
 				</label>
 				<select id="klarna_invoice_gender" name="klarna_invoice_gender" class="woocommerce-select" style="width:120px;">
-					<option value=""><?php echo __("Select gender", 'klarna') ?></option>
-					<option value="f"><?php echo __("Female", 'klarna') ?></option>
-					<option value="m"><?php echo __("Male", 'klarna') ?></option>
+					<option value=""><?php echo __("Select gender", 'woocommerce-gateway-klarna' ) ?></option>
+					<option value="f"><?php echo __("Female", 'woocommerce-gateway-klarna' ) ?></option>
+					<option value="m"><?php echo __("Male", 'woocommerce-gateway-klarna' ) ?></option>
 				</select>
 			</p>
 		<?php } ?>
@@ -347,7 +347,7 @@ if ( 'NO' == $this->klarna_helper->get_klarna_country() ) { ?>
 			<p class="form-row form-row-wide">
 				<label for="klarna_de_terms"></label>
 				<input type="checkbox" class="input-checkbox" value="yes" name="klarna_de_consent_terms" />
-				<?php echo sprintf(__('Mit der Übermittlung der für die Abwicklungdes Rechnungskaufes und einer Identitäts-und Bonitätsprüfung erforderlichen Daten an Klarna bin ich einverstanden. Meine <a href="%s" target="_blank">Einwilligung</a> kann ich jederzeit mit Wirkung für die Zukunft widerrufen. Es gelten die AGB des Händlers.', 'klarna'), 'https://online.klarna.com/consent_de.yaws') ?>
+				<?php echo sprintf(__('Mit der Übermittlung der für die Abwicklungdes Rechnungskaufes und einer Identitäts-und Bonitätsprüfung erforderlichen Daten an Klarna bin ich einverstanden. Meine <a href="%s" target="_blank">Einwilligung</a> kann ich jederzeit mit Wirkung für die Zukunft widerrufen. Es gelten die AGB des Händlers.', 'woocommerce-gateway-klarna' ), 'https://online.klarna.com/consent_de.yaws') ?>
 				
 			</p>
 		<?php } ?>

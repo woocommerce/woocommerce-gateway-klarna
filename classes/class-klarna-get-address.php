@@ -229,7 +229,7 @@ class WC_Klarna_Get_Address {
 					if( pno_getadress == '' ) {
 					
 						$(".klarna-get-address-message").show();
-						$(".klarna-get-address-message").html('<span style="clear:both; margin: 5px 2px; padding: 4px 8px; background:#ffecec"><?php _e('Be kind and enter a date of birth!', 'klarna');?></span>');
+						$(".klarna-get-address-message").html('<span style="clear:both; margin: 5px 2px; padding: 4px 8px; background:#ffecec"><?php _e('Be kind and enter a date of birth!', 'woocommerce-gateway-klarna' );?></span>');
 					
 					} else {
 											
@@ -331,7 +331,7 @@ class WC_Klarna_Get_Address {
 
 				// Only display GetAddress button for Sweden
 				if( $country == 'SE' ) { ?>
-					<span class="klarna-push-pno get-address-button button"><?php _e('Fetch', 'klarna'); ?></span>
+					<span class="klarna-push-pno get-address-button button"><?php _e('Fetch', 'woocommerce-gateway-klarna' ); ?></span>
 					<p class="form-row">
 						<div class="klarna-get-address-message"></div>
 					</p>
@@ -430,7 +430,7 @@ class WC_Klarna_Get_Address {
 				// $message = "{$e->getMessage()} (#{$e->getCode()})\n";
 				$return = $e;
 				$return = array(
-					'get_address_message' => __( 'No address found', 'klarna' )
+					'get_address_message' => __( 'No address found', 'woocommerce-gateway-klarna' )
 				);
 				
 			}

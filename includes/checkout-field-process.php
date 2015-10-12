@@ -21,7 +21,7 @@ if (
 	// Check if set, if its not set add an error.
 	if ( ! $_POST[$klarna_field_prefix . 'pno'] ) {
 		wc_add_notice(
-			__( '<strong>Date of birth</strong> is a required field.', 'klarna' ), 
+			__( '<strong>Date of birth</strong> is a required field.', 'woocommerce-gateway-klarna' ), 
 			'error'
 		);
 	}
@@ -38,7 +38,7 @@ if (
 	// Check if gender is set, if not add an error
 	if ( empty( $_POST[$klarna_field_prefix . 'gender'] ) ) {
 		wc_add_notice(
-			__( '<strong>Gender</strong> is a required field.', 'klarna' ), 
+			__( '<strong>Gender</strong> is a required field.', 'woocommerce-gateway-klarna' ), 
 			'error'
 		);
 	}
@@ -46,7 +46,7 @@ if (
 	// Check if date of birth is set, if not add an error
 	if ( ! $_POST[$klarna_field_prefix . 'date_of_birth_day'] || ! $_POST[$klarna_field_prefix . 'date_of_birth_month'] || ! $_POST[$klarna_field_prefix . 'date_of_birth_year'] ) {
 		wc_add_notice(
-			__( '<strong>Date of birth</strong> is a required field.', 'klarna' ), 
+			__( '<strong>Date of birth</strong> is a required field.', 'woocommerce-gateway-klarna' ), 
 			'error'
 		);
 	}
@@ -60,35 +60,35 @@ if (
 
 	if ( $compare_billing_and_shipping == 1 && isset( $_POST['shipping_first_name'] ) && $_POST['shipping_first_name'] !== $_POST['billing_first_name'] ) {
 		wc_add_notice(
-			__( 'Shipping and billing address must be the same when paying via Klarna.','klarna' ), 
+			__( 'Shipping and billing address must be the same when paying via Klarna.', 'woocommerce-gateway-klarna' ), 
 			'error'
 		);
 	}
 
 	if ( $compare_billing_and_shipping == 1 && isset( $_POST['shipping_last_name'] ) && $_POST['shipping_last_name'] !== $_POST['billing_last_name'] ) {
 		wc_add_notice(
-			__( 'Shipping and billing address must be the same when paying via Klarna.', 'klarna' ), 
+			__( 'Shipping and billing address must be the same when paying via Klarna.', 'woocommerce-gateway-klarna' ), 
 			'error'
 		);
 	}
 
 	if ( $compare_billing_and_shipping == 1 && isset( $_POST['shipping_address_1'] ) && $_POST['shipping_address_1'] !== $_POST['billing_address_1'] ) {
 		wc_add_notice(
-			__( 'Shipping and billing address must be the same when paying via Klarna.', 'klarna' ), 
+			__( 'Shipping and billing address must be the same when paying via Klarna.', 'woocommerce-gateway-klarna' ), 
 			'error'
 		);
 	}
 
 	if ( $compare_billing_and_shipping == 1 && isset( $_POST['shipping_postcode'] ) && $_POST['shipping_postcode'] !== $_POST['billing_postcode'] ) {
 		wc_add_notice(
-			__( 'Shipping and billing address must be the same when paying via Klarna.', 'klarna' ), 
+			__( 'Shipping and billing address must be the same when paying via Klarna.', 'woocommerce-gateway-klarna' ), 
 			'error'
 		);
 	}
 
 	if ( $compare_billing_and_shipping == 1 && isset($_POST['shipping_city']) && $_POST['shipping_city'] !== $_POST['billing_city'] ) {
 		wc_add_notice(
-			__( 'Shipping and billing address must be the same when paying via Klarna.', 'klarna' ), 
+			__( 'Shipping and billing address must be the same when paying via Klarna.', 'woocommerce-gateway-klarna' ), 
 			'error'
 		);
 	}
@@ -104,7 +104,7 @@ if (
 	// Check if set, if its not set add an error.
 	if ( ! isset( $_POST[$klarna_field_prefix . 'de_consent_terms'] ) ) {
 		wc_add_notice(
-			__( 'You must accept the Klarna consent terms.', 'klarna' ), 
+			__( 'You must accept the Klarna consent terms.', 'woocommerce-gateway-klarna' ), 
 			'error'
 		);
 	}

@@ -90,12 +90,12 @@ class WC_Gateway_Klarna_Shortcodes {
 								<?php if ( ! in_array( 'remove', $hide_columns ) ) { ?>
 								<th class="product-remove kco-leftalign"></th>
 								<?php } ?>
-								<th class="product-name kco-leftalign"><?php _e( 'Product', 'klarna' ); ?></th>
+								<th class="product-name kco-leftalign"><?php _e( 'Product', 'woocommerce-gateway-klarna' ); ?></th>
 								<?php if ( ! in_array( 'price', $hide_columns ) ) { ?>
-								<th class="product-price kco-centeralign"><?php _e( 'Price', 'klarna' ); ?></th>
+								<th class="product-price kco-centeralign"><?php _e( 'Price', 'woocommerce-gateway-klarna' ); ?></th>
 								<?php } ?>
-								<th class="product-quantity kco-centeralign"><?php _e( 'Quantity', 'klarna' ); ?></th>
-								<th class="product-total kco-rightalign"><?php _e( 'Total', 'klarna' ); ?></th>
+								<th class="product-quantity kco-centeralign"><?php _e( 'Quantity', 'woocommerce-gateway-klarna' ); ?></th>
+								<th class="product-total kco-rightalign"><?php _e( 'Total', 'woocommerce-gateway-klarna' ); ?></th>
 							</tr>
 							<?php
 							foreach ( $woocommerce->cart->get_cart() as $cart_item_key => $cart_item ) {
@@ -153,7 +153,7 @@ class WC_Gateway_Klarna_Shortcodes {
 					<table id="kco-totals">
 						<tbody>
 							<tr id="kco-page-subtotal">
-								<td class="kco-col-desc kco-rightalign"><?php _e( 'Subtotal', 'klarna' ); ?></td>
+								<td class="kco-col-desc kco-rightalign"><?php _e( 'Subtotal', 'woocommerce-gateway-klarna' ); ?></td>
 								<td id="kco-page-subtotal-amount" class="kco-col-number kco-rightalign"><span class="amount"><?php echo $woocommerce->cart->get_cart_subtotal(); ?></span></td>
 							</tr>
 							
@@ -170,7 +170,7 @@ class WC_Gateway_Klarna_Shortcodes {
 							<?php }	?>
 
 							<tr id="kco-page-total">
-								<td class="kco-rightalign kco-bold"><?php _e( 'Total', 'klarna' ); ?></a></td>
+								<td class="kco-rightalign kco-bold"><?php _e( 'Total', 'woocommerce-gateway-klarna' ); ?></a></td>
 								<td id="kco-page-total-amount" class="kco-rightalign kco-bold"><span class="amount"><?php echo $woocommerce->cart->get_total(); ?></span></td>
 							</tr>
 						</tbody>
@@ -180,7 +180,7 @@ class WC_Gateway_Klarna_Shortcodes {
 					<?php if ( 'false' != $atts['order_note'] ) { ?>
 					<div>
 						<form>
-							<textarea id="klarna-checkout-order-note" class="input-text" name="klarna-checkout-order-note" placeholder="<?php _e( 'Notes about your order, e.g. special notes for delivery.', 'klarna' ); ?>"></textarea>
+							<textarea id="klarna-checkout-order-note" class="input-text" name="klarna-checkout-order-note" placeholder="<?php _e( 'Notes about your order, e.g. special notes for delivery.', 'woocommerce-gateway-klarna' ); ?>"></textarea>
 						</form>
 					</div>
 					<?php } ?>

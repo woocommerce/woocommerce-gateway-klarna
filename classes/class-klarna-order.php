@@ -185,7 +185,7 @@ class WC_Gateway_Klarna_Order {
 				$klarna->addArticle(
 				    $qty = 1,
 				    $artNo = '',
-				    $title = __( 'Discount', 'klarna' ),
+				    $title = __( 'Discount', 'woocommerce-gateway-klarna' ),
 				    $price = - WC()->cart->coupon_discount_amounts[$code],
 				    $vat = 0,
 				    $discount = 0,
@@ -204,7 +204,7 @@ class WC_Gateway_Klarna_Order {
 			$klarna->addArticle(
 			    $qty = 1,
 			    $artNo = '',
-			    $title = __( 'Discount', 'klarna' ),
+			    $title = __( 'Discount', 'woocommerce-gateway-klarna' ),
 			    $price = -$order_discount,
 			    $vat = 0,
 			    $discount = 0,
@@ -401,7 +401,7 @@ class WC_Gateway_Klarna_Order {
 				if ( $ocr ) {
 					$order->add_order_note(
 						sprintf(
-							__( 'Klarna order fully refunded.', 'klarna' ),
+							__( 'Klarna order fully refunded.', 'woocommerce-gateway-klarna' ),
 							$ocr
 						)
 					);
@@ -411,7 +411,7 @@ class WC_Gateway_Klarna_Order {
 			} catch( Exception $e ) {
 				$order->add_order_note(
 					sprintf(
-						__( 'Klarna order refund failed. Error code %s. Error message %s', 'klarna' ),
+						__( 'Klarna order refund failed. Error code %s. Error message %s', 'woocommerce-gateway-klarna' ),
 						$e->getCode(),
 						utf8_encode( $e->getMessage() )
 					)					
@@ -444,7 +444,7 @@ class WC_Gateway_Klarna_Order {
 					if ( $ocr ) {
 						$order->add_order_note(
 							sprintf(
-								__( 'Klarna order partially refunded. Refund amount: %s.', 'klarna' ),
+								__( 'Klarna order partially refunded. Refund amount: %s.', 'woocommerce-gateway-klarna' ),
 								wc_price( $amount, array( 'currency' => $order->get_order_currency() ) )
 							)
 						);
@@ -454,7 +454,7 @@ class WC_Gateway_Klarna_Order {
 				} catch( Exception $e ) {
 					$order->add_order_note(
 						sprintf(
-							__( 'Klarna order refund failed. Error code %s. Error message %s', 'klarna' ),
+							__( 'Klarna order refund failed. Error code %s. Error message %s', 'woocommerce-gateway-klarna' ),
 							$e->getCode(),
 							utf8_encode( $e->getMessage() )
 						)					
@@ -466,7 +466,7 @@ class WC_Gateway_Klarna_Order {
 			 * If there are multiple tax rates, bail and leave order note.
 			 */
 			} else {
-				$order->add_order_note( __( 'Refund failed. WooCommerce Klarna partial refund not possible for orders containing items with different tax rates.', 'klarna' ) );
+				$order->add_order_note( __( 'Refund failed. WooCommerce Klarna partial refund not possible for orders containing items with different tax rates.', 'woocommerce-gateway-klarna' ) );
 
 				return false;
 			}
@@ -493,7 +493,7 @@ class WC_Gateway_Klarna_Order {
 
 			$order->add_order_note(
 				sprintf(
-					__( 'Klarna order refunded. Refund amount: %s.', 'klarna' ),
+					__( 'Klarna order refunded. Refund amount: %s.', 'woocommerce-gateway-klarna' ),
 					wc_price( $amount, array( 'currency' => $order->get_order_currency() ) )
 				)
 			);
@@ -502,7 +502,7 @@ class WC_Gateway_Klarna_Order {
 		} catch( Exception $e ) {
 			$order->add_order_note(
 				sprintf(
-					__( 'Klarna order refund failed. Error code %s. Error message %s', 'klarna' ),
+					__( 'Klarna order refund failed. Error code %s. Error message %s', 'woocommerce-gateway-klarna' ),
 					$e->getCode(),
 					utf8_encode( $e->getMessage() )
 				)					
@@ -671,7 +671,7 @@ class WC_Gateway_Klarna_Order {
 
 				$order->add_order_note(
 					sprintf(
-						__( 'Klarna order activated. Invoice number %s - risk status %s.', 'klarna' ),
+						__( 'Klarna order activated. Invoice number %s - risk status %s.', 'woocommerce-gateway-klarna' ),
 						$invNo,
 						$risk
 					)
@@ -682,7 +682,7 @@ class WC_Gateway_Klarna_Order {
 			} catch( Exception $e ) {
 				$order->add_order_note(
 					sprintf(
-						__( 'Klarna order activation failed. Error code %s. Error message %s', 'klarna' ),
+						__( 'Klarna order activation failed. Error code %s. Error message %s', 'woocommerce-gateway-klarna' ),
 						$e->getCode(),
 						utf8_encode( $e->getMessage() )
 					)					
@@ -743,7 +743,7 @@ class WC_Gateway_Klarna_Order {
 		// Capture full order amount on WooCommerce order completion
 		$data = array(
 			'captured_amount' => $k_order['order_amount'],
-			'description'     => __( 'WooCommerce order marked complete', 'klarna' ),
+			'description'     => __( 'WooCommerce order marked complete', 'woocommerce-gateway-klarna' ),
 			'order_lines'     => $k_order['order_lines'],
 		);
 
@@ -754,7 +754,7 @@ class WC_Gateway_Klarna_Order {
 
 			$order->add_order_note(
 				sprintf(
-					__( 'Klarna order captured.', 'klarna' ),
+					__( 'Klarna order captured.', 'woocommerce-gateway-klarna' ),
 					$invNo,
 					$risk
 				)
@@ -766,7 +766,7 @@ class WC_Gateway_Klarna_Order {
 		} catch( Exception $e ) {
 			$order->add_order_note(
 				sprintf(
-					__( 'Klarna order activation failed. Error code %s. Error message %s', 'klarna' ),
+					__( 'Klarna order activation failed. Error code %s. Error message %s', 'woocommerce-gateway-klarna' ),
 					$e->getCode(),
 					utf8_encode( $e->getMessage() )
 				)					
@@ -816,13 +816,13 @@ class WC_Gateway_Klarna_Order {
 			try {
 				$klarna->cancelReservation( $rno );
 				$order->add_order_note(
-					__( 'Klarna order cancellation completed.', 'klarna' )
+					__( 'Klarna order cancellation completed.', 'woocommerce-gateway-klarna' )
 				);
 				add_post_meta( $orderid, '_klarna_order_cancelled', time() );
 			} catch( Exception $e ) {
 				$order->add_order_note(
 					sprintf(
-						__( 'Klarna order cancellation failed. Error code %s. Error message %s', 'klarna' ),
+						__( 'Klarna order cancellation failed. Error code %s. Error message %s', 'woocommerce-gateway-klarna' ),
 						$e->getCode(),
 						utf8_encode( $e->getMessage() )
 					)					
@@ -882,13 +882,13 @@ class WC_Gateway_Klarna_Order {
 		try {
 			$k_order->cancel();
 			$order->add_order_note(
-				__( 'Klarna order cancelled.', 'klarna' )
+				__( 'Klarna order cancelled.', 'woocommerce-gateway-klarna' )
 			);
 			add_post_meta( $orderid, '_klarna_order_cancelled', time() );
 		} catch( Exception $e ) {
 			$order->add_order_note(
 				sprintf(
-					__( 'Klarna order cancelation failed. Error code %s. Error message %s', 'klarna' ),
+					__( 'Klarna order cancelation failed. Error code %s. Error message %s', 'woocommerce-gateway-klarna' ),
 					$e->getCode(),
 					utf8_encode( $e->getMessage() )
 				)					
@@ -1012,14 +1012,14 @@ class WC_Gateway_Klarna_Order {
 			if ( $result ) {
 				$order->add_order_note(
 					sprintf(
-						__( 'Klarna order updated.', 'klarna' )
+						__( 'Klarna order updated.', 'woocommerce-gateway-klarna' )
 					)
 				);
 			}
 		} catch( Exception $e ) {
 			$order->add_order_note(
 				sprintf(
-					__( 'Klarna order update failed. Error code %s. Error message %s', 'klarna' ),
+					__( 'Klarna order update failed. Error code %s. Error message %s', 'woocommerce-gateway-klarna' ),
 					$e->getCode(),
 					utf8_encode( $e->getMessage() )
 				)					
@@ -1183,13 +1183,13 @@ class WC_Gateway_Klarna_Order {
 			) );
 			$order->add_order_note(
 				sprintf(
-					__( 'Klarna order updated.', 'klarna' )
+					__( 'Klarna order updated.', 'woocommerce-gateway-klarna' )
 				)
 			);
 		} catch( Exception $e ) {
 			$order->add_order_note(
 				sprintf(
-					__( 'Klarna order update failed. Error code %s. Error message %s', 'klarna' ),
+					__( 'Klarna order update failed. Error code %s. Error message %s', 'woocommerce-gateway-klarna' ),
 					$e->getCode(),
 					utf8_encode( $e->getMessage() )
 				)					

@@ -802,13 +802,13 @@ class WC_Gateway_Klarna_K2WC {
 			if ( 'yes' == $checkout_settings['create_customer_account'] ) {
 				$password = '';
 				$new_customer = $this->create_new_customer( $klarna_order['billing_address']['email'], $klarna_order['billing_address']['email'], $password );
-				$order->add_order_note( sprintf( __( 'New customer created (user ID %s).', 'klarna' ), $new_customer, $klarna_order['id'] ) );
+				$order->add_order_note( sprintf( __( 'New customer created (user ID %s).', 'woocommerce-gateway-klarna' ), $new_customer, $klarna_order['id'] ) );
 				
 				if ( is_wp_error( $new_customer ) ) { // Creation failed
-					$order->add_order_note( sprintf( __( 'Customer creation failed. Error: %s.', 'klarna' ), $new_customer->get_error_message(), $klarna_order['id'] ) );
+					$order->add_order_note( sprintf( __( 'Customer creation failed. Error: %s.', 'woocommerce-gateway-klarna' ), $new_customer->get_error_message(), $klarna_order['id'] ) );
 					$this->customer_id = 0;
 				} else { // Creation succeeded
-					$order->add_order_note( sprintf( __( 'New customer created (user ID %s).', 'klarna' ), $new_customer, $klarna_order['id'] ) );
+					$order->add_order_note( sprintf( __( 'New customer created (user ID %s).', 'woocommerce-gateway-klarna' ), $new_customer, $klarna_order['id'] ) );
 					
 					// Add customer billing address - retrieved from callback from Klarna
 					update_user_meta( $new_customer, 'billing_first_name', $klarna_order['billing_address']['given_name'] );
@@ -863,7 +863,7 @@ class WC_Gateway_Klarna_K2WC {
 		// Rest API
 		if ( isset( $_GET['klarna-api'] ) && 'rest' == sanitize_key( $_GET['klarna-api'] ) ) {
 			$order->add_order_note( sprintf( 
-				__( 'Klarna Checkout payment created. Klarna reference number: %s.', 'klarna' ),
+				__( 'Klarna Checkout payment created. Klarna reference number: %s.', 'woocommerce-gateway-klarna' ),
 				$klarna_order['klarna_reference']
 			) );
 			$klarna_order->acknowledge();
@@ -878,7 +878,7 @@ class WC_Gateway_Klarna_K2WC {
 		// V2 API
 		} else {
 			$order->add_order_note( sprintf( 
-				__( 'Klarna Checkout payment created. Reservation number: %s.  Klarna order number: %s', 'klarna' ),
+				__( 'Klarna Checkout payment created. Reservation number: %s.  Klarna order number: %s', 'woocommerce-gateway-klarna' ),
 				$klarna_order['reservation'], 
 				$klarna_order['id'] 
 			) );
@@ -887,7 +887,7 @@ class WC_Gateway_Klarna_K2WC {
 			$expiration_time = date( get_option( 'date_format' ) . ' - ' . get_option( 'time_format' ), strtotime( $klarna_order['expires_at'] ) );
 			$order->add_order_note( 
 				sprintf( 
-					__( 'Klarna authorization expires at %s.', 'klarna' ), 
+					__( 'Klarna authorization expires at %s.', 'woocommerce-gateway-klarna' ), 
 					$expiration_time
 				)
 			);

@@ -73,7 +73,7 @@ function init_klarna_gateway() {
 		return;
 	
 	// Localisation
-	load_plugin_textdomain('klarna', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/');
+	load_plugin_textdomain( 'woocommerce-gateway-klarna', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' );
 
 	/**
 	 * Define plugin constants

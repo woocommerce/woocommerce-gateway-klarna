@@ -26,8 +26,8 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 		parent::__construct();
 		
 		$this->id                 = 'klarna_part_payment';
-		$this->method_title       = __( 'Klarna Part Payment', 'klarna' );
-		$this->method_description = sprintf( __( 'With Klarna your customers can pay by invoice. Klarna works by adding extra personal information fields and then sending the details to Klarna for verification. Documentation <a href="%s" target="_blank">can be found here</a>.', 'klarna' ), 'http://docs.woothemes.com/document/klarna/' );
+		$this->method_title       = __( 'Klarna Part Payment', 'woocommerce-gateway-klarna' );
+		$this->method_description = sprintf( __( 'With Klarna your customers can pay by invoice. Klarna works by adding extra personal information fields and then sending the details to Klarna for verification. Documentation <a href="%s" target="_blank">can be found here</a>.', 'woocommerce-gateway-klarna' ), 'http://docs.woothemes.com/document/klarna/' );
 		$this->has_fields         = true;
 		$this->order_button_text  = apply_filters( 'klarna_order_button_text', __( 'Place order', 'woocommerce' ) );
 		$this->pclass_type        = array( 0, 1 ); // Part payment flexible and part payment fixed
@@ -207,7 +207,7 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 				if ( $this->debug=='yes' ) {
 					$this->log->add( 'klarna', 'Refund Failed: No Klarna invoice ID.' );
 				}
-				$order->add_order_note( __( 'This order cannot be refunded. Please make sure it is activated.', 'klarna' ) );
+				$order->add_order_note( __( 'This order cannot be refunded. Please make sure it is activated.', 'woocommerce-gateway-klarna' ) );
 				return false;
 			}
 
@@ -245,7 +245,7 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 	 * @since 1.0.0
 	 */
 	public function admin_options() { ?>
-		<h3><?php echo ( ! empty( $this->method_title ) ) ? $this->method_title : __( 'Settings', 'klarna' ) ; ?></h3>
+		<h3><?php echo ( ! empty( $this->method_title ) ) ? $this->method_title : __( 'Settings', 'woocommerce-gateway-klarna' ) ; ?></h3>
 		<?php echo ( ! empty( $this->method_description ) ) ? wpautop( $this->method_description ) : ''; ?>
 		<table class="form-table">
 			<?php $this->generate_settings_html(); // Generate the HTML For the settings form. ?>
@@ -501,7 +501,7 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 	   	global $woocommerce;
 
 		if ( 'yes' == $this->testmode ) { ?>
-			<p><?php _e('TEST MODE ENABLED', 'klarna'); ?></p>
+			<p><?php _e('TEST MODE ENABLED', 'woocommerce-gateway-klarna' ); ?></p>
 		<?php }
 	
 		$klarna = new Klarna();
@@ -684,7 +684,7 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
     		switch( $result[1] ) {
 				case KlarnaFlags::ACCEPTED :
 					$order->add_order_note(
-						__( 'Klarna payment completed. Klarna Invoice number: ', 'klarna' ) . $invno
+						__( 'Klarna payment completed. Klarna Invoice number: ', 'woocommerce-gateway-klarna' ) . $invno
 					);
 					update_post_meta( $order_id, '_klarna_order_reservation', $invno );
 					update_post_meta( $order_id, '_transaction_id', $invno );
@@ -699,7 +699,7 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 
 				case KlarnaFlags::PENDING :
 					$order->add_order_note(
-						__( 'Order is PENDING APPROVAL by Klarna. Please visit Klarna Online for the latest status on this order. Klarna Invoice number: ', 'klarna' ) . $invno
+						__( 'Order is PENDING APPROVAL by Klarna. Please visit Klarna Online for the latest status on this order. Klarna Invoice number: ', 'woocommerce-gateway-klarna' ) . $invno
 					);
 					$order->payment_complete(); // Payment complete					
 					$woocommerce->cart->empty_cart(); // Remove cart
@@ -712,10 +712,10 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 
 				case KlarnaFlags::DENIED : // Order is denied, store it in a database.
 					$order->add_order_note(
-						__( 'Klarna payment denied.', 'klarna' )
+						__( 'Klarna payment denied.', 'woocommerce-gateway-klarna' )
 					);
 					wc_add_notice(
-						__( 'Klarna payment denied.', 'klarna' ), 
+						__( 'Klarna payment denied.', 'woocommerce-gateway-klarna' ), 
 						'error'
 					);
 					return;
@@ -723,10 +723,10 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 
 				default: // Unknown response, store it in a database.
 					$order->add_order_note(
-						__( 'Unknown response from Klarna.', 'klarna' )
+						__( 'Unknown response from Klarna.', 'woocommerce-gateway-klarna' )
 					);
 					wc_add_notice(
-						__( 'Unknown response from Klarna.', 'klarna' ),
+						__( 'Unknown response from Klarna.', 'woocommerce-gateway-klarna' ),
 						'error'
 					);
 					return;
@@ -737,7 +737,7 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
     		// The purchase was denied or something went wrong, print the message:
 			wc_add_notice(
 				sprintf(
-					__( '%s (Error code: %s)', 'klarna' ),
+					__( '%s (Error code: %s)', 'woocommerce-gateway-klarna' ),
 					utf8_encode( $e->getMessage() ),
 					$e->getCode()
 				),
@@ -754,7 +754,7 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 	 * @since 1.0.0
 	 **/
 	function receipt_page( $order ) {
-		echo '<p>'.__('Thank you for your order.', 'klarna').'</p>';		
+		echo '<p>'.__('Thank you for your order.', 'woocommerce-gateway-klarna' ).'</p>';		
 	}
 
 	
