@@ -109,7 +109,12 @@ try {
 				),
 				$this->klarna_checkout_thanks_url
 			);
-			$address_update_uri = get_home_url() . '/wc-api/WC_Gateway_Klarna_Checkout_Address/';
+			$address_update_uri = add_query_arg(
+				array(
+					'sid' => $local_order_id
+				),
+				get_home_url() . '/wc-api/WC_Gateway_Klarna_Checkout_Address/'
+			);
 		} else { // V2
 			$merchant_terms_uri = $this->terms_url;
 			$merchant_checkout_uri = esc_url_raw( add_query_arg( 
@@ -176,7 +181,6 @@ try {
 			}
 
 			// Add shipping options
-			/* 
 			WC()->cart->calculate_shipping();
 			$packages = WC()->shipping->get_packages();
 			foreach ( $packages as $i => $package ) {
@@ -206,7 +210,6 @@ try {
 				}
 			}
 			$update['shipping_options'] = $shipping_options;
-			*/
 		}
 
 		$klarna_order->update( apply_filters( 'kco_update_order', $update ) );

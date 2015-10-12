@@ -192,13 +192,21 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		// Read the post body
 		$post_body = file_get_contents('php://input');
 
+		// $this->log->add( 'klarna', 'SERVER - ' . var_export( $_SERVER, true ) );
+
+		/*
 		// Convert post body into native object
 		$data = json_decode( $post_body, true );
 
-		$this->log->add( 'klarna', 'ADDRESS UPDATE LISTENER' );
+		$this->log->add( 'klarna', 'ADDRESS UPDATE LISTENER RECEIVED - ' . var_export( $post_body, true ) );
 		$this->log->add( 'klarna', 'ADDRESS UPDATE LISTENER DECODE - ' . var_export( $data, true ) );
 		$this->log->add( 'klarna', 'ADDRESS UPDATE LISTENER ENCODE - ' . var_export( json_encode( $data ), true ) );
-		$this->log->add( 'klarna', 'Session - ' . var_export( $_SESSION, true ) );
+
+		$order_id = $_GET['sid'];
+		$this->log->add( 'klarna', 'Local order - ' . $order_id );
+		*/
+
+		// echo $post_body;
 	}
 
 
