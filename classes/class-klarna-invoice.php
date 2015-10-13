@@ -94,7 +94,6 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 		add_action( 'woocommerce_receipt_klarna_invoice', array( $this, 'receipt_page' ) );
 		add_action( 'woocommerce_checkout_process', array( $this, 'klarna_invoice_checkout_field_process' ) );
 		add_action( 'wp_print_footer_scripts', array(  $this, 'footer_scripts' ) );
-		add_action( 'wp_print_footer_scripts', array(  $this, 'footer_scripts' ) );
 
 		// Check Klarna pending order
 		add_action( 'check_klarna_pending', array( $this, 'check_klarna_pending_callback' ) );
@@ -948,6 +947,31 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 							} else $('#payment_method_klarna_invoice').prop('disabled', false);
 						});
 					});	
+				});
+
+				//
+
+				// Move PNO field and get address if SE
+				jQuery(document).ajaxComplete(function( event, xhr, settings ) {
+					settings_url = settings.url;
+
+					// Check if correct AJAX function
+					if (settings_url.indexOf('?wc-ajax=update_order_review') > -1) {
+						// Check if Klarna Invoice and SE
+						if (jQuery('input[name="payment_method"]:checked').val() == 'klarna_invoice' && 
+							jQuery('select#billing_country').val() == 'SE') {
+							
+							jQuery('.woocommerce-billing-fields #klarna-invoice-get-address').remove();
+							jQuery('#order_review #klarna-invoice-get-address').show().prependTo(jQuery('.woocommerce-billing-fields'));
+						
+						} else {
+
+							// if (jQuery('.woocommerce-billing-fields #klarna-invoice-get-address').length) {
+								jQuery('.woocommerce-billing-fields #klarna-invoice-get-address').hide().appendTo(jQuery('li.payment_method_klarna_invoice div.payment_method_klarna_invoice'));
+							// }
+
+						}
+					}
 				});
 				//]]>
 			</script>

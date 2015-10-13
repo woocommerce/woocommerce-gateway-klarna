@@ -180,7 +180,7 @@ if ( 'NO' == $this->klarna_helper->get_klarna_country() ) { ?>
 		</p>
 		<div class="clear"></div>
 		
-		<p class="form-row form-row-wide">
+		<p class="form-row form-row-wide" id="klarna-part-payment-get-address">
 		<?php if ( $this->klarna_helper->get_klarna_country() == 'NL' || $this->klarna_helper->get_klarna_country() == 'DE' ) { ?>
 			<label for="<?php echo $klarna_dob_element; ?>">
 				<?php echo __("Date of Birth", 'woocommerce-gateway-klarna' ) ?> <span class="required">*</span>
@@ -319,7 +319,7 @@ if ( 'NO' == $this->klarna_helper->get_klarna_country() ) { ?>
 				<option value="2000">2000</option>
 			</select>
 				
-		<?php } else { ?>
+		<?php } else { // Swedish is here ?>
 			<label for="<?php echo $klarna_dob_element; ?>"><?php echo __("Date of Birth", 'woocommerce-gateway-klarna' ) ?> <span class="required">*</span></label>
 			<input type="text" class="input-text" id="<?php echo $klarna_dob_element; ?>" name="<?php echo $klarna_dob_element; ?>" />
 		<?php }

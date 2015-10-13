@@ -788,6 +788,29 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 						});
 					});	
 				});
+
+				// Move PNO field and get address if SE
+				jQuery(document).ajaxComplete(function( event, xhr, settings ) {
+					settings_url = settings.url;
+
+					// Check if correct AJAX function
+					if (settings_url.indexOf('?wc-ajax=update_order_review') > -1) {
+						// Check if Klarna Invoice and SE
+						if (jQuery('input[name="payment_method"]:checked').val() == 'klarna_part_payment' && 
+							jQuery('select#billing_country').val() == 'SE') {
+							
+							jQuery('.woocommerce-billing-fields #klarna-part-payment-get-address').remove();
+							jQuery('#order_review #klarna-part-payment-get-address').show().prependTo(jQuery('.woocommerce-billing-fields'));
+						
+						} else {
+
+							// if (jQuery('.woocommerce-billing-fields #klarna-invoice-get-address').length) {
+								jQuery('.woocommerce-billing-fields #klarna-part-payment-get-address').hide().appendTo(jQuery('li.payment_method_klarna_part_payment div.payment_method_klarna_part_payment'));
+							// }
+
+						}
+					}
+				});
 				//]]>
 			</script>
 		<?php }

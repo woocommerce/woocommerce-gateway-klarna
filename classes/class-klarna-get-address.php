@@ -103,7 +103,7 @@ class WC_Klarna_Get_Address {
 				jQuery('input[name="payment_method"]').on('change', function(){
 					if ( 'yes' == getAddressCompleted ) {
 						var selected_paytype = jQuery('input[name=payment_method]:checked').val();
-						if( selected_paytype !== 'klarna' && selected_paytype !== 'klarna_account' && selected_paytype !== 'klarna_special_campaign'){
+						if( selected_paytype !== 'klarna_invoice' && selected_paytype !== 'klarna_part_payment' ){
 							
 							jQuery(".klarna-response").hide();
 							
