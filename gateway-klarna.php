@@ -24,6 +24,19 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
 
+
+/**
+ * Register activation hook
+ */
+function woocommerce_gateway_klarna_activate() {
+	 if ( version_compare( PHP_VERSION, '5.4', '<' ) ) {
+		deactivate_plugins( basename( __FILE__ ) );
+		wp_die( __( '<p><strong>WooCommerce Gateway Klarna</strong> plugin requires PHP version 5.4 or greater.</p>', 'woocommerce-gateway-klarna' ) );
+	 }
+}
+register_activation_hook( __FILE__, 'woocommerce_gateway_klarna_activate' );
+
+
 /**
  * Required functions
  */
