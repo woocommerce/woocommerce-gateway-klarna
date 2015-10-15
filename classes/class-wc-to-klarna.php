@@ -203,7 +203,7 @@ class WC_Gateway_Klarna_WC2K {
 							'reference'  => 'DISCOUNT',
 							'name'       => $coupon_name,
 							'quantity'   => 1,
-							'unit_price' => $coupon_amount,
+							'unit_price' => -$coupon_amount,
 							'tax_rate'   => 0,
 						);
 						$order_total = $order_total - $coupon_amount;
