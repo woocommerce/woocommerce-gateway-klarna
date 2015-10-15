@@ -273,7 +273,7 @@ jQuery(document).ready(function($) {
 	});
 
 	// Add coupon (v2)
-	$(document).on('submit','#klarna-checkout-widget .checkout_coupon', function( event ) {
+	$('#klarna-checkout-widget .checkout_coupon').on('submit', function( event ) {
 		event.preventDefault();
 
 		if ( typeof window._klarnaCheckout == 'function') { 
@@ -450,7 +450,7 @@ jQuery(document).ready(function($) {
 		api.on( {
 			'shipping_address_change': function (data) {
 				// console.log('****** Parent Page Received shipping_address_change DATA ******');
-				console.log(data);
+				// console.log(data);
 
 				// Only do this for USA for now
 				// if ( 'usa' == data.postal_code ) {
@@ -506,7 +506,7 @@ jQuery(document).ready(function($) {
 						},
 						success: function( response ) {
 							// console.log( 'success' );
-							console.log( response );
+							// console.log( response );
 							
 							$( kco_widget ).html( response.data.widget_html );
 						},
