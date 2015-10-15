@@ -1,12 +1,12 @@
 *** Klarna Changelog ***
 
-2015.06.30	- version 2.0
+2015.xx.xx	- version 2.0
 * Feature	- Added Klarna order activation from WooCommerce.
 * Feature	- Added Klarna order cancelation from WooCommerce.
 * Feature	- Added Klarna order update from WooCommerce.
 * Feature	- Added Klarna order refund from WooCommerce.
 * Feature	- Added support for subscription payments via Klarna Checkout (SE, NO, FI).
-* Feature	- Added support for KCO Austria.
+* Feature	- Added support for KCO UK, US & Austria.
 * Feature	- Added Cart to the Klarna Checkout page (via the new KCO cart widget).
 * Feature	- Added Shipping to the Klarna Checkout page (via the new KCO cart widget).
 * Feature	- Added Coupon management to the Klarna Checkout page (via the new KCO cart widget).
@@ -24,6 +24,8 @@
 * Tweak		- Change how and when order in WooCommerce is created when customer pays with Klarna Checkout. WooCommerce order is now only created on rendering of the KCO page if customer is logged in. Otherwise the local order is created when customer enters email address in KCO form. WooCommerce orderstatus is set to KCO incomplete until the order is confirmed from Klarna. This way incomplete orders won't clutter up the order list view and product stock isn't reserved until the order actually is finalized.
 * Tweak		- Updated translation files and updated Swedish and Norwegian translations.
 * Fix		- Fixed Get Address class so it doesn’t instantiate other classes and optimized company flow.
+			- Changed textdomain to woocommerce-gateway-klarna.
+			- Enhances get address field placement for SE.
 
 2015.05.05	- version 1.9.8.1
 * Feature	- Added filter klarna_checkout_billing_phone() for returned phone number in KCO.
