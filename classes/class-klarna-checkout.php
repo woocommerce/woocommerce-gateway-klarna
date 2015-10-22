@@ -1106,6 +1106,9 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 				    	update_post_meta( $order_id, 'klarna_order_status', 'created' );
 						update_post_meta( $order_id, '_klarna_order_reservation', $klarna_order['reservation'] );
 						
+						$order->calculate_shipping();
+						$order->calculate_taxes();
+						$order->calculate_totals();
 						$order->payment_complete();
 						// Debug
 						if ($this->debug=='yes') $this->log->add( 'klarna', 'Payment complete action triggered' );
