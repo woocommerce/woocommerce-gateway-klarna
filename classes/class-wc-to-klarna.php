@@ -366,11 +366,10 @@ class WC_Gateway_Klarna_WC2K {
 	 */
 	public function get_item_discount_rate( $cart_item ) {
 		if ( $cart_item['line_subtotal'] > $cart_item['line_total'] ) {
-			$item_discount_rate = round( ( 1 - ( $cart_item['line_total'] / $cart_item['line_subtotal'] ) ) * 10000 );
+			$item_discount_rate = ( 1 - ( $cart_item['line_total'] / $cart_item['line_subtotal'] ) ) * 10000;
 		} else {
 			$item_discount_rate = 0;
 		}
-
 		return (int) $item_discount_rate;
 	}
 

@@ -876,6 +876,9 @@ class WC_Gateway_Klarna_K2WC {
 				'merchant_reference1' => ltrim( $order->get_order_number(), '#' ) 
 			) );
 
+			$order->calculate_shipping();
+			$order->calculate_taxes();
+			$order->calculate_totals();
 			$order->payment_complete( $klarna_order['reservation'] );
 
 			delete_post_meta( $order->id, '_kco_incomplete_customer_email' );
@@ -903,6 +906,9 @@ class WC_Gateway_Klarna_K2WC {
 			$klarna_order->update( $update );
 
 			// Confirm local order
+			$order->calculate_shipping();
+			$order->calculate_taxes();
+			$order->calculate_totals();
 			$order->payment_complete( $klarna_order['reservation'] );
 
 			delete_post_meta( $order->id, '_kco_incomplete_customer_email' );
