@@ -1,5 +1,8 @@
 *** Klarna Changelog ***
 
+2015.10.22	- version 1.9.8.4
+* Fix       - Fixes discount amount shown in merchant and customer order confirmation emails.
+
 2015.10.01	- version 1.9.8.3
 * Fix       - Fixes output of JS in Klarna Checkout page.
 * Fix       - Hooks into 'woocommerce_cancel_unpaid_order' to expand it to orders created via Klarna Checkout.
