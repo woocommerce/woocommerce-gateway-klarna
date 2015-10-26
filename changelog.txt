@@ -26,6 +26,8 @@
 * Fix		- Fixed Get Address class so it doesn’t instantiate other classes and optimized company flow.
 			- Changed textdomain to woocommerce-gateway-klarna.
 			- Enhances get address field placement for SE.
+			- Calculates KCO order totals before payment_complete.
+			- Fixes how session_start is handled in KCO.
 
 2015.05.05	- version 1.9.8.1
 * Feature	- Added filter klarna_checkout_billing_phone() for returned phone number in KCO.
