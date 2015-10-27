@@ -349,7 +349,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 * @since  2.0
 	 **/
 	function register_klarna_incomplete_order_status() {
-		if ( $this->debug ) {
+		if ( 'yes' == $this->debug ) {
 			$show_in_admin_status_list = true;
 		} else {
 			$show_in_admin_status_list = false;
@@ -371,7 +371,10 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 * @since  2.0
 	 **/
 	function add_kco_incomplete_to_order_statuses( $order_statuses ) {
-		$order_statuses['wc-kco-incomplete'] = 'Incomplete Klarna Checkout';
+		// Add this status only if not in account page (so it doesn't show in My Account list of orders)
+		if ( ! is_account_page() ) {
+			$order_statuses['wc-kco-incomplete'] = 'Incomplete Klarna Checkout';
+		}
 
 		return $order_statuses;
 	}
