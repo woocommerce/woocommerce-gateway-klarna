@@ -627,14 +627,21 @@ class WC_Gateway_Klarna_Order {
 	function activate_klarna_order( $orderid ) {
 		$order = wc_get_order( $orderid );
 
-		// Check if this order hasn't been activated already
-		if ( ! get_post_meta( $orderid, '_klarna_invoice_number', true ) ) {
-			// Activation for orders created with KCO Rest
-			if ( 'rest' == get_post_meta( $order->id, '_klarna_api', true ) ) {
-				$this->activate_order_rest( $orderid );		
-			// Activation for KCO V2 and KPM orders		
-			} else {
-				$this->activate_order( $orderid );
+		$payment_method = $this->get_order_payment_method( $order );
+		$payment_method_option_name = 'woocommerce_' . $payment_method . '_settings';
+		$payment_method_option = get_option( $payment_method_option_name );
+
+		// Check if option is enabled
+		if ( 'yes' == $payment_method_option['push_completion'] ) {
+			// Check if this order hasn't been activated already
+			if ( ! get_post_meta( $orderid, '_klarna_invoice_number', true ) ) {
+				// Activation for orders created with KCO Rest
+				if ( 'rest' == get_post_meta( $order->id, '_klarna_api', true ) ) {
+					$this->activate_order_rest( $orderid );		
+				// Activation for KCO V2 and KPM orders		
+				} else {
+					$this->activate_order( $orderid );
+				}
 			}
 		}
 	}
@@ -785,15 +792,22 @@ class WC_Gateway_Klarna_Order {
 	 **/
 	function cancel_klarna_order( $orderid ) {
 		$order = wc_get_order( $orderid );
+		
+		$payment_method = $this->get_order_payment_method( $order );
+		$payment_method_option_name = 'woocommerce_' . $payment_method . '_settings';
+		$payment_method_option = get_option( $payment_method_option_name );
 
-		// Check if this order hasn't been activated already
-		if ( ! get_post_meta( $orderid, '_klarna_order_cancelled', true ) ) {
-			// Activation for orders created with KCO Rest
-			if ( 'rest' == get_post_meta( $order->id, '_klarna_api', true ) ) {
-				$this->cancel_order_rest( $orderid );		
-			// Activation for KCO V2 and KPM orders		
-			} else {
-				$this->cancel_order( $orderid );
+		// Check if option is enabled
+		if ( 'yes' == $payment_method_option['push_cancellation'] ) {
+			// Check if this order hasn't been activated already
+			if ( ! get_post_meta( $orderid, '_klarna_order_cancelled', true ) ) {
+				// Activation for orders created with KCO Rest
+				if ( 'rest' == get_post_meta( $order->id, '_klarna_api', true ) ) {
+					$this->cancel_order_rest( $orderid );		
+				// Activation for KCO V2 and KPM orders		
+				} else {
+					$this->cancel_order( $orderid );
+				}
 			}
 		}
 	}
@@ -917,15 +931,21 @@ class WC_Gateway_Klarna_Order {
 
 		$orderid = $item_row->order_id;
 		$order = wc_get_order( $orderid );
+		
+		$payment_method = $this->get_order_payment_method( $order );
+		$payment_method_option_name = 'woocommerce_' . $payment_method . '_settings';
+		$payment_method_option = get_option( $payment_method_option_name );
 
-		// Check if auto update is enabled and order is on hold so it can be edited, 
-		// and if it hasn't been captured or cancelled
-		if ( 'on-hold' == $order->get_status() && ! get_post_meta( $orderid, '_klarna_order_cancelled', true ) && ! get_post_meta( $orderid, '_klarna_order_activated', true ) ) {
-			if ( 'rest' == get_post_meta( $order->id, '_klarna_api', true ) ) {
-				$this->update_order_rest( $orderid );		
-			// Activation for KCO V2 and KPM orders		
-			} else {
-				$this->update_order( $orderid );
+		// Check if option is enabled
+		if ( 'yes' == $payment_method_option['push_update'] ) {
+			// Check if and order is on hold so it can be edited, and if it hasn't been captured or cancelled
+			if ( 'on-hold' == $order->get_status() && ! get_post_meta( $orderid, '_klarna_order_cancelled', true ) && ! get_post_meta( $orderid, '_klarna_order_activated', true ) ) {
+				if ( 'rest' == get_post_meta( $order->id, '_klarna_api', true ) ) {
+					$this->update_order_rest( $orderid );		
+				// Activation for KCO V2 and KPM orders		
+				} else {
+					$this->update_order( $orderid );
+				}
 			}
 		}
 	}
@@ -948,14 +968,20 @@ class WC_Gateway_Klarna_Order {
 		$orderid = $item_row->order_id;
 		$order = wc_get_order( $orderid );
 
-		// Check if auto update is enabled and order is on hold so it can be edited, 
-		// and if it hasn't been captured or cancelled
-		if ( 'on-hold' == $order->get_status() && ! get_post_meta( $orderid, '_klarna_order_cancelled', true ) && ! get_post_meta( $orderid, '_klarna_order_activated', true ) ) {
-			if ( 'rest' == get_post_meta( $order->id, '_klarna_api', true ) ) {
-				$this->update_order_rest( $orderid, $itemid );		
-			// Activation for KCO V2 and KPM orders		
-			} else {
-				$this->update_order( $orderid, $itemid );
+		$payment_method = $this->get_order_payment_method( $order );
+		$payment_method_option_name = 'woocommerce_' . $payment_method . '_settings';
+		$payment_method_option = get_option( $payment_method_option_name );
+
+		// Check if option is enabled
+		if ( 'yes' == $payment_method_option['push_update'] ) {
+			// Check if order is on hold so it can be edited, and if it hasn't been captured or cancelled
+			if ( 'on-hold' == $order->get_status() && ! get_post_meta( $orderid, '_klarna_order_cancelled', true ) && ! get_post_meta( $orderid, '_klarna_order_activated', true ) ) {
+				if ( 'rest' == get_post_meta( $order->id, '_klarna_api', true ) ) {
+					$this->update_order_rest( $orderid, $itemid );		
+				// Activation for KCO V2 and KPM orders		
+				} else {
+					$this->update_order( $orderid, $itemid );
+				}
 			}
 		}
 	}
@@ -969,17 +995,23 @@ class WC_Gateway_Klarna_Order {
 	function update_klarna_order_edit_item( $orderid, $items ) {
 		$order = wc_get_order( $orderid );
 
-		// Check if auto update is enabled and order is on hold so it can be edited, 
-		// and if it hasn't been captured or cancelled
-		if ( 'on-hold' == $order->get_status() && ! get_post_meta( $orderid, '_klarna_order_cancelled', true ) && ! get_post_meta( $orderid, '_klarna_order_activated', true ) ) {
-			if ( defined( 'DOING_AJAX' ) && DOING_AJAX ) {
-				// Check if order was created using this method
-				if ( 'on-hold' == $order->get_status() ) {
-					if ( 'rest' == get_post_meta( $order->id, '_klarna_api', true ) ) {
-						$this->update_order_rest( $orderid );		
-					// Activation for KCO V2 and KPM orders		
-					} else {
-						$this->update_order( $orderid );
+		$payment_method = $this->get_order_payment_method( $order );
+		$payment_method_option_name = 'woocommerce_' . $payment_method . '_settings';
+		$payment_method_option = get_option( $payment_method_option_name );
+
+		// Check if option is enabled
+		if ( 'yes' == $payment_method_option['push_update'] ) {
+			// Check if order is on hold so it can be edited, and if it hasn't been captured or cancelled
+			if ( 'on-hold' == $order->get_status() && ! get_post_meta( $orderid, '_klarna_order_cancelled', true ) && ! get_post_meta( $orderid, '_klarna_order_activated', true ) ) {
+				if ( defined( 'DOING_AJAX' ) && DOING_AJAX ) {
+					// Check if order was created using this method
+					if ( 'on-hold' == $order->get_status() ) {
+						if ( 'rest' == get_post_meta( $order->id, '_klarna_api', true ) ) {
+							$this->update_order_rest( $orderid );		
+						// Activation for KCO V2 and KPM orders		
+						} else {
+							$this->update_order( $orderid );
+						}
 					}
 				}
 			}
@@ -1088,57 +1120,6 @@ class WC_Gateway_Klarna_Order {
 			}
 		}
 
-		/*
-		// Process shipping
-		if ( $order->get_total_shipping() > 0 ) {
-			$shipping = array(  
-				'type'             => 'shipping_fee',
-				'reference'        => 'SHIPPING',
-				'name'             => $order->get_shipping_method(),
-				'quantity'         => 1,
-				'unit_price'       => ( $order->get_total_shipping() + $order->get_shipping_tax() ) * 100,
-				'tax_rate'         => $order->get_shipping_tax() / $order->get_total_shipping() * 100 * 100,
-				'total_amount'     => ( $order->get_total_shipping() + $order->get_shipping_tax() ) * 100,
-				'total_tax_amount' => $order->get_shipping_tax() * 100
-			);
-
-			$updated_order_lines[] = $shipping;
-			$updated_order_total += ( $order->get_total_shipping() + $order->get_shipping_tax() ) * 100;
-			$updated_tax_total += $order->get_shipping_tax() * 100;			
-		}
-
-		// Process discounts
-		if ( $order->get_used_coupons() ) {
-			foreach ( $order->get_used_coupons() as $code ) {
-				$smart_coupon = new WC_Coupon( $code );
-
-				if ( $smart_coupon->is_valid() && $smart_coupon->discount_type == 'smart_coupon' ) {
-					$coupon_name     = $smart_coupon->code;
-					$coupon_amount   = (int) number_format( ( $smart_coupon->coupon_amount ) * 100, 0, '', '' );
-
-					// Check if coupon amount exceeds order total
-					if ( $updated_order_total < $coupon_amount ) {
-						$coupon_amount = $updated_order_total;
-					}
-
-					$discount = array(
-						'type'             => 'discount',
-						'reference'        => 'DISCOUNT',
-						'name'             => $coupon_name,
-						'quantity'         => 1,
-						'unit_price'       => -$coupon_amount,
-						'total_amount'     => -$coupon_amount,
-						'tax_rate'         => 0,
-						'total_tax_amount' => 0,
-					);
-
-					$updated_order_lines[] = $discount;
-					$updated_order_total = $updated_order_total - $coupon_amount;
-				}
-			}
-		}
-		*/
-
 		/**
 		 * Need to send local order to constructor and Klarna order to method
 		 */
@@ -1198,6 +1179,20 @@ class WC_Gateway_Klarna_Order {
 				)					
 			);
 		}
+	}
+
+
+	/**
+	 * Helper function, gets order payment method
+	 * 
+	 * @since  2.0
+	 * 
+	 * @param  $order  WooCoommerce order object
+	 **/
+	function get_order_payment_method( $order ) {
+		$payment_method = $order->payment_method;
+
+		return $payment_method;
 	}
 
 }
