@@ -1,5 +1,8 @@
 *** Klarna Changelog ***
 
+2015.1x.xx	- version 1.9.8.4
+* Fix       - Fixes when session is started by restricting it only to KCO pages.
+
 2015.10.22	- version 1.9.8.4
 * Fix       - Fixes discount amount shown in merchant and customer order confirmation emails.
 
