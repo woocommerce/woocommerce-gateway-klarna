@@ -147,6 +147,9 @@ class WC_Gateway_Klarna_WC2K {
 			$shipping_tax_amount = $this->get_shipping_tax_amount();
 	
 			if ( $this->is_rest ) {
+				/*
+				No need to do this any longer, shipping is sent to Klarna
+				as shipping_options parameter
 				$shipping = array(  
 					'type'             => 'shipping_fee',
 					'reference'        => 'SHIPPING',
@@ -157,6 +160,7 @@ class WC_Gateway_Klarna_WC2K {
 					'total_amount'     => $shipping_amount,
 					'total_tax_amount' => $shipping_tax_amount
 				);
+				*/
 			} else {
 				$shipping = array(  
 					'type'       => 'shipping_fee',
@@ -166,9 +170,9 @@ class WC_Gateway_Klarna_WC2K {
 					'unit_price' => $shipping_amount,
 					'tax_rate'   => $shipping_tax_rate
 				);
+				$cart[] = $shipping;
+				$order_total += $shipping_amount;
 			}
-			$cart[] = $shipping;
-			$order_total += $shipping_amount;
 		}
 
 		// Process discounts

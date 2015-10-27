@@ -154,6 +154,7 @@ if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 	do_action( 'klarna_after_kco_checkout' );
 } else {
 	// If cart is empty, clear these variables
+	wp_delete_post( WC()->session->get( 'ongoing_klarna_order' ), true ); // Delete WooCommerce order
 	WC()->session->__unset( 'klarna_checkout' ); // Klarna order ID
 	WC()->session->__unset( 'klarna_checkout_country' ); // Klarna order ID
 	WC()->session->__unset( 'ongoing_klarna_order' ); // WooCommerce order ID
