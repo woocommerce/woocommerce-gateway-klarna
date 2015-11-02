@@ -247,7 +247,8 @@ jQuery(document).ready(function($) {
 				},
 				success: function( response ) {
 					if ( 0 == response.data.item_count ) {
-						window.location.href = response.data.cart_url;
+						// window.location.href = response.data.cart_url;
+						location.reload();
 					} else {
 						$( kco_widget ).html( response.data.widget_html );
 						$( item_row ).remove();
@@ -518,6 +519,7 @@ jQuery(document).ready(function($) {
 				);
 			}
 		} );
+		
 	});
 	}
 
