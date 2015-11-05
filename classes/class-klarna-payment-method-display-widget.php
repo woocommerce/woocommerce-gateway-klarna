@@ -88,22 +88,22 @@ class WC_Klarna_Payment_Method_Display_Widget extends WP_Widget {
 		$width  = ! empty( $instance['width'] ) ? $instance['width'] : '';
 		?>
 		<p>
-			<label for="<?php echo $this->get_field_id( 'design' ); ?>"><?php _e( 'Design:' ); ?></label>
-			<select class="widefat" id="<?php echo $this->get_field_id( 'design' ); ?>" name="<?php echo $this->get_field_name( 'design' ); ?>">
+			<label for="<?php echo esc_attr( $this->get_field_id( 'design' ) ); ?>"><?php _e( 'Design:' ); ?></label>
+			<select class="widefat" id="<?php echo esc_attr( $this->get_field_id( 'design' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'design' ) ); ?>">
 				<option value="long" <?php selected( $design, 'long' ); ?>>Long</option>
 				<option value="short" <?php selected( $design, 'short' ); ?>>Short</option>
 			</select>
 		</p>
 		<p>
-			<label for="<?php echo $this->get_field_id( 'color' ); ?>"><?php _e( 'Color:' ); ?></label> 
-			<select class="widefat" id="<?php echo $this->get_field_id( 'color' ); ?>" name="<?php echo $this->get_field_name( 'color' ); ?>">
+			<label for="<?php echo esc_attr( $this->get_field_id( 'color' ) ); ?>"><?php _e( 'Color:' ); ?></label> 
+			<select class="widefat" id="<?php echo esc_attr( $this->get_field_id( 'color' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'color' ) ); ?>">
 				<option value="blue" <?php selected( $color, 'blue' ); ?>>Blue</option>
 				<option value="white" <?php selected( $color, 'white' ); ?>>White</option>
 			</select>
 		</p>
 		<p>
-			<label for="<?php echo $this->get_field_id( 'width' ); ?>"><?php _e( 'Width (px):' ); ?></label> 
-			<input class="widefat" id="<?php echo $this->get_field_id( 'width' ); ?>" name="<?php echo $this->get_field_name( 'width' ); ?>" type="number" value="<?php echo esc_attr( $width ); ?>" min="100" />
+			<label for="<?php echo esc_attr( $this->get_field_id( 'width' ) ); ?>"><?php _e( 'Width (px):' ); ?></label> 
+			<input class="widefat" id="<?php echo esc_attr( $this->get_field_id( 'width' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'width' ) ); ?>" type="number" value="<?php echo esc_attr( $width ); ?>" min="100" />
 		</p>
 		<p>Read more about the options <a target="_blank" href="http://developers.klarna.com/en/se+php/kco-v2/payment-method-display">here</a>.</p>
 		<?php 

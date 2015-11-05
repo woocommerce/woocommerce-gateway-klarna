@@ -204,8 +204,8 @@ class WC_Klarna_PMS {
 		// Check if anything was returned
 		if ( ! empty( $payment_options ) ) {
 			$payment_methods_output = '<p class="form-row">';
-				$payment_methods_output .= '<label for="' . $select_id . '">' . __( 'Payment plan', 'woocommerce-gateway-klarna' ) . ' <span class="required">*</span></label>';
-				$payment_methods_output .= '<select id="' . $select_id . '" name="' . $select_id . '" class="woocommerce-select klarna_pms_select" style="max-width:100%;width:100% !important;">';
+				$payment_methods_output .= '<label for="' . esc_attr( $select_id ) . '">' . __( 'Payment plan', 'woocommerce-gateway-klarna' ) . ' <span class="required">*</span></label>';
+				$payment_methods_output .= '<select id="' . esc_attr( $select_id ) . '" name="' . esc_attr( $select_id ) . '" class="woocommerce-select klarna_pms_select" style="max-width:100%;width:100% !important;">';
 
 					$payment_methods_output .= implode( '', $payment_options );
 

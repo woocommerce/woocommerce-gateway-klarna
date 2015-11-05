@@ -208,6 +208,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		// Check if page has Klarna Checkout shortcode in it and address_update query parameter
 		if (
 			has_shortcode( $post->post_content, 'woocommerce_klarna_checkout' ) &&
+			isset( $_GET['address_update'] ) &&
 			'yes' == $_GET['address_update']
 		) {
 			// Read the post body
@@ -216,30 +217,20 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			// Convert post body into native object
 			$data = json_decode( $post_body, true );
 
-			$this->log->add( 'klarna', 'ADDRESS UPDATE LISTENER RECEIVED - ' . var_export( $post_body, true ) );
-			$this->log->add( 'klarna', 'ADDRESS UPDATE LISTENER DECODE - ' . var_export( $data, true ) );
-			$this->log->add( 'klarna', 'ADDRESS UPDATE LISTENER ENCODE - ' . var_export( json_encode( $data ), true ) );
-
 			$order_id = $_GET['sid'];
 			$this->log->add( 'klarna', 'Local order - ' . $order_id );
-
-			$this->log->add( 'klarna', 'Customer - ' . var_export( WC()->customer, true ) );
-			$this->log->add( 'klarna', 'Cart - ' . var_export( WC()->cart, true ) );
 
 			$billing_address = $data['billing_address'];
 			$shipping_address = $data['shipping_address'];
 
-			/*
-				Need to:
-				1. Capture address from Klarna
-			 */
+			// Capture address from Klarna
 			$order = wc_get_order( $order_id );
 
 			$billing_address = array(
 				'country'    => strtoupper( $data['billing_address']['country'] ),
 				'first_name' => $data['billing_address']['given_name'],
 				'last_name'  => $data['billing_address']['family_name'],
-				'company'    => $data['billing_address']['company'],
+				// 'company'    => $data['billing_address']['company'],
 				'address_1'  => $data['billing_address']['street_address'],
 				'address_2'  => $data['billing_address']['street_address2'],
 				'postcode'   => $data['billing_address']['postal_code'],
@@ -253,7 +244,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 				'country'    => strtoupper( $data['shipping_address']['country'] ),
 				'first_name' => $data['shipping_address']['given_name'],
 				'last_name'  => $data['shipping_address']['family_name'],
-				'company'    => $data['shipping_address']['company'],
+				// 'company'    => $data['shipping_address']['company'],
 				'address_1'  => $data['shipping_address']['street_address'],
 				'address_2'  => $data['shipping_address']['street_address2'],
 				'postcode'   => $data['shipping_address']['postal_code'],
@@ -1591,7 +1582,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 						}
 						echo '<td class="product-quantity kco-centeralign" data-cart_item_key="' . $cart_item_key .'">';
 							if ( $_product->is_sold_individually() ) {
-								$product_quantity = sprintf( '1 <input type="hidden" name="cart[%s][qty]" value="1" />', $cart_item_key );
+								$product_quantity = sprintf( '1 <input type="hidden" name="cart[%s][qty]" value="1" />', esc_attr( $cart_item_key ) );
 							} else {
 								$product_quantity = woocommerce_quantity_input( array(
 									'input_name'  => "cart[{$cart_item_key}][qty]",
@@ -1656,13 +1647,13 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 									<?php if ( 1 === count( $available_methods ) ) {
 										$method = current( $available_methods );
 										echo wp_kses_post( wc_cart_totals_shipping_method_label( $method ) ); ?>
-										<input type="hidden" name="shipping_method[<?php echo $index; ?>]" data-index="<?php echo $index; ?>" id="shipping_method_<?php echo $index; ?>" value="<?php echo esc_attr( $method->id ); ?>" class="shipping_method" />
+										<input type="hidden" name="shipping_method[<?php echo esc_attr( $index ); ?>]" data-index="<?php echo esc_attr( $index ); ?>" id="shipping_method_<?php echo esc_attr( $index ); ?>" value="<?php echo esc_attr( $method->id ); ?>" class="shipping_method" />
 									<?php } else { ?>
 										<ul id="shipping_method">
 											<?php foreach ( $available_methods as $method ) : ?>
 												<li>
-													<input style="margin-left:3px" type="radio" name="shipping_method[<?php echo $index; ?>]" data-index="<?php echo $index; ?>" id="shipping_method_<?php echo $index; ?>_<?php echo sanitize_title( $method->id ); ?>" value="<?php echo esc_attr( $method->id ); ?>" <?php checked( $method->id, $chosen_method ); ?> class="shipping_method" />
-													<label for="shipping_method_<?php echo $index; ?>_<?php echo sanitize_title( $method->id ); ?>"><?php echo wp_kses_post( wc_cart_totals_shipping_method_label( $method ) ); ?></label>
+													<input style="margin-left:3px" type="radio" name="shipping_method[<?php echo esc_attr( $index ); ?>]" data-index="<?php echo esc_attr( $index ); ?>" id="shipping_method_<?php echo esc_attr( $index ); ?>_<?php echo esc_attr( sanitize_title( $method->id ) ); ?>" value="<?php echo esc_attr( $method->id ); ?>" <?php checked( $method->id, $chosen_method ); ?> class="shipping_method" />
+													<label for="shipping_method_<?php echo esc_attr( $index ); ?>_<?php echo esc_attr( sanitize_title( $method->id ) ); ?>"><?php echo wp_kses_post( wc_cart_totals_shipping_method_label( $method ) ); ?></label>
 												</li>
 											<?php endforeach; ?>
 										</ul>
@@ -2461,12 +2452,14 @@ class WC_Gateway_Klarna_Checkout_Extra {
 		$length = strlen( $clean_req_uri );
 
 		// Get arrays of checkout and thank you pages for all countries
-		foreach ( $checkout_settings as $cs_key => $cs_value ) {
-			if ( strpos( $cs_key, 'klarna_checkout_url_' ) !== false ) {
-				$checkout_pages[ $cs_key ] = substr( $cs_value, 0 - $length );
-			}
-			if ( strpos( $cs_key, 'klarna_checkout_thanks_url_' ) !== false ) {
-				$thank_you_pages[ $cs_key ] = substr( $cs_value, 0 - $length );
+		if ( is_array( $checkout_settings ) ) {
+			foreach ( $checkout_settings as $cs_key => $cs_value ) {
+				if ( strpos( $cs_key, 'klarna_checkout_url_' ) !== false ) {
+					$checkout_pages[ $cs_key ] = substr( $cs_value, 0 - $length );
+				}
+				if ( strpos( $cs_key, 'klarna_checkout_thanks_url_' ) !== false ) {
+					$thank_you_pages[ $cs_key ] = substr( $cs_value, 0 - $length );
+				}
 			}
 		}
 
@@ -2521,12 +2514,14 @@ class WC_Gateway_Klarna_Checkout_Extra {
 		$length = strlen( $clean_req_uri );
 
 		// Get arrays of checkout and thank you pages for all countries
-		foreach ( $checkout_settings as $cs_key => $cs_value ) {
-			if ( strpos( $cs_key, 'klarna_checkout_url_' ) !== false ) {
-				$checkout_pages[ $cs_key ] = substr( $cs_value, 0 - $length );
-			}
-			if ( strpos( $cs_key, 'klarna_checkout_thanks_url_' ) !== false ) {
-				$thank_you_pages[ $cs_key ] = substr( $cs_value, 0 - $length );
+		if ( is_array( $checkout_settings ) ) {
+			foreach ( $checkout_settings as $cs_key => $cs_value ) {
+				if ( strpos( $cs_key, 'klarna_checkout_url_' ) !== false ) {
+					$checkout_pages[ $cs_key ] = substr( $cs_value, 0 - $length );
+				}
+				if ( strpos( $cs_key, 'klarna_checkout_thanks_url_' ) !== false ) {
+					$thank_you_pages[ $cs_key ] = substr( $cs_value, 0 - $length );
+				}
 			}
 		}
 

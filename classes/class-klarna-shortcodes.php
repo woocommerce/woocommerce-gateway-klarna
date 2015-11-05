@@ -124,7 +124,7 @@ class WC_Gateway_Klarna_Shortcodes {
 									}
 									echo '<td class="product-quantity kco-centeralign" data-cart_item_key="' . $cart_item_key .'">';
 										if ( $_product->is_sold_individually() ) {
-											$product_quantity = sprintf( '1 <input type="hidden" name="cart[%s][qty]" value="1" />', $cart_item_key );
+											$product_quantity = sprintf( '1 <input type="hidden" name="cart[%s][qty]" value="1" />', esc_attr( $cart_item_key ) );
 										} else {
 											$product_quantity = woocommerce_quantity_input( array(
 												'input_name'  => "cart[{$cart_item_key}][qty]",

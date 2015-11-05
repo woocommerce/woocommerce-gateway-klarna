@@ -28,6 +28,8 @@
 			- Enhances get address field placement for SE.
 			- Calculates KCO order totals before payment_complete.
 			- Fixes how session_start is handled in KCO.
+* Tweak     - Enhances error handling on new customer account creation.
+* Tweak     - Improved settings pages formatting.
 
 2015.05.05	- version 1.9.8.1
 * Feature	- Added filter klarna_checkout_billing_phone() for returned phone number in KCO.

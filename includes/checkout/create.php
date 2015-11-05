@@ -254,12 +254,19 @@ if ( $this->is_rest() ) {
 				foreach ( $available_methods as $method ) {
 					$preselected = ( $method->id == $chosen_method ? true : false );
 
+					// Avoid division by zero
+					if ( $method->cost == 0 ) {
+						$tax_rate = 0;
+					} else {
+						$tax_rate = round( array_sum( $method->taxes ) / $method->cost * 100 ) * 100;
+					}
+
 					$shipping_options[] = array(
-						'id' => $method->id,
-						'name' => $method->label,
-						'price' => round( ( $method->cost + array_sum( $method->taxes ) ) * 100 ),
-						'tax_amount' => round( array_sum( $method->taxes ) * 100 ),
-						'tax_rate' => round( array_sum( $method->taxes ) / $method->cost * 100 ) * 100,
+						'id'          => $method->id,
+						'name'        => $method->label,
+						'price'       => round( ( $method->cost + array_sum( $method->taxes ) ) * 100 ),
+						'tax_amount'  => round( array_sum( $method->taxes ) * 100 ),
+						'tax_rate'    => $tax_rate,
 						'description' => '',
 						'preselected' => $preselected
 					);

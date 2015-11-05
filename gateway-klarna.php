@@ -12,12 +12,15 @@
  * Plugin URI:      http://woothemes.com/woocommerce
  * Description:     Extends WooCommerce. Provides a <a href="http://www.klarna.se" target="_blank">Klarna</a> gateway for WooCommerce.
  * Version:         2.0-RC1
- * Author:          Krokedil
- * Author URI:      http://krokedil.com
- * License:         GPL-2.0+
- * License URI:     http://www.gnu.org/licenses/gpl-2.0.txt
+ * Author:          WooThemes
+ * Author URI:      http://woothemes.com/
+ * Developer:       Krokedil
+ * Developer URI:   http://krokedil.com
  * Text Domain:     woocommerce-gateway-klarna
  * Domain Path:     /languages
+ * Copyright:       © 2009-2015 WooThemes.
+ * License:         GNU General Public License v3.0
+ * License URI:     http://www.gnu.org/licenses/gpl-3.0.html
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

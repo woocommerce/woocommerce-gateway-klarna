@@ -111,7 +111,7 @@ class WC_Klarna_Get_Address {
 							jQuery("#billing_first_name").val('<?php echo $original_billing_first_name;?>');
 							jQuery("#billing_last_name").val('<?php echo $original_billing_last_name;?>');
 							jQuery("#billing_company").val('<?php echo $original_billing_company;?>');
-							jQuery("#billing_address_1").val('<?php echo $original_customer['address'];?>');
+							jQuery("#billing_address_1").val('<?php echo $original_customer['address_1'];?>');
 							jQuery("#billing_address_2").val('<?php echo $original_customer['address_2'];?>');
 							jQuery("#billing_postcode").val('<?php echo $original_customer['postcode'];?>');
 							jQuery("#billing_city").val('<?php echo $original_customer['city'];?>');
@@ -119,7 +119,7 @@ class WC_Klarna_Get_Address {
 							jQuery("#shipping_first_name").val('<?php echo $original_shipping_first_name;?>');
 							jQuery("#shipping_last_name").val('<?php echo $original_shipping_last_name;?>');
 							jQuery("#shipping_company").val('<?php echo $original_shipping_company;?>');
-							jQuery("#shipping_address_1").val('<?php echo $original_customer['shipping_address'];?>');
+							jQuery("#shipping_address_1").val('<?php echo $original_customer['shipping_address_1'];?>');
 							jQuery("#shipping_address_2").val('<?php echo $original_customer['shipping_address_2'];?>');
 							jQuery("#shipping_postcode").val('<?php echo $original_customer['shipping_postcode'];?>');
 							jQuery("#shipping_city").val('<?php echo $original_customer['shipping_city'];?>');

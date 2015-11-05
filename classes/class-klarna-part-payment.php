@@ -550,7 +550,7 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 		global $woocommerce;
 
  		// Only run this if Klarna Part Payment is the choosen payment method
- 		if ( $_POST['payment_method'] == 'klarna_part_payment' ) {
+ 		if ( isset( $_POST['payment_method'] ) && $_POST['payment_method'] == 'klarna_part_payment' ) {
  		
  			$klarna_field_prefix = 'klarna_part_payment_';
 
@@ -569,7 +569,7 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 	function collect_dob( $order_id ) {
 	
 		// Collect the dob different depending on country
-		if ( $_POST['billing_country'] == 'NL' || $_POST['billing_country'] == 'DE' ) {
+		if ( isset( $_POST['billing_country'] ) && ( $_POST['billing_country'] == 'NL' || $_POST['billing_country'] == 'DE' ) ) {
 			$klarna_pno_day = 
 				isset( $_POST['klarna_part_payment_date_of_birth_day'] ) ? woocommerce_clean( $_POST['klarna_part_payment_date_of_birth_day'] ) : '';
 			$klarna_pno_month = 
@@ -617,7 +617,7 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 		// Split address into House number and House extension for NL & DE customers
 		$klarna_billing = array();
 		$klarna_shipping = array();
-		if ( $_POST['billing_country'] == 'NL' || $_POST['billing_country'] == 'DE' ) {
+		if ( isset( $_POST['billing_country'] ) && ( $_POST['billing_country'] == 'NL' || $_POST['billing_country'] == 'DE' ) ) {
 			// Set up billing address array
 			$klarna_billing_address             = $order->billing_address_1;
 			$splitted_address                   = splitAddress( $klarna_billing_address );

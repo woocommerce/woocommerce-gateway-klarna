@@ -110,11 +110,11 @@ if ( 'NO' == $this->klarna_helper->get_klarna_country() ) { ?>
 			$pclasses = $klarna_pclasses->get_pclasses_for_country_and_type();
 			?>
 
-				<label for="<?php echo $klarna_select_pclass_element; ?>">
+				<label for="<?php echo esc_attr( $klarna_select_pclass_element ); ?>">
 					<?php echo __("Payment plan", 'woocommerce-gateway-klarna' ) ?> <span class="required">*</span>
 				</label>
 
-				<select id="<?php echo $klarna_select_pclass_element; ?>" name="<?php echo $klarna_select_pclass_element; ?>" class="woocommerce-select" style="max-width:100%;width:100% !important;">
+				<select id="<?php echo esc_attr( $klarna_select_pclass_element ); ?>" name="<?php echo esc_attr( $klarna_select_pclass_element ); ?>" class="woocommerce-select" style="max-width:100%;width:100% !important;">
 
 				<?php
 				$country = ( isset( $woocommerce->customer->country ) ) ? $woocommerce->customer->country : $this->klarna_helper->shop_country;
@@ -184,7 +184,7 @@ if ( 'NO' == $this->klarna_helper->get_klarna_country() ) { ?>
 		
 		<p class="form-row form-row-wide" id="klarna-invoice-get-address">
 		<?php if ( $this->klarna_helper->get_klarna_country() == 'NL' || $this->klarna_helper->get_klarna_country() == 'DE' || $this->klarna_helper->get_klarna_country() == 'AT' ) { ?>
-			<label for="<?php echo $klarna_dob_element; ?>">
+			<label for="<?php echo esc_attr( $klarna_dob_element ); ?>">
 				<?php echo __("Date of Birth", 'woocommerce-gateway-klarna' ) ?> <span class="required">*</span>
 			</label>
 			<select class="dob_select dob_day" name="klarna_invoice_date_of_birth_day" style="width:60px;">
@@ -322,8 +322,8 @@ if ( 'NO' == $this->klarna_helper->get_klarna_country() ) { ?>
 			</select>
 				
 		<?php } else { // Swedish is here ?>
-			<label for="<?php echo $klarna_dob_element; ?>"><?php echo __("Date of Birth", 'woocommerce-gateway-klarna' ) ?> <span class="required">*</span></label>
-			<input type="text" class="input-text" id="<?php echo $klarna_dob_element; ?>" name="<?php echo $klarna_dob_element; ?>" />
+			<label for="<?php echo esc_attr( $klarna_dob_element ); ?>"><?php echo __("Date of Birth", 'woocommerce-gateway-klarna' ) ?> <span class="required">*</span></label>
+			<input type="text" class="input-text" id="<?php echo esc_attr( $klarna_dob_element ); ?>" name="<?php echo esc_attr( $klarna_dob_element ); ?>" />
 		<?php }
 		// Button/form for getAddress
 		$data = new WC_Klarna_Get_Address;

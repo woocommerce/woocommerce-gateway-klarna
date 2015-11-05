@@ -756,7 +756,7 @@ class WC_Gateway_Klarna_K2WC {
 		do_action( 'woocommerce_register_post', $username, $email, $validation_errors );
 		$validation_errors = apply_filters( 'woocommerce_registration_errors', $validation_errors, $username, $email );
 		if ( $validation_errors->get_error_code() ) {
-			$this->klarna_log->add( 'klarna', __( 'Customer creation error', 'klarna' ) . ' - ' . $validation_errors->get_error_code() );
+			$this->klarna_log->add( 'klarna', __( 'Customer creation error', 'woocommerce-gateway-klarna' ) . ' - ' . $validation_errors->get_error_code() );
 			return 0;
 		}
 
@@ -771,7 +771,7 @@ class WC_Gateway_Klarna_K2WC {
 
 		if ( is_wp_error( $customer_id ) ) {
 			$validation_errors->add( "registration-error", '<strong>' . __( 'ERROR', 'woocommerce' ) . '</strong>: ' . __( 'Couldn&#8217;t register you&hellip; please contact us if you continue to have problems.', 'woocommerce' ) );
-			$this->klarna_log->add( 'klarna', __( 'Customer creation error', 'klarna' ) . ' - ' . $validation_errors->get_error_code() );
+			$this->klarna_log->add( 'klarna', __( 'Customer creation error', 'woocommerce-gateway-klarna' ) . ' - ' . $validation_errors->get_error_code() );
 			return 0;
 		}
 	
