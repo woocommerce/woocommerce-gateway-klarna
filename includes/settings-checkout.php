@@ -73,7 +73,7 @@ return apply_filters( 'klarna_checkout_form_fields', array(
 	),
 	'secret_se' => array(
 		'title' => __( 'Shared Secret - Sweden', 'woocommerce-gateway-klarna' ), 
-		'type' => 'password', 
+		'type' => 'text', 
 		'description' => __( 'Please enter your Klarna Shared Secret for Sweden.', 'woocommerce-gateway-klarna' ), 
 		'default' => '',
 		'desc_tip' => true
@@ -106,7 +106,7 @@ return apply_filters( 'klarna_checkout_form_fields', array(
 	),
 	'secret_no' => array(
 		'title' => __( 'Shared Secret - Norway', 'woocommerce-gateway-klarna' ), 
-		'type' => 'password', 
+		'type' => 'text', 
 		'description' => __( 'Please enter your Klarna Shared Secret for Norway.', 'woocommerce-gateway-klarna' ), 
 		'default' => '',
 		'desc_tip' => true
@@ -139,7 +139,7 @@ return apply_filters( 'klarna_checkout_form_fields', array(
 	),
 	'secret_fi' => array(
 		'title' => __( 'Shared Secret - Finland', 'woocommerce-gateway-klarna' ), 
-		'type' => 'password', 
+		'type' => 'text', 
 		'description' => __( 'Please enter your Klarna Shared Secret for Finland.', 'woocommerce-gateway-klarna' ), 
 		'default' => '',
 		'desc_tip' => true
@@ -172,7 +172,7 @@ return apply_filters( 'klarna_checkout_form_fields', array(
 	),
 	'secret_de' => array(
 		'title' => __( 'Shared Secret - Germany', 'woocommerce-gateway-klarna' ), 
-		'type' => 'password', 
+		'type' => 'text', 
 		'description' => __( 'Please enter your Klarna Shared Secret for Germany.', 'woocommerce-gateway-klarna' ), 
 		'default' => '',
 		'desc_tip' => true
@@ -219,7 +219,7 @@ return apply_filters( 'klarna_checkout_form_fields', array(
 	),
 	'secret_at' => array(
 		'title' => __( 'Shared Secret - Austria', 'woocommerce-gateway-klarna' ), 
-		'type' => 'password', 
+		'type' => 'text', 
 		'description' => __( 'Please enter your Klarna Shared Secret for Austria.', 'woocommerce-gateway-klarna' ), 
 		'default' => '',
 		'desc_tip' => true
@@ -259,7 +259,7 @@ return apply_filters( 'klarna_checkout_form_fields', array(
 	),
 	'secret_uk' => array(
 		'title' => __( 'Shared Secret - UK', 'woocommerce-gateway-klarna' ), 
-		'type' => 'password', 
+		'type' => 'text', 
 		'description' => __( 'Please enter your Klarna Shared Secret for UK.', 'woocommerce-gateway-klarna' ), 
 		'default' => '',
 		'desc_tip' => true
@@ -292,7 +292,7 @@ return apply_filters( 'klarna_checkout_form_fields', array(
 	),
 	'secret_us' => array(
 		'title' => __( 'Shared Secret - USA', 'woocommerce-gateway-klarna' ), 
-		'type' => 'password', 
+		'type' => 'text', 
 		'description' => __( 'Please enter your Klarna Shared Secret for USA.', 'woocommerce-gateway-klarna' ), 
 		'default' => '',
 		'desc_tip' => true
@@ -456,7 +456,7 @@ return apply_filters( 'klarna_checkout_form_fields', array(
 	'debug' => array(
 		'title' => __( 'Debug', 'woocommerce-gateway-klarna' ), 
 		'type' => 'checkbox', 
-		'label' => __( 'Enable logging (<code>woocommerce/logs/klarna.txt</code>)', 'woocommerce-gateway-klarna' ), 
+		'label' => __( 'Enable Klarna Test Mode. This will only work if you have a Klarna test account. For test purchases with a live account, <a href="http://integration.klarna.com/en/testing/test-persons" target="_blank">follow these instructions</a>.', 'woocommerce-gateway-klarna' ), 
 		'default' => 'no'
 	),
 
