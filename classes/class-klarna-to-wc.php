@@ -570,7 +570,9 @@ class WC_Gateway_Klarna_K2WC {
 		update_post_meta( $order_id, '_billing_first_name', $klarna_order['billing_address']['given_name'] );
 		update_post_meta( $order_id, '_billing_last_name', $klarna_order['billing_address']['family_name'] );
 		update_post_meta( $order_id, '_billing_address_1', $received__billing_address_1 );
-		update_post_meta( $order_id, '_billing_address_2', $klarna_order['billing_address']['care_of'] );
+		if ( isset( $klarna_order['billing_address']['care_of'] ) ) {
+			update_post_meta( $order_id, '_billing_address_2', $klarna_order['billing_address']['care_of'] );
+		}
 		update_post_meta( $order_id, '_billing_postcode', $klarna_order['billing_address']['postal_code'] );
 		update_post_meta( $order_id, '_billing_city', $klarna_order['billing_address']['city'] );
 		update_post_meta( $order_id, '_billing_country', strtoupper( $klarna_order['billing_address']['country'] ) );
@@ -584,7 +586,9 @@ class WC_Gateway_Klarna_K2WC {
 			update_post_meta( $order_id, '_shipping_first_name', $klarna_order['shipping_address']['given_name'] );
 			update_post_meta( $order_id, '_shipping_last_name', $klarna_order['shipping_address']['family_name'] );
 			update_post_meta( $order_id, '_shipping_address_1', $received__shipping_address_1 );
-			update_post_meta( $order_id, '_shipping_address_2', $klarna_order['shipping_address']['care_of'] );
+			if ( isset( $klarna_order['shipping_address']['care_of'] ) ) {
+				update_post_meta( $order_id, '_shipping_address_2', $klarna_order['shipping_address']['care_of'] );
+			}
 			update_post_meta( $order_id, '_shipping_postcode', $klarna_order['shipping_address']['postal_code'] );
 			update_post_meta( $order_id, '_shipping_city', $klarna_order['shipping_address']['city'] );
 			update_post_meta( $order_id, '_shipping_country', strtoupper( $klarna_order['shipping_address']['country'] ) );		
@@ -592,7 +596,9 @@ class WC_Gateway_Klarna_K2WC {
 			update_post_meta( $order_id, '_shipping_first_name', $klarna_order['billing_address']['given_name'] );
 			update_post_meta( $order_id, '_shipping_last_name', $klarna_order['billing_address']['family_name'] );
 			update_post_meta( $order_id, '_shipping_address_1', $received__billing_address_1 );
-			update_post_meta( $order_id, '_shipping_address_2', $klarna_order['billing_address']['care_of'] );
+			if ( isset( $klarna_order['billing_address']['care_of'] ) ) {
+				update_post_meta( $order_id, '_shipping_address_2', $klarna_order['billing_address']['care_of'] );
+			}
 			update_post_meta( $order_id, '_shipping_postcode', $klarna_order['billing_address']['postal_code'] );
 			update_post_meta( $order_id, '_shipping_city', $klarna_order['billing_address']['city'] );
 			update_post_meta( $order_id, '_shipping_country', strtoupper( $klarna_order['billing_address']['country'] ) );
@@ -749,11 +755,13 @@ class WC_Gateway_Klarna_K2WC {
 		$validation_errors = new WP_Error();
 		do_action( 'woocommerce_register_post', $username, $email, $validation_errors );
 		$validation_errors = apply_filters( 'woocommerce_registration_errors', $validation_errors, $username, $email );
-		if ( $validation_errors->get_error_code() )
-            return $validation_errors;
+		if ( $validation_errors->get_error_code() ) {
+			$this->klarna_log->add( 'klarna', __( 'Customer creation error', 'klarna' ) . ' - ' . $validation_errors->get_error_code() );
+			return 0;
+		}
 
 		$new_customer_data = apply_filters( 'woocommerce_new_customer_data', array(
-        	'user_login' => $username,
+			'user_login' => $username,
 			'user_pass'  => $password,
 			'user_email' => $email,
 			'role'       => 'customer'
@@ -761,8 +769,11 @@ class WC_Gateway_Klarna_K2WC {
 
 		$customer_id = wp_insert_user( $new_customer_data );
 
-		if ( is_wp_error( $customer_id ) )
-        	return new WP_Error( "registration-error", '<strong>' . __( 'ERROR', 'woocommerce' ) . '</strong>: ' . __( 'Couldn&#8217;t register you&hellip; please contact us if you continue to have problems.', 'woocommerce' ) );
+		if ( is_wp_error( $customer_id ) ) {
+			$validation_errors->add( "registration-error", '<strong>' . __( 'ERROR', 'woocommerce' ) . '</strong>: ' . __( 'Couldn&#8217;t register you&hellip; please contact us if you continue to have problems.', 'woocommerce' ) );
+			$this->klarna_log->add( 'klarna', __( 'Customer creation error', 'klarna' ) . ' - ' . $validation_errors->get_error_code() );
+			return 0;
+		}
 	
 		// Send New account creation email to customer?
 		$checkout_settings = get_option( 'woocommerce_klarna_checkout_settings' );
@@ -806,13 +817,12 @@ class WC_Gateway_Klarna_K2WC {
 			if ( 'yes' == $checkout_settings['create_customer_account'] ) {
 				$password = '';
 				$new_customer = $this->create_new_customer( $klarna_order['billing_address']['email'], $klarna_order['billing_address']['email'], $password );
-				$order->add_order_note( sprintf( __( 'New customer created (user ID %s).', 'woocommerce-gateway-klarna' ), $new_customer, $klarna_order['id'] ) );
 				
-				if ( is_wp_error( $new_customer ) ) { // Creation failed
-					$order->add_order_note( sprintf( __( 'Customer creation failed. Error: %s.', 'woocommerce-gateway-klarna' ), $new_customer->get_error_message(), $klarna_order['id'] ) );
+				if ( 0 == $new_customer ) { // Creation failed
+					$order->add_order_note( sprintf( __( 'Customer creation failed. Check error log for more details.', 'klarna' ) ) );
 					$this->customer_id = 0;
 				} else { // Creation succeeded
-					$order->add_order_note( sprintf( __( 'New customer created (user ID %s).', 'woocommerce-gateway-klarna' ), $new_customer, $klarna_order['id'] ) );
+					$order->add_order_note( sprintf( __( 'New customer created (user ID %s).', 'klarna' ), $new_customer, $klarna_order['id'] ) );
 					
 					// Add customer billing address - retrieved from callback from Klarna
 					update_user_meta( $new_customer, 'billing_first_name', $klarna_order['billing_address']['given_name'] );
@@ -871,6 +881,7 @@ class WC_Gateway_Klarna_K2WC {
 				$klarna_order['klarna_reference']
 			) );
 			$klarna_order->acknowledge();
+			$klarna_order->fetch();
 
 			$klarna_order->updateMerchantReferences( array(
 				'merchant_reference1' => ltrim( $order->get_order_number(), '#' ) 
@@ -879,7 +890,8 @@ class WC_Gateway_Klarna_K2WC {
 			$order->calculate_shipping();
 			$order->calculate_taxes();
 			$order->calculate_totals();
-			$order->payment_complete( $klarna_order['reservation'] );
+
+			$order->payment_complete( $klarna_order['klarna_reference'] );
 
 			delete_post_meta( $order->id, '_kco_incomplete_customer_email' );
 		// V2 API
