@@ -201,7 +201,6 @@ class WC_Gateway_Klarna_K2WC {
 		if ( $woocommerce->session->get( 'ongoing_klarna_order' ) && wc_get_order( $woocommerce->session->get( 'ongoing_klarna_order' ) ) ) {
 			$orderid = $woocommerce->session->get( 'ongoing_klarna_order' );
 			$order = wc_get_order( $orderid );
-			$order->remove_order_items();
 		} else {
 			// Create order in WooCommerce if we have an email
 			$order = $this->create_order();
@@ -431,7 +430,9 @@ class WC_Gateway_Klarna_K2WC {
 	 * @param  object $order        Local WC order.
 	 */
 	public function add_order_items( $order ) {
-		if ( $this->klarna_debug=='yes' ) {
+		$order->remove_order_items();
+
+		if ( $this->klarna_debug == 'yes' ) {
 			$this->klarna_log->add( 'klarna', 'Adding order items...' );
 		}
 		global $woocommerce;

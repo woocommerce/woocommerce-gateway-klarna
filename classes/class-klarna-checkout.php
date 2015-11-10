@@ -91,9 +91,6 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			'subscription_payment_method_change'
 		);
 
-		// Enqueue scripts and styles
-		// add_action( 'wp_enqueue_scripts', array( $this, 'klarna_checkout_enqueuer' ) );
-
 		// Add link to KCO page in standard checkout
 	
 		/**
@@ -149,11 +146,6 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 
 		// Add activate settings field for recurring orders
 		add_filter( 'klarna_checkout_form_fields', array( $this, 'add_activate_recurring_option' ) );
-
-		/**
-		 * Checkout page shortcodes
-		 */ 
-		// add_shortcode( 'woocommerce_klarna_checkout_widget', array( $this, 'klarna_checkout_widget' ) );
 
 		// Register new order status
 		add_action( 'init', array( $this, 'register_klarna_incomplete_order_status' ) );
@@ -624,124 +616,6 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	function kco_recurring_do_not_copy_meta_data( $order_meta_query, $original_order_id, $renewal_order_id, $new_order_role ) {
 		$order_meta_query .= " AND `meta_key` NOT IN ('_klarna_invoice_number')";
 		return $order_meta_query;
-	}
-
-	/**
-	 * Enqueue Klarna Checkout javascript.
-	 * 
-	 * @since  2.0
-	 **/
-	function klarna_checkout_enqueuer() {
-		global $woocommerce;
-
-		$suffix               = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
-		$assets_path          = str_replace( array( 'http:', 'https:' ), '', WC()->plugin_url() ) . '/assets/';
-		$frontend_script_path = $assets_path . 'js/frontend/';
-
-		wp_register_script(
-			'klarna_checkout', 
-			KLARNA_URL . 'js/klarna-checkout.js',
-			array(),
-			false,
-			true
-		);
-		wp_localize_script(
-			'klarna_checkout',
-			'kcoAjax',
-			array(
-				'ajaxurl' => admin_url( 'admin-ajax.php' ), 
-				'klarna_checkout_nonce' => wp_create_nonce( 'klarna_checkout_nonce' ),
-				'version' => $this->is_rest() ? 'v3' : 'v2'
-			)
-		);        
-
-		wp_register_style( 'klarna_checkout', KLARNA_URL . 'css/klarna-checkout.css' );	
-		if ( is_page() ) {
-			global $post;
-
-			// Need to check for HTTPS on non-HTTPS websites
-			$explode = explode( '://', $this->klarna_checkout_url );
-			if ( url_to_postid( 'https://' . $explode[1] ) ) {
-				$klarna_checkout_page_id = url_to_postid( 'https://' . $explode[1] );
-			} elseif ( url_to_postid( 'http://' . $explode[1] ) ) {
-				$klarna_checkout_page_id = url_to_postid( 'http://' . $explode[1] );
-			}
-
-			if ( $post->ID == $klarna_checkout_page_id ) {
-				wp_enqueue_script( 'jquery' );
-				wp_enqueue_script( 'wc-checkout', $frontend_script_path . 'checkout' . $suffix . '.js', array( 'jquery', 'woocommerce', 'wc-country-select', 'wc-address-i18n' ) );
-				wp_enqueue_script( 'klarna_checkout' );
-				wp_enqueue_style( 'klarna_checkout' );
-			}
-		}
-	}
-
-
-	//
-	// Shortcode callbacks
-	//
-
-
-	/**
-	 * Klarna Checkout widget shortcode callback.
-	 * 
-	 * Parameters:
-	 * col            - whether to show it as left or right column in two column layout, options: 'left' and 'right'
-	 * order_note     - whether to show order note or not, option: 'false' (to hide it)
-	 * 'hide_columns' - select columns to hide, comma separated string, options: 'remove', 'price'
-	 * 
-	 * @since  2.0
-	 **/
-	function klarna_checkout_widget( $atts ) {
-		// Don't show on thank you page
-		if ( isset( $_GET['thankyou'] ) && 'yes' == $_GET['thankyou'] )
-			return;
-
-		// Check if iframe needs to be displayed
-		if ( ! $this->show_kco() )
-			return;
-
-		global $woocommerce;
-
-		if ( ! defined( 'WOOCOMMERCE_CART' ) ) {
-			define( 'WOOCOMMERCE_CART', true );
-		}
-		$woocommerce->cart->calculate_shipping();
-		$woocommerce->cart->calculate_totals();
-
-		$atts = shortcode_atts(
-			array(
-				'col' => '',
-				'order_note' => '',
-				'hide_columns' => ''
-			),
-			$atts
-		);
-
-		$widget_class = '';
-
-		if ( 'left' == $atts['col'] ) {
-			$widget_class .= ' kco-left-col';
-		} elseif ( 'right' == $atts['col'] ) {
-			$widget_class .= ' kco-right-col';			
-		}
-
-		// Recheck cart items so that they are in stock
-		$result = $woocommerce->cart->check_cart_item_stock();
-		if ( is_wp_error( $result ) ) {
-			echo '<p>' . $result->get_error_message() . '</p>';
-			// exit();
-		}
-
-		if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
-			ob_start(); ?>
-				
-				<div id="klarna-checkout-widget" class="woocommerce <?php echo $widget_class; ?>">
-					<?php echo $this->klarna_checkout_get_kco_widget_html( $atts ); ?>
-				</div>
-
-			<?php return ob_get_clean();
-		}
 	}
 
 
