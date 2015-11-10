@@ -170,7 +170,7 @@ class WC_Klarna_Payment_Method_Widget {
 
 		global $product;
 
-		$klarna_product_total = $product->get_price();
+		$klarna_product_total = $product->get_display_price();
 		// Product with no price - do nothing
 		if ( empty( $klarna_product_total ) )
 			return;

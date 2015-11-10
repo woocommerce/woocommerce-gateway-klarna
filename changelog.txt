@@ -30,6 +30,8 @@
 			- Fixes how session_start is handled in KCO.
 * Tweak     - Enhances error handling on new customer account creation.
 * Tweak     - Improved settings pages formatting.
+* Tweak     - Adds esc_attr to all PHP generated attributes
+* Tweak     - Switched to get_display_price for price in Klarna payment widget.
 
 2015.05.05	- version 1.9.8.1
 * Feature	- Added filter klarna_checkout_billing_phone() for returned phone number in KCO.

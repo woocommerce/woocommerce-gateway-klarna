@@ -280,6 +280,9 @@ if ( ! empty( $this->eid_us ) ) {
 	$this->authorized_countries[] = 'US';
 }
 
+if ( ! is_admin() ) {
+	WC()->session->set( 'klarna_country', apply_filters( 'klarna_country', $klarna_country ) );
+}
 
 // Apply filters to Country and language
 $this->klarna_country 				= apply_filters( 'klarna_country', $klarna_country );

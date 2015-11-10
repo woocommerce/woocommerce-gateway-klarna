@@ -391,70 +391,70 @@ jQuery(document).ready(function($) {
 
 	if ( typeof window._klarnaCheckout == 'function') { 
 	window._klarnaCheckout(function (api) {
-		/* 
-		api.on( {
-			'change': function(data) {
-				window._klarnaCheckout(function (api) {
-					api.suspend();
-				});
-				// console.log(data);
+		// For v2 use 'change' JS event to capture
+		if ( 'v2' == kcoAjax.version ) {
+			api.on( {
+				'change': function(data) {
+					window._klarnaCheckout(function (api) {
+						api.suspend();
+					});
 
-				// Check if email is not defined (AT and DE only) and set it to this value
-				// For AT and DE, email field is not captured inside data object
-				if ( data.email === undefined ) {
-					data.email = 'guest_checkout@klarna.com';
-				}
+					var d = new Date();
+					console.log(d);
+					// console.log('V2');
 
-				if ( '' != data.email ) {
-					shipping_total_field = $( '#kco-page-shipping-total' );
-					total_field = $( '#kco-page-total-amount' );
-					shipping_row = $( 'tr#kco-page-shipping' );
+					// Check if email is not defined (AT and DE only) and set it to this value
+					// For AT and DE, email field is not captured inside data object
+					if ( data.email === undefined ) {
+						data.email = 'guest_checkout@klarna.com';
+					}
 
-					$.ajax(
-						kcoAjax.ajaxurl,
-						{
-							type     : 'POST',
-							dataType : 'json',
-							data     : {
-								action      : 'klarna_checkout_iframe_update_callback',
-								email       : data.email,
-								postal_code : data.postal_code,
-								nonce       : kcoAjax.klarna_checkout_nonce
-							},
-							success: function( response ) {
-								// Check if a product is out of stock
-								if ( false === response.success ) {
-									console.log( 'false' );
-									location.reload();
-									return;
+					if ( '' != data.email ) {
+						kco_widget = $( '#klarna-checkout-widget' );	
+
+						$.ajax(
+							kcoAjax.ajaxurl,
+							{
+								type     : 'POST',
+								dataType : 'json',
+								data     : {
+									action      : 'kco_iframe_change_cb',
+									email       : data.email,
+									postal_code : data.postal_code,
+									nonce       : kcoAjax.klarna_checkout_nonce
+								},
+								success: function( response ) {
+									// Check if a product is out of stock
+									if ( false === response.success ) {
+										console.log( 'false' );
+										location.reload();
+										return;
+									}
+
+									$( kco_widget ).html( response.data.widget_html );
+
+									window._klarnaCheckout(function (api) {
+										api.resume();
+									});
+								},
+								error: function( response ) {
+									window._klarnaCheckout(function (api) {
+										api.resume();
+									});
 								}
-
-								$( kco_widget ).html( response.data.widget_html );
-								$( total_field ).html( response.data.cart_total );
-								$( shipping_row ).replaceWith( response.data.shipping_row );
-								window._klarnaCheckout(function (api) {
-									api.resume();
-								});
-							},
-							error: function( response ) {
-								window._klarnaCheckout(function (api) {
-									api.resume();
-								});
 							}
-						}
-					);
+						);
+					}
 				}
-			}
-		} );
-		*/
+			} );
+		}
 
-		api.on( {
-			'shipping_address_change': function (data) {
-				// console.log('****** Parent Page Received shipping_address_change DATA ******');
-				// console.log(data);
+		if ( 'v3' == kcoAjax.version ) {
+			api.on( {
+				'shipping_address_change': function (data) {
+					// console.log('****** Parent Page Received shipping_address_change DATA ******');
+					console.log('V3');
 
-				// Only do this for USA for now
-				// if ( 'usa' == data.postal_code ) {
 					if ( '' != data.postal_code || '' != data.region ) {
 						kco_widget = $( '#klarna-checkout-widget' );	
 
@@ -464,7 +464,7 @@ jQuery(document).ready(function($) {
 								type     : 'POST',
 								dataType : 'json',
 								data     : {
-									action       : 'kco_iframe_change_cb',
+									action       : 'kco_iframe_shipping_address_change_cb',
 									region       : data.region,
 									postal_code  : data.postal_code,
 									nonce        : kcoAjax.klarna_checkout_nonce
@@ -485,9 +485,9 @@ jQuery(document).ready(function($) {
 							}
 						);
 					}
-				// }
-			}
-		} );
+				}
+			} );
+		}
 
 
 		api.on( {
