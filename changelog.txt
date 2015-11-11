@@ -1,7 +1,8 @@
 *** Klarna Changelog ***
 
-2015.1x.xx	- version 1.9.8.4
+2015.11.11	- version 1.9.8.5
 * Fix       - Fixes when session is started by restricting it only to KCO pages.
+* Fix       - Fixes cleanup of incomplete Klarna orders when "hold stock for x minutes" WooCommerce option is enabled.
 
 2015.10.22	- version 1.9.8.4
 * Fix       - Fixes discount amount shown in merchant and customer order confirmation emails.

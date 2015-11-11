@@ -1185,7 +1185,8 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 				$order_data = array(
 					'status'        => apply_filters( 'woocommerce_default_order_status', 'pending' ),
 					'customer_id'   => $this->customer_id,
-					'customer_note' => isset( $this->posted['order_comments'] ) ? $this->posted['order_comments'] : ''
+					'customer_note' => isset( $this->posted['order_comments'] ) ? $this->posted['order_comments'] : '',
+					'created_via'   => 'klarna_checkout',
 				);
 	
 				// Insert or update the post data
