@@ -399,8 +399,8 @@ jQuery(document).ready(function($) {
 						api.suspend();
 					});
 
-					var d = new Date();
-					console.log(d);
+					// var d = new Date();
+					// console.log(d);
 					// console.log('V2');
 
 					// Check if email is not defined (AT and DE only) and set it to this value
