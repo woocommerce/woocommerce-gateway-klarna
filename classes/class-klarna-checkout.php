@@ -1185,7 +1185,8 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 				$order_data = array(
 					'status'        => apply_filters( 'woocommerce_default_order_status', 'pending' ),
 					'customer_id'   => $this->customer_id,
-					'customer_note' => isset( $this->posted['order_comments'] ) ? $this->posted['order_comments'] : ''
+					'customer_note' => isset( $this->posted['order_comments'] ) ? $this->posted['order_comments'] : '',
+					'created_via'   => 'klarna_checkout',
 				);
 	
 				// Insert or update the post data
@@ -2261,13 +2262,38 @@ class WC_Gateway_Klarna_Checkout_Extra {
 	
 	// Set session
 	function start_session() {		
-		
+		// if ( ! is_admin() || defined( 'DOING_AJAX' ) ) {
 		$data = new WC_Gateway_Klarna_Checkout;
 		$enabled = $data->get_enabled();
-		
-    	if(!session_id() && $enabled == 'yes') {
-        	session_start();
-        }
+
+		$checkout_settings = get_option( 'woocommerce_klarna_checkout_settings' );		
+		$checkout_pages = array();
+		$thank_you_pages = array();
+
+		// Clean request URI to remove all parameters
+		$clean_req_uri = explode( '?', $_SERVER['REQUEST_URI'] );
+		$clean_req_uri = $clean_req_uri[0];
+		$clean_req_uri = trailingslashit( $clean_req_uri );
+		$length = strlen( $clean_req_uri );
+
+		// Get arrays of checkout and thank you pages for all countries
+		foreach ( $checkout_settings as $cs_key => $cs_value ) {
+			if ( strpos( $cs_key, 'klarna_checkout_url_' ) !== false ) {
+				$checkout_pages[ $cs_key ] = substr( $cs_value, 0 - $length );
+			}
+			if ( strpos( $cs_key, 'klarna_checkout_thanks_url_' ) !== false ) {
+				$thank_you_pages[ $cs_key ] = substr( $cs_value, 0 - $length );
+			}
+		}
+
+		// Start session if on a KCO or KCO Thank You page and KCO enabled
+		if ( 
+			( in_array( $clean_req_uri, $checkout_pages ) || in_array( $clean_req_uri, $thank_you_pages ) ) && 
+			'yes' == $enabled 
+		) {
+			session_start();
+		}
+		// }
     }
     
 	// Shortcode KCO page
