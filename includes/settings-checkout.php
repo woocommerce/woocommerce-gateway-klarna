@@ -278,6 +278,12 @@ return apply_filters( 'klarna_checkout_form_fields', array(
 		'default' => '',
 		'desc_tip' => true
 	),
+	'uk_ship_only_to_base' => array(
+		'title' => __( 'Only ship to UK', 'woocommerce-gateway-klarna' ), 
+		'type' => 'checkbox', 
+		'label' => __( 'Only allow shipping to UK addresses. You need an agreement with Klarna to allow shipping to other countries.', 'woocommerce-gateway-klarna' ), 
+		'default' => 'yes'
+	),
 
 	'us_settings_title' => array(
 		'title' => __( 'USA', 'woocommerce-gateway-klarna' ), 

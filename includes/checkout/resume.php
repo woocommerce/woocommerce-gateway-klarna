@@ -180,8 +180,15 @@ try {
 			$update['order_amount'] = $klarna_order_total;
 			$update['order_tax_amount'] = $klarna_tax_total;
 
-			$wc_countries = new WC_Countries();
-			$update['shipping_countries'] = array_keys( $wc_countries->get_shipping_countries() );
+			// Only add shipping options if the option is unchecked for UK
+			$checkout_settings = get_option( 'woocommerce_klarna_checkout_settings' );
+			if ( 'gb' == $this->klarna_country && 'yes' == $checkout_settings['uk_ship_only_to_base'] ) {
+				$update['shipping_countries'] = array();
+			} else {
+				$wc_countries = new WC_Countries();
+				$update['shipping_countries'] = array_keys( $wc_countries->get_shipping_countries() );
+			}
+
 			if ( 'billing_only' != get_option( 'woocommerce_ship_to_destination' ) ) {
 				$update['options']['allow_separate_shipping_address'] = true;
 			}
