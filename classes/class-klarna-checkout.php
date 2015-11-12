@@ -2335,7 +2335,7 @@ class WC_Gateway_Klarna_Checkout_Extra {
 		$checkout_settings = get_option( 'woocommerce_klarna_checkout_settings' );
 		$enabled = $checkout_settings['enabled'];
 		$modify_standard_checkout_url = $checkout_settings['modify_standard_checkout_url'];
-		$klarna_country = WC()->session->set( 'klarna_country', 'SE' );
+		$klarna_country = WC()->session->get( 'klarna_country' );
 		$available_countries = $data->authorized_countries;
 
 		// Change the Checkout URL if this is enabled in the settings
@@ -2448,7 +2448,7 @@ class WC_Gateway_Klarna_Checkout_Extra {
 
 		wp_register_script(
 			'klarna_checkout', 
-			KLARNA_URL . 'js/klarna-checkout.js',
+			KLARNA_URL . 'assets/js/klarna-checkout.js',
 			array(),
 			false,
 			true
@@ -2462,7 +2462,7 @@ class WC_Gateway_Klarna_Checkout_Extra {
 				'version' => WC()->session->get( 'klarna_is_rest', false ) ? 'v3' : 'v2'
 			)
 		);        
-		wp_register_style( 'klarna_checkout', KLARNA_URL . 'css/klarna-checkout.css' );	
+		wp_register_style( 'klarna_checkout', KLARNA_URL . 'assets/css/klarna-checkout.css' );	
 
 		if ( is_page() ) {
 			global $post;

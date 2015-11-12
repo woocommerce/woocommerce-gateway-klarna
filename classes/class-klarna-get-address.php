@@ -43,23 +43,9 @@ class WC_Klarna_Get_Address {
 		add_action( 'wp_footer', array( $this, 'js' ) );
 		add_action( 'wp_footer', array( $this, 'checkout_restore_customer_defaults' ) );
 		
-		
-		// Register and enqueue scripts and styles
-		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_scripts') );
-		
 		// GetAddresses response above the checkout billing form
 		add_action( 'woocommerce_before_checkout_form', array( $this, 'get_address_response' ) );
 	} // End constructor
-	
-
-	/**
- 	 * CSS for Get Addresses form
- 	 */
-	function enqueue_scripts() {
-		if ( is_checkout() && ( $this->partpay_enabled || $this->invo_enabled ) ) {
-			wp_enqueue_style( 'klarna-style', KLARNA_URL . 'assets/css/style.css' );
-		}
-	}
 	
 	
 	/**

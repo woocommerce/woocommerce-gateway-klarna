@@ -24,15 +24,15 @@ if ( 'NO' == $this->klarna_helper->get_klarna_country() ) { ?>
 		}
 		global $woocommerce;
 		$klarna_pms_data = $klarna_pms->get_data(
-			$this->klarna_helper->get_eid(),               // $eid
-			$this->klarna_helper->get_secret(),            // $secret
-			$this->selected_currency,       // $selected_currency
-			$this->klarna_helper->get_klarna_country(),    // $shop_country
-			$woocommerce->cart->total,      // $cart_total
-			'invoice',                      // $payment_method_group
-			'klarna_invoice_pclass',           // $select_id,
-			$klarna_mode,                   // $klarna_mode
-			$this->get_invoice_fee_price()  // $invoice_fee
+			$this->klarna_helper->get_eid(),
+			$this->klarna_helper->get_secret(),
+			$this->selected_currency,
+			$this->klarna_helper->get_klarna_country(),
+			$woocommerce->cart->total,
+			'invoice',
+			'klarna_invoice_pclass',
+			$klarna_mode,
+			$this->get_invoice_fee_price()
 		);
 		echo $klarna_pms_data;
 		?>

@@ -37,7 +37,7 @@ class WC_Klarna_PMS {
 		if ( is_checkout() ) {
 			wp_register_script(
 				'klarna-pms-js', 
-				KLARNA_URL . 'js/klarnapms.js',
+				KLARNA_URL . 'assets/js/klarnapms.js',
 				array('jquery'),
 				'1.0',
 				false
