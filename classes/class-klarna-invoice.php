@@ -916,7 +916,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 	 **/
 	function footer_scripts () {			
 		global $woocommerce;
-		if ( is_checkout() && $this->enabled=="yes" && $this->invoice_fee_id > 0 ) {
+		if ( is_checkout() && $this->enabled=="yes" ) {
 			?>
 			<script type="text/javascript">
 				//<![CDATA[

@@ -769,7 +769,6 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 	 * @todo  move to separate JS file?
 	 **/
 	function footer_scripts () {
-			
 		if ( is_checkout() && 'yes' == $this->enabled ) { ?>
 			<script type="text/javascript">
 				//<![CDATA[
