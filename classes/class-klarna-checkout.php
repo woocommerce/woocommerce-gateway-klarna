@@ -1373,7 +1373,12 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		$woocommerce->cart->calculate_totals();
 		?>
 		<tr id="kco-page-shipping">
-			<?php if ( $this->is_rest() ) { // Just show shipping cost for Rest ?>
+			<?php
+			// if ( WC()->session->get( 'klarna_is_rest', false ) ) { // Just show shipping cost for Rest 
+			// Temporarily commented out while Klarna works on this feaure and replaced by the check below
+			// that always returns true.
+			?>
+			<?php if ( 1 > 2 ) { // Just show shipping cost for Rest ?>
 				<td class="kco-rightalign">
 					<?php _e( 'Shipping', 'woocommerce-gateway-klarna' ); ?>
 				</td>

@@ -244,6 +244,7 @@ if ( $this->is_rest() ) {
 		$create['options']['allow_separate_shipping_address'] = true;
 	}
 
+	/* 
 	// Add shipping options
 	WC()->cart->calculate_shipping();
 	$packages = WC()->shipping->get_packages();
@@ -282,6 +283,7 @@ if ( $this->is_rest() ) {
 		}
 	}
 	$create['shipping_options'] = $shipping_options;
+	*/
 
 	$klarna_order = new \Klarna\Rest\Checkout\Order( $connector );
 } else  {

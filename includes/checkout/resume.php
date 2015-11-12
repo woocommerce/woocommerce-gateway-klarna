@@ -193,6 +193,7 @@ try {
 				$update['options']['allow_separate_shipping_address'] = true;
 			}
 
+			/* 
 			// Add shipping options
 			WC()->cart->calculate_shipping();
 			$packages = WC()->shipping->get_packages();
@@ -223,6 +224,7 @@ try {
 				}
 			}
 			$update['shipping_options'] = $shipping_options;
+			*/
 		}
 
 		$klarna_order->update( apply_filters( 'kco_update_order', $update ) );
