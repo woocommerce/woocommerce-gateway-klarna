@@ -2341,8 +2341,12 @@ class WC_Gateway_Klarna_Checkout_Extra {
 		$enabled = $checkout_settings['enabled'];
 		$modify_standard_checkout_url = $checkout_settings['modify_standard_checkout_url'];
 		$klarna_country = WC()->session->get( 'klarna_country' );
-		$available_countries = $data->authorized_countries;
-
+		
+		
+		
+		$available_countries = $this->get_authorized_countries();
+		var_dump(WC()->session->get( 'klarna_country' ));
+		die();
 		// Change the Checkout URL if this is enabled in the settings
 		if ( 
 			$modify_standard_checkout_url == 'yes' && 
@@ -2503,6 +2507,49 @@ class WC_Gateway_Klarna_Checkout_Extra {
 			}
 		}
 	}
+	
+	
+	/**
+	 * Get authorized KCO Countries.
+	 * 
+	 * @since  2.0
+	 **/
+	public function get_authorized_countries() {
+		$checkout_settings = get_option( 'woocommerce_klarna_checkout_settings' );
+		$this->eid_se = ( isset( $checkout_settings['eid_se'] ) ) ? $checkout_settings['eid_se'] : '';
+		$this->eid_no = ( isset( $checkout_settings['eid_no'] ) ) ? $checkout_settings['eid_no'] : '';
+		$this->eid_fi = ( isset( $checkout_settings['eid_fi'] ) ) ? $checkout_settings['eid_fi'] : '';
+		$this->eid_de = ( isset( $checkout_settings['eid_de'] ) ) ? $checkout_settings['eid_de'] : '';
+		$this->eid_at = ( isset( $checkout_settings['eid_at'] ) ) ? $checkout_settings['eid_at'] : '';
+		$this->eid_uk = ( isset( $checkout_settings['eid_uk'] ) ) ? $checkout_settings['eid_uk'] : '';
+		$this->eid_us = ( isset( $checkout_settings['eid_us'] ) ) ? $checkout_settings['eid_us'] : '';
+		
+		$this->authorized_countries	= array();
+		if ( ! empty( $this->eid_se ) ) {
+			$this->authorized_countries[] = 'SE';
+		}
+		if ( ! empty( $this->eid_no ) ) {
+			$this->authorized_countries[] = 'NO';
+		}
+		if ( ! empty( $this->eid_fi ) ) {
+			$this->authorized_countries[] = 'FI';
+		}
+		if ( ! empty( $this->eid_de ) ) {
+			$this->authorized_countries[] = 'DE';
+		}
+		if ( ! empty( $this->eid_at ) ) {
+			$this->authorized_countries[] = 'AT';
+		}
+		if ( ! empty( $this->eid_uk ) ) {
+			$this->authorized_countries[] = 'GB';
+		}
+		if ( ! empty( $this->eid_us ) ) {
+			$this->authorized_countries[] = 'US';
+		}
+		
+		return $this->authorized_countries;
+	}
+	
 
 } // End class WC_Gateway_Klarna_Checkout_Extra
 
