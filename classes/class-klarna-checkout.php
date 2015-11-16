@@ -2341,12 +2341,9 @@ class WC_Gateway_Klarna_Checkout_Extra {
 		$enabled = $checkout_settings['enabled'];
 		$modify_standard_checkout_url = $checkout_settings['modify_standard_checkout_url'];
 		$klarna_country = WC()->session->get( 'klarna_country' );
-		
-		
-		
+
 		$available_countries = $this->get_authorized_countries();
-		var_dump(WC()->session->get( 'klarna_country' ));
-		die();
+		
 		// Change the Checkout URL if this is enabled in the settings
 		if ( 
 			$modify_standard_checkout_url == 'yes' && 
