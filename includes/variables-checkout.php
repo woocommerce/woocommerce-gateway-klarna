@@ -219,6 +219,7 @@ switch ( $this->shop_country ) {
 		}
 		break;
 	case 'GB' :
+	case 'gb' :
 		$klarna_country 			= 'gb';
 		$klarna_language 			= 'en-gb';
 		$klarna_currency 			= 'gbp';
@@ -232,6 +233,7 @@ switch ( $this->shop_country ) {
 		}
 		break;
 	case 'US' :
+	case 'us' :
 		$klarna_country 			= 'us';
 		$klarna_language 			= 'en-us';
 		$klarna_currency 			= 'usd';
@@ -278,7 +280,6 @@ if ( ! empty( $this->eid_uk ) ) {
 if ( ! empty( $this->eid_us ) ) {
 	$this->authorized_countries[] = 'US';
 }
-
 
 if ( ! is_admin() && ! empty( $klarna_country ) ) {
 	WC()->session->set( 'klarna_country', apply_filters( 'klarna_country', $klarna_country ) );
