@@ -209,7 +209,6 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			$data = json_decode( $post_body, true );
 
 			$order_id = $_GET['sid'];
-			$this->log->add( 'klarna', 'Local order - ' . $order_id );
 
 			$billing_address = $data['billing_address'];
 			$shipping_address = $data['shipping_address'];
