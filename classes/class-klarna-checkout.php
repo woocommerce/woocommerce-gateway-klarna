@@ -959,13 +959,13 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			$this->update_or_create_local_order( $_REQUEST['email'] );
 			$orderid = $woocommerce->session->get( 'ongoing_klarna_order' );
 			$data['orderid'] = $orderid;
-
-			$connector = Klarna_Checkout_Connector::create( $this->klarna_secret, $this->klarna_server );		
+			$connector = Klarna_Checkout_Connector::create( $this->klarna_secret, $this->klarna_server );
+				
 			$klarna_order = new Klarna_Checkout_Order(
 				$connector,
 				WC()->session->get( 'klarna_checkout' )
 			);
-
+			
 			$klarna_order->fetch();
 
 			$update['merchant']['push_uri'] = add_query_arg(
@@ -2199,8 +2199,8 @@ class WC_Gateway_Klarna_Checkout_Extra {
 		add_filter( 'woocommerce_is_checkout', array( $this, 'change_is_checkout_value' ) );
 		
 	}
-
-
+	
+	
 	/**
 	 * Prevent caching in KCO and KCO thank you pages
 	 *
@@ -2446,11 +2446,15 @@ class WC_Gateway_Klarna_Checkout_Extra {
 	 **/
 	function klarna_checkout_enqueuer() {
 		global $woocommerce;
-
+		
 		$suffix               = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
 		$assets_path          = str_replace( array( 'http:', 'https:' ), '', WC()->plugin_url() ) . '/assets/';
 		$frontend_script_path = $assets_path . 'js/frontend/';
-
+		if( true == $this->is_rest() ) {
+			$version = 'v3';
+		} else {
+			$version = 'v2';
+		}
 		wp_register_script(
 			'klarna_checkout', 
 			KLARNA_URL . 'assets/js/klarna-checkout.js',
@@ -2458,15 +2462,17 @@ class WC_Gateway_Klarna_Checkout_Extra {
 			false,
 			true
 		);
+		
 		wp_localize_script(
 			'klarna_checkout',
 			'kcoAjax',
 			array(
 				'ajaxurl' => admin_url( 'admin-ajax.php' ), 
 				'klarna_checkout_nonce' => wp_create_nonce( 'klarna_checkout_nonce' ),
-				'version' => WC()->session->get( 'klarna_is_rest', false ) ? 'v3' : 'v2'
+				'version' => $version
 			)
-		);        
+		);
+		
 		wp_register_style( 'klarna_checkout', KLARNA_URL . 'assets/css/klarna-checkout.css' );	
 
 		if ( is_page() ) {
@@ -2544,6 +2550,29 @@ class WC_Gateway_Klarna_Checkout_Extra {
 		}
 		
 		return $this->authorized_countries;
+	}
+	
+	
+	/**
+	 * Determines which version of Klarna API should be used
+	 * 
+	 * @todo remove or move this function to a separate class. This function exist in the WC_Gateway_Klarna_Checkout class as well.
+	 * We needed to move it here because the is_rest function in the WC_Gateway_Klarna_Checkout class was probably called after the klarna_checkout_enqueuer function in this class.
+	 * This caused is_rest to be false on first pageload of the checkout even if the Klarna country was UK or US.
+	 * 
+	 */
+	function is_rest() {
+		$this->klarna_country = WC()->session->get( 'klarna_country' );
+		
+		if ( 'GB' == $this->klarna_country || 'gb' == $this->klarna_country || 'US' == $this->klarna_country || 'us' == $this->klarna_country ) {
+			// Set it in session as well, to be used in Shortcodes class
+			WC()->session->set( 'klarna_is_rest', true );
+			return true;
+		}
+
+		// Set it in session as well, to be used in Shortcodes class
+		WC()->session->set( 'klarna_is_rest', false );
+		return false;
 	}
 	
 
