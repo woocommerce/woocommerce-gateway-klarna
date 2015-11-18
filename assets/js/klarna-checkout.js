@@ -389,7 +389,7 @@ jQuery(document).ready(function($) {
 		);
 	});
 
-	if ( typeof window._klarnaCheckout == 'function') { 
+	if ( typeof window._klarnaCheckout == 'function') {
 	window._klarnaCheckout(function (api) {
 		// For v2 use 'change' JS event to capture
 		if ( 'v2' == kcoAjax.version ) {
