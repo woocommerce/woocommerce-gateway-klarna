@@ -1001,6 +1001,14 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 					$item_tax_percentage = 0.00;
 				endif;
 				
+				// Add product attributes to product name
+				$item_name = $item['name'];					
+				$item_meta = new WC_Order_Item_Meta( $item );
+				
+				if ( $meta = $item_meta->display( true, true ) ) {
+					$item_name .= ' ( ' . $meta . ' )';
+				}
+				
 				// apply_filters to item price so we can filter this if needed
 				$klarna_item_price_including_tax = $order->get_item_total( $item, true );
 				$item_price = apply_filters( 'klarna_item_price_including_tax', $klarna_item_price_including_tax );
@@ -1017,8 +1025,8 @@ class WC_Gateway_Klarna_Account extends WC_Gateway_Klarna {
 					
 					$k->addArticle(
 		    		$qty = $item['qty'], 					//Quantity
-		    		$artNo = strval($reference),		 					//Article number
-		    		$title = utf8_decode ($item['name']), 	//Article name/title
+		    		$artNo = strval($reference),			//Article number
+		    		$title = utf8_decode ($item_name), 		//Article name/title
 		    		$price = $item_price, 					// Price including tax
 		    		$vat = round( $item_tax_percentage ),			// Tax
 		    		$discount = 0, 
