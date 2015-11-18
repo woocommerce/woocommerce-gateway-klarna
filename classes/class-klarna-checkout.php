@@ -2277,12 +2277,14 @@ class WC_Gateway_Klarna_Checkout_Extra {
 		$length = strlen( $clean_req_uri );
 
 		// Get arrays of checkout and thank you pages for all countries
-		foreach ( $checkout_settings as $cs_key => $cs_value ) {
-			if ( strpos( $cs_key, 'klarna_checkout_url_' ) !== false ) {
-				$checkout_pages[ $cs_key ] = substr( $cs_value, 0 - $length );
-			}
-			if ( strpos( $cs_key, 'klarna_checkout_thanks_url_' ) !== false ) {
-				$thank_you_pages[ $cs_key ] = substr( $cs_value, 0 - $length );
+		if ( is_array( $checkout_settings ) ) {
+			foreach ( $checkout_settings as $cs_key => $cs_value ) {
+				if ( strpos( $cs_key, 'klarna_checkout_url_' ) !== false ) {
+					$checkout_pages[ $cs_key ] = substr( $cs_value, 0 - $length );
+				}
+				if ( strpos( $cs_key, 'klarna_checkout_thanks_url_' ) !== false ) {
+					$thank_you_pages[ $cs_key ] = substr( $cs_value, 0 - $length );
+				}
 			}
 		}
 
