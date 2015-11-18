@@ -1,6 +1,7 @@
 *** Klarna Changelog ***
 
 2015.11.18	- version 1.9.8.6
+* Tweak		- Product attributes sent in product name to Klarna for KPM (Invoice and Account).
 * Fix       - Fixes PHP warning in start_session() for users that has no KCO setting saved at all.
 * Fix       - Changed Useragent to Krokedil-V1.9 in Klarna SDK for module identification against Klarna.
 
