@@ -125,16 +125,7 @@ switch ( get_woocommerce_currency() ) {
 		$klarna_country = '';
 }
 
-if ( ! is_admin() && null !== WC() ) {
-	global $woocommerce;
-	if ( class_exists( 'WC_Session' ) && WC()->session->get( 'klarna_country' ) ) {
-		$this->shop_country = WC()->session->get( 'klarna_country' );
-	} else {
-		$this->shop_country	= $klarna_country;
-	}
-} else {
-	$this->shop_country	= $klarna_country;
-}
+$this->shop_country	= $klarna_country;
 
 // Country and language
 switch ( $this->shop_country ) {
@@ -281,6 +272,7 @@ if ( ! empty( $this->eid_us ) ) {
 	$this->authorized_countries[] = 'US';
 }
 
+// Set Klarna Country session
 if ( ! is_admin() && ! empty( $klarna_country ) ) {
 	WC()->session->set( 'klarna_country', apply_filters( 'klarna_country', $klarna_country ) );
 }
