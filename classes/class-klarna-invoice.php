@@ -749,7 +749,14 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 			else :
 				$item_tax_percentage = 0.00;
 			endif;
-				
+			
+			// Add product attributes to product name
+			$item_name = $item['name'];					
+			$item_meta = new WC_Order_Item_Meta( $item );
+			
+			if ( $meta = $item_meta->display( true, true ) ) {
+				$item_name .= ' ( ' . $meta . ' )';
+			}
 				
 			// apply_filters to item price so we can filter this if needed
 			$klarna_item_price_including_tax = $order->get_item_total( $item, true );
@@ -758,7 +765,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 				$k->addArticle(
 		    			$item['qty'], 					// Quantity
 						strval($reference),		 		// Article number
-			    		utf8_decode ($item['name']), 	// Article name/title
+			    		utf8_decode ($item_name), 		// Article name/title
 			    		$item_price, 					// Price including tax
 						round( $item_tax_percentage ),	// Tax
 		    			0, 								// Discount
