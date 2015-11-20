@@ -63,9 +63,6 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		// Push listener
 		add_action( 'woocommerce_api_wc_gateway_klarna_checkout', array( $this, 'check_checkout_listener' ) );
 
-		// Address update listener
-		add_filter( 'template_include', array( $this, 'address_update_listener' ) );
-
 		// We execute the woocommerce_thankyou hook when the KCO Thank You page is rendered,
 		// because other plugins use this, but we don't want to display the actual WC Order
 		// details table in KCO Thank You page. This action is removed here, but only when
@@ -183,77 +180,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	}
 
 
-	/**
-	 * Change the template for address_update callback
-	 * 
-	 * Can't use WC_API here because we need output on the page.
-	 * Checks if KCO shortcode is used and query parameter exists.
-	 * 
-	 * Output JSON and die()
-	 * 
-	 * @since  2.0
-	 **/
-	function address_update_listener( $template ) {
-		global $post;
-		
-		// Check if page has Klarna Checkout shortcode in it and address_update query parameter
-		if (
-			has_shortcode( $post->post_content, 'woocommerce_klarna_checkout' ) &&
-			isset( $_GET['address_update'] ) &&
-			'yes' == $_GET['address_update']
-		) {
-			// Read the post body
-			$post_body = file_get_contents('php://input');
-
-			// Convert post body into native object
-			$data = json_decode( $post_body, true );
-
-			$order_id = $_GET['sid'];
-
-			$billing_address = $data['billing_address'];
-			$shipping_address = $data['shipping_address'];
-
-			// Capture address from Klarna
-			$order = wc_get_order( $order_id );
-
-			$billing_address = array(
-				'country'    => strtoupper( $data['billing_address']['country'] ),
-				'first_name' => $data['billing_address']['given_name'],
-				'last_name'  => $data['billing_address']['family_name'],
-				// 'company'    => $data['billing_address']['company'],
-				'address_1'  => $data['billing_address']['street_address'],
-				'address_2'  => $data['billing_address']['street_address2'],
-				'postcode'   => $data['billing_address']['postal_code'],
-				'city'       => $data['billing_address']['city'],
-				'state'      => $data['billing_address']['region'],
-				'email'      => $data['billing_address']['email'],
-				'phone'      => $data['billing_address']['phone'],
-			);
-
-			$shipping_address = array(
-				'country'    => strtoupper( $data['shipping_address']['country'] ),
-				'first_name' => $data['shipping_address']['given_name'],
-				'last_name'  => $data['shipping_address']['family_name'],
-				// 'company'    => $data['shipping_address']['company'],
-				'address_1'  => $data['shipping_address']['street_address'],
-				'address_2'  => $data['shipping_address']['street_address2'],
-				'postcode'   => $data['shipping_address']['postal_code'],
-				'city'       => $data['shipping_address']['city'],
-				'state'      => $data['shipping_address']['region'],
-				'email'      => $data['shipping_address']['email'],
-				'phone'      => $data['shipping_address']['phone'],
-			);
-
-			$order->set_address( $billing_address, 'billing' );
-			$order->set_address( $billing_address, 'shipping' );
-
-			echo $post_body;
-
-			die();
-		} else {
-			return $template;
-		}
-	}
+	
 
 
 	/**
@@ -2198,6 +2125,9 @@ class WC_Gateway_Klarna_Checkout_Extra {
 		// Change is_checkout to true on KCO page
 		add_filter( 'woocommerce_is_checkout', array( $this, 'change_is_checkout_value' ) );
 		
+		// Address update listener
+		add_action( 'template_redirect', array( $this, 'address_update_listener' ) );
+		
 	}
 	
 	
@@ -2575,6 +2505,78 @@ class WC_Gateway_Klarna_Checkout_Extra {
 		return false;
 	}
 	
+	
+	/**
+	 * Change the template for address_update callback
+	 * 
+	 * Can't use WC_API here because we need output on the page.
+	 * Checks if KCO shortcode is used and query parameter exists.
+	 * 
+	 * Output JSON and die()
+	 * 
+	 * @since  2.0
+	 **/
+	function address_update_listener() {
+		global $post;
+		
+		// Check if page has Klarna Checkout shortcode in it and address_update query parameter
+		if (
+			has_shortcode( $post->post_content, 'woocommerce_klarna_checkout' ) &&
+			isset( $_GET['address_update'] ) &&
+			'yes' == $_GET['address_update']
+		) {
+			// Read the post body
+			$post_body = file_get_contents('php://input');
+
+			// Convert post body into native object
+			$data = json_decode( $post_body, true );
+
+			$order_id = $_GET['sid'];
+
+			$billing_address = $data['billing_address'];
+			$shipping_address = $data['shipping_address'];
+
+			// Capture address from Klarna
+			$order = wc_get_order( $order_id );
+
+			$billing_address = array(
+				'country'    => strtoupper( $data['billing_address']['country'] ),
+				'first_name' => $data['billing_address']['given_name'],
+				'last_name'  => $data['billing_address']['family_name'],
+				// 'company'    => $data['billing_address']['company'],
+				'address_1'  => $data['billing_address']['street_address'],
+				'address_2'  => $data['billing_address']['street_address2'],
+				'postcode'   => $data['billing_address']['postal_code'],
+				'city'       => $data['billing_address']['city'],
+				'state'      => $data['billing_address']['region'],
+				'email'      => $data['billing_address']['email'],
+				'phone'      => $data['billing_address']['phone'],
+			);
+
+			$shipping_address = array(
+				'country'    => strtoupper( $data['shipping_address']['country'] ),
+				'first_name' => $data['shipping_address']['given_name'],
+				'last_name'  => $data['shipping_address']['family_name'],
+				// 'company'    => $data['shipping_address']['company'],
+				'address_1'  => $data['shipping_address']['street_address'],
+				'address_2'  => $data['shipping_address']['street_address2'],
+				'postcode'   => $data['shipping_address']['postal_code'],
+				'city'       => $data['shipping_address']['city'],
+				'state'      => $data['shipping_address']['region'],
+				'email'      => $data['shipping_address']['email'],
+				'phone'      => $data['shipping_address']['phone'],
+			);
+
+			$order->set_address( $billing_address, 'billing' );
+			$order->set_address( $billing_address, 'shipping' );
+
+			echo $post_body;
+
+			die();
+		} else {
+			return $template;
+		}
+	}	
 
 } // End class WC_Gateway_Klarna_Checkout_Extra
 
