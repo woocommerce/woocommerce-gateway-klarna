@@ -1012,7 +1012,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 					update_post_meta( $order_id, '_billing_address_2', $klarna_order['billing_address']['care_of'] );
 					update_post_meta( $order_id, '_billing_postcode', $klarna_order['billing_address']['postal_code'] );
 					update_post_meta( $order_id, '_billing_city', $klarna_order['billing_address']['city'] );
-					update_post_meta( $order_id, '_billing_country', $klarna_order['billing_address']['country'] );
+					update_post_meta( $order_id, '_billing_country', strtoupper( $klarna_order['billing_address']['country'] ) );
 					update_post_meta( $order_id, '_billing_email', $klarna_order['billing_address']['email'] );
 					update_post_meta( $order_id, '_billing_phone', apply_filters( 'klarna_checkout_billing_phone', $klarna_order['billing_address']['phone'] ) );
 					
@@ -1027,7 +1027,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 						update_post_meta( $order_id, '_shipping_address_2', $klarna_order['shipping_address']['care_of'] );
 						update_post_meta( $order_id, '_shipping_postcode', $klarna_order['shipping_address']['postal_code'] );
 						update_post_meta( $order_id, '_shipping_city', $klarna_order['shipping_address']['city'] );
-						update_post_meta( $order_id, '_shipping_country', $klarna_order['shipping_address']['country'] );
+						update_post_meta( $order_id, '_shipping_country', strtoupper( $klarna_order['shipping_address']['country'] ) );
 					
 					} else {
 						
@@ -1037,7 +1037,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 						update_post_meta( $order_id, '_shipping_address_2', $klarna_order['billing_address']['care_of'] );
 						update_post_meta( $order_id, '_shipping_postcode', $klarna_order['billing_address']['postal_code'] );
 						update_post_meta( $order_id, '_shipping_city', $klarna_order['billing_address']['city'] );
-						update_post_meta( $order_id, '_shipping_country', $klarna_order['billing_address']['country'] );
+						update_post_meta( $order_id, '_shipping_country', strtoupper( $klarna_order['billing_address']['country'] ) );
 					}
 					
 					
