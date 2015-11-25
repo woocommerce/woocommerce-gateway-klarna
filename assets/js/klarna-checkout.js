@@ -388,7 +388,9 @@ jQuery(document).ready(function($) {
 			}
 		);
 	});
-
+	
+	// Address change (email, postal code) v2
+	var isSubmitting = false;
 	if ( typeof window._klarnaCheckout == 'function') {
 	window._klarnaCheckout(function (api) {
 		// For v2 use 'change' JS event to capture
@@ -410,8 +412,13 @@ jQuery(document).ready(function($) {
 					}
 
 					if ( '' != data.email ) {
-						kco_widget = $( '#klarna-checkout-widget' );	
-
+						kco_widget = $( '#klarna-checkout-widget' );
+							
+						if(isSubmitting) {
+							return;
+						}
+						isSubmitting = true;
+						
 						$.ajax(
 							kcoAjax.ajaxurl,
 							{
@@ -448,7 +455,8 @@ jQuery(document).ready(function($) {
 				}
 			} );
 		}
-
+		
+		// Address change (postal code, region) v3
 		if ( 'v3' == kcoAjax.version ) {
 			api.on( {
 				'shipping_address_change': function (data) {
