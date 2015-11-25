@@ -301,8 +301,6 @@ class WC_Gateway_Klarna_K2WC {
 			// Confirm the order in Klarnas system
 			$klarna_order = $this->confirm_klarna_order( $order, $klarna_order );
 
-			$order->calculate_shipping();	
-			$order->calculate_taxes();	
 			$order->calculate_totals();		
 
 			// Other plugins and themes can hook into here
@@ -888,8 +886,6 @@ class WC_Gateway_Klarna_K2WC {
 				'merchant_reference1' => ltrim( $order->get_order_number(), '#' ) 
 			) );
 
-			$order->calculate_shipping();
-			$order->calculate_taxes();
 			$order->calculate_totals();
 
 			$order->payment_complete( $klarna_order['klarna_reference'] );
@@ -919,8 +915,6 @@ class WC_Gateway_Klarna_K2WC {
 			$klarna_order->update( $update );
 
 			// Confirm local order
-			$order->calculate_shipping();
-			$order->calculate_taxes();
 			$order->calculate_totals();
 			$order->payment_complete( $klarna_order['reservation'] );
 
