@@ -208,7 +208,8 @@ return apply_filters( 'klarna_invoice_form_fields', array(
 	'debug' => array(
 		'title' => __( 'Debug', 'woocommerce-gateway-klarna' ), 
 		'type' => 'checkbox', 
-		'label' => __( 'Enable Klarna Test Mode. This will only work if you have a Klarna test account. For test purchases with a live account, <a href="http://integration.klarna.com/en/testing/test-persons" target="_blank">follow these instructions</a>.', 'woocommerce-gateway-klarna' ), 
+		'label' => __( 'Enable logging.', 'woocommerce-gateway-klarna' ),
+		'description' => sprintf( __( 'Log Klarna events, in <code>%s</code>', 'woocommerce' ), wc_get_log_file_path( 'klarna' ) ),
 		'default' => 'no'
 	),
 ) );
