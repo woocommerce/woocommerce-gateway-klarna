@@ -663,7 +663,12 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 
 								$item_name 	= $item['name'];
 								
-								$item_meta = new WC_Order_Item_Meta( $item );
+								if ( defined( 'WOOCOMMERCE_VERSION' ) && version_compare( WOOCOMMERCE_VERSION, '2.4', '>=' ) ) {
+									$item_meta = new WC_Order_Item_Meta( $item );
+								} else {
+									$item_meta = new WC_Order_Item_Meta( $item['item_meta'] );
+								}
+								
 								if ( $meta = $item_meta->display( true, true ) )
 									$item_name .= ' ( ' . $meta . ' )';
 									

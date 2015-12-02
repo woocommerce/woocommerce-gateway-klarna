@@ -1,5 +1,8 @@
 *** Klarna Changelog ***
 
+2015.xx.xx	- version 1.9.8.8
+* Fix       - Fixes how item meta is displayed in WooCommerce 2.3 or lower.
+
 2015.11.23	- version 1.9.8.7
 * Fix       - Fixes order total calculating issue in WC order for stores that don't have tax activated (Klarna Checkout).
 * Tweak		- Save country code with uppercase letters on callback from Klarna to store Billing & Shipping country correct in orders.
