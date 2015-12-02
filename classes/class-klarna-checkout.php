@@ -662,15 +662,14 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 								}
 
 								$item_name 	= $item['name'];
-								
-								if ( defined( 'WOOCOMMERCE_VERSION' ) && version_compare( WOOCOMMERCE_VERSION, '2.4', '>=' ) ) {
-									$item_meta = new WC_Order_Item_Meta( $item );
-								} else {
+
+								// Append item meta to the title, if it exists
+								if ( isset( $item['item_meta'] ) ) {
 									$item_meta = new WC_Order_Item_Meta( $item['item_meta'] );
+									if ( $meta = $item_meta->display( true, true ) ) {
+										$item_name .= ' (' . $meta . ')';
+									}
 								}
-								
-								if ( $meta = $item_meta->display( true, true ) )
-									$item_name .= ' ( ' . $meta . ' )';
 									
 								// apply_filters to item price so we can filter this if needed
 								$klarna_item_price_including_tax = $order->get_item_total( $item, true );
