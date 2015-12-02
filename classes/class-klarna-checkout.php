@@ -2159,6 +2159,7 @@ class WC_Gateway_Klarna_Checkout_Extra {
 			}
 		}
 
+		// Check if string is longer than 1 character, to avoid homepage caching
 		if ( strlen( $clean_req_uri ) > 1 ) {
 			if ( in_array( $clean_req_uri, $checkout_pages ) || in_array( $clean_req_uri, $thank_you_pages ) ) {
 				// Prevent caching
