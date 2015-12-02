@@ -2159,16 +2159,18 @@ class WC_Gateway_Klarna_Checkout_Extra {
 			}
 		}
 
-		if ( in_array( $clean_req_uri, $checkout_pages ) || in_array( $clean_req_uri, $thank_you_pages ) ) {
-			// Prevent caching
-			if ( ! defined( 'DONOTCACHEPAGE' ) )
-				define( "DONOTCACHEPAGE", "true" );
-			if ( ! defined( 'DONOTCACHEOBJECT' ) )
-				define( "DONOTCACHEOBJECT", "true" );
-			if ( ! defined( 'DONOTCACHEDB' ) )
-				define( "DONOTCACHEDB", "true" );
+		if ( strlen( $clean_req_uri ) > 1 ) {
+			if ( in_array( $clean_req_uri, $checkout_pages ) || in_array( $clean_req_uri, $thank_you_pages ) ) {
+				// Prevent caching
+				if ( ! defined( 'DONOTCACHEPAGE' ) )
+					define( "DONOTCACHEPAGE", "true" );
+				if ( ! defined( 'DONOTCACHEOBJECT' ) )
+					define( "DONOTCACHEOBJECT", "true" );
+				if ( ! defined( 'DONOTCACHEDB' ) )
+					define( "DONOTCACHEDB", "true" );
 
-			nocache_headers();
+				nocache_headers();
+			}
 		}
 	}	
 
