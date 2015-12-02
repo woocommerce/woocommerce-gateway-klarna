@@ -2,6 +2,7 @@
 
 2015.xx.xx	- version 1.9.8.8
 * Fix       - Fixes how item meta is displayed in WooCommerce 2.3 or lower.
+* Fix       - Prevents homepage from not being cached.
 
 2015.11.23	- version 1.9.8.7
 * Fix       - Fixes order total calculating issue in WC order for stores that don't have tax activated (Klarna Checkout).

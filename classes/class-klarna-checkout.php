@@ -2249,16 +2249,18 @@ class WC_Gateway_Klarna_Checkout_Extra {
 		$klarna_checkout_thanks_compare = substr( $klarna_checkout_thanks_url, 0 - $length );
 		$klarna_checkout_thanks_compare = trailingslashit( $klarna_checkout_thanks_compare );
 
-		if ( $clean_req_uri == $klarna_checkout_compare || $clean_req_uri == $klarna_checkout_thanks_compare ) {
-			// Prevent caching
-			if ( ! defined( 'DONOTCACHEPAGE' ) )
-				define( "DONOTCACHEPAGE", "true" );
-			if ( ! defined( 'DONOTCACHEOBJECT' ) )
-				define( "DONOTCACHEOBJECT", "true" );
-			if ( ! defined( 'DONOTCACHEDB' ) )
-				define( "DONOTCACHEDB", "true" );
+		if ( strlen( $clean_req_uri ) > 1 ) {
+			if ( $clean_req_uri == $klarna_checkout_compare || $clean_req_uri == $klarna_checkout_thanks_compare ) {
+				// Prevent caching
+				if ( ! defined( 'DONOTCACHEPAGE' ) )
+					define( "DONOTCACHEPAGE", "true" );
+				if ( ! defined( 'DONOTCACHEOBJECT' ) )
+					define( "DONOTCACHEOBJECT", "true" );
+				if ( ! defined( 'DONOTCACHEDB' ) )
+					define( "DONOTCACHEDB", "true" );
 
-			nocache_headers();
+				nocache_headers();
+			}
 		}
 	}	
 	
