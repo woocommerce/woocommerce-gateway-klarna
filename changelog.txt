@@ -32,6 +32,7 @@
 * Tweak     - Improved settings pages formatting.
 * Tweak     - Adds esc_attr to all PHP generated attributes
 * Tweak     - Switched to get_display_price for price in Klarna payment widget.
+* Fix       - Fixes shipping tax calculation for non-taxable shipping methods.
 
 2015.05.05	- version 1.9.8.1
 * Feature	- Added filter klarna_checkout_billing_phone() for returned phone number in KCO.

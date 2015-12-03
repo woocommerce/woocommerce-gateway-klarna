@@ -301,7 +301,7 @@ class WC_Gateway_Klarna_K2WC {
 			// Confirm the order in Klarnas system
 			$klarna_order = $this->confirm_klarna_order( $order, $klarna_order );
 
-			$order->calculate_totals();		
+			$order->calculate_totals( false );		
 
 			// Other plugins and themes can hook into here
 			do_action( 'klarna_after_kco_push_notification', $order->id );
@@ -886,7 +886,7 @@ class WC_Gateway_Klarna_K2WC {
 				'merchant_reference1' => ltrim( $order->get_order_number(), '#' ) 
 			) );
 
-			$order->calculate_totals();
+			$order->calculate_totals( false );
 
 			$order->payment_complete( $klarna_order['klarna_reference'] );
 
@@ -915,7 +915,7 @@ class WC_Gateway_Klarna_K2WC {
 			$klarna_order->update( $update );
 
 			// Confirm local order
-			$order->calculate_totals();
+			$order->calculate_totals( false );
 			$order->payment_complete( $klarna_order['reservation'] );
 
 			delete_post_meta( $order->id, '_kco_incomplete_customer_email' );
