@@ -397,60 +397,64 @@ jQuery(document).ready(function($) {
 		if ( 'v2' == kcoAjax.version ) {
 			api.on( {
 				'change': function(data) {
-					window._klarnaCheckout(function (api) {
-						api.suspend();
-					});
+					// console.log(data);
 
-					// var d = new Date();
-					// console.log(d);
-					// console.log('V2');
+					if ( '' != data.email && '' != data.postal_code ) {
 
-					// Check if email is not defined (AT and DE only) and set it to this value
-					// For AT and DE, email field is not captured inside data object
-					if ( data.email === undefined ) {
-						data.email = 'guest_checkout@klarna.com';
-					}
+						window._klarnaCheckout(function (api) {
+							api.suspend();
+						});
 
-					if ( '' != data.email ) {
-						kco_widget = $( '#klarna-checkout-widget' );
-							
-						if(isSubmitting) {
-							return;
+						console.log('V2');
+
+						// Check if email is not defined (AT and DE only) and set it to this value
+						// For AT and DE, email field is not captured inside data object
+						if ( data.email === undefined ) {
+							data.email = 'guest_checkout@klarna.com';
 						}
-						isSubmitting = true;
-						
-						$.ajax(
-							kcoAjax.ajaxurl,
-							{
-								type     : 'POST',
-								dataType : 'json',
-								data     : {
-									action      : 'kco_iframe_change_cb',
-									email       : data.email,
-									postal_code : data.postal_code,
-									nonce       : kcoAjax.klarna_checkout_nonce
-								},
-								success: function( response ) {
-									// Check if a product is out of stock
-									if ( false === response.success ) {
-										console.log( 'false' );
-										location.reload();
-										return;
-									}
 
-									$( kco_widget ).html( response.data.widget_html );
-
-									window._klarnaCheckout(function (api) {
-										api.resume();
-									});
-								},
-								error: function( response ) {
-									window._klarnaCheckout(function (api) {
-										api.resume();
-									});
-								}
+						if ( '' != data.email ) {
+							kco_widget = $( '#klarna-checkout-widget' );
+								
+							if(isSubmitting) {
+								return;
 							}
-						);
+							isSubmitting = true;
+							
+							$.ajax(
+								kcoAjax.ajaxurl,
+								{
+									type     : 'POST',
+									dataType : 'json',
+									data     : {
+										action      : 'kco_iframe_change_cb',
+										email       : data.email,
+										postal_code : data.postal_code,
+										nonce       : kcoAjax.klarna_checkout_nonce
+									},
+									success: function( response ) {
+										// Check if a product is out of stock
+										if ( false === response.success ) {
+											console.log( 'false' );
+											location.reload();
+											return;
+										}
+
+										$( kco_widget ).html( response.data.widget_html );
+
+										window._klarnaCheckout(function (api) {
+											api.resume();
+										});
+									},
+									error: function( response ) {
+										window._klarnaCheckout(function (api) {
+											api.resume();
+										});
+									}
+								}
+							);
+						}
+
 					}
 				}
 			} );
