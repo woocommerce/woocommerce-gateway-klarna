@@ -620,14 +620,13 @@ class WC_Gateway_Klarna_K2WC {
 			$this->klarna_log->add( 'klarna', 'Adding order tax...' );
 		}
 
-		global $woocommerce;
-
-		foreach ( array_keys( $woocommerce->cart->taxes + $woocommerce->cart->shipping_taxes ) as $tax_rate_id ) {
-			if ( ! $order->add_tax( $tax_rate_id, $woocommerce->cart->get_tax_amount( $tax_rate_id ), $woocommerce->cart->get_shipping_tax_amount( $tax_rate_id ) ) ) {
-				if ( $this->klarna_debug=='yes' ) {
+		// Store tax rows
+		foreach ( array_keys( WC()->cart->taxes + WC()->cart->shipping_taxes ) as $tax_rate_id ) {
+			if ( $tax_rate_id && ! $order->add_tax( $tax_rate_id, WC()->cart->get_tax_amount( $tax_rate_id ), WC()->cart->get_shipping_tax_amount( $tax_rate_id ) ) && apply_filters( 'woocommerce_cart_remove_taxes_zero_rate_id', 'zero-rated' ) !== $tax_rate_id ) {
+				if ( $this->klarna_debug == 'yes' ) {
 					$this->klarna_log->add( 'klarna', 'Unable to add taxes.' );
 				}
-				throw new Exception( __( 'Error: Unable to create order. Please try again.', 'woocommerce' ) );
+				throw new Exception( sprintf( __( 'Error %d: Unable to create order. Please try again.', 'woocommerce' ), 405 ) );
 			}
 		}
 	}
