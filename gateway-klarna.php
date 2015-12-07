@@ -181,21 +181,6 @@ function init_klarna_gateway() {
 			}
 
 		}
-		
-		/**
-	 	 * Helper function to check if curl exist or not on the server
-	 	 * 
-	 	 * @todo  Determine if this is needed
-	 	 */
-		public function curl_exist() {
-
-			if ( function_exists( 'curl_version' ) ) {
-				return true;
-			} else {
-				return false;
-			}
-
-		}
 
 	} // End class WC_Gateway_Klarna
 	

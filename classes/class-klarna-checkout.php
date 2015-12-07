@@ -1558,13 +1558,6 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		if ( empty( $klarna_terms_page ) && empty( $this->terms_url ) ) {
 			echo '<strong>' . __( 'You need to specify a Terms Page in the WooCommerce settings or in the Klarna Checkout settings in order to enable the Klarna Checkout payment method.', 'woocommerce-gateway-klarna' ) . '</strong>';
 		}
-
-		// Check if Curl is installed. If not - display message to the merchant about this.
-		if( function_exists( 'curl_version' ) ) {
-			// Do nothing
-		} else {
-			echo '<div id="message" class="error"><p>' . __( 'The PHP library cURL does not seem to be installed on your server. Klarna Checkout will not work without it.', 'woocommerce-gateway-klarna' ) . '</p></div>';
-		}
 		?>
 
 		<table class="form-table">
