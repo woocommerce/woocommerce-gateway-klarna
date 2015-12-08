@@ -370,7 +370,7 @@ class WC_Gateway_Klarna_K2WC {
 	 * @access public
 	 */
 	public function create_order() {
-		if ( $this->klarna_debug=='yes' ) {
+		if ( $this->klarna_debug == 'yes' ) {
 			$this->klarna_log->add( 'klarna', 'Creating local order...' );
 		}
 		global $woocommerce;
@@ -387,6 +387,7 @@ class WC_Gateway_Klarna_K2WC {
 
 		// Create the order
 		$order = wc_create_order( $order_data );
+
 		if ( is_wp_error( $order ) ) {
 			throw new Exception( __( 'Error: Unable to create order. Please try again.', 'woocommerce' ) );
 		}
@@ -407,7 +408,7 @@ class WC_Gateway_Klarna_K2WC {
 	 * @access public
 	 */
 	public function change_order_currency( $order, $klarna_order ) {
-		if ( $this->klarna_debug=='yes' ) {
+		if ( $this->klarna_debug == 'yes' ) {
 			$this->klarna_log->add( 'klarna', 'Maybe fixing order currency...' );
 		}
 

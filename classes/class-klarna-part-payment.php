@@ -83,7 +83,7 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 		$this->klarna_wb_img_single_product = apply_filters( 'klarna_wb_img_single_product', $klarna_wb['img_single_product'] );
 		$this->klarna_wb_img_product_list = apply_filters( 'klarna_wb_img_product_list', $klarna_wb['img_product_list'] );
 
-		// Subscription support
+		// Refunds support
 		$this->supports = array( 
 			'products', 
 			'refunds'
@@ -300,13 +300,16 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 	function is_available() {
 
 		if ( ! $this->check_enabled() ) return false;
-		if ( ! $this->check_required_fields() ) return false;
-		if ( ! $this->check_customer_country() ) return false;
-		if ( ! $this->check_customer_currency() ) return false;
-		if ( ! $this->check_cart_total() ) return false;
-		if ( ! $this->check_lower_threshold() ) return false;
-		if ( ! $this->check_upper_threshold() ) return false;
-		if ( ! $this->check_pclasses() ) return false;
+		
+		if ( ! is_admin() ) {
+			if ( ! $this->check_required_fields() ) return false;
+			if ( ! $this->check_customer_country() ) return false;
+			if ( ! $this->check_customer_currency() ) return false;
+			if ( ! $this->check_cart_total() ) return false;
+			if ( ! $this->check_lower_threshold() ) return false;
+			if ( ! $this->check_upper_threshold() ) return false;
+			if ( ! $this->check_pclasses() ) return false;
+		}
 
 		return true;
 
@@ -375,10 +378,12 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 	 **/
 	function check_cart_total() {
 
-		global $woocommerce;
+		if ( ! is_admin() ) {
+			global $woocommerce;
 
-		if ( ! isset( $woocommerce->cart->total ) ) {
-			return false;
+			if ( ! isset( $woocommerce->cart->total ) ) {
+				return false;
+			}
 		}
 
 		return true;
@@ -393,12 +398,14 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 	 **/
 	function check_lower_threshold() {
 
-		global $woocommerce;
+		if ( ! is_admin() ) {
+			global $woocommerce;
 
-		// Cart totals check - Lower threshold
-		if ( $this->lower_threshold !== '' ) {
-			if ( $woocommerce->cart->total < $this->lower_threshold ) {
-				return false;
+			// Cart totals check - Lower threshold
+			if ( $this->lower_threshold !== '' ) {
+				if ( $woocommerce->cart->total < $this->lower_threshold ) {
+					return false;
+				}
 			}
 		}
 
@@ -414,13 +421,15 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 	 **/
 	function check_upper_threshold() {
 
-		global $woocommerce;
-		
-		// Cart totals check - Upper threshold
-		if ( $this->upper_threshold !== '' ) {
-			if ( $woocommerce->cart->total > $this->upper_threshold ) {
-				return false;
-			} 
+		if ( ! is_admin() ) {
+			global $woocommerce;
+			
+			// Cart totals check - Upper threshold
+			if ( $this->upper_threshold !== '' ) {
+				if ( $woocommerce->cart->total > $this->upper_threshold ) {
+					return false;
+				} 
+			}
 		}
 
 		return true;
@@ -435,17 +444,19 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 	 **/
 	function check_customer_country() {
 
-		global $woocommerce;
-		
-		// Only activate the payment gateway if the customers country is the same as 
-		// the filtered shop country ($this->klarna_country)
-		if ( $woocommerce->customer->get_country() == true && ! in_array( $woocommerce->customer->get_country(), $this->authorized_countries ) ) {
-			return false;
-		}
+		if ( ! is_admin() ) {
+			global $woocommerce;
+			
+			// Only activate the payment gateway if the customers country is the same as 
+			// the filtered shop country ($this->klarna_country)
+			if ( $woocommerce->customer->get_country() == true && ! in_array( $woocommerce->customer->get_country(), $this->authorized_countries ) ) {
+				return false;
+			}
 
-		// Don't allow orders over the amount of €250 for Dutch customers
-		if ( ( $woocommerce->customer->get_country() == true && $woocommerce->customer->get_country() == 'NL' ) && $woocommerce->cart->total >= 251 ) {
-			return false;
+			// Don't allow orders over the amount of €250 for Dutch customers
+			if ( ( $woocommerce->customer->get_country() == true && $woocommerce->customer->get_country() == 'NL' ) && $woocommerce->cart->total >= 251 ) {
+				return false;
+			}
 		}
 
 		return true;
@@ -460,12 +471,14 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 	 **/
 	function check_customer_currency() {
 
-		global $woocommerce;
-		
-		// Currency check
-		$currency_for_country = $this->klarna_helper->get_currency_for_country( $woocommerce->customer->get_country() );
-		if ( ! empty( $currency_for_country ) && $currency_for_country !== $this->selected_currency ) {
-			return false;
+		if ( ! is_admin() ) {
+			global $woocommerce;
+			
+			// Currency check
+			$currency_for_country = $this->klarna_helper->get_currency_for_country( $woocommerce->customer->get_country() );
+			if ( ! empty( $currency_for_country ) && $currency_for_country !== $this->selected_currency ) {
+				return false;
+			}
 		}
 
 		return true;

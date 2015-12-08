@@ -119,7 +119,7 @@ if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 	/**
 	 * Create WooCommerce order
 	 */
-	$this->update_or_create_local_order();
+	$orderid = $this->update_or_create_local_order();
 
 	/**
 	 * Check if Klarna order already exists and if country was changed

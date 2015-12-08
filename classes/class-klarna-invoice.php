@@ -83,7 +83,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 		$this->klarna_wb_img_single_product = apply_filters( 'klarna_wb_img_single_product', $klarna_wb['img_single_product'] );
 		$this->klarna_wb_img_product_list = apply_filters( 'klarna_wb_img_product_list', $klarna_wb['img_product_list'] );
 
-		// Subscription support
+		// Refunds support
 		$this->supports = array( 
 			'products', 
 			'refunds'
@@ -426,13 +426,16 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 	 */		
 	function is_available() {
 		if ( ! $this->check_enabled() ) return false;
-		if ( ! $this->check_required_fields() ) return false;
-		// if ( ! $this->check_pclasses() ) return false;
-		if ( ! $this->check_cart_total() ) return false;
-		if ( ! $this->check_lower_threshold() ) return false;
-		if ( ! $this->check_upper_threshold() ) return false;
-		if ( ! $this->check_customer_country() ) return false;
-		if ( ! $this->check_customer_currency() ) return false;
+
+		if ( ! is_admin() ) {
+			if ( ! $this->check_required_fields() ) return false;
+			// if ( ! $this->check_pclasses() ) return false;
+			if ( ! $this->check_cart_total() ) return false;
+			if ( ! $this->check_lower_threshold() ) return false;
+			if ( ! $this->check_upper_threshold() ) return false;
+			if ( ! $this->check_customer_country() ) return false;
+			if ( ! $this->check_customer_currency() ) return false;
+		}
 
 		return true;
 	}

@@ -70,15 +70,27 @@ if ( $klarna_order['status'] == 'checkout_incomplete' ) {
 
 // Display Klarna iframe
 if ( $this->is_rest() ) {
-	$snippet = "<div>{$klarna_order['html_snippet']}</div>";
+	$snippet = '<div>' . $klarna_order['html_snippet'] . '</div>';
 } else {
 	$snippet = '<div class="klarna-thank-you-snippet">' . $klarna_order['gui']['snippet'] . '</div>';	
 }
 
-do_action( 'klarna_before_kco_confirmation', $_GET['sid'] );
+do_action( 'klarna_before_kco_confirmation', intval( $_GET['sid'] ) );
+
+if ( ! defined( 'WOOCOMMERCE_CART' ) ) {
+	define( 'WOOCOMMERCE_CART', true );
+}
+if ( ! defined( 'WOOCOMMERCE_CHECKOUT' ) ) {
+	define( 'WOOCOMMERCE_CHECKOUT', true );
+}
+
+// WC Subscriptions 2.0 needs this
+WC()->cart->calculate_totals();
+do_action( 'woocommerce_checkout_order_processed', intval( $_GET['sid'] ), array() );
+
 echo $snippet;	
-do_action( 'klarna_after_kco_confirmation', $_GET['sid'] );
-do_action( 'woocommerce_thankyou', $_GET['sid'] );
+do_action( 'klarna_after_kco_confirmation', intval( $_GET['sid'] ) );
+do_action( 'woocommerce_thankyou', intval( $_GET['sid'] ) );
 
 // Clear session and empty cart
 WC()->session->__unset( 'klarna_checkout' );

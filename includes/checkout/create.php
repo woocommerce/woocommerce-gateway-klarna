@@ -223,7 +223,6 @@ if ( class_exists( 'WC_Subscriptions_Cart' ) && WC_Subscriptions_Cart::cart_cont
 		}
 
 	}
-
 }
 
 if ( $this->is_rest() ) {
