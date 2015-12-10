@@ -4,6 +4,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
 
+if ( ! defined( 'WOOCOMMERCE_CART' ) ) {
+	define( 'WOOCOMMERCE_CART', true );
+}
+if ( ! defined( 'WOOCOMMERCE_CHECKOUT' ) ) {
+	define( 'WOOCOMMERCE_CHECKOUT', true );
+}
+if ( ! defined( 'WOOCOMMERCE_KLARNA_AVAILABLE' ) ) {
+	define( 'WOOCOMMERCE_KLARNA_AVAILABLE', true ); // Used to make gateway available for Subscriptions 2.0
+}
+
 /**
  * Display Klarna Checkout Thank You page
  */
@@ -77,16 +87,9 @@ if ( $this->is_rest() ) {
 
 do_action( 'klarna_before_kco_confirmation', intval( $_GET['sid'] ) );
 
-if ( ! defined( 'WOOCOMMERCE_CART' ) ) {
-	define( 'WOOCOMMERCE_CART', true );
-}
-if ( ! defined( 'WOOCOMMERCE_CHECKOUT' ) ) {
-	define( 'WOOCOMMERCE_CHECKOUT', true );
-}
-
 // WC Subscriptions 2.0 needs this
 WC()->cart->calculate_totals();
-do_action( 'woocommerce_checkout_order_processed', intval( $_GET['sid'] ), array() );
+do_action( 'woocommerce_checkout_order_processed', intval( $_GET['sid'] ), false );
 
 echo $snippet;	
 do_action( 'klarna_after_kco_confirmation', intval( $_GET['sid'] ) );
@@ -98,45 +101,3 @@ WC()->session->__unset( 'klarna_checkout_country' );
 WC()->session->__unset( 'ongoing_klarna_order' );
 WC()->session->__unset( 'klarna_order_note' );
 WC()->cart->empty_cart(); // Remove cart
-
-/* DEBUG
-$orderid = $_GET['sid'];
-$billing_country = get_post_meta( $orderid, '_billing_country', true );
-$klarna_order_id = get_post_meta( $orderid, '_klarna_order_id', true );
-if ( $this->testmode == 'yes' ) {
-	if ( 'gb' == strtolower( $billing_country ) ) {
-		$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_TEST_BASE_URL;
-	} elseif ( 'us' == strtolower( $billing_country ) ) {
-		$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::NA_TEST_BASE_URL;
-	}
-} else {
-	if ( 'gb' == strtolower( $billing_country ) ) {
-		$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_BASE_URL;
-	} elseif ( 'us' == strtolower( $billing_country ) ) {
-		$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::NA_BASE_URL;
-	}
-}
-
-if ( 'gb' == strtolower( $billing_country ) ) {
-	$connector = Klarna\Rest\Transport\Connector::create(
-		$this->eid_uk,
-		$this->secret_uk,
-		$klarna_server_url
-	);
-} elseif ( 'us' == strtolower( $billing_country ) ) {
-	$connector = Klarna\Rest\Transport\Connector::create(
-		$this->eid_us,
-		$this->secret_us,
-		$klarna_server_url
-	);
-}
-$k_order = new Klarna\Rest\OrderManagement\Order(
-	$connector,
-	$klarna_order_id
-);
-
-$k_order->fetch();
-echo '<pre>';
-print_r( $k_order );
-echo '</pre>';
-*/

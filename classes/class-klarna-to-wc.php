@@ -667,7 +667,7 @@ class WC_Gateway_Klarna_K2WC {
 	 * @param  object $klarna_order Klarna order.
 	 */
 	public function add_order_payment_method( $order ) {
-		if ( $this->klarna_debug=='yes' ) {
+		if ( $this->klarna_debug == 'yes' ) {
 			$this->klarna_log->add( 'klarna', 'Adding order payment method...' );
 		}
 
@@ -677,7 +677,6 @@ class WC_Gateway_Klarna_K2WC {
 		$payment_method = $available_gateways[ 'klarna_checkout' ];
 	
 		$order->set_payment_method( $payment_method );
-
 	}
 
 	/**

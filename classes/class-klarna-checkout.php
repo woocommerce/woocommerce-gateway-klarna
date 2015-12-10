@@ -135,7 +135,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		add_action( 'wp_ajax_nopriv_kco_iframe_shipping_address_change_cb', array( $this, 'kco_iframe_shipping_address_change_cb' ) );
 
 		// Process subscription payment
-		add_action( 'scheduled_subscription_payment_klarna_checkout', array( $this, 'scheduled_subscription_payment' ), 10, 3 );
+		add_action( 'woocommerce_scheduled_subscription_payment_klarna_checkout', array( $this, 'scheduled_subscription_payment' ), 10, 3 );
 
 		// Purge kco_incomplete orders hourly
 		add_action( 'wp', array( $this, 'register_purge_cron_job' ) );
@@ -1573,6 +1573,10 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 * @since 1.0.0
 	 */
 	function is_available() {
+		if ( defined( 'WOOCOMMERCE_KLARNA_AVAILABLE' ) ) {
+			return true;
+		}
+
 		return false;
 	}
 
