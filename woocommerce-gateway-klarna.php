@@ -45,7 +45,7 @@ register_activation_hook( __FILE__, 'woocommerce_gateway_klarna_activate' );
 function woocommerce_gateway_klarna_welcome_notice() {
 	// Check if either one of three payment methods is configured
 	if ( 
-		false != get_option('woocommerce_klarna_invoice_settings') ||
+		false == get_option('woocommerce_klarna_invoice_settings') ||
 		false == get_option('woocommerce_klarna_part_payment_settings') ||
 		false == get_option( 'woocommerce_klarna_checkout_settings' )
 	) {
