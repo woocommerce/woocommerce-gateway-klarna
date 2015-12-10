@@ -294,7 +294,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			'posts_per_page' => -1,
 			'date_query'     => array(
 				array(
-					'before' => '2 days ago'
+					'before' => '2 weeks ago'
 				)
 			)
 
