@@ -191,9 +191,12 @@ class WC_Gateway_Klarna_Shortcodes {
 			return;
 
 		// Check if widget needs to be displayed
-		// if ( ! WC()->session->get( 'klarna_show_kco', false ) )
-			// return;
+		$checkout_settings = get_option( 'woocommerce_klarna_checkout_settings' );
+		if ( 'yes' != $checkout_settings['enabled'] ) {
+			return;
+		}
 
+		
 		global $woocommerce;
 
 		if ( ! defined( 'WOOCOMMERCE_CART' ) ) {
