@@ -135,7 +135,8 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		add_action( 'wp_ajax_nopriv_kco_iframe_shipping_address_change_cb', array( $this, 'kco_iframe_shipping_address_change_cb' ) );
 
 		// Process subscription payment
-		add_action( 'woocommerce_scheduled_subscription_payment_klarna_checkout', array( $this, 'scheduled_subscription_payment' ), 10, 3 );
+		add_action( 'woocommerce_scheduled_subscription_renewal_klarna_checkout', array( $this, 'scheduled_subscription_payment' ), 10, 2 );
+		// add_action( 'woocommerce_scheduled_subscription_payment_klarna_checkout', array( $this, 'scheduled_subscription_payment' ), 10, 2 );
 
 		// Purge kco_incomplete orders hourly
 		add_action( 'wp', array( $this, 'register_purge_cron_job' ) );
@@ -148,6 +149,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		add_action( 'init', array( $this, 'register_klarna_incomplete_order_status' ) );
 		add_filter( 'wc_order_statuses', array( $this, 'add_kco_incomplete_to_order_statuses' ) );
 		add_filter( 'woocommerce_valid_order_statuses_for_payment_complete', array( $this, 'kco_incomplete_payment_complete' ) );
+		add_filter( 'woocommerce_valid_order_statuses_for_payment', array( $this, 'kco_incomplete_payment_complete' ) );
 
 		// Do not copy invoice number to recurring orders
 		add_filter( 'woocommerce_subscriptions_renewal_order_meta_query', array( $this, 'kco_recurring_do_not_copy_meta_data' ), 10, 4 );
@@ -163,7 +165,6 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 
     }
 
-
 	/**
 	 * Cancel unpaid KCO orders if the option is enabled
 	 * 
@@ -178,10 +179,6 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 
 		return $cancel;
 	}
-
-
-	
-
 
 	/**
 	 * Remove "Refunded" and "KCO Incomplete" statuses from the dropdown for KCO orders
@@ -387,7 +384,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 * 
 	 * @since  2.0
 	 **/
-	function scheduled_subscription_payment( $amount_to_charge, $order, $product_id ) {
+	function scheduled_subscription_payment( $amount_to_charge, $order ) {
 		// Check if order was created using this method
 		if ( $this->id == get_post_meta( $order->id, '_payment_method', true ) ) {
 			// Prevent hook from firing twice
