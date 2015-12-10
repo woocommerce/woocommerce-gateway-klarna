@@ -32,13 +32,33 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Register activation hook
  */
 function woocommerce_gateway_klarna_activate() {
-	 if ( version_compare( PHP_VERSION, '5.4', '<' ) ) {
+	if ( version_compare( PHP_VERSION, '5.4', '<' ) ) {
 		deactivate_plugins( basename( __FILE__ ) );
 		wp_die( __( '<p><strong>WooCommerce Gateway Klarna</strong> plugin requires PHP version 5.4 or greater.</p>', 'woocommerce-gateway-klarna' ) );
-	 }
+	}
 }
 register_activation_hook( __FILE__, 'woocommerce_gateway_klarna_activate' );
 
+/**
+ * Show welcome notice
+ */
+function woocommerce_gateway_klarna_welcome_notice() {
+	// Check if either one of three payment methods is configured
+	if ( 
+		false != get_option('woocommerce_klarna_invoice_settings') ||
+		false == get_option('woocommerce_klarna_part_payment_settings') ||
+		false == get_option( 'woocommerce_klarna_checkout_settings' )
+	) {
+		$html = '<div class="updated">';
+			$html .= '<p>';
+				$html .= __( 'Thank you for choosing Klarna as your payment provider. You need to configure Klarna Payment Gateway before you can start using it. Please visit <a href="admin.php?page=wc-settings&tab=checkout&section=wc_gateway_klarna_checkout">Klarna Checkout</a>, <a href="admin.php?page=wc-settings&tab=checkout&section=wc_gateway_klarna_invoice">Klarna Invoice</a> or <a href="admin.php?page=wc-settings&tab=checkout&section=wc_gateway_klarna_part_payment">Klarna Part Payment</a> settings page to enter your credentials. ', 'woocommerce-gateway-klarna' );
+			$html .= '</p>';
+		$html .= '</div><!-- /.updated -->';
+
+		echo $html;
+	}
+}
+add_action( 'admin_notices', 'woocommerce_gateway_klarna_welcome_notice' );
 
 /**
  * Required functions
