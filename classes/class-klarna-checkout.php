@@ -85,7 +85,8 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			'subscription_reactivation',
 			'subscription_amount_changes',
 			'subscription_date_changes',
-			'subscription_payment_method_change'
+			'subscription_payment_method_change',
+			'multiple_subscriptions'
 		);
 
 		// Add link to KCO page in standard checkout
@@ -134,9 +135,14 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		add_action( 'wp_ajax_kco_iframe_shipping_address_change_cb', array( $this, 'kco_iframe_shipping_address_change_cb' ) );
 		add_action( 'wp_ajax_nopriv_kco_iframe_shipping_address_change_cb', array( $this, 'kco_iframe_shipping_address_change_cb' ) );
 
-		// Process subscription payment
-		add_action( 'woocommerce_scheduled_subscription_renewal_klarna_checkout', array( $this, 'scheduled_subscription_payment' ), 10, 2 );
-		// add_action( 'woocommerce_scheduled_subscription_payment_klarna_checkout', array( $this, 'scheduled_subscription_payment' ), 10, 2 );
+		if ( class_exists( 'WC_Subscriptions_Order' ) ) {
+			// Process subscription payment
+			// add_action( 'woocommerce_scheduled_subscription_renewal_klarna_checkout', array( $this, 'scheduled_subscription_payment' ), 10, 2 );
+			add_action( 'woocommerce_scheduled_subscription_payment_klarna_checkout', array( $this, 'scheduled_subscription_payment' ), 10, 2 );
+
+			// Do not copy invoice number to recurring orders
+			// add_filter( 'woocommerce_subscriptions_renewal_order_meta_query', array( $this, 'kco_recurring_do_not_copy_meta_data' ), 10, 4 );
+		}
 
 		// Purge kco_incomplete orders hourly
 		add_action( 'wp', array( $this, 'register_purge_cron_job' ) );
@@ -150,9 +156,6 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		add_filter( 'wc_order_statuses', array( $this, 'add_kco_incomplete_to_order_statuses' ) );
 		add_filter( 'woocommerce_valid_order_statuses_for_payment_complete', array( $this, 'kco_incomplete_payment_complete' ) );
 		add_filter( 'woocommerce_valid_order_statuses_for_payment', array( $this, 'kco_incomplete_payment_complete' ) );
-
-		// Do not copy invoice number to recurring orders
-		add_filter( 'woocommerce_subscriptions_renewal_order_meta_query', array( $this, 'kco_recurring_do_not_copy_meta_data' ), 10, 4 );
 
 		// Hide "Refunded" and "KCO Incomplete" statuses for KCO orders
 		add_filter( 'wc_order_statuses', array( $this, 'remove_refunded_and_kco_incomplete' ), 1000 );
