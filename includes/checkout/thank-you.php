@@ -88,6 +88,7 @@ if ( $this->is_rest() ) {
 do_action( 'klarna_before_kco_confirmation', intval( $_GET['sid'] ) );
 
 // WC Subscriptions 2.0 needs this
+sleep(5);
 WC()->cart->calculate_totals();
 do_action( 'woocommerce_checkout_order_processed', intval( $_GET['sid'] ), false );
 
