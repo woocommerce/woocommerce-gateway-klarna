@@ -388,12 +388,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 * @since  2.0
 	 **/
 	function scheduled_subscription_payment( $amount_to_charge, $order ) {
-		error_log('111');
-		WC_Subscriptions_Manager::process_subscription_payments_on_order( $order );
-		error_log('222');
-
 		// Check if order was created using this method
-		/* 
 		if ( $this->id == get_post_meta( $order->id, '_payment_method', true ) ) {
 			// Prevent hook from firing twice
 			if ( ! get_post_meta( $order->id, '_schedule_klarna_subscription_payment', true ) ) {
@@ -409,7 +404,6 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 				delete_post_meta( $order->id, '_schedule_klarna_subscription_payment', 'no' );
 			}
 		}
-		*/
 	}
 
 
@@ -507,7 +501,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		foreach ( $cart as $item ) {
 			$create['cart']['items'][] = $item;
 		}
-		
+
 		$connector = Klarna_Checkout_Connector::create(
 			$klarna_secret,
 			$this->klarna_server
@@ -1579,7 +1573,6 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 * @since 1.0.0
 	 */
 	function is_available() {
-		return true;
 		if ( defined( 'WOOCOMMERCE_KLARNA_AVAILABLE' ) ) {
 			return true;
 		}
@@ -2528,7 +2521,6 @@ class WC_Gateway_Klarna_Checkout_Extra {
 		
 		// Check if page has Klarna Checkout shortcode in it and address_update query parameter
 		if (
-			is_object( $post ) &&
 			has_shortcode( $post->post_content, 'woocommerce_klarna_checkout' ) &&
 			isset( $_GET['address_update'] ) &&
 			'yes' == $_GET['address_update']
