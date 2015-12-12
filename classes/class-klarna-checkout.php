@@ -507,7 +507,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		foreach ( $cart as $item ) {
 			$create['cart']['items'][] = $item;
 		}
-
+		
 		$connector = Klarna_Checkout_Connector::create(
 			$klarna_secret,
 			$this->klarna_server
@@ -2528,6 +2528,7 @@ class WC_Gateway_Klarna_Checkout_Extra {
 		
 		// Check if page has Klarna Checkout shortcode in it and address_update query parameter
 		if (
+			is_object( $post ) &&
 			has_shortcode( $post->post_content, 'woocommerce_klarna_checkout' ) &&
 			isset( $_GET['address_update'] ) &&
 			'yes' == $_GET['address_update']

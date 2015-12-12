@@ -272,13 +272,13 @@ function add_klarna_gateway( $methods ) {
 	$klarna_shop_country = get_option( 'woocommerce_default_country' );
 	$klarna_shop_country = substr( $klarna_shop_country, 0, 2 ); // Cut off first two characters to remove state
 
-	$available_countries = array( 'SE', 'NO', 'FI', 'DK', 'DE', 'NL' );
+	$available_countries = array( 'SE', 'NO', 'FI', 'DK', 'DE', 'NL', 'AT' );
 	if ( in_array( $klarna_shop_country, $available_countries ) ) {
 		$methods[] = 'WC_Gateway_Klarna_Part_Payment';
 		$methods[] = 'WC_Gateway_Klarna_Invoice';
 	}
 	
-	// Only add the Klarna Checkout method if Sweden, Norway or Finland is set as the base country
+	// Only add the Klarna Checkout method if Sweden, Norway, Finland, Germany, Austria, UK or US is set as the base country
 	$available_countries = array( 'SE', 'NO', 'FI', 'DE', 'GB', 'AT', 'US' );
 	if ( in_array( $klarna_shop_country, $available_countries ) ) {
 		$methods[] = 'WC_Gateway_Klarna_Checkout';
