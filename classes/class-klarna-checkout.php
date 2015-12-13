@@ -414,13 +414,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 * @since  2.0
 	 **/
 	function process_subscription_payment( $amount_to_charge, $order ) {
-		$subscriptions_in_order = WC_Subscriptions_Order::get_recurring_items( $order );
-		$subscription_item      = array_pop( $subscriptions_in_order );
-		$subscription_key       = WC_Subscriptions_Manager::get_subscription_key( $order->id, $subscription_item['product_id'] );
-		$subscription           = WC_Subscriptions_Manager::get_subscription( $subscription_key, $order->customer_user );
-
-		$product = wc_get_product( $product_id );
-
+		
 		if ( 0 == $amount_to_charge ) {
 			// Payment complete
 			$order->payment_complete();
@@ -456,20 +450,41 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			'street_address'  => get_post_meta( $order->id, '_shipping_address_1', true ),
 			'phone'           => $shipping_phone
 		);
-
+		
+		// Products in subscription
 		$cart = array();
-
-		$recurring_price = ( $subscription_item['recurring_line_total'] + $subscription_item['recurring_line_tax'] ) * 100;
-		$recurring_tax_rate = ( $subscription_item['recurring_line_tax'] / $subscription_item['recurring_line_total'] ) * 10000;
-		$cart[] = array(
-			'reference'     => strval( $product->id ),
-			'name'          => $product->post->post_title,
-			'quantity'      => (int) $subscription_item['qty'],
-			'unit_price'    => (int) $recurring_price,
-			'discount_rate' => 0,
-			'tax_rate'      => (int) $recurring_tax_rate			
-		);
-
+		if ( sizeof( $order->get_items() ) > 0 ) {
+			foreach ( $order->get_items() as $item_key => $item ) {
+				
+				$_product = $order->get_product_from_item( $item );
+				if ( $_product->exists() && $item['qty'] ) {
+					
+					// Get SKU or product id
+					$reference = '';
+					if ( $_product->get_sku() ) {
+						$reference = $_product->get_sku();
+					} elseif ( $_product->variation_id ) {
+						$reference = $_product->variation_id;
+					} else {
+						$reference = $_product->id;
+					}
+					
+					$recurring_price = $order->get_item_total( $item, true ) * 100;
+					$recurring_tax_rate = ( $item['line_tax'] / $item['line_total'] ) * 10000;
+					
+					$cart[] = array(
+						'reference'     => strval( $reference ),
+						'name'          => utf8_decode( $item['name'] ),
+						'quantity'      => (int) $item['qty'],
+						'unit_price'    => (int) $recurring_price,
+						'discount_rate' => 0,
+						'tax_rate'      => (int) $recurring_tax_rate			
+					);
+				}
+			}
+		}
+		
+		// Shipping
 		if ( $order->get_total_shipping() > 0 ) {
 			$shipping_price = ( $order->get_total_shipping() + $order->get_shipping_tax() ) * 100;
 			$shipping_tax_rate = ( $order->get_shipping_tax() / $order->get_total_shipping() ) * 10000;
@@ -496,13 +511,13 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		$create['billing_address']    = $klarna_billing;
 		$create['shipping_address']   = $klarna_shipping;
 		$create['merchant_reference'] = array(
-			'orderid1' => $order->id . '_' . $product_id . '_' . time()
+			'orderid1' => ltrim( $order->get_order_number(), '#' )
 		);
 		$create['cart'] = array();
 		foreach ( $cart as $item ) {
 			$create['cart']['items'][] = $item;
 		}
-
+		
 		$connector = Klarna_Checkout_Connector::create(
 			$klarna_secret,
 			$this->klarna_server
