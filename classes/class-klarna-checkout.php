@@ -392,12 +392,13 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		if ( $this->id == get_post_meta( $order->id, '_payment_method', true ) ) {
 			// Prevent hook from firing twice
 			if ( ! get_post_meta( $order->id, '_schedule_klarna_subscription_payment', true ) ) {
-				$result = $this->process_subscription_payment( $amount_to_charge, $order, $product_id );
+				$result = $this->process_subscription_payment( $amount_to_charge, $order );
 
 				if ( false == $result ) {
-					WC_Subscriptions_Manager::process_subscription_payment_failure_on_order( $order, $product_id );
+					WC_Subscriptions_Manager::process_subscription_payment_failure_on_order( $order );
 				} else {
 					WC_Subscriptions_Manager::process_subscription_payments_on_order( $order );
+					$order->payment_complete(); // Need to mark new order complete, so Subscription is marked as Active again
 				}
 				add_post_meta( $order->id, '_schedule_klarna_subscription_payment', 'no', true );
 			} else {
@@ -412,7 +413,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 * 
 	 * @since  2.0
 	 **/
-	function process_subscription_payment( $amount_to_charge, $order, $product_id ) {
+	function process_subscription_payment( $amount_to_charge, $order ) {
 		$subscriptions_in_order = WC_Subscriptions_Order::get_recurring_items( $order );
 		$subscription_item      = array_pop( $subscriptions_in_order );
 		$subscription_key       = WC_Subscriptions_Manager::get_subscription_key( $order->id, $subscription_item['product_id'] );
@@ -427,11 +428,11 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		}
 
 		$klarna_recurring_token = get_post_meta( $order->id, '_klarna_recurring_token', true );
-		$klarna_currency = get_post_meta( $order->id, '_order_currency', true );
-		$klarna_country = get_post_meta( $order->id, '_billing_country', true );
-		$klarna_locale = get_post_meta( $order->id, '_klarna_locale', true );
-		$klarna_eid = $this->klarna_eid;
-		$klarna_secret = $this->klarna_secret;
+		$klarna_currency        = get_post_meta( $order->id, '_order_currency', true );
+		$klarna_country         = get_post_meta( $order->id, '_billing_country', true );
+		$klarna_locale          = get_post_meta( $order->id, '_klarna_locale', true );
+		$klarna_eid             = $this->klarna_eid;
+		$klarna_secret          = $this->klarna_secret;
 
 		$klarna_billing  = array(
 			'postal_code'     => get_post_meta( $order->id, '_billing_postcode', true ),
@@ -530,6 +531,8 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 					utf8_encode( $e->getMessage() )
 				)					
 			);
+			error_log( var_export( $create, true ) );
+			// error_log( var_export( $e, true ) );
 			return false;
 		}
 	}
@@ -1573,7 +1576,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 * @since 1.0.0
 	 */
 	function is_available() {
-		if ( defined( 'WOOCOMMERCE_KLARNA_AVAILABLE' ) ) {
+		if ( defined( 'WOOCOMMERCE_KLARNA_AVAILABLE' ) || ! is_checkout() ) {
 			return true;
 		}
 
