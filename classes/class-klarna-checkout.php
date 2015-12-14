@@ -192,7 +192,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		if ( is_admin() && function_exists( 'get_current_screen' ) ) {
 			$screen = get_current_screen();
 
-			if ( 'shop_order' == $screen->id ) {
+			if ( is_object( $screen ) && 'shop_order' == $screen->id ) {
 				if ( absint( $_GET['post'] ) == $_GET['post'] ) {
 					$order_id = $_GET['post'];
 					$order = wc_get_order( $order_id );
@@ -523,7 +523,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			$this->klarna_server
 		);
 		$klarna_order = new Klarna_Checkout_RecurringOrder( $connector, $klarna_recurring_token );
-
+	
 		try {
 			$klarna_order->create( $create );
 			if ( isset( $klarna_order['invoice'] ) ) {
@@ -546,7 +546,6 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 					utf8_encode( $e->getMessage() )
 				)					
 			);
-			error_log( var_export( $create, true ) );
 			// error_log( var_export( $e, true ) );
 			return false;
 		}
