@@ -874,22 +874,24 @@ class WC_Gateway_Klarna_K2WC {
 	public function confirm_klarna_order( $order, $klarna_order ) {
 		// Rest API
 		if ( isset( $_GET['klarna-api'] ) && 'rest' == sanitize_key( $_GET['klarna-api'] ) ) {
-			$order->add_order_note( sprintf( 
-				__( 'Klarna Checkout payment created. Klarna reference number: %s.', 'woocommerce-gateway-klarna' ),
-				$klarna_order['klarna_reference']
-			) );
-			$klarna_order->acknowledge();
-			$klarna_order->fetch();
+			if ( ! get_post_meta( $order->id, '_kco_payment_created', true ) ) {
+				$order->add_order_note( sprintf( 
+					__( 'Klarna Checkout payment created. Klarna reference number: %s.', 'woocommerce-gateway-klarna' ),
+					$klarna_order['klarna_reference']
+				) );
+				$klarna_order->acknowledge();
+				$klarna_order->fetch();
 
-			$klarna_order->updateMerchantReferences( array(
-				'merchant_reference1' => ltrim( $order->get_order_number(), '#' ) 
-			) );
+				$klarna_order->updateMerchantReferences( array(
+					'merchant_reference1' => ltrim( $order->get_order_number(), '#' ) 
+				) );
 
-			$order->calculate_totals( false );
+				$order->calculate_totals( false );
+				$order->payment_complete( $klarna_order['klarna_reference'] );
 
-			$order->payment_complete( $klarna_order['klarna_reference'] );
-
-			delete_post_meta( $order->id, '_kco_incomplete_customer_email' );
+				delete_post_meta( $order->id, '_kco_incomplete_customer_email' );	
+				add_post_meta( $order->id, '_kco_payment_created', time() );
+			}
 		// V2 API
 		} else {
 			$order->add_order_note( sprintf( 
