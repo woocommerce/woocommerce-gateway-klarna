@@ -1095,7 +1095,7 @@ class WC_Gateway_Klarna_Invoice_Extra {
 			}
 
 			if ( is_object( $current_gateway ) ) {
-				if ( 'klarna_invoice' === $current_gateway->id ) {
+				if ( 'klarna_invoice' === $current_gateway->id && $woocommerce->cart->total > 0 ) {
 	        		$this->add_fee_to_cart( $cart );
 				}
 			}
