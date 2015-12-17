@@ -1,0 +1,30 @@
+{
+    "name": "klarna/php-xmlrpc",
+    "description": "PHP SDK for Klarna's XMLRPC API",
+    "homepage": "http://developers.klarna.com",
+    "license": "Apache-2.0",
+    "type": "library",
+    "authors": [
+        {
+            "name": "Klarna AB",
+            "email": "integration@klarna.com"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require": {
+        "ext-curl": "*",
+        "php": ">=5.2.16",
+        "phpxmlrpc/phpxmlrpc": "~3.0"
+    },
+    "require-dev": {
+        "apigen/apigen": "4.0.*",
+        "klarna/apigen-theme": "~1.0"
+    },
+    "autoload": {
+        "psr-0": { "": "src/" }
+    },
+    "scripts": {
+        "zip": "composer install --prefer-dist --optimize-autoloader --no-dev && composer archive --format=zip",
+        "reference": "vendor/bin/apigen generate -s src -d docs/reference --template-config='vendor/klarna/apigen-theme/src/config.neon'"
+    }
+}
