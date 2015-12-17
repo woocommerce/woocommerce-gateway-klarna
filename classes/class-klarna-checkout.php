@@ -1566,7 +1566,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		<h3><?php _e( 'Klarna Checkout', 'woocommerce-gateway-klarna' ); ?></h3>
 
 		<p>
-			<?php printf(__( 'With Klarna Checkout your customers can pay by invoice or credit card. Klarna Checkout works by replacing the standard WooCommerce checkout form. Documentation <a href="%s" target="_blank">can be found here</a>.', 'woocommerce-gateway-klarna' ), 'http://docs.krokedil.com/documentation/klarna-for-woocommerce/' ); ?>
+			<?php printf(__( 'With Klarna Checkout your customers can pay by invoice or credit card. Klarna Checkout works by replacing the standard WooCommerce checkout form. Documentation <a href="%s" target="_blank">can be found here</a>.', 'woocommerce-gateway-klarna' ), 'https://docs.woothemes.com/document/klarna/' ); ?>
 		</p>
 
 		<?php

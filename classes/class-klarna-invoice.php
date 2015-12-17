@@ -30,7 +30,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 		
 		$this->id                 = 'klarna_invoice';
 		$this->method_title       = __( 'Klarna Invoice', 'woocommerce-gateway-klarna' );
-		$this->method_description = sprintf( __( 'With Klarna your customers can pay by invoice. Klarna works by adding extra personal information fields and then sending the details to Klarna for verification. Documentation <a href="%s" target="_blank">can be found here</a>.', 'woocommerce-gateway-klarna' ), 'http://docs.krokedil.com/documentation/klarna-for-woocommerce/' );
+		$this->method_description = sprintf( __( 'With Klarna your customers can pay by invoice. Klarna works by adding extra personal information fields and then sending the details to Klarna for verification. Documentation <a href="%s" target="_blank">can be found here</a>.', 'woocommerce-gateway-klarna' ), 'https://docs.woothemes.com/document/klarna/' );
 		$this->has_fields         = true;
 		$this->order_button_text  = apply_filters( 'klarna_order_button_text', __( 'Place order', 'woocommerce' ) );
 		$this->pclass_type        = array( 2 );
@@ -952,7 +952,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 					});	
 				});
 
-				//
+				
 
 				// Move PNO field and get address if SE
 				jQuery(document).ajaxComplete(function( event, xhr, settings ) {
@@ -965,14 +965,20 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 							jQuery('select#billing_country').val() == 'SE') {
 							
 							jQuery('.woocommerce-billing-fields #klarna-invoice-get-address').remove();
+
+							/* 
+							jQuery('#order_review').on('change', function() {
+								if ( 'undefined' !== typeof pno_getadress ) {
+									jQuery('input#klarna_invoice_pno').val(pno_getadress);
+								}
+							});
+							*/
 							jQuery('#order_review #klarna-invoice-get-address').show().prependTo(jQuery('.woocommerce-billing-fields'));
-						
 						} else {
 
 							// if (jQuery('.woocommerce-billing-fields #klarna-invoice-get-address').length) {
 								jQuery('.woocommerce-billing-fields #klarna-invoice-get-address').hide().appendTo(jQuery('li.payment_method_klarna_invoice div.payment_method_klarna_invoice'));
 							// }
-
 						}
 					}
 				});
@@ -1095,7 +1101,7 @@ class WC_Gateway_Klarna_Invoice_Extra {
 			}
 
 			if ( is_object( $current_gateway ) ) {
-				if ( 'klarna_invoice' === $current_gateway->id && $woocommerce->cart->total > 0 ) {
+				if ( 'klarna_invoice' === $current_gateway->id && $woocommerce->cart->subtotal > 0 ) {
 	        		$this->add_fee_to_cart( $cart );
 				}
 			}

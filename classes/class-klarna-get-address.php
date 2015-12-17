@@ -127,7 +127,7 @@ class WC_Klarna_Get_Address {
  	 * and populating the checkout fields after the call to Klarna.
  	 */
 	function js() {	
-		if( is_checkout() && $this->get_shop_country() == 'SE' && ($this->partpay_enabled || $this->invo_enabled ) ) {
+		if( is_checkout() && $this->get_shop_country() == 'SE' && ( $this->partpay_enabled || $this->invo_enabled ) ) {
 
 			if ( defined( 'WOOCOMMERCE_KLARNA_CHECKOUT' ) ) return;
 			?>
@@ -143,9 +143,9 @@ class WC_Klarna_Get_Address {
 					klarnainfo("company", info, value);
 				});
 				
-				function klarnainfo(type, info, value){
+				function klarnainfo( type, info, value ) {
 					
-					if(type == 'company'){
+					if ( type == 'company' ) {
 						var adress = info[0][value];
 						var orgno_getadress = "";
 						/*
@@ -174,8 +174,8 @@ class WC_Klarna_Get_Address {
 						getAddressCompleted = 'yes';
 					}
 					
-					if(type == 'private'){
-						if(value == 0){
+					if ( type == 'private' ) {
+						if ( value == 0 ) {
 							
 							var adress = info[0][value];
 							var pno_getadress = "";
@@ -217,10 +217,8 @@ class WC_Klarna_Get_Address {
 					}
 
 					if( pno_getadress == '' ) {
-					
 						$(".klarna-get-address-message").show();
 						$(".klarna-get-address-message").html('<span style="clear:both; margin: 5px 2px; padding: 4px 8px; background:#ffecec"><?php _e('Be kind and enter a date of birth!', 'woocommerce-gateway-klarna' );?></span>');
-					
 					} else {
 											
 						jQuery.post(
