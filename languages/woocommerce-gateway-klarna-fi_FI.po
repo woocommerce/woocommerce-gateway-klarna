@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Klarna\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-12-01 13:24+0100\n"
-"PO-Revision-Date: 2015-12-01 13:25+0100\n"
+"POT-Creation-Date: 2015-12-16 17:57+0100\n"
+"PO-Revision-Date: 2015-12-16 17:57+0100\n"
 "Last-Translator: Niklas Högefjord <info@krokedil.se>\n"
 "Language-Team: \n"
 "Language: fi_FI\n"
@@ -16,7 +16,7 @@ msgstr ""
 "X-Poedit-SearchPath-0: ..\n"
 
 #: ../classes/class-klarna-checkout.php:29
-#: ../classes/class-klarna-checkout.php:1549
+#: ../classes/class-klarna-checkout.php:1566
 #: ../includes/settings-checkout.php:23
 msgid "Klarna Checkout"
 msgstr ""
@@ -34,59 +34,59 @@ msgid ""
 "If this option is checked recurring orders will be activated automatically"
 msgstr ""
 
-#: ../classes/class-klarna-checkout.php:516
+#: ../classes/class-klarna-checkout.php:532
 msgid "Klarna subscription payment invoice number: "
 msgstr ""
 
-#: ../classes/class-klarna-checkout.php:521
+#: ../classes/class-klarna-checkout.php:537
 msgid "Klarna subscription payment reservation number: "
 msgstr ""
 
-#: ../classes/class-klarna-checkout.php:528
+#: ../classes/class-klarna-checkout.php:544
 #, php-format
 msgid "Klarna subscription payment failed. Error code %s. Error message %s"
 msgstr ""
 
-#: ../classes/class-klarna-checkout.php:1161
-#: ../classes/class-klarna-shortcodes.php:272
+#: ../classes/class-klarna-checkout.php:1178
+#: ../classes/class-klarna-shortcodes.php:275
 msgid "Subtotal"
 msgstr ""
 
-#: ../classes/class-klarna-checkout.php:1171
-#: ../classes/class-klarna-checkout.php:1234
-#: ../classes/class-klarna-shortcodes.php:282
-#: ../classes/class-klarna-shortcodes.php:345
+#: ../classes/class-klarna-checkout.php:1188
+#: ../classes/class-klarna-checkout.php:1251
+#: ../classes/class-klarna-shortcodes.php:285
+#: ../classes/class-klarna-shortcodes.php:348
 msgid "Total"
 msgstr ""
 
-#: ../classes/class-klarna-checkout.php:1190
-#: ../classes/class-klarna-shortcodes.php:301
+#: ../classes/class-klarna-checkout.php:1207
+#: ../classes/class-klarna-shortcodes.php:304
 msgid "Notes about your order, e.g. special notes for delivery."
 msgstr ""
 
-#: ../classes/class-klarna-checkout.php:1229
-#: ../classes/class-klarna-shortcodes.php:340
+#: ../classes/class-klarna-checkout.php:1246
+#: ../classes/class-klarna-shortcodes.php:343
 msgid "Product"
 msgstr ""
 
-#: ../classes/class-klarna-checkout.php:1231
-#: ../classes/class-klarna-shortcodes.php:342
+#: ../classes/class-klarna-checkout.php:1248
+#: ../classes/class-klarna-shortcodes.php:345
 msgid "Price"
 msgstr ""
 
-#: ../classes/class-klarna-checkout.php:1233
-#: ../classes/class-klarna-shortcodes.php:344
+#: ../classes/class-klarna-checkout.php:1250
+#: ../classes/class-klarna-shortcodes.php:347
 msgid "Quantity"
 msgstr ""
 
-#: ../classes/class-klarna-checkout.php:1309
-#: ../classes/class-klarna-checkout.php:1507
-#: ../classes/class-klarna-shortcodes.php:420
+#: ../classes/class-klarna-checkout.php:1326
+#: ../classes/class-klarna-checkout.php:1524
+#: ../classes/class-klarna-shortcodes.php:423
 #: ../classes/class-wc-to-klarna.php:423
 msgid "Shipping"
 msgstr ""
 
-#: ../classes/class-klarna-checkout.php:1552
+#: ../classes/class-klarna-checkout.php:1569
 #, php-format
 msgid ""
 "With Klarna Checkout your customers can pay by invoice or credit card. "
@@ -94,33 +94,27 @@ msgid ""
 "Documentation <a href=\"%s\" target=\"_blank\">can be found here</a>."
 msgstr ""
 
-#: ../classes/class-klarna-checkout.php:1559
+#: ../classes/class-klarna-checkout.php:1576
 msgid ""
 "You need to specify a Terms Page in the WooCommerce settings or in the "
 "Klarna Checkout settings in order to enable the Klarna Checkout payment "
 "method."
 msgstr ""
 
-#: ../classes/class-klarna-checkout.php:1566
-msgid ""
-"The PHP library cURL does not seem to be installed on your server. Klarna "
-"Checkout will not work without it."
-msgstr ""
-
-#: ../classes/class-klarna-checkout.php:1955
+#: ../classes/class-klarna-checkout.php:1969
 #: ../classes/class-klarna-invoice.php:342
 #: ../classes/class-klarna-part-payment.php:213
 msgid "This order cannot be refunded. Please make sure it is activated."
 msgstr ""
 
-#: ../classes/class-klarna-checkout.php:2062
+#: ../classes/class-klarna-checkout.php:2076
 #, php-format
 msgid ""
 "Sorry, you can not buy via Klarna Checkout from your country or currency. "
 "Please <a href=\"%s\">use another payment method</a>. "
 msgstr ""
 
-#: ../classes/class-klarna-checkout.php:2078
+#: ../classes/class-klarna-checkout.php:2092
 #, php-format
 msgid "You must be logged in to checkout. %s or %s."
 msgstr ""
@@ -183,49 +177,49 @@ msgstr ""
 msgid "Settings"
 msgstr ""
 
-#: ../classes/class-klarna-invoice.php:615
-#: ../classes/class-klarna-part-payment.php:507
+#: ../classes/class-klarna-invoice.php:618
+#: ../classes/class-klarna-part-payment.php:520
 msgid "TEST MODE ENABLED"
 msgstr ""
 
-#: ../classes/class-klarna-invoice.php:802
-#: ../classes/class-klarna-part-payment.php:690
+#: ../classes/class-klarna-invoice.php:805
+#: ../classes/class-klarna-part-payment.php:703
 msgid "Klarna payment completed. Klarna Invoice number: "
 msgstr ""
 
-#: ../classes/class-klarna-invoice.php:819
+#: ../classes/class-klarna-invoice.php:822
 msgid ""
 "Order is PENDING APPROVAL by Klarna. Please visit Klarna Online for the "
 "latest status on this order. Klarna reservation number: "
 msgstr ""
 
-#: ../classes/class-klarna-invoice.php:832
 #: ../classes/class-klarna-invoice.php:835
-#: ../classes/class-klarna-invoice.php:891
-#: ../classes/class-klarna-part-payment.php:718
-#: ../classes/class-klarna-part-payment.php:721
+#: ../classes/class-klarna-invoice.php:838
+#: ../classes/class-klarna-invoice.php:894
+#: ../classes/class-klarna-part-payment.php:731
+#: ../classes/class-klarna-part-payment.php:734
 msgid "Klarna payment denied."
 msgstr ""
 
-#: ../classes/class-klarna-invoice.php:843
 #: ../classes/class-klarna-invoice.php:846
-#: ../classes/class-klarna-part-payment.php:729
-#: ../classes/class-klarna-part-payment.php:732
+#: ../classes/class-klarna-invoice.php:849
+#: ../classes/class-klarna-part-payment.php:742
+#: ../classes/class-klarna-part-payment.php:745
 msgid "Unknown response from Klarna."
 msgstr ""
 
-#: ../classes/class-klarna-invoice.php:857
-#: ../classes/class-klarna-part-payment.php:743
+#: ../classes/class-klarna-invoice.php:860
+#: ../classes/class-klarna-part-payment.php:756
 #, php-format
 msgid "%s (Error code: %s)"
 msgstr ""
 
-#: ../classes/class-klarna-invoice.php:887
+#: ../classes/class-klarna-invoice.php:890
 msgid "Klarna payment completed. You can now activate Klarna order."
 msgstr ""
 
-#: ../classes/class-klarna-invoice.php:906
-#: ../classes/class-klarna-part-payment.php:760
+#: ../classes/class-klarna-invoice.php:909
+#: ../classes/class-klarna-part-payment.php:773
 msgid "Thank you for your order."
 msgstr ""
 
@@ -299,7 +293,7 @@ msgstr ""
 msgid "Klarna Part Payment"
 msgstr ""
 
-#: ../classes/class-klarna-part-payment.php:705
+#: ../classes/class-klarna-part-payment.php:718
 msgid ""
 "Order is PENDING APPROVAL by Klarna. Please visit Klarna Online for the "
 "latest status on this order. Klarna Invoice number: "
@@ -450,52 +444,56 @@ msgstr ""
 msgid "Country:"
 msgstr ""
 
-#: ../classes/class-klarna-shortcodes.php:479
+#: ../classes/class-klarna-shortcodes.php:482
 #, php-format
 msgid "Coupon: %s"
 msgstr ""
 
-#: ../classes/class-klarna-shortcodes.php:480
+#: ../classes/class-klarna-shortcodes.php:483
 msgid "(remove)"
 msgstr ""
 
-#: ../classes/class-klarna-to-wc.php:391 ../classes/class-klarna-to-wc.php:489
-#: ../classes/class-klarna-to-wc.php:531 ../classes/class-klarna-to-wc.php:630
-#: ../classes/class-klarna-to-wc.php:655
+#: ../classes/class-klarna-to-wc.php:392 ../classes/class-klarna-to-wc.php:490
+#: ../classes/class-klarna-to-wc.php:532 ../classes/class-klarna-to-wc.php:655
 msgid "Error: Unable to create order. Please try again."
 msgstr ""
 
-#: ../classes/class-klarna-to-wc.php:459
+#: ../classes/class-klarna-to-wc.php:460
 msgid "Error: Unable to add order item. Please try again."
 msgstr ""
 
-#: ../classes/class-klarna-to-wc.php:731
+#: ../classes/class-klarna-to-wc.php:630
+#, php-format
+msgid "Error %d: Unable to create order. Please try again."
+msgstr ""
+
+#: ../classes/class-klarna-to-wc.php:730
 msgid "Please provide a valid email address."
 msgstr ""
 
-#: ../classes/class-klarna-to-wc.php:734
+#: ../classes/class-klarna-to-wc.php:733
 msgid "An account is already registered with your email address. Please login."
 msgstr ""
 
-#: ../classes/class-klarna-to-wc.php:758 ../classes/class-klarna-to-wc.php:773
+#: ../classes/class-klarna-to-wc.php:757 ../classes/class-klarna-to-wc.php:772
 msgid "Customer creation error"
 msgstr ""
 
-#: ../classes/class-klarna-to-wc.php:772
+#: ../classes/class-klarna-to-wc.php:771
 msgid "ERROR"
 msgstr ""
 
-#: ../classes/class-klarna-to-wc.php:772
+#: ../classes/class-klarna-to-wc.php:771
 msgid ""
 "Couldn&#8217;t register you&hellip; please contact us if you continue to "
 "have problems."
 msgstr ""
 
-#: ../classes/class-klarna-to-wc.php:821
+#: ../classes/class-klarna-to-wc.php:820
 msgid "Customer creation failed. Check error log for more details."
 msgstr ""
 
-#: ../classes/class-klarna-to-wc.php:824
+#: ../classes/class-klarna-to-wc.php:823
 #, php-format
 msgid "New customer created (user ID %s)."
 msgstr ""
@@ -505,22 +503,16 @@ msgstr ""
 msgid "Klarna Checkout payment created. Klarna reference number: %s."
 msgstr ""
 
-#: ../classes/class-klarna-to-wc.php:897
+#: ../classes/class-klarna-to-wc.php:898
 #, php-format
 msgid ""
 "Klarna Checkout payment created. Reservation number: %s.  Klarna order "
 "number: %s"
 msgstr ""
 
-#: ../classes/class-klarna-to-wc.php:906
+#: ../classes/class-klarna-to-wc.php:907
 #, php-format
 msgid "Klarna authorization expires at %s."
-msgstr ""
-
-#: ../gateway-klarna.php:37
-msgid ""
-"<p><strong>WooCommerce Gateway Klarna</strong> plugin requires PHP version "
-"5.4 or greater.</p>"
 msgstr ""
 
 #: ../includes/checkout-field-process.php:28
@@ -1392,4 +1384,23 @@ msgstr ""
 
 #: ../views/public/payment-fields-part-payment.php:178
 msgid "Klarna PClasses seem to be missing. Klarna Part Payment does not work."
+msgstr ""
+
+#: ../woocommerce-gateway-klarna.php:36
+msgid ""
+"<p><strong>WooCommerce Gateway Klarna</strong> plugin requires PHP version "
+"5.4 or greater.</p>"
+msgstr ""
+
+#: ../woocommerce-gateway-klarna.php:53
+msgid ""
+"Thank you for choosing Klarna as your payment provider. WooCommerce Klarna "
+"Gateway is almost ready. Please visit <a href=\"admin.php?page=wc-"
+"settings&tab=checkout&section=wc_gateway_klarna_checkout\">Klarna Checkout</"
+"a>, <a href=\"admin.php?page=wc-"
+"settings&tab=checkout&section=wc_gateway_klarna_invoice\">Klarna Invoice</a> "
+"or <a href=\"admin.php?page=wc-"
+"settings&tab=checkout&section=wc_gateway_klarna_part_payment\">Klarna Part "
+"Payment</a> settings to enter your EID and shared secret for countries you "
+"have an agreement for with Klarna. "
 msgstr ""
