@@ -405,7 +405,7 @@ jQuery(document).ready(function($) {
 							api.suspend();
 						});
 
-						console.log('V2');
+						// console.log('V2');
 
 						// Check if email is not defined (AT and DE only) and set it to this value
 						// For AT and DE, email field is not captured inside data object
@@ -465,7 +465,7 @@ jQuery(document).ready(function($) {
 			api.on( {
 				'shipping_address_change': function (data) {
 					// console.log('****** Parent Page Received shipping_address_change DATA ******');
-					console.log('V3');
+					// console.log('V3');
 
 					if ( '' != data.postal_code || '' != data.region ) {
 						kco_widget = $( '#klarna-checkout-widget' );	

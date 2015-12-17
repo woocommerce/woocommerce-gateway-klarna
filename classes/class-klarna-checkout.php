@@ -193,7 +193,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			$screen = get_current_screen();
 
 			if ( is_object( $screen ) && 'shop_order' == $screen->id ) {
-				if ( absint( $_GET['post'] ) == $_GET['post'] ) {
+				if ( isset( $_GET['post'] ) && absint( $_GET['post'] ) == $_GET['post'] ) {
 					$order_id = $_GET['post'];
 					$order = wc_get_order( $order_id );
 

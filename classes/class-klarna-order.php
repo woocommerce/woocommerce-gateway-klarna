@@ -764,9 +764,8 @@ class WC_Gateway_Klarna_Order {
 
 			$order->add_order_note(
 				sprintf(
-					__( 'Klarna order captured.', 'woocommerce-gateway-klarna' ),
-					$invNo,
-					$risk
+					__( 'Klarna order captured. Invoice number %s.', 'woocommerce-gateway-klarna' ),
+					$k_order['captures'][0]['capture_id']
 				)
 			);
 
