@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: WooCommerce Klarna Gateway v1.8.8\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2015-12-16 17:59+0100\n"
-"PO-Revision-Date: 2015-12-16 17:59+0100\n"
+"PO-Revision-Date: 2015-12-17 10:50+0100\n"
 "Last-Translator: Niklas Högefjord <info@krokedil.se>\n"
 "Language-Team: \n"
 "Language: sv_SE\n"
@@ -483,12 +483,12 @@ msgstr "Betalningsplan"
 
 #: ../classes/class-klarna-shortcodes.php:66
 msgid "Order Notes"
-msgstr ""
+msgstr "Ordernoteringar"
 
 #: ../classes/class-klarna-shortcodes.php:67
 msgctxt "placeholder"
 msgid "Notes about your order, e.g. special notes for delivery."
-msgstr ""
+msgstr "Anteckningar om din order, t.ex. speciella önskemål för leverans."
 
 # @ klarna
 #: ../classes/class-klarna-shortcodes.php:124
@@ -518,11 +518,11 @@ msgstr "Land:"
 #: ../classes/class-klarna-shortcodes.php:482
 #, php-format
 msgid "Coupon: %s"
-msgstr ""
+msgstr "Rabattkod: %s"
 
 #: ../classes/class-klarna-shortcodes.php:483
 msgid "(remove)"
-msgstr ""
+msgstr "(ta bort)"
 
 # @ woocommerce
 #: ../classes/class-klarna-to-wc.php:392 ../classes/class-klarna-to-wc.php:490
@@ -1465,9 +1465,8 @@ msgstr "Delbetalning"
 
 # @ klarna
 #: ../includes/settings-part-payment.php:26
-#, fuzzy
 msgid "This controls the description which the user sees during checkout. "
-msgstr "Det här kontrollerar den beskrivning kunden ser i kassan."
+msgstr "Det här kontrollerar den beskrivning kunden ser i kassan. "
 
 #: ../includes/settings-part-payment.php:174
 msgid ""
@@ -1644,6 +1643,15 @@ msgid ""
 "Payment</a> settings to enter your EID and shared secret for countries you "
 "have an agreement for with Klarna. "
 msgstr ""
+"Tack för att du valt Klarna som betalleverantör. WooCommerce Klarna Gateway "
+"är nästan färdig. Navigera till inställningarna för <a href=\"admin.php?"
+"page=wc-settings&tab=checkout&section=wc_gateway_klarna_checkout\">Klarna "
+"Checkout</a>, <a href=\"admin.php?page=wc-"
+"settings&tab=checkout&section=wc_gateway_klarna_invoice\">Klarna faktura</a> "
+"eller <a href=\"admin.php?page=wc-"
+"settings&tab=checkout&section=wc_gateway_klarna_part_payment\">Klarna "
+"delbetalning</a> och ange ditt EID och Shared secret för de länder du har "
+"ett avtal med Klarna."
 
 # @ klarna
 #~ msgid ""
