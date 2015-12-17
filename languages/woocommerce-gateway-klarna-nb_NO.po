@@ -1,9 +1,9 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: WooCommerce Klarna Gateway v1.8.8\n"
+"Project-Id-Version: WooCommerce Klarna Gateway v2.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2015-12-16 17:58+0100\n"
-"PO-Revision-Date: 2015-12-16 17:58+0100\n"
+"PO-Revision-Date: 2015-12-17 11:06+0100\n"
 "Last-Translator: Niklas Högefjord <info@krokedil.se>\n"
 "Language-Team: \n"
 "Language: nb_NO\n"
@@ -12,7 +12,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
 "X-Generator: Poedit 1.8.6\n"
-"X-Poedit-SourceCharset: utf-8\n"
+"X-Poedit-SourceCharset: UTF-8\n"
 "X-Poedit-KeywordsList: __;_e;__ngettext:1,2;_n:1,2;__ngettext_noop:1,2;"
 "_n_noop:1,2;_c,_nc:4c,1,2;_x:1,2c;_ex:1,2c;_nx:4c,1,2;_nx_noop:4c,1,2\n"
 "X-Poedit-Basepath: .\n"
@@ -62,34 +62,34 @@ msgstr ""
 #: ../classes/class-klarna-checkout.php:1178
 #: ../classes/class-klarna-shortcodes.php:275
 msgid "Subtotal"
-msgstr ""
+msgstr "Delsum"
 
 #: ../classes/class-klarna-checkout.php:1188
 #: ../classes/class-klarna-checkout.php:1251
 #: ../classes/class-klarna-shortcodes.php:285
 #: ../classes/class-klarna-shortcodes.php:348
 msgid "Total"
-msgstr ""
+msgstr "Total"
 
 #: ../classes/class-klarna-checkout.php:1207
 #: ../classes/class-klarna-shortcodes.php:304
 msgid "Notes about your order, e.g. special notes for delivery."
-msgstr ""
+msgstr "Notater for din ordre. F.eks. leveringsnotat eller lignende."
 
 #: ../classes/class-klarna-checkout.php:1246
 #: ../classes/class-klarna-shortcodes.php:343
 msgid "Product"
-msgstr ""
+msgstr "Produkt"
 
 #: ../classes/class-klarna-checkout.php:1248
 #: ../classes/class-klarna-shortcodes.php:345
 msgid "Price"
-msgstr ""
+msgstr "Pris"
 
 #: ../classes/class-klarna-checkout.php:1250
 #: ../classes/class-klarna-shortcodes.php:347
 msgid "Quantity"
-msgstr ""
+msgstr "Antall"
 
 #: ../classes/class-klarna-checkout.php:1326
 #: ../classes/class-klarna-checkout.php:1524
@@ -675,26 +675,22 @@ msgstr ""
 # @ klarna
 #: ../includes/settings-checkout.php:70 ../includes/settings-invoice.php:60
 #: ../includes/settings-part-payment.php:60
-#, fuzzy
 msgid "Please enter your Klarna Eid for Sweden. Leave blank to disable."
 msgstr ""
-"Skriv inn URL til ikon bilde. La stå tom for at den skal være deaktivert."
+"Skriv inn din Klarna Eid for Sweden. La stå tom for at den skal være "
+"deaktivert."
 
 # @ klarna
 #: ../includes/settings-checkout.php:75 ../includes/settings-invoice.php:65
 #: ../includes/settings-part-payment.php:65
-#, fuzzy
 msgid "Shared Secret - Sweden"
-msgstr "Felles Hemmelighet"
+msgstr "Felles Hemmelighet - Sverige"
 
 # @ klarna
 #: ../includes/settings-checkout.php:77 ../includes/settings-invoice.php:67
 #: ../includes/settings-part-payment.php:67
-#, fuzzy
 msgid "Please enter your Klarna Shared Secret for Sweden."
-msgstr ""
-"Vennligst skriv din Klarna Felles Hemmelighet; dette er nødvendig for å ta "
-"betalt!"
+msgstr "Vennligst skriv din Klarna Felles Hemmelighet for Sverige."
 
 # @ klarna
 #: ../includes/settings-checkout.php:82
@@ -736,26 +732,22 @@ msgstr ""
 # @ klarna
 #: ../includes/settings-checkout.php:103 ../includes/settings-invoice.php:79
 #: ../includes/settings-part-payment.php:79
-#, fuzzy
 msgid "Please enter your Klarna Eid for Norway. Leave blank to disable."
 msgstr ""
-"Skriv inn URL til ikon bilde. La stå tom for at den skal være deaktivert."
+"Skriv inn din Klarna Eid for Norge. La stå tom for at den skal være "
+"deaktivert."
 
 # @ klarna
 #: ../includes/settings-checkout.php:108 ../includes/settings-invoice.php:84
 #: ../includes/settings-part-payment.php:84
-#, fuzzy
 msgid "Shared Secret - Norway"
-msgstr "Felles Hemmelighet"
+msgstr "Felles Hemmelighet - Norge"
 
 # @ klarna
 #: ../includes/settings-checkout.php:110 ../includes/settings-invoice.php:86
 #: ../includes/settings-part-payment.php:86
-#, fuzzy
 msgid "Please enter your Klarna Shared Secret for Norway."
-msgstr ""
-"Vennligst skriv din Klarna Felles Hemmelighet; dette er nødvendig for å ta "
-"betalt!"
+msgstr "Vennligst skriv din Klarna Felles Hemmelighet for Norge"
 
 # @ klarna
 #: ../includes/settings-checkout.php:115
@@ -792,26 +784,22 @@ msgstr ""
 # @ klarna
 #: ../includes/settings-checkout.php:136 ../includes/settings-invoice.php:98
 #: ../includes/settings-part-payment.php:98
-#, fuzzy
 msgid "Please enter your Klarna Eid for Finland. Leave blank to disable."
 msgstr ""
-"Skriv inn URL til ikon bilde. La stå tom for at den skal være deaktivert."
+"Skriv inn din Klarna Eid for Finland. La stå tom for at den skal være "
+"deaktivert."
 
 # @ klarna
 #: ../includes/settings-checkout.php:141 ../includes/settings-invoice.php:103
 #: ../includes/settings-part-payment.php:103
-#, fuzzy
 msgid "Shared Secret - Finland"
-msgstr "Felles Hemmelighet"
+msgstr "Felles Hemmelighet - Finland"
 
 # @ klarna
 #: ../includes/settings-checkout.php:143 ../includes/settings-invoice.php:105
 #: ../includes/settings-part-payment.php:105
-#, fuzzy
 msgid "Please enter your Klarna Shared Secret for Finland."
-msgstr ""
-"Vennligst skriv din Klarna Felles Hemmelighet; dette er nødvendig for å ta "
-"betalt!"
+msgstr "Vennligst skriv din Klarna Felles Hemmelighet for Finland."
 
 # @ klarna
 #: ../includes/settings-checkout.php:148
