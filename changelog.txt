@@ -1,6 +1,6 @@
-*** Klarna Changelog ***
+*** WooCommerce Gateway Klarna Changelog ***
 
-2015.12.17	- version 2.0
+2015.12.21	- version 2.0.0
 * Feature	- Added Klarna order activation from WooCommerce.
 * Feature	- Added Klarna order cancelation from WooCommerce.
 * Feature	- Added Klarna order update from WooCommerce.
@@ -146,7 +146,7 @@
 
 2014.09.09 	- version 1.8.5
 * Tweak		- Klarna invoice not available to companies in DE & AT.
-* Tweak		- Added do_action('woocommerce_thankyou') after KCO Thank you page has rendered, other plugins rely on this hook. 
+* Tweak		- Added do_action('woocommerce_thankyou') after KCO Thank you page has rendered, other plugins rely on this hook.
 * Tweak 	- Removed the hook woocommerce_order_details_table (executed via woocommerce_thankyou) so the WC order detail table doesn't get displayed under the KCO Thank you page.
 * Fix		- Moved housenumber for Austria so that it is sent to Klarna together with the address field (KMP).
 * Fix		- Gender issue fix (KPM) for DE, NL & AT.
@@ -164,7 +164,7 @@
 
 2014.08.04 	- version 1.8.3
 * Fix		- Removed included files kco-create-order-2.0.php & kco-create-order-2.1.php and added the code as functions in class-klarna-checkout instead. Caused error on some LiteSpeed stacks.
-* Fix		- Php notices fix. 
+* Fix		- Php notices fix.
 
 2014.07.18 	- version 1.8.2
 * Fix		- Flag for automatically calculate and reserve the cart total amount in the reserveAmount call (Account & Special Campaign)
@@ -176,7 +176,7 @@
 2014.06.26 	- version 1.8
 * Feature	- Support for Austria (Klarna Invoice).
 * Feature	- Support for Klarna Checkout in Germany.
-* Tweak		- Advanced integration added for Klarna Invoice, Account and Campaign (Klarna Checkout already uses this).			
+* Tweak		- Advanced integration added for Klarna Invoice, Account and Campaign (Klarna Checkout already uses this).
 * Tweak		- Added Klarnas new price widget on single product pages. Removed the old "Display cost per month" on shop page and single product page.
 * Tweak		- Added apply_filters klarna_kco_checkout. Possibility for other plugins to filter the rendered checkout.
 * Tweak		- Use of get_woocommerce_currency() instead of checking for WPML and WC Currency Switcher plugin for multi currency support.
@@ -196,8 +196,8 @@
  * Tweak	- Added check for separate shipping address in push notification if allow_separate_shipping_address is used.
  * Fix		- Improved Round() handling of tax percentage sent to Klarna (Klarna Checkout).
  * Fix		- No calculation of monthly fee (Klarna Account) for products with no price.
- 
- 
+
+
 2014.03.25 	- version 1.7.7
  * Fix		- 2.1 compatibility bugfix in check - Shipping and Billing address must be the same (for DE & NL).
  * Fix		- Added specific create_order() function for WC v2.1+ (Klarna Checkout). Improvment of bugfix in version 1.7.6.
@@ -212,10 +212,10 @@
 
 2014.01.30 	- version 1.7.4
  * Fix		- Invoice fee display fix on checkout page (Klarna Invoice).
- 
+
 2014.01.15 	- version 1.7.3
  * Fix		- WooCommerce 2.1 compatibility
- 
+
 2014.01.15 	- version 1.7.2
  * Feature	- Klarna Checkout - Integration support with  WooCommerce Currency Switcher (http://dev.pathtoenlightenment.net).
  * Feature	- Klarna Checkout - Integration support with  WPML's new multiple currencies feature, independent of the site’s languages.
@@ -236,7 +236,7 @@
  * Tweak	- Possibility to send entered billing addres in WooCommerce checkout as shipping address to  Klarna (Klarna Invoice, Account and Special campaign).
  * Tweak	- Added apply_filters klarna_invoice_description
  * Fix		- Correct php opening of class-klarna-checkout.php
- 
+
 2013.08.28 	- version 1.7
  * Feature	- Klarna Checkout support for Norway and Finland.
  * Feature	- Possibility to use separate Thanks Page for Klarna Checkout.
@@ -255,11 +255,11 @@
 
 2013.04.29 - version 1.6.4
  * Bugfix - removed a var_dump() in Klarna Checkout (function start_session()).
- 
+
 2013.04.25 - version 1.6.3
  * Bugfix - Klarna Checkout: Moved session_start() to init. Further improvment to the problem with completed Klarna Checkout form fields not stays completed if customer navigate away from checkout and then returns again.
  * Improved check for if Klarna Checkout is enabled.
- 
+
 2013.04.09 - version 1.6.2
  * Added - Possible to specify URL to custom Terms Page for Klarna Checkout.
  * Bugfix - Completed Klarna Checkout form fields now stays completed if customer navigate away from checkout and then returns again.
@@ -284,7 +284,7 @@
  * Added check: Cart total must be greater than current $pclass->getMinAmount() when displaying a PClass as a available Payment Plan on Checkout.
  * Added ability for companies to make purchases via Klarna Invoice
  * Changed Norwegian translation (Fødelsedato to Personnummer)
- 
+
 2012.12.05 - version 1.5.2
  * Updater
 
@@ -333,11 +333,11 @@
  * Added Klarna localization files.
  * Improved handlig of invoice fee. The gateway now uses a simple (hidden) product that acts as invoice fee.
  * Added apply_filters to country, language, currency, invoice_terms, invoice_fee.
- 
+
 
 2012.03.15 - version 1.1
  * Gateway can now be used without SSL certificate.
 
- 
+
 2011.12.01 - version 1.0
  * First Release
