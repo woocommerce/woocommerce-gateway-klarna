@@ -1,13 +1,16 @@
 <?php
 /**
- * WooCommerce Klarna Gateway
- * By Niklas Högefjord (niklas@krokedil.se)
+ * WooCommerce Klarna Gateway uninstall
+ *
+ * Removes all Klarna options from DB when user deletes the plugin via WordPress backend.
  * 
- * Uninstall - removes all Klarna options from DB when user deletes the plugin via WordPress backend.
+ * @link http://www.woothemes.com/products/klarna/
  * @since 0.3
- **/
+ *
+ * @package WC_Gateway_Klarna
+ */
  
-if ( !defined('WP_UNINSTALL_PLUGIN') ) {
+if ( ! defined('WP_UNINSTALL_PLUGIN' ) ) {
     exit();
 }
 

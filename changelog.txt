@@ -1,5 +1,40 @@
 *** Klarna Changelog ***
 
+2015.12.17	- version 2.0
+* Feature	- Added Klarna order activation from WooCommerce.
+* Feature	- Added Klarna order cancelation from WooCommerce.
+* Feature	- Added Klarna order update from WooCommerce.
+* Feature	- Added Klarna order refund from WooCommerce.
+* Feature	- Added support for subscription payments via Klarna Checkout (SE & NO).
+* Feature	- Added support for KCO UK, US & Austria.
+* Feature	- Added mini cart to the Klarna Checkout page (via shortcode [woocommerce_klarna_checkout_widget]).
+* Feature	- Added Shipping to the Klarna Checkout page (via shortcode [woocommerce_klarna_checkout_widget]).
+* Feature	- Added Coupon management to the Klarna Checkout page (via shortcode [woocommerce_klarna_checkout_widget]).
+* Feature	- Added a country selector to the Klarna Checkout page (via shortcode [woocommerce_klarna_country]), when selling to multiple EUR countries.
+* Feature	- Moved customer order note field into the new KCO mini cart.
+* Feature	- Updated flow for orders that are marked *Needs pending approval from Klarna* (KPM). Order status is now set to On Hold and a cronjob is checking the orderstatus with Klarna every 2 hours.
+* Feature	- Added Shipping and payment info from Klarna in order confirmation (on thank you page for KPM).
+* Feature	- Started implementing Klarnas Remarketing feature for KCO. All local WC orders (when selecting KCO as payment method but not finalizing the purchase) does now include the customers email address.
+* Feature	- Added setting in KCO to make it possible to display a button with a link back to the KCO page in WooCommerce standard checkout.
+* Feature	- Added a new WP widget for displaying Klarna as an available payment option in the store.
+* Feature	- Added Klarna's Part payment widget (display monthly cost on product pages) even for KCO (previous only KPM).
+* Feature 	- Address information entered in KCO form is updated in local order/session. Adds support for postal number calculated shipping via Table Rate Shipping extension.
+* Feature	- Adds support for buying with gift certificates created via Smart Coupons extension.
+* Tweak		- Code refactoring.
+* Tweak		- Change Klarna Invoice, Account and Special campaign to two payment methods instead of three different. They are now called Invoice and Part payment.
+* Tweak		- Add customer info from Klarna to WooCommerce (name, phone etc) when creating users automatically with KCO.
+* Tweak		- Change how order in WooCommerce is created when customer pays with Klarna Checkout. WooCommerce orderstatus is now set to KCO incomplete until the order is confirmed from Klarna. This way incomplete orders won't clutter up the order list view and product stock isn't reserved until the order actually is finalized.
+* Tweak		- Updated translation files and updated Swedish and Norwegian translations.
+* Tweak		- Changed textdomain to woocommerce-gateway-klarna.
+* Tweak		- Changed plugin main file name to follow WP best practices.
+* Tweak		- Enhances get address field placement for SE.
+* Tweak     - Enhances error handling on new customer account creation.
+* Tweak     - Improved settings pages formatting.
+* Tweak     - Adds esc_attr to all PHP generated attributes
+* Tweak     - Switched to get_display_price for price in Klarna payment widget.
+* Tweak		- Switched to using wp_remote_request instead of curl.
+* Fix		- Fixed Get Address class so it doesn’t instantiate other classes and optimized company flow.
+
 2015.11.23	- version 1.9.8.7
 * Fix       - Fixes order total calculating issue in WC order for stores that don't have tax activated (Klarna Checkout).
 * Tweak		- Save country code with uppercase letters on callback from Klarna to store Billing & Shipping country correct in orders.

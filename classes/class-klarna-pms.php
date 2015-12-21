@@ -16,6 +16,9 @@
  *
  */
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
 
 class WC_Klarna_PMS {
 
@@ -32,7 +35,13 @@ class WC_Klarna_PMS {
 	function load_scripts() {
 		
 		if ( is_checkout() ) {
-			wp_register_script( 'klarna-pms-js', plugins_url( '../js/klarnapms.js' , __FILE__ ), array('jquery'), '1.0', false );
+			wp_register_script(
+				'klarna-pms-js', 
+				KLARNA_URL . 'assets/js/klarnapms.js',
+				array('jquery'),
+				'1.0',
+				false
+			);
 			wp_enqueue_script( 'klarna-pms-js' );
 		}
 
@@ -42,14 +51,17 @@ class WC_Klarna_PMS {
 	/**
  	 * Gets response from Klarna
  	 */
-	function get_data( $eid, $secret, $selected_currency, $shop_country, $cart_total, $payment_method_group, $select_id, $mode, $invoice_fee = false ) {
-
-		require_once( KLARNA_LIB . 'Klarna.php' );
-		
-		if ( ! function_exists( 'xmlrpc_encode_entitites' ) && !class_exists('xmlrpcresp' ) ) {
-			require_once( KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc.inc' );
-			require_once( KLARNA_LIB . '/transport/xmlrpc-3.0.0.beta/lib/xmlrpc_wrappers.inc' );
-		}
+	function get_data(
+		$eid, 
+		$secret, 
+		$selected_currency, 
+		$shop_country, 
+		$cart_total, 
+		$payment_method_group, 
+		$select_id, 
+		$mode, 
+		$invoice_fee = false
+	) {
 
 		$klarna = new Klarna();
 		$config = new KlarnaConfig();
@@ -125,20 +137,26 @@ class WC_Klarna_PMS {
 				// Create payment option details output
 				if ( $i < 2 ) {
 					$inline_style = 'style="clear:both;position:relative"';
+					$extra_class = 'visible-pms';
 				} else {
 					$inline_style = 'style="clear:both;display:none;position:relative"';
+					$extra_class = '';
 				}
 
-				$payment_options_details_output = '<div class="klarna-pms-details" data-pclass="' . $payment_method['pclass_id'] . '" ' . $inline_style . '>';
+				$payment_options_details_output = '<div class="klarna-pms-details ' . $extra_class . '" data-pclass="' . $payment_method['pclass_id'] . '" ' . $inline_style . '>';
 
-					$payment_options_details_output .= '<div style="padding:3px 120px 3px 3px;min-height:30px; font-size:0.95em">';
+					if ( isset( $payment_method['logo']['uri'] ) && '' != $payment_method['logo']['uri'] ) {
+						$payment_options_details_output .= '<img class="klarna-pms-logo" style="display:none" src="' . $payment_method['logo']['uri'] . '?width=100" />';
+					}
+
+					$payment_options_details_output .= '<div>';
 
 						$payment_options_details_output .= '<strong style="font-size:1.2em;display:block;margin-bottom:0.5em;">' . $payment_method['group']['title'] . '</strong>';
 
 						if ( ! empty( $payment_method['details'] ) ) {
-							$payment_options_details_output .= '<ul style="list-style:none;margin-bottom:0.75em">';
+							$payment_options_details_output .= '<ul style="list-style:none;margin-bottom:0.75em;margin-left:0">';
 								foreach ( $payment_method['details'] as $pd_k => $pd_v ) {
-									$payment_options_details_output .= '<li id="pms-details-' . $pd_k . '">' . implode( ' ', $pd_v ) . '</li>';
+									$payment_options_details_output .= '<li style="padding:0.5em 0 !important" id="pms-details-' . $pd_k . '">' . implode( ' ', $pd_v ) . '</li>';
 								}
 							$payment_options_details_output .= '</ul>';
 						}
@@ -175,11 +193,6 @@ class WC_Klarna_PMS {
 
 					$payment_options_details_output .= '</div>';
 
-					if ( isset( $payment_method['logo']['uri'] ) && '' != $payment_method['logo']['uri'] ) {
-						$payment_options_details_output .= '<div class="klarna-pms-logo-uri=" style="position:absolute;top:3px;right:3px"><img src="' . $payment_method['logo']['uri'] . '?width=100" /></div>';
-					}
-
-
 				$payment_options_details_output .= '</div>';
 
 				$payment_options_details[] = $payment_options_details_output;
@@ -191,8 +204,8 @@ class WC_Klarna_PMS {
 		// Check if anything was returned
 		if ( ! empty( $payment_options ) ) {
 			$payment_methods_output = '<p class="form-row">';
-				$payment_methods_output .= '<label for="klarna_account_pclass">' . __( 'Payment plan', 'klarna') . ' <span class="required">*</span></label>';
-				$payment_methods_output .= '<select id="' . $select_id . '" name="' . $select_id . '" class="woocommerce-select klarna_pms_select">';
+				$payment_methods_output .= '<label for="' . esc_attr( $select_id ) . '">' . __( 'Payment plan', 'woocommerce-gateway-klarna' ) . ' <span class="required">*</span></label>';
+				$payment_methods_output .= '<select id="' . esc_attr( $select_id ) . '" name="' . esc_attr( $select_id ) . '" class="woocommerce-select klarna_pms_select" style="max-width:100%;width:100% !important;">';
 
 					$payment_methods_output .= implode( '', $payment_options );
 

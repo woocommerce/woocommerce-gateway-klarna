@@ -1,0 +1,7 @@
+{
+    "require": {
+        "klarna/php-xmlrpc": "4.0",
+        "klarna/checkout": "4.0",
+        "klarna/kco_rest": "^2.1"
+    }
+}
