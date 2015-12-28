@@ -2068,20 +2068,6 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			return false;
 		}
 
-		// If no Klarna country is set - return.
-		if ( empty( $this->klarna_country ) ) {
-			echo apply_filters(
-				'klarna_checkout_wrong_country_message', 
-				sprintf( 
-					__( 'Sorry, you can not buy via Klarna Checkout from your country or currency. Please <a href="%s">use another payment method</a>. ', 'woocommerce-gateway-klarna' ),
-					get_permalink( get_option( 'woocommerce_checkout_page_id' ) )
-				) 
-			);
-
-			WC()->session->set( 'klarna_show_kco', false );
-			return false;
-		}
-
 		// If checkout registration is disabled and not logged in, the user cannot checkout
 		global $woocommerce;
 		$checkout = $woocommerce->checkout();
@@ -2099,6 +2085,19 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			return false;
 		}
 
+		// If no Klarna country is set - return.
+		if ( empty( $this->klarna_country ) ) {
+			echo apply_filters(
+				'klarna_checkout_wrong_country_message', 
+				sprintf( 
+					__( 'Sorry, you can not buy via Klarna Checkout from your country or currency. Please <a href="%s">use another payment method</a>. ', 'woocommerce-gateway-klarna' ),
+					get_permalink( get_option( 'woocommerce_checkout_page_id' ) )
+				) 
+			);
+
+			WC()->session->set( 'klarna_show_kco', false );
+			return false;
+		}
 
 		// If the WooCommerce terms page or the Klarna Checkout settings field 
 		// Terms Page isn't set, do nothing.

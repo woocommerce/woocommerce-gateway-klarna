@@ -1,5 +1,9 @@
 *** WooCommerce Gateway Klarna Changelog ***
 
+2015.12.29	- version 2.0.1
+* Fix       - Fixes logic that shows Klarna setup notification in the admin.
+* Fix		- Added login/create account link on KCO checkout page if gest checkout is disabled and user isn't logged in.
+
 2015.12.21	- version 2.0.0
 * Feature	- Added Klarna order activation from WooCommerce.
 * Feature	- Added Klarna order cancelation from WooCommerce.

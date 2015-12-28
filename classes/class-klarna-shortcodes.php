@@ -51,6 +51,14 @@ class WC_Gateway_Klarna_Shortcodes {
 
 		$checkout = WC()->checkout();
 		if ( ! $checkout->enable_guest_checkout && ! is_user_logged_in() ) {
+			echo apply_filters( 
+				'klarna_checkout_must_be_logged_in_message',
+				sprintf(
+					__( 'You must be logged in to checkout. %s or %s.', 'woocommerce' ),
+					'<a href="' . wp_login_url() . '" title="Login">Login</a>',
+					'<a href="' . wp_registration_url() . '" title="Create an account">create an account</a>'
+				)
+			);
 		} else {
 			$data = new WC_Gateway_Klarna_Checkout;
 			return '<div class="klarna_checkout ' . $widget_class . '">' . $data->get_klarna_checkout_page() . '</div>';
@@ -195,9 +203,13 @@ class WC_Gateway_Klarna_Shortcodes {
 		if ( 'yes' != $checkout_settings['enabled'] ) {
 			return;
 		}
-
 		
 		global $woocommerce;
+
+		$checkout = $woocommerce->checkout();
+		if ( ! $checkout->enable_guest_checkout && ! is_user_logged_in() ) {
+			return;
+		}
 
 		if ( ! defined( 'WOOCOMMERCE_CART' ) ) {
 			define( 'WOOCOMMERCE_CART', true );
