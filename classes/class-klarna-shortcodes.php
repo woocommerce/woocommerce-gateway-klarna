@@ -214,7 +214,9 @@ class WC_Gateway_Klarna_Shortcodes {
 		if ( ! defined( 'WOOCOMMERCE_CART' ) ) {
 			define( 'WOOCOMMERCE_CART', true );
 		}
+
 		$woocommerce->cart->calculate_shipping();
+		$woocommerce->cart->calculate_fees();
 		$woocommerce->cart->calculate_totals();
 
 		$atts = shortcode_atts(
