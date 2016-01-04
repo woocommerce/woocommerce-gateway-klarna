@@ -122,13 +122,11 @@ function init_klarna_gateway() {
 
 	// Set CURLOPT_SSL_VERIFYPEER via constant in library/src/Klarna/Checkout/HTTP/CURLTransport.php.
 	// No need to set it to true if the store doesn't use https.
-	/*
-	if( is_ssl() ) {
+	if ( is_ssl() ) {
 		define( 'KLARNA_WC_SSL_VERIFYPEER', true );
 	} else {
 		define( 'KLARNA_WC_SSL_VERIFYPEER', false );
 	}
-	*/
 
 	/**
 	 * WooCommerce Klarna Gateway class
