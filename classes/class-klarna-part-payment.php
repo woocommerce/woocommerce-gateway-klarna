@@ -631,6 +631,8 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 		$klarna_billing = array();
 		$klarna_shipping = array();
 		if ( isset( $_POST['billing_country'] ) && ( $_POST['billing_country'] == 'NL' || $_POST['billing_country'] == 'DE' ) ) {
+			require_once(KLARNA_DIR . 'split-address.php');
+
 			// Set up billing address array
 			$klarna_billing_address             = $order->billing_address_1;
 			$splitted_address                   = splitAddress( $klarna_billing_address );
