@@ -1,6 +1,6 @@
 *** WooCommerce Gateway Klarna Changelog ***
 
-2016.01.0x  - version 2.0.2
+2016.01.07  - version 2.0.2
 * Fix       - Fixes KPM DE and NL bug.
 * Fix       - Makes 'Shipping Fee' string translatable.
 
