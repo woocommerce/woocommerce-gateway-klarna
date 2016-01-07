@@ -1,5 +1,9 @@
 *** WooCommerce Gateway Klarna Changelog ***
 
+2016.01.0x  - version 2.0.2
+* Fix       - Fixes KPM DE and NL bug.
+* Fix       - Makes 'Shipping Fee' string translatable.
+
 2015.12.29	- version 2.0.1
 * Fix       - Fixes logic that shows Klarna setup notification in the admin.
 * Fix		- Added login/create account link on KCO checkout page if gest checkout is disabled and user isn't logged in.
