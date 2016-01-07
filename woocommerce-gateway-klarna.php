@@ -11,7 +11,7 @@
  * Plugin Name:     WooCommerce Klarna Gateway
  * Plugin URI:      http://woothemes.com/woocommerce
  * Description:     Extends WooCommerce. Provides a <a href="http://www.klarna.se" target="_blank">Klarna</a> gateway for WooCommerce.
- * Version:         2.0.1
+ * Version:         2.0.2
  * Author:          WooThemes
  * Author URI:      http://woothemes.com/
  * Developer:       Krokedil
@@ -122,13 +122,11 @@ function init_klarna_gateway() {
 
 	// Set CURLOPT_SSL_VERIFYPEER via constant in library/src/Klarna/Checkout/HTTP/CURLTransport.php.
 	// No need to set it to true if the store doesn't use https.
-	/*
-	if( is_ssl() ) {
+	if ( is_ssl() ) {
 		define( 'KLARNA_WC_SSL_VERIFYPEER', true );
 	} else {
 		define( 'KLARNA_WC_SSL_VERIFYPEER', false );
 	}
-	*/
 
 	/**
 	 * WooCommerce Klarna Gateway class

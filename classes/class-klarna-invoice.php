@@ -708,55 +708,53 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 
 		global $woocommerce;
 		$klarna_gender = null;
-		
+
 		$order = wc_get_order( $order_id );
 
 		// Get values from klarna form on checkout page
-		
+
 		// Collect the DoB
 		$klarna_pno = $this->collect_dob();
 
 		// Store Klarna specific form values in order as post meta
 		update_post_meta( $order_id, 'klarna_pno', $klarna_pno);
-		
-		$klarna_pclass = 
+
+		$klarna_pclass =
 			isset( $_POST['klarna_invoice_pclass'] ) ? woocommerce_clean( $_POST['klarna_invoice_pclass'] ) : '';
-		$klarna_gender = 
+		$klarna_gender =
 			isset( $_POST['klarna_invoice_gender'] ) ? woocommerce_clean( $_POST['klarna_invoice_gender'] ) : '';
-		$klarna_de_consent_terms = 
+		$klarna_de_consent_terms =
 			isset( $_POST['klarna_de_consent_terms'] ) ? woocommerce_clean( $_POST['klarna_de_consent_terms'] ) : '';
-			
+
 		// Split address into House number and House extension for NL & DE customers
 		$klarna_billing = array();
 		$klarna_shipping = array();
 		if ( isset( $_POST['billing_country'] ) && ( $_POST['billing_country'] == 'NL' || $_POST['billing_country'] == 'DE' ) ) {
-			
+			require_once(KLARNA_DIR . 'split-address.php');
+
 			// Set up billing address array
 			$klarna_billing_address             = $order->billing_address_1;
 			$splitted_address                   = splitAddress( $klarna_billing_address );
 			$klarna_billing['address']          = $splitted_address[0];
 			$klarna_billing['house_number']	    = $splitted_address[1];
 			$klarna_billing['house_extension']  = $splitted_address[2];
-			
+
 			// Set up shipping address array
 			$klarna_shipping_address            = $order->shipping_address_1;
 			$splitted_address                   = splitAddress( $klarna_shipping_address );
 			$klarna_shipping['address']         = $splitted_address[0];
 			$klarna_shipping['house_number']    = $splitted_address[1];
 			$klarna_shipping['house_extension'] = $splitted_address[2];
-
 		} else {
-
 			$klarna_billing['address']          = $order->billing_address_1;
 			$klarna_billing['house_number']     = '';
 			$klarna_billing['house_extension']  = '';
-			
+
 			$klarna_shipping['address']         = $order->shipping_address_1;
 			$klarna_shipping['house_number']    = '';
 			$klarna_shipping['house_extension'] = '';
-
 		}
-			
+
 		$klarna = new Klarna();
 
 		/**
@@ -778,7 +776,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 		    $orderid2 = $order_id,
 		    $user     = '' // Username, email or identifier for the user?
 		);
-		
+
 
 		try {
 			// Transmit all the specified data, from the steps above, to Klarna.
@@ -789,7 +787,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 				KlarnaFlags::NO_FLAG, 	// No specific behaviour like RETURN_OCR or TEST_MODE.
 				$klarna_pclass 			// Get the pclass object that the customer has choosen.
 			);
-    		
+
 			// Prepare redirect url
 			$redirect_url = $order->get_checkout_order_received_url();
 
@@ -807,7 +805,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 					update_post_meta( $order_id, '_klarna_order_reservation', $invno );
 					update_post_meta( $order_id, '_transaction_id', $invno );
 					$order->payment_complete(); // Payment complete
-					$woocommerce->cart->empty_cart(); // Remove cart	
+					$woocommerce->cart->empty_cart(); // Remove cart
 					// Return thank you redirect
 					return array(
 						'result'   => 'success',
@@ -821,7 +819,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 					$order->add_order_note(
 						__( 'Order is PENDING APPROVAL by Klarna. Please visit Klarna Online for the latest status on this order. Klarna reservation number: ', 'woocommerce-gateway-klarna' ) . $invno
 					);
-					$order->update_status( 'on-hold' ); // Change order status to On Hold					
+					$order->update_status( 'on-hold' ); // Change order status to On Hold
 					$woocommerce->cart->empty_cart(); // Remove cart
 					// Return thank you redirect
 					return array(
@@ -835,7 +833,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 						__( 'Klarna payment denied.', 'woocommerce-gateway-klarna' )
 					);
 					wc_add_notice(
-						__( 'Klarna payment denied.', 'woocommerce-gateway-klarna' ), 
+						__( 'Klarna payment denied.', 'woocommerce-gateway-klarna' ),
 						'error'
 					);
 					return;
