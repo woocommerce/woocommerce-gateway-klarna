@@ -47,14 +47,24 @@ class WC_Gateway_Klarna_WC2K {
 	public $is_rest;
 
 	/**
+	 * Check which Klarna country is in use.
+	 *
+	 * @since  2.0.0
+	 * @access public
+	 * @var    boolean
+	 */
+	public $klarna_country;
+
+	/**
 	 * Constructor
 	 *
 	 * @since 2.0.0
 	 */
-	public function __construct( $is_rest = false ) {
+	public function __construct( $is_rest = false, $klarna_country = '' ) {
 		global $woocommerce;
 		$this->cart = $woocommerce->cart->get_cart();
 		$this->is_rest = $is_rest;
+		$this->klarna_country = $klarna_country;
 	}
 
 	/**
@@ -231,7 +241,11 @@ class WC_Gateway_Klarna_WC2K {
 	 * @return integer $item_tax_amount Item tax amount.
 	 */
 	public function get_item_tax_amount( $cart_item ) {
-		$item_tax_amount = $cart_item['line_tax'] * 100;
+		if ( 'uss' == $this->klarna_country ) {
+			$item_tax_amount = 00;
+		} else {
+			$item_tax_amount = $cart_item['line_tax'] * 100;
+		}
 
 		return round( $item_tax_amount );
 	}
@@ -250,7 +264,11 @@ class WC_Gateway_Klarna_WC2K {
 		// We manually calculate the tax percentage here
 		if ( $_product->is_taxable() && $cart_item['line_subtotal_tax'] > 0 ) {
 			// Calculate tax rate
-			$item_tax_rate = round( $cart_item['line_subtotal_tax'] / $cart_item['line_subtotal'], 2 ) * 100;
+			if ( 'uss' == $this->klarna_country ) {
+				$item_tax_rate = 00;
+			} else {
+				$item_tax_rate = round( $cart_item['line_subtotal_tax'] / $cart_item['line_subtotal'], 2 ) * 100;
+			}
 		} else {
 			$item_tax_rate = 00;
 		}
@@ -294,7 +312,11 @@ class WC_Gateway_Klarna_WC2K {
 	 */
 	public function get_item_price( $cart_item ) {
 		// apply_filters to item price so we can filter this if needed
-		$item_price_including_tax = $cart_item['line_subtotal'] + $cart_item['line_subtotal_tax'];
+		if ( 'uss' == $this->klarna_country ) {
+			$item_price_including_tax = $cart_item['line_subtotal'];
+		} else {
+			$item_price_including_tax = $cart_item['line_subtotal'] + $cart_item['line_subtotal_tax'];
+		}
 		$item_price = apply_filters( 'klarna_item_price_including_tax', $item_price_including_tax );
 		$item_price = number_format( $item_price * 100, 0, '', '' ) / $cart_item['quantity'];
 		// $item_price = $item_price * 100 / $cart_item['quantity'];
@@ -389,7 +411,11 @@ class WC_Gateway_Klarna_WC2K {
 	 * @return integer $item_total_amount Cart item total amount.
 	 */
 	public function get_item_total_amount( $cart_item ) {
-		$item_total_amount = ( ( $cart_item['line_total'] + $cart_item['line_tax'] ) * 100 );
+		if ( 'uss' == $this->klarna_country ) {
+			$item_total_amount = ( $cart_item['line_total'] * 100 );			
+		} else {
+			$item_total_amount = ( ( $cart_item['line_total'] + $cart_item['line_tax'] ) * 100 );			
+		}
 
 		return round( $item_total_amount );
 	}

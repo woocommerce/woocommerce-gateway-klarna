@@ -87,7 +87,7 @@ if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 
 	// Process cart contents and prepare them for Klarna
 	include_once( KLARNA_DIR . 'classes/class-wc-to-klarna.php' );
-	$wc_to_klarna = new WC_Gateway_Klarna_WC2K( $this->is_rest() );
+	$wc_to_klarna = new WC_Gateway_Klarna_WC2K( $this->is_rest(), $this->klarna_country );
 	$cart = $wc_to_klarna->process_cart_contents();
 
 	// Initiate Klarna
@@ -161,3 +161,7 @@ if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 	WC()->session->__unset( 'klarna_order_note' ); // Order note
 	wp_redirect( $woocommerce->cart->get_cart_url() ); // Redirect to cart page
 } // End if sizeof cart
+
+echo '<pre>';
+print_r( $klarna_order );
+echo '</pre>';

@@ -1102,7 +1102,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 
 		// Process cart contents and prepare them for Klarna
 		include_once( KLARNA_DIR . 'classes/class-wc-to-klarna.php' );
-		$wc_to_klarna = new WC_Gateway_Klarna_WC2K( $this->is_rest() );
+		$wc_to_klarna = new WC_Gateway_Klarna_WC2K( $this->is_rest(), $this->klarna_country );
 		$cart = $wc_to_klarna->process_cart_contents();
 
 		if ( 0 == count( $cart ) ) {
@@ -2585,6 +2585,11 @@ class WC_Gateway_Klarna_Checkout_Extra {
 
 			$order->set_address( $billing_address, 'billing' );
 			$order->set_address( $billing_address, 'shipping' );
+
+			// Add US sales tax
+			if ( 'us' == strtolower( $data['billing_address']['country'] ) ) {
+
+			}
 
 			echo $post_body;
 
