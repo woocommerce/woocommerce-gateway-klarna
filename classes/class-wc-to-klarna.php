@@ -139,6 +139,44 @@ class WC_Gateway_Klarna_WC2K {
 			}
 		}
 
+		// Process fees
+		if ( $woocommerce->cart->fee_total > 0 ) {
+			foreach ( $woocommerce->cart->get_fees() as $cart_fee ) {
+				$fee_name         = $this->get_fee_name( $cart_fee );
+				$fee_reference    = $this->get_fee_reference( $cart_fee );
+				$fee_type         = 'surcharge';
+				$fee_quantity     = 1;
+				$fee_unit_price   = $this->get_fee_amount( $cart_fee );
+				$fee_total_amount = $this->get_fee_amount( $cart_fee );
+				$fee_tax_rate     = $this->get_fee_tax_rate( $cart_fee );
+				$fee_tax_amount   = $this->get_fee_tax_amount( $cart_fee );
+
+				if ( $this->is_rest ) {
+					$klarna_fee_item = array(
+						'type'             => $fee_type,
+						'reference'        => $fee_reference,
+						'name'             => $fee_name,
+						'quantity'         => $fee_quantity,
+						'unit_price'       => $fee_unit_price,
+						'total_amount'     => $fee_total_amount,
+						'tax_rate'         => $fee_tax_rate,
+						'total_tax_amount' => $fee_tax_amount
+					);
+				} else {
+					$klarna_fee_item = array(
+						'reference'  => $fee_reference,
+						'name'       => $fee_name,
+						'quantity'   => $fee_quantity,
+						'unit_price' => $fee_unit_price,
+						'tax_rate'   => $fee_tax_rate
+					);
+				}
+
+				$cart[] = $klarna_fee_item;
+				$order_total += (int) $cart_fee->amount * 100;
+			}
+		}
+
 		// Process shipping
 		if ( $woocommerce->cart->shipping_total > 0 ) {
 			$shipping_name       = $this->get_shipping_name();
@@ -392,6 +430,85 @@ class WC_Gateway_Klarna_WC2K {
 		$item_total_amount = ( ( $cart_item['line_total'] + $cart_item['line_tax'] ) * 100 );
 
 		return round( $item_total_amount );
+	}
+
+	/**
+	 * Get cart fee name.
+	 *
+	 * @since  2.0.0
+	 * @access public
+	 *
+	 * @param  array  $cart_fee      Cart fee.
+	 * @return string $cart_fee_name Cart fee name.
+	 */
+	public function get_fee_name( $cart_fee ) {
+		return strip_tags( $cart_fee->name );
+	}
+
+	/**
+	 * Get cart fee reference.
+	 *
+	 * @since  2.0.0
+	 * @access public
+	 *
+	 * @param  array  $cart_fee           Cart fee.
+	 * @return string $cart_fee_reference Cart fee reference.
+	 */
+	public function get_fee_reference( $cart_fee ) {
+		return strip_tags( $cart_fee->id );
+	}
+
+	/**
+	 * Get cart fee amount.
+	 *
+	 * @since  2.0.0
+	 * @access public
+	 *
+	 * @param  array $cart_fee      Cart fee.
+	 * @return int   $cart_fee_amount Cart fee name.
+	 */
+	public function get_fee_amount( $cart_fee ) {
+		$cart_fee_amount = (int) ( ( $cart_fee->amount + $cart_fee->tax ) * 100 );
+		return $cart_fee_amount;
+	}
+
+	/**
+	 * Get cart fee tax amount.
+	 *
+	 * @since  2.0.0
+	 * @access public
+	 *
+	 * @param  array $cart_fee            Cart fee.
+	 * @return int   $cart_fee_tax_amount Cart fee tax amount.
+	 */
+	public function get_fee_tax_amount( $cart_fee ) {
+		if ( $cart_fee->taxable ) {
+			$cart_fee_tax_amount = (int) ($cart_fee->tax * 100);
+		} else {
+			$cart_fee_tax_amount = 0;
+		}
+
+		return $cart_fee_tax_amount;
+	}
+
+	/**
+	 * Get cart fee tax rate.
+	 *
+	 * @since  2.0.0
+	 * @access public
+	 *
+	 * @param  array $cart_fee          Cart fee.
+	 * @return int   $cart_fee_tax_rate Cart fee tax rate.
+	 */
+	public function get_fee_tax_rate( $cart_fee ) {
+		if ( $cart_fee->taxable ) {
+			$cart_fee_tax_rate = $cart_fee->tax / $cart_fee->amount * 100 * 100;
+		} else {
+			$cart_fee_tax_rate = 0;
+		}
+
+		$cart_fee_tax_rate = (int) $cart_fee_tax_rate;
+		return $cart_fee_tax_rate;
 	}
 
 	/**
