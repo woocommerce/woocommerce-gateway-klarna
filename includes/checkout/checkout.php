@@ -161,7 +161,3 @@ if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 	WC()->session->__unset( 'klarna_order_note' ); // Order note
 	wp_redirect( $woocommerce->cart->get_cart_url() ); // Redirect to cart page
 } // End if sizeof cart
-
-echo '<pre>';
-print_r( $klarna_order );
-echo '</pre>';

@@ -948,7 +948,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			$data['widget_html'] = $this->klarna_checkout_get_kco_widget_html();
 
 			if ( WC()->session->get( 'klarna_checkout' ) ) {
-				$this->ajax_update_klarna_order();				
+				$this->ajax_update_klarna_order();
 			}
 		}
 
@@ -999,7 +999,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		$data['widget_html'] = $this->klarna_checkout_get_kco_widget_html();
 
 		if ( WC()->session->get( 'klarna_checkout' ) ) {
-			$this->ajax_update_klarna_order();				
+			$this->ajax_update_klarna_order();
 		}
 
 		wp_send_json_success( $data );
@@ -1117,7 +1117,13 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 				foreach ( $cart as $item ) {
 					$update['order_lines'][] = $item;
 					$klarna_order_total += $item['total_amount'];
-					$klarna_tax_total += $item['total_tax_amount'];			
+
+					// Process sales_tax item differently
+					if ( array_key_exists( 'type', $item ) && 'sales_tax' == $item['type'] ) {
+						$klarna_tax_total += $item['total_amount'];
+					} else {
+						$klarna_tax_total += $item['total_tax_amount'];
+					}
 				}
 				$update['order_amount'] = $klarna_order_total;
 				$update['order_tax_amount'] = $klarna_tax_total;
@@ -1131,8 +1137,9 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			try {
 				$klarna_order->update( apply_filters( 'kco_update_order', $update ) );
 			} catch ( Exception $e ) {
-				if ( $this->debug=='yes' ) {
+				if ( $this->debug == 'yes' ) {
 					$this->log->add( 'klarna', 'KCO ERROR: ' . var_export( $e, true ) );
+					error_log( 'ERROR: ' . var_export( $e, true ) );
 				}
 			}
 		}
@@ -2534,7 +2541,7 @@ class WC_Gateway_Klarna_Checkout_Extra {
 	 **/
 	function address_update_listener() {
 		global $post;
-		
+
 		// Check if page has Klarna Checkout shortcode in it and address_update query parameter
 		if (
 			has_shortcode( $post->post_content, 'woocommerce_klarna_checkout' ) &&
@@ -2542,15 +2549,12 @@ class WC_Gateway_Klarna_Checkout_Extra {
 			'yes' == $_GET['address_update']
 		) {
 			// Read the post body
-			$post_body = file_get_contents('php://input');
+			$post_body = file_get_contents( 'php://input' );
 
 			// Convert post body into native object
 			$data = json_decode( $post_body, true );
 
 			$order_id = $_GET['sid'];
-
-			$billing_address = $data['billing_address'];
-			$shipping_address = $data['shipping_address'];
 
 			// Capture address from Klarna
 			$order = wc_get_order( $order_id );
@@ -2584,15 +2588,51 @@ class WC_Gateway_Klarna_Checkout_Extra {
 			);
 
 			$order->set_address( $billing_address, 'billing' );
-			$order->set_address( $billing_address, 'shipping' );
+			$order->set_address( $shipping_address, 'shipping' );
 
-			// Add US sales tax
+			$order->calculate_taxes();
+			$sales_tax = round( ( $order->get_cart_tax() + $order->get_shipping_tax() ) * 100 );
+
 			if ( 'us' == strtolower( $data['billing_address']['country'] ) ) {
+				/**
+				 * Update order total by removing old tax value and then adding the
+				 * new one and set new order_tax_amount to $sales_tax value.
+				 */
+				$data['order_amount'] = $data['order_amount'] - $data['order_tax_amount'];
+				$data['order_amount'] = $data['order_amount'] + $sales_tax;
+				$data['order_tax_amount'] = $sales_tax;
 
+				/**
+				 * Loop through $data['order_lines'], then create new array only with
+				 * elements where 'type' is not equal to 'sales_tax'. Then add new
+				 * sales_tax element to this new array, json_encode the array and send
+				 * it back to Klarna.
+				 */
+				foreach ( $data['order_lines'] as $order_line_key => $order_line ) {
+					if ( 'sales_tax' == $order_line['type'] ) {
+						unset( $data['order_lines'][ $order_line_key ] );
+					}
+				}
+
+				// Add sales tax line item
+				$data['order_lines'][] = array(
+					'type'                  => 'sales_tax',
+					'reference'             => __( 'Sales Tax', 'woocommerce-gateway-klarna' ),
+					'name'                  => __( 'Sales Tax', 'woocommerce-gateway-klarna' ),
+					'quantity'              => 1,
+					'unit_price'            => $sales_tax,
+					'tax_rate'              => 0,
+					'total_amount'          => $sales_tax,
+					'total_discount_amount' => 0,
+					'total_tax_amount'      => 0
+				);
 			}
 
-			echo $post_body;
+			// Remove array indexing for order lines
+			$data['order_lines'] = array_values( $data['order_lines'] );
+			$response = json_encode( $data );
 
+			echo $response;
 			die();
 		}
 	}	

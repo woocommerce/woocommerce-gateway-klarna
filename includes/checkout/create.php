@@ -159,7 +159,13 @@ foreach ( $cart as $item ) {
 	if ( $this->is_rest() ) {
 		$create['order_lines'][] = $item;
 		$klarna_order_total += $item['total_amount'];
-		$klarna_tax_total += $item['total_tax_amount'];			
+
+		// Process sales_tax item differently
+		if ( array_key_exists( 'type', $item ) && 'sales_tax' == $item['type'] ) {
+			$klarna_tax_total += $item['total_amount'];
+		} else {
+			$klarna_tax_total += $item['total_tax_amount'];
+		}
 	} else {
 		$create['cart']['items'][] = $item;				
 	}
@@ -226,8 +232,8 @@ if ( class_exists( 'WC_Subscriptions_Cart' ) && WC_Subscriptions_Cart::cart_cont
 }
 
 if ( $this->is_rest() ) {
-	$create['order_amount'] = $klarna_order_total;
-	$create['order_tax_amount'] = $klarna_tax_total;
+	$create['order_amount']     = (int) $klarna_order_total;
+	$create['order_tax_amount'] = (int) $klarna_tax_total;
 
 	// Only add shipping options if the option is unchecked for UK
 	$checkout_settings = get_option( 'woocommerce_klarna_checkout_settings' );
