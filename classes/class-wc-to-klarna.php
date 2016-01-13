@@ -190,8 +190,9 @@ class WC_Gateway_Klarna_WC2K {
 		}
 
 		// Process shipping
-		if ( $woocommerce->cart->shipping_total > 0 ) {
+		if ( $woocommerce->shipping->get_packages() ) {
 			$shipping_name       = $this->get_shipping_name();
+			$shipping_reference  = $this->get_shipping_reference();
 			$shipping_amount     = $this->get_shipping_amount();
 			$shipping_tax_rate   = $this->get_shipping_tax_rate();
 			$shipping_tax_amount = $this->get_shipping_tax_amount();
@@ -205,7 +206,7 @@ class WC_Gateway_Klarna_WC2K {
 				*/
 				$shipping = array(
 					'type'             => 'shipping_fee',
-					'reference'        => 'SHIPPING',
+					'reference'        => $shipping_reference,
 					'name'             => $shipping_name,
 					'quantity'         => 1,
 					'unit_price'       => $shipping_amount,
@@ -216,7 +217,7 @@ class WC_Gateway_Klarna_WC2K {
 			} else {
 				$shipping = array(
 					'type'       => 'shipping_fee',
-					'reference'  => 'SHIPPING',
+					'reference'  => $shipping_reference,
 					'name'       => $shipping_name,
 					'quantity'   => 1,
 					'unit_price' => $shipping_amount,
@@ -593,6 +594,38 @@ class WC_Gateway_Klarna_WC2K {
 		}
 
 		return $shipping_name;
+	}
+
+	/**
+	 * Get shipping reference.
+	 *
+	 * @since  2.0.0
+	 * @access public
+	 *
+	 * @return string $shipping_reference Reference for selected shipping method.
+	 */
+	public function get_shipping_reference() {
+		global $woocommerce;
+
+		$shipping_packages = $woocommerce->shipping->get_packages();
+		foreach ( $shipping_packages as $i => $package ) {
+			$chosen_method = isset( $woocommerce->session->chosen_shipping_methods[ $i ] ) ? $woocommerce->session->chosen_shipping_methods[ $i ] : '';
+
+			if ( '' != $chosen_method ) {
+				$package_rates = $package['rates'];
+				foreach ( $package_rates as $rate_key => $rate_value ) {
+					if ( $rate_key == $chosen_method ) {
+						$shipping_reference = $rate_value->id;
+					}
+				}
+			}
+		}
+
+		if ( ! isset( $shipping_reference ) ) {
+			$shipping_reference = __( 'Shipping', 'woocommerce-gateway-klarna' );
+		}
+
+		return $shipping_reference;
 	}
 
 	/**
