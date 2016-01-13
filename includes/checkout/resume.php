@@ -44,7 +44,13 @@ try {
 			if ( $this->is_rest() ) {
 				$update['order_lines'][] = $item;				
 				$klarna_order_total += $item['total_amount'];
-				$klarna_tax_total += $item['total_tax_amount'];			
+
+				// Process sales_tax item differently
+				if ( array_key_exists( 'type', $item ) && 'sales_tax' == $item['type'] ) {
+					$klarna_tax_total += $item['total_amount'];
+				} else {
+					$klarna_tax_total += $item['total_tax_amount'];
+				}
 			} else {
 				$update['cart']['items'][] = $item;				
 			}
@@ -177,8 +183,8 @@ try {
 		}
 
 		if ( $this->is_rest() ) {
-			$update['order_amount'] = $klarna_order_total;
-			$update['order_tax_amount'] = $klarna_tax_total;
+			$update['order_amount']     = (int) $klarna_order_total;
+			$update['order_tax_amount'] = (int) $klarna_tax_total;
 
 			// Only add shipping options if the option is unchecked for UK
 			$checkout_settings = get_option( 'woocommerce_klarna_checkout_settings' );
