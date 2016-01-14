@@ -173,6 +173,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 * 
 	 * @param  $cancel 	boolean 	Cancel or not
 	 * @param  $order 	Object  	WooCommerce order object
+	 * @return boolean
 	 * @since  2.0
 	 **/
 	function cancel_unpaid_kco( $cancel, $order ) {
@@ -2014,7 +2015,6 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			}
 
 			if ( 'v2' == get_post_meta( $order->id, '_klarna_api', true ) ) {
-
 				$country = get_post_meta( $orderid, '_billing_country', true );
 								
 				$klarna = new Klarna();
@@ -2023,33 +2023,33 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 
 				$klarna_order = new WC_Gateway_Klarna_Order( $order, $klarna );
 				$refund_order = $klarna_order->refund_order( $amount, $reason, $invNo );
-
 			} elseif ( 'rest' == get_post_meta( $order->id, '_klarna_api', true ) ) {
+				$country = get_post_meta( $orderid, '_billing_country', true );
 
 				/**
 				 * Need to send local order to constructor and Klarna order to method
 				 */
 				if ( $this->testmode == 'yes' ) {
-					if ( 'gb' == $this->klarna_country ) {
+					if ( 'gb' == strtolower( $country ) ) {
 						$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_TEST_BASE_URL;
-					} elseif ( 'us' == $this->klarna_country ) {
+					} elseif ( 'us' == strtolower( $country ) ) {
 						$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::NA_TEST_BASE_URL;
 					}
 				} else {
-					if ( 'gb' == $this->klarna_country ) {
+					if ( 'gb' == strtolower( $country ) ) {
 						$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_BASE_URL;
-					} elseif ( 'us' == $this->klarna_country ) {
+					} elseif ( 'us' == strtolower( $country ) ) {
 						$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::NA_BASE_URL;
 					}
 				}
-
-				if ( 'gb' == strtolower( $this->klarna_country ) ) {
+				
+				if ( 'gb' == strtolower( $country ) ) {
 					$connector = Klarna\Rest\Transport\Connector::create(
 						$this->eid_uk,
 						$this->secret_uk,
 						$klarna_server_url
 					);
-				} elseif ( 'us' == strtolower( $this->klarna_country ) ) {
+				} elseif ( 'us' == strtolower( $country ) ) {
 					$connector = Klarna\Rest\Transport\Connector::create(
 						$this->eid_us,
 						$this->secret_us,
@@ -2066,7 +2066,6 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 
 				$klarna_order = new WC_Gateway_Klarna_Order( $order );
 				$refund_order = $klarna_order->refund_order_rest( $amount, $reason, $k_order );
-
 			}
 
 			if ( $refund_order ) {
@@ -2080,8 +2079,8 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 
 	/**
 	 * Determines which version of Klarna API should be used
-	 * 
-	 * @param  integer $orderid
+	 *
+	 * @return boolean
 	 * @since  2.0.0
 	 */
 	function is_rest() {
