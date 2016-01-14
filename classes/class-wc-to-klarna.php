@@ -517,8 +517,7 @@ class WC_Gateway_Klarna_WC2K {
 	 */
 	public function get_fee_amount( $cart_fee ) {
 		if ( 'us' == $this->klarna_country ) {
-			// @TODO: fix this
-			$cart_fee_amount = 00;
+			$cart_fee_amount = (int) ( $cart_fee->amount * 100 );
 		} else {
 			$cart_fee_amount = (int) ( ( $cart_fee->amount + $cart_fee->tax ) * 100 );
 		}
@@ -639,7 +638,6 @@ class WC_Gateway_Klarna_WC2K {
 	public function get_shipping_amount() {
 		global $woocommerce;
 
-		// @TODO: Check how shipping tax should be sent to Klarna
 		if ( 'us' == $this->klarna_country ) {
 			$shipping_amount = (int) number_format( $woocommerce->cart->shipping_total * 100, 0, '', '' );
 		} else {
@@ -660,7 +658,6 @@ class WC_Gateway_Klarna_WC2K {
 	public function get_shipping_tax_rate() {
 		global $woocommerce;
 
-		// @TODO: Check how shipping tax should be sent to Klarna
 		if ( $woocommerce->cart->shipping_tax_total > 0 && 'us' != $this->klarna_country ) {
 			$shipping_tax_rate = round( $woocommerce->cart->shipping_tax_total / $woocommerce->cart->shipping_total, 2 ) * 100;
 		} else {
@@ -681,7 +678,6 @@ class WC_Gateway_Klarna_WC2K {
 	public function get_shipping_tax_amount() {
 		global $woocommerce;
 
-		// @TODO: Check how shipping tax should be sent to Klarna
 		if ( 'us' == $this->klarna_country ) {
 			$shipping_tax_amount = 0;
 		} else {
