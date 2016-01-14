@@ -258,11 +258,12 @@ class WC_Gateway_Klarna_Shortcodes {
 	/**
 	 * Gets Klarna checkout widget HTML.
 	 * Used in KCO widget.
-	 * 
+	 *
 	 * @param  $atts Attributes passed to shortcode
-	 * 
+	 *
 	 * @since  2.0
-	 **/
+	 * @return HTML string
+	 */
 	function klarna_checkout_get_kco_widget_html( $atts = null ) {
 		global $woocommerce;
 
@@ -289,8 +290,10 @@ class WC_Gateway_Klarna_Shortcodes {
 					<td class="kco-col-desc kco-rightalign"><?php _e( 'Subtotal', 'woocommerce-gateway-klarna' ); ?></td>
 					<td id="kco-page-subtotal-amount" class="kco-col-number kco-rightalign"><span class="amount"><?php echo $woocommerce->cart->get_cart_subtotal(); ?></span></td>
 				</tr>
-				
+
 				<?php echo $this->klarna_checkout_get_shipping_options_row_html(); // Shipping options ?>
+
+				<?php echo $this->klarna_checkout_get_fees_row_html(); // Fees ?>
 
 				<?php echo $this->klarna_checkout_get_coupon_rows_html(); // Coupons ?>
 
@@ -362,9 +365,9 @@ class WC_Gateway_Klarna_Shortcodes {
 					<th class="product-total kco-rightalign"><?php _e( 'Total', 'woocommerce-gateway-klarna' ); ?></th>
 				</tr>
 				<?php
+				// Cart items
 				foreach ( $woocommerce->cart->get_cart() as $cart_item_key => $cart_item ) {
 					$_product = $cart_item['data'];
-					$cart_item_product = wc_get_product( $cart_item['product_id'] );
 					echo '<tr>';
 						if ( ! in_array( 'remove', $hide_columns ) ) {
 						echo '<td class="kco-product-remove kco-leftalign"><a href="#">x</a></td>';
@@ -408,6 +411,8 @@ class WC_Gateway_Klarna_Shortcodes {
 		<?php
 		return ob_get_clean();
 	}
+
+	/**
 
 
 	/**
@@ -477,6 +482,39 @@ class WC_Gateway_Klarna_Shortcodes {
 			<?php } ?>
 		</tr>
 		<?php
+		return ob_get_clean();
+	}
+
+
+	/**
+	 * Gets shipping options as formatted HTML.
+	 *
+	 * @since  2.0
+	 **/
+	function klarna_checkout_get_fees_row_html() {
+		global $woocommerce;
+
+		ob_start();
+		if ( ! defined( 'WOOCOMMERCE_CART' ) ) {
+			define( 'WOOCOMMERCE_CART', true );
+		}
+		$woocommerce->cart->calculate_shipping();
+		$woocommerce->cart->calculate_fees();
+		$woocommerce->cart->calculate_totals();
+
+		// Fees
+		foreach ( $woocommerce->cart->get_fees() as $cart_fee ) {
+			echo '<tr class="kco-fee">';
+			echo '<td class="kco-col-desc kco-rightalign">';
+			echo strip_tags( $cart_fee->name );
+			echo '</td>';
+
+			echo '<td class="kco-col-number kco-rightalign"><span class="amount">';
+			echo wc_price( $cart_fee->amount + $cart_fee->tax );
+			echo '</span></td>';
+			echo '</tr>';
+		}
+
 		return ob_get_clean();
 	}
 

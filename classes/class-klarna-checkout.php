@@ -997,6 +997,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		$this->update_or_create_local_order();
 
 		$data['widget_html'] = $this->klarna_checkout_get_kco_widget_html();
+		$data['widget_html'] = $this->klarna_checkout_get_kco_widget_html();
 
 		if ( WC()->session->get( 'klarna_checkout' ) ) {
 			$this->ajax_update_klarna_order();
@@ -1188,6 +1189,8 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 				
 				<?php echo $this->klarna_checkout_get_shipping_options_row_html(); // Shipping options ?>
 
+				<?php echo $this->klarna_checkout_get_fees_row_html(); // Fees ?>
+
 				<?php echo $this->klarna_checkout_get_coupon_rows_html(); // Coupons ?>
 
 				<?php /* Cart total */ ?>
@@ -1373,6 +1376,39 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			<?php } ?>
 		</tr>
 		<?php
+		return ob_get_clean();
+	}
+
+
+	/**
+	 * Gets shipping options as formatted HTML.
+	 *
+	 * @since  2.0
+	 **/
+	function klarna_checkout_get_fees_row_html() {
+		global $woocommerce;
+
+		ob_start();
+		if ( ! defined( 'WOOCOMMERCE_CART' ) ) {
+			define( 'WOOCOMMERCE_CART', true );
+		}
+		$woocommerce->cart->calculate_shipping();
+		$woocommerce->cart->calculate_fees();
+		$woocommerce->cart->calculate_totals();
+
+		// Fees
+		foreach ( $woocommerce->cart->get_fees() as $cart_fee ) {
+			echo '<tr class="kco-fee">';
+			echo '<td class="kco-col-desc kco-rightalign">';
+			echo strip_tags( $cart_fee->name );
+			echo '</td>';
+
+			echo '<td class="kco-col-number kco-rightalign"><span class="amount">';
+			echo wc_price( $cart_fee->amount + $cart_fee->tax );
+			echo '</span></td>';
+			echo '</tr>';
+		}
+
 		return ob_get_clean();
 	}
 
