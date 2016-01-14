@@ -2042,7 +2042,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 						$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::NA_BASE_URL;
 					}
 				}
-				
+
 				if ( 'gb' == strtolower( $country ) ) {
 					$connector = Klarna\Rest\Transport\Connector::create(
 						$this->eid_uk,
