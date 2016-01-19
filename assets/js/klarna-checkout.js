@@ -482,7 +482,7 @@ jQuery(document).ready(function($) {
 									nonce        : kcoAjax.klarna_checkout_nonce
 								},
 								success: function( response ) {
-									// console.log( response.data );
+									// console.log( response );
 									$( kco_widget ).html( response.data.widget_html );
 
 									window._klarnaCheckout(function (api) {
