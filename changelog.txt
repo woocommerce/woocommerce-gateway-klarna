@@ -6,6 +6,7 @@
 * Bug       - Makes sure free shipping options are sent to Klarna in Klarna Checkout.
 * Bug       - Fixes US tax calculations by introducing sales_tax order line.
 * Bug       - Fixes refund tax rate calculation.
+* Bug       - Fixes tax rate rounding issue.
 
 2016.01.07  - version 2.0.2
 * Fix       - Fixes KPM DE and NL bug.

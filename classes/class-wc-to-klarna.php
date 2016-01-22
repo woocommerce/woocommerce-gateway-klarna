@@ -327,13 +327,14 @@ class WC_Gateway_Klarna_WC2K {
 			if ( 'us' == $this->klarna_country ) {
 				$item_tax_rate = 00;
 			} else {
-				$item_tax_rate = round( $cart_item['line_subtotal_tax'] / $cart_item['line_subtotal'], 2 ) * 100;
+				// $item_tax_rate = round( $cart_item['line_subtotal_tax'] / $cart_item['line_subtotal'], 2 ) * 100;
+				$item_tax_rate = round( $cart_item['line_subtotal_tax'] / $cart_item['line_subtotal'] * 100 * 100 );
 			}
 		} else {
 			$item_tax_rate = 00;
 		}
 
-		return intval( $item_tax_rate . '00' );
+		return intval( $item_tax_rate );
 	}
 
 	/**
