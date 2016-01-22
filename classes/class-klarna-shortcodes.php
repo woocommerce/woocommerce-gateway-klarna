@@ -22,7 +22,7 @@ class WC_Gateway_Klarna_Shortcodes {
 	 *
 	 * @since 1.0.0
 	 */
-	public function __construct() { 
+	public function __construct() {
 
 		add_shortcode( 'woocommerce_klarna_checkout', array( $this, 'klarna_checkout_page') );
 		add_shortcode( 'woocommerce_klarna_checkout_order_note', array( $this, 'klarna_checkout_order_note') );
@@ -46,12 +46,12 @@ class WC_Gateway_Klarna_Shortcodes {
 		if ( 'left' == $atts['col'] ) {
 			$widget_class .= ' kco-left-col';
 		} elseif ( 'right' == $atts['col'] ) {
-			$widget_class .= ' kco-right-col';			
+			$widget_class .= ' kco-right-col';
 		}
 
 		$checkout = WC()->checkout();
 		if ( ! $checkout->enable_guest_checkout && ! is_user_logged_in() ) {
-			echo apply_filters( 
+			echo apply_filters(
 				'klarna_checkout_must_be_logged_in_message',
 				sprintf(
 					__( 'You must be logged in to checkout. %s or %s.', 'woocommerce' ),
@@ -82,7 +82,7 @@ class WC_Gateway_Klarna_Shortcodes {
 		}
 
 		ob_start();
-		
+
 		if ( sizeof( WC()->cart->get_cart() ) > 0 ) {
 			echo '<div class="woocommerce"><form>';
 			woocommerce_form_field( 'kco_order_note', $field, $order_note );
@@ -94,10 +94,10 @@ class WC_Gateway_Klarna_Shortcodes {
 
 	/**
 	 * Klarna Checkout country selector shortcode callback.
-	 * 
+	 *
 	 * @since  2.0
 	 **/
-	function klarna_checkout_country() {	
+	function klarna_checkout_country() {
 		if ( sizeof( WC()->cart->get_cart() ) > 0 && 'EUR' == get_woocommerce_currency() ) {
 			ob_start();
 
@@ -155,7 +155,7 @@ class WC_Gateway_Klarna_Shortcodes {
 					}
 				}
 			}
-			
+
 			// If there's no Klarna enabled countries, or there's only one, bail
 			if ( count( $klarna_checkout_enabled_countries ) < 2 ) {
 				return;
@@ -185,12 +185,12 @@ class WC_Gateway_Klarna_Shortcodes {
 
 	/**
 	 * Klarna Checkout widget shortcode callback.
-	 * 
+	 *
 	 * Parameters:
 	 * col            - whether to show it as left or right column in two column layout, options: 'left' and 'right'
 	 * order_note     - whether to show order note or not, option: 'false' (to hide it)
 	 * 'hide_columns' - select columns to hide, comma separated string, options: 'remove', 'price'
-	 * 
+	 *
 	 * @since  2.0
 	 **/
 	function klarna_checkout_widget( $atts ) {
@@ -203,7 +203,7 @@ class WC_Gateway_Klarna_Shortcodes {
 		if ( 'yes' != $checkout_settings['enabled'] ) {
 			return;
 		}
-		
+
 		global $woocommerce;
 
 		$checkout = $woocommerce->checkout();
@@ -233,7 +233,7 @@ class WC_Gateway_Klarna_Shortcodes {
 		if ( 'left' == $atts['col'] ) {
 			$widget_class .= ' kco-left-col';
 		} elseif ( 'right' == $atts['col'] ) {
-			$widget_class .= ' kco-right-col';			
+			$widget_class .= ' kco-right-col';
 		}
 
 		// Recheck cart items so that they are in stock
@@ -245,7 +245,7 @@ class WC_Gateway_Klarna_Shortcodes {
 
 		if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 			ob_start(); ?>
-				
+
 				<div id="klarna-checkout-widget" class="woocommerce <?php echo $widget_class; ?>">
 					<?php echo $this->klarna_checkout_get_kco_widget_html( $atts ); ?>
 				</div>
@@ -258,11 +258,12 @@ class WC_Gateway_Klarna_Shortcodes {
 	/**
 	 * Gets Klarna checkout widget HTML.
 	 * Used in KCO widget.
-	 * 
+	 *
 	 * @param  $atts Attributes passed to shortcode
-	 * 
+	 *
 	 * @since  2.0
-	 **/
+	 * @return HTML string
+	 */
 	function klarna_checkout_get_kco_widget_html( $atts = null ) {
 		global $woocommerce;
 
@@ -274,7 +275,7 @@ class WC_Gateway_Klarna_Shortcodes {
 		$woocommerce->cart->calculate_fees();
 		$woocommerce->cart->calculate_totals();
 		?>
-	
+
 		<!-- Coupons -->
 		<?php woocommerce_checkout_coupon_form(); ?>
 
@@ -286,17 +287,21 @@ class WC_Gateway_Klarna_Shortcodes {
 		<table id="kco-totals">
 			<tbody>
 				<tr id="kco-page-subtotal">
-					<td class="kco-col-desc kco-rightalign"><?php _e( 'Subtotal', 'woocommerce-gateway-klarna' ); ?></td>
+					<td class="kco-col-desc"><?php _e( 'Subtotal', 'woocommerce-gateway-klarna' ); ?></td>
 					<td id="kco-page-subtotal-amount" class="kco-col-number kco-rightalign"><span class="amount"><?php echo $woocommerce->cart->get_cart_subtotal(); ?></span></td>
 				</tr>
-				
+
 				<?php echo $this->klarna_checkout_get_shipping_options_row_html(); // Shipping options ?>
+
+				<?php echo $this->klarna_checkout_get_fees_row_html(); // Fees ?>
 
 				<?php echo $this->klarna_checkout_get_coupon_rows_html(); // Coupons ?>
 
+				<?php echo $this->klarna_checkout_get_taxes_rows_html(); // Taxes ?>
+
 				<?php /* Cart total */ ?>
 				<tr id="kco-page-total">
-					<td class="kco-rightalign kco-bold"><?php _e( 'Total', 'woocommerce-gateway-klarna' ); ?></a></td>
+					<td class="kco-bold"><?php _e( 'Total', 'woocommerce-gateway-klarna' ); ?></a></td>
 					<td id="kco-page-total-amount" class="kco-rightalign kco-bold"><span class="amount"><?php echo $woocommerce->cart->get_total(); ?></span></td>
 				</tr>
 				<?php /* Cart total */ ?>
@@ -327,7 +332,7 @@ class WC_Gateway_Klarna_Shortcodes {
 	/**
 	 * Gets cart contents as formatted HTML.
 	 * Used in KCO widget.
-	 * 
+	 *
 	 * @since  2.0
 	 **/
 	function klarna_checkout_get_cart_contents_html( $atts ) {
@@ -362,9 +367,9 @@ class WC_Gateway_Klarna_Shortcodes {
 					<th class="product-total kco-rightalign"><?php _e( 'Total', 'woocommerce-gateway-klarna' ); ?></th>
 				</tr>
 				<?php
+				// Cart items
 				foreach ( $woocommerce->cart->get_cart() as $cart_item_key => $cart_item ) {
 					$_product = $cart_item['data'];
-					$cart_item_product = wc_get_product( $cart_item['product_id'] );
 					echo '<tr>';
 						if ( ! in_array( 'remove', $hide_columns ) ) {
 						echo '<td class="kco-product-remove kco-leftalign"><a href="#">x</a></td>';
@@ -372,7 +377,7 @@ class WC_Gateway_Klarna_Shortcodes {
 						echo '<td class="product-name kco-leftalign">';
 							if ( ! $_product->is_visible() ) {
 								echo apply_filters( 'woocommerce_cart_item_name', $_product->get_title(), $cart_item, $cart_item_key ) . '&nbsp;';
-							} else { 
+							} else {
 								echo apply_filters( 'woocommerce_cart_item_name', sprintf( '<a href="%s">%s </a>', $_product->get_permalink( $cart_item ), $_product->get_title() ), $cart_item, $cart_item_key );
 							}
 							// Meta data
@@ -409,10 +414,12 @@ class WC_Gateway_Klarna_Shortcodes {
 		return ob_get_clean();
 	}
 
+	/**
+
 
 	/**
 	 * Gets shipping options as formatted HTML.
-	 * 
+	 *
 	 * @since  2.0
 	 **/
 	function klarna_checkout_get_shipping_options_row_html() {
@@ -428,7 +435,7 @@ class WC_Gateway_Klarna_Shortcodes {
 		?>
 		<tr id="kco-page-shipping">
 			<?php
-			// if ( WC()->session->get( 'klarna_is_rest', false ) ) { // Just show shipping cost for Rest 
+			// if ( WC()->session->get( 'klarna_is_rest', false ) ) { // Just show shipping cost for Rest
 			// Temporarily commented out while Klarna works on this feaure and replaced by the check below
 			// that always returns true.
 			?>
@@ -436,11 +443,11 @@ class WC_Gateway_Klarna_Shortcodes {
 				<td class="kco-rightalign">
 					<?php _e( 'Shipping', 'woocommerce-gateway-klarna' ); ?>
 				</td>
-				<td id="kco-page-shipping-total" class="kco-rightalign">
+				<td id="kco-page-shipping-total">
 					<?php echo $woocommerce->cart->get_cart_shipping_total(); ?>
 				</td>
 			<?php } else { ?>
-				<td class="kco-rightalign">
+				<td>
 					<?php
 						$woocommerce->cart->calculate_shipping();
 						$packages = $woocommerce->shipping->get_packages();
@@ -451,12 +458,13 @@ class WC_Gateway_Klarna_Shortcodes {
 							$index = $i;
 							?>
 								<?php if ( ! empty( $available_methods ) ) { ?>
-						
+
 									<?php if ( 1 === count( $available_methods ) ) {
 										$method = current( $available_methods );
 										echo wp_kses_post( wc_cart_totals_shipping_method_label( $method ) ); ?>
 										<input type="hidden" name="shipping_method[<?php echo esc_attr( $index ); ?>]" data-index="<?php echo esc_attr( $index ); ?>" id="shipping_method_<?php echo esc_attr( $index ); ?>" value="<?php echo esc_attr( $method->id ); ?>" class="shipping_method" />
 									<?php } else { ?>
+										<p style="margin: 0 0 0.5em !important; padding: 0 !important;"><?php _e( 'Shipping', 'woocommerce-gateway-klarna' ); ?></p>
 										<ul id="shipping_method">
 											<?php foreach ( $available_methods as $method ) : ?>
 												<li>
@@ -466,7 +474,7 @@ class WC_Gateway_Klarna_Shortcodes {
 											<?php endforeach; ?>
 										</ul>
 									<?php } ?>
-								<?php } ?>				
+								<?php } ?>
 							<?php
 						}
 					?>
@@ -482,8 +490,42 @@ class WC_Gateway_Klarna_Shortcodes {
 
 
 	/**
+	 * Gets shipping options as formatted HTML.
+	 *
+	 * @since  2.0
+	 **/
+	function klarna_checkout_get_fees_row_html() {
+		global $woocommerce;
+
+		ob_start();
+		if ( ! defined( 'WOOCOMMERCE_CART' ) ) {
+			define( 'WOOCOMMERCE_CART', true );
+		}
+		$woocommerce->cart->calculate_shipping();
+		$woocommerce->cart->calculate_fees();
+		$woocommerce->cart->calculate_totals();
+
+		// Fees
+		foreach ( $woocommerce->cart->get_fees() as $cart_fee ) {
+			echo '<tr class="kco-fee">';
+			echo '<td class="kco-col-desc">';
+			echo strip_tags( $cart_fee->name );
+			echo '</td>';
+
+			echo '<td class="kco-col-number kco-rightalign"><span class="amount">';
+			// echo wc_price( $cart_fee->amount + $cart_fee->tax );
+			echo wc_cart_totals_fee_html( $cart_fee );
+			echo '</span></td>';
+			echo '</tr>';
+		}
+
+		return ob_get_clean();
+	}
+
+
+	/**
 	 * Gets coupons as formatted HTML.
-	 * 
+	 *
 	 * @since  2.0
 	 **/
 	function klarna_checkout_get_coupon_rows_html() {
@@ -492,7 +534,7 @@ class WC_Gateway_Klarna_Shortcodes {
 		ob_start();
 		foreach ( $woocommerce->cart->get_applied_coupons() as $coupon ) { ?>
 			<tr class="kco-applied-coupon">
-				<td class="kco-rightalign">
+				<td>
 					<?php printf( _e( 'Coupon: %s', 'woocommerce-gateway-klarna' ), $coupon ); ?>
 					<a class="kco-remove-coupon" data-coupon="<?php echo $coupon; ?>" href="#"><?php _e( '(remove)' ); ?></a>
 				</td>
@@ -502,6 +544,32 @@ class WC_Gateway_Klarna_Shortcodes {
 		return ob_get_clean();
 	}
 
+	/**
+	 * Gets coupons as formatted HTML.
+	 *
+	 * @since  2.0
+	 **/
+	function klarna_checkout_get_taxes_rows_html() {
+		ob_start();
+		if ( wc_tax_enabled() && 'excl' === WC()->cart->tax_display_cart ) {
+			if ( 'itemized' === get_option( 'woocommerce_tax_total_display' ) ) {
+				foreach ( WC()->cart->get_tax_totals() as $code => $tax ) { ?>
+					<tr class="kco-tax-rate kco-tax-rate-<?php echo sanitize_title( $code ); ?>">
+						<td><?php echo esc_html( $tax->label ); ?></td>
+						<td class="kco-rightalign" data-title="<?php echo esc_html( $tax->label ); ?>"><?php echo
+							wp_kses_post( $tax->formatted_amount ); ?></td>
+					</tr>
+				<?php }
+			} else { ?>
+				<tr class="tax-total">
+					<td><?php echo esc_html( WC()->countries->tax_or_vat() ); ?></td>
+					<td class="kco-rightalign" data-title="<?php echo esc_html( WC()->countries->tax_or_vat() );
+					?>"><?php wc_cart_totals_taxes_total_html(); ?></td>
+				</tr>
+			<?php }
+		}
+		return ob_get_clean();
+	}
 }
 
 $wc_klarna_checkout_shortcodes = new WC_Gateway_Klarna_Shortcodes;

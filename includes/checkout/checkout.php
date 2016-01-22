@@ -87,7 +87,7 @@ if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 
 	// Process cart contents and prepare them for Klarna
 	include_once( KLARNA_DIR . 'classes/class-wc-to-klarna.php' );
-	$wc_to_klarna = new WC_Gateway_Klarna_WC2K( $this->is_rest() );
+	$wc_to_klarna = new WC_Gateway_Klarna_WC2K( $this->is_rest(), $this->klarna_country );
 	$cart = $wc_to_klarna->process_cart_contents();
 
 	// Initiate Klarna

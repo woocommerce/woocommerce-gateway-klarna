@@ -30,6 +30,10 @@ a.std-checkout-button {
 	border: none;
 	width: 100%;
 }
+th.product-remove {
+	width: 1.5em;
+}
+/*
 th.product-name {
 	width: 35%;
 }
@@ -48,6 +52,7 @@ th.product-total {
 .kco-col-number {
 	width: 20%;
 }
+*/
 
 #klarna-checkout-widget input[type=number] {
 	display: block;

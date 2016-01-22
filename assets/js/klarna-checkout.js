@@ -468,7 +468,7 @@ jQuery(document).ready(function($) {
 					// console.log('V3');
 
 					if ( '' != data.postal_code || '' != data.region ) {
-						kco_widget = $( '#klarna-checkout-widget' );	
+						kco_widget = $( '#klarna-checkout-widget' );
 
 						$.ajax(
 							kcoAjax.ajaxurl,
@@ -482,7 +482,7 @@ jQuery(document).ready(function($) {
 									nonce        : kcoAjax.klarna_checkout_nonce
 								},
 								success: function( response ) {
-									// console.log( response.data );
+									// console.log( response );
 									$( kco_widget ).html( response.data.widget_html );
 
 									window._klarnaCheckout(function (api) {
@@ -505,7 +505,7 @@ jQuery(document).ready(function($) {
 		api.on( {
 			'shipping_option_change': function (data) {
 				new_method       = data.id;
-				kco_widget       = $( '#klarna-checkout-widget' );	
+				kco_widget       = $( '#klarna-checkout-widget' );
 
 				$.ajax(
 					kcoAjax.ajaxurl,
@@ -513,14 +513,14 @@ jQuery(document).ready(function($) {
 						type     : 'POST',
 						dataType : 'json',
 						data     : {
-							action :    'kco_iframe_shipping_option_change_cb', 
+							action :    'kco_iframe_shipping_option_change_cb',
 							new_method : new_method,
 							nonce :      kcoAjax.klarna_checkout_nonce
 						},
 						success: function( response ) {
 							// console.log( 'success' );
 							// console.log( response );
-							
+
 							$( kco_widget ).html( response.data.widget_html );
 						},
 						error: function( response ) {

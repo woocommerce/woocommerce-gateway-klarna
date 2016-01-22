@@ -103,7 +103,7 @@ class WC_Klarna_PMS {
 			);
 		} catch ( KlarnaException $e ) {
 			// cURL exception
-			throw $e;
+			return false;
 		}
 
 		$data = $response->getData();

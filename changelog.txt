@@ -1,5 +1,13 @@
 *** WooCommerce Gateway Klarna Changelog ***
 
+2016.01.22  - version 2.0.3
+* Feature   - Adds fee processing to Klarna Checkout.
+* Tweak     - Adds fee display to KCO cart widget.
+* Bug       - Makes sure free shipping options are sent to Klarna in Klarna Checkout.
+* Bug       - Fixes US tax calculations by introducing sales_tax order line.
+* Bug       - Fixes refund tax rate calculation.
+* Bug       - Fixes tax rate rounding issue.
+
 2016.01.07  - version 2.0.2
 * Fix       - Fixes KPM DE and NL bug.
 * Fix       - Makes 'Shipping Fee' string translatable.
@@ -22,7 +30,7 @@
 * Feature	- Moved customer order note field into the new KCO mini cart.
 * Feature	- Updated flow for orders that are marked *Needs pending approval from Klarna* (KPM). Order status is now set to On Hold and a cronjob is checking the orderstatus with Klarna every 2 hours.
 * Feature	- Added Shipping and payment info from Klarna in order confirmation (on thank you page for KPM).
-* Feature	- Started implementing Klarnas Remarketing feature for KCO. All local WC orders (when selecting KCO as payment method but not finalizing the purchase) does now include the customers email address.
+* Feature	- Started implementing Klarna's Remarketing feature for KCO. All local WC orders (when selecting KCO as payment method but not finalizing the purchase) does now include the customers email address.
 * Feature	- Added setting in KCO to make it possible to display a button with a link back to the KCO page in WooCommerce standard checkout.
 * Feature	- Added a new WP widget for displaying Klarna as an available payment option in the store.
 * Feature	- Added Klarna's Part payment widget (display monthly cost on product pages) even for KCO (previous only KPM).

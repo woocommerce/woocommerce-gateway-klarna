@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * This class grabs WC cart contents and formats them so they can
  * be sent to Klarna when a KCO order is being created or updated.
- * 
+ *
  * Needs Klarna order object passed as parameter
  * Checks if cart is empty
  * Checks if Rest API is in use
@@ -24,7 +24,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Process shipping
  * - Rest and V2
  * Returns array formatted for Klarna
- * 
+ *
  */
 class WC_Gateway_Klarna_WC2K {
 
@@ -47,19 +47,29 @@ class WC_Gateway_Klarna_WC2K {
 	public $is_rest;
 
 	/**
+	 * Check which Klarna country is in use.
+	 *
+	 * @since  2.0.0
+	 * @access public
+	 * @var    boolean
+	 */
+	public $klarna_country;
+
+	/**
 	 * Constructor
 	 *
 	 * @since 2.0.0
 	 */
-	public function __construct( $is_rest = false ) {
+	public function __construct( $is_rest = false, $klarna_country = '' ) {
 		global $woocommerce;
 		$this->cart = $woocommerce->cart->get_cart();
 		$this->is_rest = $is_rest;
+		$this->klarna_country = $klarna_country;
 	}
 
 	/**
 	 * Check if cart is empty.
-	 * 
+	 *
 	 * Checks if WooCommerce cart is empty. If it is, there's no reason to proceed.
 	 *
 	 * @since  2.0.0
@@ -77,7 +87,7 @@ class WC_Gateway_Klarna_WC2K {
 
 	/**
 	 * Formats cart contents for Klarna.
-	 * 
+	 *
 	 * Checks if WooCommerce cart is empty. If it is, there's no reason to proceed.
 	 *
 	 * @since  2.0.0
@@ -87,8 +97,10 @@ class WC_Gateway_Klarna_WC2K {
 	 */
 	public function process_cart_contents() {
 		global $woocommerce;
+
 		$woocommerce->cart->calculate_shipping();
 		$woocommerce->cart->calculate_totals();
+
 		$cart = array();
 
 		// We need to keep track of order total, in case a smart coupon exceeds it
@@ -104,14 +116,14 @@ class WC_Gateway_Klarna_WC2K {
 
 				$item_name            = $this->get_item_name( $cart_item );
 				$item_price           = $this->get_item_price( $cart_item );
- 				$item_quantity        = $this->get_item_quantity( $cart_item );
+				$item_quantity        = $this->get_item_quantity( $cart_item );
 				$item_reference       = $this->get_item_reference( $_product );
 				$item_discount_amount = $this->get_item_discount_amount( $cart_item );
 				$item_discount_rate   = $this->get_item_discount_rate( $cart_item );
 				$item_tax_amount      = $this->get_item_tax_amount( $cart_item );
 				$item_tax_rate        = $this->get_item_tax_rate( $cart_item, $_product );
 				$item_total_amount    = $this->get_item_total_amount( $cart_item );
-	
+
 				if ( $this->is_rest ) {
 					$klarna_item = array(
 						'reference'             => $item_reference,
@@ -131,7 +143,7 @@ class WC_Gateway_Klarna_WC2K {
 						'unit_price'     => $item_price,
 						'tax_rate'       => $item_tax_rate,
 						'discount_rate'  => $item_discount_rate
-					);					
+					);
 				}
 
 				$cart[] = $klarna_item;
@@ -139,13 +151,52 @@ class WC_Gateway_Klarna_WC2K {
 			}
 		}
 
+		// Process fees
+		if ( $woocommerce->cart->fee_total > 0 ) {
+			foreach ( $woocommerce->cart->get_fees() as $cart_fee ) {
+				$fee_name         = $this->get_fee_name( $cart_fee );
+				$fee_reference    = $this->get_fee_reference( $cart_fee );
+				$fee_type         = 'surcharge';
+				$fee_quantity     = 1;
+				$fee_unit_price   = $this->get_fee_amount( $cart_fee );
+				$fee_total_amount = $this->get_fee_amount( $cart_fee );
+				$fee_tax_rate     = $this->get_fee_tax_rate( $cart_fee );
+				$fee_tax_amount   = $this->get_fee_tax_amount( $cart_fee );
+
+				if ( $this->is_rest ) {
+					$klarna_fee_item = array(
+						'type'             => $fee_type,
+						'reference'        => $fee_reference,
+						'name'             => $fee_name,
+						'quantity'         => $fee_quantity,
+						'unit_price'       => $fee_unit_price,
+						'total_amount'     => $fee_total_amount,
+						'tax_rate'         => $fee_tax_rate,
+						'total_tax_amount' => $fee_tax_amount
+					);
+				} else {
+					$klarna_fee_item = array(
+						'reference'  => $fee_reference,
+						'name'       => $fee_name,
+						'quantity'   => $fee_quantity,
+						'unit_price' => $fee_unit_price,
+						'tax_rate'   => $fee_tax_rate
+					);
+				}
+
+				$cart[] = $klarna_fee_item;
+				$order_total += (int) $cart_fee->amount * 100;
+			}
+		}
+
 		// Process shipping
-		if ( $woocommerce->cart->shipping_total > 0 ) {
+		if ( $woocommerce->shipping->get_packages() ) {
 			$shipping_name       = $this->get_shipping_name();
+			$shipping_reference  = $this->get_shipping_reference();
 			$shipping_amount     = $this->get_shipping_amount();
 			$shipping_tax_rate   = $this->get_shipping_tax_rate();
 			$shipping_tax_amount = $this->get_shipping_tax_amount();
-	
+
 			if ( $this->is_rest ) {
 				/*
 				Temporarily return shipping to V3
@@ -153,9 +204,9 @@ class WC_Gateway_Klarna_WC2K {
 				No need to do this any longer, shipping is sent to Klarna
 				as shipping_options parameter
 				*/
-				$shipping = array(  
+				$shipping = array(
 					'type'             => 'shipping_fee',
-					'reference'        => 'SHIPPING',
+					'reference'        => $shipping_reference,
 					'name'             => $shipping_name,
 					'quantity'         => 1,
 					'unit_price'       => $shipping_amount,
@@ -164,9 +215,9 @@ class WC_Gateway_Klarna_WC2K {
 					'total_tax_amount' => $shipping_tax_amount
 				);
 			} else {
-				$shipping = array(  
+				$shipping = array(
 					'type'       => 'shipping_fee',
-					'reference'  => 'SHIPPING',
+					'reference'  => $shipping_reference,
 					'name'       => $shipping_name,
 					'quantity'   => 1,
 					'unit_price' => $shipping_amount,
@@ -176,6 +227,25 @@ class WC_Gateway_Klarna_WC2K {
 			$cart[] = $shipping;
 			$order_total += $shipping_amount;
 		}
+
+		// Process sales tax for US
+		if ( $this->is_rest && 'us' == $this->klarna_country ) {
+			$sales_tax = round( ( $woocommerce->cart->tax_total + $woocommerce->cart->shipping_tax_total ) * 100 );
+
+			// Add sales tax line item
+			$cart[] = array(
+				'type'                  => 'sales_tax',
+				'reference'             => __( 'Sales Tax', 'woocommerce-gateway-klarna' ),
+				'name'                  => __( 'Sales Tax', 'woocommerce-gateway-klarna' ),
+				'quantity'              => 1,
+				'unit_price'            => $sales_tax,
+				'tax_rate'              => 0,
+				'total_amount'          => $sales_tax,
+				'total_discount_amount' => 0,
+				'total_tax_amount'      => 0
+			);
+		}
+		$order_total += $sales_tax;
 
 		// Process discounts
 		if ( WC()->cart->applied_coupons ) {
@@ -231,7 +301,11 @@ class WC_Gateway_Klarna_WC2K {
 	 * @return integer $item_tax_amount Item tax amount.
 	 */
 	public function get_item_tax_amount( $cart_item ) {
-		$item_tax_amount = $cart_item['line_tax'] * 100;
+		if ( 'us' == $this->klarna_country ) {
+			$item_tax_amount = 00;
+		} else {
+			$item_tax_amount = $cart_item['line_tax'] * 100;
+		}
 
 		return round( $item_tax_amount );
 	}
@@ -250,12 +324,17 @@ class WC_Gateway_Klarna_WC2K {
 		// We manually calculate the tax percentage here
 		if ( $_product->is_taxable() && $cart_item['line_subtotal_tax'] > 0 ) {
 			// Calculate tax rate
-			$item_tax_rate = round( $cart_item['line_subtotal_tax'] / $cart_item['line_subtotal'], 2 ) * 100;
+			if ( 'us' == $this->klarna_country ) {
+				$item_tax_rate = 00;
+			} else {
+				// $item_tax_rate = round( $cart_item['line_subtotal_tax'] / $cart_item['line_subtotal'], 2 ) * 100;
+				$item_tax_rate = round( $cart_item['line_subtotal_tax'] / $cart_item['line_subtotal'] * 100 * 100 );
+			}
 		} else {
 			$item_tax_rate = 00;
 		}
 
-		return intval( $item_tax_rate . '00' );
+		return intval( $item_tax_rate );
 	}
 
 	/**
@@ -294,7 +373,11 @@ class WC_Gateway_Klarna_WC2K {
 	 */
 	public function get_item_price( $cart_item ) {
 		// apply_filters to item price so we can filter this if needed
-		$item_price_including_tax = $cart_item['line_subtotal'] + $cart_item['line_subtotal_tax'];
+		if ( 'us' == $this->klarna_country ) {
+			$item_price_including_tax = $cart_item['line_subtotal'];
+		} else {
+			$item_price_including_tax = $cart_item['line_subtotal'] + $cart_item['line_subtotal_tax'];
+		}
 		$item_price = apply_filters( 'klarna_item_price_including_tax', $item_price_including_tax );
 		$item_price = number_format( $item_price * 100, 0, '', '' ) / $cart_item['quantity'];
 		// $item_price = $item_price * 100 / $cart_item['quantity'];
@@ -317,7 +400,7 @@ class WC_Gateway_Klarna_WC2K {
 
 	/**
 	 * Get cart item reference.
-	 * 
+	 *
 	 * Returns SKU or product ID.
 	 *
 	 * @since  2.0.0
@@ -389,9 +472,96 @@ class WC_Gateway_Klarna_WC2K {
 	 * @return integer $item_total_amount Cart item total amount.
 	 */
 	public function get_item_total_amount( $cart_item ) {
-		$item_total_amount = ( ( $cart_item['line_total'] + $cart_item['line_tax'] ) * 100 );
+		if ( 'us' == $this->klarna_country ) {
+			$item_total_amount = ( $cart_item['line_total'] * 100 );
+		} else {
+			$item_total_amount = ( ( $cart_item['line_total'] + $cart_item['line_tax'] ) * 100 );
+		}
 
 		return round( $item_total_amount );
+	}
+
+	/**
+	 * Get cart fee name.
+	 *
+	 * @since  2.0.0
+	 * @access public
+	 *
+	 * @param  array  $cart_fee      Cart fee.
+	 * @return string $cart_fee_name Cart fee name.
+	 */
+	public function get_fee_name( $cart_fee ) {
+		return strip_tags( $cart_fee->name );
+	}
+
+	/**
+	 * Get cart fee reference.
+	 *
+	 * @since  2.0.0
+	 * @access public
+	 *
+	 * @param  array  $cart_fee           Cart fee.
+	 * @return string $cart_fee_reference Cart fee reference.
+	 */
+	public function get_fee_reference( $cart_fee ) {
+		return strip_tags( $cart_fee->id );
+	}
+
+	/**
+	 * Get cart fee amount.
+	 *
+	 * @since  2.0.0
+	 * @access public
+	 *
+	 * @param  array $cart_fee      Cart fee.
+	 * @return int   $cart_fee_amount Cart fee name.
+	 */
+	public function get_fee_amount( $cart_fee ) {
+		if ( 'us' == $this->klarna_country ) {
+			$cart_fee_amount = (int) ( $cart_fee->amount * 100 );
+		} else {
+			$cart_fee_amount = (int) ( ( $cart_fee->amount + $cart_fee->tax ) * 100 );
+		}
+		return $cart_fee_amount;
+	}
+
+	/**
+	 * Get cart fee tax amount.
+	 *
+	 * @since  2.0.0
+	 * @access public
+	 *
+	 * @param  array $cart_fee            Cart fee.
+	 * @return int   $cart_fee_tax_amount Cart fee tax amount.
+	 */
+	public function get_fee_tax_amount( $cart_fee ) {
+		if ( $cart_fee->taxable && 'us' != $this->klarna_country ) {
+			$cart_fee_tax_amount = (int) ($cart_fee->tax * 100);
+		} else {
+			$cart_fee_tax_amount = 0;
+		}
+
+		return $cart_fee_tax_amount;
+	}
+
+	/**
+	 * Get cart fee tax rate.
+	 *
+	 * @since  2.0.0
+	 * @access public
+	 *
+	 * @param  array $cart_fee          Cart fee.
+	 * @return int   $cart_fee_tax_rate Cart fee tax rate.
+	 */
+	public function get_fee_tax_rate( $cart_fee ) {
+		if ( $cart_fee->taxable && 'us' != $this->klarna_country ) {
+			$cart_fee_tax_rate = $cart_fee->tax / $cart_fee->amount * 100 * 100;
+		} else {
+			$cart_fee_tax_rate = 0;
+		}
+
+		$cart_fee_tax_rate = (int) $cart_fee_tax_rate;
+		return $cart_fee_tax_rate;
 	}
 
 	/**
@@ -416,7 +586,7 @@ class WC_Gateway_Klarna_WC2K {
 						$shipping_name = $rate_value->label;
 					}
 				}
-			}	
+			}
 		}
 
 		if ( ! isset( $shipping_name ) ) {
@@ -424,6 +594,38 @@ class WC_Gateway_Klarna_WC2K {
 		}
 
 		return $shipping_name;
+	}
+
+	/**
+	 * Get shipping reference.
+	 *
+	 * @since  2.0.0
+	 * @access public
+	 *
+	 * @return string $shipping_reference Reference for selected shipping method.
+	 */
+	public function get_shipping_reference() {
+		global $woocommerce;
+
+		$shipping_packages = $woocommerce->shipping->get_packages();
+		foreach ( $shipping_packages as $i => $package ) {
+			$chosen_method = isset( $woocommerce->session->chosen_shipping_methods[ $i ] ) ? $woocommerce->session->chosen_shipping_methods[ $i ] : '';
+
+			if ( '' != $chosen_method ) {
+				$package_rates = $package['rates'];
+				foreach ( $package_rates as $rate_key => $rate_value ) {
+					if ( $rate_key == $chosen_method ) {
+						$shipping_reference = $rate_value->id;
+					}
+				}
+			}
+		}
+
+		if ( ! isset( $shipping_reference ) ) {
+			$shipping_reference = __( 'Shipping', 'woocommerce-gateway-klarna' );
+		}
+
+		return $shipping_reference;
 	}
 
 	/**
@@ -437,7 +639,11 @@ class WC_Gateway_Klarna_WC2K {
 	public function get_shipping_amount() {
 		global $woocommerce;
 
-		$shipping_amount = (int) number_format( ( $woocommerce->cart->shipping_total + $woocommerce->cart->shipping_tax_total ) * 100, 0, '', '' );
+		if ( 'us' == $this->klarna_country ) {
+			$shipping_amount = (int) number_format( $woocommerce->cart->shipping_total * 100, 0, '', '' );
+		} else {
+			$shipping_amount = (int) number_format( ( $woocommerce->cart->shipping_total + $woocommerce->cart->shipping_tax_total ) * 100, 0, '', '' );
+		}
 
 		return (int) $shipping_amount;
 	}
@@ -453,7 +659,7 @@ class WC_Gateway_Klarna_WC2K {
 	public function get_shipping_tax_rate() {
 		global $woocommerce;
 
-		if ( $woocommerce->cart->shipping_tax_total > 0 ) {
+		if ( $woocommerce->cart->shipping_tax_total > 0 && 'us' != $this->klarna_country ) {
 			$shipping_tax_rate = round( $woocommerce->cart->shipping_tax_total / $woocommerce->cart->shipping_total, 2 ) * 100;
 		} else {
 			$shipping_tax_rate = 00;
@@ -473,7 +679,11 @@ class WC_Gateway_Klarna_WC2K {
 	public function get_shipping_tax_amount() {
 		global $woocommerce;
 
-		$shipping_tax_amount = $woocommerce->cart->shipping_tax_total * 100;
+		if ( 'us' == $this->klarna_country ) {
+			$shipping_tax_amount = 0;
+		} else {
+			$shipping_tax_amount = $woocommerce->cart->shipping_tax_total * 100;
+		}
 
 		return (int) $shipping_tax_amount;
 	}
