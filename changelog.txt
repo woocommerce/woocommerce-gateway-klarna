@@ -1,5 +1,8 @@
 *** WooCommerce Gateway Klarna Changelog ***
 
+2016.01.xx  - version 2.0.4
+* Fix       - Changed Composer autoload.php path.
+
 2016.01.22  - version 2.0.3
 * Feature   - Adds fee processing to Klarna Checkout.
 * Tweak     - Adds fee display to KCO cart widget.

@@ -890,12 +890,6 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			exit( 'Nonce can not be verified.' );
 		}
 
-		// Make this compatible with WooCommerce Advanced Pricing
-		if ( class_exists( 'WooCommerce_Advanced_Pricing' ) && ! class_exists( 'WCAPRI_Prices' ) ) {
-			require_once WP_PLUGIN_DIR . '/woocommerce-advanced-pricing/includes/class-wcapri-pricing.php';
-			new WCAPRI_Prices();
-		}
-
 		global $woocommerce;
 		$data = array();
 
@@ -1169,12 +1163,6 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 **/
 	function klarna_checkout_get_kco_widget_html( $atts = null ) {
 		global $woocommerce;
-
-		// Make this compatible with WooCommerce Advanced Pricing
-		if ( class_exists( 'WooCommerce_Advanced_Pricing' ) && ! class_exists( 'WCAPRI_Prices' ) ) {
-			require_once WP_PLUGIN_DIR . '/woocommerce-advanced-pricing/includes/class-wcapri-pricing.php';
-			new WCAPRI_Prices();
-		}
 
 		ob_start();
 		if ( ! defined( 'WOOCOMMERCE_CART' ) ) {
