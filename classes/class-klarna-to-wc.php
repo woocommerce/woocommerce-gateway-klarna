@@ -210,6 +210,9 @@ class WC_Gateway_Klarna_K2WC {
 
 		// If there's an order at this point, proceed
 		if ( isset( $order ) ) {
+			// Need to clean up the order first, to avoid duplicate items
+			$order->remove_order_items();
+
 			// Add order items
 			$this->add_order_items( $order );
 
