@@ -704,6 +704,12 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 					$order->add_order_note(
 						__( 'Klarna payment completed. Klarna Invoice number: ', 'woocommerce-gateway-klarna' ) . $invno
 					);
+					if ( $this->debug == 'yes' ) {
+						$this->log->add(
+							'klarna',
+							__( 'Klarna payment completed. Klarna Invoice number: ', 'woocommerce-gateway-klarna' ) . $invno
+						);
+					}
 					update_post_meta( $order_id, '_klarna_order_reservation', $invno );
 					update_post_meta( $order_id, '_transaction_id', $invno );
 					$order->payment_complete(); // Payment complete
@@ -719,7 +725,13 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 					$order->add_order_note(
 						__( 'Order is PENDING APPROVAL by Klarna. Please visit Klarna Online for the latest status on this order. Klarna Invoice number: ', 'woocommerce-gateway-klarna' ) . $invno
 					);
-					$order->payment_complete(); // Payment complete					
+					if ( $this->debug == 'yes' ) {
+						$this->log->add(
+							'klarna',
+							__( 'Order is PENDING APPROVAL by Klarna. Please visit Klarna Online for the latest status on this order. Klarna reservation number: ', 'woocommerce-gateway-klarna' ) . $invno
+						);
+					}
+					$order->payment_complete(); // Payment complete
 					$woocommerce->cart->empty_cart(); // Remove cart
 					// Return thank you redirect
 					return array(
@@ -732,6 +744,12 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 					$order->add_order_note(
 						__( 'Klarna payment denied.', 'woocommerce-gateway-klarna' )
 					);
+					if ( $this->debug == 'yes' ) {
+						$this->log->add(
+							'klarna',
+							__( 'Klarna payment denied.', 'woocommerce-gateway-klarna' )
+						);
+					}
 					wc_add_notice(
 						__( 'Klarna payment denied.', 'woocommerce-gateway-klarna' ), 
 						'error'
@@ -743,6 +761,12 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 					$order->add_order_note(
 						__( 'Unknown response from Klarna.', 'woocommerce-gateway-klarna' )
 					);
+					if ( $this->debug == 'yes' ) {
+						$this->log->add(
+							'klarna',
+							__( 'Unknown response from Klarna.', 'woocommerce-gateway-klarna' )
+						);
+					}
 					wc_add_notice(
 						__( 'Unknown response from Klarna.', 'woocommerce-gateway-klarna' ),
 						'error'
@@ -761,6 +785,16 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 				),
 				'error'
 			);
+			if ( $this->debug == 'yes' ) {
+				$this->log->add(
+					'klarna',
+					sprintf(
+						__( '%s (Error code: %s)', 'woocommerce-gateway-klarna' ),
+						utf8_encode( $e->getMessage() ),
+						$e->getCode()
+					)
+				);
+			}
 			return;
 		}
 

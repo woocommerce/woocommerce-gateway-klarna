@@ -9,6 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 $this->enabled     = $this->get_option( 'enabled' );
 $this->testmode    = $this->get_option( 'testmode' );
+$this->debug       = $this->get_option( 'debug' );
 $this->title       = $this->get_option( 'title' );
 $this->description = $this->get_option( 'description' );
 $this->log = new WC_Logger();
