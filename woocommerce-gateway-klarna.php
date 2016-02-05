@@ -215,6 +215,7 @@ function init_klarna_gateway() {
 	// Include our Klarna classes
 	require_once 'classes/class-klarna-part-payment.php'; // KPM Part Payment
 	require_once 'classes/class-klarna-invoice.php'; // KPM Invoice
+	require_once 'classes/class-klarna-process-checkout-kpm.php'; // KPM process checkout fields
 	require_once 'classes/class-klarna-payment-method-widget.php'; // Partpayment widget
 	require_once 'classes/class-klarna-get-address.php'; // Get address
 	require_once 'classes/class-klarna-pms.php'; // PMS
