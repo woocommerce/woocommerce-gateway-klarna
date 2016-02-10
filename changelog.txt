@@ -4,6 +4,8 @@
 * Fix       - Changed Composer autoload.php path.
 * Tweak     - Additional logging for Invoice and Part Payment.
 * Fix       - Improved checkout checks for KPM.
+* Feature   - Introduces 'klarna_invoice_label' to make it possible for merchants to filter 'Pay in 14 days' text for
+ Klarna Invoice
 
 2016.01.22  - version 2.0.3
 * Feature   - Adds fee processing to Klarna Checkout.

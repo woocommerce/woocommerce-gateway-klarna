@@ -135,7 +135,8 @@ if ( 'NO' == $this->klarna_helper->get_klarna_country() ) { ?>
 						$invoice_string = __( 'Pay in 14 days', 'woocommerce-gateway-klarna' );
 				}
 				?>
-				<option value="-1"><?php echo $invoice_string; ?></option>
+				<option value="-1"><?php echo apply_filters( 'klarna_invoice_label', $invoice_string, $country );
+					?></option>
 				<?php 
 				if ( $pclasses ) { 
 					foreach ( $pclasses as $pclass ) { // Loop through the available PClasses stored in the file srv/pclasses.json
