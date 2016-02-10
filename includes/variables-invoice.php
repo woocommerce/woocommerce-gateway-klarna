@@ -12,11 +12,11 @@ $this->testmode    = $this->get_option( 'testmode' );
 $this->debug       = $this->get_option( 'debug' );
 $this->title       = $this->get_option( 'title' );
 $this->description = $this->get_option( 'description' );
-$this->log = new WC_Logger();
+$this->log         = new WC_Logger();
 
-$this->push_completion = ( isset( $this->settings['push_completion'] ) ) ? $this->settings['push_completion'] : '';
+$this->push_completion   = ( isset( $this->settings['push_completion'] ) ) ? $this->settings['push_completion'] : '';
 $this->push_cancellation = ( isset( $this->settings['push_cancellation'] ) ) ? $this->settings['push_cancellation'] : '';
-$this->push_update = ( isset( $this->settings['push_update'] ) ) ? $this->settings['push_update'] : '';
+$this->push_update       = ( isset( $this->settings['push_update'] ) ) ? $this->settings['push_update'] : '';
 
 // Sweden
 $this->eid_se    = $this->get_option( 'eid_se' );

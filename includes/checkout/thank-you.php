@@ -44,27 +44,17 @@ if ( $this->is_rest() ) {
 		}
 	}
 
-	$connector = \Klarna\Rest\Transport\Connector::create(
-		$merchantId,
-		$sharedSecret,
-		$klarna_server_url
-	);
+	$connector    = \Klarna\Rest\Transport\Connector::create( $merchantId, $sharedSecret, $klarna_server_url );
 	$klarna_order = new Klarna\Rest\Checkout\Order( $connector, $orderUri );
 } else {
 	// Klarna_Checkout_Order::$contentType = 'application/vnd.klarna.checkout.aggregated-order-v2+json';  
-	$connector = Klarna_Checkout_Connector::create(
-		$sharedSecret,
-		$this->klarna_server
-	);  
-	$klarna_order = new Klarna_Checkout_Order(
-		$connector, 
-		$orderUri
-	);
+	$connector    = Klarna_Checkout_Connector::create( $sharedSecret, $this->klarna_server );
+	$klarna_order = new Klarna_Checkout_Order( $connector, $orderUri );
 }
 
 try {
 	$klarna_order->fetch();
-} catch( Exception $e ) {
+} catch ( Exception $e ) {
 	if ( is_user_logged_in() && $this->debug ) {
 		// The purchase was denied or something went wrong, print the message:
 		echo '<div>';
@@ -75,14 +65,14 @@ try {
 
 if ( $klarna_order['status'] == 'checkout_incomplete' ) {
 	wp_redirect( $this->klarna_checkout_url );
-	exit;  
+	exit;
 }
 
 // Display Klarna iframe
 if ( $this->is_rest() ) {
 	$snippet = '<div>' . $klarna_order['html_snippet'] . '</div>';
 } else {
-	$snippet = '<div class="klarna-thank-you-snippet">' . $klarna_order['gui']['snippet'] . '</div>';	
+	$snippet = '<div class="klarna-thank-you-snippet">' . $klarna_order['gui']['snippet'] . '</div>';
 }
 
 do_action( 'klarna_before_kco_confirmation', intval( $_GET['sid'] ) );
@@ -90,7 +80,7 @@ do_action( 'klarna_before_kco_confirmation', intval( $_GET['sid'] ) );
 // WC Subscriptions 2.0 needs this
 if ( class_exists( 'WC_Subscriptions_Cart' ) && WC_Subscriptions_Cart::cart_contains_subscription() ) {
 	sleep( 5 );
-	$parent_order = new WC_Order( intval( $_GET['sid'] ) );
+	$parent_order  = new WC_Order( intval( $_GET['sid'] ) );
 	$subscriptions = array();
 	// First clear out any subscriptions created for a failed payment to give us a clean slate for creating new subscriptions
 	$subscriptions = wcs_get_subscriptions_for_order( $parent_order->id, array( 'order_type' => 'parent' ) );
@@ -112,7 +102,7 @@ if ( class_exists( 'WC_Subscriptions_Cart' ) && WC_Subscriptions_Cart::cart_cont
 	do_action( 'subscriptions_created_for_order', $parent_order ); // Backward compatibility
 }
 
-echo $snippet;	
+echo $snippet;
 
 do_action( 'klarna_after_kco_confirmation', intval( $_GET['sid'] ) );
 do_action( 'woocommerce_thankyou', intval( $_GET['sid'] ) );

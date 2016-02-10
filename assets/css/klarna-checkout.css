@@ -3,6 +3,7 @@
 	#klarna-checkout-widget.kco-right-col {
 		width: 40%;
 	}
+
 	.klarna_checkout.kco-left-col,
 	.klarna_checkout.kco-right-col {
 		width: 55%;
@@ -12,6 +13,7 @@
 	.klarna_checkout.kco-left-col {
 		float: left;
 	}
+
 	#klarna-checkout-widget.kco-right-col,
 	.klarna_checkout.kco-right-col {
 		float: right;
@@ -25,14 +27,17 @@ a.std-checkout-button {
 #klarna-checkout-widget.kco-one-col {
 	margin-bottom: 2em;
 }
+
 #klarna-checkout-widget table {
 	table-layout: fixed;
 	border: none;
 	width: 100%;
 }
+
 th.product-remove {
 	width: 1.5em;
 }
+
 /*
 th.product-name {
 	width: 35%;
@@ -64,30 +69,37 @@ th.product-total {
 .kco-leftalign {
 	text-align: left;
 }
+
 .kco-centeralign {
 	text-align: center;
 }
+
 .kco-rightalign {
 	text-align: right;
 }
+
 .kco-bold {
 	font-weight: bold;
 }
 
 #klarna-checkout-widget {
 }
+
 #klarna-checkout-widget td,
 #klarna-checkout-widget th {
 	font-size: 11px;
 	padding: 5px;
 	border: none;
 }
+
 #klarna-checkout-widget #shipping_method li {
 	list-style: none;
 }
+
 #klarna-checkout-widget #kco-page-shipping li span.amount {
 	font-weight: normal;
 }
+
 textarea#klarna-checkout-order-note {
 	display: block;
 	width: 100%;

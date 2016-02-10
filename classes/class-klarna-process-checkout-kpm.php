@@ -35,12 +35,11 @@ class WC_Gateway_Klarna_Process_Checkout_KPM {
 		if ( isset( $_POST['payment_method'] ) ) {
 			if ( $_POST['payment_method'] == 'klarna_part_payment' || $_POST['payment_method'] == 'klarna_invoice' ) {
 				$payment_method_option_name = 'woocommerce_' . $_POST['payment_method'] . '_settings';
-				$payment_method_option = get_option( $payment_method_option_name );
+				$payment_method_option      = get_option( $payment_method_option_name );
 
 				// Set variables
-				$this->klarna_field_prefix = $_POST['payment_method'] . '_';
-				$this->klarna_shop_country = apply_filters( 'klarna_shop_country', get_option(
-					'woocommerce_default_country' ) );
+				$this->klarna_field_prefix             = $_POST['payment_method'] . '_';
+				$this->klarna_shop_country             = apply_filters( 'klarna_shop_country', get_option( 'woocommerce_default_country' ) );
 				$this->klarna_de_consent_terms_setting = $payment_method_option['de_consent_terms'];
 
 				add_action( 'woocommerce_checkout_process', array( $this, 'process_checkout_fields' ) );
@@ -141,7 +140,7 @@ class WC_Gateway_Klarna_Process_Checkout_KPM {
 	 */
 	public function check_consent_terms() {
 		if ( ( $this->klarna_shop_country == 'DE' || $this->klarna_shop_country == 'AT' ) && $this->klarna_de_consent_terms_setting == 'yes' ) {
-			error_log('inside');
+			error_log( 'inside' );
 			// Check if set, if its not set add an error.
 			if ( empty( $_POST[ $this->klarna_field_prefix . 'de_consent_terms' ] ) ) {
 				wc_add_notice( __( 'You must accept the Klarna consent terms.', 'woocommerce-gateway-klarna' ), 'error' );

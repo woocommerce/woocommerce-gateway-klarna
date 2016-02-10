@@ -15,11 +15,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Gateway_Klarna_Helper {
 
 	public function __construct( $parent ) {
-
 		$this->parent = $parent;
-
 	}
-
 
 	/**
 	 * Helper function, gets Klarna payment method testmode.
@@ -29,7 +26,7 @@ class WC_Gateway_Klarna_Helper {
 	function get_test_mode() {
 		return $this->parent->testmode;
 	}
-	
+
 	/**
 	 * Checks if method is enabled.
 	 *
@@ -44,8 +41,9 @@ class WC_Gateway_Klarna_Helper {
 	 * Helper function, gets Klarna locale based on current locale.
 	 *
 	 * @since 1.0.0
-	 * 
+	 *
 	 * @param string $locale
+	 *
 	 * @return string $klarna_locale
 	 **/
 	function get_klarna_locale( $locale ) {
@@ -83,76 +81,27 @@ class WC_Gateway_Klarna_Helper {
 			default:
 				$klarna_locale = '';
 		}
-		
+
 		return $klarna_locale;
 	}
-	
-	
-	/**
-	 * Helper function, gets Klarna eid based on country.
-	 *
-	 * @since 1.0.0
-	 * 
-	 * @param string $country
-	 * @return integer $current_eid
-	 **/
-	function get_eid( $country = false ) {
-		global $woocommerce;
-	
-		if ( empty( $country ) ) {
-			$country = ( isset( $woocommerce->customer->country ) ) ? $woocommerce->customer->country : $this->parent->shop_country;
-		}
-		
-		$current_eid = '';
-		
-		switch ( $country )	{
-			case 'DK' :
-				$current_eid = $this->parent->eid_dk;
-				break;
-			case 'DE' :
-				$current_eid = $this->parent->eid_de;
-				break;
-			case 'NL' :
-				$current_eid = $this->parent->eid_nl;
-				break;
-			case 'NO' :
-				$current_eid = $this->parent->eid_no;
-				break;
-			case 'FI' :
-				$current_eid = $this->parent->eid_fi;
-				break;
-			case 'SE' :
-				$current_eid = $this->parent->eid_se;
-				break;
-			case 'AT' :
-				$current_eid = $this->parent->eid_at;
-				break;
-			default:
-				$current_eid = '';
-		}
-		
-		return $current_eid;
-	}
-	
-	
+
 	/**
 	 * Helper function, gets Klarna secret based on country.
 	 *
 	 * @since 1.0.0
-	 * 
-	 * @param string $country
+	 *
+	 * @param  string $country
+	 *
 	 * @return string $current_secret
 	 **/
-	function get_secret( $country = false ) {
+	function get_secret( $country = '' ) {
 		global $woocommerce;
-	
+
 		if ( empty( $country ) ) {
 			$country = ( isset( $woocommerce->customer->country ) ) ? $woocommerce->customer->country : $this->parent->shop_country;
 		}
-		
-		$current_secret = '';
-		
-		switch ( $country )	{
+
+		switch ( $country ) {
 			case 'DK' :
 				$current_secret = $this->parent->secret_dk;
 				break;
@@ -177,21 +126,21 @@ class WC_Gateway_Klarna_Helper {
 			default:
 				$current_secret = '';
 		}
-		
+
 		return $current_secret;
 	}
-	
-	
+
 	/**
 	 * Helper function, gets currency for selected country.
 	 *
 	 * @since 1.0.0
-	 * 
+	 *
 	 * @param string $country
+	 *
 	 * @return string $currency
 	 **/
-	function get_currency_for_country( $country ) {	
-		switch ( $country )	{
+	function get_currency_for_country( $country ) {
+		switch ( $country ) {
 			case 'DK' :
 				$currency = 'DKK';
 				break;
@@ -216,21 +165,21 @@ class WC_Gateway_Klarna_Helper {
 			default:
 				$currency = '';
 		}
-		
+
 		return $currency;
 	}
-	
-	
+
 	/**
 	 * Helper function, gets Klarna language for selected country.
 	 *
 	 * @since 1.0.0
-	 * 
+	 *
 	 * @param  string $country
+	 *
 	 * @return string $language
 	 **/
-	function get_klarna_language( $country ) {		
-		switch ( $country )	{
+	function get_klarna_language( $country ) {
+		switch ( $country ) {
 			case 'DK' :
 				$language = 'DA';
 				break;
@@ -255,16 +204,15 @@ class WC_Gateway_Klarna_Helper {
 			default:
 				$language = '';
 		}
-		
+
 		return $language;
 	}
-	
-	
+
 	/**
 	 * Helper function, gets Klarna country.
 	 *
 	 * @since 1.0.0
-	 * 
+	 *
 	 * @return string $klarna_country
 	 **/
 	function get_klarna_country() {
@@ -291,8 +239,7 @@ class WC_Gateway_Klarna_Helper {
 			return $klarna_country;
 		}
 	}
-	
-	
+
 	/**
 	 * Helper function, gets invoice icon.
 	 *
@@ -302,40 +249,83 @@ class WC_Gateway_Klarna_Helper {
 		global $woocommerce;
 
 		$country = ( isset( $woocommerce->customer->country ) ) ? $woocommerce->customer->country : '';
-	
+
 		if ( empty( $country ) ) {
 			$country = $this->parent->shop_country;
 		}
-		
-		$current_secret = '';
-		
+
 		switch ( $country ) {
 			case 'DK':
 				$klarna_part_payment_icon = 'https://cdn.klarna.com/1.0/shared/image/generic/logo/da_dk/basic/blue-black.png?width=100&eid=' . $this->get_eid();
 				break;
-			case 'DE' :
+			case 'DE':
 				$klarna_part_payment_icon = 'https://cdn.klarna.com/1.0/shared/image/generic/logo/de_de/basic/blue-black.png?width=100&eid=' . $this->get_eid();
 				break;
-			case 'NL' :
+			case 'NL':
 				$klarna_part_payment_icon = 'https://cdn.klarna.com/1.0/shared/image/generic/logo/nl_nl/basic/blue-black.png?width=100&eid=' . $this->get_eid();
 				break;
-			case 'NO' :
+			case 'NO':
 				$klarna_part_payment_icon = false;
 				break;
-			case 'FI' :
+			case 'FI':
 				$klarna_part_payment_icon = 'https://cdn.klarna.com/1.0/shared/image/generic/logo/fi_fi/basic/blue-black.png?width=100&eid=' . $this->get_eid();
 				break;
-			case 'SE' :
+			case 'SE':
 				$klarna_part_payment_icon = 'https://cdn.klarna.com/1.0/shared/image/generic/logo/sv_se/basic/blue-black.png?width=100&eid=' . $this->get_eid();
 				break;
-			case 'AT' :
+			case 'AT':
 				$klarna_part_payment_icon = 'https://cdn.klarna.com/1.0/shared/image/generic/logo/de_at/basic/blue-black.png?width=100&eid=' . $this->get_eid();
 				break;
 			default:
 				$klarna_part_payment_icon = '';
 		}
-		
+
 		return $klarna_part_payment_icon;
-	}	
+	}
+
+	/**
+	 * Helper function, gets Klarna eid based on country.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param  string $country
+	 *
+	 * @return integer $current_eid
+	 **/
+	function get_eid( $country = '' ) {
+		global $woocommerce;
+
+		if ( empty( $country ) ) {
+			$country = ( isset( $woocommerce->customer->country ) ) ? $woocommerce->customer->country : $this->parent->shop_country;
+		}
+
+		switch ( $country ) {
+			case 'DK' :
+				$current_eid = $this->parent->eid_dk;
+				break;
+			case 'DE' :
+				$current_eid = $this->parent->eid_de;
+				break;
+			case 'NL' :
+				$current_eid = $this->parent->eid_nl;
+				break;
+			case 'NO' :
+				$current_eid = $this->parent->eid_no;
+				break;
+			case 'FI' :
+				$current_eid = $this->parent->eid_fi;
+				break;
+			case 'SE' :
+				$current_eid = $this->parent->eid_se;
+				break;
+			case 'AT' :
+				$current_eid = $this->parent->eid_at;
+				break;
+			default:
+				$current_eid = '';
+		}
+
+		return $current_eid;
+	}
 
 }

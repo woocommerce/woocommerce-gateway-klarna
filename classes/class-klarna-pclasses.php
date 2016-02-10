@@ -30,14 +30,14 @@ class WC_Gateway_Klarna_PClasses {
 
 	/**
 	 * Retrieves PClasses for country.
-	 * 
+	 *
 	 * @since 1.0.0
-	 * 
+	 *
 	 * @return $pclasses Key value array of countries and their PClasses
 	 */
 	function get_pclasses_for_country_and_type() {
 
-		$pclasses_country_all = $this->fetch_pclasses();
+		$pclasses_country_all  = $this->fetch_pclasses();
 		$pclasses_country_type = array();
 		unset( $pclasses_country_type );
 
@@ -58,7 +58,7 @@ class WC_Gateway_Klarna_PClasses {
 
 	/**
 	 * Displays available PClasses in admin settings page.
-	 * 
+	 *
 	 * @since 1.0.0
 	 */
 	function display_pclasses_for_country_and_type() {
@@ -68,16 +68,16 @@ class WC_Gateway_Klarna_PClasses {
 			<h5 style="margin-bottom:0.25em;"><?php echo $this->country; ?></h5>
 			<?php
 			$pclass_string = '';
-			foreach( $pclasses as $pclass ) {
+			foreach ( $pclasses as $pclass ) {
 				if ( in_array( $pclass->getType(), $this->type ) ) { // Passed from parent file
 					$pclass_string .= $pclass->getDescription() . ', ';
 				}
 			}
-			$pclass_string = substr( $pclass_string, 0, -2 );
+			$pclass_string = substr( $pclass_string, 0, - 2 );
 			?>
 			<p style="margin-top:0;"><?php echo $pclass_string; ?></p>
 		<?php }
-				
+
 	}
 
 	/**
@@ -86,7 +86,7 @@ class WC_Gateway_Klarna_PClasses {
 	 * @since 1.0.0
 	 */
 	function fetch_pclasses() {
-					
+
 		$klarna = $this->klarna;
 
 		if ( $klarna->getPClasses() ) {
@@ -95,10 +95,10 @@ class WC_Gateway_Klarna_PClasses {
 			try {
 				// You can specify country (and language, currency if you wish) if you don't want 
 				// to use the configured country.
-				$klarna->fetchPClasses( $this->country ); 
+				$klarna->fetchPClasses( $this->country );
+
 				return $klarna->getAllPClasses();
-			}
-			catch( Exception $e ) {
+			} catch ( Exception $e ) {
 				return false;
 			}
 		}

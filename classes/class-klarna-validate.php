@@ -31,11 +31,11 @@ class WC_Gateway_Klarna_Order_Validate {
 
 
 	/**
-     * Validate Klarna order
-     * Checks order items' stock status.
+	 * Validate Klarna order
+	 * Checks order items' stock status.
 	 *
 	 * @since 1.0.0
-     */
+	 */
 	function validate_checkout_listener() {
 		$logger = new WC_Logger();
 		$logger->add( 'klarna', 'LISTENER: ' . var_export( $_GET, true ) );
