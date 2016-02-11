@@ -23,10 +23,8 @@ class WC_Gateway_Klarna_Order_Validate {
 	 * @since 1.0.0
 	 */
 	public function __construct() {
-
 		// Validation listener
 		add_action( 'woocommerce_api_wc_gateway_klarna_order_validate', array( $this, 'validate_checkout_listener' ) );
-
 	}
 
 
@@ -37,13 +35,11 @@ class WC_Gateway_Klarna_Order_Validate {
 	 * @since 1.0.0
 	 */
 	function validate_checkout_listener() {
-		$logger = new WC_Logger();
-		$logger->add( 'klarna', 'LISTENER: ' . var_export( $_GET, true ) );
-		if ( isset( $_GET['validate'] ) && 'yes' == $_GET['validate'] ) {
-			$logger->add( 'klarna', 'HITTIN VALIDATOR' );
-		}
+		error_log('test');
 		// header( 'HTTP/1.0 303 See Other' );
 		// header( 'Location: http://www.example.com/' );
 	} // End function validate_checkout_listener
 
 }
+
+$wc_gateway_klarna_order_validate = new WC_Gateway_Klarna_Order_Validate();
