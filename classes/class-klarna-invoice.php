@@ -558,12 +558,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 		if ( $woocommerce->customer->get_country() == true && ! in_array( $woocommerce->customer->get_country(), $this->authorized_countries ) ) {
 			return false;
 		}
-
-		// Don't allow orders over the amount of €250 for Dutch customers
-		if ( ( $woocommerce->customer->get_country() == true && $woocommerce->customer->get_country() == 'NL' ) && $woocommerce->cart->total >= 251 ) {
-			return false;
-		}
-
+		
 		return true;
 	}
 
