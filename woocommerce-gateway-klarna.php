@@ -250,21 +250,9 @@ add_action( 'plugins_loaded', 'init_klarna_gateway', 2 );
  * @return array $methods
  */
 function add_klarna_gateway( $methods ) {
-	if ( ! is_admin() ) {
-		$klarna_customer_country = WC()->customer->get_country();
-	}
-
-	$available_countries = array( 'SE', 'NO', 'FI', 'DK', 'DE', 'NL', 'AT' );
-	if ( is_admin() || in_array( $klarna_customer_country, $available_countries ) ) {
-		$methods[] = 'WC_Gateway_Klarna_Part_Payment';
-		$methods[] = 'WC_Gateway_Klarna_Invoice';
-	}
-
-	// Only add the Klarna Checkout method if Sweden, Norway, Finland, Germany, Austria, UK or US is set as the base country
-	$available_countries = array( 'SE', 'NO', 'FI', 'DE', 'GB', 'AT', 'US' );
-	if ( is_admin() || in_array( $klarna_customer_country, $available_countries ) ) {
-		$methods[] = 'WC_Gateway_Klarna_Checkout';
-	}
+	$methods[] = 'WC_Gateway_Klarna_Part_Payment';
+	$methods[] = 'WC_Gateway_Klarna_Invoice';
+	$methods[] = 'WC_Gateway_Klarna_Checkout';
 
 	return $methods;
 }
