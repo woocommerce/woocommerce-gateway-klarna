@@ -380,7 +380,7 @@ return apply_filters( 'klarna_checkout_form_fields', array(
 		'default' => 'no'
 	),
 	'send_new_account_email'  => array(
-		'title'   => __( 'Send New account email when creating new accounts.', 'woocommerce-gateway-klarna' ),
+		'title'   => __( 'Send New account email when creating new accounts', 'woocommerce-gateway-klarna' ),
 		'type'    => 'checkbox',
 		'label'   => __( 'Send New account email', 'woocommerce-gateway-klarna' ),
 		'default' => 'no'
@@ -399,52 +399,60 @@ return apply_filters( 'klarna_checkout_form_fields', array(
 		'default'     => '',
 		'desc_tip'    => true
 	),
+	'validate_stock'          => array(
+		'title'    => __( 'Check items stock during checkout', 'woocommerce-gateway-klarna' ),
+		'type'     => 'checkbox',
+		'label'    => __( 'If this option is checked, stock status will be checked again for all items in the cart
+		 while Klarna Checkout request is being processed. Useful for high-volume stores, HTTPS is required.', 'woocommerce-gateway-klarna' ),
+		'default'  => '',
+		'desc_tip' => true
+	),
 
 	'color_settings_title'     => array(
 		'title' => __( 'Color Settings', 'woocommerce-gateway-klarna' ),
 		'type'  => 'title',
 	),
 	'color_button'             => array(
-		'title'    => __( 'Checkout button color', 'woocommerce-gateway-klarna' ),
-		'type'     => 'color',
-		'desc_tip' => __( 'Checkout page button color', 'woocommerce-gateway-klarna' ),
-		'default'  => '',
-		'desc_tip' => true
+		'title'       => __( 'Checkout button color', 'woocommerce-gateway-klarna' ),
+		'type'        => 'color',
+		'description' => __( 'Checkout page button color', 'woocommerce-gateway-klarna' ),
+		'default'     => '',
+		'desc_tip'    => true
 	),
 	'color_button_text'        => array(
-		'title'    => __( 'Checkout button text color', 'woocommerce-gateway-klarna' ),
-		'type'     => 'color',
-		'desc_tip' => __( 'Checkout page button text color', 'woocommerce-gateway-klarna' ),
-		'default'  => '',
-		'desc_tip' => true
+		'title'       => __( 'Checkout button text color', 'woocommerce-gateway-klarna' ),
+		'type'        => 'color',
+		'description' => __( 'Checkout page button text color', 'woocommerce-gateway-klarna' ),
+		'default'     => '',
+		'desc_tip'    => true
 	),
 	'color_checkbox'           => array(
-		'title'    => __( 'Checkout checkbox color', 'woocommerce-gateway-klarna' ),
-		'type'     => 'color',
-		'desc_tip' => __( 'Checkout page checkbox color', 'woocommerce-gateway-klarna' ),
-		'default'  => '',
-		'desc_tip' => true
+		'title'       => __( 'Checkout checkbox color', 'woocommerce-gateway-klarna' ),
+		'type'        => 'color',
+		'description' => __( 'Checkout page checkbox color', 'woocommerce-gateway-klarna' ),
+		'default'     => '',
+		'desc_tip'    => true
 	),
 	'color_checkbox_checkmark' => array(
-		'title'    => __( 'Checkout checkbox checkmark color', 'woocommerce-gateway-klarna' ),
-		'type'     => 'color',
-		'desc_tip' => __( 'Checkout page checkbox checkmark color', 'woocommerce-gateway-klarna' ),
-		'default'  => '',
-		'desc_tip' => true
+		'title'       => __( 'Checkout checkbox checkmark color', 'woocommerce-gateway-klarna' ),
+		'type'        => 'color',
+		'description' => __( 'Checkout page checkbox checkmark color', 'woocommerce-gateway-klarna' ),
+		'default'     => '',
+		'desc_tip'    => true
 	),
 	'color_header'             => array(
-		'title'    => __( 'Checkout header color', 'woocommerce-gateway-klarna' ),
-		'type'     => 'color',
-		'desc_tip' => __( 'Checkout page header color', 'woocommerce-gateway-klarna' ),
-		'default'  => '',
-		'desc_tip' => true
+		'title'       => __( 'Checkout header color', 'woocommerce-gateway-klarna' ),
+		'type'        => 'color',
+		'description' => __( 'Checkout page header color', 'woocommerce-gateway-klarna' ),
+		'default'     => '',
+		'desc_tip'    => true
 	),
 	'color_link'               => array(
-		'title'    => __( 'Checkout link color', 'woocommerce-gateway-klarna' ),
-		'type'     => 'color',
-		'desc_tip' => __( 'Checkout page link color', 'woocommerce-gateway-klarna' ),
-		'default'  => '',
-		'desc_tip' => true
+		'title'       => __( 'Checkout link color', 'woocommerce-gateway-klarna' ),
+		'type'        => 'color',
+		'description' => __( 'Checkout page link color', 'woocommerce-gateway-klarna' ),
+		'default'     => '',
+		'desc_tip'    => true
 	),
 
 

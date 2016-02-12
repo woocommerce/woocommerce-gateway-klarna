@@ -92,19 +92,25 @@ if ( $this->is_rest() ) {
 
 // Different format for V3 and V2
 if ( $this->is_rest() ) {
-	$merchantUrls            = array(
+	$merchantUrls = array(
 		'terms'          => $merchant_terms_uri,
 		'checkout'       => $merchant_checkout_uri,
 		'confirmation'   => $merchant_confirmation_uri,
 		'push'           => $merchant_push_uri,
 		'address_update' => $address_update_uri
 	);
+	if ( 'yes' == $this->validate_stock ) {
+		$merchantUrls['validation'] = get_home_url() . '/wc-api/WC_Gateway_Klarna_Order_Validate/';
+	}
 	$create['merchant_urls'] = $merchantUrls;
 } else {
 	$create['merchant']['terms_uri']        = $merchant_terms_uri;
 	$create['merchant']['checkout_uri']     = $merchant_checkout_uri;
 	$create['merchant']['confirmation_uri'] = $merchant_confirmation_uri;
 	$create['merchant']['push_uri']         = $merchant_push_uri;
+	if ( 'yes' == $this->validate_stock ) {
+		$create['merchant']['validation_uri']   = get_home_url() . '/wc-api/WC_Gateway_Klarna_Order_Validate/';
+	}
 }
 
 // Make phone a mandatory field for German stores?

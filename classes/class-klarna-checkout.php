@@ -65,6 +65,8 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 
 		// Push listener
 		add_action( 'woocommerce_api_wc_gateway_klarna_checkout', array( $this, 'check_checkout_listener' ) );
+		// Validate listener
+		add_action( 'woocommerce_api_wc_gateway_klarna_order_validate', array( 'WC_Gateway_Klarna_Order_Validate', 'validate_checkout_listener' ) );
 
 		// We execute the woocommerce_thankyou hook when the KCO Thank You page is rendered,
 		// because other plugins use this, but we don't want to display the actual WC Order

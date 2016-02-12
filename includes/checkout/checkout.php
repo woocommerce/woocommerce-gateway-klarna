@@ -43,7 +43,7 @@ if ( ! defined( 'WOOCOMMERCE_KLARNA_CHECKOUT' ) ) {
 	define( 'WOOCOMMERCE_KLARNA_CHECKOUT', true );
 }
 
-// Set Klarna Checkout as the choosen payment method in the WC session
+// Set Klarna Checkout as the chosen payment method in the WC session
 WC()->session->set( 'chosen_payment_method', 'klarna_checkout' );
 
 // Set customer country so taxes and shipping can be calculated properly
@@ -73,7 +73,6 @@ $add_klarna_window_size_script = true;
 $result = $woocommerce->cart->check_cart_item_stock();
 if ( is_wp_error( $result ) ) {
 	return $result->get_error_message();
-	exit();
 }
 
 // Check if there's anything in the cart
