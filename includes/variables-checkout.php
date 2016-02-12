@@ -71,6 +71,9 @@ $this->send_new_account_email  = ( isset( $this->settings['send_new_account_emai
 $this->account_signup_text = ( isset( $this->settings['account_signup_text'] ) ) ? $this->settings['account_signup_text'] : '';
 $this->account_login_text  = ( isset( $this->settings['account_login_text'] ) ) ? $this->settings['account_login_text'] : '';
 
+$this->validate_stock = $this->get_option( 'validate_stock' );
+
+
 // Color options
 $this->color_button             = ( isset( $this->settings['color_button'] ) ) ? $this->settings['color_button'] : '';
 $this->color_button_text        = ( isset( $this->settings['color_button_text'] ) ) ? $this->settings['color_button_text'] : '';

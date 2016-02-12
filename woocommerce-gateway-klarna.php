@@ -201,7 +201,6 @@ function init_klarna_gateway() {
 	require_once 'classes/class-klarna-get-address.php'; // Get address
 	require_once 'classes/class-klarna-pms.php'; // PMS
 	require_once 'classes/class-klarna-order.php'; // Handles Klarna orders
-	require_once 'classes/class-klarna-validate.php'; // Validates Klarna orders
 	require_once 'classes/class-klarna-payment-method-display-widget.php'; // WordPress widget
 
 	// register Foo_Widget widget
@@ -214,6 +213,7 @@ function init_klarna_gateway() {
 	// Klarna Checkout class
 	require_once 'classes/class-klarna-checkout.php';
 	require_once 'classes/class-klarna-shortcodes.php';
+	require_once 'classes/class-klarna-validate.php';
 
 	// Send customer and merchant emails for KCO Incomplete > Processing status change
 

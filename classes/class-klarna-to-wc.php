@@ -625,6 +625,8 @@ class WC_Gateway_Klarna_K2WC {
 	 * @access public
 	 *
 	 * @param  object $order Local WC order.
+	 *
+	 * @throws Exception
 	 */
 	public function add_order_coupons( $order ) {
 		if ( $this->klarna_debug == 'yes' ) {
@@ -650,7 +652,8 @@ class WC_Gateway_Klarna_K2WC {
 	 * @access public
 	 *
 	 * @param  object $order Local WC order.
-	 * @param  object $klarna_order Klarna order.
+	 *
+	 * @internal param object $klarna_order Klarna order.
 	 */
 	public function add_order_payment_method( $order ) {
 		if ( $this->klarna_debug == 'yes' ) {

@@ -134,12 +134,18 @@ try {
 				'push'           => $merchant_push_uri,
 				'address_update' => $address_update_uri
 			);
+			if ( 'yes' == $this->validate_stock ) {
+				$merchantUrls['validation'] = get_home_url() . '/wc-api/WC_Gateway_Klarna_Order_Validate/';
+			}
 			$update['merchant_urls'] = $merchantUrls;
 		} else {
 			$update['merchant']['terms_uri']        = $merchant_terms_uri;
 			$update['merchant']['checkout_uri']     = $merchant_checkout_uri;
 			$update['merchant']['confirmation_uri'] = $merchant_confirmation_uri;
 			$update['merchant']['push_uri']         = $merchant_push_uri;
+			if ( 'yes' == $this->validate_stock ) {
+				$update['merchant']['validation_uri']   = get_home_url() . '/wc-api/WC_Gateway_Klarna_Order_Validate/';
+			}
 		}
 
 		// Customer info if logged in
