@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * File containing the Transport factory
+ * File containing the PHPUnit Klarna_HTTP_WPTest test case
  *
  * PHP version 5.3
  *
@@ -28,27 +28,25 @@
  */
 
 /**
- * Factory of HTTP Transport
+ * Factory of cURL handles
  *
  * @category   Payment
  * @package    Payment_Klarna
  * @subpackage Unit_Tests
- * @author     David K. <david.keijser@klarna.com>
+ * @author     Klarna <support@klarna.com>
  * @copyright  2015 Klarna AB
  * @license    http://www.apache.org/licenses/LICENSE-2.0 Apache license v2.0
  * @link       http://developers.klarna.com/
  */
-class Klarna_Checkout_HTTP_Transport
+class Klarna_Checkout_HTTP_WPFactory
 {
     /**
-     * Create a new transport instance
+     * Create a new cURL handle
      *
-     * @return Klarna_Checkout_HTTP_TransportInterface
+     * @return Klarna_Checkout_HTTP_WPHandle
      */
-    public static function create()
+    public function handle()
     {
-        return new Klarna_Checkout_HTTP_WPTransport(
-            new Klarna_Checkout_HTTP_WPFactory
-        );
+        return new Klarna_Checkout_HTTP_WPHandle();
     }
 }

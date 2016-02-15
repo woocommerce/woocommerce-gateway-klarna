@@ -14,13 +14,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * File containing the Transport factory
+ * File containing the Klarna_Checkout_HTTP_WPHeaders class
  *
  * PHP version 5.3
  *
  * @category   Payment
  * @package    Payment_Klarna
- * @subpackage Unit_Tests
+ * @subpackage HTTP
  * @author     Klarna <support@klarna.com>
  * @copyright  2015 Klarna AB
  * @license    http://www.apache.org/licenses/LICENSE-2.0 Apache license v2.0
@@ -28,27 +28,53 @@
  */
 
 /**
- * Factory of HTTP Transport
+ * Defines a cURL handle interface
  *
  * @category   Payment
  * @package    Payment_Klarna
- * @subpackage Unit_Tests
+ * @subpackage HTTP
  * @author     David K. <david.keijser@klarna.com>
  * @copyright  2015 Klarna AB
  * @license    http://www.apache.org/licenses/LICENSE-2.0 Apache license v2.0
  * @link       http://developers.klarna.com/
  */
-class Klarna_Checkout_HTTP_Transport
+interface Klarna_Checkout_HTTP_WPHandleInterface
 {
     /**
-     * Create a new transport instance
+     * Set an option for the cURL transfer
      *
-     * @return Klarna_Checkout_HTTP_TransportInterface
+     * @param int   $name  option the set
+     * @param mixed $value the value to be set on option
+     *
+     * @return void
      */
-    public static function create()
-    {
-        return new Klarna_Checkout_HTTP_WPTransport(
-            new Klarna_Checkout_HTTP_WPFactory
-        );
-    }
+    public function setOption($name, $value);
+
+    /**
+     * Perform the cURL session
+     *
+     * @return mixed response
+     */
+    public function execute();
+
+    /**
+     * Get information regarding this transfer
+     *
+     * @return array
+     */
+    public function getInfo();
+
+    /**
+     * Get error message regarding this transfer
+     *
+     * @return string Error message
+     */
+    public function getError();
+
+    /**
+     * Close the cURL session
+     *
+     * @return void
+     */
+    public function close();
 }
