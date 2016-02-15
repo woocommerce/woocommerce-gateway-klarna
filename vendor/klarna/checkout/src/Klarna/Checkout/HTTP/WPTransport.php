@@ -6,7 +6,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *	 http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,36 +19,27 @@
  * PHP version 5.3
  *
  * @category   Payment
- * @package    Payment_Klarna
+ * @package	   Payment_Klarna
  * @subpackage HTTP
- * @author     Klarna <support@klarna.com>
+ * @author	   Klarna <support@klarna.com>
  * @copyright  2015 Klarna AB AB
- * @license    http://www.apache.org/licenses/LICENSE-2.0 Apache license v2.0
- * @link       http://developers.klarna.com/
+ * @license	   http://www.apache.org/licenses/LICENSE-2.0 Apache license v2.0
+ * @link	   http://developers.klarna.com/
  */
 
 /**
  * Klarna HTTP transport implementation for cURL
  *
  * @category   Payment
- * @package    Payment_Klarna
+ * @package	   Payment_Klarna
  * @subpackage HTTP
- * @author     Klarna <support@klarna.com>
+ * @author	   Klarna <support@klarna.com>
  * @copyright  2015 Klarna AB
- * @license    http://www.apache.org/licenses/LICENSE-2.0 Apache license v2.0
- * @link       http://developers.klarna.com/
+ * @license	   http://www.apache.org/licenses/LICENSE-2.0 Apache license v2.0
+ * @link	   http://developers.klarna.com/
  */
-class Klarna_Checkout_HTTP_WPTransport implements
-    Klarna_Checkout_HTTP_TransportInterface
-{
+class Klarna_Checkout_HTTP_WPTransport implements Klarna_Checkout_HTTP_TransportInterface {
     const DEFAULT_TIMEOUT = 10;
-
-    /**
-     * Factory for cUrl
-     *
-     * @var Klarna_Checkout_HTTP_WPFactory
-     */
-    protected $curl;
 
     /**
      * Number of seconds before the connection times out.
@@ -58,35 +49,10 @@ class Klarna_Checkout_HTTP_WPTransport implements
     protected $timeout;
 
     /**
-     * Options for cURL
-     *
-     * @var array
-     */
-    protected $options;
-
-    /**
      * Initializes a new instance of the HTTP cURL class.
-     *
-     * @param Klarna_Checkout_HTTP_WPFactory $curl factory to for curl handles
      */
-    public function __construct(Klarna_Checkout_HTTP_WPFactory $curl)
-    {
-        $this->curl = $curl;
+    public function __construct() {
         $this->timeout = self::DEFAULT_TIMEOUT;
-        $this->options = array();
-    }
-
-    /**
-     * Set specific cURL options.
-     *
-     * @param int   $option cURL option constant
-     * @param mixed $value  cURL option value
-     *
-     * @return void
-     */
-    public function setOption($option, $value)
-    {
-        $this->options[$option] = $value;
     }
 
     /**
@@ -96,9 +62,8 @@ class Klarna_Checkout_HTTP_WPTransport implements
      *
      * @return void
      */
-    public function setTimeout($timeout)
-    {
-        $this->timeout = intval($timeout);
+    public function setTimeout( $timeout ) {
+        $this->timeout = intval( $timeout );
     }
 
     /**
@@ -106,91 +71,52 @@ class Klarna_Checkout_HTTP_WPTransport implements
      *
      * @return int timeout in number of seconds
      */
-    public function getTimeout()
-    {
+    public function getTimeout() {
         return $this->timeout;
     }
 
     /**
      * Performs a HTTP request.
      *
-     * @param Klarna_Checkout_HTTP_Request $request the HTTP request to send.
+     * @param  Klarna_Checkout_HTTP_Request $request the HTTP request to send.
      *
-     * @throws RuntimeException                Thrown if a cURL handle cannot
-     *                                         be initialized.
      * @throws Klarna_Checkout_ConnectionErrorException Thrown for unspecified
-     *                                                  network or hardware issues.
+     *												    network or hardware issues.
      * @return Klarna_Checkout_HTTP_Response
      */
-    public function send(Klarna_Checkout_HTTP_Request $request)
-    {
-        $curl = $this->curl->handle();
-        if ($curl === false) {
-            throw new RuntimeException(
-                'Failed to initialize a HTTP handle.'
-            );
-        }
-
-        $url = $request->getURL();
-        $curl->setOption(CURLOPT_URL, $url);
-
-        $method = $request->getMethod();
-        if ($method === 'POST') {
-            $curl->setOption(CURLOPT_POST, true);
-            $curl->setOption(CURLOPT_POSTFIELDS, $request->getData());
-        }
-
-        // Convert headers to cURL format.
-        $requestHeaders = array();
-        foreach ($request->getHeaders() as $key => $value) {
-            $requestHeaders[] = $key . ': ' . $value;
-        }
-
-        $curl->setOption(CURLOPT_HTTPHEADER, $requestHeaders);
-
-        $curl->setOption(CURLOPT_RETURNTRANSFER, true);
-        $curl->setOption(CURLOPT_CONNECTTIMEOUT, $this->timeout);
-        $curl->setOption(CURLOPT_TIMEOUT, $this->timeout);
-
-        $curlHeaders = new Klarna_Checkout_HTTP_WPHeaders();
-        $curl->setOption(
-            CURLOPT_HEADERFUNCTION,
-            array(&$curlHeaders, 'processHeader')
+    public function send( Klarna_Checkout_HTTP_Request $request ) {
+        // Set arguments for wp_remote_request
+        $args = array(
+            'method'   => $request->getMethod(),
+            'headers'  => $request->getHeaders(),
+            'body'     => $request->getData(),
+            'timeout'  => $this->getTimeout(),
         );
 
-        $curl->setOption(CURLOPT_SSL_VERIFYHOST, 2);
-        $curl->setOption(CURLOPT_SSL_VERIFYPEER, KLARNA_WC_SSL_VERIFYPEER);
-
-        // Override specific set options
-        foreach ($this->options as $option => $value) {
-            $curl->setOption($option, $value);
+        // For GET requests we need to get Klarna order URI, set in WC session
+        if ( 'GET' == $request->getMethod() && WC()->session->get( 'klarna_request_uri' ) ) {
+            $req_url = WC()->session->get( 'klarna_request_uri' );
+        } else {
+            $req_url = $request->getURL();
         }
 
-        $payload = $curl->execute();
-        $info = $curl->getInfo();
-        $error = $curl->getError();
-
-        $curl->close();
-
-        /*
-         * A failure occurred if:
-         * payload is false (e.g. HTTP timeout?).
-         * info is false, then it has no HTTP status code.
-         */
-        if ($payload === false || $info === false) {
-            throw new Klarna_Checkout_ConnectionErrorException(
-                "Connection to '{$url}' failed: {$error}"
-            );
-        }
-
-        $headers = $curlHeaders->getHeaders();
-
-        // Convert Content-Type into a normal header
-        $headers['Content-Type'] = $info['content_type'];
+        $my_response = wp_remote_request(
+            $req_url,
+            $args
+        );
 
         $response = new Klarna_Checkout_HTTP_Response(
-            $request, $headers, intval($info['http_code']), strval($payload)
+            $request,
+            $request->getHeaders(),
+            intval( $my_response['response']['code'] ),
+            strval( $my_response['body'] )
         );
+
+        // Set order URI as session value for GET request
+        if ( 'POST' == $request->getMethod() ) {
+            WC()->session->__unset( 'klarna_request_uri' );
+            WC()->session->set( 'klarna_request_uri', $my_response['headers']['location'] );
+        }
 
         return $response;
     }
@@ -198,14 +124,13 @@ class Klarna_Checkout_HTTP_WPTransport implements
     /**
      * Creates a HTTP request object.
      *
-     * @param string $url the request URL.
+     * @param  string $url the request URL.
      *
      * @throws InvalidArgumentException If the specified argument
-     *                                  is not of type string.
+     *								    is not of type string.
      * @return Klarna_Checkout_HTTP_Request
      */
-    public function createRequest($url)
-    {
-        return new Klarna_Checkout_HTTP_Request($url);
+    public function createRequest( $url ) {
+        return new Klarna_Checkout_HTTP_Request( $url );
     }
 }

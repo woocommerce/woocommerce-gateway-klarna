@@ -47,8 +47,6 @@ class Klarna_Checkout_HTTP_Transport
      */
     public static function create()
     {
-        return new Klarna_Checkout_HTTP_WPTransport(
-            new Klarna_Checkout_HTTP_WPFactory
-        );
+        return new Klarna_Checkout_HTTP_WPTransport();
     }
 }
