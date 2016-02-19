@@ -536,7 +536,7 @@ class WC_Gateway_Klarna_Shortcodes {
 		foreach ( $woocommerce->cart->get_applied_coupons() as $coupon ) { ?>
 			<tr class="kco-applied-coupon">
 				<td>
-					<?php printf( _e( 'Coupon: %s', 'woocommerce-gateway-klarna' ), $coupon ); ?>
+					<?php _e( 'Coupon: ', 'woocommerce-gateway-klarna' ); ?><?php echo $coupon; ?>
 					<a class="kco-remove-coupon" data-coupon="<?php echo $coupon; ?>"
 					   href="#"><?php _e( '(remove)' ); ?></a>
 				</td>

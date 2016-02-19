@@ -59,6 +59,9 @@ class WC_Gateway_Klarna_WC2K {
 	 * Constructor
 	 *
 	 * @since 2.0.0
+	 *
+	 * @param bool $is_rest
+	 * @param string $klarna_country
 	 */
 	public function __construct( $is_rest = false, $klarna_country = '' ) {
 		global $woocommerce;
@@ -251,40 +254,47 @@ class WC_Gateway_Klarna_WC2K {
 		// Process discounts
 		if ( WC()->cart->applied_coupons ) {
 			foreach ( WC()->cart->applied_coupons as $code ) {
-				$smart_coupon = new WC_Coupon( $code );
+				$coupon = new WC_Coupon( $code );
 
-				if ( $smart_coupon->is_valid() && $smart_coupon->discount_type == 'smart_coupon' ) {
-					$coupon_name   = $this->get_coupon_name( $smart_coupon );
-					$coupon_amount = $this->get_coupon_amount( $smart_coupon );
+				if ( ! $coupon->is_valid() ) {
+					break;
+				}
 
-					// Check if coupon amount exceeds order total
-					if ( $order_total < $coupon_amount ) {
-						$coupon_amount = $order_total;
-					}
+				$klarna_settings = get_option( 'woocommerce_klarna_checkout_settings' );
+				if ( 'yes' != $klarna_settings['send_discounts_separately'] && $coupon->discount_type != 'smart_coupon' ) {
+					break;
+				}
 
-					if ( $this->is_rest ) {
-						$cart[]      = array(
-							'type'             => 'discount',
-							'reference'        => 'DISCOUNT',
-							'name'             => $coupon_name,
-							'quantity'         => 1,
-							'unit_price'       => - $coupon_amount,
-							'total_amount'     => - $coupon_amount,
-							'tax_rate'         => 0,
-							'total_tax_amount' => 0,
-						);
-						$order_total = $order_total - $coupon_amount;
-					} else {
-						$cart[]      = array(
-							'type'       => 'discount',
-							'reference'  => 'DISCOUNT',
-							'name'       => $coupon_name,
-							'quantity'   => 1,
-							'unit_price' => - $coupon_amount,
-							'tax_rate'   => 0,
-						);
-						$order_total = $order_total - $coupon_amount;
-					}
+				$coupon_name   = $this->get_coupon_name( $coupon );
+				$coupon_amount = $this->get_coupon_amount( $coupon );
+
+				// Check if coupon amount exceeds order total
+				if ( $order_total < $coupon_amount ) {
+					$coupon_amount = $order_total;
+				}
+
+				if ( $this->is_rest ) {
+					$cart[]      = array(
+						'type'             => 'discount',
+						'reference'        => 'DISCOUNT',
+						'name'             => $coupon_name,
+						'quantity'         => 1,
+						'unit_price'       => - $coupon_amount,
+						'total_amount'     => - $coupon_amount,
+						'tax_rate'         => 0,
+						'total_tax_amount' => 0,
+					);
+					$order_total = $order_total - $coupon_amount;
+				} else {
+					$cart[]      = array(
+						'type'       => 'discount',
+						'reference'  => 'DISCOUNT',
+						'name'       => $coupon_name,
+						'quantity'   => 1,
+						'unit_price' => - $coupon_amount,
+						'tax_rate'   => 0,
+					);
+					$order_total = $order_total - $coupon_amount;
 				}
 			}
 		}
@@ -464,7 +474,9 @@ class WC_Gateway_Klarna_WC2K {
 	 * @return integer $item_discount_rate Cart item discount rate.
 	 */
 	public function get_item_discount_rate( $cart_item ) {
-		if ( $cart_item['line_subtotal'] > $cart_item['line_total'] ) {
+		$klarna_settings = get_option( 'woocommerce_klarna_checkout_settings' );
+
+		if ( 'yes' != $klarna_settings['send_discounts_separately'] && $cart_item['line_subtotal'] > $cart_item['line_total'] ) {
 			$item_discount_rate = ( 1 - ( $cart_item['line_total'] / $cart_item['line_subtotal'] ) ) * 10000;
 		} else {
 			$item_discount_rate = 0;
@@ -715,8 +727,8 @@ class WC_Gateway_Klarna_WC2K {
 	 *
 	 * @return string $coupon_name Name for selected coupon method.
 	 */
-	public function get_coupon_name( $smart_coupon ) {
-		$coupon_name = $smart_coupon->code;
+	public function get_coupon_name( $coupon ) {
+		$coupon_name = $coupon->code;
 
 		return $coupon_name;
 	}
@@ -729,30 +741,11 @@ class WC_Gateway_Klarna_WC2K {
 	 *
 	 * @return integer $coupon_amount Amount for selected coupon method.
 	 */
-	public function get_coupon_amount( $smart_coupon ) {
-		$coupon_amount = (int) number_format( ( $smart_coupon->coupon_amount ) * 100, 0, '', '' );
+	public function get_coupon_amount( $coupon ) {
+		$coupon_amount = WC()->cart->get_coupon_discount_amount( $coupon->code, false );
+		$coupon_amount = (int) number_format( ( $coupon_amount ) * 100, 0, '', '' );
 
-		return (int) $coupon_amount;
-	}
-
-	/**
-	 * Get coupon method tax rate.
-	 *
-	 * @since  2.0.0
-	 * @access public
-	 *
-	 * @return integer $coupon_tax_rate Tax rate for selected coupon method.
-	 */
-	public function get_coupon_tax_rate( $smart_coupon ) {
-		global $woocommerce;
-
-		if ( $woocommerce->cart->coupon_tax_total > 0 ) {
-			$coupon_tax_rate = round( $woocommerce->cart->coupon_tax_total / $woocommerce->cart->coupon_total, 2 ) * 100;
-		} else {
-			$coupon_tax_rate = 00;
-		}
-
-		return intval( $coupon_tax_rate . '00' );
+		return $coupon_amount;
 	}
 
 }

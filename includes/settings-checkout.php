@@ -474,4 +474,12 @@ return apply_filters( 'klarna_checkout_form_fields', array(
 		'default'     => 'no'
 	),
 
+	'send_discounts_separately' => array(
+		'title'       => __( 'Send discounts as separate items', 'woocommerce-gateway-klarna' ),
+		'type'        => 'checkbox',
+		'label'       => __( 'If you enable this option discounts will be sent to Klarna as separate cart items instead of being applied to regular cart items.', 'woocommerce-gateway-klarna' ),
+		'description' => __( 'Use this if you encounter rounding issues that cause WooCommerce order total not to match Klarna order total.', 'klarna' ),
+		'default'     => 'no'
+	),
+
 ) );
