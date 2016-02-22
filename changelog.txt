@@ -7,6 +7,7 @@
 * Feature   - Introduces 'klarna_invoice_label' to make it possible for merchants to filter 'Pay in 14 days' text for
  Klarna Invoice
  * Feature  - Introduces validate URI listener.
+ * Tweak    - Adds conditional check before firing AJAX callback on KCO iframe change.
 
 2016.01.22  - version 2.0.3
 * Feature   - Adds fee processing to Klarna Checkout.
