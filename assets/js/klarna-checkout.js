@@ -33,8 +33,8 @@ jQuery(document).ready(function ($) {
 					location.reload();
 				},
 				error: function (response) {
-					console.log('error');
-					console.log(response);
+					// console.log('error');
+					// console.log(response);
 
 					if (typeof window._klarnaCheckout == 'function') {
 						window._klarnaCheckout(function (api) {
@@ -78,8 +78,8 @@ jQuery(document).ready(function ($) {
 					}
 				},
 				error: function (response) {
-					console.log('error');
-					console.log(response);
+					// console.log('error');
+					// console.log(response);
 
 					if (typeof window._klarnaCheckout == 'function') {
 						window._klarnaCheckout(function (api) {
@@ -93,7 +93,7 @@ jQuery(document).ready(function ($) {
 	});
 
 	// Old order note shortcode
-	/* 
+	/*
 	 $('#kco_order_note').blur(function () {
 	 var kco_order_note = '';
 
@@ -156,8 +156,8 @@ jQuery(document).ready(function ($) {
 					}
 				},
 				error: function (response) {
-					console.log('error');
-					console.log(response);
+					// console.log('error');
+					// console.log(response);
 
 					if (typeof window._klarnaCheckout == 'function') {
 						window._klarnaCheckout(function (api) {
@@ -207,8 +207,8 @@ jQuery(document).ready(function ($) {
 					}
 				},
 				error: function (response) {
-					console.log('error');
-					console.log(response);
+					// console.log('error');
+					// console.log(response);
 
 					if (typeof window._klarnaCheckout == 'function') {
 						window._klarnaCheckout(function (api) {
@@ -376,8 +376,8 @@ jQuery(document).ready(function ($) {
 					}
 				},
 				error: function (response) {
-					console.log('remove-error');
-					console.log(response);
+					// console.log('remove-error');
+					// console.log(response);
 
 					if (typeof window._klarnaCheckout == 'function') {
 						window._klarnaCheckout(function (api) {
@@ -389,70 +389,72 @@ jQuery(document).ready(function ($) {
 		);
 	});
 
+	// End KCO widget
+
 	// Address change (email, postal code) v2
-	var isSubmitting = false;
 	if (typeof window._klarnaCheckout == 'function') {
 		window._klarnaCheckout(function (api) {
 			// For v2 use 'change' JS event to capture
 			if ('v2' == kcoAjax.version) {
+				var customerEmail = '';
+				var customerPostal = '';
+
 				api.on({
 					'change': function (data) {
 						// console.log(data);
 
 						if ('' != data.email && '' != data.postal_code) {
+							// Check if email and postal code have changed since last 'change' event
+							if ( customerEmail != data.email || customerPostal != data.postal_code ) {
+								customerEmail  = data.email;
+								customerPostal = data.postal_code;
 
-							window._klarnaCheckout(function (api) {
-								api.suspend();
-							});
+								window._klarnaCheckout(function (api) {
+									api.suspend();
+								});
 
-							// console.log('V2');
+								// console.log('V2');
 
-							// Check if email is not defined (AT and DE only) and set it to this value
-							// For AT and DE, email field is not captured inside data object
-							if (data.email === undefined) {
-								data.email = 'guest_checkout@klarna.com';
-							}
-
-							if ('' != data.email) {
-								kco_widget = $('#klarna-checkout-widget');
-
-								if (isSubmitting) {
-									return;
+								// Check if email is not defined (AT and DE only) and set it to this value
+								// For AT and DE, email field is not captured inside data object
+								if (data.email === undefined) {
+									data.email = 'guest_checkout@klarna.com';
 								}
-								isSubmitting = true;
 
-								$.ajax(
-									kcoAjax.ajaxurl,
-									{
-										type: 'POST',
-										dataType: 'json',
-										data: {
-											action: 'kco_iframe_change_cb',
-											email: data.email,
-											postal_code: data.postal_code,
-											nonce: kcoAjax.klarna_checkout_nonce
-										},
-										success: function (response) {
-											// Check if a product is out of stock
-											if (false === response.success) {
-												console.log('false');
-												location.reload();
-												return;
-											}
+								if ('' != data.email) {
+									kco_widget = $('#klarna-checkout-widget');
 
-											$(kco_widget).html(response.data.widget_html);
+									$.ajax(
+										kcoAjax.ajaxurl,
+										{
+											type: 'POST',
+											dataType: 'json',
+											data: {
+												action: 'kco_iframe_change_cb',
+												email: data.email,
+												postal_code: data.postal_code,
+												nonce: kcoAjax.klarna_checkout_nonce
+											},
+											success: function (response) {
+												// Check if a product is out of stock
+												if (false === response.success) {
+													// console.log('false');
+													location.reload();
+													return;
+												}
 
-											window._klarnaCheckout(function (api) {
-												api.resume();
-											});
-										},
-										error: function (response) {
-											window._klarnaCheckout(function (api) {
-												api.resume();
-											});
+												$(kco_widget).html(response.data.widget_html);
+											},
+											error: function (response) {}
 										}
-									}
-								);
+									);
+
+								}
+
+								window._klarnaCheckout(function (api) {
+									api.resume();
+								});
+
 							}
 
 						}
@@ -524,8 +526,8 @@ jQuery(document).ready(function ($) {
 								$(kco_widget).html(response.data.widget_html);
 							},
 							error: function (response) {
-								console.log('error');
-								console.log(response);
+								// console.log('error');
+								// console.log(response);
 							}
 						}
 					);
