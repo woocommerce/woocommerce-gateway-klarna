@@ -373,39 +373,46 @@ return apply_filters( 'klarna_checkout_form_fields', array(
 		'desc_tip'    => true
 	),
 
-	'create_customer_account' => array(
+	'create_customer_account'   => array(
 		'title'   => __( 'Create customer account', 'woocommerce-gateway-klarna' ),
 		'type'    => 'checkbox',
 		'label'   => __( 'Automatically create an account for new customers.', 'woocommerce-gateway-klarna' ),
 		'default' => 'no'
 	),
-	'send_new_account_email'  => array(
+	'send_new_account_email'    => array(
 		'title'   => __( 'Send New account email when creating new accounts', 'woocommerce-gateway-klarna' ),
 		'type'    => 'checkbox',
 		'label'   => __( 'Send New account email', 'woocommerce-gateway-klarna' ),
 		'default' => 'no'
 	),
-	'account_signup_text'     => array(
+	'account_signup_text'       => array(
 		'title'       => __( 'Account Signup Text', 'woocommerce-gateway-klarna' ),
 		'type'        => 'textarea',
 		'description' => __( 'Add text above the Account Registration Form. Useful for legal text for German stores. See documentation for more information. Leave blank to disable.', 'woocommerce-gateway-klarna' ),
 		'default'     => '',
 		'desc_tip'    => true
 	),
-	'account_login_text'      => array(
+	'account_login_text'        => array(
 		'title'       => __( 'Account Login Text', 'woocommerce-gateway-klarna' ),
 		'type'        => 'textarea',
 		'description' => __( 'Add text above the Account Login Form. Useful for legal text for German stores. See documentation for more information. Leave blank to disable.', 'woocommerce-gateway-klarna' ),
 		'default'     => '',
 		'desc_tip'    => true
 	),
-	'validate_stock'          => array(
+	'validate_stock'            => array(
 		'title'    => __( 'Check items stock during checkout', 'woocommerce-gateway-klarna' ),
 		'type'     => 'checkbox',
 		'label'    => __( 'If this option is checked, stock status will be checked again for all items in the cart
 		 while Klarna Checkout request is being processed. Useful for high-volume stores, HTTPS is required.', 'woocommerce-gateway-klarna' ),
 		'default'  => '',
 		'desc_tip' => true
+	),
+	'send_discounts_separately' => array(
+		'title'       => __( 'Send discounts as separate items', 'woocommerce-gateway-klarna' ),
+		'type'        => 'checkbox',
+		'label'       => __( 'If you enable this option discounts will be sent to Klarna as separate cart items instead of being applied to regular cart items.', 'woocommerce-gateway-klarna' ),
+		'description' => __( 'Use this if you encounter rounding issues that cause WooCommerce order total not to match Klarna order total.', 'klarna' ),
+		'default'     => 'no'
 	),
 
 	'color_settings_title'     => array(
@@ -471,14 +478,6 @@ return apply_filters( 'klarna_checkout_form_fields', array(
 		'type'        => 'checkbox',
 		'label'       => __( 'Enable logging.', 'woocommerce-gateway-klarna' ),
 		'description' => sprintf( __( 'Log Klarna events, in <code>%s</code>', 'woocommerce' ), wc_get_log_file_path( 'klarna' ) ),
-		'default'     => 'no'
-	),
-
-	'send_discounts_separately' => array(
-		'title'       => __( 'Send discounts as separate items', 'woocommerce-gateway-klarna' ),
-		'type'        => 'checkbox',
-		'label'       => __( 'If you enable this option discounts will be sent to Klarna as separate cart items instead of being applied to regular cart items.', 'woocommerce-gateway-klarna' ),
-		'description' => __( 'Use this if you encounter rounding issues that cause WooCommerce order total not to match Klarna order total.', 'klarna' ),
 		'default'     => 'no'
 	),
 
