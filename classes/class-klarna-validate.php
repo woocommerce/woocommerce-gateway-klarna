@@ -31,13 +31,15 @@ class WC_Gateway_Klarna_Order_Validate {
 		$data = json_decode( $post_body, true );
 
 		$all_in_stock = true;
-		$cart_items = $data['cart']['items'];
-		foreach( $cart_items as $cart_item ) {
-			if ( 'physical' == $cart_item['type'] ) {
-				$cart_item_product = new WC_Product( $cart_item['reference'] );
+		if ( get_option( 'woocommerce_manage_stock' ) == 'yes' ) {
+			$cart_items = $data['cart']['items'];
+			foreach ( $cart_items as $cart_item ) {
+				if ( 'physical' == $cart_item['type'] ) {
+					$cart_item_product = new WC_Product( $cart_item['reference'] );
 
-				if ( ! $cart_item_product->has_enough_stock( $cart_item['quantity'] ) ) {
-					$all_in_stock = false;
+					if ( ! $cart_item_product->has_enough_stock( $cart_item['quantity'] ) ) {
+						$all_in_stock = false;
+					}
 				}
 			}
 		}
