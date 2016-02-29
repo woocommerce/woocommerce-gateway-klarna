@@ -7,31 +7,24 @@
  * The Part Payment Widget can be displayed on single product pages.
  * Settings for the widget is configured in the Klarna Account settings.
  *
- * @class 		WC_Klarna_Payment_Method_Widget
- * @version		1.0
- * @since		1.8.1
- * @category	Class
- * @author 		Krokedil
+ * @class        WC_Klarna_Payment_Method_Widget
+ * @version        1.0
+ * @since        1.8.1
+ * @category    Class
+ * @author        Krokedil
  *
  */
- 
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
 
 class WC_Klarna_Payment_Method_Widget {
-	
+
 	public function __construct() {
-	
-		add_action( 
-			'woocommerce_single_product_summary', 
-			array( $this, 'display_widget'), 
-			$this->get_priority() 
-		);
-		add_action( 
-			'wp_enqueue_scripts', 
-			array( $this, 'enqueue_scripts') 
-		);
+
+		add_action( 'woocommerce_single_product_summary', array( $this, 'display_widget' ), $this->get_priority() );
+		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
 
 		add_filter( 'woocommerce_get_sections_products', array( $this, 'add_section' ) );
 		add_filter( 'woocommerce_get_settings_products', array( $this, 'add_settings' ), 10, 2 );
@@ -47,8 +40,8 @@ class WC_Klarna_Payment_Method_Widget {
 			$klarna_country = $woocommerce->customer->get_country();
 		} else {
 			// Get current customers selected language if this is a multi language site
-			$iso_code = explode( '_', get_locale() );
-			$shop_language = strtoupper( $iso_code[0] ); // Country ISO code (SE)
+			$iso_code       = explode( '_', get_locale() );
+			$shop_language  = strtoupper( $iso_code[0] ); // Country ISO code (SE)
 			$klarna_country = $shop_language;
 			switch ( $this->parent->shop_country ) {
 				case 'NB' :
@@ -59,7 +52,7 @@ class WC_Klarna_Payment_Method_Widget {
 					break;
 			}
 		}
-		
+
 		return strtolower( $klarna_country );
 
 	}
@@ -101,7 +94,7 @@ class WC_Klarna_Payment_Method_Widget {
 			default:
 				$klarna_locale = '';
 		}
-		
+
 		return $klarna_locale;
 
 	}
@@ -112,22 +105,25 @@ class WC_Klarna_Payment_Method_Widget {
 		$customer_country = $this->get_customer_country();
 
 		$checkout_settings = get_option( 'woocommerce_klarna_checkout_settings' );
-		if ( isset( $checkout_settings['eid_' . $customer_country] ) ) 
-			return $checkout_settings['eid_' . $customer_country];
+		if ( isset( $checkout_settings[ 'eid_' . $customer_country ] ) ) {
+			return $checkout_settings[ 'eid_' . $customer_country ];
+		}
 
 		$part_payment_settings = get_option( 'woocommerce_klarna_part_payment_settings' );
-		if ( isset( $part_payment_settings['eid_' . $customer_country] ) )
-			return $part_payment_settings['eid_' . $customer_country];
+		if ( isset( $part_payment_settings[ 'eid_' . $customer_country ] ) ) {
+			return $part_payment_settings[ 'eid_' . $customer_country ];
+		}
 
 		$invoice_settings = get_option( 'woocommerce_klarna_invoice_settings' );
-		if ( isset( $invoice_settings['eid_' . $customer_country] ) )
-			return $invoice_settings['eid_' . $customer_country];
+		if ( isset( $invoice_settings[ 'eid_' . $customer_country ] ) ) {
+			return $invoice_settings[ 'eid_' . $customer_country ];
+		}
 
 		return false;
 
 	}
 
-	
+
 	function get_lower_threshold() {
 		$lower_threshold = get_option( 'klarna_display_monthly_price_lower_threshold' );
 		if ( is_numeric( $lower_threshold ) ) {
@@ -165,16 +161,18 @@ class WC_Klarna_Payment_Method_Widget {
 
 
 	function display_widget() {
-		if ( ! $this->get_enabled() )
+		if ( ! $this->get_enabled() ) {
 			return false;
+		}
 
 		global $product;
 
 		$klarna_product_total = $product->get_display_price();
 		// Product with no price - do nothing
-		if ( empty( $klarna_product_total ) )
+		if ( empty( $klarna_product_total ) ) {
 			return;
-		
+		}
+
 		$sum = apply_filters( 'klarna_product_total', $klarna_product_total ); // Product price.
 
 		if ( $this->get_lower_threshold() ) {
@@ -190,20 +188,22 @@ class WC_Klarna_Payment_Method_Widget {
 		}
 
 		$locale = $this->get_klarna_locale();
-		if ( empty( $locale ) )
+		if ( empty( $locale ) ) {
 			return;
+		}
 
 		$eid = $this->get_klarna_eid();
-		if ( empty( $eid ) )
+		if ( empty( $eid ) ) {
 			return;
+		}
 
 		?>
-		<div style="width:100%; height:70px" 
-			class="klarna-widget klarna-part-payment"
-			data-eid="<?php echo $eid; ?>" 
-			data-locale="<?php echo $locale; ?>"
-			data-price="<?php echo $sum;?>"
-			data-layout="pale">
+		<div style="width:100%; height:70px"
+		     class="klarna-widget klarna-part-payment"
+		     data-eid="<?php echo $eid; ?>"
+		     data-locale="<?php echo $locale; ?>"
+		     data-price="<?php echo $sum; ?>"
+		     data-layout="pale">
 		</div>
 		<?php
 	}
@@ -252,22 +252,16 @@ class WC_Klarna_Payment_Method_Widget {
 
 
 	/**
- 	 * Register and Enqueue Klarna scripts
- 	 */
+	 * Register and Enqueue Klarna scripts
+	 */
 	function enqueue_scripts() {
 		//$this->show_monthly_cost = 'yes';
 		//$this->enabled = 'yes';
-		
+
 		// Part Payment Widget js
 		//if ( is_product() && $this->show_monthly_cost == 'yes' && $this->enabled == 'yes' ) {
-			wp_register_script( 
-				'klarna-part-payment-widget-js', 
-				'https://cdn.klarna.com/1.0/code/client/all.js', 
-				array('jquery'), 
-				'1.0', 
-				true 
-			);
-			wp_enqueue_script( 'klarna-part-payment-widget-js' );
+		wp_register_script( 'klarna-part-payment-widget-js', 'https://cdn.klarna.com/1.0/code/client/all.js', array( 'jquery' ), '1.0', true );
+		wp_enqueue_script( 'klarna-part-payment-widget-js' );
 		//}
 
 	} // End function
@@ -296,28 +290,28 @@ class WC_Klarna_Payment_Method_Widget {
 			$settings = apply_filters( 'woocommerce_klarna_payment_method_widget_settings', array(
 
 				// Start partpayment widget section
-				array( 
-					'title' => __( 'Klarna Payment Method Widget Settings', 'woocommerce-gateway-klarna' ), 
-					'type' => 'title', 
-					'id' => 'klarna_payment_method_widget_settings' 
+				array(
+					'title' => __( 'Klarna Payment Method Widget Settings', 'woocommerce-gateway-klarna' ),
+					'type'  => 'title',
+					'id'    => 'klarna_payment_method_widget_settings'
 				),
 
 				array(
-					'title'         => __( 'Monthly cost', 'woocommerce-gateway-klarna' ),
-					'desc'          => __( 'Display monthly cost in product pages', 'woocommerce-gateway-klarna' ),
-					'desc_tip'      => __( 'If enabled, this option will display Klarna partpayment widget in product pages', 'woocommerce-gateway-klarna' ),
-					'id'            => 'klarna_display_monthly_price',
-					'default'       => 'no',
-					'type'          => 'checkbox',
+					'title'    => __( 'Monthly cost', 'woocommerce-gateway-klarna' ),
+					'desc'     => __( 'Display monthly cost in product pages', 'woocommerce-gateway-klarna' ),
+					'desc_tip' => __( 'If enabled, this option will display Klarna partpayment widget in product pages', 'woocommerce-gateway-klarna' ),
+					'id'       => 'klarna_display_monthly_price',
+					'default'  => 'no',
+					'type'     => 'checkbox',
 				),
 				array(
-					'title'         => __( 'Monthly cost placement', 'woocommerce-gateway-klarna' ),
-					'desc'          => __( 'Select where to display the widget in your product pages', 'woocommerce-gateway-klarna' ),
-					'id'            => 'klarna_display_monthly_price_prio',
-					'class'         => 'wc-enhanced-select',
-					'default'       => '15',
-					'type'          => 'select',
-					'options'  => array(
+					'title'   => __( 'Monthly cost placement', 'woocommerce-gateway-klarna' ),
+					'desc'    => __( 'Select where to display the widget in your product pages', 'woocommerce-gateway-klarna' ),
+					'id'      => 'klarna_display_monthly_price_prio',
+					'class'   => 'wc-enhanced-select',
+					'default' => '15',
+					'type'    => 'select',
+					'options' => array(
 						'4'  => __( 'Above Title', 'woocommerce-gateway-klarna' ),
 						'7'  => __( 'Between Title and Price', 'woocommerce-gateway-klarna' ),
 						'15' => __( 'Between Price and Excerpt', 'woocommerce-gateway-klarna' ),
@@ -333,7 +327,7 @@ class WC_Klarna_Payment_Method_Widget {
 					'id'       => 'klarna_display_monthly_price_lower_threshold',
 					'default'  => '',
 					'type'     => 'number',
-					'desc_tip' =>  __( 'Monthly cost widget will not be displayed in product pages if product price is less than this value.', 'woocommerce-gateway-klarna' ),
+					'desc_tip' => __( 'Monthly cost widget will not be displayed in product pages if product price is less than this value.', 'woocommerce-gateway-klarna' ),
 					'autoload' => false
 				),
 				array(
@@ -342,22 +336,22 @@ class WC_Klarna_Payment_Method_Widget {
 					'id'       => 'klarna_display_monthly_price_upper_threshold',
 					'default'  => '',
 					'type'     => 'text',
-					'desc_tip' =>  __( 'Monthly cost widget will not be displayed in product pages if product price is more than this value.', 'woocommerce-gateway-klarna' ),
+					'desc_tip' => __( 'Monthly cost widget will not be displayed in product pages if product price is more than this value.', 'woocommerce-gateway-klarna' ),
 					'autoload' => false
 				),
 
-				array( 
-					'type' => 'sectionend', 
-					'id' => 'klarna_payment_method_widget_settings_end' 
+				array(
+					'type' => 'sectionend',
+					'id'   => 'klarna_payment_method_widget_settings_end'
 				),
 				// End partpayment widget section
-				
-			) );			
+
+			) );
 
 		}
 
 		return $settings;
 	}
-	
+
 } // End class
 $wc_klarna_partpayment_widget = new WC_Klarna_Payment_Method_Widget;

@@ -4,6 +4,7 @@
  * House extension.
  *
  * @param string $address Address string to split
+ *
  * @return array
  */
 
@@ -23,7 +24,7 @@ function splitAddress( $address ) {
 
 	// Remove the street from the address.
 	$address = str_replace( $match[0], '', $address );
-	$street = trim($match[0]);
+	$street  = trim( $match[0] );
 
 	// Nothing left to split, return
 	if ( strlen( $address == 0 ) ) {

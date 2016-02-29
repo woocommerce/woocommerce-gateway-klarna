@@ -11,7 +11,7 @@
  * Plugin Name:     WooCommerce Klarna Gateway
  * Plugin URI:      http://woothemes.com/woocommerce
  * Description:     Extends WooCommerce. Provides a <a href="http://www.klarna.se" target="_blank">Klarna</a> gateway for WooCommerce.
- * Version:         2.0.3
+ * Version:         2.1
  * Author:          WooThemes
  * Author URI:      http://woothemes.com/
  * Developer:       Krokedil
@@ -36,6 +36,7 @@ function woocommerce_gateway_klarna_activate() {
 		wp_die( __( '<p><strong>WooCommerce Gateway Klarna</strong> plugin requires PHP version 5.4 or greater.</p>', 'woocommerce-gateway-klarna' ) );
 	}
 }
+
 register_activation_hook( __FILE__, 'woocommerce_gateway_klarna_activate' );
 
 /**
@@ -43,27 +44,25 @@ register_activation_hook( __FILE__, 'woocommerce_gateway_klarna_activate' );
  */
 function woocommerce_gateway_klarna_welcome_notice() {
 	// Check if either one of three payment methods is configured
-	if ( 
-		false == get_option('woocommerce_klarna_invoice_settings') &&
-		false == get_option('woocommerce_klarna_part_payment_settings') &&
-		false == get_option( 'woocommerce_klarna_checkout_settings' )
-	) {
+	if ( false == get_option( 'woocommerce_klarna_invoice_settings' ) && false == get_option( 'woocommerce_klarna_part_payment_settings' ) && false == get_option( 'woocommerce_klarna_checkout_settings' ) ) {
 		$html = '<div class="updated">';
-			$html .= '<p>';
-				$html .= __( 'Thank you for choosing Klarna as your payment provider. WooCommerce Klarna Gateway is almost ready. Please visit <a href="admin.php?page=wc-settings&tab=checkout&section=wc_gateway_klarna_checkout">Klarna Checkout</a>, <a href="admin.php?page=wc-settings&tab=checkout&section=wc_gateway_klarna_invoice">Klarna Invoice</a> or <a href="admin.php?page=wc-settings&tab=checkout&section=wc_gateway_klarna_part_payment">Klarna Part Payment</a> settings to enter your EID and shared secret for countries you have an agreement for with Klarna. ', 'woocommerce-gateway-klarna' );
-			$html .= '</p>';
+		$html .= '<p>';
+		$html .= __( 'Thank you for choosing Klarna as your payment provider. WooCommerce Klarna Gateway is almost ready. Please visit <a href="admin.php?page=wc-settings&tab=checkout&section=wc_gateway_klarna_checkout">Klarna Checkout</a>, <a href="admin.php?page=wc-settings&tab=checkout&section=wc_gateway_klarna_invoice">Klarna Invoice</a> or <a href="admin.php?page=wc-settings&tab=checkout&section=wc_gateway_klarna_part_payment">Klarna Part Payment</a> settings to enter your EID and shared secret for countries you have an agreement for with Klarna. ', 'woocommerce-gateway-klarna' );
+		$html .= '</p>';
 		$html .= '</div><!-- /.updated -->';
 
 		echo $html;
 	}
 }
+
 add_action( 'admin_notices', 'woocommerce_gateway_klarna_welcome_notice' );
 
 /**
  * Required functions
  */
-if ( ! function_exists( 'woothemes_queue_update' ) )
+if ( ! function_exists( 'woothemes_queue_update' ) ) {
 	require_once( 'woo-includes/woo-functions.php' );
+}
 
 /**
  * Plugin updates
@@ -80,23 +79,18 @@ function klarna_2_update() {
 	// Invoice
 	if ( false == get_option( 'woocommerce_klarna_invoice_settings' ) ) {
 		if ( get_option( 'woocommerce_klarna_settings' ) ) {
-			add_option(
-				'woocommerce_klarna_invoice_settings',
-				get_option( 'woocommerce_klarna_settings' )
-			);
+			add_option( 'woocommerce_klarna_invoice_settings', get_option( 'woocommerce_klarna_settings' ) );
 		}
 	}
 
 	// Part Payment
 	if ( false == get_option( 'woocommerce_klarna_part_payment_settings' ) ) {
 		if ( get_option( 'woocommerce_klarna_account_settings' ) ) {
-			add_option(
-				'woocommerce_klarna_part_payment_settings',
-				get_option( 'woocommerce_klarna_account_settings' )
-			);
+			add_option( 'woocommerce_klarna_part_payment_settings', get_option( 'woocommerce_klarna_account_settings' ) );
 		}
 	}
 }
+
 add_action( 'plugins_loaded', 'klarna_2_update' );
 
 
@@ -107,8 +101,9 @@ add_action( 'plugins_loaded', 'klarna_2_update' );
 function init_klarna_gateway() {
 
 	// If the WooCommerce payment gateway class is not available, do nothing
-	if ( ! class_exists( 'WC_Payment_Gateway' ) )
+	if ( ! class_exists( 'WC_Payment_Gateway' ) ) {
 		return;
+	}
 
 	// Localisation
 	load_plugin_textdomain( 'woocommerce-gateway-klarna', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' );
@@ -116,8 +111,8 @@ function init_klarna_gateway() {
 	/**
 	 * Define plugin constants
 	 */
-	define( 'KLARNA_DIR', dirname(__FILE__) . '/' );         // Root dir
-	define( 'KLARNA_LIB', dirname(__FILE__) . '/library/' ); // Klarna library dir
+	define( 'KLARNA_DIR', dirname( __FILE__ ) . '/' );         // Root dir
+	define( 'KLARNA_LIB', dirname( __FILE__ ) . '/library/' ); // Klarna library dir
 	define( 'KLARNA_URL', plugin_dir_url( __FILE__ ) );      // Plugin folder URL
 
 	// Set CURLOPT_SSL_VERIFYPEER via constant in library/src/Klarna/Checkout/HTTP/CURLTransport.php.
@@ -143,14 +138,12 @@ function init_klarna_gateway() {
 			$this->shop_country = get_option( 'woocommerce_default_country' );
 
 			// Check if woocommerce_default_country includes state as well. If it does, remove state
-			if ( strstr( $this->shop_country, ':' ) ) :
+			if ( strstr( $this->shop_country, ':' ) ) {
 				$this->shop_country = current( explode( ':', $this->shop_country ) );
-			else :
-				$this->shop_country = $this->shop_country;
-			endif;
+			}
 
 			// Get current customers selected language if this is a multi lanuage site
-			$iso_code = explode( '_', get_locale() );
+			$iso_code            = explode( '_', get_locale() );
 			$this->shop_language = strtoupper( $iso_code[0] ); // Country ISO code (SE)
 
 			switch ( $this->shop_language ) {
@@ -169,32 +162,20 @@ function init_klarna_gateway() {
 			$this->shop_country = apply_filters( 'klarna_shop_country', $this->shop_country );
 
 			// Actions
-			add_action( 'wp_enqueue_scripts', array( $this, 'klarna_load_scripts') );
+			add_action( 'wp_enqueue_scripts', array( $this, 'klarna_load_scripts' ) );
 
 		}
 
-	 	/**
-	 	 * Register and enqueue Klarna scripts
-	 	 */
+		/**
+		 * Register and enqueue Klarna scripts
+		 */
 		function klarna_load_scripts() {
 
 			wp_enqueue_script( 'jquery' );
 
 			if ( is_checkout() ) {
-				wp_register_script(
-					'klarna-base-js',
-					'https://cdn.klarna.com/public/kitt/core/v1.0/js/klarna.min.js',
-					array('jquery'),
-					'1.0',
-					false
-				);
-				wp_register_script(
-					'klarna-terms-js',
-					'https://cdn.klarna.com/public/kitt/toc/v1.1/js/klarna.terms.min.js',
-					array('klarna-base-js'),
-					'1.0',
-					false
-				);
+				wp_register_script( 'klarna-base-js', 'https://cdn.klarna.com/public/kitt/core/v1.0/js/klarna.min.js', array( 'jquery' ), '1.0', false );
+				wp_register_script( 'klarna-terms-js', 'https://cdn.klarna.com/public/kitt/toc/v1.1/js/klarna.terms.min.js', array( 'klarna-base-js' ), '1.0', false );
 				wp_enqueue_script( 'klarna-base-js' );
 				wp_enqueue_script( 'klarna-terms-js' );
 			}
@@ -204,7 +185,8 @@ function init_klarna_gateway() {
 	} // End class WC_Gateway_Klarna
 
 
-	require_once 'vendor/autoload.php';
+	// Composer autoloader
+	require_once __DIR__ . '/vendor/autoload.php';
 
 
 	// Include the WooCommerce Compatibility Utility class
@@ -214,27 +196,24 @@ function init_klarna_gateway() {
 	// Include our Klarna classes
 	require_once 'classes/class-klarna-part-payment.php'; // KPM Part Payment
 	require_once 'classes/class-klarna-invoice.php'; // KPM Invoice
+	require_once 'classes/class-klarna-process-checkout-kpm.php'; // KPM process checkout fields
 	require_once 'classes/class-klarna-payment-method-widget.php'; // Partpayment widget
 	require_once 'classes/class-klarna-get-address.php'; // Get address
 	require_once 'classes/class-klarna-pms.php'; // PMS
 	require_once 'classes/class-klarna-order.php'; // Handles Klarna orders
-	// require_once 'classes/class-klarna-validate.php'; // Validates Klarna orders
 	require_once 'classes/class-klarna-payment-method-display-widget.php'; // WordPress widget
 
 	// register Foo_Widget widget
 	function register_klarna_pmd_widget() {
 		register_widget( 'WC_Klarna_Payment_Method_Display_Widget' );
 	}
+
 	add_action( 'widgets_init', 'register_klarna_pmd_widget' );
 
 	// Klarna Checkout class
-	$klarna_shop_country = get_option( 'woocommerce_default_country' );
-	$klarna_shop_country = substr( $klarna_shop_country, 0, 2 ); // Get first two characters to remove state
-	$available_countries = array( 'SE', 'NO', 'FI', 'DE', 'GB', 'AT', 'US' );
-	if ( in_array( $klarna_shop_country, $available_countries ) ) {
-		require_once 'classes/class-klarna-checkout.php';
-		require_once 'classes/class-klarna-shortcodes.php';
-	}
+	require_once 'classes/class-klarna-checkout.php';
+	require_once 'classes/class-klarna-shortcodes.php';
+	require_once 'classes/class-klarna-validate.php';
 
 	// Send customer and merchant emails for KCO Incomplete > Processing status change
 
@@ -242,6 +221,7 @@ function init_klarna_gateway() {
 	add_filter( 'woocommerce_email_actions', 'wc_klarna_kco_add_kco_incomplete_email_actions' );
 	function wc_klarna_kco_add_kco_incomplete_email_actions( $email_actions ) {
 		$email_actions[] = 'woocommerce_order_status_kco-incomplete_to_processing';
+
 		return $email_actions;
 	}
 
@@ -249,9 +229,9 @@ function init_klarna_gateway() {
 	add_action( 'woocommerce_order_status_kco-incomplete_to_processing_notification', 'wc_klarna_kco_incomplete_trigger' );
 	function wc_klarna_kco_incomplete_trigger( $orderid ) {
 		$kco_mailer = WC()->mailer();
-		$kco_mails = $kco_mailer->get_emails();
+		$kco_mails  = $kco_mailer->get_emails();
 		foreach ( $kco_mails as $kco_mail ) {
-			$order =  new WC_Order( $orderid );
+			$order = new WC_Order( $orderid );
 			if ( 'new_order' == $kco_mail->id || 'customer_processing_order' == $kco_mail->id ) {
 				$kco_mail->trigger( $order->id );
 			}
@@ -259,30 +239,22 @@ function init_klarna_gateway() {
 	}
 
 }
+
 add_action( 'plugins_loaded', 'init_klarna_gateway', 2 );
 
 /**
  * Add payment gateways to WooCommerce.
  *
  * @param  array $methods
+ *
  * @return array $methods
  */
 function add_klarna_gateway( $methods ) {
-	$klarna_shop_country = get_option( 'woocommerce_default_country' );
-	$klarna_shop_country = substr( $klarna_shop_country, 0, 2 ); // Cut off first two characters to remove state
-
-	$available_countries = array( 'SE', 'NO', 'FI', 'DK', 'DE', 'NL', 'AT' );
-	if ( in_array( $klarna_shop_country, $available_countries ) ) {
-		$methods[] = 'WC_Gateway_Klarna_Part_Payment';
-		$methods[] = 'WC_Gateway_Klarna_Invoice';
-	}
-
-	// Only add the Klarna Checkout method if Sweden, Norway, Finland, Germany, Austria, UK or US is set as the base country
-	$available_countries = array( 'SE', 'NO', 'FI', 'DE', 'GB', 'AT', 'US' );
-	if ( in_array( $klarna_shop_country, $available_countries ) ) {
-		$methods[] = 'WC_Gateway_Klarna_Checkout';
-	}
+	$methods[] = 'WC_Gateway_Klarna_Part_Payment';
+	$methods[] = 'WC_Gateway_Klarna_Invoice';
+	$methods[] = 'WC_Gateway_Klarna_Checkout';
 
 	return $methods;
 }
+
 add_filter( 'woocommerce_payment_gateways', 'add_klarna_gateway' );

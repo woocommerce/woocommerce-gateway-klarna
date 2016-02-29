@@ -1,5 +1,15 @@
 *** WooCommerce Gateway Klarna Changelog ***
 
+2016.03.01  - version 2.1
+* Fix       - Changed Composer autoload.php path.
+* Tweak     - Additional logging for Invoice and Part Payment.
+* Fix       - Improved checkout checks for KPM.
+* Feature   - Introduces 'klarna_invoice_label' filter to make it possible for merchants to filter 'Pay in 14 days' text for Klarna Invoice
+ * Feature  - Introduces validate URI listener.
+ * Tweak    - Adds conditional check before firing AJAX callback on KCO iframe change.
+ * Tweak    - Changes in WPTransport method for KCO.
+ * Feature  - Adds options to send discounts as separate line items for KCO.
+
 2016.01.22  - version 2.0.3
 * Feature   - Adds fee processing to Klarna Checkout.
 * Tweak     - Adds fee display to KCO cart widget.

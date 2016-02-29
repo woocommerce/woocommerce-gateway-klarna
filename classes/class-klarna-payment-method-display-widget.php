@@ -5,11 +5,11 @@
  *
  * Using Klarna's Payment method display you generate trust and increase your conversion.
  *
- * @class 		WC_Klarna_Payment_Method_Display_Widget
- * @version		1.0
- * @since		2.0
- * @category	Class
- * @author 		Krokedil
+ * @class        WC_Klarna_Payment_Method_Display_Widget
+ * @version        1.0
+ * @since        2.0
+ * @category    Class
+ * @author        Krokedil
  *
  */
 
@@ -23,8 +23,7 @@ class WC_Klarna_Payment_Method_Display_Widget extends WP_Widget {
 	 * Register widget with WordPress.
 	 */
 	function __construct() {
-		parent::__construct(
-			'klarna_pmd', // Base ID
+		parent::__construct( 'klarna_pmd', // Base ID
 			__( 'Klarna Payment Method Display Widget', 'woocommerce-gateway-klarna' ), // Name
 			array( 'description' => __( 'Displays an image that informs the consumer about the payment methods that are available in your store.', 'woocommerce-gateway-klarna' ), ) // Args
 		);
@@ -35,7 +34,7 @@ class WC_Klarna_Payment_Method_Display_Widget extends WP_Widget {
 	 *
 	 * @see WP_Widget::widget()
 	 *
-	 * @param array $args     Widget arguments.
+	 * @param array $args Widget arguments.
 	 * @param array $instance Saved values from database.
 	 */
 	public function widget( $args, $instance ) {
@@ -89,24 +88,30 @@ class WC_Klarna_Payment_Method_Display_Widget extends WP_Widget {
 		?>
 		<p>
 			<label for="<?php echo esc_attr( $this->get_field_id( 'design' ) ); ?>"><?php _e( 'Design:' ); ?></label>
-			<select class="widefat" id="<?php echo esc_attr( $this->get_field_id( 'design' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'design' ) ); ?>">
+			<select class="widefat" id="<?php echo esc_attr( $this->get_field_id( 'design' ) ); ?>"
+			        name="<?php echo esc_attr( $this->get_field_name( 'design' ) ); ?>">
 				<option value="long" <?php selected( $design, 'long' ); ?>>Long</option>
 				<option value="short" <?php selected( $design, 'short' ); ?>>Short</option>
 			</select>
 		</p>
 		<p>
-			<label for="<?php echo esc_attr( $this->get_field_id( 'color' ) ); ?>"><?php _e( 'Color:' ); ?></label> 
-			<select class="widefat" id="<?php echo esc_attr( $this->get_field_id( 'color' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'color' ) ); ?>">
+			<label for="<?php echo esc_attr( $this->get_field_id( 'color' ) ); ?>"><?php _e( 'Color:' ); ?></label>
+			<select class="widefat" id="<?php echo esc_attr( $this->get_field_id( 'color' ) ); ?>"
+			        name="<?php echo esc_attr( $this->get_field_name( 'color' ) ); ?>">
 				<option value="blue" <?php selected( $color, 'blue' ); ?>>Blue</option>
 				<option value="white" <?php selected( $color, 'white' ); ?>>White</option>
 			</select>
 		</p>
 		<p>
-			<label for="<?php echo esc_attr( $this->get_field_id( 'width' ) ); ?>"><?php _e( 'Width (px):' ); ?></label> 
-			<input class="widefat" id="<?php echo esc_attr( $this->get_field_id( 'width' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'width' ) ); ?>" type="number" value="<?php echo esc_attr( $width ); ?>" min="100" />
+			<label for="<?php echo esc_attr( $this->get_field_id( 'width' ) ); ?>"><?php _e( 'Width (px):' ); ?></label>
+			<input class="widefat" id="<?php echo esc_attr( $this->get_field_id( 'width' ) ); ?>"
+			       name="<?php echo esc_attr( $this->get_field_name( 'width' ) ); ?>" type="number"
+			       value="<?php echo esc_attr( $width ); ?>" min="100"/>
 		</p>
-		<p>Read more about the options <a target="_blank" href="http://developers.klarna.com/en/se+php/kco-v2/payment-method-display">here</a>.</p>
-		<?php 
+		<p>Read more about the options <a target="_blank"
+		                                  href="http://developers.klarna.com/en/se+php/kco-v2/payment-method-display">here</a>.
+		</p>
+		<?php
 	}
 
 	/**
@@ -120,10 +125,10 @@ class WC_Klarna_Payment_Method_Display_Widget extends WP_Widget {
 	 * @return array Updated safe values to be saved.
 	 */
 	public function update( $new_instance, $old_instance ) {
-		$instance = array();
+		$instance           = array();
 		$instance['design'] = ( 'long' == $new_instance['design'] || 'short' == $new_instance['design'] ) ? strip_tags( $new_instance['design'] ) : '';
-		$instance['color'] = ( 'blue' == $new_instance['color'] || 'white' == $new_instance['color'] ) ? $new_instance['color'] : '';
-		$instance['width'] = (int) $new_instance['width'];
+		$instance['color']  = ( 'blue' == $new_instance['color'] || 'white' == $new_instance['color'] ) ? $new_instance['color'] : '';
+		$instance['width']  = (int) $new_instance['width'];
 
 		return $instance;
 	}

@@ -14,8 +14,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 // Check if country was set in WC session
 // Used when changing countries in KCO page
 $kco_session_country = WC()->session->get( 'klarna_country', '' );
-$local_order_id = WC()->session->get( 'ongoing_klarna_order' );
-$kco_session_locale = '';
+$local_order_id      = WC()->session->get( 'ongoing_klarna_order' );
+$kco_session_locale  = '';
 
 if ( '' != $kco_session_country ) {
 	if ( 'DE' == $kco_session_country ) {
@@ -35,15 +35,15 @@ if ( '' != $kco_session_country ) {
 }
 
 $kco_country = ( '' != $kco_session_country ) ? $kco_session_country : $this->klarna_country;
-$kco_locale = ( '' != $kco_session_locale ) ? $kco_session_locale : $this->klarna_language;
+$kco_locale  = ( '' != $kco_session_locale ) ? $kco_session_locale : $this->klarna_language;
 
-$create['purchase_country'] = $kco_country;
+$create['purchase_country']  = $kco_country;
 $create['purchase_currency'] = $this->klarna_currency;
-$create['locale'] = $kco_locale;
+$create['locale']            = $kco_locale;
 
 // Set Euro country session value
 if ( 'eur' == strtolower( $create['purchase_currency'] ) ) {
-	WC()->session->set( 'klarna_euro_country', $create['purchase_country'] );	
+	WC()->session->set( 'klarna_euro_country', $create['purchase_country'] );
 }
 
 if ( ! $this->is_rest() ) {
@@ -54,63 +54,40 @@ if ( ! $this->is_rest() ) {
 $push_uri_base = get_home_url() . '/wc-api/WC_Gateway_Klarna_Checkout/';
 // REST
 if ( $this->is_rest() ) {
-	$merchant_terms_uri = $this->terms_url;
-	$merchant_checkout_uri = esc_url_raw( add_query_arg( 
-		'klarnaListener', 
-		'checkout', 
-		$this->klarna_checkout_url 
-	) );
-	$merchant_push_uri = add_query_arg( 
-		array(
-			'sid'          => $local_order_id, 
-			'scountry'     => $this->klarna_country, 
-			'klarna_order' => '{checkout.order.id}', 
-			'wc-api'       => 'WC_Gateway_Klarna_Checkout',
-			'klarna-api'   => 'rest'
-		),
-		$push_uri_base
-	);			
-	$merchant_confirmation_uri = add_query_arg( 
-		array(
-			'klarna_order'   => '{checkout.order.id}', 
-			'sid'            => $local_order_id, 
-			'order-received' => $local_order_id,
-			'thankyou'       => 'yes'
-		),
-		$this->klarna_checkout_thanks_url
-	);
-	$address_update_uri = add_query_arg(
-		array(
-			'address_update' => 'yes',
-			'sid'            => $local_order_id, 
-		),
-		$this->klarna_checkout_url
-	);
+	$merchant_terms_uri        = $this->terms_url;
+	$merchant_checkout_uri     = esc_url_raw( add_query_arg( 'klarnaListener', 'checkout', $this->klarna_checkout_url ) );
+	$merchant_push_uri         = add_query_arg( array(
+		'sid'          => $local_order_id,
+		'scountry'     => $this->klarna_country,
+		'klarna_order' => '{checkout.order.id}',
+		'wc-api'       => 'WC_Gateway_Klarna_Checkout',
+		'klarna-api'   => 'rest'
+	), $push_uri_base );
+	$merchant_confirmation_uri = add_query_arg( array(
+		'klarna_order'   => '{checkout.order.id}',
+		'sid'            => $local_order_id,
+		'order-received' => $local_order_id,
+		'thankyou'       => 'yes'
+	), $this->klarna_checkout_thanks_url );
+	$address_update_uri        = add_query_arg( array(
+		'address_update' => 'yes',
+		'sid'            => $local_order_id,
+	), $this->klarna_checkout_url );
 } else { // V2
-	$merchant_terms_uri = $this->terms_url;
-	$merchant_checkout_uri = esc_url_raw( add_query_arg( 
-		'klarnaListener', 
-		'checkout', 
-		$this->klarna_checkout_url 
-	) );
-	$merchant_push_uri = add_query_arg( 
-		array(
-			'sid'          => $local_order_id, 
-			'scountry'     => $this->klarna_country, 
-			'klarna_order' => '{checkout.order.id}', 
-			'klarna-api'   => 'v2'
-		),
-		$push_uri_base 
-	);
-	$merchant_confirmation_uri = add_query_arg ( 
-		array(
-			'klarna_order'   => '{checkout.order.id}', 
-			'sid'            => $local_order_id, 
-			'order-received' => $local_order_id,
-			'thankyou'       => 'yes'
-		),
-		$this->klarna_checkout_thanks_url
-	);
+	$merchant_terms_uri        = $this->terms_url;
+	$merchant_checkout_uri     = esc_url_raw( add_query_arg( 'klarnaListener', 'checkout', $this->klarna_checkout_url ) );
+	$merchant_push_uri         = add_query_arg( array(
+		'sid'          => $local_order_id,
+		'scountry'     => $this->klarna_country,
+		'klarna_order' => '{checkout.order.id}',
+		'klarna-api'   => 'v2'
+	), $push_uri_base );
+	$merchant_confirmation_uri = add_query_arg( array(
+		'klarna_order'   => '{checkout.order.id}',
+		'sid'            => $local_order_id,
+		'order-received' => $local_order_id,
+		'thankyou'       => 'yes'
+	), $this->klarna_checkout_thanks_url );
 }
 
 // Different format for V3 and V2
@@ -122,22 +99,28 @@ if ( $this->is_rest() ) {
 		'push'           => $merchant_push_uri,
 		'address_update' => $address_update_uri
 	);
+	if ( 'yes' == $this->validate_stock ) {
+		$merchantUrls['validation'] = get_home_url() . '/wc-api/WC_Gateway_Klarna_Order_Validate/';
+	}
 	$create['merchant_urls'] = $merchantUrls;
 } else {
-	$create['merchant']['terms_uri'] =        $merchant_terms_uri;
-	$create['merchant']['checkout_uri'] =     $merchant_checkout_uri;
+	$create['merchant']['terms_uri']        = $merchant_terms_uri;
+	$create['merchant']['checkout_uri']     = $merchant_checkout_uri;
 	$create['merchant']['confirmation_uri'] = $merchant_confirmation_uri;
-	$create['merchant']['push_uri'] =         $merchant_push_uri;
+	$create['merchant']['push_uri']         = $merchant_push_uri;
+	if ( 'yes' == $this->validate_stock ) {
+		$create['merchant']['validation_uri']   = get_home_url() . '/wc-api/WC_Gateway_Klarna_Order_Validate/';
+	}
 }
 
 // Make phone a mandatory field for German stores?
 if ( $this->phone_mandatory_de == 'yes' ) {
-	$create['options']['phone_mandatory'] = true;	
+	$create['options']['phone_mandatory'] = true;
 }
 
 // Enable DHL packstation feature for German stores?
 if ( $this->dhl_packstation_de == 'yes' ) {
-	$create['options']['packstation_enabled'] = true;	
+	$create['options']['packstation_enabled'] = true;
 }
 
 // Customer info if logged in
@@ -154,7 +137,7 @@ if ( $this->testmode !== 'yes' ) {
 $create['gui']['layout'] = $klarna_checkout_layout;
 
 $klarna_order_total = 0;
-$klarna_tax_total = 0;
+$klarna_tax_total   = 0;
 foreach ( $cart as $item ) {
 	if ( $this->is_rest() ) {
 		$create['order_lines'][] = $item;
@@ -167,7 +150,7 @@ foreach ( $cart as $item ) {
 			$klarna_tax_total += $item['total_tax_amount'];
 		}
 	} else {
-		$create['cart']['items'][] = $item;				
+		$create['cart']['items'][] = $item;
 	}
 }
 
@@ -194,7 +177,7 @@ if ( '' != $this->color_link ) {
 // Check if there's a subscription product in cart
 if ( class_exists( 'WC_Subscriptions_Cart' ) && WC_Subscriptions_Cart::cart_contains_subscription() ) {
 	$create['recurring'] = true;
-	
+
 	// Extra merchant data
 	$fetched_subscription_product_id = $this->get_subscription_product_id();
 	if ( $fetched_subscription_product_id ) {
@@ -202,13 +185,13 @@ if ( class_exists( 'WC_Subscriptions_Cart' ) && WC_Subscriptions_Cart::cart_cont
 		if ( 0 !== $subscription_expiration_time ) {
 			$end_time = date( 'Y-m-d\TH:i', strtotime( $subscription_expiration_time ) );
 		} else {
-			$end_time = date( 'Y-m-d\TH:i', strtotime( '+50 year') );
+			$end_time = date( 'Y-m-d\TH:i', strtotime( '+50 year' ) );
 		}
-		
+
 		$klarna_subscription_info = array(
-			'subscription_name' => 'Subscription: ' . get_the_title( $fetched_subscription_product_id ),
-			'start_time' => date('Y-m-d\TH:i'),
-			'end_time' => $end_time,
+			'subscription_name'            => 'Subscription: ' . get_the_title( $fetched_subscription_product_id ),
+			'start_time'                   => date( 'Y-m-d\TH:i' ),
+			'end_time'                     => $end_time,
 			'auto_renewal_of_subscription' => true
 		);
 		if ( get_current_user_id() ) {
@@ -225,7 +208,7 @@ if ( class_exists( 'WC_Subscriptions_Cart' ) && WC_Subscriptions_Cart::cart_cont
 
 		if ( $body_attachment ) {
 			$create['attachment']['content_type'] = 'application/vnd.klarna.internal.emd-v2+json';
-			$create['attachment']['body'] = $body_attachment;
+			$create['attachment']['body']         = $body_attachment;
 		}
 
 	}
@@ -241,7 +224,7 @@ if ( $this->is_rest() ) {
 		$create['shipping_countries'] = array();
 	} else {
 		// Add shipping countries
-		$wc_countries = new WC_Countries();
+		$wc_countries                 = new WC_Countries();
 		$create['shipping_countries'] = array_keys( $wc_countries->get_shipping_countries() );
 	}
 
@@ -291,7 +274,7 @@ if ( $this->is_rest() ) {
 	*/
 
 	$klarna_order = new \Klarna\Rest\Checkout\Order( $connector );
-} else  {
+} else {
 	// Klarna_Checkout_Order::$baseUri = $this->klarna_server;
 	// Klarna_Checkout_Order::$contentType = 'application/vnd.klarna.checkout.aggregated-order-v2+json';
 	$klarna_order = new Klarna_Checkout_Order( $connector, $this->klarna_server );
@@ -300,7 +283,7 @@ if ( $this->is_rest() ) {
 try {
 	$klarna_order->create( apply_filters( 'kco_create_order', $create ) );
 	$klarna_order->fetch();
-} catch( Exception $e ) {
+} catch ( Exception $e ) {
 	if ( is_user_logged_in() && $this->debug ) {
 		// The purchase was denied or something went wrong, print the message:
 		echo '<div class="woocommerce-error">';

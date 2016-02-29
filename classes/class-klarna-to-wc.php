@@ -15,11 +15,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * This class grabs WC cart contents and formats them so they can
  * be sent to Klarna when a KCO order is being created or updated.
- * 
+ *
  * Needs Klarna order object passed as parameter
  * Checks if Rest API is in use
  * WC log class needs to be instantiated
- * 
+ *
  * Get customer data
  * Create WC order
  * Add order items
@@ -33,7 +33,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * EITHER Store customer (user) ID as post meta
  * OR     Maybe create customer account
  * Empty WooCommerce cart
- * 
+ *
  */
 class WC_Gateway_Klarna_K2WC {
 
@@ -183,12 +183,12 @@ class WC_Gateway_Klarna_K2WC {
 
 	/**
 	 * Prepares local order.
-	 * 
+	 *
 	 * Creates local order on Klarna's push notification.
 	 *
 	 * @since  2.0.0
 	 * @access public
-	 * 
+	 *
 	 * @param  $customer_email KCO incomplete customer email
 	 */
 	public function prepare_wc_order( $customer_email ) {
@@ -200,7 +200,7 @@ class WC_Gateway_Klarna_K2WC {
 
 		if ( $woocommerce->session->get( 'ongoing_klarna_order' ) && wc_get_order( $woocommerce->session->get( 'ongoing_klarna_order' ) ) ) {
 			$orderid = $woocommerce->session->get( 'ongoing_klarna_order' );
-			$order = wc_get_order( $orderid );
+			$order   = wc_get_order( $orderid );
 		} else {
 			// Create order in WooCommerce if we have an email
 			$order = $this->create_order();
@@ -210,6 +210,9 @@ class WC_Gateway_Klarna_K2WC {
 
 		// If there's an order at this point, proceed
 		if ( isset( $order ) ) {
+			// Need to clean up the order first, to avoid duplicate items
+			$order->remove_order_items();
+
 			// Add order items
 			$this->add_order_items( $order );
 
@@ -217,7 +220,7 @@ class WC_Gateway_Klarna_K2WC {
 			$this->add_order_fees( $order );
 
 			// Add order shipping
-			$this->add_order_shipping( $order );				
+			$this->add_order_shipping( $order );
 
 			// Add order taxes
 			$this->add_order_tax_rows( $order );
@@ -232,15 +235,15 @@ class WC_Gateway_Klarna_K2WC {
 			$this->set_order_totals( $order );
 
 			// Tie this order to a user
-			if ( email_exists( $customer_email ) ) {		
-				$user = get_user_by( 'email', $customer_email );
+			if ( email_exists( $customer_email ) ) {
+				$user    = get_user_by( 'email', $customer_email );
 				$user_id = $user->ID;
 				update_post_meta( $order->id, '_customer_user', $user_id );
 			}
 
 			// Let plugins add meta
 			do_action( 'woocommerce_checkout_update_order_meta', $order->id, array() );
-					
+
 			// Store which KCO API was used
 			if ( $this->is_rest ) {
 				update_post_meta( $order->id, '_klarna_api', 'rest' );
@@ -254,32 +257,32 @@ class WC_Gateway_Klarna_K2WC {
 
 	/**
 	 * KCO listener function.
-	 * 
+	 *
 	 * Creates local order on Klarna's push notification.
 	 *
 	 * @since  2.0.0
 	 * @access public
 	 */
 	public function listener() {
-		if ( $this->klarna_debug=='yes' ) {
+		if ( $this->klarna_debug == 'yes' ) {
 			$this->klarna_log->add( 'klarna', 'Listener triggered...' );
 		}
 
 		global $woocommerce;
-		
+
 		// Retrieve Klarna order
 		$klarna_order = $this->retrieve_klarna_order();
 
 		// Check if order has been completed by Klarna, for V2 and Rest
-		if ( $klarna_order['status'] == 'checkout_complete' || $klarna_order['status'] == 'AUTHORIZED' ) { 			
+		if ( $klarna_order['status'] == 'checkout_complete' || $klarna_order['status'] == 'AUTHORIZED' ) {
 			$local_order_id = sanitize_key( $_GET['sid'] );
-			$order = wc_get_order( $local_order_id );
+			$order          = wc_get_order( $local_order_id );
 
 			// Check if order was recurring
 			if ( isset( $klarna_order['recurring_token'] ) ) {
 				update_post_meta( $order->id, '_klarna_recurring_token', $klarna_order['recurring_token'] );
 			}
-			
+
 			if ( sanitize_key( $_GET['klarna-api'] ) && 'rest' == sanitize_key( $_GET['klarna-api'] ) ) {
 				update_post_meta( $order->id, '_klarna_order_id', $klarna_order['order_id'] );
 			} else {
@@ -288,20 +291,20 @@ class WC_Gateway_Klarna_K2WC {
 
 			// Change order currency
 			$this->change_order_currency( $order, $klarna_order );
-			
+
 			// Add order addresses
 			$this->add_order_addresses( $order, $klarna_order );
 
 			// Store payment method
 			$this->add_order_payment_method( $order );
-					
+
 			// Add order customer info
 			$this->add_order_customer_info( $order, $klarna_order );
-								
+
 			// Confirm the order in Klarnas system
 			$klarna_order = $this->confirm_klarna_order( $order, $klarna_order );
 
-			$order->calculate_totals( false );		
+			$order->calculate_totals( false );
 
 			// Other plugins and themes can hook into here
 			do_action( 'klarna_after_kco_push_notification', $order->id );
@@ -336,28 +339,15 @@ class WC_Gateway_Klarna_K2WC {
 				}
 			}
 
-			$connector = \Klarna\Rest\Transport\Connector::create(
-				$this->eid,
-				$this->secret,
-				$klarna_server_url
-			);
+			$connector = \Klarna\Rest\Transport\Connector::create( $this->eid, $this->secret, $klarna_server_url );
 
-			$klarna_order = new \Klarna\Rest\OrderManagement\Order(
-				$connector,
-				$this->klarna_order_uri
-			);
+			$klarna_order = new \Klarna\Rest\OrderManagement\Order( $connector, $this->klarna_order_uri );
 		} else {
-			$connector = Klarna_Checkout_Connector::create(
-				$this->secret,
-				$this->klarna_server
-			);  			
-			$checkoutId = $this->klarna_order_uri;  
-			$klarna_order = new Klarna_Checkout_Order(
-				$connector,
-				$checkoutId
-			);  
+			$connector    = Klarna_Checkout_Connector::create( $this->secret, $this->klarna_server );
+			$checkoutId   = $this->klarna_order_uri;
+			$klarna_order = new Klarna_Checkout_Order( $connector, $checkoutId );
 		}
-		
+
 		$klarna_order->fetch();
 
 		return $klarna_order;
@@ -380,9 +370,9 @@ class WC_Gateway_Klarna_K2WC {
 
 		// Order data
 		$order_data = array(
-			'status'        => apply_filters( 'klarna_checkout_incomplete_order_status', 'kco-incomplete' ),
-			'customer_id'   => $customer_id,
-			'created_via'   => 'klarna_checkout'
+			'status'      => apply_filters( 'klarna_checkout_incomplete_order_status', 'kco-incomplete' ),
+			'customer_id' => $customer_id,
+			'created_via' => 'klarna_checkout'
 		);
 
 		// Create the order
@@ -392,8 +382,8 @@ class WC_Gateway_Klarna_K2WC {
 			throw new Exception( __( 'Error: Unable to create order. Please try again.', 'woocommerce' ) );
 		}
 
-		if ( $this->klarna_debug=='yes' ) {
-			$this->klarna_log->add( 'klarna', 'Local order created, order ID: ' . $order->id );	
+		if ( $this->klarna_debug == 'yes' ) {
+			$this->klarna_log->add( 'klarna', 'Local order created, order ID: ' . $order->id );
 		}
 
 		return $order;
@@ -401,7 +391,7 @@ class WC_Gateway_Klarna_K2WC {
 
 	/**
 	 * Changes local order currency.
-	 * 
+	 *
 	 * When Aelia currency switcher is used, default store currency is always saved.
 	 *
 	 * @since  2.0.0
@@ -413,7 +403,7 @@ class WC_Gateway_Klarna_K2WC {
 		}
 
 		if ( $order->get_order_currency != strtoupper( $klarna_order['purchase_currency'] ) ) {
-			if ( $this->klarna_debug=='yes' ) {
+			if ( $this->klarna_debug == 'yes' ) {
 				$this->klarna_log->add( 'klarna', 'Updating order currency...' );
 			}
 			update_post_meta( $order->id, '_order_currency', strtoupper( $klarna_order['purchase_currency'] ) );
@@ -425,8 +415,8 @@ class WC_Gateway_Klarna_K2WC {
 	 *
 	 * @since  2.0.0
 	 * @access public
-	 * 
-	 * @param  object $order        Local WC order.
+	 *
+	 * @param  object $order Local WC order.
 	 */
 	public function add_order_items( $order ) {
 		$order->remove_order_items();
@@ -438,23 +428,19 @@ class WC_Gateway_Klarna_K2WC {
 		$order_id = $order->id;
 
 		foreach ( $woocommerce->cart->get_cart() as $cart_item_key => $values ) {
-			$item_id = $order->add_product(
-				$values['data'],
-				$values['quantity'],
-				array(
-					'variation' => $values['variation'],
-					'totals'    => array(
-						'subtotal'     => $values['line_subtotal'],
-						'subtotal_tax' => $values['line_subtotal_tax'],
-						'total'        => $values['line_total'],
-						'tax'          => $values['line_tax'],
-						'tax_data'     => $values['line_tax_data'] // Since 2.2
-					)
+			$item_id = $order->add_product( $values['data'], $values['quantity'], array(
+				'variation' => $values['variation'],
+				'totals'    => array(
+					'subtotal'     => $values['line_subtotal'],
+					'subtotal_tax' => $values['line_subtotal_tax'],
+					'total'        => $values['line_total'],
+					'tax'          => $values['line_tax'],
+					'tax_data'     => $values['line_tax_data'] // Since 2.2
 				)
-			);
+			) );
 
 			if ( ! $item_id ) {
-		 		if ( $this->klarna_debug=='yes' ) {
+				if ( $this->klarna_debug == 'yes' ) {
 					$this->klarna_log->add( 'klarna', 'Unable to add order item.' );
 				}
 				throw new Exception( __( 'Error: Unable to add order item. Please try again.', 'woocommerce' ) );
@@ -470,21 +456,21 @@ class WC_Gateway_Klarna_K2WC {
 	 *
 	 * @since  2.0.0
 	 * @access public
-	 * 
-	 * @param  object $order        Local WC order.
+	 *
+	 * @param  object $order Local WC order.
 	 */
 	public function add_order_fees( $order ) {
-		if ( $this->klarna_debug=='yes' ) {
+		if ( $this->klarna_debug == 'yes' ) {
 			$this->klarna_log->add( 'klarna', 'Adding order fees...' );
 		}
 		global $woocommerce;
 		$order_id = $order->id;
-		
+
 		foreach ( $woocommerce->cart->get_fees() as $fee_key => $fee ) {
 			$item_id = $order->add_fee( $fee );
 
 			if ( ! $item_id ) {
-				if ( $this->klarna_debug=='yes' ) {
+				if ( $this->klarna_debug == 'yes' ) {
 					$this->klarna_log->add( 'klarna', 'Unable to add order fee.' );
 				}
 				throw new Exception( __( 'Error: Unable to create order. Please try again.', 'woocommerce' ) );
@@ -492,7 +478,7 @@ class WC_Gateway_Klarna_K2WC {
 
 			// Allow plugins to add order item meta to fees
 			do_action( 'woocommerce_add_order_fee_meta', $order_id, $item_id, $fee, $fee_key );
-		}		
+		}
 	}
 
 	/**
@@ -500,12 +486,12 @@ class WC_Gateway_Klarna_K2WC {
 	 *
 	 * @since  2.0.0
 	 * @access public
-	 * 
-	 * @param  object $order        Local WC order.
+	 *
+	 * @param  object $order Local WC order.
 	 * @param  object $klarna_order Klarna order.
 	 */
 	public function add_order_shipping( $order ) {
-		if ( $this->klarna_debug=='yes' ) {
+		if ( $this->klarna_debug == 'yes' ) {
 			$this->klarna_log->add( 'klarna', 'Adding order shipping...' );
 		}
 		global $woocommerce;
@@ -517,7 +503,7 @@ class WC_Gateway_Klarna_K2WC {
 		$woocommerce->cart->calculate_fees();
 		$woocommerce->cart->calculate_totals();
 
-		$order_id = $order->id;
+		$order_id              = $order->id;
 		$this_shipping_methods = $woocommerce->session->get( 'chosen_shipping_methods' );
 
 		// Store shipping for all packages
@@ -526,7 +512,7 @@ class WC_Gateway_Klarna_K2WC {
 				$item_id = $order->add_shipping( $package['rates'][ $this_shipping_methods[ $package_key ] ] );
 
 				if ( ! $item_id ) {
-					if ( $this->klarna_debug=='yes' ) {
+					if ( $this->klarna_debug == 'yes' ) {
 						$this->klarna_log->add( 'klarna', 'Unable to add shipping item.' );
 					}
 					throw new Exception( __( 'Error: Unable to create order. Please try again.', 'woocommerce' ) );
@@ -543,29 +529,29 @@ class WC_Gateway_Klarna_K2WC {
 	 *
 	 * @since  2.0.0
 	 * @access public
-	 * 
-	 * @param  object $order        Local WC order.
+	 *
+	 * @param  object $order Local WC order.
 	 * @param  object $klarna_order Klarna order.
 	 */
 	public function add_order_addresses( $order, $klarna_order ) {
-		if ( $this->klarna_debug=='yes' ) {
+		if ( $this->klarna_debug == 'yes' ) {
 			$this->klarna_log->add( 'klarna', 'Adding order addresses...' );
 		}
 
 		$order_id = $order->id;
-		
+
 		// Different names on the returned street address if it's a German purchase or not
 		$received__billing_address_1  = '';
 		$received__shipping_address_1 = '';
 
 		if ( $_GET['scountry'] == 'DE' || $_GET['scountry'] == 'AT' ) {
-			$received__billing_address_1 = $klarna_order['billing_address']['street_name'] . ' ' . $klarna_order['billing_address']['street_number'];
+			$received__billing_address_1  = $klarna_order['billing_address']['street_name'] . ' ' . $klarna_order['billing_address']['street_number'];
 			$received__shipping_address_1 = $klarna_order['shipping_address']['street_name'] . ' ' . $klarna_order['shipping_address']['street_number'];
-		} else {		
-			$received__billing_address_1 	= $klarna_order['billing_address']['street_address'];
-			$received__shipping_address_1 	= $klarna_order['shipping_address']['street_address'];		
+		} else {
+			$received__billing_address_1  = $klarna_order['billing_address']['street_address'];
+			$received__shipping_address_1 = $klarna_order['shipping_address']['street_address'];
 		}
-			
+
 		// Add customer billing address - retrieved from callback from Klarna
 		update_post_meta( $order_id, '_billing_first_name', $klarna_order['billing_address']['given_name'] );
 		update_post_meta( $order_id, '_billing_last_name', $klarna_order['billing_address']['family_name'] );
@@ -578,11 +564,11 @@ class WC_Gateway_Klarna_K2WC {
 		update_post_meta( $order_id, '_billing_country', strtoupper( $klarna_order['billing_address']['country'] ) );
 		update_post_meta( $order_id, '_billing_email', $klarna_order['billing_address']['email'] );
 		update_post_meta( $order_id, '_billing_phone', $klarna_order['billing_address']['phone'] );
-		
+
 		// Add customer shipping address - retrieved from callback from Klarna
 		$allow_separate_shipping = ( isset( $klarna_order['options']['allow_separate_shipping_address'] ) ) ? $klarna_order['options']['allow_separate_shipping_address'] : '';
-		
-		if ( $allow_separate_shipping == 'true' || $_GET['scountry'] == 'DE' || $_GET['scountry'] == 'AT' ) {		
+
+		if ( $allow_separate_shipping == 'true' || $_GET['scountry'] == 'DE' || $_GET['scountry'] == 'AT' ) {
 			update_post_meta( $order_id, '_shipping_first_name', $klarna_order['shipping_address']['given_name'] );
 			update_post_meta( $order_id, '_shipping_last_name', $klarna_order['shipping_address']['family_name'] );
 			update_post_meta( $order_id, '_shipping_address_1', $received__shipping_address_1 );
@@ -591,8 +577,8 @@ class WC_Gateway_Klarna_K2WC {
 			}
 			update_post_meta( $order_id, '_shipping_postcode', $klarna_order['shipping_address']['postal_code'] );
 			update_post_meta( $order_id, '_shipping_city', $klarna_order['shipping_address']['city'] );
-			update_post_meta( $order_id, '_shipping_country', strtoupper( $klarna_order['shipping_address']['country'] ) );		
-		} else {			
+			update_post_meta( $order_id, '_shipping_country', strtoupper( $klarna_order['shipping_address']['country'] ) );
+		} else {
 			update_post_meta( $order_id, '_shipping_first_name', $klarna_order['billing_address']['given_name'] );
 			update_post_meta( $order_id, '_shipping_last_name', $klarna_order['billing_address']['family_name'] );
 			update_post_meta( $order_id, '_shipping_address_1', $received__billing_address_1 );
@@ -613,11 +599,11 @@ class WC_Gateway_Klarna_K2WC {
 	 *
 	 * @since  2.0.0
 	 * @access public
-	 * 
-	 * @param  object $order        Local WC order.
+	 *
+	 * @param  object $order Local WC order.
 	 */
 	public function add_order_tax_rows( $order ) {
-		if ( $this->klarna_debug=='yes' ) {
+		if ( $this->klarna_debug == 'yes' ) {
 			$this->klarna_log->add( 'klarna', 'Adding order tax...' );
 		}
 
@@ -637,11 +623,13 @@ class WC_Gateway_Klarna_K2WC {
 	 *
 	 * @since  2.0.0
 	 * @access public
-	 * 
-	 * @param  object $order        Local WC order.
+	 *
+	 * @param  object $order Local WC order.
+	 *
+	 * @throws Exception
 	 */
 	public function add_order_coupons( $order ) {
-		if ( $this->klarna_debug=='yes' ) {
+		if ( $this->klarna_debug == 'yes' ) {
 			$this->klarna_log->add( 'klarna', 'Adding order coupons...' );
 		}
 
@@ -649,7 +637,7 @@ class WC_Gateway_Klarna_K2WC {
 
 		foreach ( $woocommerce->cart->get_coupons() as $code => $coupon ) {
 			if ( ! $order->add_coupon( $code, $woocommerce->cart->get_coupon_discount_amount( $code ) ) ) {
-				if ( $this->klarna_debug=='yes' ) {
+				if ( $this->klarna_debug == 'yes' ) {
 					$this->klarna_log->add( 'klarna', 'Unable to add coupons.' );
 				}
 				throw new Exception( __( 'Error: Unable to create order. Please try again.', 'woocommerce' ) );
@@ -662,9 +650,10 @@ class WC_Gateway_Klarna_K2WC {
 	 *
 	 * @since  2.0.0
 	 * @access public
-	 * 
-	 * @param  object $order        Local WC order.
-	 * @param  object $klarna_order Klarna order.
+	 *
+	 * @param  object $order Local WC order.
+	 *
+	 * @internal param object $klarna_order Klarna order.
 	 */
 	public function add_order_payment_method( $order ) {
 		if ( $this->klarna_debug == 'yes' ) {
@@ -674,8 +663,8 @@ class WC_Gateway_Klarna_K2WC {
 		global $woocommerce;
 
 		$available_gateways = $woocommerce->payment_gateways->payment_gateways();
-		$payment_method = $available_gateways[ 'klarna_checkout' ];
-	
+		$payment_method     = $available_gateways['klarna_checkout'];
+
 		$order->set_payment_method( $payment_method );
 	}
 
@@ -684,11 +673,11 @@ class WC_Gateway_Klarna_K2WC {
 	 *
 	 * @since  2.0.0
 	 * @access public
-	 * 
-	 * @param  object $order        Local WC order.
+	 *
+	 * @param  object $order Local WC order.
 	 */
-	public function set_order_totals( $order ) {		
-		if ( $this->klarna_debug=='yes' ) {
+	public function set_order_totals( $order ) {
+		if ( $this->klarna_debug == 'yes' ) {
 			$this->klarna_log->add( 'klarna', 'Setting order totals...' );
 		}
 
@@ -720,17 +709,20 @@ class WC_Gateway_Klarna_K2WC {
 	 * @param  string $email
 	 * @param  string $username
 	 * @param  string $password
+	 *
 	 * @return WP_Error on failure, Int (user ID) on success
 	 *
 	 * @since 1.0.0
 	 */
 	function create_new_customer( $email, $username = '', $password = '' ) {
-    	// Check the e-mail address
-		if ( empty( $email ) || ! is_email( $email ) )
-            return new WP_Error( "registration-error", __( "Please provide a valid email address.", "woocommerce" ) );
+		// Check the e-mail address
+		if ( empty( $email ) || ! is_email( $email ) ) {
+			return new WP_Error( "registration-error", __( "Please provide a valid email address.", "woocommerce" ) );
+		}
 
-		if ( email_exists( $email ) )
-            return new WP_Error( "registration-error", __( "An account is already registered with your email address. Please login.", "woocommerce" ) );
+		if ( email_exists( $email ) ) {
+			return new WP_Error( "registration-error", __( "An account is already registered with your email address. Please login.", "woocommerce" ) );
+		}
 
 
 		// Handle username creation
@@ -746,7 +738,7 @@ class WC_Gateway_Klarna_K2WC {
 		}
 
 		// Handle password creation
-		$password = wp_generate_password();
+		$password           = wp_generate_password();
 		$password_generated = true;
 
 		// WP Validation
@@ -755,6 +747,7 @@ class WC_Gateway_Klarna_K2WC {
 		$validation_errors = apply_filters( 'woocommerce_registration_errors', $validation_errors, $username, $email );
 		if ( $validation_errors->get_error_code() ) {
 			$this->klarna_log->add( 'klarna', __( 'Customer creation error', 'woocommerce-gateway-klarna' ) . ' - ' . $validation_errors->get_error_code() );
+
 			return 0;
 		}
 
@@ -770,15 +763,16 @@ class WC_Gateway_Klarna_K2WC {
 		if ( is_wp_error( $customer_id ) ) {
 			$validation_errors->add( "registration-error", '<strong>' . __( 'ERROR', 'woocommerce' ) . '</strong>: ' . __( 'Couldn&#8217;t register you&hellip; please contact us if you continue to have problems.', 'woocommerce' ) );
 			$this->klarna_log->add( 'klarna', __( 'Customer creation error', 'woocommerce-gateway-klarna' ) . ' - ' . $validation_errors->get_error_code() );
+
 			return 0;
 		}
-	
+
 		// Send New account creation email to customer?
 		$checkout_settings = get_option( 'woocommerce_klarna_checkout_settings' );
 		if ( 'yes' == $checkout_settings['send_new_account_email'] ) {
 			do_action( 'woocommerce_created_customer', $customer_id, $new_customer_data, $password_generated );
 		}
-	
+
 		return $customer_id;
 	}
 
@@ -787,41 +781,41 @@ class WC_Gateway_Klarna_K2WC {
 	 *
 	 * @since  2.0.0
 	 * @access public
-	 * 
-	 * @param  object $order        Local WC order.
+	 *
+	 * @param  object $order Local WC order.
 	 * @param  object $klarna_order Klarna order.
 	 */
 	public function add_order_customer_info( $order, $klarna_order ) {
 		$order_id = $order->id;
 
 		// Store user id in order so the user can keep track of track it in My account
-		if ( email_exists( $klarna_order['billing_address']['email'] ) ) {		
+		if ( email_exists( $klarna_order['billing_address']['email'] ) ) {
 			if ( $this->klarna_debug == 'yes' ) {
 				$this->klarna_log->add( 'klarna', 'Billing email: ' . $klarna_order['billing_address']['email'] );
 			}
-		
-			$user = get_user_by('email', $klarna_order['billing_address']['email']);
-			
+
+			$user = get_user_by( 'email', $klarna_order['billing_address']['email'] );
+
 			if ( $this->klarna_debug == 'yes' ) {
 				$this->klarna_log->add( 'klarna', 'Customer User ID: ' . $user->ID );
 			}
-				
+
 			$this->customer_id = $user->ID;
-			
+
 			update_post_meta( $order->id, '_customer_user', $this->customer_id );
 		} else {
 			// Create new user
 			$checkout_settings = get_option( 'woocommerce_klarna_checkout_settings' );
 			if ( 'yes' == $checkout_settings['create_customer_account'] ) {
-				$password = '';
+				$password     = '';
 				$new_customer = $this->create_new_customer( $klarna_order['billing_address']['email'], $klarna_order['billing_address']['email'], $password );
-				
+
 				if ( 0 == $new_customer ) { // Creation failed
 					$order->add_order_note( sprintf( __( 'Customer creation failed. Check error log for more details.', 'klarna' ) ) );
 					$this->customer_id = 0;
 				} else { // Creation succeeded
 					$order->add_order_note( sprintf( __( 'New customer created (user ID %s).', 'klarna' ), $new_customer, $klarna_order['id'] ) );
-					
+
 					// Add customer billing address - retrieved from callback from Klarna
 					update_user_meta( $new_customer, 'billing_first_name', $klarna_order['billing_address']['given_name'] );
 					update_user_meta( $new_customer, 'billing_last_name', $klarna_order['billing_address']['family_name'] );
@@ -832,10 +826,10 @@ class WC_Gateway_Klarna_K2WC {
 					update_user_meta( $new_customer, 'billing_country', $klarna_order['billing_address']['country'] );
 					update_user_meta( $new_customer, 'billing_email', $klarna_order['billing_address']['email'] );
 					update_user_meta( $new_customer, 'billing_phone', $klarna_order['billing_address']['phone'] );
-					
+
 					// Add customer shipping address - retrieved from callback from Klarna
 					$allow_separate_shipping = ( isset( $klarna_order['options']['allow_separate_shipping_address'] ) ) ? $klarna_order['options']['allow_separate_shipping_address'] : '';
-					
+
 					if ( $allow_separate_shipping == 'true' || $_GET['scountry'] == 'DE' || $_GET['scountry'] == 'AT' ) {
 						update_user_meta( $new_customer, 'shipping_first_name', $klarna_order['shipping_address']['given_name'] );
 						update_user_meta( $new_customer, 'shipping_last_name', $klarna_order['shipping_address']['family_name'] );
@@ -856,7 +850,7 @@ class WC_Gateway_Klarna_K2WC {
 
 					$this->customer_id = $new_customer;
 				}
-			
+
 				update_post_meta( $order->id, '_customer_user', $this->customer_id );
 			}
 		}
@@ -867,51 +861,39 @@ class WC_Gateway_Klarna_K2WC {
 	 *
 	 * @since  2.0.0
 	 * @access public
-	 * 
-	 * @param  object $order        Local WC order.
+	 *
+	 * @param  object $order Local WC order.
 	 * @param  object $klarna_order Klarna order.
 	 */
 	public function confirm_klarna_order( $order, $klarna_order ) {
 		// Rest API
 		if ( isset( $_GET['klarna-api'] ) && 'rest' == sanitize_key( $_GET['klarna-api'] ) ) {
 			if ( ! get_post_meta( $order->id, '_kco_payment_created', true ) ) {
-				$order->add_order_note( sprintf( 
-					__( 'Klarna Checkout payment created. Klarna reference number: %s.', 'woocommerce-gateway-klarna' ),
-					$klarna_order['klarna_reference']
-				) );
+				$order->add_order_note( sprintf( __( 'Klarna Checkout payment created. Klarna reference number: %s.', 'woocommerce-gateway-klarna' ), $klarna_order['klarna_reference'] ) );
 				$klarna_order->acknowledge();
 				$klarna_order->fetch();
 
 				$klarna_order->updateMerchantReferences( array(
-					'merchant_reference1' => ltrim( $order->get_order_number(), '#' ) 
+					'merchant_reference1' => ltrim( $order->get_order_number(), '#' )
 				) );
 
 				$order->calculate_totals( false );
 				$order->payment_complete( $klarna_order['klarna_reference'] );
 
-				delete_post_meta( $order->id, '_kco_incomplete_customer_email' );	
+				delete_post_meta( $order->id, '_kco_incomplete_customer_email' );
 				add_post_meta( $order->id, '_kco_payment_created', time() );
 			}
-		// V2 API
+			// V2 API
 		} else {
-			$order->add_order_note( sprintf( 
-				__( 'Klarna Checkout payment created. Reservation number: %s.  Klarna order number: %s', 'woocommerce-gateway-klarna' ),
-				$klarna_order['reservation'], 
-				$klarna_order['id'] 
-			) );
+			$order->add_order_note( sprintf( __( 'Klarna Checkout payment created. Reservation number: %s.  Klarna order number: %s', 'woocommerce-gateway-klarna' ), $klarna_order['reservation'], $klarna_order['id'] ) );
 
 			// Add order expiration date
 			$expiration_time = date( get_option( 'date_format' ) . ' - ' . get_option( 'time_format' ), strtotime( $klarna_order['expires_at'] ) );
-			$order->add_order_note( 
-				sprintf( 
-					__( 'Klarna authorization expires at %s.', 'woocommerce-gateway-klarna' ), 
-					$expiration_time
-				)
-			);
+			$order->add_order_note( sprintf( __( 'Klarna authorization expires at %s.', 'woocommerce-gateway-klarna' ), $expiration_time ) );
 
-			$update['status'] = 'created';
+			$update['status']             = 'created';
 			$update['merchant_reference'] = array(
-				'orderid1' => ltrim( $order->get_order_number(), '#' ) 
+				'orderid1' => ltrim( $order->get_order_number(), '#' )
 			);
 			$klarna_order->update( $update );
 

@@ -23,25 +23,19 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Klarna_PMS {
 
 	public function __construct() {
-	
-		add_action( 'wp_enqueue_scripts', array( $this, 'load_scripts') );
+
+		add_action( 'wp_enqueue_scripts', array( $this, 'load_scripts' ) );
 		add_action( 'wp_enqueue_scripts', 'add_thickbox' );
 
 	}
 
 	/**
- 	 * Register and Enqueue Klarna scripts
- 	 */
+	 * Register and Enqueue Klarna scripts
+	 */
 	function load_scripts() {
-		
+
 		if ( is_checkout() ) {
-			wp_register_script(
-				'klarna-pms-js', 
-				KLARNA_URL . 'assets/js/klarnapms.js',
-				array('jquery'),
-				'1.0',
-				false
-			);
+			wp_register_script( 'klarna-pms-js', KLARNA_URL . 'assets/js/klarnapms.js', array( 'jquery' ), '1.0', false );
 			wp_enqueue_script( 'klarna-pms-js' );
 		}
 
@@ -49,55 +43,46 @@ class WC_Klarna_PMS {
 
 
 	/**
- 	 * Gets response from Klarna
- 	 */
+	 * Gets response from Klarna
+	 */
 	function get_data(
-		$eid, 
-		$secret, 
-		$selected_currency, 
-		$shop_country, 
-		$cart_total, 
-		$payment_method_group, 
-		$select_id, 
-		$mode, 
-		$invoice_fee = false
+		$eid, $secret, $selected_currency, $shop_country, $cart_total, $payment_method_group, $select_id, $mode, $invoice_fee = false
 	) {
 
 		$klarna = new Klarna();
 		$config = new KlarnaConfig();
-		
+
 		// Default required options
 		if ( $mode == 'test' ) {
-			$klarna_ssl = 'false';
+			$klarna_ssl      = 'false';
 			$klarna_endpoint = 'https://api-test.klarna.com/touchpoint/checkout/';
-			$klarna_mode = Klarna::BETA;
+			$klarna_mode     = Klarna::BETA;
 		} else {
 			// Set SSL if used in webshop
-			if (is_ssl()) {
+			if ( is_ssl() ) {
 				$klarna_ssl = 'true';
 			} else {
 				$klarna_ssl = 'false';
 			}
 			$klarna_endpoint = 'https://api.klarna.com/touchpoint/checkout/';
-			$klarna_mode = Klarna::LIVE;
+			$klarna_mode     = Klarna::LIVE;
 		}
-		
+
 		// Configuration needed for the checkout service
-		$config['mode'] 				= $klarna_mode;
-		$config['ssl'] 					= $klarna_ssl;
+		$config['mode']                 = $klarna_mode;
+		$config['ssl']                  = $klarna_ssl;
 		$config['checkout_service_uri'] = $klarna_endpoint;
-		$config['pcStorage'] 			= 'json';
-		$config['pcURI']     			= './pclasses.json';
-		$config['eid']       			= $eid;
-		$config['secret']    			= $secret;
+		$config['pcStorage']            = 'json';
+		$config['pcURI']                = './pclasses.json';
+		$config['eid']                  = $eid;
+		$config['secret']               = $secret;
 
 		$klarna->setConfig( $config );
 
 		$klarna_pms_locale = $this->get_locale( $shop_country );
-		
+
 		try {
-			$response = $klarna->checkoutService(
-				$cart_total,        // Total price of the checkout including VAT
+			$response = $klarna->checkoutService( $cart_total,        // Total price of the checkout including VAT
 				$selected_currency, // Currency used by the checkout
 				$klarna_pms_locale  // Locale used by the checkout
 			);
@@ -121,7 +106,7 @@ class WC_Klarna_PMS {
 
 		$payment_methods = $data['payment_methods'];
 
-		$payment_options = array();
+		$payment_options         = array();
 		$payment_options_details = array();
 
 		$i = 0;
@@ -129,69 +114,69 @@ class WC_Klarna_PMS {
 
 			// Check if payment group we're looking for
 			if ( $payment_method_group == $payment_method['group']['code'] ) {
-				$i++;
-	
+				$i ++;
+
 				// Create option element output
 				$payment_options[] = '<option value="' . $payment_method['pclass_id'] . '">' . $payment_method['title'] . '</option>';
 
 				// Create payment option details output
 				if ( $i < 2 ) {
 					$inline_style = 'style="clear:both;position:relative"';
-					$extra_class = 'visible-pms';
+					$extra_class  = 'visible-pms';
 				} else {
 					$inline_style = 'style="clear:both;display:none;position:relative"';
-					$extra_class = '';
+					$extra_class  = '';
 				}
 
 				$payment_options_details_output = '<div class="klarna-pms-details ' . $extra_class . '" data-pclass="' . $payment_method['pclass_id'] . '" ' . $inline_style . '>';
 
-					if ( isset( $payment_method['logo']['uri'] ) && '' != $payment_method['logo']['uri'] ) {
-						$payment_options_details_output .= '<img class="klarna-pms-logo" style="display:none" src="' . $payment_method['logo']['uri'] . '?width=100" />';
+				if ( isset( $payment_method['logo']['uri'] ) && '' != $payment_method['logo']['uri'] ) {
+					$payment_options_details_output .= '<img class="klarna-pms-logo" style="display:none" src="' . $payment_method['logo']['uri'] . '?width=100" />';
+				}
+
+				$payment_options_details_output .= '<div>';
+
+				$payment_options_details_output .= '<strong style="font-size:1.2em;display:block;margin-bottom:0.5em;">' . $payment_method['group']['title'] . '</strong>';
+
+				if ( ! empty( $payment_method['details'] ) ) {
+					$payment_options_details_output .= '<ul style="list-style:none;margin-bottom:0.75em;margin-left:0">';
+					foreach ( $payment_method['details'] as $pd_k => $pd_v ) {
+						$payment_options_details_output .= '<li style="padding:0.5em 0 !important" id="pms-details-' . $pd_k . '">' . implode( ' ', $pd_v ) . '</li>';
+					}
+					$payment_options_details_output .= '</ul>';
+				}
+
+				if ( isset( $payment_method['use_case'] ) && '' != $payment_method['use_case'] ) {
+					$payment_options_details_output .= '<div class="klarna-pms-use-case" style="margin-bottom:0.75em">' . $payment_method['use_case'] . '</div>';
+				}
+
+				if ( isset( $payment_method['terms']['uri'] ) && '' != $payment_method['terms']['uri'] ) {
+					$klarna_terms_uri = $payment_method['terms']['uri'];
+
+					// Check if invoice fee needs to be added
+					// Invoice terms links ends with ?fee=
+					if ( strpos( $klarna_terms_uri, '?fee=' ) ) {
+						if ( $invoice_fee ) {
+							$klarna_terms_uri = $klarna_terms_uri . $invoice_fee . '&TB_iframe=true&width=600&height=550';
+						} else {
+							$klarna_terms_uri = $klarna_terms_uri . '0&TB_iframe=true&width=600&height=550';
+						}
+					} else {
+						$klarna_terms_uri .= '?TB_iframe=true&width=600&height=550';
 					}
 
-					$payment_options_details_output .= '<div>';
+					if ( 'SE' == $shop_country ) {
+						$read_more_text = 'Läs mer';
+					} elseif ( 'NO' == $shop_country ) {
+						$read_more_text = 'Les mer';
+					} else {
+						$read_more_text = 'Read more';
+					}
+					add_thickbox();
+					$payment_options_details_output .= '<div class="klarna-pms-terms-uri" style="margin-bottom:1em;"><a class="thickbox" href="' . $klarna_terms_uri . '" target="_blank">' . $read_more_text . '</a></div>';
+				}
 
-						$payment_options_details_output .= '<strong style="font-size:1.2em;display:block;margin-bottom:0.5em;">' . $payment_method['group']['title'] . '</strong>';
-
-						if ( ! empty( $payment_method['details'] ) ) {
-							$payment_options_details_output .= '<ul style="list-style:none;margin-bottom:0.75em;margin-left:0">';
-								foreach ( $payment_method['details'] as $pd_k => $pd_v ) {
-									$payment_options_details_output .= '<li style="padding:0.5em 0 !important" id="pms-details-' . $pd_k . '">' . implode( ' ', $pd_v ) . '</li>';
-								}
-							$payment_options_details_output .= '</ul>';
-						}
-
-						if ( isset( $payment_method['use_case'] ) && '' != $payment_method['use_case'] ) {
-							$payment_options_details_output .= '<div class="klarna-pms-use-case" style="margin-bottom:0.75em">' . $payment_method['use_case'] . '</div>';
-						}
-
-						if ( isset( $payment_method['terms']['uri'] ) && '' != $payment_method['terms']['uri'] ) {
-							$klarna_terms_uri = $payment_method['terms']['uri'];
-
-							// Check if invoice fee needs to be added
-							// Invoice terms links ends with ?fee=
-							if ( strpos( $klarna_terms_uri, '?fee=' ) ) {
-								if ( $invoice_fee ) {
-									$klarna_terms_uri = $klarna_terms_uri . $invoice_fee . '&TB_iframe=true&width=600&height=550';
-								} else {
-									$klarna_terms_uri = $klarna_terms_uri . '0&TB_iframe=true&width=600&height=550';
-								}
-							} else {
-								$klarna_terms_uri .= '?TB_iframe=true&width=600&height=550'; 
-							}
-
-							if ( 'SE' == $shop_country ) {
-								$read_more_text = 'Läs mer';
-							} elseif ( 'NO' == $shop_country ) {
-								$read_more_text = 'Les mer';
-							} else {
-								$read_more_text = 'Read more';
-							}
-							add_thickbox();
-							$payment_options_details_output .= '<div class="klarna-pms-terms-uri" style="margin-bottom:1em;"><a class="thickbox" href="' . $klarna_terms_uri . '" target="_blank">' . $read_more_text . '</a></div>';
-						}
-
-					$payment_options_details_output .= '</div>';
+				$payment_options_details_output .= '</div>';
 
 				$payment_options_details_output .= '</div>';
 
@@ -204,12 +189,12 @@ class WC_Klarna_PMS {
 		// Check if anything was returned
 		if ( ! empty( $payment_options ) ) {
 			$payment_methods_output = '<p class="form-row">';
-				$payment_methods_output .= '<label for="' . esc_attr( $select_id ) . '">' . __( 'Payment plan', 'woocommerce-gateway-klarna' ) . ' <span class="required">*</span></label>';
-				$payment_methods_output .= '<select id="' . esc_attr( $select_id ) . '" name="' . esc_attr( $select_id ) . '" class="woocommerce-select klarna_pms_select" style="max-width:100%;width:100% !important;">';
+			$payment_methods_output .= '<label for="' . esc_attr( $select_id ) . '">' . __( 'Payment plan', 'woocommerce-gateway-klarna' ) . ' <span class="required">*</span></label>';
+			$payment_methods_output .= '<select id="' . esc_attr( $select_id ) . '" name="' . esc_attr( $select_id ) . '" class="woocommerce-select klarna_pms_select" style="max-width:100%;width:100% !important;">';
 
-					$payment_methods_output .= implode( '', $payment_options );
+			$payment_methods_output .= implode( '', $payment_options );
 
-				$payment_methods_output .= '</select>';
+			$payment_methods_output .= '</select>';
 			$payment_methods_output .= '</p>';
 
 			if ( ! empty( $payment_options_details ) ) {
@@ -253,7 +238,7 @@ class WC_Klarna_PMS {
 		return $klarna_pms_locale;
 
 	}
-	
+
 }
 
 $wc_klarna_pms = new WC_Klarna_PMS;

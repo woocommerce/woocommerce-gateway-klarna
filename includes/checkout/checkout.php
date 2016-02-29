@@ -10,8 +10,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Check if iframe needs to be displayed
-if ( ! $this->show_kco() )
+if ( ! $this->show_kco() ) {
 	return;
+}
 
 // Check if selected Klarna country is in WooCommerce allowed countries
 if ( ! array_key_exists( strtoupper( $this->get_klarna_country() ), WC()->countries->get_allowed_countries() ) ) {
@@ -33,14 +34,16 @@ if ( class_exists( 'WC_Subscriptions_Cart' ) && WC_Subscriptions_Cart::cart_cont
 
 
 // Process order via Klarna Checkout page
-if ( ! defined( 'WOOCOMMERCE_CHECKOUT' ) )
+if ( ! defined( 'WOOCOMMERCE_CHECKOUT' ) ) {
 	define( 'WOOCOMMERCE_CHECKOUT', true );
+}
 
 // Process order via Klarna Checkout page
-if ( ! defined( 'WOOCOMMERCE_KLARNA_CHECKOUT' ) )
+if ( ! defined( 'WOOCOMMERCE_KLARNA_CHECKOUT' ) ) {
 	define( 'WOOCOMMERCE_KLARNA_CHECKOUT', true );
+}
 
-// Set Klarna Checkout as the choosen payment method in the WC session
+// Set Klarna Checkout as the chosen payment method in the WC session
 WC()->session->set( 'chosen_payment_method', 'klarna_checkout' );
 
 // Set customer country so taxes and shipping can be calculated properly
@@ -60,7 +63,7 @@ if ( wp_is_mobile() ) {
 }
 
 /**
- * Set $add_klarna_window_size_script to true so that Window size 
+ * Set $add_klarna_window_size_script to true so that Window size
  * detection script can load in the footer
  */
 global $add_klarna_window_size_script;
@@ -70,7 +73,6 @@ $add_klarna_window_size_script = true;
 $result = $woocommerce->cart->check_cart_item_stock();
 if ( is_wp_error( $result ) ) {
 	return $result->get_error_message();
-	exit();
 }
 
 // Check if there's anything in the cart
@@ -82,13 +84,13 @@ if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 	}
 
 	// Get Klarna credentials
-	$eid = $this->klarna_eid;
+	$eid          = $this->klarna_eid;
 	$sharedSecret = $this->klarna_secret;
 
 	// Process cart contents and prepare them for Klarna
 	include_once( KLARNA_DIR . 'classes/class-wc-to-klarna.php' );
 	$wc_to_klarna = new WC_Gateway_Klarna_WC2K( $this->is_rest(), $this->klarna_country );
-	$cart = $wc_to_klarna->process_cart_contents();
+	$cart         = $wc_to_klarna->process_cart_contents();
 
 	// Initiate Klarna
 	if ( $this->is_rest() ) {
@@ -105,11 +107,7 @@ if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 				$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::NA_BASE_URL;
 			}
 		}
-		$connector = Klarna\Rest\Transport\Connector::create(
-		    $eid,
-		    $sharedSecret,
-		    $klarna_server_url
-		);
+		$connector = Klarna\Rest\Transport\Connector::create( $eid, $sharedSecret, $klarna_server_url );
 	} else {
 		$connector = Klarna_Checkout_Connector::create( $sharedSecret, $this->klarna_server );
 	}
