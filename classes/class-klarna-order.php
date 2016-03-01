@@ -220,13 +220,22 @@ class WC_Gateway_Klarna_Order {
 					$item_tax_percentage = 0.00;
 				}
 
+				$invoice_settings = get_option( 'woocommerce_klarna_invoice_settings' );
+				$invoice_fee_id = $invoice_settings['invoice_fee_id'];
+				$invoice_fee_product = wc_get_product( $invoice_fee_id );
+				if ( $invoice_fee_product ) {
+					$invoice_fee_name = $invoice_fee_product->get_title();
+				} else {
+					$invoice_fee_name = '';
+				}
+
 				// Invoice fee or regular fee
 				if ( $invoice_fee_name == $item['name'] ) {
 					$klarna_flags = KlarnaFlags::INC_VAT + KlarnaFlags::IS_HANDLING; // Price is including VAT and is handling/invoice fee
 				} else {
 					$klarna_flags = KlarnaFlags::INC_VAT; // Price is including VAT
 				}
-
+				
 				// apply_filters to item price so we can filter this if needed
 				$klarna_item_price_including_tax = $item['line_total'] + $item['line_tax'];
 				$item_price                      = apply_filters( 'klarna_fee_price_including_tax', $klarna_item_price_including_tax );
