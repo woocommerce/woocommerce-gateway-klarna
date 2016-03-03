@@ -2338,10 +2338,10 @@ class WC_Gateway_Klarna_Checkout_Extra {
 		if ( is_array( $checkout_settings ) ) {
 			foreach ( $checkout_settings as $cs_key => $cs_value ) {
 				if ( strpos( $cs_key, 'klarna_checkout_url_' ) !== false ) {
-					$checkout_pages[ $cs_key ] = substr( $cs_value, 0 - $length );
+					$checkout_pages[ $cs_key ] = substr( trailingslashit( $cs_value ), 0 - $length );
 				}
 				if ( strpos( $cs_key, 'klarna_checkout_thanks_url_' ) !== false ) {
-					$thank_you_pages[ $cs_key ] = substr( $cs_value, 0 - $length );
+					$thank_you_pages[ $cs_key ] = substr( trailingslashit( $cs_value ), 0 - $length );
 				}
 			}
 		}
