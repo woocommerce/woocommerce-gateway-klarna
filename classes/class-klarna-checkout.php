@@ -2074,7 +2074,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 				}
 				$order->add_order_note( __( 'This order cannot be refunded. Please make sure it is activated.', 'woocommerce-gateway-klarna' ) );
 
-				return false;
+				return new WP_Error( 'error', __( 'This order cannot be refunded. Please make sure it is activated.', 'woocommerce-gateway-klarna' ) );
 			}
 
 			if ( 'v2' == get_post_meta( $order->id, '_klarna_api', true ) ) {
