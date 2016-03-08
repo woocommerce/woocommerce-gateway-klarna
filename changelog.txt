@@ -1,8 +1,14 @@
 *** WooCommerce Gateway Klarna Changelog ***
 
+2016.03.xx  - version 2.1.2
+* Fix       - Adds trailingslashit to URL comparison for KCO pages.
+* Tweak     - Adds error notification when attempting to refund a non-activated KCO order.
+* Tweak     - Updated Finnish translation files.
+* Tweak     - Adds English locale for all countries (except Germany).
+* Tweak     - Introduces is_ssl check for KCO V3 before adding address_update URL.
+
 2016.03.04  - version 2.1.1
 * Fix       - Fixes how Klarna Invoice fees are sent to Klarna (flag 48 instead of 32).
-
 
 2016.03.01  - version 2.1
 * Fix       - Changed Composer autoload.php path.
@@ -32,7 +38,7 @@
 
 2015.12.21	- version 2.0.0
 * Feature	- Added Klarna order activation from WooCommerce.
-* Feature	- Added Klarna order cancelation from WooCommerce.
+* Feature	- Added Klarna order cancellation from WooCommerce.
 * Feature	- Added Klarna order update from WooCommerce.
 * Feature	- Added Klarna order refund from WooCommerce.
 * Feature	- Added support for subscription payments via Klarna Checkout (SE & NO).

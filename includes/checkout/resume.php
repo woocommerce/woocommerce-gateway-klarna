@@ -16,6 +16,7 @@ if ( $this->is_rest() ) {
 	$klarna_order = new Klarna_Checkout_Order( $connector, WC()->session->get( 'klarna_checkout' ) );
 }
 $local_order_id = WC()->session->get( 'ongoing_klarna_order' );
+$kco_session_country = WC()->session->get( 'klarna_country', '' );
 
 try {
 	$klarna_order->fetch();
@@ -70,9 +71,29 @@ try {
 			$update['options']['color_link'] = $this->color_link;
 		}
 
+		$kco_session_locale  = '';
+		if ( ( 'en_US' == get_locale() || 'en_GB' == get_locale() ) && 'DE' != $kco_session_country ) {
+			$kco_session_locale = 'en-gb';
+		} elseif ( '' != $kco_session_country ) {
+			if ( 'DE' == $kco_session_country ) {
+				$kco_session_locale = 'de-de';
+			} elseif ( 'AT' == $kco_session_country ) {
+				$kco_session_locale = 'de-at';
+			} elseif ( 'FI' == $kco_session_country ) {
+				// Check if WPML is used and determine if Finnish or Swedish is used as language
+				if ( class_exists( 'woocommerce_wpml' ) && defined( 'ICL_LANGUAGE_CODE' ) && strtoupper( ICL_LANGUAGE_CODE ) == 'SV' ) {
+					// Swedish
+					$kco_session_locale = 'sv-fi';
+				} else {
+					// Finnish
+					$kco_session_locale = 'fi-fi';
+				}
+			}
+		}
+
 		// Update the order WC id
-		$kco_country = $this->klarna_country;
-		$kco_locale  = $this->klarna_language;
+		$kco_country = ( '' != $kco_session_country ) ? $kco_session_country : $this->klarna_country;
+		$kco_locale  = ( '' != $kco_session_locale ) ? $kco_session_locale : $this->klarna_language;
 
 		$update['purchase_country']  = $kco_country;
 		$update['purchase_currency'] = $this->klarna_currency;
@@ -132,10 +153,12 @@ try {
 				'checkout'       => $merchant_checkout_uri,
 				'confirmation'   => $merchant_confirmation_uri,
 				'push'           => $merchant_push_uri,
-				'address_update' => $address_update_uri
 			);
 			if ( 'yes' == $this->validate_stock ) {
 				$merchantUrls['validation'] = get_home_url() . '/wc-api/WC_Gateway_Klarna_Order_Validate/';
+			}
+			if ( is_ssl() ) {
+				$merchantUrls['address_update'] = $address_update_uri;
 			}
 			$update['merchant_urls'] = $merchantUrls;
 		} else {
