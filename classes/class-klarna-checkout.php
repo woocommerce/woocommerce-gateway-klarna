@@ -913,6 +913,14 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 
 			// Store new country as WC session value
 			WC()->session->set( 'klarna_euro_country', $new_country );
+
+			// Get new checkout URL
+			$lowercase_country = strtolower( $new_country );
+			$checkout_settings = get_option( 'woocommerce_klarna_checkout_settings' );
+			$data['new_url'] = $checkout_settings["klarna_checkout_url_$lowercase_country"];
+
+			// Send data back to JS function
+			$data['klarna_euro_country'] = $new_country;
 		}
 
 		wp_send_json_success( $data );
