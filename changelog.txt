@@ -7,6 +7,7 @@
 * Tweak     - Adds English locale for all countries (except Germany).
 * Tweak     - Introduces is_ssl check for KCO V3 before adding address_update URL.
 * Tweak     - Sends the user to new checkout URL on Klarna Euro country change, instead of just reloading the page.
+* Tweak     - Stores Klarna order ID as order note for UK and US.
 
 2016.03.04  - version 2.1.1
 * Fix       - Fixes how Klarna Invoice fees are sent to Klarna (flag 48 instead of 32).
