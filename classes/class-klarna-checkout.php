@@ -66,7 +66,10 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		// Push listener
 		add_action( 'woocommerce_api_wc_gateway_klarna_checkout', array( $this, 'check_checkout_listener' ) );
 		// Validate listener
-		add_action( 'woocommerce_api_wc_gateway_klarna_order_validate', array( 'WC_Gateway_Klarna_Order_Validate', 'validate_checkout_listener' ) );
+		add_action( 'woocommerce_api_wc_gateway_klarna_order_validate', array(
+			'WC_Gateway_Klarna_Order_Validate',
+			'validate_checkout_listener'
+		) );
 
 		// We execute the woocommerce_thankyou hook when the KCO Thank You page is rendered,
 		// because other plugins use this, but we don't want to display the actual WC Order
@@ -256,7 +259,14 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 					$order    = wc_get_order( $order_id );
 
 					if ( false != $order && 'refunded' != $order->get_status() && 'klarna_checkout' == get_post_meta( $order_id, '_created_via', true ) ) {
-						unset( $order_statuses['wc-refunded'] );
+						/**
+						 * Filter that allows merchants to show Refunded status in order status dropdown.
+						 *
+						 * @param boolean $hide Default value true.
+						 */
+						if ( apply_filters( 'klarna_checkout_hide_refunded_status', true ) ) {
+							unset( $order_statuses['wc-refunded'] );
+						}
 					}
 
 					// NEVER make it possible to change status to KCO Incomplete
@@ -917,7 +927,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			// Get new checkout URL
 			$lowercase_country = strtolower( $new_country );
 			$checkout_settings = get_option( 'woocommerce_klarna_checkout_settings' );
-			$data['new_url'] = $checkout_settings["klarna_checkout_url_$lowercase_country"];
+			$data['new_url']   = $checkout_settings["klarna_checkout_url_$lowercase_country"];
 
 			// Send data back to JS function
 			$data['klarna_euro_country'] = $new_country;
