@@ -9,6 +9,8 @@
 * Tweak     - Sends the user to new checkout URL on Klarna Euro country change, instead of just reloading the page.
 * Tweak     - Stores Klarna order ID as order note for UK and US.
 * Fix       - Fixes typos in DE and AT terms text.
+* Fix       - Adds back woocommerce_checkout_order_processed action hook for KCO.
+* Fix       - Adds html_entity_decode to Klarna secret keys for US and UK.
 
 2016.03.04  - version 2.1.1
 * Fix       - Fixes how Klarna Invoice fees are sent to Klarna (flag 48 instead of 32).
