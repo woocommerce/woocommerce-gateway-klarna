@@ -1483,7 +1483,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			<tr class="kco-applied-coupon">
 				<td>
 					<?php _e( 'Coupon: ', 'woocommerce-gateway-klarna' ); ?><?php echo $coupon; ?>
-					<a class="kco-remove-coupon" data-coupon="<?php echo $coupon; ?>" href="#">(remove)</a>
+					<a class="kco-remove-coupon" data-coupon="<?php echo $coupon; ?>" href="#"><?php _e( '(remove)', 'woocommerce-gateway-klarna' ); ?></a>
 				</td>
 				<td class="kco-rightalign">
 					-<?php echo wc_price( $woocommerce->cart->get_coupon_discount_amount( $coupon, $woocommerce->cart->display_cart_ex_tax ) ); ?></td>
@@ -2187,7 +2187,18 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		global $woocommerce;
 		$checkout = $woocommerce->checkout();
 		if ( ! $checkout->enable_guest_checkout && ! is_user_logged_in() ) {
-			echo apply_filters( 'klarna_checkout_must_be_logged_in_message', sprintf( __( 'You must be logged in to checkout. %s or %s.', 'woocommerce' ), '<a href="' . wp_login_url() . '" title="Login">Login</a>', '<a href="' . wp_registration_url() . '" title="Create an account">create an account</a>' ) );
+			echo apply_filters(
+				'klarna_checkout_must_be_logged_in_message',
+				sprintf(
+					__( 'You must be logged in to checkout. %s or %s.', 'woocommerce' ),
+					'<a href="' . wp_login_url() . '" title="' . __( 'Login', 'woocommerce-gateway-klarna'
+					) . '">' . __( 'Login', 'woocommerce-gateway-klarna' ) . '</a>',
+					'<a href="' . wp_registration_url() . '" title="' . __( 'create an account',
+						'woocommerce-gateway-klarna' ) . '">' . __( 'create an account', 'woocommerce-gateway-klarna'
+					) . '</a>'
+				)
+			);
+			echo '</div>';
 
 			WC()->session->set( 'klarna_show_kco', false );
 

@@ -13,6 +13,10 @@
 * Fix       - Adds html_entity_decode to Klarna secret keys for US and UK.
 * Filter    - Introduces 'klarna_checkout_hide_refunded_status' filter that allows merchants to add back Refunded to
 order status dropdown for KCO orders.
+* Fix       - Makes remove coupon string translatable.
+* Fix       - Makes 'Login' and 'create an account' strings translatable in guest checkout notice.
+* Fix       - Adds 'klarna-checkout-guest-notice' CSS class to "must log in" notice if guest checkout is disabled.
+* Fix       - Changes HTML element for Klarna Get Address button to button.
 
 2016.03.04  - version 2.1.1
 * Fix       - Fixes how Klarna Invoice fees are sent to Klarna (flag 48 instead of 32).

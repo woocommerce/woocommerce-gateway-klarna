@@ -93,6 +93,7 @@ if ( 'NO' == $this->klarna_helper->get_klarna_country() ) { ?>
 			} else if (klarna_part_payment_selected_country == 'AT') {
 				var klarna_part_payment_current_locale = 'de_AT';
 			} else {
+				var klarna_part_payment_current_locale = 'en_GB';
 			}
 
 			new Klarna.Terms.Account({

@@ -31,7 +31,7 @@ if ( 'NO' == $this->klarna_helper->get_klarna_country() ) { ?>
 			<label for="klarna_invoice_pno"><?php echo __( "Date of Birth", 'woocommerce-gateway-klarna' ) ?> <span
 					class="required">*</span></label>
 			<input type="text" class="input-text" name="klarna_invoice_pno" id="klarna_invoice_pno"
-			       placeholder="DDMMYYXXXXX" />
+			       placeholder="DDMMYYXXXXX"/>
 
 			<?php
 			// Button/form for getAddress
@@ -77,6 +77,7 @@ if ( 'NO' == $this->klarna_helper->get_klarna_country() ) { ?>
 			} else if (klarna_invoice_selected_country == 'AT') {
 				var klarna_invoice_current_locale = 'de_AT';
 			} else {
+				klarna_invoice_current_locale = 'en_GB';
 			}
 
 			new Klarna.Terms.Invoice({
@@ -306,7 +307,7 @@ if ( 'NO' == $this->klarna_helper->get_klarna_country() ) { ?>
 					for="<?php echo esc_attr( $klarna_dob_element ); ?>"><?php echo __( "Date of Birth", 'woocommerce-gateway-klarna' ) ?>
 					<span class="required">*</span></label>
 				<input type="text" class="input-text" id="<?php echo esc_attr( $klarna_dob_element ); ?>"
-				       name="<?php echo esc_attr( $klarna_dob_element ); ?>" placeholder="YYMMDD-XXXX" />
+				       name="<?php echo esc_attr( $klarna_dob_element ); ?>" placeholder="YYMMDD-XXXX"/>
 			<?php }
 			// Button/form for getAddress
 			$data = new WC_Klarna_Get_Address;
@@ -332,8 +333,9 @@ if ( 'NO' == $this->klarna_helper->get_klarna_country() ) { ?>
 		<?php if ( ( $this->klarna_helper->get_klarna_country() == 'DE' || $this->klarna_helper->get_klarna_country() == 'AT' ) && $this->de_consent_terms == 'yes' ) { // Consent terms for German & Austrian shops ?>
 			<p class="form-row form-row-wide">
 				<label for="klarna_invoice_de_consent_terms">
-				<input type="checkbox" class="input-checkbox" value="yes" name="klarna_invoice_de_consent_terms" id="klarna_invoice_de_consent_terms" />
-				<?php echo sprintf( __( 'Mit der Übermittlung der für die Abwicklung der gewählten Klarna Zahlungsmethode und einer Identitäts- und Bonitätsprüfung erforderlichen Daten an Klarna bin ich einverstanden. Meine <a href="%s" target="_blank">Einwilligung</a> kann ich jederzeit mit Wirkung für die Zukunft widerrufen. Es gelten die AGB des Händlers.', 'woocommerce-gateway-klarna' ), 'https://online.klarna.com/consent_de.yaws' ) ?>
+					<input type="checkbox" class="input-checkbox" value="yes" name="klarna_invoice_de_consent_terms"
+					       id="klarna_invoice_de_consent_terms"/>
+					<?php echo sprintf( __( 'Mit der Übermittlung der für die Abwicklung der gewählten Klarna Zahlungsmethode und einer Identitäts- und Bonitätsprüfung erforderlichen Daten an Klarna bin ich einverstanden. Meine <a href="%s" target="_blank">Einwilligung</a> kann ich jederzeit mit Wirkung für die Zukunft widerrufen. Es gelten die AGB des Händlers.', 'woocommerce-gateway-klarna' ), 'https://online.klarna.com/consent_de.yaws' ) ?>
 				</label>
 			</p>
 		<?php } ?>
