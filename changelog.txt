@@ -1,8 +1,25 @@
 *** WooCommerce Gateway Klarna Changelog ***
 
+2016.03.xx  - version 2.1.2
+* Fix       - Adds trailingslashit to URL comparison for KCO pages.
+* Tweak     - Adds error notification when attempting to refund a non-activated KCO order.
+* Tweak     - Updated Finnish translation files.
+* Tweak     - Adds English locale for all countries (except Germany).
+* Tweak     - Introduces is_ssl check for KCO V3 before adding address_update URL.
+* Tweak     - Sends the user to new checkout URL on Klarna Euro country change, instead of just reloading the page.
+* Tweak     - Stores Klarna order ID as order note for UK and US.
+* Fix       - Fixes typos in DE and AT terms text.
+* Fix       - Adds back woocommerce_checkout_order_processed action hook for KCO.
+* Fix       - Adds html_entity_decode to Klarna secret keys for US and UK.
+* Filter    - Introduces 'klarna_checkout_hide_refunded_status' filter that allows merchants to add back Refunded to
+order status dropdown for KCO orders.
+* Fix       - Makes remove coupon string translatable.
+* Fix       - Makes 'Login' and 'create an account' strings translatable in guest checkout notice.
+* Fix       - Adds 'klarna-checkout-guest-notice' CSS class to "must log in" notice if guest checkout is disabled.
+* Fix       - Changes HTML element for Klarna Get Address button to button.
+
 2016.03.04  - version 2.1.1
 * Fix       - Fixes how Klarna Invoice fees are sent to Klarna (flag 48 instead of 32).
-
 
 2016.03.01  - version 2.1
 * Fix       - Changed Composer autoload.php path.
@@ -32,7 +49,7 @@
 
 2015.12.21	- version 2.0.0
 * Feature	- Added Klarna order activation from WooCommerce.
-* Feature	- Added Klarna order cancelation from WooCommerce.
+* Feature	- Added Klarna order cancellation from WooCommerce.
 * Feature	- Added Klarna order update from WooCommerce.
 * Feature	- Added Klarna order refund from WooCommerce.
 * Feature	- Added support for subscription payments via Klarna Checkout (SE & NO).

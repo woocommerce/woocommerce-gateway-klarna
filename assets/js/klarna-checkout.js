@@ -24,13 +24,15 @@ jQuery(document).ready(function ($) {
 					// console.log( 'success' );
 					// console.log( response.data );
 
+					/*
 					if (typeof window._klarnaCheckout == 'function') {
 						window._klarnaCheckout(function (api) {
 							api.resume();
 						});
 					}
+					*/
 
-					location.reload();
+					document.location.assign(response.data.new_url);
 				},
 				error: function (response) {
 					// console.log('error');

@@ -66,7 +66,10 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		// Push listener
 		add_action( 'woocommerce_api_wc_gateway_klarna_checkout', array( $this, 'check_checkout_listener' ) );
 		// Validate listener
-		add_action( 'woocommerce_api_wc_gateway_klarna_order_validate', array( 'WC_Gateway_Klarna_Order_Validate', 'validate_checkout_listener' ) );
+		add_action( 'woocommerce_api_wc_gateway_klarna_order_validate', array(
+			'WC_Gateway_Klarna_Order_Validate',
+			'validate_checkout_listener'
+		) );
 
 		// We execute the woocommerce_thankyou hook when the KCO Thank You page is rendered,
 		// because other plugins use this, but we don't want to display the actual WC Order
@@ -256,7 +259,14 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 					$order    = wc_get_order( $order_id );
 
 					if ( false != $order && 'refunded' != $order->get_status() && 'klarna_checkout' == get_post_meta( $order_id, '_created_via', true ) ) {
-						unset( $order_statuses['wc-refunded'] );
+						/**
+						 * Filter that allows merchants to show Refunded status in order status dropdown.
+						 *
+						 * @param boolean $hide Default value true.
+						 */
+						if ( apply_filters( 'klarna_checkout_hide_refunded_status', true ) ) {
+							unset( $order_statuses['wc-refunded'] );
+						}
 					}
 
 					// NEVER make it possible to change status to KCO Incomplete
@@ -913,6 +923,14 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 
 			// Store new country as WC session value
 			WC()->session->set( 'klarna_euro_country', $new_country );
+
+			// Get new checkout URL
+			$lowercase_country = strtolower( $new_country );
+			$checkout_settings = get_option( 'woocommerce_klarna_checkout_settings' );
+			$data['new_url']   = $checkout_settings["klarna_checkout_url_$lowercase_country"];
+
+			// Send data back to JS function
+			$data['klarna_euro_country'] = $new_country;
 		}
 
 		wp_send_json_success( $data );
@@ -1465,7 +1483,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			<tr class="kco-applied-coupon">
 				<td>
 					<?php _e( 'Coupon: ', 'woocommerce-gateway-klarna' ); ?><?php echo $coupon; ?>
-					<a class="kco-remove-coupon" data-coupon="<?php echo $coupon; ?>" href="#">(remove)</a>
+					<a class="kco-remove-coupon" data-coupon="<?php echo $coupon; ?>" href="#"><?php _e( '(remove)', 'woocommerce-gateway-klarna' ); ?></a>
 				</td>
 				<td class="kco-rightalign">
 					-<?php echo wc_price( $woocommerce->cart->get_coupon_discount_amount( $coupon, $woocommerce->cart->display_cart_ex_tax ) ); ?></td>
@@ -2074,7 +2092,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 				}
 				$order->add_order_note( __( 'This order cannot be refunded. Please make sure it is activated.', 'woocommerce-gateway-klarna' ) );
 
-				return false;
+				return new WP_Error( 'error', __( 'This order cannot be refunded. Please make sure it is activated.', 'woocommerce-gateway-klarna' ) );
 			}
 
 			if ( 'v2' == get_post_meta( $order->id, '_klarna_api', true ) ) {
@@ -2169,7 +2187,18 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		global $woocommerce;
 		$checkout = $woocommerce->checkout();
 		if ( ! $checkout->enable_guest_checkout && ! is_user_logged_in() ) {
-			echo apply_filters( 'klarna_checkout_must_be_logged_in_message', sprintf( __( 'You must be logged in to checkout. %s or %s.', 'woocommerce' ), '<a href="' . wp_login_url() . '" title="Login">Login</a>', '<a href="' . wp_registration_url() . '" title="Create an account">create an account</a>' ) );
+			echo apply_filters(
+				'klarna_checkout_must_be_logged_in_message',
+				sprintf(
+					__( 'You must be logged in to checkout. %s or %s.', 'woocommerce' ),
+					'<a href="' . wp_login_url() . '" title="' . __( 'Login', 'woocommerce-gateway-klarna'
+					) . '">' . __( 'Login', 'woocommerce-gateway-klarna' ) . '</a>',
+					'<a href="' . wp_registration_url() . '" title="' . __( 'create an account',
+						'woocommerce-gateway-klarna' ) . '">' . __( 'create an account', 'woocommerce-gateway-klarna'
+					) . '</a>'
+				)
+			);
+			echo '</div>';
 
 			WC()->session->set( 'klarna_show_kco', false );
 
@@ -2338,10 +2367,10 @@ class WC_Gateway_Klarna_Checkout_Extra {
 		if ( is_array( $checkout_settings ) ) {
 			foreach ( $checkout_settings as $cs_key => $cs_value ) {
 				if ( strpos( $cs_key, 'klarna_checkout_url_' ) !== false ) {
-					$checkout_pages[ $cs_key ] = substr( $cs_value, 0 - $length );
+					$checkout_pages[ $cs_key ] = substr( trailingslashit( $cs_value ), 0 - $length );
 				}
 				if ( strpos( $cs_key, 'klarna_checkout_thanks_url_' ) !== false ) {
-					$thank_you_pages[ $cs_key ] = substr( $cs_value, 0 - $length );
+					$thank_you_pages[ $cs_key ] = substr( trailingslashit( $cs_value ), 0 - $length );
 				}
 			}
 		}

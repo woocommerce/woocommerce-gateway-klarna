@@ -113,7 +113,9 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 	/**
 	 * Add Klarna's shipping details to order confirmation page.
 	 *
-	 * @param  $text  Default order confirmation text
+	 * @param  $text  string Default order confirmation text
+	 * @param  $order object WC_Order object
+	 * @return $text  string Updated order confirmation text
 	 *
 	 * @since  2.0.0
 	 */
@@ -864,7 +866,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 
 
 	/**
-	 * Disable the radio button for the Klarna Part Payment payment method if Company name
+	 * Disable the radio button for the Klarna Invoice payment method if Company name
 	 * is entered and the customer is from Germany or Austria.
 	 *
 	 * @since 1.0.0

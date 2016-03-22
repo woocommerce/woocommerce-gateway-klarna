@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: WooCommerce Klarna Gateway v2.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2015-12-16 17:57+0100\n"
-"PO-Revision-Date: 2015-12-17 11:06+0100\n"
+"PO-Revision-Date: 2016-01-14 15:10+0200\n"
 "Last-Translator: Niklas Högefjord <info@krokedil.se>\n"
 "Language-Team: \n"
 "Language: fi_FI\n"
@@ -12,7 +12,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Poedit-KeywordsList: __;_e\n"
 "X-Poedit-Basepath: .\n"
-"X-Generator: Poedit 1.8.6\n"
+"X-Generator: Poedit 1.8.4\n"
 "X-Poedit-SearchPath-0: ..\n"
 
 #: ../classes/class-klarna-checkout.php:29
@@ -50,41 +50,41 @@ msgstr ""
 #: ../classes/class-klarna-checkout.php:1178
 #: ../classes/class-klarna-shortcodes.php:275
 msgid "Subtotal"
-msgstr ""
+msgstr "Välisumma"
 
 #: ../classes/class-klarna-checkout.php:1188
 #: ../classes/class-klarna-checkout.php:1251
 #: ../classes/class-klarna-shortcodes.php:285
 #: ../classes/class-klarna-shortcodes.php:348
 msgid "Total"
-msgstr ""
+msgstr "Yhteensä"
 
 #: ../classes/class-klarna-checkout.php:1207
 #: ../classes/class-klarna-shortcodes.php:304
 msgid "Notes about your order, e.g. special notes for delivery."
-msgstr ""
+msgstr "Tilaukseen liittyvät toivomukset"
 
 #: ../classes/class-klarna-checkout.php:1246
 #: ../classes/class-klarna-shortcodes.php:343
 msgid "Product"
-msgstr ""
+msgstr "Tuote"
 
 #: ../classes/class-klarna-checkout.php:1248
 #: ../classes/class-klarna-shortcodes.php:345
 msgid "Price"
-msgstr ""
+msgstr "Hinta"
 
 #: ../classes/class-klarna-checkout.php:1250
 #: ../classes/class-klarna-shortcodes.php:347
 msgid "Quantity"
-msgstr ""
+msgstr "Määrä"
 
 #: ../classes/class-klarna-checkout.php:1326
 #: ../classes/class-klarna-checkout.php:1524
 #: ../classes/class-klarna-shortcodes.php:423
 #: ../classes/class-wc-to-klarna.php:423
 msgid "Shipping"
-msgstr ""
+msgstr "Toimitus"
 
 #: ../classes/class-klarna-checkout.php:1569
 #, php-format
@@ -121,7 +121,7 @@ msgstr ""
 
 #: ../classes/class-klarna-get-address.php:222
 msgid "Be kind and enter a date of birth!"
-msgstr ""
+msgstr "Klarnan luottopäätöstä varten teidän tulee antaa henkilötunnuksenne."
 
 #: ../classes/class-klarna-get-address.php:250
 msgid "Address found and added to the checkout form."
@@ -142,7 +142,7 @@ msgstr ""
 
 #: ../classes/class-klarna-invoice.php:32
 msgid "Klarna Invoice"
-msgstr ""
+msgstr "Klarna lasku"
 
 #: ../classes/class-klarna-invoice.php:33
 #: ../classes/class-klarna-part-payment.php:33
@@ -157,7 +157,7 @@ msgstr ""
 #: ../classes/class-klarna-invoice.php:35
 #: ../classes/class-klarna-part-payment.php:35
 msgid "Place order"
-msgstr ""
+msgstr "Vahvista tilaus"
 
 #: ../classes/class-klarna-invoice.php:285
 #: ../classes/class-klarna-order.php:1050
@@ -221,11 +221,11 @@ msgstr ""
 #: ../classes/class-klarna-invoice.php:909
 #: ../classes/class-klarna-part-payment.php:773
 msgid "Thank you for your order."
-msgstr ""
+msgstr "Kiitos tilauksestasi."
 
 #: ../classes/class-klarna-order.php:191
 msgid "Discount"
-msgstr ""
+msgstr "Alennus"
 
 #: ../classes/class-klarna-order.php:407
 msgid "Klarna order fully refunded."
@@ -291,7 +291,7 @@ msgstr ""
 
 #: ../classes/class-klarna-part-payment.php:32
 msgid "Klarna Part Payment"
-msgstr ""
+msgstr "Klarna erämaksu"
 
 #: ../classes/class-klarna-part-payment.php:718
 msgid ""
@@ -331,7 +331,7 @@ msgstr ""
 
 #: ../classes/class-klarna-payment-method-widget.php:306
 msgid "Monthly cost"
-msgstr ""
+msgstr "Arvioitu kuukausierä"
 
 #: ../classes/class-klarna-payment-method-widget.php:307
 msgid "Display monthly cost in product pages"
@@ -415,11 +415,11 @@ msgstr ""
 #: ../views/public/payment-fields-invoice.php:114
 #: ../views/public/payment-fields-part-payment.php:120
 msgid "Payment plan"
-msgstr ""
+msgstr "Maksusuunnitelma"
 
 #: ../classes/class-klarna-shortcodes.php:66
 msgid "Order Notes"
-msgstr ""
+msgstr "Lisätietoa tilauksesta"
 
 #: ../classes/class-klarna-shortcodes.php:124
 #: ../includes/settings-checkout.php:130 ../includes/settings-checkout.php:330
@@ -442,12 +442,12 @@ msgstr ""
 
 #: ../classes/class-klarna-shortcodes.php:164
 msgid "Country:"
-msgstr ""
+msgstr "Maa:"
 
 #: ../classes/class-klarna-shortcodes.php:482
 #, php-format
 msgid "Coupon: %s"
-msgstr ""
+msgstr "Alennuskoodi: %s"
 
 #: ../classes/class-klarna-shortcodes.php:483
 msgid "(remove)"
@@ -469,7 +469,7 @@ msgstr ""
 
 #: ../classes/class-klarna-to-wc.php:730
 msgid "Please provide a valid email address."
-msgstr ""
+msgstr "Tarkistathan antamasi sähköpostiosoitteen."
 
 #: ../classes/class-klarna-to-wc.php:733
 msgid "An account is already registered with your email address. Please login."
@@ -1133,7 +1133,7 @@ msgstr ""
 
 #: ../includes/settings-invoice.php:21
 msgid "Invoice"
-msgstr ""
+msgstr "Lasku"
 
 #: ../includes/settings-invoice.php:24 ../includes/settings-part-payment.php:24
 msgid "Description"
@@ -1207,7 +1207,7 @@ msgstr ""
 
 #: ../includes/settings-invoice.php:205
 msgid "Invoice Fee"
-msgstr ""
+msgstr "Maksutapalisä"
 
 #: ../includes/settings-invoice.php:207
 msgid ""
@@ -1245,7 +1245,7 @@ msgstr ""
 
 #: ../includes/settings-part-payment.php:21
 msgid "Part payments"
-msgstr ""
+msgstr "Erämaksu"
 
 #: ../includes/settings-part-payment.php:26
 msgid "This controls the description which the user sees during checkout. "
@@ -1270,11 +1270,11 @@ msgstr ""
 #: ../views/public/payment-fields-part-payment.php:186
 #: ../views/public/payment-fields-part-payment.php:323
 msgid "Date of Birth"
-msgstr ""
+msgstr "Henkilötunnus"
 
 #: ../views/public/payment-fields-invoice.php:135
 msgid "Pay in 14 days"
-msgstr ""
+msgstr "Maksa 14 päivän kuluessa"
 
 #: ../views/public/payment-fields-invoice.php:163
 #: ../views/public/payment-fields-part-payment.php:158

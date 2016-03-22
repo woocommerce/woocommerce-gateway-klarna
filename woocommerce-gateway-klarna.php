@@ -11,7 +11,7 @@
  * Plugin Name:     WooCommerce Klarna Gateway
  * Plugin URI:      http://woothemes.com/woocommerce
  * Description:     Extends WooCommerce. Provides a <a href="http://www.klarna.se" target="_blank">Klarna</a> gateway for WooCommerce.
- * Version:         2.1.1
+ * Version:         2.1.2
  * Author:          WooThemes
  * Author URI:      http://woothemes.com/
  * Developer:       Krokedil
@@ -256,5 +256,35 @@ function add_klarna_gateway( $methods ) {
 
 	return $methods;
 }
-
 add_filter( 'woocommerce_payment_gateways', 'add_klarna_gateway' );
+
+
+/**
+ * Displays admin error messages if some of Klarna Checkout and Klarna Thank You pages are not valid URLs.
+ */
+function klarna_checkout_admin_error_notices() {
+	// Only show it on Klarna settings pages
+	if ( isset( $_GET['section'] ) && 'wc_gateway_klarna_' === substr( $_GET['section'], 0, 18 ) ) {
+		// Get arrays of checkout and thank you pages for all countries
+		$error_message = '';
+		$checkout_settings = get_option( 'woocommerce_klarna_checkout_settings' );
+		if ( is_array( $checkout_settings ) ) {
+			foreach ( $checkout_settings as $cs_key => $cs_value ) {
+				if ( strpos( $cs_key, 'klarna_checkout_url_' ) !== false || strpos( $cs_key, 'klarna_checkout_thanks_url_' ) !== false ) {
+					if ( '' != $cs_value && esc_url( $cs_value ) != $cs_value ) {
+						$error_message .= '<p>' . sprintf( __( '%s is not a valid URL.', 'woocommerce-gateway-klarna' ),
+						$cs_key ) . '</p>';
+					}
+				}
+			}
+		}
+
+		// Display error message, if there is one
+		if ( '' != $error_message ) {
+			echo '<div class="notice notice-error">';
+			echo $error_message;
+			echo '</div>';
+		}
+	}
+}
+// add_filter( 'admin_notices', 'klarna_checkout_admin_error_notices' );

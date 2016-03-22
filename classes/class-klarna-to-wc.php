@@ -206,6 +206,9 @@ class WC_Gateway_Klarna_K2WC {
 			$order = $this->create_order();
 			update_post_meta( $order->id, '_kco_incomplete_customer_email', $customer_email, true );
 			$woocommerce->session->set( 'ongoing_klarna_order', $order->id );
+
+			// Other plugins need this hook
+			do_action( 'woocommerce_checkout_order_processed', $order->id, false );
 		}
 
 		// If there's an order at this point, proceed
@@ -285,6 +288,8 @@ class WC_Gateway_Klarna_K2WC {
 
 			if ( sanitize_key( $_GET['klarna-api'] ) && 'rest' == sanitize_key( $_GET['klarna-api'] ) ) {
 				update_post_meta( $order->id, '_klarna_order_id', $klarna_order['order_id'] );
+				$order->add_order_note( sprintf( __( 'Klarna order ID: %s.', 'woocommerce-gateway-klarna' ), $klarna_order['order_id'] ) );
+
 			} else {
 				update_post_meta( $order->id, '_klarna_order_reservation', $klarna_order['reservation'] );
 			}
@@ -864,6 +869,8 @@ class WC_Gateway_Klarna_K2WC {
 	 *
 	 * @param  object $order Local WC order.
 	 * @param  object $klarna_order Klarna order.
+	 *
+	 * @return object $klarna_order Klarna order.
 	 */
 	public function confirm_klarna_order( $order, $klarna_order ) {
 		// Rest API
