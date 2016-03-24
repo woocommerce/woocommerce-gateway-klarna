@@ -1,6 +1,6 @@
 *** WooCommerce Gateway Klarna Changelog ***
 
-2016.03.xx  - version 2.1.2
+2016.03.24  - version 2.1.2
 * Fix       - Adds trailingslashit to URL comparison for KCO pages.
 * Tweak     - Adds error notification when attempting to refund a non-activated KCO order.
 * Tweak     - Updated Finnish translation files.
@@ -17,6 +17,7 @@ order status dropdown for KCO orders.
 * Fix       - Makes 'Login' and 'create an account' strings translatable in guest checkout notice.
 * Fix       - Adds 'klarna-checkout-guest-notice' CSS class to "must log in" notice if guest checkout is disabled.
 * Fix       - Changes HTML element for Klarna Get Address button to button.
+* Fix       - Changes shipping reference format to string for KCO.
 
 2016.03.04  - version 2.1.1
 * Fix       - Fixes how Klarna Invoice fees are sent to Klarna (flag 48 instead of 32).

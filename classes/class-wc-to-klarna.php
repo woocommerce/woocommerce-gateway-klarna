@@ -656,7 +656,7 @@ class WC_Gateway_Klarna_WC2K {
 			$shipping_reference = __( 'Shipping', 'woocommerce-gateway-klarna' );
 		}
 
-		return $shipping_reference;
+		return strval( $shipping_reference );
 	}
 
 	/**
