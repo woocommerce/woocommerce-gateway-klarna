@@ -197,6 +197,8 @@ try {
 
 			if ( 'billing_only' != get_option( 'woocommerce_ship_to_destination' ) ) {
 				$update['options']['allow_separate_shipping_address'] = true;
+			} else {
+				$update['options']['allow_separate_shipping_address'] = false;
 			}
 
 			/* 

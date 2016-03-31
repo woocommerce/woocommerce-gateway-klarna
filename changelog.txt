@@ -1,5 +1,8 @@
 *** WooCommerce Gateway Klarna Changelog ***
 
+2016.03.31  - version 2.1.3
+* Fix       - Fixes how shipping address is stored in WooCommerce for KCO orders.
+
 2016.03.24  - version 2.1.2
 * Fix       - Adds trailingslashit to URL comparison for KCO pages.
 * Tweak     - Adds error notification when attempting to refund a non-activated KCO order.
