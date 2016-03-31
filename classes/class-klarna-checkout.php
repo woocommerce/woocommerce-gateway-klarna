@@ -1482,7 +1482,12 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		foreach ( $woocommerce->cart->get_applied_coupons() as $coupon ) { ?>
 			<tr class="kco-applied-coupon">
 				<td>
-					<?php _e( 'Coupon: ', 'woocommerce-gateway-klarna' ); ?><?php echo $coupon; ?>
+					<?php if ( strstr( strtoupper( $coupon ), 'WC_POINTS_REDEMPTION' ) ) {
+						// WooCommerce points and rewards compatibility
+						echo esc_html( __( 'Points redemption', 'woocommerce-gateway-klarna' ) );
+					} else { ?>
+						<?php _e( 'Coupon: ', 'woocommerce-gateway-klarna' ); ?><?php echo $coupon; ?>
+					<?php } ?>
 					<a class="kco-remove-coupon" data-coupon="<?php echo $coupon; ?>" href="#"><?php _e( '(remove)', 'woocommerce-gateway-klarna' ); ?></a>
 				</td>
 				<td class="kco-rightalign">

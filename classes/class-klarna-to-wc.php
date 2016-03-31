@@ -541,6 +541,7 @@ class WC_Gateway_Klarna_K2WC {
 	public function add_order_addresses( $order, $klarna_order ) {
 		if ( $this->klarna_debug == 'yes' ) {
 			$this->klarna_log->add( 'klarna', 'Adding order addresses...' );
+			$this->klarna_log->add( 'klarna', var_export( $klarna_order, true ) );
 		}
 
 		$order_id = $order->id;
@@ -573,27 +574,15 @@ class WC_Gateway_Klarna_K2WC {
 		// Add customer shipping address - retrieved from callback from Klarna
 		$allow_separate_shipping = ( isset( $klarna_order['options']['allow_separate_shipping_address'] ) ) ? $klarna_order['options']['allow_separate_shipping_address'] : '';
 
-		if ( $allow_separate_shipping == 'true' || $_GET['scountry'] == 'DE' || $_GET['scountry'] == 'AT' ) {
-			update_post_meta( $order_id, '_shipping_first_name', $klarna_order['shipping_address']['given_name'] );
-			update_post_meta( $order_id, '_shipping_last_name', $klarna_order['shipping_address']['family_name'] );
-			update_post_meta( $order_id, '_shipping_address_1', $received__shipping_address_1 );
-			if ( isset( $klarna_order['shipping_address']['care_of'] ) ) {
-				update_post_meta( $order_id, '_shipping_address_2', $klarna_order['shipping_address']['care_of'] );
-			}
-			update_post_meta( $order_id, '_shipping_postcode', $klarna_order['shipping_address']['postal_code'] );
-			update_post_meta( $order_id, '_shipping_city', $klarna_order['shipping_address']['city'] );
-			update_post_meta( $order_id, '_shipping_country', strtoupper( $klarna_order['shipping_address']['country'] ) );
-		} else {
-			update_post_meta( $order_id, '_shipping_first_name', $klarna_order['billing_address']['given_name'] );
-			update_post_meta( $order_id, '_shipping_last_name', $klarna_order['billing_address']['family_name'] );
-			update_post_meta( $order_id, '_shipping_address_1', $received__billing_address_1 );
-			if ( isset( $klarna_order['billing_address']['care_of'] ) ) {
-				update_post_meta( $order_id, '_shipping_address_2', $klarna_order['billing_address']['care_of'] );
-			}
-			update_post_meta( $order_id, '_shipping_postcode', $klarna_order['billing_address']['postal_code'] );
-			update_post_meta( $order_id, '_shipping_city', $klarna_order['billing_address']['city'] );
-			update_post_meta( $order_id, '_shipping_country', strtoupper( $klarna_order['billing_address']['country'] ) );
+		update_post_meta( $order_id, '_shipping_first_name', $klarna_order['shipping_address']['given_name'] );
+		update_post_meta( $order_id, '_shipping_last_name', $klarna_order['shipping_address']['family_name'] );
+		update_post_meta( $order_id, '_shipping_address_1', $received__shipping_address_1 );
+		if ( isset( $klarna_order['shipping_address']['care_of'] ) ) {
+			update_post_meta( $order_id, '_shipping_address_2', $klarna_order['shipping_address']['care_of'] );
 		}
+		update_post_meta( $order_id, '_shipping_postcode', $klarna_order['shipping_address']['postal_code'] );
+		update_post_meta( $order_id, '_shipping_city', $klarna_order['shipping_address']['city'] );
+		update_post_meta( $order_id, '_shipping_country', strtoupper( $klarna_order['shipping_address']['country'] ) );
 
 		// Store Klarna locale
 		update_post_meta( $order_id, '_klarna_locale', $klarna_order['locale'] );
