@@ -637,7 +637,6 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 
 		$klarna = new Klarna();
 
-
 		/**
 		 * Setup Klarna configuration
 		 */

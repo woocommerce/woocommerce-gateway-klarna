@@ -225,6 +225,24 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		// Cancel unpaid orders for KCO orders too
 		add_filter( 'woocommerce_cancel_unpaid_order', array( $this, 'cancel_unpaid_kco' ), 10, 2 );
 
+		// Validate Klarna account on settings save
+		/*
+		if ( 0 >= did_action( 'update_option_woocommerce_klarna_checkout_settings' ) ) {
+			add_action( 'update_option_woocommerce_klarna_checkout_settings', array(
+				$this,
+				'check_klarna_account'
+			), 10, 2 );
+		}
+		*/
+	}
+
+	/**
+	 * Checks if Klarna accounts are valid.
+	 */
+	public function check_klarna_account( $new_value, $old_value ) {
+		error_log( did_action( 'update_option_woocommerce_klarna_checkout_settings' ) );
+
+		return $new_value;
 	}
 
 	/**
