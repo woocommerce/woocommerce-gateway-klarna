@@ -226,21 +226,29 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		add_filter( 'woocommerce_cancel_unpaid_order', array( $this, 'cancel_unpaid_kco' ), 10, 2 );
 
 		// Validate Klarna account on settings save
-		/*
-		if ( 0 >= did_action( 'update_option_woocommerce_klarna_checkout_settings' ) ) {
-			add_action( 'update_option_woocommerce_klarna_checkout_settings', array(
-				$this,
-				'check_klarna_account'
-			), 10, 2 );
-		}
-		*/
+		add_action( 'update_option_woocommerce_klarna_checkout_settings', array(
+			$this,
+			'check_klarna_account'
+		), 10, 2 );
 	}
 
 	/**
 	 * Checks if Klarna accounts are valid.
 	 */
 	public function check_klarna_account( $new_value, $old_value ) {
-		error_log( did_action( 'update_option_woocommerce_klarna_checkout_settings' ) );
+		if ( 2 > did_action( 'update_option_woocommerce_klarna_checkout_settings' ) ) {
+			// Check KCO account for all countries (SE, NO, FI, DE, AT, UK, US)
+
+			// Check if there's any difference between old and new
+			$updated_settings = array_diff( $old_value, $new_value );
+			if ( ! empty( $updated_settings ) ) {
+				if ( isset( $updated_settings['testmode'] ) ) { // If testmode setting has changed, check all countries with Eid and secret
+
+				} else { // Otherwise check only countries where Eid or secret has changed
+
+				}
+			}
+		}
 
 		return $new_value;
 	}
@@ -505,8 +513,13 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		$klarna_currency        = get_post_meta( $order->id, '_order_currency', true );
 		$klarna_country         = get_post_meta( $order->id, '_billing_country', true );
 		$klarna_locale          = get_post_meta( $order->id, '_klarna_locale', true );
-		$klarna_eid             = $this->klarna_eid;
-		$klarna_secret          = $this->klarna_secret;
+
+		// Can't use same methods to retrieve Eid and secret that are used in frontend.
+		// Need to use order billing country as base instead.
+		$klarna_checkout_settings = get_option( 'woocommerce_klarna_checkout_settings' );
+		$klarna_country_lowercase = strtolower( $klarna_country );
+		$klarna_eid = $klarna_checkout_settings[ 'eid_' . $klarna_country_lowercase ];
+		$klarna_secret = $klarna_checkout_settings[ 'secret_' . $klarna_country_lowercase ];
 
 		$klarna_billing  = array(
 			'postal_code'    => get_post_meta( $order->id, '_billing_postcode', true ),
