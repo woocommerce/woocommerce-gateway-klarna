@@ -224,7 +224,6 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 
 		// Cancel unpaid orders for KCO orders too
 		add_filter( 'woocommerce_cancel_unpaid_order', array( $this, 'cancel_unpaid_kco' ), 10, 2 );
-
 	}
 
 	/**
@@ -487,8 +486,13 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		$klarna_currency        = get_post_meta( $order->id, '_order_currency', true );
 		$klarna_country         = get_post_meta( $order->id, '_billing_country', true );
 		$klarna_locale          = get_post_meta( $order->id, '_klarna_locale', true );
-		$klarna_eid             = $this->klarna_eid;
-		$klarna_secret          = $this->klarna_secret;
+
+		// Can't use same methods to retrieve Eid and secret that are used in frontend.
+		// Need to use order billing country as base instead.
+		$klarna_checkout_settings = get_option( 'woocommerce_klarna_checkout_settings' );
+		$klarna_country_lowercase = strtolower( $klarna_country );
+		$klarna_eid = $klarna_checkout_settings[ 'eid_' . $klarna_country_lowercase ];
+		$klarna_secret = $klarna_checkout_settings[ 'secret_' . $klarna_country_lowercase ];
 
 		$klarna_billing  = array(
 			'postal_code'    => get_post_meta( $order->id, '_billing_postcode', true ),
@@ -1479,19 +1483,16 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		global $woocommerce;
 
 		ob_start();
-		foreach ( $woocommerce->cart->get_applied_coupons() as $coupon ) { ?>
+		foreach ( $woocommerce->cart->get_coupons() as $code => $coupon ) { ?>
 			<tr class="kco-applied-coupon">
 				<td>
-					<?php if ( strstr( strtoupper( $coupon ), 'WC_POINTS_REDEMPTION' ) ) {
-						// WooCommerce points and rewards compatibility
-						echo esc_html( __( 'Points redemption', 'woocommerce-gateway-klarna' ) );
-					} else { ?>
-						<?php _e( 'Coupon: ', 'woocommerce-gateway-klarna' ); ?><?php echo $coupon; ?>
-					<?php } ?>
-					<a class="kco-remove-coupon" data-coupon="<?php echo $coupon; ?>" href="#"><?php _e( '(remove)', 'woocommerce-gateway-klarna' ); ?></a>
+					<?php echo apply_filters( 'woocommerce_cart_totals_coupon_label', esc_html( __( 'Coupon:',
+							'woocommerce' ) . ' ' . $coupon->code ), $coupon ); ?>
+					<a class="kco-remove-coupon" data-coupon="<?php echo $coupon->code; ?>"
+					   href="#"><?php _e( '(remove)', 'woocommerce-gateway-klarna' ); ?></a>
 				</td>
 				<td class="kco-rightalign">
-					-<?php echo wc_price( $woocommerce->cart->get_coupon_discount_amount( $coupon, $woocommerce->cart->display_cart_ex_tax ) ); ?></td>
+					-<?php echo wc_price( $woocommerce->cart->get_coupon_discount_amount( $code, $woocommerce->cart->display_cart_ex_tax ) ); ?></td>
 			</tr>
 		<?php }
 

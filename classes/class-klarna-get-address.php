@@ -324,8 +324,7 @@ class WC_Klarna_Get_Address {
 
 			// Only display GetAddress button for Sweden
 			if ( $country == 'SE' ) { ?>
-				<button style="margin-top:0.5em"
-					class="klarna-push-pno get-address-button button alt"><?php _e( 'Fetch', 'woocommerce-gateway-klarna' ); ?></button>
+				<button type="button" style="margin-top:0.5em" class="klarna-push-pno get-address-button button alt"><?php _e( 'Fetch', 'woocommerce-gateway-klarna' ); ?></button>
 				<p class="form-row">
 				<div class="klarna-get-address-message"></div>
 				</p>
