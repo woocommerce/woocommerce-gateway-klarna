@@ -1,5 +1,9 @@
 *** WooCommerce Gateway Klarna Changelog ***
 
+2016.04.12  - version 2.1.4
+* Fix       - Fixes AffiliateWP support for Klarna Checkout.
+* Fix       - Fixes GetAddress button functionality for invoice and part payment.
+
 2016.03.31  - version 2.1.3
 * Fix       - Fixes how shipping address is stored in WooCommerce for KCO orders.
 * Fix       - Adds compatibility with WooCommerce Points and Rewards for KCO.
