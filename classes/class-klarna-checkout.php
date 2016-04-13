@@ -586,7 +586,11 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		// Shipping
 		if ( $order->get_total_shipping() > 0 ) {
 			$shipping_price    = ( $order->get_total_shipping() + $order->get_shipping_tax() ) * 100;
-			$shipping_tax_rate = ( $order->get_shipping_tax() / $order->get_total_shipping() ) * 10000;
+			if ( $order->get_total_shipping() > 0 ) {
+				$shipping_tax_rate = ( $order->get_shipping_tax() / $order->get_total_shipping() ) * 10000;
+			} else {
+				$shipping_tax_rate = 0;
+			}
 			$cart[]            = array(
 				'type'       => 'shipping_fee',
 				'reference'  => 'SHIPPING',
