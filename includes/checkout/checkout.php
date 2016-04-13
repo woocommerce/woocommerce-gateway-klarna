@@ -119,6 +119,11 @@ if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 	 */
 	$orderid = $this->update_or_create_local_order();
 
+	// WC Subscriptions 2.0 needs this
+	if ( class_exists( 'WC_Subscriptions_Cart' ) && WC_Subscriptions_Cart::cart_contains_subscription() ) {
+		update_post_meta( $orderid, '_klarna_recurring_carts',  WC()->cart->recurring_carts );
+	}
+
 	/**
 	 * Check if Klarna order already exists and if country was changed
 	 */

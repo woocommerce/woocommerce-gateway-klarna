@@ -77,31 +77,6 @@ if ( $this->is_rest() ) {
 
 do_action( 'klarna_before_kco_confirmation', intval( $_GET['sid'] ) );
 
-// WC Subscriptions 2.0 needs this
-if ( class_exists( 'WC_Subscriptions_Cart' ) && WC_Subscriptions_Cart::cart_contains_subscription() ) {
-	sleep( 5 );
-	$parent_order  = new WC_Order( intval( $_GET['sid'] ) );
-	$subscriptions = array();
-	// First clear out any subscriptions created for a failed payment to give us a clean slate for creating new subscriptions
-	$subscriptions = wcs_get_subscriptions_for_order( $parent_order->id, array( 'order_type' => 'parent' ) );
-	if ( ! empty( $subscriptions ) ) {
-		foreach ( $subscriptions as $subscription ) {
-			wp_delete_post( $subscription->id );
-		}
-	}
-	WC()->cart->calculate_totals();
-	// Create new subscriptions for each group of subscription products in the cart (that is not a renewal)
-	foreach ( WC()->cart->recurring_carts as $recurring_cart ) {
-		$subscription = WC_Subscriptions_Checkout::create_subscription( $parent_order, $recurring_cart ); // Exceptions are caught by WooCommerce
-		$subscription->payment_complete();
-		if ( is_wp_error( $subscription ) ) {
-			throw new Exception( $subscription->get_error_message() );
-		}
-		do_action( 'woocommerce_checkout_subscription_created', $subscription, $parent_order, $recurring_cart );
-	}
-	do_action( 'subscriptions_created_for_order', $parent_order ); // Backward compatibility
-}
-
 echo $snippet;
 
 do_action( 'klarna_after_kco_confirmation', intval( $_GET['sid'] ) );
