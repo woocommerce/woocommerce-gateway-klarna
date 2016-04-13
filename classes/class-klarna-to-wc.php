@@ -316,7 +316,7 @@ class WC_Gateway_Klarna_K2WC {
 			if ( class_exists( 'WC_Subscriptions_Checkout' ) && get_post_meta( $order->id, '_klarna_recurring_carts', true ) ) {
 
 				// First clear out any subscriptions created for a failed payment to give us a clean slate for creating new subscriptions
-				$subscriptions = wcs_get_subscriptions_for_order( $orderid, array( 'order_type' => 'parent' ) );
+				$subscriptions = wcs_get_subscriptions_for_order( $order->id, array( 'order_type' => 'parent' ) );
 				if ( ! empty( $subscriptions ) ) {
 					foreach ( $subscriptions as $subscription ) {
 						wp_delete_post( $subscription->id );
