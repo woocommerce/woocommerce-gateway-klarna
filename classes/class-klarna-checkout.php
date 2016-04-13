@@ -224,6 +224,35 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 
 		// Cancel unpaid orders for KCO orders too
 		add_filter( 'woocommerce_cancel_unpaid_order', array( $this, 'cancel_unpaid_kco' ), 10, 2 );
+
+		// Validate Klarna account on settings save
+		/*
+		add_action( 'update_option_woocommerce_klarna_checkout_settings', array(
+			$this,
+			'check_klarna_account'
+		), 10, 2 );
+		*/
+	}
+
+	/**
+	 * Checks if Klarna accounts are valid.
+	 */
+	public function check_klarna_account( $new_value, $old_value ) {
+		if ( 2 > did_action( 'update_option_woocommerce_klarna_checkout_settings' ) ) {
+			// Check KCO account for all countries (SE, NO, FI, DE, AT, UK, US)
+
+			// Check if there's any difference between old and new
+			$updated_settings = array_diff( $old_value, $new_value );
+			if ( ! empty( $updated_settings ) ) {
+				if ( isset( $updated_settings['testmode'] ) ) { // If testmode setting has changed, check all countries with Eid and secret
+
+				} else { // Otherwise check only countries where Eid or secret has changed
+
+				}
+			}
+		}
+
+		return $new_value;
 	}
 
 	/**
@@ -535,8 +564,12 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 						$reference = $_product->id;
 					}
 
-					$recurring_price    = $order->get_item_total( $item, true ) * 100;
-					$recurring_tax_rate = ( $item['line_tax'] / $item['line_total'] ) * 10000;
+					$recurring_price = $order->get_item_total( $item, true ) * 100;
+					if ( $item['line_total'] > 0 ) {
+						$recurring_tax_rate = ( $item['line_tax'] / $item['line_total'] ) * 10000;
+					} else {
+						$recurring_tax_rate = 0;
+					}
 
 					$cart[] = array(
 						'reference'     => strval( $reference ),
