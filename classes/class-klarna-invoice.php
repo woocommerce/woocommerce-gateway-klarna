@@ -107,6 +107,29 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 		), 20, 2 );
 		// add_action( 'woocommerce_email_after_order_table', array( $this, 'output_klarna_details_confirmation_email' ), 10, 3 );
 
+		add_action(
+			'update_option_woocommerce_' . $this->id . '_settings',
+			array( $this, 'flush_pclasses_on_settings_save'	), 10, 2
+		);
+
+	}
+
+	function flush_pclasses_on_settings_save( $oldvalue, $newvalue ) {
+		if ( $oldvalue['testmode'] != $newvalue['testmode'] ) {
+			$countries = array(
+				'SE',
+				'NO',
+				'FI',
+				'DK',
+				'DE',
+				'NL',
+				'AT'
+			);
+
+			foreach ( $countries as $country ) {
+				delete_transient( 'klarna_pclasses_' . $country );
+			}
+		}
 	}
 
 
@@ -485,6 +508,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 
 		$klarna_pclasses = new WC_Gateway_Klarna_PClasses( $klarna, false, $country );
 		$pclasses        = $klarna_pclasses->fetch_pclasses();
+
 		if ( empty( $pclasses ) ) {
 			return false;
 		}
