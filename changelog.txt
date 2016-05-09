@@ -1,5 +1,8 @@
 *** WooCommerce Gateway Klarna Changelog ***
 
+2016.04.xx  - version 2.1.5
+* Fix       - Removes session_start in Klarna Checkout, since WooCommerce session is now used to store Klarna order information.
+
 2016.04.12  - version 2.1.4
 * Fix       - Fixes AffiliateWP support for Klarna Checkout.
 * Fix       - Fixes GetAddress button functionality for invoice and part payment.

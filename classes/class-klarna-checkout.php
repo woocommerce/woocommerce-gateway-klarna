@@ -679,6 +679,10 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			define( 'WOOCOMMERCE_CART', true );
 		}
 
+		if ( ! defined( 'WOOCOMMERCE_CHECKOUT' ) ) {
+			define( 'WOOCOMMERCE_CHECKOUT', true );
+		}
+
 		$cart_items      = $woocommerce->cart->get_cart();
 		$updated_item    = $cart_items[ $updated_item_key ];
 		$updated_product = wc_get_product( $updated_item['product_id'] );
@@ -1604,7 +1608,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 					if ( isset( $cart_item['item_meta'] ) ) {
 						$item_meta = new WC_Order_Item_Meta( $cart_item['item_meta'] );
 						if ( $meta = $item_meta->display( true, true ) ) {
-							$item_name .= ' ( ' . $meta . ' )';
+							$cart_item_name .= ' ( ' . $meta . ' )';
 						}
 					}
 
@@ -2222,7 +2226,6 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		if ( $this->enabled != 'yes' ) {
 			// Set it in session as well, to be used in Shortcodes class
 			WC()->session->set( 'klarna_show_kco', false );
-
 			return false;
 		}
 
@@ -2230,6 +2233,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		global $woocommerce;
 		$checkout = $woocommerce->checkout();
 		if ( ! $checkout->enable_guest_checkout && ! is_user_logged_in() ) {
+			echo '<div>';
 			echo apply_filters(
 				'klarna_checkout_must_be_logged_in_message',
 				sprintf(
@@ -2244,7 +2248,27 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			echo '</div>';
 
 			WC()->session->set( 'klarna_show_kco', false );
+			return false;
+		}
 
+		// Validate Shipping Methods
+		WC()->cart->calculate_shipping();
+		$shipping_ok      = true;
+		$packages         = WC()->shipping->get_packages();
+		$shipping_methods = WC()->session->get( 'chosen_shipping_methods' );
+
+		foreach ( $packages as $i => $package ) {
+			if ( ! isset( $package['rates'][ $shipping_methods[ $i ] ] ) ) {
+				$shipping_ok =  false;
+			}
+		}
+
+		if ( ! $shipping_ok ) {
+			echo '<div>';
+			_e( 'No shipping method has been selected. Please double check your address, or contact us if you need any help.', 'woocommerce' );
+			echo '</div>';
+
+			WC()->session->set( 'klarna_show_kco', false );
 			return false;
 		}
 
@@ -2253,7 +2277,6 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			echo apply_filters( 'klarna_checkout_wrong_country_message', sprintf( __( 'Sorry, you can not buy via Klarna Checkout from your country or currency. Please <a href="%s">use another payment method</a>. ', 'woocommerce-gateway-klarna' ), get_permalink( get_option( 'woocommerce_checkout_page_id' ) ) ) );
 
 			WC()->session->set( 'klarna_show_kco', false );
-
 			return false;
 		}
 
@@ -2261,12 +2284,10 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		// Terms Page isn't set, do nothing.
 		if ( empty( $this->terms_url ) ) {
 			WC()->session->set( 'klarna_show_kco', false );
-
 			return false;
 		}
 
 		WC()->session->set( 'klarna_show_kco', true );
-
 		return true;
 	}
 
@@ -2394,6 +2415,7 @@ class WC_Gateway_Klarna_Checkout_Extra {
 		$data = new WC_Gateway_Klarna_Checkout; // Still need to initiate it here, otherwise shortcode won't work
 
 		// if ( ! is_admin() || defined( 'DOING_AJAX' ) ) {
+		/*
 		$checkout_settings = get_option( 'woocommerce_klarna_checkout_settings' );
 		$is_enabled        = ( isset( $checkout_settings['enabled'] ) ) ? $checkout_settings['enabled'] : '';
 
@@ -2423,6 +2445,7 @@ class WC_Gateway_Klarna_Checkout_Extra {
 			session_start();
 		}
 		// }
+		*/
 	}
 
 

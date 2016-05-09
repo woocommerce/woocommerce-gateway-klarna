@@ -317,6 +317,10 @@ jQuery(document).ready(function ($) {
 						$('tr#kco-page-total').before(html_string);
 						$(input_field).val('');
 						$(kco_widget).html(response.data.widget_html);
+
+						if (typeof window._klarnaCheckout != 'function') {
+							location.reload();
+						}
 					}
 					else {
 						$('#klarna_checkout_coupon_result').html('<p>Coupon could not be added.</p>');
@@ -376,6 +380,8 @@ jQuery(document).ready(function ($) {
 							api.resume();
 						});
 					}
+
+					location.reload();
 				},
 				error: function (response) {
 					// console.log('remove-error');
