@@ -700,7 +700,7 @@ class WC_Gateway_Klarna_Order {
 		$order = wc_get_order( $orderid );
 
 		// Klarna reservation number and billing country must be set
-		if ( get_post_meta( $orderid, '_klarna_order_reservation', true ) && get_post_meta( $orderid, '_billing_country', true ) ) {
+		if ( get_post_meta( $orderid, '_klarna_order_reservation', true ) && get_post_meta( $orderid, '_billing_country', true ) && ! get_post_meta( $orderid, '_klarna_order_activated', true ) ) {
 			$rno            = get_post_meta( $orderid, '_klarna_order_reservation', true );
 			$country        = get_post_meta( $orderid, '_billing_country', true );
 			$payment_method = get_post_meta( $orderid, '_payment_method', true );

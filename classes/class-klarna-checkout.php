@@ -1853,8 +1853,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 */
 	function get_klarna_checkout_page() {
 		global $woocommerce;
-		global $current_user;
-		get_currentuserinfo();
+		$current_user = wp_get_current_user();
 
 		// Debug
 		if ( $this->debug == 'yes' ) {
