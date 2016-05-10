@@ -614,8 +614,8 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 	 * @since  2.0
 	 **/
 	function configure_klarna( $klarna, $country ) {
-		$klarna->config( $this->klarna_helper->get_eid(),                         // EID
-			$this->klarna_helper->get_secret(),                      // Secret
+		$klarna->config( $this->klarna_helper->get_eid( $country ),  // EID
+			$this->klarna_helper->get_secret( $country ),            // Secret
 			$country,                                                // Country
 			$this->klarna_helper->get_klarna_language( $country ),   // Language
 			$this->selected_currency,                                // Currency

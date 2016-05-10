@@ -314,7 +314,6 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 	 * @since 1.0.0
 	 */
 	function is_available() {
-
 		if ( ! $this->check_enabled() ) {
 			return false;
 		}
@@ -338,13 +337,10 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 			if ( ! $this->check_upper_threshold() ) {
 				return false;
 			}
-			if ( ! $this->check_pclasses() ) {
-				return false;
-			}
+			// if ( ! $this->check_pclasses() ) { return false; }
 		}
 
 		return true;
-
 	}
 
 
@@ -475,7 +471,6 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 	 * @since  2.0
 	 **/
 	function check_customer_country() {
-
 		if ( ! is_admin() ) {
 			global $woocommerce;
 
@@ -492,7 +487,6 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 		}
 
 		return true;
-
 	}
 
 
@@ -525,8 +519,8 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 	 **/
 	function configure_klarna( $klarna, $country ) {
 
-		$klarna->config( $this->klarna_helper->get_eid(),                         // EID
-			$this->klarna_helper->get_secret(),                      // Secret
+		$klarna->config( $this->klarna_helper->get_eid( $country ),  // EID
+			$this->klarna_helper->get_secret( $country ),            // Secret
 			$country,                                                // Country
 			$this->klarna_helper->get_klarna_language( $country ),   // Language
 			$this->selected_currency,                                // Currency

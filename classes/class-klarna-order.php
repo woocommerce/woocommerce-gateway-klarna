@@ -501,6 +501,13 @@ class WC_Gateway_Klarna_Order {
 				$klarna_eid      = $klarna_settings['eid_uk'];
 				$klarna_secret   = $klarna_settings['secret_uk'];
 				break;
+			case 'NL' :
+				$klarna_country  = 'NL';
+				$klarna_language = 'nl-nl';
+				$klarna_currency = 'EUR';
+				$klarna_eid      = $klarna_settings['eid_nl'];
+				$klarna_secret   = $klarna_settings['secret_nl'];
+				break;
 			default:
 				$klarna_country  = '';
 				$klarna_language = '';

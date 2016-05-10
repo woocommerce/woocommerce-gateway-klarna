@@ -3,6 +3,8 @@
 2016.04.xx  - version 2.1.5
 * Fix       - Removes session_start in Klarna Checkout, since WooCommerce session is now used to store Klarna order information.
 * Fix       - Prevents KCO checkout if there's no valid shipping option available.
+* Fix       - Flushes PClasses when you save Klarna options.
+* Fix       - Fixes wrong WCML currency in AJAX issue.
 
 2016.04.12  - version 2.1.4
 * Fix       - Fixes AffiliateWP support for Klarna Checkout.

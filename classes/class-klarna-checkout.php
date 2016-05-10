@@ -232,6 +232,9 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			'check_klarna_account'
 		), 10, 2 );
 		*/
+
+		// Passes AJAX actions to WCML
+		add_filter( 'wcml_multi_currency_is_ajax', array( $this, 'pass_ajax_actions_to_wcml' ) );
 	}
 
 	/**
@@ -2309,6 +2312,28 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		}
 
 		return parent::get_transaction_url( $order );
+	}
+
+	/**
+	 * Pass KCO iframe update AJAX actions to WCML, so it can filter the currency.
+	 *
+	 * @param $actions
+	 *
+	 * @return array
+	 */
+	function pass_ajax_actions_to_wcml( $actions ) {
+		$actions[] = 'kco_iframe_change_cb';
+		$actions[] = 'kco_iframe_shipping_address_change_cb';
+		$actions[] = 'kco_iframe_shipping_option_change_cb';
+		$actions[] = 'klarna_checkout_remove_coupon_callback';
+		$actions[] = 'klarna_checkout_coupons_callback';
+		$actions[] = 'klarna_checkout_cart_callback_remove';
+		$actions[] = 'klarna_checkout_cart_callback_update';
+		$actions[] = 'klarna_checkout_shipping_callback';
+		$actions[] = 'klarna_checkout_order_note_callback';
+		$actions[] = 'klarna_checkout_country_callback';
+
+		return $actions;
 	}
 
 } // End class WC_Gateway_Klarna_Checkout

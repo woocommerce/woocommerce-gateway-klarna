@@ -80,7 +80,11 @@ if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 
 	// Add button to Standard Checkout Page if this is enabled in the settings
 	if ( $this->add_std_checkout_button == 'yes' ) {
-		echo '<div class="woocommerce"><a href="' . get_permalink( get_option( 'woocommerce_checkout_page_id' ) ) . '" class="button std-checkout-button">' . $this->std_checkout_button_label . '</a></div>';
+		echo '<div class="woocommerce">';
+		echo '<a href="' . get_permalink( get_option( 'woocommerce_checkout_page_id' ) ) . '" class="button std-checkout-button">';
+		echo $this->std_checkout_button_label;
+		echo '</a>';
+		echo  '</div>';
 	}
 
 	// Get Klarna credentials
