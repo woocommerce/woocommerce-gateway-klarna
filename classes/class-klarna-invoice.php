@@ -23,7 +23,6 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 	 * @since 1.0.0
 	 */
 	public function __construct() {
-
 		global $woocommerce;
 
 		parent::__construct();
@@ -107,6 +106,29 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 		), 20, 2 );
 		// add_action( 'woocommerce_email_after_order_table', array( $this, 'output_klarna_details_confirmation_email' ), 10, 3 );
 
+		add_action(
+			'update_option_woocommerce_' . $this->id . '_settings',
+			array( $this, 'flush_pclasses_on_settings_save'	), 10, 2
+		);
+
+	}
+
+	function flush_pclasses_on_settings_save( $oldvalue, $newvalue ) {
+		if ( $oldvalue['testmode'] != $newvalue['testmode'] ) {
+			$countries = array(
+				'SE',
+				'NO',
+				'FI',
+				'DK',
+				'DE',
+				'NL',
+				'AT'
+			);
+
+			foreach ( $countries as $country ) {
+				delete_transient( 'klarna_pclasses_' . $country );
+			}
+		}
 	}
 
 
@@ -485,6 +507,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 
 		$klarna_pclasses = new WC_Gateway_Klarna_PClasses( $klarna, false, $country );
 		$pclasses        = $klarna_pclasses->fetch_pclasses();
+
 		if ( empty( $pclasses ) ) {
 			return false;
 		}
@@ -590,8 +613,8 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 	 * @since  2.0
 	 **/
 	function configure_klarna( $klarna, $country ) {
-		$klarna->config( $this->klarna_helper->get_eid(),                         // EID
-			$this->klarna_helper->get_secret(),                      // Secret
+		$klarna->config( $this->klarna_helper->get_eid( $country ),  // EID
+			$this->klarna_helper->get_secret( $country ),            // Secret
 			$country,                                                // Country
 			$this->klarna_helper->get_klarna_language( $country ),   // Language
 			$this->selected_currency,                                // Currency
@@ -874,7 +897,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 	 **/
 	function footer_scripts() {
 		global $woocommerce;
-		if ( is_checkout() && $this->enabled == "yes" ) {
+		if ( is_checkout() && $this->enabled == "yes" && ! is_klarna_checkout() ) {
 			?>
 			<script type="text/javascript">
 				//<![CDATA[
@@ -885,10 +908,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 				});
 				//]]>
 			</script>
-			<?php
-		}
 
-		if ( is_checkout() && 'yes' == $this->enabled ) { ?>
 			<script type="text/javascript">
 				//<![CDATA[
 				jQuery(document).ajaxComplete(function () {
@@ -916,7 +936,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 					if (settings_url.indexOf('?wc-ajax=update_order_review') > -1) {
 						// Check if Klarna Invoice and SE
 						if (jQuery('input[name="payment_method"]:checked').val() == 'klarna_invoice' &&
-							jQuery('select#billing_country').val() == 'SE') {
+							jQuery('#billing_country').val() == 'SE') {
 
 							jQuery('.woocommerce-billing-fields #klarna-invoice-get-address').remove();
 
@@ -928,6 +948,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 							 });
 							 */
 							jQuery('#order_review #klarna-invoice-get-address').show().prependTo(jQuery('.woocommerce-billing-fields'));
+							jQuery( document.body ).trigger( 'moved_get_address_form' );
 						} else {
 
 							// if (jQuery('.woocommerce-billing-fields #klarna-invoice-get-address').length) {

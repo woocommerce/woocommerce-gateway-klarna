@@ -465,7 +465,7 @@ class WC_Gateway_Klarna_Shortcodes {
 
 							<?php if ( 1 === count( $available_methods ) ) {
 								$method = current( $available_methods );
-								echo wp_kses_post( wc_cart_totals_shipping_method_label( $method ) ); ?>
+								echo wp_kses_post( $method->get_label() ); ?>
 								<input type="hidden" name="shipping_method[<?php echo esc_attr( $index ); ?>]"
 								       data-index="<?php echo esc_attr( $index ); ?>"
 								       id="shipping_method_<?php echo esc_attr( $index ); ?>"

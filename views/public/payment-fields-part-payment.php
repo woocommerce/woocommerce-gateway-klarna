@@ -40,7 +40,7 @@ if ( 'NO' == $this->klarna_helper->get_klarna_country() ) { ?>
 				for="klarna_part_payment_pno"><?php echo esc_attr( __( 'Date of Birth', 'woocommerce-gateway-klarna' ) ); ?>
 				<span class="required">*</span></label>
 			<input type="text" class="input-text" id="klarna_part_payment_pno" name="klarna_part_payment_pno"
-			       placeholder="DDMMYYXXXXX" />
+			       placeholder="<?php _e( 'DDMMYYXXXXX', 'woocommerce-gateway-klarna' ); ?>" />
 
 			<?php
 			// Button/form for getAddress
@@ -306,7 +306,7 @@ if ( 'NO' == $this->klarna_helper->get_klarna_country() ) { ?>
 					for="<?php echo esc_attr( $klarna_dob_element ); ?>"><?php echo __( 'Date of Birth', 'woocommerce-gateway-klarna' ) ?>
 					<span class="required">*</span></label>
 				<input type="text" class="input-text" id="<?php echo esc_attr( $klarna_dob_element ); ?>"
-				       name="<?php echo esc_attr( $klarna_dob_element ); ?>" placeholder="YYMMDD-XXXX" />
+				       name="<?php echo esc_attr( $klarna_dob_element ); ?>" placeholder="<?php _e( 'YYMMDD-XXXX', 'woocommerce-gateway-klarna' ); ?>" />
 			<?php }
 			// Button/form for getAddress
 			$data = new WC_Klarna_Get_Address;

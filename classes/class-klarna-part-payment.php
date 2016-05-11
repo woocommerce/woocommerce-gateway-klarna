@@ -104,8 +104,30 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 		), 20, 2 );
 		// add_action( 'woocommerce_email_after_order_table', array( $this, 'output_klarna_details_confirmation_email' ), 10, 3 );
 
+		add_action(
+			'update_option_woocommerce_' . $this->id . '_settings',
+			array( $this, 'flush_pclasses_on_settings_save'	), 10, 2
+		);
+
 	}
 
+	function flush_pclasses_on_settings_save( $oldvalue, $newvalue ) {
+		if ( $oldvalue['testmode'] != $newvalue['testmode'] ) {
+			$countries = array(
+				'SE',
+				'NO',
+				'FI',
+				'DK',
+				'DE',
+				'NL',
+				'AT'
+			);
+
+			foreach ( $countries as $country ) {
+				delete_transient( 'klarna_pclasses_' . $country );
+			}
+		}
+	}
 
 	/**
 	 * Add Klarna's shipping details to order confirmation page.
@@ -292,7 +314,6 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 	 * @since 1.0.0
 	 */
 	function is_available() {
-
 		if ( ! $this->check_enabled() ) {
 			return false;
 		}
@@ -316,13 +337,10 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 			if ( ! $this->check_upper_threshold() ) {
 				return false;
 			}
-			if ( ! $this->check_pclasses() ) {
-				return false;
-			}
+			// if ( ! $this->check_pclasses() ) { return false; }
 		}
 
 		return true;
-
 	}
 
 
@@ -453,7 +471,6 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 	 * @since  2.0
 	 **/
 	function check_customer_country() {
-
 		if ( ! is_admin() ) {
 			global $woocommerce;
 
@@ -470,7 +487,6 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 		}
 
 		return true;
-
 	}
 
 
@@ -503,8 +519,8 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 	 **/
 	function configure_klarna( $klarna, $country ) {
 
-		$klarna->config( $this->klarna_helper->get_eid(),                         // EID
-			$this->klarna_helper->get_secret(),                      // Secret
+		$klarna->config( $this->klarna_helper->get_eid( $country ),  // EID
+			$this->klarna_helper->get_secret( $country ),            // Secret
 			$country,                                                // Country
 			$this->klarna_helper->get_klarna_language( $country ),   // Language
 			$this->selected_currency,                                // Currency
@@ -751,7 +767,7 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 	 * @todo  move to separate JS file?
 	 **/
 	function footer_scripts() {
-		if ( is_checkout() && 'yes' == $this->enabled ) { ?>
+		if ( is_checkout() && 'yes' == $this->enabled && ! is_klarna_checkout() ) { ?>
 			<script type="text/javascript">
 				//<![CDATA[
 				jQuery(document).ajaxComplete(function () {
@@ -778,11 +794,11 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 					if (settings_url.indexOf('?wc-ajax=update_order_review') > -1) {
 						// Check if Klarna Invoice and SE
 						if (jQuery('input[name="payment_method"]:checked').val() == 'klarna_part_payment' &&
-							jQuery('select#billing_country').val() == 'SE') {
+							jQuery('#billing_country').val() == 'SE') {
 
 							jQuery('.woocommerce-billing-fields #klarna-part-payment-get-address').remove();
 							jQuery('#order_review #klarna-part-payment-get-address').show().prependTo(jQuery('.woocommerce-billing-fields'));
-
+							jQuery( document.body ).trigger( 'moved_get_address_form' );
 						} else {
 
 							// if (jQuery('.woocommerce-billing-fields #klarna-invoice-get-address').length) {

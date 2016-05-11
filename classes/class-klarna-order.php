@@ -501,6 +501,13 @@ class WC_Gateway_Klarna_Order {
 				$klarna_eid      = $klarna_settings['eid_uk'];
 				$klarna_secret   = $klarna_settings['secret_uk'];
 				break;
+			case 'NL' :
+				$klarna_country  = 'NL';
+				$klarna_language = 'nl-nl';
+				$klarna_currency = 'EUR';
+				$klarna_eid      = $klarna_settings['eid_nl'];
+				$klarna_secret   = $klarna_settings['secret_nl'];
+				break;
 			default:
 				$klarna_country  = '';
 				$klarna_language = '';
@@ -542,6 +549,22 @@ class WC_Gateway_Klarna_Order {
 
 		// Check if option is enabled
 		if ( 'yes' == $payment_method_option['push_completion'] ) {
+			// If this reservation was already cancelled, do nothing.
+			if ( get_post_meta( $orderid, '_klarna_order_activated', true ) ) {
+				$order->add_order_note(
+					__( 'Could not activate Klarna reservation, Klarna reservation is already activated.', 'woocommerce-gateway-klarna' )
+				);
+				return;
+			}
+
+			// If this reservation was already cancelled, do nothing.
+			if ( get_post_meta( $orderid, '_klarna_order_cancelled', true ) ) {
+				$order->add_order_note(
+					__( 'Could not activate Klarna reservation, Klarna reservation was previously cancelled.', 'woocommerce-gateway-klarna' )
+				);
+				return;
+			}
+
 			// Check if this order hasn't been activated already
 			if ( ! get_post_meta( $orderid, '_klarna_invoice_number', true ) ) {
 				// Activation for orders created with KCO Rest
@@ -679,6 +702,11 @@ class WC_Gateway_Klarna_Order {
 				} else {
 					$this->cancel_order( $orderid );
 				}
+			} else {
+				$order->add_order_note(
+					__( 'Could not activate Klarna reservation, Klarna reservation is already cancelled.', 'woocommerce-gateway-klarna' )
+				);
+				return;
 			}
 		}
 	}
@@ -693,7 +721,7 @@ class WC_Gateway_Klarna_Order {
 		$order = wc_get_order( $orderid );
 
 		// Klarna reservation number and billing country must be set
-		if ( get_post_meta( $orderid, '_klarna_order_reservation', true ) && get_post_meta( $orderid, '_billing_country', true ) ) {
+		if ( get_post_meta( $orderid, '_klarna_order_reservation', true ) && get_post_meta( $orderid, '_billing_country', true ) && ! get_post_meta( $orderid, '_klarna_order_activated', true ) ) {
 			$rno            = get_post_meta( $orderid, '_klarna_order_reservation', true );
 			$country        = get_post_meta( $orderid, '_billing_country', true );
 			$payment_method = get_post_meta( $orderid, '_payment_method', true );

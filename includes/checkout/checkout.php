@@ -80,7 +80,11 @@ if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 
 	// Add button to Standard Checkout Page if this is enabled in the settings
 	if ( $this->add_std_checkout_button == 'yes' ) {
-		echo '<div class="woocommerce"><a href="' . get_permalink( get_option( 'woocommerce_checkout_page_id' ) ) . '" class="button std-checkout-button">' . $this->std_checkout_button_label . '</a></div>';
+		echo '<div class="woocommerce">';
+		echo '<a href="' . get_permalink( get_option( 'woocommerce_checkout_page_id' ) ) . '" class="button std-checkout-button">';
+		echo $this->std_checkout_button_label;
+		echo '</a>';
+		echo  '</div>';
 	}
 
 	// Get Klarna credentials
@@ -118,6 +122,11 @@ if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 	 * Create WooCommerce order
 	 */
 	$orderid = $this->update_or_create_local_order();
+
+	// WC Subscriptions 2.0 needs this
+	if ( class_exists( 'WC_Subscriptions_Cart' ) && WC_Subscriptions_Cart::cart_contains_subscription() ) {
+		update_post_meta( $orderid, '_klarna_recurring_carts',  WC()->cart->recurring_carts );
+	}
 
 	/**
 	 * Check if Klarna order already exists and if country was changed

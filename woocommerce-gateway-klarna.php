@@ -11,7 +11,7 @@
  * Plugin Name:     WooCommerce Klarna Gateway
  * Plugin URI:      http://woothemes.com/woocommerce
  * Description:     Extends WooCommerce. Provides a <a href="http://www.klarna.se" target="_blank">Klarna</a> gateway for WooCommerce.
- * Version:         2.1.4
+ * Version:         2.1.5
  * Author:          WooThemes
  * Author URI:      http://woothemes.com/
  * Developer:       Krokedil
@@ -257,6 +257,48 @@ function add_klarna_gateway( $methods ) {
 	return $methods;
 }
 add_filter( 'woocommerce_payment_gateways', 'add_klarna_gateway' );
+
+/**
+ * Helper function that determines if we're at KCO page or not.
+ *
+ * @return bool
+ */
+function is_klarna_checkout() {
+	if ( is_page() ) {
+		global $post;
+
+		$checkout_settings = get_option( 'woocommerce_klarna_checkout_settings' );
+		$checkout_pages    = array();
+		$thank_you_pages   = array();
+
+		// Clean request URI to remove all parameters
+		$clean_req_uri = explode( '?', $_SERVER['REQUEST_URI'] );
+		$clean_req_uri = $clean_req_uri[0];
+		$clean_req_uri = trailingslashit( $clean_req_uri );
+		$length        = strlen( $clean_req_uri );
+
+		// Get arrays of checkout and thank you pages for all countries
+		if ( is_array( $checkout_settings ) ) {
+			foreach ( $checkout_settings as $cs_key => $cs_value ) {
+				if ( strpos( $cs_key, 'klarna_checkout_url_' ) !== false ) {
+					$checkout_pages[ $cs_key ] = substr( $cs_value, 0 - $length );
+				}
+				if ( strpos( $cs_key, 'klarna_checkout_thanks_url_' ) !== false ) {
+					$thank_you_pages[ $cs_key ] = substr( $cs_value, 0 - $length );
+				}
+			}
+		}
+
+		// Start session if on a KCO or KCO Thank You page and KCO enabled
+		if ( in_array( $clean_req_uri, $checkout_pages ) || in_array( $clean_req_uri, $thank_you_pages ) ) {
+			return true;
+		}
+
+		return false;
+	}
+
+	return false;
+}
 
 
 /**
