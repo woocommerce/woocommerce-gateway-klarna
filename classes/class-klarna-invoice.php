@@ -948,6 +948,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 							 });
 							 */
 							jQuery('#order_review #klarna-invoice-get-address').show().prependTo(jQuery('.woocommerce-billing-fields'));
+							jQuery( document.body ).trigger( 'moved_get_address_form' );
 						} else {
 
 							// if (jQuery('.woocommerce-billing-fields #klarna-invoice-get-address').length) {

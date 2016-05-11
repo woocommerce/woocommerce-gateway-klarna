@@ -798,7 +798,7 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 
 							jQuery('.woocommerce-billing-fields #klarna-part-payment-get-address').remove();
 							jQuery('#order_review #klarna-part-payment-get-address').show().prependTo(jQuery('.woocommerce-billing-fields'));
-
+							jQuery( document.body ).trigger( 'moved_get_address_form' );
 						} else {
 
 							// if (jQuery('.woocommerce-billing-fields #klarna-invoice-get-address').length) {

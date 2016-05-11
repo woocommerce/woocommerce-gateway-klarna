@@ -138,6 +138,8 @@ class WC_Klarna_Get_Address {
 			<script type="text/javascript">
 				jQuery(document).ready(function ($) {
 
+					var pno_getadress = '';
+
 					$(document).on('click', '.compadress', function () {
 						var value = $(this).attr("id");
 
@@ -213,9 +215,6 @@ class WC_Klarna_Get_Address {
 
 					jQuery(document).on('click', '.klarna-push-pno', function () {
 						jQuery('.klarna-push-pno').prop('disabled', true);
-						console.log(jQuery('.klarna-push-pno').prop('disabled'));
-
-						pno_getadress = '';
 
 						if (jQuery('#klarna_invoice_pno').length && jQuery('#klarna_invoice_pno').val() != '') {
 							pno_getadress = jQuery('#klarna_invoice_pno').val();
@@ -312,6 +311,13 @@ class WC_Klarna_Get_Address {
 									}
 								}
 							);
+						}
+					});
+
+					$('body').on('moved_get_address_form', function() {
+						if ('' != pno_getadress) {
+							$('#klarna_part_payment_pno').val(pno_getadress);
+							$('#klarna_invoice_pno').val(pno_getadress);
 						}
 					});
 				});
