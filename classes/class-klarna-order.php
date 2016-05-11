@@ -549,6 +549,22 @@ class WC_Gateway_Klarna_Order {
 
 		// Check if option is enabled
 		if ( 'yes' == $payment_method_option['push_completion'] ) {
+			// If this reservation was already cancelled, do nothing.
+			if ( get_post_meta( $orderid, '_klarna_order_activated', true ) ) {
+				$order->add_order_note(
+					__( 'Could not activate Klarna reservation, Klarna reservation is already activated.', 'woocommerce-gateway-klarna' )
+				);
+				return;
+			}
+
+			// If this reservation was already cancelled, do nothing.
+			if ( get_post_meta( $orderid, '_klarna_order_cancelled', true ) ) {
+				$order->add_order_note(
+					__( 'Could not activate Klarna reservation, Klarna reservation was previously cancelled.', 'woocommerce-gateway-klarna' )
+				);
+				return;
+			}
+
 			// Check if this order hasn't been activated already
 			if ( ! get_post_meta( $orderid, '_klarna_invoice_number', true ) ) {
 				// Activation for orders created with KCO Rest
@@ -686,6 +702,11 @@ class WC_Gateway_Klarna_Order {
 				} else {
 					$this->cancel_order( $orderid );
 				}
+			} else {
+				$order->add_order_note(
+					__( 'Could not activate Klarna reservation, Klarna reservation is already cancelled.', 'woocommerce-gateway-klarna' )
+				);
+				return;
 			}
 		}
 	}
