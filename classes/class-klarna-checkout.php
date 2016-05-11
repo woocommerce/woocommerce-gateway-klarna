@@ -1741,6 +1741,18 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 * @since 1.0.0
 	 */
 	public function admin_options() { ?>
+		<?php if ( ! get_option( 'permalink_structure' ) ) { ?>
+			<div id="message" class="error">
+				<p>
+					<?php
+					printf(
+						__( 'Klarna Checkout requires pretty permalinks to be enabled. <a href="%s">Click here</a> to update your permalinks structure.', 'woocommerce-gateway-klarna' ),
+						admin_url( 'options-permalink.php' )
+					)
+					?>
+				</p>
+			</div>
+		<?php } ?>
 
 		<h3><?php _e( 'Klarna Checkout', 'woocommerce-gateway-klarna' ); ?></h3>
 
@@ -1759,7 +1771,6 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		<table class="form-table">
 			<?php $this->generate_settings_html(); ?>
 		</table><!--/.form-table-->
-
 	<?php }
 
 
