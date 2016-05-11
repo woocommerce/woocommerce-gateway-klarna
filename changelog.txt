@@ -7,6 +7,14 @@
 * Fix       - Fixes wrong WCML currency in AJAX issue.
 * Fix       - Removes shipping price from KCO widget shipping label when only one method is available.
 * Fix       - Removes deprecated get_currentuserinfo, replaced with wp_get_current_user.
+* Fix       - Moves personal number fields above billing form even if there is only one billing country.
+* Tweak     - Makes personal number placeholders translatable.
+* Tweak     - Adds permalink structure notice to KCO settings page.
+* Tweak     - Adds checks before attempting to cancel or capture Klarna order.
+* Tweak     - Prevents personal number from disappearing on update checkout.
+* Tweak     - Makes get address button disabled until the result is returned.
+* Tweak     - Introduces is_klarna_checkout conditional function.
+* Tweak     - Loads inline JS more selectively (only when needed).
 
 2016.04.12  - version 2.1.4
 * Fix       - Fixes AffiliateWP support for Klarna Checkout.
