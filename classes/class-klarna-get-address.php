@@ -212,6 +212,9 @@ class WC_Klarna_Get_Address {
 
 
 					jQuery(document).on('click', '.klarna-push-pno', function () {
+						jQuery('.klarna-push-pno').prop('disabled', true);
+						console.log(jQuery('.klarna-push-pno').prop('disabled'));
+
 						pno_getadress = '';
 
 						if (jQuery('#klarna_invoice_pno').length && jQuery('#klarna_invoice_pno').val() != '') {
@@ -221,10 +224,10 @@ class WC_Klarna_Get_Address {
 						}
 
 						if (pno_getadress == '') {
-							$(".klarna-get-address-message").show();
-							$(".klarna-get-address-message").html('<span style="clear:both; margin: 5px 2px; padding: 4px 8px; background:#ffecec"><?php _e( 'Be kind and enter a date of birth!', 'woocommerce-gateway-klarna' );?></span>');
+							jQuery(".klarna-get-address-message").show();
+							jQuery(".klarna-get-address-message").html('<span style="clear:both; margin: 5px 2px; padding: 4px 8px; background:#ffecec"><?php _e( 'Be kind and enter a date of birth!', 'woocommerce-gateway-klarna' );?></span>');
+							// jQuery('.klarna-push-pno').prop('disabled', false);
 						} else {
-
 							jQuery.post(
 								'<?php echo site_url() . '/wp-admin/admin-ajax.php' ?>',
 								{
@@ -292,6 +295,8 @@ class WC_Klarna_Get_Address {
 										 else{
 										 klarnainfo(klarna_client_type, response, 0);
 										 }*/
+
+										jQuery('.klarna-push-pno').prop('disabled', false);
 									}
 									else {
 										$(".klarna-get-address-message").show();
@@ -303,6 +308,7 @@ class WC_Klarna_Get_Address {
 											$(this).val("");
 											$(this).prop("readonly", false);
 										});
+										jQuery('.klarna-push-pno').prop('disabled', false);
 									}
 								}
 							);
