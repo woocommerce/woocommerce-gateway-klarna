@@ -899,7 +899,6 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 		global $woocommerce;
 		if ( is_checkout() && $this->enabled == "yes" && ! is_klarna_checkout() ) {
 			?>
-			<?php echo '<!-- Klarna Invoice -->'; ?>
 			<script type="text/javascript">
 				//<![CDATA[
 				jQuery(document).ready(function ($) {
@@ -937,7 +936,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 					if (settings_url.indexOf('?wc-ajax=update_order_review') > -1) {
 						// Check if Klarna Invoice and SE
 						if (jQuery('input[name="payment_method"]:checked').val() == 'klarna_invoice' &&
-							jQuery('select#billing_country').val() == 'SE') {
+							jQuery('#billing_country').val() == 'SE') {
 
 							jQuery('.woocommerce-billing-fields #klarna-invoice-get-address').remove();
 

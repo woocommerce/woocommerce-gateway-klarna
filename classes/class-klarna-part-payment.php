@@ -768,7 +768,6 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 	 **/
 	function footer_scripts() {
 		if ( is_checkout() && 'yes' == $this->enabled && ! is_klarna_checkout() ) { ?>
-			<?php echo '<!-- Klarna Part Payment -->'; ?>
 			<script type="text/javascript">
 				//<![CDATA[
 				jQuery(document).ajaxComplete(function () {
@@ -795,7 +794,7 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 					if (settings_url.indexOf('?wc-ajax=update_order_review') > -1) {
 						// Check if Klarna Invoice and SE
 						if (jQuery('input[name="payment_method"]:checked').val() == 'klarna_part_payment' &&
-							jQuery('select#billing_country').val() == 'SE') {
+							jQuery('#billing_country').val() == 'SE') {
 
 							jQuery('.woocommerce-billing-fields #klarna-part-payment-get-address').remove();
 							jQuery('#order_review #klarna-part-payment-get-address').show().prependTo(jQuery('.woocommerce-billing-fields'));
