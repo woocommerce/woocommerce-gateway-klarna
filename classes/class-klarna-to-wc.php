@@ -458,6 +458,8 @@ class WC_Gateway_Klarna_K2WC {
 	 * @access public
 	 *
 	 * @param  object $order Local WC order.
+	 *
+	 * @throws Exception
 	 */
 	public function add_order_items( $order ) {
 		$order->remove_order_items();
@@ -499,6 +501,8 @@ class WC_Gateway_Klarna_K2WC {
 	 * @access public
 	 *
 	 * @param  object $order Local WC order.
+	 *
+	 * @throws Exception
 	 */
 	public function add_order_fees( $order ) {
 		if ( $this->klarna_debug == 'yes' ) {
@@ -529,7 +533,9 @@ class WC_Gateway_Klarna_K2WC {
 	 * @access public
 	 *
 	 * @param  object $order Local WC order.
-	 * @param  object $klarna_order Klarna order.
+	 *
+	 * @throws Exception
+	 * @internal param object $klarna_order Klarna order.
 	 */
 	public function add_order_shipping( $order ) {
 		if ( $this->klarna_debug == 'yes' ) {

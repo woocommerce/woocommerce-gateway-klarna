@@ -1179,13 +1179,10 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 				}
 			}
 			$connector = Klarna\Rest\Transport\Connector::create( $eid, $sharedSecret, $klarna_server_url );
-
 			$klarna_order = new \Klarna\Rest\Checkout\Order( $connector, WC()->session->get( 'klarna_checkout' ) );
 		} else {
 			$connector = Klarna_Checkout_Connector::create( $sharedSecret, $this->klarna_server );
-
 			$klarna_order = new Klarna_Checkout_Order( $connector, WC()->session->get( 'klarna_checkout' ) );
-
 			$klarna_order->fetch();
 		}
 
