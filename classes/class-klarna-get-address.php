@@ -56,7 +56,7 @@ class WC_Klarna_Get_Address {
 	 * and in the end use another payment method than Klarna.
 	 */
 	public function checkout_restore_customer_defaults() {
-		if ( is_checkout() && 'SE' == $this->get_shop_country() && ( $this->partpay_enabled || $this->invo_enabled ) ) {
+		if ( is_checkout() && 'SE' == $this->get_shop_country() && ( $this->partpay_enabled || $this->invo_enabled ) && ! is_klarna_checkout() ) {
 
 			if ( defined( 'WOOCOMMERCE_KLARNA_CHECKOUT' ) ) {
 				return;
@@ -129,7 +129,7 @@ class WC_Klarna_Get_Address {
 	 * and populating the checkout fields after the call to Klarna.
 	 */
 	function js() {
-		if ( is_checkout() && $this->get_shop_country() == 'SE' && ( $this->partpay_enabled || $this->invo_enabled ) ) {
+		if ( is_checkout() && $this->get_shop_country() == 'SE' && ( $this->partpay_enabled || $this->invo_enabled ) && ! is_klarna_checkout() ) {
 
 			if ( defined( 'WOOCOMMERCE_KLARNA_CHECKOUT' ) ) {
 				return;

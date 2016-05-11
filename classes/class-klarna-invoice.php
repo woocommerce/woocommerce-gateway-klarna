@@ -23,7 +23,6 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 	 * @since 1.0.0
 	 */
 	public function __construct() {
-
 		global $woocommerce;
 
 		parent::__construct();
@@ -898,8 +897,9 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 	 **/
 	function footer_scripts() {
 		global $woocommerce;
-		if ( is_checkout() && $this->enabled == "yes" ) {
+		if ( is_checkout() && $this->enabled == "yes" && ! is_klarna_checkout() ) {
 			?>
+			<?php echo '<!-- Klarna Invoice -->'; ?>
 			<script type="text/javascript">
 				//<![CDATA[
 				jQuery(document).ready(function ($) {
@@ -909,10 +909,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 				});
 				//]]>
 			</script>
-			<?php
-		}
 
-		if ( is_checkout() && 'yes' == $this->enabled ) { ?>
 			<script type="text/javascript">
 				//<![CDATA[
 				jQuery(document).ajaxComplete(function () {

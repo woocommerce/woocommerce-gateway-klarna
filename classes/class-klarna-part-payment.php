@@ -767,7 +767,8 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 	 * @todo  move to separate JS file?
 	 **/
 	function footer_scripts() {
-		if ( is_checkout() && 'yes' == $this->enabled ) { ?>
+		if ( is_checkout() && 'yes' == $this->enabled && ! is_klarna_checkout() ) { ?>
+			<?php echo '<!-- Klarna Part Payment -->'; ?>
 			<script type="text/javascript">
 				//<![CDATA[
 				jQuery(document).ajaxComplete(function () {
