@@ -710,9 +710,6 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 		// Collect the DoB
 		$klarna_pno = $this->collect_dob();
 
-		// Store Klarna specific form values in order as post meta
-		update_post_meta( $order_id, 'klarna_pno', $klarna_pno );
-
 		$klarna_pclass           = isset( $_POST['klarna_invoice_pclass'] ) ? woocommerce_clean( $_POST['klarna_invoice_pclass'] ) : '';
 		$klarna_gender           = isset( $_POST['klarna_invoice_gender'] ) ? woocommerce_clean( $_POST['klarna_invoice_gender'] ) : '';
 		$klarna_de_consent_terms = isset( $_POST['klarna_de_consent_terms'] ) ? woocommerce_clean( $_POST['klarna_de_consent_terms'] ) : '';
