@@ -1292,6 +1292,9 @@ msgstr ""
 msgid "Month"
 msgstr ""
 
+msgid "YYMMDD-XXXX"
+msgstr "DDMMYY-XXXX"
+
 #: ../views/public/payment-fields-invoice.php:226
 #: ../views/public/payment-fields-part-payment.php:224
 msgid "Jan"
