@@ -2285,7 +2285,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		*/
 
 		// If no Klarna country is set - return.
-		if ( empty( $this->klarna_country ) ) {
+		if ( empty( $this->klarna_country ) || empty( $this->klarna_eid ) || empty( $this->klarna_secret ) ) {
 			echo apply_filters( 'klarna_checkout_wrong_country_message', sprintf( __( 'Sorry, you can not buy via Klarna Checkout from your country or currency. Please <a href="%s">use another payment method</a>. ', 'woocommerce-gateway-klarna' ), get_permalink( get_option( 'woocommerce_checkout_page_id' ) ) ) );
 
 			WC()->session->set( 'klarna_show_kco', false );
