@@ -2261,6 +2261,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			return false;
 		}
 
+		/*
 		// Validate Shipping Methods
 		WC()->cart->calculate_shipping();
 		$shipping_ok      = true;
@@ -2281,6 +2282,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			WC()->session->set( 'klarna_show_kco', false );
 			return false;
 		}
+		*/
 
 		// If no Klarna country is set - return.
 		if ( empty( $this->klarna_country ) ) {
