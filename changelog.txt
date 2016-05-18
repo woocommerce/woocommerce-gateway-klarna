@@ -1,5 +1,8 @@
 *** WooCommerce Gateway Klarna Changelog ***
 
+2016.05.__  - version 2.1.6
+* Fix       - Prevents KCO request if Eid and secret are not set for chosen country.
+
 2016.05.11  - version 2.1.5
 * Fix       - Removes session_start in Klarna Checkout, since WooCommerce session is now used to store Klarna order information.
 * Fix       - Prevents KCO checkout if there's no valid shipping option available.

@@ -193,7 +193,7 @@ class WC_Gateway_Klarna_WC2K {
 		}
 
 		// Process shipping
-		if ( $woocommerce->shipping->get_packages() ) {
+		if ( $woocommerce->shipping->get_packages() && $woocommerce->session->get( 'chosen_shipping_methods' ) ) {
 			$shipping_name       = $this->get_shipping_name();
 			$shipping_reference  = $this->get_shipping_reference();
 			$shipping_amount     = $this->get_shipping_amount();
