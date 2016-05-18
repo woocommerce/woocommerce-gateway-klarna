@@ -21,28 +21,9 @@ jQuery(document).ready(function ($) {
 					nonce: kcoAjax.klarna_checkout_nonce
 				},
 				success: function (response) {
-					// console.log( 'success' );
-					// console.log( response.data );
-
-					/*
-					if (typeof window._klarnaCheckout == 'function') {
-						window._klarnaCheckout(function (api) {
-							api.resume();
-						});
-					}
-					*/
-
 					document.location.assign(response.data.new_url);
 				},
 				error: function (response) {
-					// console.log('error');
-					// console.log(response);
-
-					if (typeof window._klarnaCheckout == 'function') {
-						window._klarnaCheckout(function (api) {
-							api.resume();
-						});
-					}
 				}
 			}
 		);
@@ -70,19 +51,10 @@ jQuery(document).ready(function ($) {
 					nonce: kcoAjax.klarna_checkout_nonce
 				},
 				success: function (response) {
-					// console.log( 'success' );
-					// console.log( response.data );
-
-					if (typeof window._klarnaCheckout == 'function') {
-						window._klarnaCheckout(function (api) {
-							api.resume();
-						});
-					}
 				},
 				error: function (response) {
-					// console.log('error');
-					// console.log(response);
-
+				},
+				complete: function() {
 					if (typeof window._klarnaCheckout == 'function') {
 						window._klarnaCheckout(function (api) {
 							api.resume();
@@ -93,36 +65,6 @@ jQuery(document).ready(function ($) {
 		);
 
 	});
-
-	// Old order note shortcode
-	/*
-	 $('#kco_order_note').blur(function () {
-	 var kco_order_note = '';
-
-	 if( $('#kco_order_note').val() != '' ) {
-	 var kco_order_note = $('#kco_order_note').val();
-	 }
-
-	 if(kco_order_note == '') {
-
-	 } else {
-
-	 $.post(
-	 kcoAjax.ajaxurl,
-	 {
-	 action			: 'customer_update_kco_order_note',
-	 kco_order_note	: kco_order_note,
-	 kco_order_id	: '<?php echo WC()->session->order_awaiting_payment;?>',
-	 _wpnonce		: kcoAjax.klarna_checkout_nonce,
-	 },
-	 function( response ) {
-	 console.log( response );
-	 }
-	 );
-
-	 }
-	 });
-	 */
 
 	// Update shipping (v2)
 	$(document).on('change', 'table#kco-totals #kco-page-shipping input[type="radio"]', function (event) {
@@ -146,21 +88,11 @@ jQuery(document).ready(function ($) {
 					nonce: kcoAjax.klarna_checkout_nonce
 				},
 				success: function (response) {
-					// console.log( 'success' );
-					// console.log( response.data );
-
 					$(kco_widget).html(response.data.widget_html);
-
-					if (typeof window._klarnaCheckout == 'function') {
-						window._klarnaCheckout(function (api) {
-							api.resume();
-						});
-					}
 				},
 				error: function (response) {
-					// console.log('error');
-					// console.log(response);
-
+				},
+				complete: function() {
 					if (typeof window._klarnaCheckout == 'function') {
 						window._klarnaCheckout(function (api) {
 							api.resume();
@@ -197,21 +129,11 @@ jQuery(document).ready(function ($) {
 					nonce: kcoAjax.klarna_checkout_nonce
 				},
 				success: function (response) {
-					// console.log( 'success' );
-					// console.log( response.data );
-
 					$(kco_widget).html(response.data.widget_html);
-
-					if (typeof window._klarnaCheckout == 'function') {
-						window._klarnaCheckout(function (api) {
-							api.resume();
-						});
-					}
 				},
 				error: function (response) {
-					// console.log('error');
-					// console.log(response);
-
+				},
+				complete: function() {
 					if (typeof window._klarnaCheckout == 'function') {
 						window._klarnaCheckout(function (api) {
 							api.resume();
@@ -249,22 +171,19 @@ jQuery(document).ready(function ($) {
 				},
 				success: function (response) {
 					if (0 == response.data.item_count) {
-						// window.location.href = response.data.cart_url;
 						location.reload();
 					} else {
 						$(kco_widget).html(response.data.widget_html);
 						$(item_row).remove();
 
-						if (typeof window._klarnaCheckout == 'function') {
-							window._klarnaCheckout(function (api) {
-								api.resume();
-							});
-						} else {
+						if (typeof window._klarnaCheckout != 'function') {
 							location.reload();
 						}
 					}
 				},
 				error: function (response) {
+				},
+				complete: function (response) {
 					if (typeof window._klarnaCheckout == 'function') {
 						window._klarnaCheckout(function (api) {
 							api.resume();
@@ -276,7 +195,8 @@ jQuery(document).ready(function ($) {
 	});
 
 	// Add coupon (v2)
-	$('#klarna-checkout-widget .checkout_coupon').on('submit', function (event) {
+	$(document).on('submit', '#klarna-checkout-widget .checkout_coupon', function (event) {
+	// $('#klarna-checkout-widget .checkout_coupon').on('submit', function (event) {
 		event.preventDefault();
 
 		if (typeof window._klarnaCheckout == 'function') {
@@ -300,15 +220,6 @@ jQuery(document).ready(function ($) {
 					nonce: kcoAjax.klarna_checkout_nonce
 				},
 				success: function (response) {
-					// console.log( 'success' );
-					// console.log( response.data );
-
-					if (typeof window._klarnaCheckout == 'function') {
-						window._klarnaCheckout(function (api) {
-							api.resume();
-						});
-					}
-
 					if (response.data.coupon_success) {
 						$('#klarna_checkout_coupon_result').html('<p>Coupon added.</p>');
 
@@ -328,7 +239,8 @@ jQuery(document).ready(function ($) {
 				},
 				error: function (response) {
 					$('#klarna_checkout_coupon_result').html('<p>Coupon could not be added.</p>');
-
+				},
+				complete: function (response) {
 					if (typeof window._klarnaCheckout == 'function') {
 						window._klarnaCheckout(function (api) {
 							api.resume();
@@ -366,27 +278,15 @@ jQuery(document).ready(function ($) {
 					nonce: kcoAjax.klarna_checkout_nonce
 				},
 				success: function (response) {
-					// console.log( 'remove-success' );
-					// console.log( response.data );
-
 					$(clicked_el).closest('tr').remove();
 					$(kco_widget).html(response.data.widget_html);
 
 					// Remove WooCommerce notification
 					$('#klarna-checkout-widget .woocommerce-info + .woocommerce-message').remove();
-
-					if (typeof window._klarnaCheckout == 'function') {
-						window._klarnaCheckout(function (api) {
-							api.resume();
-						});
-					}
-
-					location.reload();
 				},
 				error: function (response) {
-					// console.log('remove-error');
-					// console.log(response);
-
+				},
+				complete: function (response) {
 					if (typeof window._klarnaCheckout == 'function') {
 						window._klarnaCheckout(function (api) {
 							api.resume();
@@ -453,7 +353,8 @@ jQuery(document).ready(function ($) {
 
 												$(kco_widget).html(response.data.widget_html);
 											},
-											error: function (response) {}
+											error: function (response) {
+											}
 										}
 									);
 
@@ -492,7 +393,6 @@ jQuery(document).ready(function ($) {
 										nonce: kcoAjax.klarna_checkout_nonce
 									},
 									success: function (response) {
-										// console.log( response );
 										$(kco_widget).html(response.data.widget_html);
 
 										window._klarnaCheckout(function (api) {
@@ -500,6 +400,8 @@ jQuery(document).ready(function ($) {
 										});
 									},
 									error: function (response) {
+									},
+									complete: function(response) {
 										window._klarnaCheckout(function (api) {
 											api.resume();
 										});
@@ -528,14 +430,9 @@ jQuery(document).ready(function ($) {
 								nonce: kcoAjax.klarna_checkout_nonce
 							},
 							success: function (response) {
-								// console.log( 'success' );
-								// console.log( response );
-
 								$(kco_widget).html(response.data.widget_html);
 							},
 							error: function (response) {
-								// console.log('error');
-								// console.log(response);
 							}
 						}
 					);
