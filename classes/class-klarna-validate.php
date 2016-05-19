@@ -56,7 +56,7 @@ class WC_Gateway_Klarna_Order_Validate {
 			header( 'HTTP/1.0 303 See Other' );
 			if ( ! $all_in_stock ) {
 				header( 'Location: ' . WC()->cart->get_cart_url() );
-			} else {
+			} elseif ( ! $shipping_chosen ) {
 				header( 'Location: ' . WC()->cart->get_checkout_url() . '?no_shipping' );
 			}
 		}

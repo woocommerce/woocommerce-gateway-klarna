@@ -311,7 +311,6 @@ class WC_Gateway_Klarna_K2WC {
 			// Other plugins need this hook
 			do_action( 'woocommerce_checkout_order_processed', $order->id, false );
 
-
 			// Process subscriptions for order
 			if ( class_exists( 'WC_Subscriptions_Checkout' ) && get_post_meta( $order->id, '_klarna_recurring_carts', true ) ) {
 
