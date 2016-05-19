@@ -123,6 +123,15 @@ if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 	 */
 	$orderid = $this->update_or_create_local_order();
 
+	// Add GA cookie as custom field for GA Ecommerce plugin
+	if ( class_exists( 'Yoast_GA_Woo_eCommerce_Tracking' ) && isset( $_COOKIE['_ga'] ) ) {
+		// The _ga cookie consists of GA[version_number][user_id], we are only interested in the user_id
+		// so strip the version number.
+		$cookie = preg_replace( '/^(GA\d\.\d\.)/', '', $_COOKIE['_ga'] );
+
+		update_post_meta( $orderid, '_yoast_gau_uuid', $cookie );
+	}
+
 	// WC Subscriptions 2.0 needs this
 	if ( class_exists( 'WC_Subscriptions_Cart' ) && WC_Subscriptions_Cart::cart_contains_subscription() ) {
 		update_post_meta( $orderid, '_klarna_recurring_carts',  WC()->cart->recurring_carts );
