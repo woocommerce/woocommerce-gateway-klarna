@@ -299,6 +299,7 @@ jQuery(document).ready(function ($) {
 
 	// End KCO widget
 
+	var returned_data_v2 = '';
 	// Address change (email, postal code) v2
 	if (typeof window._klarnaCheckout == 'function') {
 		window._klarnaCheckout(function (api) {
@@ -309,105 +310,111 @@ jQuery(document).ready(function ($) {
 
 				api.on({
 					'change': function (data) {
-						// console.log(data);
+						// Check if the data actually changed
+						if ( returned_data_v2 !== JSON.stringify(data) ) {
+							returned_data_v2 = JSON.stringify(data);
+							
+							if ('' != data.email && '' != data.postal_code) {
+								// Check if email and postal code have changed since last 'change' event
+								if (customerEmail != data.email || customerPostal != data.postal_code) {
+									customerEmail = data.email;
+									customerPostal = data.postal_code;
 
-						if ('' != data.email && '' != data.postal_code) {
-							// Check if email and postal code have changed since last 'change' event
-							if ( customerEmail != data.email || customerPostal != data.postal_code ) {
-								customerEmail  = data.email;
-								customerPostal = data.postal_code;
+									window._klarnaCheckout(function (api) {
+										api.suspend();
+									});
 
-								window._klarnaCheckout(function (api) {
-									api.suspend();
-								});
+									// console.log('V2');
 
-								// console.log('V2');
+									// Check if email is not defined (AT and DE only) and set it to this value
+									// For AT and DE, email field is not captured inside data object
+									if (data.email === undefined) {
+										data.email = 'guest_checkout@klarna.com';
+									}
 
-								// Check if email is not defined (AT and DE only) and set it to this value
-								// For AT and DE, email field is not captured inside data object
-								if (data.email === undefined) {
-									data.email = 'guest_checkout@klarna.com';
-								}
+									if ('' != data.email) {
+										kco_widget = $('#klarna-checkout-widget');
 
-								if ('' != data.email) {
-									kco_widget = $('#klarna-checkout-widget');
+										$.ajax(
+											kcoAjax.ajaxurl,
+											{
+												type: 'POST',
+												dataType: 'json',
+												data: {
+													action: 'kco_iframe_change_cb',
+													email: data.email,
+													postal_code: data.postal_code,
+													nonce: kcoAjax.klarna_checkout_nonce
+												},
+												success: function (response) {
+													// Check if a product is out of stock
+													if (false === response.success) {
+														// console.log('false');
+														location.reload();
+														return;
+													}
 
-									$.ajax(
-										kcoAjax.ajaxurl,
-										{
-											type: 'POST',
-											dataType: 'json',
-											data: {
-												action: 'kco_iframe_change_cb',
-												email: data.email,
-												postal_code: data.postal_code,
-												nonce: kcoAjax.klarna_checkout_nonce
-											},
-											success: function (response) {
-												// Check if a product is out of stock
-												if (false === response.success) {
-													// console.log('false');
-													location.reload();
-													return;
+													$(kco_widget).html(response.data.widget_html);
+												},
+												error: function (response) {
 												}
-
-												$(kco_widget).html(response.data.widget_html);
-											},
-											error: function (response) {
 											}
-										}
-									);
+										);
+
+									}
+
+									window._klarnaCheckout(function (api) {
+										api.resume();
+									});
 
 								}
-
-								window._klarnaCheckout(function (api) {
-									api.resume();
-								});
 
 							}
-
 						}
 					}
 				});
 			}
 
+			var returned_address_v3 = '';
 			// Address change (postal code, region) v3
 			if ('v3' == kcoAjax.version) {
 				api.on({
 					'shipping_address_change': function (data) {
-						// console.log('****** Parent Page Received shipping_address_change DATA ******');
-						// console.log('V3');
+						// Check if the address actually changed
+						if ( returned_address_v3 !== JSON.stringify(data) ) {
+							returned_address_v3 = JSON.stringify(data);
 
-						if ('' != data.postal_code || '' != data.region) {
-							kco_widget = $('#klarna-checkout-widget');
+							if ('' != data.postal_code || '' != data.region) {
+								window._klarnaCheckout(function (api) {
+									api.suspend();
+								});
 
-							$.ajax(
-								kcoAjax.ajaxurl,
-								{
-									type: 'POST',
-									dataType: 'json',
-									data: {
-										action: 'kco_iframe_shipping_address_change_cb',
-										region: data.region,
-										postal_code: data.postal_code,
-										nonce: kcoAjax.klarna_checkout_nonce
-									},
-									success: function (response) {
-										$(kco_widget).html(response.data.widget_html);
+								kco_widget = $('#klarna-checkout-widget');
 
-										window._klarnaCheckout(function (api) {
-											api.resume();
-										});
-									},
-									error: function (response) {
-									},
-									complete: function(response) {
-										window._klarnaCheckout(function (api) {
-											api.resume();
-										});
+								$.ajax(
+									kcoAjax.ajaxurl,
+									{
+										type: 'POST',
+										dataType: 'json',
+										data: {
+											action: 'kco_iframe_shipping_address_change_cb',
+											region: data.region,
+											postal_code: data.postal_code,
+											nonce: kcoAjax.klarna_checkout_nonce
+										},
+										success: function (response) {
+											$(kco_widget).html(response.data.widget_html);
+										},
+										error: function (response) {
+										},
+										complete: function (response) {
+											window._klarnaCheckout(function (api) {
+												api.resume();
+											});
+										}
 									}
-								}
-							);
+								);
+							}
 						}
 					}
 				});
@@ -416,6 +423,9 @@ jQuery(document).ready(function ($) {
 
 			api.on({
 				'shipping_option_change': function (data) {
+					// var seconds = new Date().getTime() / 1000;
+					// console.log( 'Shipping option change: ' + seconds );
+
 					new_method = data.id;
 					kco_widget = $('#klarna-checkout-widget');
 

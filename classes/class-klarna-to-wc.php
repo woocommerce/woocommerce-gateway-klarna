@@ -461,8 +461,6 @@ class WC_Gateway_Klarna_K2WC {
 	 * @throws Exception
 	 */
 	public function add_order_items( $order ) {
-		$order->remove_order_items();
-
 		if ( $this->klarna_debug == 'yes' ) {
 			$this->klarna_log->add( 'klarna', 'Adding order items...' );
 		}
