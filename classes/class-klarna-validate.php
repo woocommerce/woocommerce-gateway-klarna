@@ -34,19 +34,21 @@ class WC_Gateway_Klarna_Order_Validate {
 
 		$all_in_stock = true;
 		$shipping_chosen = false;
-		if ( get_option( 'woocommerce_manage_stock' ) == 'yes' ) {
-			$cart_items = $data['cart']['items'];
-			foreach ( $cart_items as $cart_item ) {
-				if ( 'physical' == $cart_item['type'] ) {
-					$cart_item_product = new WC_Product( $cart_item['reference'] );
 
-					if ( ! $cart_item_product->has_enough_stock( $cart_item['quantity'] ) ) {
-						$all_in_stock = false;
-					}
-				} elseif ( 'shipping_fee' == $cart_item['type'] ) {
-					$shipping_chosen = true;
+		if ( is_array( $data['order_lines'] ) ) {
+			$cart_items = $data['order_lines']; // V3
+		} elseif ( is_array( $data['cart']['items'] ) ) {
+			$cart_items = $data['cart']['items']; // V2
+		}
+		foreach ( $cart_items as $cart_item ) {
+			if ( 'physical' == $cart_item['type'] ) {
+				$cart_item_product = new WC_Product( $cart_item['reference'] );
+
+				if ( ! $cart_item_product->has_enough_stock( $cart_item['quantity'] ) ) {
+					$all_in_stock = false;
 				}
-
+			} elseif ( 'shipping_fee' == $cart_item['type'] ) {
+				$shipping_chosen = true;
 			}
 		}
 

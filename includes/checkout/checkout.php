@@ -78,6 +78,12 @@ if ( is_wp_error( $result ) ) {
 // Check if there's anything in the cart
 if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 
+	if ( isset( $_GET['no_shipping'] ) ) {
+		echo '<div class="woocommerce-error">';
+		_e( 'Please select a shipping method', 'woocommerce-gateway-klarna' );
+		echo '</div>';
+	}
+
 	// Add button to Standard Checkout Page if this is enabled in the settings
 	if ( $this->add_std_checkout_button == 'yes' ) {
 		echo '<div class="woocommerce">';
