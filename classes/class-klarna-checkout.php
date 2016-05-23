@@ -2261,29 +2261,8 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			return false;
 		}
 
-		// Validate Shipping Methods
-		WC()->cart->calculate_shipping();
-		$shipping_ok      = true;
-		$packages         = WC()->shipping->get_packages();
-		$shipping_methods = WC()->session->get( 'chosen_shipping_methods' );
-
-		foreach ( $packages as $i => $package ) {
-			if ( ! isset( $package['rates'][ $shipping_methods[ $i ] ] ) ) {
-				$shipping_ok =  false;
-			}
-		}
-
-		if ( ! $shipping_ok ) {
-			echo '<div>';
-			_e( 'No shipping method has been selected. Please double check your address, or contact us if you need any help.', 'woocommerce' );
-			echo '</div>';
-
-			WC()->session->set( 'klarna_show_kco', false );
-			return false;
-		}
-
 		// If no Klarna country is set - return.
-		if ( empty( $this->klarna_country ) ) {
+		if ( empty( $this->klarna_country ) || empty( $this->klarna_eid ) || empty( $this->klarna_secret ) ) {
 			echo apply_filters( 'klarna_checkout_wrong_country_message', sprintf( __( 'Sorry, you can not buy via Klarna Checkout from your country or currency. Please <a href="%s">use another payment method</a>. ', 'woocommerce-gateway-klarna' ), get_permalink( get_option( 'woocommerce_checkout_page_id' ) ) ) );
 
 			WC()->session->set( 'klarna_show_kco', false );

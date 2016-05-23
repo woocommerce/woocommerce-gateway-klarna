@@ -400,10 +400,10 @@ return apply_filters( 'klarna_checkout_form_fields', array(
 		'desc_tip'    => true
 	),
 	'validate_stock'            => array(
-		'title'    => __( 'Check items stock during checkout', 'woocommerce-gateway-klarna' ),
+		'title'    => __( 'Check items stock and valid shipping method during checkout', 'woocommerce-gateway-klarna' ),
 		'type'     => 'checkbox',
 		'label'    => __( 'If this option is checked, stock status will be checked again for all items in the cart
-		 while Klarna Checkout request is being processed. Useful for high-volume stores, HTTPS is required.', 'woocommerce-gateway-klarna' ),
+		 while Klarna Checkout request is being processed. Useful for high-volume stores, HTTPS is required. In addition to stock check, a check for valid shipping option will be performed.', 'woocommerce-gateway-klarna' ),
 		'default'  => '',
 		'desc_tip' => true
 	),

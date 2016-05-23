@@ -615,9 +615,6 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 		// Collect the DoB
 		$klarna_pno = $this->collect_dob( $order_id );
 
-		// Store Klarna specific form values in order as post meta
-		update_post_meta( $order_id, 'klarna_pno', $klarna_pno );
-
 		$klarna_pclass           = isset( $_POST['klarna_part_payment_pclass'] ) ? woocommerce_clean( $_POST['klarna_part_payment_pclass'] ) : '';
 		$klarna_gender           = isset( $_POST['klarna_part_payment_gender'] ) ? woocommerce_clean( $_POST['klarna_part_payment_gender'] ) : '';
 		$klarna_de_consent_terms = isset( $_POST['klarna_de_consent_terms'] ) ? woocommerce_clean( $_POST['klarna_de_consent_terms'] ) : '';
@@ -744,7 +741,7 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 				$this->log->add( 'klarna', sprintf( __( '%s (Error code: %s)', 'woocommerce-gateway-klarna' ), utf8_encode( $e->getMessage() ), $e->getCode() ) );
 			}
 
-			return;
+			return false;
 		}
 
 	}

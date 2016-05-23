@@ -1,5 +1,13 @@
 *** WooCommerce Gateway Klarna Changelog ***
 
+2016.05.xx  - version 2.1.7
+* Fix       - Better error handling for process_payment in Invoice and Part Payment classes.
+
+2016.05.23  - version 2.1.6
+* Fix       - Prevents KCO request if Eid and secret are not set for chosen country.
+* Tweak     - Better handling of KCO JS events (change and shipping_address_change).
+* Tweak     - Improves Klarna Checkout validate callback, adds check for valid shipping option.
+
 2016.05.11  - version 2.1.5
 * Fix       - Removes session_start in Klarna Checkout, since WooCommerce session is now used to store Klarna order information.
 * Fix       - Prevents KCO checkout if there's no valid shipping option available.

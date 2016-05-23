@@ -19,7 +19,7 @@ class WC_Gateway_Klarna_Order_Validate {
 
 	/**
 	 * Validate Klarna order
-	 * Checks order items' stock status.
+	 * Checks order items' stock status and confirms there's a chosen shipping method
 	 *
 	 * @since 1.0.0
 	 */
@@ -30,25 +30,37 @@ class WC_Gateway_Klarna_Order_Validate {
 		// Convert post body into native object
 		$data = json_decode( $post_body, true );
 
-		$all_in_stock = true;
-		if ( get_option( 'woocommerce_manage_stock' ) == 'yes' ) {
-			$cart_items = $data['cart']['items'];
-			foreach ( $cart_items as $cart_item ) {
-				if ( 'physical' == $cart_item['type'] ) {
-					$cart_item_product = new WC_Product( $cart_item['reference'] );
+		// error_log( 'validate: ' . var_export( $data, true ) );
 
-					if ( ! $cart_item_product->has_enough_stock( $cart_item['quantity'] ) ) {
-						$all_in_stock = false;
-					}
+		$all_in_stock = true;
+		$shipping_chosen = false;
+
+		if ( is_array( $data['order_lines'] ) ) {
+			$cart_items = $data['order_lines']; // V3
+		} elseif ( is_array( $data['cart']['items'] ) ) {
+			$cart_items = $data['cart']['items']; // V2
+		}
+		foreach ( $cart_items as $cart_item ) {
+			if ( 'physical' == $cart_item['type'] ) {
+				$cart_item_product = new WC_Product( $cart_item['reference'] );
+
+				if ( ! $cart_item_product->has_enough_stock( $cart_item['quantity'] ) ) {
+					$all_in_stock = false;
 				}
+			} elseif ( 'shipping_fee' == $cart_item['type'] ) {
+				$shipping_chosen = true;
 			}
 		}
 
-		if ( $all_in_stock ) {
+		if ( $all_in_stock && $shipping_chosen ) {
 			header( 'HTTP/1.0 200 OK' );
 		} else {
 			header( 'HTTP/1.0 303 See Other' );
-			header( 'Location: ' . WC()->cart->get_cart_url() );
+			if ( ! $all_in_stock ) {
+				header( 'Location: ' . WC()->cart->get_cart_url() );
+			} elseif ( ! $shipping_chosen ) {
+				header( 'Location: ' . WC()->cart->get_checkout_url() . '?no_shipping' );
+			}
 		}
 	} // End function validate_checkout_listener
 
