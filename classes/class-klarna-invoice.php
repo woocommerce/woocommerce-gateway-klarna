@@ -699,7 +699,6 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 	 * @since 1.0.0
 	 **/
 	function process_payment( $order_id ) {
-
 		global $woocommerce;
 		$klarna_gender = null;
 
@@ -838,7 +837,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 				$this->log->add( 'klarna', sprintf( __( '%s (Error code: %s)', 'woocommerce-gateway-klarna' ), utf8_encode( $e->getMessage() ), $e->getCode() ) );
 			}
 
-			return;
+			return false;
 		}
 
 	}

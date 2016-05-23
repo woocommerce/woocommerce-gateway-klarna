@@ -741,7 +741,7 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 				$this->log->add( 'klarna', sprintf( __( '%s (Error code: %s)', 'woocommerce-gateway-klarna' ), utf8_encode( $e->getMessage() ), $e->getCode() ) );
 			}
 
-			return;
+			return false;
 		}
 
 	}
