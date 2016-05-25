@@ -588,16 +588,18 @@ class WC_Gateway_Klarna_Order {
 		$order = wc_get_order( $orderid );
 
 		if ( get_post_meta( $orderid, '_klarna_order_reservation', true ) && get_post_meta( $orderid, '_billing_country', true ) ) {
+			$rno            = get_post_meta( $orderid, '_klarna_order_reservation', true );
+			$country        = get_post_meta( $orderid, '_billing_country', true );
+			$payment_method = get_post_meta( $orderid, '_payment_method', true );
+
 			// Check if this is a subscription order
 			if ( class_exists( 'WC_Subscriptions_Renewal_Order' ) && WC_Subscriptions_Renewal_Order::is_renewal( $order ) ) {
 				if ( ! get_post_meta( $orderid, '_klarna_order_reservation_recurring', true ) ) {
 					return;
 				}
-			}
 
-			$rno            = get_post_meta( $orderid, '_klarna_order_reservation', true );
-			$country        = get_post_meta( $orderid, '_billing_country', true );
-			$payment_method = get_post_meta( $orderid, '_payment_method', true );
+				$rno = get_post_meta( $orderid, '_klarna_order_reservation_recurring', true );
+			}
 
 			$klarna = new Klarna();
 			$this->configure_klarna( $klarna, $country, $payment_method );
