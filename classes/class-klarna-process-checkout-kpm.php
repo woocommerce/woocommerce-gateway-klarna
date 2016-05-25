@@ -140,7 +140,6 @@ class WC_Gateway_Klarna_Process_Checkout_KPM {
 	 */
 	public function check_consent_terms() {
 		if ( ( $this->klarna_shop_country == 'DE' || $this->klarna_shop_country == 'AT' ) && $this->klarna_de_consent_terms_setting == 'yes' ) {
-			error_log( 'inside' );
 			// Check if set, if its not set add an error.
 			if ( empty( $_POST[ $this->klarna_field_prefix . 'de_consent_terms' ] ) ) {
 				wc_add_notice( __( 'You must accept the Klarna consent terms.', 'woocommerce-gateway-klarna' ), 'error' );

@@ -882,7 +882,6 @@ class WC_Gateway_Klarna_K2WC {
 					}
 
 					$this->customer_id = $new_customer;
-					error_log( '1: ' . var_export( $new_customer, true ) );
 				}
 
 				update_post_meta( $order->id, '_customer_user', $this->customer_id );
