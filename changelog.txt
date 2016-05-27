@@ -3,6 +3,7 @@
 2016.05.xx  - version 2.1.7
 * Fix       - Better error handling for process_payment in Invoice and Part Payment classes.
 * Fix       - Fixed recurring payment handling (checks for different meta field now).
+* Fix       - Fixes $post not set notice in empty search results page (https://github.com/woothemes/woocommerce-gateway-klarna/issues/28).
 * Tweak     - Updated shipping label in KCO cart widget.
 
 2016.05.23  - version 2.1.6

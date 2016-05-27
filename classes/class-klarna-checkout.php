@@ -2739,7 +2739,7 @@ class WC_Gateway_Klarna_Checkout_Extra {
 		global $post;
 
 		// Check if page has Klarna Checkout shortcode in it and address_update query parameter
-		if ( has_shortcode( $post->post_content, 'woocommerce_klarna_checkout' ) && isset( $_GET['address_update'] ) && 'yes' == $_GET['address_update'] ) {
+		if ( isset( $post ) && has_shortcode( $post->post_content, 'woocommerce_klarna_checkout' ) && isset( $_GET['address_update'] ) && 'yes' == $_GET['address_update'] ) {
 			// Read the post body
 			$post_body = file_get_contents( 'php://input' );
 
