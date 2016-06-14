@@ -39,11 +39,21 @@ class WC_Gateway_Klarna_Process_Checkout_KPM {
 
 				// Set variables
 				$this->klarna_field_prefix             = $_POST['payment_method'] . '_';
-				$this->klarna_shop_country             = apply_filters( 'klarna_shop_country', get_option( 'woocommerce_default_country' ) );
 				$this->klarna_de_consent_terms_setting = $payment_method_option['de_consent_terms'];
+				$this->klarna_shop_country             = apply_filters( 'klarna_shop_country', get_option( 'woocommerce_default_country' ) );
 
 				add_action( 'woocommerce_checkout_process', array( $this, 'process_checkout_fields' ) );
+				add_action( 'woocommerce_before_checkout_process', array( $this, 'maybe_update_country' ) );
 			}
+		}
+	}
+
+	/**
+	 * Checks if customer country is set before processing checkout.
+	 */
+	public function maybe_update_country() {
+		if ( WC()->customer->get_country() ) {
+			$this->klarna_shop_country =  WC()->customer->get_country();
 		}
 	}
 
@@ -140,7 +150,6 @@ class WC_Gateway_Klarna_Process_Checkout_KPM {
 	 */
 	public function check_consent_terms() {
 		if ( ( $this->klarna_shop_country == 'DE' || $this->klarna_shop_country == 'AT' ) && $this->klarna_de_consent_terms_setting == 'yes' ) {
-			error_log( 'inside' );
 			// Check if set, if its not set add an error.
 			if ( empty( $_POST[ $this->klarna_field_prefix . 'de_consent_terms' ] ) ) {
 				wc_add_notice( __( 'You must accept the Klarna consent terms.', 'woocommerce-gateway-klarna' ), 'error' );
@@ -149,5 +158,4 @@ class WC_Gateway_Klarna_Process_Checkout_KPM {
 	}
 
 }
-
 $wc_gateway_klarna_process_checkout_kpm = new WC_Gateway_Klarna_Process_Checkout_KPM;

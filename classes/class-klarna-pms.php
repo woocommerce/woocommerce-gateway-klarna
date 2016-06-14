@@ -20,35 +20,44 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
 
+
 class WC_Klarna_PMS {
 
 	public function __construct() {
 
 		add_action( 'wp_enqueue_scripts', array( $this, 'load_scripts' ) );
 		add_action( 'wp_enqueue_scripts', 'add_thickbox' );
-
 	}
 
 	/**
 	 * Register and Enqueue Klarna scripts
 	 */
 	function load_scripts() {
-
 		if ( is_checkout() ) {
 			wp_register_script( 'klarna-pms-js', KLARNA_URL . 'assets/js/klarnapms.js', array( 'jquery' ), '1.0', false );
 			wp_enqueue_script( 'klarna-pms-js' );
 		}
-
 	} // End function
-
 
 	/**
 	 * Gets response from Klarna
+	 *
+	 * @param $eid
+	 * @param $secret
+	 * @param $selected_currency
+	 * @param $shop_country
+	 * @param $cart_total
+	 * @param $payment_method_group
+	 * @param $select_id
+	 * @param $mode
+	 * @param bool $invoice_fee
+	 *
+	 * @return string
+	 * @throws Exception
 	 */
 	function get_data(
 		$eid, $secret, $selected_currency, $shop_country, $cart_total, $payment_method_group, $select_id, $mode, $invoice_fee = false
 	) {
-
 		$klarna = new Klarna();
 		$config = new KlarnaConfig();
 
@@ -82,7 +91,8 @@ class WC_Klarna_PMS {
 		$klarna_pms_locale = $this->get_locale( $shop_country );
 
 		try {
-			$response = $klarna->checkoutService( $cart_total,        // Total price of the checkout including VAT
+			$response = $klarna->checkoutService(
+				$cart_total,        // Total price of the checkout including VAT
 				$selected_currency, // Currency used by the checkout
 				$klarna_pms_locale  // Locale used by the checkout
 			);
@@ -181,9 +191,7 @@ class WC_Klarna_PMS {
 				$payment_options_details_output .= '</div>';
 
 				$payment_options_details[] = $payment_options_details_output;
-
 			}
-
 		}
 
 		// Check if anything was returned
@@ -200,17 +208,14 @@ class WC_Klarna_PMS {
 			if ( ! empty( $payment_options_details ) ) {
 				$payment_methods_output .= implode( '', $payment_options_details );
 			}
-
 		} else {
 			$payment_methods_output = false;
 		}
 
 		return $payment_methods_output;
-
 	}
 
 	function get_locale( $shop_country ) {
-
 		switch ( $shop_country ) {
 			case 'SE' :
 				$klarna_pms_locale = 'sv_SE';
@@ -236,9 +241,7 @@ class WC_Klarna_PMS {
 		}
 
 		return $klarna_pms_locale;
-
 	}
 
 }
-
 $wc_klarna_pms = new WC_Klarna_PMS;

@@ -54,6 +54,7 @@ if ( ! $this->is_rest() ) {
 
 // Merchant URIs
 $push_uri_base = get_home_url() . '/wc-api/WC_Gateway_Klarna_Checkout/';
+$order_key = get_post_meta( $local_order_id, '_order_key', true );
 // REST
 if ( $this->is_rest() ) {
 	$merchant_terms_uri        = $this->terms_url;
@@ -69,7 +70,8 @@ if ( $this->is_rest() ) {
 		'klarna_order'   => '{checkout.order.id}',
 		'sid'            => $local_order_id,
 		'order-received' => $local_order_id,
-		'thankyou'       => 'yes'
+		'thankyou'       => 'yes',
+		'key'            => $order_key
 	), $this->klarna_checkout_thanks_url );
 	$address_update_uri        = add_query_arg( array(
 		'address_update' => 'yes',
@@ -88,7 +90,8 @@ if ( $this->is_rest() ) {
 		'klarna_order'   => '{checkout.order.id}',
 		'sid'            => $local_order_id,
 		'order-received' => $local_order_id,
-		'thankyou'       => 'yes'
+		'thankyou'       => 'yes',
+		'key'            => $order_key
 	), $this->klarna_checkout_thanks_url );
 }
 

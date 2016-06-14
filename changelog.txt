@@ -1,5 +1,14 @@
 *** WooCommerce Gateway Klarna Changelog ***
 
+2016.06.14  - version 2.1.7
+* Fix       - Better error handling for process_payment in Invoice and Part Payment classes.
+* Fix       - Fixed recurring payment handling (checks for different meta field now).
+* Fix       - Fixes $post not set notice in empty search results page (https://github.com/woothemes/woocommerce-gateway-klarna/issues/28).
+* Tweak     - Updated shipping label in KCO cart widget.
+* Tweak     - Improved customer country check when processing checkout fields for Invoice and Part Payment.
+* Fix       - Supports WooCommerce 2.6.
+* Feature   - Adds support for DuracellTomi's Google Tag Manager.
+
 2016.05.23  - version 2.1.6
 * Fix       - Prevents KCO request if Eid and secret are not set for chosen country.
 * Tweak     - Better handling of KCO JS events (change and shipping_address_change).

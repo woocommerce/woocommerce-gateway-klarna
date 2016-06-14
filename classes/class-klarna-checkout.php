@@ -629,6 +629,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 
 		try {
 			$klarna_order->create( $create );
+			
 			if ( isset( $klarna_order['invoice'] ) ) {
 				add_post_meta( $order->id, '_klarna_order_invoice_recurring', $klarna_order['invoice'], true );
 				$order->add_order_note( __( 'Klarna subscription payment invoice number: ', 'woocommerce-gateway-klarna' ) . $klarna_order['invoice'] );
@@ -641,7 +642,6 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		} catch ( Klarna_Checkout_ApiErrorException $e ) {
 			$order->add_order_note( sprintf( __( 'Klarna subscription payment failed. Error code %s. Error message %s', 'woocommerce-gateway-klarna' ), $e->getCode(), utf8_encode( $e->getMessage() ) ) );
 
-			// error_log( var_export( $e, true ) );
 			return false;
 		}
 	}
@@ -1444,7 +1444,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 						<?php if ( ! empty( $available_methods ) ) { ?>
 							<?php if ( 1 === count( $available_methods ) ) {
 								$method = current( $available_methods );
-								echo wp_kses_post( wc_cart_totals_shipping_method_label( $method ) ); ?>
+								echo wp_kses_post( $method->get_label() ); ?>
 								<input type="hidden" name="shipping_method[<?php echo esc_attr( $index ); ?>]"
 								       data-index="<?php echo esc_attr( $index ); ?>"
 								       id="shipping_method_<?php echo esc_attr( $index ); ?>"
@@ -2261,6 +2261,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			return false;
 		}
 
+
 		// If no Klarna country is set - return.
 		if ( empty( $this->klarna_country ) || empty( $this->klarna_eid ) || empty( $this->klarna_secret ) ) {
 			echo apply_filters( 'klarna_checkout_wrong_country_message', sprintf( __( 'Sorry, you can not buy via Klarna Checkout from your country or currency. Please <a href="%s">use another payment method</a>. ', 'woocommerce-gateway-klarna' ), get_permalink( get_option( 'woocommerce_checkout_page_id' ) ) ) );
@@ -2738,7 +2739,7 @@ class WC_Gateway_Klarna_Checkout_Extra {
 		global $post;
 
 		// Check if page has Klarna Checkout shortcode in it and address_update query parameter
-		if ( has_shortcode( $post->post_content, 'woocommerce_klarna_checkout' ) && isset( $_GET['address_update'] ) && 'yes' == $_GET['address_update'] ) {
+		if ( isset( $post ) && has_shortcode( $post->post_content, 'woocommerce_klarna_checkout' ) && isset( $_GET['address_update'] ) && 'yes' == $_GET['address_update'] ) {
 			// Read the post body
 			$post_body = file_get_contents( 'php://input' );
 
