@@ -12,6 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
 
+
 class WC_Gateway_Klarna_PClasses {
 
 	/**
@@ -24,19 +25,15 @@ class WC_Gateway_Klarna_PClasses {
 		$this->klarna  = $klarna;
 		$this->country = $country;
 		$this->type    = $type;
-
 	}
-
 
 	/**
 	 * Retrieves PClasses for country.
 	 *
-	 * @since 1.0.0
-	 *
-	 * @return $pclasses Key value array of countries and their PClasses
+	 * @since  1.0.0
+	 * @return array $pclasses Key value array of countries and their PClasses
 	 */
 	function get_pclasses_for_country_and_type() {
-
 		$pclasses_country_all  = $this->fetch_pclasses();
 		$pclasses_country_type = array();
 		unset( $pclasses_country_type );
@@ -52,9 +49,7 @@ class WC_Gateway_Klarna_PClasses {
 		if ( ! empty( $pclasses_country_type ) ) {
 			return $pclasses_country_type;
 		}
-
 	}
-
 
 	/**
 	 * Displays available PClasses in admin settings page.
@@ -62,7 +57,6 @@ class WC_Gateway_Klarna_PClasses {
 	 * @since 1.0.0
 	 */
 	function display_pclasses_for_country_and_type() {
-
 		$pclasses = $this->get_pclasses_for_country_and_type( $this->country, $this->type );
 		if ( $pclasses ) { ?>
 			<h5 style="margin-bottom:0.25em;"><?php echo $this->country; ?></h5>
@@ -77,7 +71,6 @@ class WC_Gateway_Klarna_PClasses {
 			?>
 			<p style="margin-top:0;"><?php echo $pclass_string; ?></p>
 		<?php }
-
 	}
 
 	/**
@@ -86,7 +79,6 @@ class WC_Gateway_Klarna_PClasses {
 	 * @since 1.0.0
 	 */
 	function fetch_pclasses() {
-
 		$klarna = $this->klarna;
 
 		if ( $klarna->getPClasses() ) {
@@ -102,8 +94,6 @@ class WC_Gateway_Klarna_PClasses {
 				return false;
 			}
 		}
-
 	}
-
 
 }
