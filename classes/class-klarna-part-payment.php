@@ -617,7 +617,7 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 
 		$klarna_pclass           = isset( $_POST['klarna_part_payment_pclass'] ) ? woocommerce_clean( $_POST['klarna_part_payment_pclass'] ) : '';
 		$klarna_gender           = isset( $_POST['klarna_part_payment_gender'] ) ? woocommerce_clean( $_POST['klarna_part_payment_gender'] ) : '';
-		$klarna_de_consent_terms = isset( $_POST['klarna_de_consent_terms'] ) ? woocommerce_clean( $_POST['klarna_de_consent_terms'] ) : '';
+		$klarna_de_consent_terms = isset( $_POST['klarna_part_payment_de_consent_terms'] ) ? woocommerce_clean( $_POST['klarna_part_payment_de_consent_terms'] ) : '';
 
 		// Split address into House number and House extension for NL & DE customers
 		$klarna_billing  = array();
