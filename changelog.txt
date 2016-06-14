@@ -7,6 +7,7 @@
 * Tweak     - Updated shipping label in KCO cart widget.
 * Tweak     - Improved customer country check when processing checkout fields for Invoice and Part Payment.
 * Fix       - Supports WooCommerce 2.6.
+* Feature   - Adds support for DuracellTomi's Google Tag Manager.
 
 2016.05.23  - version 2.1.6
 * Fix       - Prevents KCO request if Eid and secret are not set for chosen country.
