@@ -1,5 +1,8 @@
 *** WooCommerce Gateway Klarna Changelog ***
 
+2016.06.xx  - version 2.1.8
+* Fix       - Improved validation callback handling.
+
 2016.06.14  - version 2.1.7
 * Fix       - Better error handling for process_payment in Invoice and Part Payment classes.
 * Fix       - Fixed recurring payment handling (checks for different meta field now).

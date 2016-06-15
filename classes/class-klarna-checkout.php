@@ -225,6 +225,9 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		// Cancel unpaid orders for KCO orders too
 		add_filter( 'woocommerce_cancel_unpaid_order', array( $this, 'cancel_unpaid_kco' ), 10, 2 );
 
+		// Validate callback notice
+		add_action( 'wp', array( $this, 'add_validate_notice' ) );
+
 		// Validate Klarna account on settings save
 		/*
 		add_action( 'update_option_woocommerce_klarna_checkout_settings', array(
@@ -1996,6 +1999,18 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		}
 	} // End function check_checkout_listener
 
+	/**
+	 * Add out of stock notice if validate callback fails.
+	 */
+	function add_validate_notice() {
+		if ( ! is_cart() ) {
+			return;
+		}
+
+		if ( isset( $_GET['stock_validate_failed'] ) ) {
+			wc_add_notice( __( 'This product is currently out of stock and unavailable.', 'woocommerce' ), 'error' );
+		}
+	}
 
 	/**
 	 * Helper function get_enabled

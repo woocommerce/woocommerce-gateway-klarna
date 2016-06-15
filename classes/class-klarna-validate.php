@@ -57,7 +57,9 @@ class WC_Gateway_Klarna_Order_Validate {
 		} else {
 			header( 'HTTP/1.0 303 See Other' );
 			if ( ! $all_in_stock ) {
-				header( 'Location: ' . WC()->cart->get_cart_url() );
+				// $logger = new WC_Logger();
+				// $logger->add( 'klarna', 'Stock validation failed' );
+				header( 'Location: ' . WC()->cart->get_cart_url() . '?stock_validate_failed' );
 			} elseif ( ! $shipping_chosen ) {
 				header( 'Location: ' . WC()->cart->get_checkout_url() . '?no_shipping' );
 			}
@@ -65,5 +67,4 @@ class WC_Gateway_Klarna_Order_Validate {
 	} // End function validate_checkout_listener
 
 }
-
 $wc_gateway_klarna_order_validate = new WC_Gateway_Klarna_Order_Validate();
