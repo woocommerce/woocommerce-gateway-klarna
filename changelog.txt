@@ -2,6 +2,7 @@
 
 2016.06.xx  - version 2.1.8
 * Fix       - Improved validation callback handling.
+* Tweak     - Adds kco_http_request_timeout filter (default is 10 seconds) for stores that encounter WP_Error in KCO http requests because of timeout.
 
 2016.06.14  - version 2.1.7
 * Fix       - Better error handling for process_payment in Invoice and Part Payment classes.
