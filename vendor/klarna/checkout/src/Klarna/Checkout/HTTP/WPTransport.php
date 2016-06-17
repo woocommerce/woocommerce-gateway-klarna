@@ -90,7 +90,7 @@ class Klarna_Checkout_HTTP_WPTransport implements Klarna_Checkout_HTTP_Transport
 			'method'  => $request->getMethod(),
 			'headers' => $request->getHeaders(),
 			'body'    => $request->getData(),
-			'timeout' => $this->getTimeout(),
+			'timeout' => apply_filters( 'kco_http_request_timeout', $this->getTimeout() ),
 		);
 
 		// For GET requests we need to get Klarna order URI, set in WC session
