@@ -332,7 +332,7 @@ class Klarna_Checkout_BasicConnector implements Klarna_Checkout_ConnectorInterfa
         // Set a payload if it is a POST call.
         $payload = '';
         if ($method === 'POST') {
-            $payload = json_encode($this->getData($resource, $options));
+            $payload = wp_json_encode($this->getData($resource, $options));
         }
 
         // Create a HTTP Request object

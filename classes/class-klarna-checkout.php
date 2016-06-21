@@ -638,6 +638,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 				$order->add_order_note( __( 'Klarna subscription payment invoice number: ', 'woocommerce-gateway-klarna' ) . $klarna_order['invoice'] );
 			} elseif ( isset( $klarna_order['reservation'] ) ) {
 				add_post_meta( $order->id, '_klarna_order_reservation_recurring', $klarna_order['reservation'], true );
+				add_post_meta( $order->id, '_klarna_order_reservation', $klarna_order['reservation'], true );
 				$order->add_order_note( __( 'Klarna subscription payment reservation number: ', 'woocommerce-gateway-klarna' ) . $klarna_order['reservation'] );
 			}
 
