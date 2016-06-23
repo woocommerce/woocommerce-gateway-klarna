@@ -379,6 +379,15 @@ class WC_Gateway_Klarna_Shortcodes {
 						echo '<td class="kco-product-remove kco-leftalign"><a href="#">x</a></td>';
 					}
 					echo '<td class="product-name kco-leftalign">';
+					if ( apply_filters( 'kco_show_cart_widget_thumbnails', false ) ) {
+						$thumbnail = apply_filters( 'woocommerce_cart_item_thumbnail', $_product->get_image(), $cart_item, $cart_item_key );
+						if ( ! $_product->is_visible() ) {
+							echo $thumbnail;
+						} else {
+							printf( '<a href="%s">%s</a>', $_product->get_permalink( $cart_item ), $thumbnail );
+						}
+					}
+
 					if ( ! $_product->is_visible() ) {
 						echo apply_filters( 'woocommerce_cart_item_name', $_product->get_title(), $cart_item, $cart_item_key ) . '&nbsp;';
 					} else {
