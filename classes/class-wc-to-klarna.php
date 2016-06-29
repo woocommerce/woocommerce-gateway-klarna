@@ -482,7 +482,7 @@ class WC_Gateway_Klarna_WC2K {
 			$item_discount_rate = 0;
 		}
 
-		return (int) $item_discount_rate;
+		return (int) round( $item_discount_rate );
 	}
 
 	/**
