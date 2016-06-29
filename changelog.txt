@@ -1,6 +1,6 @@
 *** WooCommerce Gateway Klarna Changelog ***
 
-2016.06.xx  - version 2.1.8
+2016.06.29  - version 2.1.8
 * Fix       - Improved validation callback handling.
 * Fix       - Added rounding to item discount rate calculation for KCO to avoid mismatch in calculations with many decimals.
 * Tweak     - Adds kco_http_request_timeout filter (default is 10 seconds) for stores that encounter WP_Error in KCO http requests because of timeout.
