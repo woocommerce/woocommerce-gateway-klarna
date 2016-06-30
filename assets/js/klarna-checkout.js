@@ -24,6 +24,8 @@ jQuery(document).ready(function ($) {
 					document.location.assign(response.data.new_url);
 				},
 				error: function (response) {
+					console.log('select euro country AJAX error');
+					console.log(response);
 				}
 			}
 		);
@@ -53,6 +55,8 @@ jQuery(document).ready(function ($) {
 				success: function (response) {
 				},
 				error: function (response) {
+					console.log('order note AJAX error');
+					console.log(response);
 				},
 				complete: function() {
 					if (typeof window._klarnaCheckout == 'function') {
@@ -91,6 +95,8 @@ jQuery(document).ready(function ($) {
 					$(kco_widget).html(response.data.widget_html);
 				},
 				error: function (response) {
+					console.log('update shipping AJAX error');
+					console.log(response);
 				},
 				complete: function() {
 					if (typeof window._klarnaCheckout == 'function') {
@@ -132,6 +138,8 @@ jQuery(document).ready(function ($) {
 					$(kco_widget).html(response.data.widget_html);
 				},
 				error: function (response) {
+					console.log('update cart item AJAX error');
+					console.log(response);
 				},
 				complete: function() {
 					if (typeof window._klarnaCheckout == 'function') {
@@ -182,6 +190,8 @@ jQuery(document).ready(function ($) {
 					}
 				},
 				error: function (response) {
+					console.log('remove cart item AJAX error');
+					console.log(response);
 				},
 				complete: function (response) {
 					if (typeof window._klarnaCheckout == 'function') {
@@ -239,6 +249,8 @@ jQuery(document).ready(function ($) {
 				},
 				error: function (response) {
 					$('#klarna_checkout_coupon_result').html('<p>Coupon could not be added.</p>');
+					console.log('add coupon AJAX error');
+					console.log(response);
 				},
 				complete: function (response) {
 					if (typeof window._klarnaCheckout == 'function') {
@@ -285,6 +297,8 @@ jQuery(document).ready(function ($) {
 					$('#klarna-checkout-widget .woocommerce-info + .woocommerce-message').remove();
 				},
 				error: function (response) {
+					console.log('remove coupon AJAX error');
+					console.log(response);
 				},
 				complete: function (response) {
 					if (typeof window._klarnaCheckout == 'function') {
@@ -357,6 +371,8 @@ jQuery(document).ready(function ($) {
 													$(kco_widget).html(response.data.widget_html);
 												},
 												error: function (response) {
+													console.log('change AJAX error');
+													console.log(response);
 												}
 											}
 										);
@@ -406,6 +422,8 @@ jQuery(document).ready(function ($) {
 											$(kco_widget).html(response.data.widget_html);
 										},
 										error: function (response) {
+											console.log('shipping_address_change AJAX error');
+											console.log(response);
 										},
 										complete: function (response) {
 											window._klarnaCheckout(function (api) {
@@ -443,6 +461,8 @@ jQuery(document).ready(function ($) {
 								$(kco_widget).html(response.data.widget_html);
 							},
 							error: function (response) {
+								console.log('shipping_option_change AJAX error');
+								console.log(response);
 							}
 						}
 					);

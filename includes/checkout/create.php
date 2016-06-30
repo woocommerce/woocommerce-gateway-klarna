@@ -103,7 +103,7 @@ if ( $this->is_rest() ) {
 		'confirmation'   => $merchant_confirmation_uri,
 		'push'           => $merchant_push_uri,
 	);
-	if ( 'yes' == $this->validate_stock ) {
+	if ( is_ssl() && 'yes' == $this->validate_stock ) {
 		$merchantUrls['validation'] = get_home_url() . '/wc-api/WC_Gateway_Klarna_Order_Validate/';
 	}
 	if ( is_ssl() ) {
@@ -115,7 +115,7 @@ if ( $this->is_rest() ) {
 	$create['merchant']['checkout_uri']     = $merchant_checkout_uri;
 	$create['merchant']['confirmation_uri'] = $merchant_confirmation_uri;
 	$create['merchant']['push_uri']         = $merchant_push_uri;
-	if ( 'yes' == $this->validate_stock ) {
+	if ( is_ssl() && 'yes' == $this->validate_stock ) {
 		$create['merchant']['validation_uri']   = get_home_url() . '/wc-api/WC_Gateway_Klarna_Order_Validate/';
 	}
 }

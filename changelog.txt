@@ -1,5 +1,13 @@
 *** WooCommerce Gateway Klarna Changelog ***
 
+2016.06.30  - version 2.1.8
+* Fix       - Improved validation callback handling.
+* Fix       - Added rounding to item discount rate calculation for KCO to avoid mismatch in calculations with many decimals.
+* Tweak     - Adds kco_http_request_timeout filter (default is 10 seconds) for stores that encounter WP_Error in KCO http requests because of timeout.
+* Tweak     - Switches from json_encode to wp_json_encode in KCO library (BasicConnector.php) to add support for non-English characters.
+* Tweak     - Adds option to show product thumbnails in KCO cart widget, using kco_show_cart_widget_thumbnails filter.
+* Tweak     - Adds AJAX error messages (KCO).
+
 2016.06.14  - version 2.1.7
 * Fix       - Better error handling for process_payment in Invoice and Part Payment classes.
 * Fix       - Fixed recurring payment handling (checks for different meta field now).

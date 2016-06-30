@@ -225,6 +225,9 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		// Cancel unpaid orders for KCO orders too
 		add_filter( 'woocommerce_cancel_unpaid_order', array( $this, 'cancel_unpaid_kco' ), 10, 2 );
 
+		// Validate callback notice
+		add_action( 'wp', array( $this, 'add_validate_notice' ) );
+
 		// Validate Klarna account on settings save
 		/*
 		add_action( 'update_option_woocommerce_klarna_checkout_settings', array(
@@ -635,6 +638,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 				$order->add_order_note( __( 'Klarna subscription payment invoice number: ', 'woocommerce-gateway-klarna' ) . $klarna_order['invoice'] );
 			} elseif ( isset( $klarna_order['reservation'] ) ) {
 				add_post_meta( $order->id, '_klarna_order_reservation_recurring', $klarna_order['reservation'], true );
+				add_post_meta( $order->id, '_klarna_order_reservation', $klarna_order['reservation'], true );
 				$order->add_order_note( __( 'Klarna subscription payment reservation number: ', 'woocommerce-gateway-klarna' ) . $klarna_order['reservation'] );
 			}
 
@@ -1361,6 +1365,15 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 						echo '<td class="kco-product-remove kco-leftalign"><a href="#">x</a></td>';
 					}
 					echo '<td class="product-name kco-leftalign">';
+					if ( apply_filters( 'kco_show_cart_widget_thumbnails', false ) ) {
+						$thumbnail = apply_filters( 'woocommerce_cart_item_thumbnail', $_product->get_image(), $cart_item, $cart_item_key );
+						if ( ! $_product->is_visible() ) {
+							echo $thumbnail;
+						} else {
+							printf( '<a href="%s">%s</a>', $_product->get_permalink( $cart_item ), $thumbnail );
+						}
+					}
+
 					if ( ! $_product->is_visible() ) {
 						echo apply_filters( 'woocommerce_cart_item_name', $_product->get_title(), $cart_item, $cart_item_key ) . '&nbsp;';
 					} else {
@@ -1996,6 +2009,18 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		}
 	} // End function check_checkout_listener
 
+	/**
+	 * Add out of stock notice if validate callback fails.
+	 */
+	function add_validate_notice() {
+		if ( ! is_cart() ) {
+			return;
+		}
+
+		if ( isset( $_GET['stock_validate_failed'] ) ) {
+			wc_add_notice( __( 'This product is currently out of stock and unavailable.', 'woocommerce' ), 'error' );
+		}
+	}
 
 	/**
 	 * Helper function get_enabled

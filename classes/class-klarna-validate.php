@@ -40,9 +40,15 @@ class WC_Gateway_Klarna_Order_Validate {
 		} elseif ( is_array( $data['cart']['items'] ) ) {
 			$cart_items = $data['cart']['items']; // V2
 		}
+
 		foreach ( $cart_items as $cart_item ) {
 			if ( 'physical' == $cart_item['type'] ) {
-				$cart_item_product = new WC_Product( $cart_item['reference'] );
+				// Get product by SKU or ID
+				if ( wc_get_product_id_by_sku( $cart_item['reference'] ) ) {
+					$cart_item_product = wc_get_product( wc_get_product_id_by_sku( $cart_item['reference'] ) );
+				} else {
+					$cart_item_product = wc_get_product( $cart_item['reference'] );
+				}
 
 				if ( ! $cart_item_product->has_enough_stock( $cart_item['quantity'] ) ) {
 					$all_in_stock = false;
@@ -57,7 +63,9 @@ class WC_Gateway_Klarna_Order_Validate {
 		} else {
 			header( 'HTTP/1.0 303 See Other' );
 			if ( ! $all_in_stock ) {
-				header( 'Location: ' . WC()->cart->get_cart_url() );
+				$logger = new WC_Logger();
+				$logger->add( 'klarna', 'Stock validation failed for SKU ' . $cart_item['reference'] );
+				header( 'Location: ' . WC()->cart->get_cart_url() . '?stock_validate_failed' );
 			} elseif ( ! $shipping_chosen ) {
 				header( 'Location: ' . WC()->cart->get_checkout_url() . '?no_shipping' );
 			}
@@ -65,5 +73,4 @@ class WC_Gateway_Klarna_Order_Validate {
 	} // End function validate_checkout_listener
 
 }
-
 $wc_gateway_klarna_order_validate = new WC_Gateway_Klarna_Order_Validate();
