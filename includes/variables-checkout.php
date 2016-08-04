@@ -76,8 +76,10 @@ $this->validate_stock = $this->get_option( 'validate_stock' );
 // Helper function to make sure colors start with '#' character
 if ( ! function_exists( 'wc_klarna_add_hash_to_color' ) ) {
 	function wc_klarna_add_hash_to_color( $hex ) {
-		$hex = str_replace( '#', '', $hex );
-		$hex = '#' . $hex;
+		if ( '' != $hex ) {
+			$hex = str_replace( '#', '', $hex );
+			$hex = '#' . $hex;
+		}
 
 		return $hex;
 	}
