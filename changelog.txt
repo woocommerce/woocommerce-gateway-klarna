@@ -1,5 +1,9 @@
 *** WooCommerce Gateway Klarna Changelog ***
 
+2016.08.08  - version 2.1.9
+* Fix       - Fixes order lines formatting when V3 (US and UK) KCO order is edited.
+* Fix       - Adds check to make sure color codes sent to KCO iframe start with #.
+
 2016.06.30  - version 2.1.8
 * Fix       - Improved validation callback handling.
 * Fix       - Added rounding to item discount rate calculation for KCO to avoid mismatch in calculations with many decimals.
