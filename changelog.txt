@@ -3,6 +3,8 @@
 2016.08.08  - version 2.1.9
 * Fix       - Fixes order lines formatting when V3 (US and UK) KCO order is edited.
 * Fix       - Adds check to make sure color codes sent to KCO iframe start with #.
+* Tweak     - Lets KCO widget retain hidden columns on refresh.
+* Fix       - Adds html_entity_decode to secret_uk and secret_us.
 
 2016.06.30  - version 2.1.8
 * Fix       - Improved validation callback handling.
