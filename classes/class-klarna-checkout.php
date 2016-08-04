@@ -808,7 +808,6 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 				define( 'WOOCOMMERCE_CART', true );
 			}
 
-
 			if ( WC()->session->get( 'klarna_checkout' ) ) {
 				$this->ajax_update_klarna_order();
 			}
@@ -1325,7 +1324,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 *
 	 * @since  2.0
 	 **/
-	function klarna_checkout_get_cart_contents_html( $atts ) {
+	function klarna_checkout_get_cart_contents_html() {
 		global $woocommerce;
 
 		ob_start();
@@ -1336,13 +1335,14 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		$woocommerce->cart->calculate_fees();
 		$woocommerce->cart->calculate_totals();
 
-
+		// Need to recover hidden columns, set first time shortcode was loaded
 		$hide_columns = array();
-		if ( '' != $atts['hide_columns'] ) {
-			$hide_columns = explode( ',', $atts['hide_columns'] );
+		if ( WC()->session->get( 'kco_widget_hide_columns' ) ) {
+			$hide_columns = WC()->session->get( 'kco_widget_hide_columns' );
 		}
 		?>
 		<div>
+			<div id="klarna_checkout_coupon_result"></div>
 			<table id="klarna-checkout-cart">
 				<tbody>
 				<tr>
@@ -2637,7 +2637,9 @@ class WC_Gateway_Klarna_Checkout_Extra {
 		wp_localize_script( 'klarna_checkout', 'kcoAjax', array(
 			'ajaxurl'               => admin_url( 'admin-ajax.php' ),
 			'klarna_checkout_nonce' => wp_create_nonce( 'klarna_checkout_nonce' ),
-			'version'               => $version
+			'version'               => $version,
+			'coupon_success'        => __( 'Coupon added.', 'woocommerce-gateway-klarna' ),
+			'coupon_fail'           => __( 'Coupon could not be added.', 'woocommerce-gateway-klarna' )
 		) );
 
 		wp_register_style( 'klarna_checkout', KLARNA_URL . 'assets/css/klarna-checkout.css' );
