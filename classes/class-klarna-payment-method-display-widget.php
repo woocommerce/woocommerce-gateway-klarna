@@ -45,6 +45,7 @@ class WC_Klarna_Payment_Method_Display_Widget extends WP_Widget {
 
 		switch ( get_locale() ) {
 			case 'de_DE' :
+			case 'de_DE_formal' :
 				$klarna_locale = 'de_de';
 				break;
 			case 'no_NO' :

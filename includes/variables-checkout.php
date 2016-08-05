@@ -116,7 +116,7 @@ switch ( get_woocommerce_currency() ) {
 		if ( null !== WC()->session && ! is_admin() && WC()->session->get( 'klarna_euro_country' ) ) {
 			$klarna_country = WC()->session->get( 'klarna_euro_country' );
 		} else {
-			if ( get_locale() == 'de_DE' && '' != $this->eid_de && '' != $this->secret_de ) {
+			if ( ( get_locale() == 'de_DE' || get_locale() == 'de_DE_formal' ) && '' != $this->eid_de && '' != $this->secret_de ) {
 				$klarna_country = 'DE';
 			} elseif ( get_locale() == 'fi' && '' != $this->eid_fi && '' != $this->secret_fi ) {
 				$klarna_country = 'FI';

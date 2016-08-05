@@ -52,6 +52,7 @@ class WC_Gateway_Klarna_Helper {
 				$klarna_locale = 'da_dk';
 				break;
 			case 'de_DE' :
+			case 'de_DE_formal' :
 				$klarna_locale = 'de_de';
 				break;
 			case 'no_NO' :

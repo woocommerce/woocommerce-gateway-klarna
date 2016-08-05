@@ -67,6 +67,7 @@ class WC_Klarna_Payment_Method_Widget {
 				$klarna_locale = 'da_dk';
 				break;
 			case 'de_DE' :
+			case 'de_DE_formal' :
 				$klarna_locale = 'de_de';
 				break;
 			case 'no_NO' :
@@ -218,6 +219,7 @@ class WC_Klarna_Payment_Method_Widget {
 				$klarna_locale = 'da_dk';
 				break;
 			case 'de_DE' :
+			case 'de_DE_formal' :
 				$klarna_locale = 'de_de';
 				break;
 			case 'no_NO' :

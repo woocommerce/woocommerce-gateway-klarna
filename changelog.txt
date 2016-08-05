@@ -5,6 +5,7 @@
 * Fix       - Adds check to make sure color codes sent to KCO iframe start with #.
 * Tweak     - Lets KCO widget retain hidden columns on refresh.
 * Fix       - Adds html_entity_decode to secret_uk and secret_us.
+* Tweak     - Adds filter to edit german locale - 'klarna_german_locale' - default is 'de_DE'.
 
 2016.06.30  - version 2.1.8
 * Fix       - Improved validation callback handling.
