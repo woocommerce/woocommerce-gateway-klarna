@@ -1774,7 +1774,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		// If the WooCommerce terms page isn't set, do nothing.
 		$klarna_terms_page = get_option( 'woocommerce_terms_page_id' );
 		if ( empty( $klarna_terms_page ) && empty( $this->terms_url ) ) {
-			echo '<strong>' . __( 'You need to specify a Terms Page in the WooCommerce settings or in the Klarna Checkout settings in order to enable the Klarna Checkout payment method.', 'woocommerce-gateway-klarna' ) . '</strong>';
+			echo '<div class="error"><p>' . __( 'You need to specify a Terms Page in the WooCommerce settings or in the Klarna Checkout settings in order to enable the Klarna Checkout payment method.', 'woocommerce-gateway-klarna' ) . '</p></div>';
 		}
 		?>
 
