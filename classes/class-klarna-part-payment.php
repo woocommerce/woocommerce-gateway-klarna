@@ -737,8 +737,9 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 		} catch ( Exception $e ) {
 			// The purchase was denied or something went wrong, print the message:
 			wc_add_notice( sprintf( __( '%s (Error code: %s)', 'woocommerce-gateway-klarna' ), utf8_encode( $e->getMessage() ), $e->getCode() ), 'error' );
+
 			if ( $this->debug == 'yes' ) {
-				$this->log->add( 'klarna', sprintf( __( '%s (Error code: %s)', 'woocommerce-gateway-klarna' ), utf8_encode( $e->getMessage() ), $e->getCode() ) );
+				$this->log->add( 'klarna', 'Klarna API error: ' . var_export( $e, true ) );
 			}
 
 			return false;

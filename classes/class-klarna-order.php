@@ -14,6 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /**
  * Class that handles Klarna orders.
+ * @property WC_Logger log
  */
 class WC_Gateway_Klarna_Order {
 
@@ -28,6 +29,13 @@ class WC_Gateway_Klarna_Order {
 	public function __construct( $order = false, $klarna = false ) {
 		$this->order  = $order;
 		$this->klarna = $klarna;
+		if ( ! empty( $this->log ) ) {
+			$this->log = new WC_Logger();
+		}
+
+		// Borrow debug setting from Klarna Checkout
+		$klarna_settings = get_option( 'woocommerce_klarna_checkout_settings' );
+		$this->debug = isset( $klarna_settings['debug'] ) ? $klarna_settings['debug'] : '';
 
 		// Cancel order
 		add_action( 'woocommerce_order_status_cancelled', array( $this, 'cancel_klarna_order' ) );
@@ -376,6 +384,10 @@ class WC_Gateway_Klarna_Order {
 					return true;
 				}
 			} catch ( Exception $e ) {
+				if ( $this->debug == 'yes' ) {
+					$this->log->add( 'klarna', 'Klarna API error: ' . var_export( $e, true ) );
+				}
+
 				$order->add_order_note( sprintf( __( 'Klarna order refund failed. Error code %s. Error message %s', 'woocommerce-gateway-klarna' ), $e->getCode(), utf8_encode( $e->getMessage() ) ) );
 
 				return false;
@@ -408,6 +420,10 @@ class WC_Gateway_Klarna_Order {
 						return true;
 					}
 				} catch ( Exception $e ) {
+					if ( $this->debug == 'yes' ) {
+						$this->log->add( 'klarna', 'Klarna API error: ' . var_export( $e, true ) );
+					}
+
 					$order->add_order_note( sprintf( __( 'Klarna order refund failed. Error code %s. Error message %s', 'woocommerce-gateway-klarna' ), $e->getCode(), utf8_encode( $e->getMessage() ) ) );
 
 					return false;
@@ -445,6 +461,10 @@ class WC_Gateway_Klarna_Order {
 
 			return true;
 		} catch ( Exception $e ) {
+			if ( $this->debug == 'yes' ) {
+				$this->log->add( 'klarna', 'Klarna API error: ' . var_export( $e, true ) );
+			}
+
 			$order->add_order_note( sprintf( __( 'Klarna order refund failed. Error code %s. Error message %s', 'woocommerce-gateway-klarna' ), $e->getCode(), utf8_encode( $e->getMessage() ) ) );
 
 			return false;
@@ -638,6 +658,10 @@ class WC_Gateway_Klarna_Order {
 				update_post_meta( $orderid, '_klarna_invoice_number', $invNo );
 				update_post_meta( $orderid, '_transaction_id', $invNo );
 			} catch ( Exception $e ) {
+				if ( $this->debug == 'yes' ) {
+					$this->log->add( 'klarna', 'Klarna API error: ' . var_export( $e, true ) );
+				}
+
 				$order->add_order_note( sprintf( __( 'Klarna order activation failed. Error code %s. Error message %s', 'woocommerce-gateway-klarna' ), $e->getCode(), utf8_encode( $e->getMessage() ) ) );
 			}
 		}
@@ -699,6 +723,10 @@ class WC_Gateway_Klarna_Order {
 			update_post_meta( $orderid, '_klarna_invoice_number', $k_order['captures'][0]['capture_id'] );
 			update_post_meta( $orderid, '_transaction_id', $k_order['captures'][0]['capture_id'] );
 		} catch ( Exception $e ) {
+			if ( $this->debug == 'yes' ) {
+				$this->log->add( 'klarna', 'Klarna API error: ' . var_export( $e, true ) );
+			}
+
 			$order->add_order_note( sprintf( __( 'Klarna order activation failed. Error code %s. Error message %s', 'woocommerce-gateway-klarna' ), $e->getCode(), utf8_encode( $e->getMessage() ) ) );
 		}
 	}
@@ -759,6 +787,10 @@ class WC_Gateway_Klarna_Order {
 				$order->add_order_note( __( 'Klarna order cancellation completed.', 'woocommerce-gateway-klarna' ) );
 				add_post_meta( $orderid, '_klarna_order_cancelled', time() );
 			} catch ( Exception $e ) {
+				if ( $this->debug == 'yes' ) {
+					$this->log->add( 'klarna', 'Klarna API error: ' . var_export( $e, true ) );
+				}
+
 				$order->add_order_note( sprintf( __( 'Klarna order cancellation failed. Error code %s. Error message %s', 'woocommerce-gateway-klarna' ), $e->getCode(), utf8_encode( $e->getMessage() ) ) );
 			}
 		}
@@ -806,6 +838,10 @@ class WC_Gateway_Klarna_Order {
 			$order->add_order_note( __( 'Klarna order cancelled.', 'woocommerce-gateway-klarna' ) );
 			add_post_meta( $orderid, '_klarna_order_cancelled', time() );
 		} catch ( Exception $e ) {
+			if ( $this->debug == 'yes' ) {
+				$this->log->add( 'klarna', 'Klarna API error: ' . var_export( $e, true ) );
+			}
+
 			$order->add_order_note( sprintf( __( 'Klarna order cancelation failed. Error code %s. Error message %s', 'woocommerce-gateway-klarna' ), $e->getCode(), utf8_encode( $e->getMessage() ) ) );
 		}
 
@@ -945,6 +981,10 @@ class WC_Gateway_Klarna_Order {
 				$order->add_order_note( sprintf( __( 'Klarna order updated.', 'woocommerce-gateway-klarna' ) ) );
 			}
 		} catch ( Exception $e ) {
+			if ( $this->debug == 'yes' ) {
+				$this->log->add( 'klarna', 'Klarna API error: ' . var_export( $e, true ) );
+			}
+
 			$order->add_order_note( sprintf( __( 'Klarna order update failed. Error code %s. Error message %s', 'woocommerce-gateway-klarna' ), $e->getCode(), utf8_encode( $e->getMessage() ) ) );
 		}
 	}
@@ -1184,6 +1224,10 @@ class WC_Gateway_Klarna_Order {
 			) );
 			$order->add_order_note( sprintf( __( 'Klarna order updated.', 'woocommerce-gateway-klarna' ) ) );
 		} catch ( Exception $e ) {
+			if ( $this->debug == 'yes' ) {
+				$this->log->add( 'klarna', 'Klarna API error: ' . var_export( $e, true ) );
+			}
+
 			$order->add_order_note( sprintf( __( 'Klarna order update failed. Error code %s. Error message %s', 'woocommerce-gateway-klarna' ), $e->getCode(), utf8_encode( $e->getMessage() ) ) );
 		}
 	}

@@ -644,6 +644,10 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 
 			return true;
 		} catch ( Klarna_Checkout_ApiErrorException $e ) {
+			if ( $this->debug == 'yes' ) {
+				$this->log->add( 'klarna', 'Klarna API error: ' . var_export( $e, true ) );
+			}
+
 			$order->add_order_note( sprintf( __( 'Klarna subscription payment failed. Error code %s. Error message %s', 'woocommerce-gateway-klarna' ), $e->getCode(), utf8_encode( $e->getMessage() ) ) );
 
 			return false;
@@ -1227,8 +1231,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 				$klarna_order->update( apply_filters( 'kco_update_order', $update ) );
 			} catch ( Exception $e ) {
 				if ( $this->debug == 'yes' ) {
-					$this->log->add( 'klarna', 'KCO ERROR: ' . var_export( $e, true ) );
-					error_log( 'ERROR: ' . var_export( $e, true ) );
+					$this->log->add( 'klarna', 'Klarna API error: ' . var_export( $e, true ) );
 				}
 			}
 		}

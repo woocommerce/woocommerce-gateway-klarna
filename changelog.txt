@@ -6,6 +6,9 @@
 * Tweak     - Lets KCO widget retain hidden columns on refresh.
 * Fix       - Adds html_entity_decode to secret_uk and secret_us.
 * Tweak     - Adds filter to edit german locale - 'klarna_german_locale' - default is 'de_DE'.
+* Tweak     - Adds support for 'de_DE_formal' locale.
+* Tweak     - Improves status page check for valid checkout and thank you URLs.
+* Tweak     - Adds check for terms page to status page.
 
 2016.06.30  - version 2.1.8
 * Fix       - Improved validation callback handling.

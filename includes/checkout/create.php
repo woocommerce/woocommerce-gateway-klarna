@@ -291,6 +291,10 @@ try {
 	$klarna_order->create( apply_filters( 'kco_create_order', $create ) );
 	$klarna_order->fetch();
 } catch ( Exception $e ) {
+	if ( $this->debug == 'yes' ) {
+		$this->log->add( 'klarna', 'Klarna API error: ' . var_export( $e, true ) );
+	}
+
 	if ( is_user_logged_in() && $this->debug ) {
 		// The purchase was denied or something went wrong, print the message:
 		echo '<div class="woocommerce-error">';
