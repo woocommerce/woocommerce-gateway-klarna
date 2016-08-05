@@ -9,6 +9,7 @@
 * Tweak     - Adds support for 'de_DE_formal' locale.
 * Tweak     - Improves status page check for valid checkout and thank you URLs.
 * Tweak     - Adds check for terms page to status page.
+* Tweak     - Improves API error logging.
 
 2016.06.30  - version 2.1.8
 * Fix       - Improved validation callback handling.

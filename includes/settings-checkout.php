@@ -83,14 +83,14 @@ return apply_filters( 'klarna_checkout_form_fields', array(
 		'type'        => 'text',
 		'description' => __( 'Please enter the URL to the page that acts as Checkout Page for Klarna Checkout Sweden. This page must contain the shortcode [woocommerce_klarna_checkout].', 'woocommerce-gateway-klarna' ),
 		'default'     => '',
-		'desc_tip'    => true
+		'desc_tip'    => false
 	),
 	'klarna_checkout_thanks_url_se' => array(
 		'title'       => __( 'Custom Thanks Page - Sweden', 'woocommerce-gateway-klarna' ),
 		'type'        => 'text',
 		'description' => __( 'Enter the URL to the page that acts as Thanks Page for Klarna Checkout Sweden. This page must contain the shortcode [woocommerce_klarna_checkout]. Leave blank to use the Custom Checkout Page as Thanks Page.', 'woocommerce-gateway-klarna' ),
 		'default'     => '',
-		'desc_tip'    => true
+		'desc_tip'    => false
 	),
 
 	'norway_settings_title'         => array(
@@ -116,14 +116,14 @@ return apply_filters( 'klarna_checkout_form_fields', array(
 		'type'        => 'text',
 		'description' => __( 'Please enter the URL to the page that acts as Checkout Page for Klarna Checkout Norway. This page must contain the shortcode [woocommerce_klarna_checkout].', 'woocommerce-gateway-klarna' ),
 		'default'     => '',
-		'desc_tip'    => true
+		'desc_tip'    => false
 	),
 	'klarna_checkout_thanks_url_no' => array(
 		'title'       => __( 'Custom Thanks Page - Norway', 'woocommerce-gateway-klarna' ),
 		'type'        => 'text',
 		'description' => __( 'Enter the URL to the page that acts as Thanks Page for Klarna Checkout Norway. This page must contain the shortcode [woocommerce_klarna_checkout]. Leave blank to use the Custom Checkout Page as Thanks Page.', 'woocommerce-gateway-klarna' ),
 		'default'     => '',
-		'desc_tip'    => true
+		'desc_tip'    => false
 	),
 
 	'finland_settings_title'        => array(
@@ -149,14 +149,14 @@ return apply_filters( 'klarna_checkout_form_fields', array(
 		'type'        => 'text',
 		'description' => __( 'Please enter the URL to the page that acts as Checkout Page for Klarna Checkout Finland. This page must contain the shortcode [woocommerce_klarna_checkout].', 'woocommerce-gateway-klarna' ),
 		'default'     => '',
-		'desc_tip'    => true
+		'desc_tip'    => false
 	),
 	'klarna_checkout_thanks_url_fi' => array(
 		'title'       => __( 'Custom Thanks Page - Finland', 'woocommerce-gateway-klarna' ),
 		'type'        => 'text',
 		'description' => __( 'Enter the URL to the page that acts as Thanks Page for Klarna Checkout Finland. This page must contain the shortcode [woocommerce_klarna_checkout]. Leave blank to use the Custom Checkout Page as Thanks Page.', 'woocommerce-gateway-klarna' ),
 		'default'     => '',
-		'desc_tip'    => true
+		'desc_tip'    => false
 	),
 
 	'germany_settings_title'        => array(
@@ -182,14 +182,14 @@ return apply_filters( 'klarna_checkout_form_fields', array(
 		'type'        => 'text',
 		'description' => __( 'Please enter the URL to the page that acts as Checkout Page for Klarna Checkout Germany. This page must contain the shortcode [woocommerce_klarna_checkout].', 'woocommerce-gateway-klarna' ),
 		'default'     => '',
-		'desc_tip'    => true
+		'desc_tip'    => false
 	),
 	'klarna_checkout_thanks_url_de' => array(
 		'title'       => __( 'Custom Thanks Page - Germany', 'woocommerce-gateway-klarna' ),
 		'type'        => 'text',
 		'description' => __( 'Enter the URL to the page that acts as Thanks Page for Klarna Checkout Germany. This page must contain the shortcode [woocommerce_klarna_checkout]. Leave blank to use the Custom Checkout Page as Thanks Page.', 'woocommerce-gateway-klarna' ),
 		'default'     => '',
-		'desc_tip'    => true
+		'desc_tip'    => false
 	),
 	'phone_mandatory_de'            => array(
 		'title'    => __( 'Phone Number Mandatory - Germany', 'woocommerce-gateway-klarna' ),
@@ -229,14 +229,14 @@ return apply_filters( 'klarna_checkout_form_fields', array(
 		'type'        => 'text',
 		'description' => __( 'Please enter the URL to the page that acts as Checkout Page for Klarna Checkout Austria. This page must contain the shortcode [woocommerce_klarna_checkout].', 'woocommerce-gateway-klarna' ),
 		'default'     => '',
-		'desc_tip'    => true
+		'desc_tip'    => false
 	),
 	'klarna_checkout_thanks_url_at' => array(
 		'title'       => __( 'Custom Thanks Page - Austria', 'woocommerce-gateway-klarna' ),
 		'type'        => 'text',
 		'description' => __( 'Enter the URL to the page that acts as Thanks Page for Klarna Checkout Austria. This page must contain the shortcode [woocommerce_klarna_checkout]. Leave blank to use the Custom Checkout Page as Thanks Page.', 'woocommerce-gateway-klarna' ),
 		'default'     => '',
-		'desc_tip'    => true
+		'desc_tip'    => false
 	),
 	'phone_mandatory_at'            => array(
 		'title'    => __( 'Phone Number Mandatory - Austria', 'woocommerce-gateway-klarna' ),
@@ -269,14 +269,14 @@ return apply_filters( 'klarna_checkout_form_fields', array(
 		'type'        => 'text',
 		'description' => __( 'Please enter the URL to the page that acts as Checkout Page for Klarna Checkout UK. This page must contain the shortcode [woocommerce_klarna_checkout].', 'woocommerce-gateway-klarna' ),
 		'default'     => '',
-		'desc_tip'    => true
+		'desc_tip'    => false
 	),
 	'klarna_checkout_thanks_url_uk' => array(
 		'title'       => __( 'Custom Thanks Page - UK', 'woocommerce-gateway-klarna' ),
 		'type'        => 'text',
 		'description' => __( 'Enter the URL to the page that acts as Thanks Page for Klarna Checkout UK. This page must contain the shortcode [woocommerce_klarna_checkout]. Leave blank to use the Custom Checkout Page as Thanks Page.', 'woocommerce-gateway-klarna' ),
 		'default'     => '',
-		'desc_tip'    => true
+		'desc_tip'    => false
 	),
 	'uk_ship_only_to_base'          => array(
 		'title'   => __( 'Only ship to UK', 'woocommerce-gateway-klarna' ),
@@ -308,14 +308,14 @@ return apply_filters( 'klarna_checkout_form_fields', array(
 		'type'        => 'text',
 		'description' => __( 'Please enter the URL to the page that acts as Checkout Page for Klarna Checkout USA. This page must contain the shortcode [woocommerce_klarna_checkout].', 'woocommerce-gateway-klarna' ),
 		'default'     => '',
-		'desc_tip'    => true
+		'desc_tip'    => false
 	),
 	'klarna_checkout_thanks_url_us' => array(
 		'title'       => __( 'Custom Thanks Page - USA', 'woocommerce-gateway-klarna' ),
 		'type'        => 'text',
 		'description' => __( 'Enter the URL to the page that acts as Thanks Page for Klarna Checkout USA. This page must contain the shortcode [woocommerce_klarna_checkout]. Leave blank to use the Custom Checkout Page as Thanks Page.', 'woocommerce-gateway-klarna' ),
 		'default'     => '',
-		'desc_tip'    => true
+		'desc_tip'    => false
 	),
 
 	'checkout_settings_title'      => array(
