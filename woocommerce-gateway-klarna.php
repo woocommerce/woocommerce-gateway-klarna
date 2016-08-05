@@ -307,27 +307,37 @@ function is_klarna_checkout() {
  */
 function klarna_checkout_admin_error_notices() {
 	// Only show it on Klarna settings pages
-	if ( isset( $_GET['section'] ) && 'wc_gateway_klarna_' === substr( $_GET['section'], 0, 18 ) ) {
+	if ( isset( $_GET['section'] ) && 'klarna_checkout' === $_GET['section'] ) {
 		// Get arrays of checkout and thank you pages for all countries
-		$error_message = '';
 		$checkout_settings = get_option( 'woocommerce_klarna_checkout_settings' );
+
 		if ( is_array( $checkout_settings ) ) {
 			foreach ( $checkout_settings as $cs_key => $cs_value ) {
 				if ( strpos( $cs_key, 'klarna_checkout_url_' ) !== false || strpos( $cs_key, 'klarna_checkout_thanks_url_' ) !== false ) {
-					if ( '' != $cs_value && esc_url( $cs_value ) != $cs_value ) {
-						$error_message .= '<p>' . sprintf( __( '%s is not a valid URL.', 'woocommerce-gateway-klarna' ),
-						$cs_key ) . '</p>';
+					$page = url_to_postid( $checkout_settings[ $cs_key ] );
+
+					// Check if URL is valid
+					if ( '' != $checkout_settings[ $cs_key ] ) {
+						if ( 0 == $page || get_permalink( $page ) != $checkout_settings[ $cs_key ] ) {
+							WC_Admin_Settings::add_error( sprintf( __( '%s is not a valid WordPress page URL.', 'woocommerce-gateway-klarna' ), $checkout_settings[ $cs_key ] ) );
+						}
+						// If it's a Checkout page, check if it contains shortcode
+						if ( 0 != $page ) {
+							if ( strpos( $cs_key, 'klarna_checkout_url_' ) !== false ) {
+								$kco_page = get_post( $page );
+								if ( ! has_shortcode( $kco_page->post_content, 'woocommerce_klarna_checkout' ) ) {
+									WC_Admin_Settings::add_error( sprintf( __( '%s Klarna Checkout page doesn\'t contain [woocommerce_klarna_checkout] shortcode.', 'woocommerce-gateway-klarna' ), $checkout_settings[ $cs_key ] ) );
+								}
+							}
+						}
 					}
 				}
 			}
 		}
-
-		// Display error message, if there is one
-		if ( '' != $error_message ) {
-			echo '<div class="notice notice-error">';
-			echo $error_message;
-			echo '</div>';
-		}
 	}
 }
-// add_filter( 'admin_notices', 'klarna_checkout_admin_error_notices' );
+if ( ! empty( $_POST ) ) {
+	add_action( 'woocommerce_settings_saved', 'klarna_checkout_admin_error_notices' );
+} else {
+	add_action( 'admin_init', 'klarna_checkout_admin_error_notices' );
+}
