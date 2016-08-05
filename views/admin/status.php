@@ -57,10 +57,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 			$errors[] = 'Secret key not set ';
 		}
 		if ( '' != $checkout_settings[ 'klarna_checkout_url_' . $kco_country_key ] ) {
-			$page = url_to_postid( $checkout_settings[ 'klarna_checkout_url_' . $kco_country_key ] );
+			$settings_page_url = $checkout_settings[ 'klarna_checkout_url_' . $kco_country_key ];
+			$page              = url_to_postid( $checkout_settings[ 'klarna_checkout_url_' . $kco_country_key ] );
 
-			if ( 0 == $page ) {
-				$errors[] = 'Klarna Checkout page points to an invalid URL ';
+			// Check if this page exists and make sure the URL is entered correctly
+			// No relative URLs.
+			if ( 0 == $page || get_permalink( $page ) != $settings_page_url ) {
+				$errors[] = 'Klarna Checkout page points to an invalid URL. Make sure you are using a valid, absolute URL. Relative URLs are not allowed.';
 			} else {
 				$kco_page = get_post( $page );
 				if ( ! has_shortcode( $kco_page->post_content, 'woocommerce_klarna_checkout' ) ) {
