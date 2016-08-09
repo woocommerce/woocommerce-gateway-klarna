@@ -341,7 +341,6 @@ jQuery(document).ready(function ($) {
 										api.suspend();
 									});
 
-									// console.log('V2');
 
 									// Check if email is not defined (AT and DE only) and set it to this value
 									// For AT and DE, email field is not captured inside data object
@@ -361,6 +360,7 @@ jQuery(document).ready(function ($) {
 													action: 'kco_iframe_change_cb',
 													email: data.email,
 													postal_code: data.postal_code,
+													country: data.country,
 													nonce: kcoAjax.klarna_checkout_nonce
 												},
 												success: function (response) {
@@ -372,22 +372,23 @@ jQuery(document).ready(function ($) {
 													}
 
 													$(kco_widget).html(response.data.widget_html);
+
+													window._klarnaCheckout(function (api) {
+														api.resume();
+													});
 												},
 												error: function (response) {
 													console.log('change AJAX error');
 													console.log(response);
+
+													window._klarnaCheckout(function (api) {
+														api.resume();
+													});
 												}
 											}
 										);
-
 									}
-
-									window._klarnaCheckout(function (api) {
-										api.resume();
-									});
-
 								}
-
 							}
 						}
 					}
@@ -419,6 +420,7 @@ jQuery(document).ready(function ($) {
 											action: 'kco_iframe_shipping_address_change_cb',
 											region: data.region,
 											postal_code: data.postal_code,
+											country: data.country,
 											nonce: kcoAjax.klarna_checkout_nonce
 										},
 										success: function (response) {

@@ -1088,8 +1088,13 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		}
 
 		if ( isset( $_REQUEST['country'] ) && is_string( $_REQUEST['country'] ) ) {
-			$woocommerce->customer->set_country( 'US' );
-			$woocommerce->customer->set_shipping_country( 'US' );
+			if ( 'gbr' == $_REQUEST['country'] ) {
+				$woocommerce->customer->set_country( 'GB' );
+				$woocommerce->customer->set_shipping_country( 'GB' );
+			} elseif ( 'usa' == $_REQUEST['country'] ) {
+				$woocommerce->customer->set_country( 'US' );
+				$woocommerce->customer->set_shipping_country( 'US' );
+			}
 		}
 
 		if ( ! defined( 'WOOCOMMERCE_CART' ) ) {
