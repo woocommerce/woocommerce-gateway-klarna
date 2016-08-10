@@ -230,7 +230,7 @@ class WC_Klarna_PMS {
 				$klarna_pms_locale = 'fi_FI';
 				break;
 			case 'DE' :
-				$klarna_pms_locale = 'de_DE';
+				$klarna_pms_locale = apply_filters( 'klarna_german_locale', 'de_DE' );
 				break;
 			case 'NL' :
 				$klarna_pms_locale = 'nl_NL';

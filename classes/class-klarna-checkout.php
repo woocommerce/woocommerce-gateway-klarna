@@ -644,6 +644,10 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 
 			return true;
 		} catch ( Klarna_Checkout_ApiErrorException $e ) {
+			if ( $this->debug == 'yes' ) {
+				$this->log->add( 'klarna', 'Klarna API error: ' . var_export( $e, true ) );
+			}
+
 			$order->add_order_note( sprintf( __( 'Klarna subscription payment failed. Error code %s. Error message %s', 'woocommerce-gateway-klarna' ), $e->getCode(), utf8_encode( $e->getMessage() ) ) );
 
 			return false;
@@ -807,7 +811,6 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			if ( ! defined( 'WOOCOMMERCE_CART' ) ) {
 				define( 'WOOCOMMERCE_CART', true );
 			}
-
 
 			if ( WC()->session->get( 'klarna_checkout' ) ) {
 				$this->ajax_update_klarna_order();
@@ -1085,8 +1088,13 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		}
 
 		if ( isset( $_REQUEST['country'] ) && is_string( $_REQUEST['country'] ) ) {
-			$woocommerce->customer->set_country( 'US' );
-			$woocommerce->customer->set_shipping_country( 'US' );
+			if ( 'gbr' == $_REQUEST['country'] ) {
+				$woocommerce->customer->set_country( 'GB' );
+				$woocommerce->customer->set_shipping_country( 'GB' );
+			} elseif ( 'usa' == $_REQUEST['country'] ) {
+				$woocommerce->customer->set_country( 'US' );
+				$woocommerce->customer->set_shipping_country( 'US' );
+			}
 		}
 
 		if ( ! defined( 'WOOCOMMERCE_CART' ) ) {
@@ -1228,8 +1236,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 				$klarna_order->update( apply_filters( 'kco_update_order', $update ) );
 			} catch ( Exception $e ) {
 				if ( $this->debug == 'yes' ) {
-					$this->log->add( 'klarna', 'KCO ERROR: ' . var_export( $e, true ) );
-					error_log( 'ERROR: ' . var_export( $e, true ) );
+					$this->log->add( 'klarna', 'Klarna API error: ' . var_export( $e, true ) );
 				}
 			}
 		}
@@ -1325,7 +1332,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 *
 	 * @since  2.0
 	 **/
-	function klarna_checkout_get_cart_contents_html( $atts ) {
+	function klarna_checkout_get_cart_contents_html() {
 		global $woocommerce;
 
 		ob_start();
@@ -1336,13 +1343,14 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		$woocommerce->cart->calculate_fees();
 		$woocommerce->cart->calculate_totals();
 
-
+		// Need to recover hidden columns, set first time shortcode was loaded
 		$hide_columns = array();
-		if ( '' != $atts['hide_columns'] ) {
-			$hide_columns = explode( ',', $atts['hide_columns'] );
+		if ( WC()->session->get( 'kco_widget_hide_columns' ) ) {
+			$hide_columns = WC()->session->get( 'kco_widget_hide_columns' );
 		}
 		?>
 		<div>
+			<div id="klarna_checkout_coupon_result"></div>
 			<table id="klarna-checkout-cart">
 				<tbody>
 				<tr>
@@ -1774,7 +1782,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		// If the WooCommerce terms page isn't set, do nothing.
 		$klarna_terms_page = get_option( 'woocommerce_terms_page_id' );
 		if ( empty( $klarna_terms_page ) && empty( $this->terms_url ) ) {
-			echo '<strong>' . __( 'You need to specify a Terms Page in the WooCommerce settings or in the Klarna Checkout settings in order to enable the Klarna Checkout payment method.', 'woocommerce-gateway-klarna' ) . '</strong>';
+			echo '<div class="error"><p>' . __( 'You need to specify a Terms Page in the WooCommerce settings or in the Klarna Checkout settings in order to enable the Klarna Checkout payment method.', 'woocommerce-gateway-klarna' ) . '</p></div>';
 		}
 		?>
 
@@ -2637,7 +2645,9 @@ class WC_Gateway_Klarna_Checkout_Extra {
 		wp_localize_script( 'klarna_checkout', 'kcoAjax', array(
 			'ajaxurl'               => admin_url( 'admin-ajax.php' ),
 			'klarna_checkout_nonce' => wp_create_nonce( 'klarna_checkout_nonce' ),
-			'version'               => $version
+			'version'               => $version,
+			'coupon_success'        => __( 'Coupon added.', 'woocommerce-gateway-klarna' ),
+			'coupon_fail'           => __( 'Coupon could not be added.', 'woocommerce-gateway-klarna' )
 		) );
 
 		wp_register_style( 'klarna_checkout', KLARNA_URL . 'assets/css/klarna-checkout.css' );

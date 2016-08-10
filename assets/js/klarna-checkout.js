@@ -205,9 +205,11 @@ jQuery(document).ready(function ($) {
 	});
 
 	// Add coupon (v2)
+	$('#klarna-checkout-widget .checkout_coupon').off(); // Remove WC built-in event handler
 	$(document).on('submit', '#klarna-checkout-widget .checkout_coupon', function (event) {
-	// $('#klarna-checkout-widget .checkout_coupon').on('submit', function (event) {
 		event.preventDefault();
+
+		$('#klarna_checkout_coupon_result').html('');
 
 		if (typeof window._klarnaCheckout == 'function') {
 			window._klarnaCheckout(function (api) {
@@ -231,7 +233,8 @@ jQuery(document).ready(function ($) {
 				},
 				success: function (response) {
 					if (response.data.coupon_success) {
-						$('#klarna_checkout_coupon_result').html('<p>Coupon added.</p>');
+						console.log('e');
+						$('#klarna_checkout_coupon_result').html('<p>' + kcoAjax.coupon_success + '</p>');
 
 						html_string = '<tr class="kco-applied-coupon"><td class="kco-rightalign">Coupon: ' + response.data.coupon + ' <a class="kco-remove-coupon" data-coupon="' + response.data.coupon + '" href="#">(remove)</a></td><td class="kco-rightalign">-' + response.data.amount + '</td></tr>';
 
@@ -244,11 +247,11 @@ jQuery(document).ready(function ($) {
 						}
 					}
 					else {
-						$('#klarna_checkout_coupon_result').html('<p>Coupon could not be added.</p>');
+						$('#klarna_checkout_coupon_result').html('<div class="woocommerce-error">' + kcoAjax.coupon_fail + '</div>');
 					}
 				},
 				error: function (response) {
-					$('#klarna_checkout_coupon_result').html('<p>Coupon could not be added.</p>');
+					$('#klarna_checkout_coupon_result').html('<div class="woocommerce-error">' + kcoAjax.coupon_fail + '</div>');
 					console.log('add coupon AJAX error');
 					console.log(response);
 				},
@@ -338,7 +341,6 @@ jQuery(document).ready(function ($) {
 										api.suspend();
 									});
 
-									// console.log('V2');
 
 									// Check if email is not defined (AT and DE only) and set it to this value
 									// For AT and DE, email field is not captured inside data object
@@ -358,6 +360,7 @@ jQuery(document).ready(function ($) {
 													action: 'kco_iframe_change_cb',
 													email: data.email,
 													postal_code: data.postal_code,
+													country: data.country,
 													nonce: kcoAjax.klarna_checkout_nonce
 												},
 												success: function (response) {
@@ -369,22 +372,23 @@ jQuery(document).ready(function ($) {
 													}
 
 													$(kco_widget).html(response.data.widget_html);
+
+													window._klarnaCheckout(function (api) {
+														api.resume();
+													});
 												},
 												error: function (response) {
 													console.log('change AJAX error');
 													console.log(response);
+
+													window._klarnaCheckout(function (api) {
+														api.resume();
+													});
 												}
 											}
 										);
-
 									}
-
-									window._klarnaCheckout(function (api) {
-										api.resume();
-									});
-
 								}
-
 							}
 						}
 					}
@@ -416,6 +420,7 @@ jQuery(document).ready(function ($) {
 											action: 'kco_iframe_shipping_address_change_cb',
 											region: data.region,
 											postal_code: data.postal_code,
+											country: data.country,
 											nonce: kcoAjax.klarna_checkout_nonce
 										},
 										success: function (response) {

@@ -354,9 +354,11 @@ class WC_Gateway_Klarna_Shortcodes {
 		$hide_columns = array();
 		if ( '' != $atts['hide_columns'] ) {
 			$hide_columns = explode( ',', $atts['hide_columns'] );
+			WC()->session->set( 'kco_widget_hide_columns', $hide_columns );
 		}
 		?>
 		<div>
+			<div id="klarna_checkout_coupon_result"></div>
 			<table id="klarna-checkout-cart">
 				<tbody>
 				<tr>

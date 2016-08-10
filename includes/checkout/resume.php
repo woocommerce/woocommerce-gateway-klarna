@@ -249,6 +249,10 @@ try {
 
 	} // End if country change
 } catch ( Exception $e ) {
+	if ( $this->debug == 'yes' ) {
+		$this->log->add( 'klarna', 'Klarna API error: ' . var_export( $e, true ) );
+	}
+
 	if ( is_user_logged_in() && $this->debug ) {
 		// Something went wrong, print the message:
 		echo '<div class="woocommerce-error">';

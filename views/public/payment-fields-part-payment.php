@@ -87,7 +87,7 @@ if ( 'NO' == $this->klarna_helper->get_klarna_country() ) { ?>
 			} else if (klarna_part_payment_selected_country == 'FI') {
 				var klarna_part_payment_current_locale = 'fi_FI';
 			} else if (klarna_part_payment_selected_country == 'DE') {
-				var klarna_part_payment_current_locale = 'de_DE';
+				var klarna_part_payment_current_locale = apply_filters( 'klarna_german_locale', 'de_DE' ;
 			} else if (klarna_part_payment_selected_country == 'NL') {
 				var klarna_part_payment_current_locale = 'nl_NL';
 			} else if (klarna_part_payment_selected_country == 'AT') {

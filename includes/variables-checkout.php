@@ -73,14 +73,25 @@ $this->account_login_text  = ( isset( $this->settings['account_login_text'] ) ) 
 
 $this->validate_stock = $this->get_option( 'validate_stock' );
 
+// Helper function to make sure colors start with '#' character
+if ( ! function_exists( 'wc_klarna_add_hash_to_color' ) ) {
+	function wc_klarna_add_hash_to_color( $hex ) {
+		if ( '' != $hex ) {
+			$hex = str_replace( '#', '', $hex );
+			$hex = '#' . $hex;
+		}
+
+		return $hex;
+	}
+}
 
 // Color options
-$this->color_button             = ( isset( $this->settings['color_button'] ) ) ? $this->settings['color_button'] : '';
-$this->color_button_text        = ( isset( $this->settings['color_button_text'] ) ) ? $this->settings['color_button_text'] : '';
-$this->color_checkbox           = ( isset( $this->settings['color_checkbox'] ) ) ? $this->settings['color_checkbox'] : '';
-$this->color_checkbox_checkmark = ( isset( $this->settings['color_checkbox_checkmark'] ) ) ? $this->settings['color_checkbox_checkmark'] : '';
-$this->color_header             = ( isset( $this->settings['color_header'] ) ) ? $this->settings['color_header'] : '';
-$this->color_link               = ( isset( $this->settings['color_link'] ) ) ? $this->settings['color_link'] : '';
+$this->color_button             = ( isset( $this->settings['color_button'] ) ) ? wc_klarna_add_hash_to_color( $this->settings['color_button'] ) : '';
+$this->color_button_text        = ( isset( $this->settings['color_button_text'] ) ) ? wc_klarna_add_hash_to_color( $this->settings['color_button_text'] ) : '';
+$this->color_checkbox           = ( isset( $this->settings['color_checkbox'] ) ) ? wc_klarna_add_hash_to_color( $this->settings['color_checkbox'] ) : '';
+$this->color_checkbox_checkmark = ( isset( $this->settings['color_checkbox_checkmark'] ) ) ? wc_klarna_add_hash_to_color( $this->settings['color_checkbox_checkmark'] ) : '';
+$this->color_header             = ( isset( $this->settings['color_header'] ) ) ? wc_klarna_add_hash_to_color( $this->settings['color_header'] ) : '';
+$this->color_link               = ( isset( $this->settings['color_link'] ) ) ? wc_klarna_add_hash_to_color( $this->settings['color_link'] ) : '';
 
 $this->activate_recurring = ( isset( $this->settings['activate_recurring'] ) ) ? $this->settings['activate_recurring'] : '';
 
@@ -105,7 +116,7 @@ switch ( get_woocommerce_currency() ) {
 		if ( null !== WC()->session && ! is_admin() && WC()->session->get( 'klarna_euro_country' ) ) {
 			$klarna_country = WC()->session->get( 'klarna_euro_country' );
 		} else {
-			if ( get_locale() == 'de_DE' && '' != $this->eid_de && '' != $this->secret_de ) {
+			if ( ( get_locale() == 'de_DE' || get_locale() == 'de_DE_formal' ) && '' != $this->eid_de && '' != $this->secret_de ) {
 				$klarna_country = 'DE';
 			} elseif ( get_locale() == 'fi' && '' != $this->eid_fi && '' != $this->secret_fi ) {
 				$klarna_country = 'FI';

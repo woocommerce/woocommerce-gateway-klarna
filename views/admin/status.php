@@ -57,10 +57,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 			$errors[] = 'Secret key not set ';
 		}
 		if ( '' != $checkout_settings[ 'klarna_checkout_url_' . $kco_country_key ] ) {
-			$page = url_to_postid( $checkout_settings[ 'klarna_checkout_url_' . $kco_country_key ] );
+			$settings_page_url = $checkout_settings[ 'klarna_checkout_url_' . $kco_country_key ];
+			$page              = url_to_postid( $checkout_settings[ 'klarna_checkout_url_' . $kco_country_key ] );
 
-			if ( 0 == $page ) {
-				$errors[] = 'Klarna Checkout page points to an invalid URL ';
+			// Check if this page exists and make sure the URL is entered correctly
+			// No relative URLs.
+			if ( 0 == $page || get_permalink( $page ) != $settings_page_url ) {
+				$errors[] = 'Klarna Checkout page points to an invalid URL. Make sure you are using a valid, absolute URL. Relative URLs are not allowed.';
 			} else {
 				$kco_page = get_post( $page );
 				if ( ! has_shortcode( $kco_page->post_content, 'woocommerce_klarna_checkout' ) ) {
@@ -82,5 +85,20 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</td>
 	</tr>
 	<?php } ?>
+	<tr>
+		<td data-export-label="<?php _e( 'Terms Page', 'woocommerce-gateway-klarna' ); ?>"><?php _e( 'Terms Page', 'woocommerce-gateway-klarna' ); ?>:</td>
+		<td class="help">&nbsp;</td>
+		<td>
+			<?php
+			// If the WooCommerce terms page isn't set, do nothing.
+			$klarna_terms_page = get_option( 'woocommerce_terms_page_id' );
+			if ( empty( $klarna_terms_page ) && empty( $this->terms_url ) ) {
+			_e( 'You need to specify a Terms Page in the WooCommerce settings or in the Klarna Checkout settings in order to enable the Klarna Checkout payment method.', 'woocommerce-gateway-klarna' );
+			} else {
+				echo '<mark class="yes"><span class="dashicons dashicons-yes"></span></mark>';
+			}
+			?>
+		</td>
+	</tr>
 	</tbody>
 </table>
