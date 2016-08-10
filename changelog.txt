@@ -1,6 +1,6 @@
 *** WooCommerce Gateway Klarna Changelog ***
 
-2016.08.08  - version 2.1.9
+2016.08.10  - version 2.1.9
 * Fix       - Fixes order lines formatting when V3 (US and UK) KCO order is edited.
 * Fix       - Adds check to make sure color codes sent to KCO iframe start with #.
 * Tweak     - Lets KCO widget retain hidden columns on refresh.
@@ -10,6 +10,8 @@
 * Tweak     - Improves status page check for valid checkout and thank you URLs.
 * Tweak     - Adds check for terms page to status page.
 * Tweak     - Improves API error logging.
+* Fix       - Fixes syncing between WooCommerce and Klarna Checkout orders on KCO iframe update.
+* Tweak     - Adds second argument ($klarna_order) to 'klarna_after_kco_push_notification' action hook.
 
 2016.06.30  - version 2.1.8
 * Fix       - Improved validation callback handling.

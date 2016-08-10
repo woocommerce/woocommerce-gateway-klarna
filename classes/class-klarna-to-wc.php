@@ -342,12 +342,8 @@ class WC_Gateway_Klarna_K2WC {
 
 			}
 
-
-
-
-
 			// Other plugins and themes can hook into here
-			do_action( 'klarna_after_kco_push_notification', $order->id );
+			do_action( 'klarna_after_kco_push_notification', $order->id, $klarna_order );
 		}
 	}
 
