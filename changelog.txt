@@ -1,5 +1,8 @@
 *** WooCommerce Gateway Klarna Changelog ***
 
+2016.08.xx  - version 2.2.0
+* Fix       - Fixes logging in WC_Gateway_Klarna_Order class.
+
 2016.08.10  - version 2.1.9
 * Fix       - Fixes order lines formatting when V3 (US and UK) KCO order is edited.
 * Fix       - Adds check to make sure color codes sent to KCO iframe start with #.
