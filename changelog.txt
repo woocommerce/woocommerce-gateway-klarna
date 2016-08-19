@@ -2,6 +2,7 @@
 
 2016.08.19  - version 2.1.9.1
 * Fix       - Updated translation files.
+* Fix       - Fixes WC Logging on order update fail.
 
 2016.08.10  - version 2.1.9
 * Fix       - Fixes order lines formatting when V3 (US and UK) KCO order is edited.
