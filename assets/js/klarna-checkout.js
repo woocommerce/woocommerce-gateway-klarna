@@ -233,7 +233,6 @@ jQuery(document).ready(function ($) {
 				},
 				success: function (response) {
 					if (response.data.coupon_success) {
-						console.log('e');
 						$('#klarna_checkout_coupon_result').html('<p>' + kcoAjax.coupon_success + '</p>');
 
 						html_string = '<tr class="kco-applied-coupon"><td class="kco-rightalign">Coupon: ' + response.data.coupon + ' <a class="kco-remove-coupon" data-coupon="' + response.data.coupon + '" href="#">(remove)</a></td><td class="kco-rightalign">-' + response.data.amount + '</td></tr>';
