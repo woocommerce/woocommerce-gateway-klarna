@@ -3,6 +3,8 @@
 2016.08.19  - version 2.2.0
 * Fix       - Updated translation files.
 * Fix       - Fixes WC Logging on order update fail.
+* Fix       - Fixes code syntax error in payment fields files for Invoice and Part Payment.
+* Tweak     - Uses session values to hide/show order note in KCO widget.
 
 2016.08.10  - version 2.1.9
 * Fix       - Fixes order lines formatting when V3 (US and UK) KCO order is edited.
