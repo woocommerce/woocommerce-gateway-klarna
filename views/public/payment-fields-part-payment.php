@@ -87,7 +87,7 @@ if ( 'NO' == $this->klarna_helper->get_klarna_country() ) { ?>
 			} else if (klarna_part_payment_selected_country == 'FI') {
 				var klarna_part_payment_current_locale = 'fi_FI';
 			} else if (klarna_part_payment_selected_country == 'DE') {
-				var klarna_part_payment_current_locale = apply_filters( 'klarna_german_locale', 'de_DE' ;
+				var klarna_part_payment_current_locale = apply_filters( 'klarna_german_locale', 'de_DE' );
 			} else if (klarna_part_payment_selected_country == 'NL') {
 				var klarna_part_payment_current_locale = 'nl_NL';
 			} else if (klarna_part_payment_selected_country == 'AT') {
@@ -333,7 +333,7 @@ if ( 'NO' == $this->klarna_helper->get_klarna_country() ) { ?>
 			<p class="form-row form-row-wide">
 				<label for="klarna_part_payment_de_consent_terms">
 				<input type="checkbox" class="input-checkbox" value="yes" name="klarna_part_payment_de_consent_terms"  id="klarna_part_payment_de_consent_terms" />
-				<?php echo sprintf( __( 'Mit der Übermittlung der für die Abwicklung der gewählten Klarna Zahlungsmethode und einer Identitäts- und Bonitätsprüfung erforderlichen Daten an Klarna bin ich einverstanden. Meine <a href="%s" target="_blank">Einwilligung</a> kann ich jederzeit mit Wirkung für die Zukunft widerrufen. Es gelten die AGB des Händlers.', 'woocommerce-gateway-klarna' ), 'https://online.klarna.com/consent_de.yaws' ) ?>
+				<?php echo sprintf( __( 'Mit der &#xDC;bermittlung der f&#xFC;r die Abwicklung der gew&#xE4;hlten Klarna Zahlungsmethode und einer Identit&#xE4;ts- und Bonit&#xE4;tspr&#xFC;fung erforderlichen Daten an Klarna bin ich einverstanden. Meine <a href="%s" target="_blank">Einwilligung</a> kann ich jederzeit mit Wirkung f&#xFC;r die Zukunft widerrufen. Es gelten die AGB des H&#xE4;ndlers.', 'woocommerce-gateway-klarna' ), 'https://online.klarna.com/consent_de.yaws' ) ?>
 				</label>
 			</p>
 		<?php } ?>

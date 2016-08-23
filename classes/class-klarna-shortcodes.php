@@ -313,7 +313,8 @@ class WC_Gateway_Klarna_Shortcodes {
 		</div>
 
 		<!-- Order note -->
-		<?php if ( 'false' != $atts['order_note'] ) { ?>
+		<?php if ( 'hide' != $atts['order_note'] ) { ?>
+			<?php WC()->session->set( 'kco_widget_hide_order_note', 'no' ); ?>
 			<div>
 				<form>
 					<?php
@@ -327,7 +328,9 @@ class WC_Gateway_Klarna_Shortcodes {
 					          placeholder="<?php _e( 'Notes about your order, e.g. special notes for delivery.', 'woocommerce-gateway-klarna' ); ?>"><?php echo $order_note; ?></textarea>
 				</form>
 			</div>
-		<?php }
+		<?php } else {
+			WC()->session->set( 'kco_widget_hide_order_note', 'yes' );
+		}
 
 		return ob_get_clean();
 	}
