@@ -1306,7 +1306,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		</div>
 
 		<!-- Order note -->
-		<?php if ( 'false' != $atts['order_note'] ) { ?>
+		<?php if ( 'no' == WC()->session->get( 'kco_widget_hide_order_note' ) ) { ?>
 			<div>
 				<form>
 					<?php
