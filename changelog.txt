@@ -1,6 +1,6 @@
 *** WooCommerce Gateway Klarna Changelog ***
 
-2016.08.19  - version 2.2.0
+2016.08.19  - version 2.1.9.1
 * Fix       - Updated translation files.
 * Fix       - Fixes WC Logging on order update fail.
 * Fix       - Fixes code syntax error in payment fields files for Invoice and Part Payment.
