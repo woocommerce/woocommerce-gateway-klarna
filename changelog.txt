@@ -1,5 +1,13 @@
 *** WooCommerce Gateway Klarna Changelog ***
 
+2016.08.25  - version 2.1.10
+* Tweak     - Adds kco_before_validate_checkout, kco_validate_checkout and kco_after_validate_checkout action hook in validate callback.
+* Tweak     - Adds kco_before_confirm_order action hook in order confirmation listener.
+* Tweak     - Adds kco_hide_singular_shipping_method filter in KCO widget.
+* Tweak     - Adds kco_widget_before_calculation, kco_widget_before_coupon, kco_widget_before_cart_items, kco_widget_before_totals, kco_widget_before_order_note and kco_widget_after action hooks in KCO widget.
+* Tweak     - Adds shipping_address_change and order_total_change JS functions in Klarna Checkout script.
+* Tweak     - Updates German translation files.
+
 2016.08.19  - version 2.1.9.1
 * Fix       - Updated translation files.
 * Fix       - Fixes WC Logging on order update fail.
