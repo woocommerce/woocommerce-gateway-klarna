@@ -7,6 +7,7 @@
 * Tweak     - Adds kco_widget_before_calculation, kco_widget_before_coupon, kco_widget_before_cart_items, kco_widget_before_totals, kco_widget_before_order_note and kco_widget_after action hooks in KCO widget (props: github.com/Webbmekanikern).
 * Tweak     - Adds shipping_address_change and order_total_change JS functions in Klarna Checkout script (props: github.com/Webbmekanikern).
 * Tweak     - Updates German translation files.
+* Fix       - Fixes billing and shipping address capture when creating new customer in Klarna Checkout.
 
 2016.08.23  - version 2.1.9.1
 * Fix       - Updated translation files.
