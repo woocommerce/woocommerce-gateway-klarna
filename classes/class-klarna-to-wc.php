@@ -303,7 +303,9 @@ class WC_Gateway_Klarna_K2WC {
 			// Add order customer info
 			$this->add_order_customer_info( $order, $klarna_order );
 
-			// Confirm the order in Klarnas system
+			do_action( 'kco_before_confirm_order', $order->id );
+
+			// Confirm the order in Klarna's system
 			$klarna_order = $this->confirm_klarna_order( $order, $klarna_order );
 
 			$order->calculate_totals( false );

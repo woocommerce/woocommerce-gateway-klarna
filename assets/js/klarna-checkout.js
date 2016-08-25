@@ -81,6 +81,8 @@ jQuery(document).ready(function ($) {
 		new_method = $(this).val();
 		kco_widget = $('#klarna-checkout-widget');
 
+		$(document.body).trigger('kco_widget_update_shipping', new_method);
+
 		$.ajax(
 			kcoAjax.ajaxurl,
 			{
@@ -104,6 +106,8 @@ jQuery(document).ready(function ($) {
 							api.resume();
 						});
 					}
+
+					$(document.body).trigger('kco_widget_updated_shipping', new_method);
 				}
 			}
 		);
@@ -350,6 +354,8 @@ jQuery(document).ready(function ($) {
 									if ('' != data.email) {
 										kco_widget = $('#klarna-checkout-widget');
 
+										$(document.body).trigger('kco_widget_update', data);
+
 										$.ajax(
 											kcoAjax.ajaxurl,
 											{
@@ -371,6 +377,7 @@ jQuery(document).ready(function ($) {
 													}
 
 													$(kco_widget).html(response.data.widget_html);
+													$(document.body).trigger('kco_widget_updated', response);
 
 													window._klarnaCheckout(function (api) {
 														api.resume();
@@ -390,6 +397,14 @@ jQuery(document).ready(function ($) {
 								}
 							}
 						}
+
+						$(document.body).trigger('kco_change', data);
+					},
+					shipping_address_change: function(data) {
+						$(document.body).trigger('kco_shipping_address_change', data);
+					},
+					order_total_change: function(data) {
+						$(document.body).trigger('kco_order_total_change', data);
 					}
 				});
 			}
