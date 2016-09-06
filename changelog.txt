@@ -1,5 +1,8 @@
 *** WooCommerce Gateway Klarna Changelog ***
 
+2016.09.06  - version 2.1.11
+* Fix       - Fixes javascript errors caused by missing PHP codes in payment fields files for invoice and part payment.
+
 2016.08.25  - version 2.1.10
 * Tweak     - Adds kco_before_validate_checkout, kco_validate_checkout and kco_after_validate_checkout action hook in validate callback (props: github.com/Webbmekanikern).
 * Tweak     - Adds kco_before_confirm_order action hook in order confirmation listener (props: github.com/Webbmekanikern).
