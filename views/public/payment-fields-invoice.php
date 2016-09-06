@@ -70,7 +70,7 @@ if ( 'NO' == $this->klarna_helper->get_klarna_country() ) { ?>
 			} else if (klarna_invoice_selected_country == 'FI') {
 				var klarna_invoice_current_locale = 'fi_FI';
 			} else if (klarna_invoice_selected_country == 'DE') {
-				var klarna_invoice_current_locale = apply_filters( 'klarna_german_locale', 'de_DE' );
+				var klarna_invoice_current_locale = <?php echo apply_filters( 'klarna_german_locale', 'de_DE' ); ?>
 			} else if (klarna_invoice_selected_country == 'NL') {
 				var klarna_invoice_current_locale = 'nl_NL';
 			} else if (klarna_invoice_selected_country == 'AT') {
