@@ -1,5 +1,8 @@
 *** WooCommerce Gateway Klarna Changelog ***
 
+2016.09.08  - version 2.1.12
+* Fix       - Adds missing quotes for German locale filter.
+
 2016.09.06  - version 2.1.11
 * Fix       - Fixes javascript errors caused by missing PHP codes in payment fields files for invoice and part payment.
 
