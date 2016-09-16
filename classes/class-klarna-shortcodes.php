@@ -267,14 +267,24 @@ class WC_Gateway_Klarna_Shortcodes {
 	 */
 	function klarna_checkout_get_kco_widget_html( $atts = null ) {
 		global $woocommerce;
-
 		ob_start();
+
 		if ( ! defined( 'WOOCOMMERCE_CART' ) ) {
 			define( 'WOOCOMMERCE_CART', true );
 		}
 
-		do_action( 'kco_widget_before_calculation', $atts, $this );
+		if ( $atts ) {
+			// When the shortcode is first rendered we store attributes into session
+			WC()->session->set( 'kco_widget_atts', $atts );
+		} else if ( WC()->session->get( 'kco_widget_atts' ) ) {
+			// Then we pull them from the session on widget refresh
+			$atts = WC()->session->get( 'kco_widget_atts' );
+		} else {
+			// Set empty defaults
+			$atts = array( 'order_note' => '', 'hide_columns' => '' );
+		}
 
+		do_action( 'kco_widget_before_calculation', $atts, $this );
 		$woocommerce->cart->calculate_shipping();
 		$woocommerce->cart->calculate_fees();
 		$woocommerce->cart->calculate_totals();
@@ -325,7 +335,6 @@ class WC_Gateway_Klarna_Shortcodes {
 
 		<!-- Order note -->
 		<?php if ( 'hide' != $atts['order_note'] ) { ?>
-			<?php WC()->session->set( 'kco_widget_hide_order_note', 'no' ); ?>
 			<div>
 				<form>
 					<?php
@@ -339,12 +348,9 @@ class WC_Gateway_Klarna_Shortcodes {
 					          placeholder="<?php _e( 'Notes about your order, e.g. special notes for delivery.', 'woocommerce-gateway-klarna' ); ?>"><?php echo $order_note; ?></textarea>
 				</form>
 			</div>
-		<?php } else {
-			WC()->session->set( 'kco_widget_hide_order_note', 'yes' );
-		}
+		<?php }
 
 		do_action('kco_widget_after', $atts, $this);
-
 		return ob_get_clean();
 	}
 
@@ -370,7 +376,6 @@ class WC_Gateway_Klarna_Shortcodes {
 		$hide_columns = array();
 		if ( '' != $atts['hide_columns'] ) {
 			$hide_columns = explode( ',', $atts['hide_columns'] );
-			WC()->session->set( 'kco_widget_hide_columns', $hide_columns );
 		}
 		?>
 		<div>
