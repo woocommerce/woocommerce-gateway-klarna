@@ -167,7 +167,7 @@ class WC_Gateway_Klarna_Shortcodes {
 			if ( WC()->session->get( 'klarna_euro_country' ) ) {
 				$kco_euro_country = WC()->session->get( 'klarna_euro_country' );
 			} else {
-				$kco_euro_country = $this->shop_country;
+				$kco_euro_country = '';
 			}
 
 			echo '<div class="woocommerce"><p>';
