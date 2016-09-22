@@ -1,15 +1,10 @@
 *** WooCommerce Gateway Klarna Changelog ***
 
-2016.09.xx  - version 2.1.13
-* Fix       - Fixes a PHP notice in shortcodes class.
-* Fix       - Gets rid of code duplication in KCO widget.
-* Update    - Removes tests from bundled libraries.
-
 2016.09.08  - version 2.1.12
 * Fix       - Adds missing quotes for German locale filter.
 
 2016.09.06  - version 2.1.11
-* Fix       - Fixes javascript errors caused by missing PHP codes in payment fields files for invoice and part payment (props: @michaelrimbach).
+* Fix       - Fixes javascript errors caused by missing PHP codes in payment fields files for invoice and part payment.
 
 2016.08.25  - version 2.1.10
 * Tweak     - Adds kco_before_validate_checkout, kco_validate_checkout and kco_after_validate_checkout action hook in validate callback (props: github.com/Webbmekanikern).
@@ -20,7 +15,7 @@
 * Tweak     - Updates German translation files.
 * Fix       - Fixes billing and shipping address capture when creating new customer in Klarna Checkout.
 
-2016.08.23  - version 2.1.9.1
+2016.08.19  - version 2.1.9.1
 * Fix       - Updated translation files.
 * Fix       - Fixes WC Logging on order update fail.
 * Fix       - Fixes code syntax error in payment fields files for Invoice and Part Payment.
