@@ -1,5 +1,10 @@
 *** WooCommerce Gateway Klarna Changelog ***
 
+2016.09.xx  - version 2.1.13
+* Fix       - Fixes a PHP notice in shortcodes class.
+* Fix       - Gets rid of code duplication in KCO widget.
+* Update    - Removes tests from bundled libraries.
+
 2016.09.08  - version 2.1.12
 * Fix       - Adds missing quotes for German locale filter.
 
