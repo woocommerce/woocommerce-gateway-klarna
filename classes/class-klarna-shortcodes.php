@@ -284,23 +284,23 @@ class WC_Gateway_Klarna_Shortcodes {
 			$atts = array( 'order_note' => '', 'hide_columns' => '' );
 		}
 
-		do_action( 'kco_widget_before_calculation', $atts, $this );
+		do_action( 'kco_widget_before_calculation', $atts );
 		$woocommerce->cart->calculate_shipping();
 		$woocommerce->cart->calculate_fees();
 		$woocommerce->cart->calculate_totals();
 		?>
 
-		<?php do_action( 'kco_widget_before_coupon', $atts, $this ); ?>
+		<?php do_action( 'kco_widget_before_coupon', $atts ); ?>
 
 		<!-- Coupons -->
 		<?php woocommerce_checkout_coupon_form(); ?>
 
-		<?php do_action( 'kco_widget_before_cart_items', $atts, $this ); ?>
+		<?php do_action( 'kco_widget_before_cart_items', $atts ); ?>
 
 		<!-- Cart items -->
 		<?php echo $this->klarna_checkout_get_cart_contents_html( $atts ); ?>
 
-		<?php do_action( 'kco_widget_before_totals', $atts, $this ); ?>
+		<?php do_action( 'kco_widget_before_totals', $atts ); ?>
 
 		<!-- Totals -->
 		<div>
@@ -331,7 +331,7 @@ class WC_Gateway_Klarna_Shortcodes {
 			</table>
 		</div>
 
-		<?php do_action( 'kco_widget_before_order_note', $atts, $this ); ?>
+		<?php do_action( 'kco_widget_before_order_note', $atts ); ?>
 
 		<!-- Order note -->
 		<?php if ( 'hide' != $atts['order_note'] ) { ?>
@@ -350,7 +350,7 @@ class WC_Gateway_Klarna_Shortcodes {
 			</div>
 		<?php }
 
-		do_action('kco_widget_after', $atts, $this);
+		do_action('kco_widget_after', $atts );
 		return ob_get_clean();
 	}
 
