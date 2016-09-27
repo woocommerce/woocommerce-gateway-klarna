@@ -173,6 +173,7 @@ if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 		$snippet = $klarna_order['gui']['snippet'];
 	}
 	echo '<div>' . apply_filters( 'klarna_kco_checkout', $snippet ) . '</div>';
+
 	do_action( 'klarna_after_kco_checkout' );
 } else {
 	// If cart is empty, clear these variables

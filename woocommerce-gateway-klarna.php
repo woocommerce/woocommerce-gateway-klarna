@@ -203,6 +203,7 @@ function init_klarna_gateway() {
 	require_once 'classes/class-klarna-order.php'; // Handles Klarna orders
 	require_once 'classes/class-klarna-payment-method-display-widget.php'; // WordPress widget
 	require_once 'classes/class-klarna-status.php'; // WooCommerce status page extension
+	require_once 'classes/class-klarna-cross-sells.php'; // Klarna Checkout cross-sells
 
 	// register Klarna Payment Method Display widget
 	function register_klarna_pmd_widget() {

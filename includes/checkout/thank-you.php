@@ -83,7 +83,7 @@ do_action( 'klarna_before_kco_confirmation', intval( $_GET['sid'] ) );
 
 echo $snippet;
 
-do_action( 'klarna_after_kco_confirmation', intval( $_GET['sid'] ) );
+do_action( 'klarna_after_kco_confirmation', intval( $_GET['sid'] ), $klarna_order );
 do_action( 'woocommerce_thankyou', intval( $_GET['sid'] ) );
 
 // Clear session and empty cart
