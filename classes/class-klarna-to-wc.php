@@ -189,6 +189,8 @@ class WC_Gateway_Klarna_K2WC {
 	 * @access public
 	 *
 	 * @param  $customer_email KCO incomplete customer email
+	 *
+	 * @return int
 	 */
 	public function prepare_wc_order( $customer_email ) {
 		global $woocommerce;
@@ -208,18 +210,35 @@ class WC_Gateway_Klarna_K2WC {
 		if ( isset( $order ) ) {
 			// Need to clean up the order first, to avoid duplicate items
 			$order->remove_order_items();
+
 			// Add order items
-			$this->add_order_items( $order );
+			if ( empty( $order->get_items( array( 'line_item' ) ) ) ) {
+				$this->add_order_items( $order );
+			}
+
 			// Add order fees
-			$this->add_order_fees( $order );
+			if ( empty( $order->get_items( array( 'fee' ) ) ) ) {
+				$this->add_order_fees( $order );
+			}
+
 			// Add order shipping
-			$this->add_order_shipping( $order );
+			if ( empty( $order->get_items( array( 'shipping' ) ) ) ) {
+				$this->add_order_shipping( $order );
+			}
+
 			// Add order taxes
-			$this->add_order_tax_rows( $order );
+			if ( empty( $order->get_items( array( 'tax' ) ) ) ) {
+				$this->add_order_tax_rows( $order );
+			}
+
 			// Store coupons
-			$this->add_order_coupons( $order );
+			if ( empty( $order->get_items( array( 'coupon' ) ) ) ) {
+				$this->add_order_coupons( $order );
+			}
+
 			// Store payment method
 			$this->add_order_payment_method( $order );
+
 			// Calculate order totals
 			$this->set_order_totals( $order );
 			// Tie this order to a user
