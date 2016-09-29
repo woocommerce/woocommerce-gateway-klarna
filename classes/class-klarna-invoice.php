@@ -781,8 +781,13 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 			<script type="text/javascript">
 				//<![CDATA[
 				jQuery(document).ready(function ($) {
-					$(document.body).on('change', 'input[name="payment_method"]', function () {
-						$('body').trigger('update_checkout');
+					var selected_method = $("input[name='payment_method']:checked").val();
+					$(document.body).on('change', 'input[name="payment_method"]', function (event) {
+						// Only do it if switching to or from Klarna Invoice
+						if ('klarna_invoice' === event.target.value || 'klarna_invoice' === selected_method) {
+							selected_method = event.target.value;
+							$('body').trigger('update_checkout');
+						}
 					});
 				});
 				//]]>
