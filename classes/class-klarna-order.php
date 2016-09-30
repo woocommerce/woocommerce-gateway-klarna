@@ -1221,12 +1221,14 @@ class WC_Gateway_Klarna_Order {
 				'order_lines'      => $updated_order_lines
 			) );
 			$order->add_order_note( sprintf( __( 'Klarna order updated.', 'woocommerce-gateway-klarna' ) ) );
+			return true;
 		} catch ( Exception $e ) {
 			if ( $this->debug == 'yes' ) {
 				$this->log->add( 'klarna', 'Klarna API error: ' . var_export( $e, true ) );
 			}
 
 			$order->add_order_note( sprintf( __( 'Klarna order update failed. Error code %s. Error message %s', 'woocommerce-gateway-klarna' ), $e->getCode(), utf8_encode( $e->getMessage() ) ) );
+			return new WP_Error( $e->getCode(), utf8_encode( $e->getMessage() ) );
 		}
 	}
 

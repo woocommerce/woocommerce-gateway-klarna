@@ -7,16 +7,16 @@ jQuery(document).ready(function ($) {
 		update_possible = false;
 		$('#klarna-checkout-cross-sells').remove();
 	}
-	var timer = setTimeout(countdown_timer, 30 * 60 * 60);
+	var timer = setTimeout(countdown_timer, 30 * 60 * 60 * 1000);
 
 	$('.klarna-cross-sells-button:not(.disabled)').on('click', function(event) {
 		event.preventDefault();
-		$(this).addClass('disabled')
+		$(this).addClass('disabled');
 
 		if (update_possible) {
 			var product_id = $(this).data('product_id');
 			var clicked_button = $(this);
-			var ancestor = $(clicked_button).closest('li.product')
+			var ancestor = $(clicked_button).closest('li.product');
 
 			if (typeof window._klarnaCheckout === 'function') {
 				window._klarnaCheckout(function (api) {
@@ -42,9 +42,15 @@ jQuery(document).ready(function ($) {
 							nonce: kcoCrossSells.klarna_cross_sells_nonce
 						},
 						success: function (response) {
-							$(ancestor).unblock();
-							$(clicked_button).addClass('disabled').text(kcoCrossSells.added_to_order_text);
+							$(clicked_button).addClass('disabled');
 
+							if (response.success) {
+								$(clicked_button).after('<p>' + kcoCrossSells.added_to_order_text + '</p>');
+							} else {
+								$(clicked_button).after('<p>' + response.data.message + '</p>');
+							}
+
+							$(ancestor).unblock();
 							window._klarnaCheckout(function (api) {
 								api.resume();
 							});

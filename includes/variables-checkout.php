@@ -246,7 +246,7 @@ switch ( $this->shop_country ) {
 		$klarna_eid          = $this->eid_us;
 		$klarna_secret       = $this->secret_us;
 		$klarna_checkout_url = $this->klarna_checkout_url_us;
-		if ( $this->klarna_checkout_thanks_url_uk == '' ) {
+		if ( $this->klarna_checkout_thanks_url_us == '' ) {
 			$klarna_checkout_thanks_url = $this->klarna_checkout_url_us;
 		} else {
 			$klarna_checkout_thanks_url = $this->klarna_checkout_thanks_url_us;

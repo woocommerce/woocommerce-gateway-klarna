@@ -32,9 +32,9 @@ class WC_Gateway_Klarna_Cross_Sells {
 
 			ob_start();
 			wc_get_template( 'cart/cross-sells.php', array(
-				'posts_per_page' => 2,
-				'orderby'        => 'rand',
-				'columns'        => 2,
+				'posts_per_page' => apply_filters( 'klarna_checkout_cross_sells_per_page', 2 ),
+				'columns'        => apply_filters( 'klarna_checkout_cross_sells_columns', 2 ),
+				'orderby'        => apply_filters( 'klarna_checkout_cross_sells_orderby', 'rand' )
 			) );
 			$cross_sells_output = ob_get_contents();
 			ob_end_clean();
@@ -51,8 +51,10 @@ class WC_Gateway_Klarna_Cross_Sells {
 	}
 
 	function klarna_checkout_cross_sells_enqueuer() {
+		// @TODO: Enqueue on checkout pages as well, in case a merchant doesn't have separate TY page
 		if ( is_page() ) {
 			$checkout_settings = get_option( 'woocommerce_klarna_checkout_settings' );
+			$checkout_pages    = array();
 			$thank_you_pages   = array();
 
 			// Clean request URI to remove all parameters
@@ -64,18 +66,21 @@ class WC_Gateway_Klarna_Cross_Sells {
 			// Get arrays of checkout and thank you pages for all countries
 			if ( is_array( $checkout_settings ) ) {
 				foreach ( $checkout_settings as $cs_key => $cs_value ) {
+					if ( strpos( $cs_key, 'klarna_checkout_url_' ) !== false ) {
+						$checkout_pages[ $cs_key ] = substr( $cs_value, 0 - $length );
+					}
 					if ( strpos( $cs_key, 'klarna_checkout_thanks_url_' ) !== false ) {
 						$thank_you_pages[ $cs_key ] = substr( $cs_value, 0 - $length );
 					}
 				}
 			}
 
-			if ( in_array( $clean_req_uri, $thank_you_pages ) && strlen( $clean_req_uri ) > 1 ) {
+			if ( ( in_array( $clean_req_uri, $checkout_pages ) || in_array( $clean_req_uri, $thank_you_pages ) ) && strlen( $clean_req_uri ) > 1 ) {
 				wp_register_script( 'klarna_checkout_cross_sells', KLARNA_URL . 'assets/js/cross-sells.js', array(), false, true );
 				wp_localize_script( 'klarna_checkout_cross_sells', 'kcoCrossSells', array(
 					'ajaxurl'                  => admin_url( 'admin-ajax.php' ),
 					'klarna_cross_sells_nonce' => wp_create_nonce( 'klarna_cross_sells_nonce' ),
-					'added_to_order_text'      => __( 'Item added to order', 'woocommerce-gateway-klarna' )
+					'added_to_order_text'      => __( 'Thanks! The product has been added to your order!', 'woocommerce-gateway-klarna' )
 				) );
 				wp_enqueue_script( 'klarna_checkout_cross_sells' );
 			}
@@ -96,7 +101,10 @@ class WC_Gateway_Klarna_Cross_Sells {
 		do_action( 'klarna_before_kco_cross_sells', $order_id, $klarna_order );
 
 		// Check if cart update is allowed by Klarna
-		if ( $klarna_order['cart_update_allowed'] ) {
+		if (
+			( isset( $klarna_order['cart_update_allowed'] ) && $klarna_order['cart_update_allowed'] )
+			// || ( isset( $klarna_order['payment_type_allows_increase'] ) && $klarna_order['payment_type_allows_increase'] )
+		) {
 			echo WC()->session->get( 'klarna_cross_sells' );
 		}
 
@@ -121,10 +129,22 @@ class WC_Gateway_Klarna_Cross_Sells {
 		do_action( 'klarna_before_adding_kco_cross_sell', $wc_order->id, $product->id );
 
 		// Add to WooCommerce order first, so in next step we can use WC_Gateway_Klarna_Order
-		$this->cross_sells_add_woocommerce( $wc_order, $product );
+		$item_id = $this->cross_sells_add_woocommerce( $wc_order, $product );
 
 		// Add to Klarna order
-		$this->cross_sells_add_klarna( $wc_order );
+		$result = $this->cross_sells_add_klarna( $wc_order );
+
+		$data = array();
+		if ( is_wp_error( $result ) ) {
+			// Remove the item from WC order
+			wc_delete_order_item( $item_id );
+
+			$data['message'] = __( "We're sorry, the item couldn't be added to your order. Please try creating a new order instead.", 'woocommerce-gateway-klarna' );
+			wp_send_json_error( $data );
+		} else {
+			wp_send_json_success();
+		}
+		wp_die();
 
 		do_action( 'klarna_after_adding_kco_cross_sell', $wc_order->id, $product->id );
 	}
@@ -134,9 +154,12 @@ class WC_Gateway_Klarna_Cross_Sells {
 	 *
 	 * @param $wc_order
 	 * @param $product
+	 *
+	 * @return mixed
 	 */
 	function cross_sells_add_woocommerce( $wc_order, $product ) {
-		$wc_order->add_product( $product );
+		$item_id = $wc_order->add_product( $product );
+
 		$wc_order->add_order_note(
 			sprintf(
 				__( '%s added to order.', 'woocommerce-gateway-klarna' ),
@@ -144,20 +167,26 @@ class WC_Gateway_Klarna_Cross_Sells {
 			)
 		);
 		$wc_order->calculate_totals();
+
+		return $item_id;
 	}
 
 	/**
 	 * Add the item to Klarna order
 	 *
 	 * @param $wc_order
+	 *
+	 * @return bool|void|WP_Error
 	 */
 	function cross_sells_add_klarna( $wc_order ) {
 		$klarna_order = new WC_Gateway_Klarna_Order();
 		if ( 'rest' == get_post_meta( $wc_order->id, '_klarna_api', true ) ) {
-			$klarna_order->update_order_rest( $wc_order->id );
+			$result = $klarna_order->update_order_rest( $wc_order->id );
 		} else {
-			$klarna_order->update_order( $wc_order->id );
+			$result = $klarna_order->update_order( $wc_order->id );
 		}
+
+		return $result;
 	}
 
 }
