@@ -26,8 +26,22 @@ class WC_Gateway_Klarna_Cross_Sells {
 	} // End constructor
 
 	function add_cross_sells_ids_to_session() {
-		if ( $crosssells = WC()->cart->get_cross_sells() ) {
-			WC()->session->set( 'klarna_cross_sells', $crosssells );
+		if ( WC()->cart->get_cross_sells() ) {
+			// Change the button filter
+			add_filter( 'woocommerce_loop_add_to_cart_link', array( $this, 'filter_add_to_cart_button' ), 10, 2 );
+
+			ob_start();
+			wc_get_template( 'cart/cross-sells.php', array(
+				'posts_per_page' => 2,
+				'orderby'        => 'rand',
+				'columns'        => 2,
+			) );
+			$cross_sells_output = ob_get_contents();
+			ob_end_clean();
+			WC()->session->set( 'klarna_cross_sells', $cross_sells_output );
+
+			// Remove change the button filter
+			remove_filter( 'woocommerce_loop_add_to_cart_link', array( $this, 'filter_add_to_cart_button' ) );
 		}
 	}
 
@@ -83,37 +97,7 @@ class WC_Gateway_Klarna_Cross_Sells {
 
 		// Check if cart update is allowed by Klarna
 		if ( $klarna_order['cart_update_allowed'] ) {
-			// Change the button
-			add_filter( 'woocommerce_loop_add_to_cart_link', array( $this, 'filter_add_to_cart_button' ), 10, 2 );
-			if ( $crosssells = WC()->session->get( 'klarna_cross_sells' ) ) {
-				$args                        = array(
-					'post_type'           => 'product',
-					'ignore_sticky_posts' => 1,
-					'no_found_rows'       => 1,
-					'posts_per_page'      => apply_filters( 'woocommerce_cross_sells_total', 2 ),
-					'orderby'             => 'rand',
-					'post__in'            => $crosssells,
-					'meta_query'          => WC()->query->get_meta_query(),
-				);
-				$products                    = new WP_Query( $args );
-				$woocommerce_loop['name']    = 'cross-sells';
-				$woocommerce_loop['columns'] = apply_filters( 'woocommerce_cross_sells_columns', 2 );
-				if ( $products->have_posts() ) : ?>
-
-					<div class="cross-sells" id="klarna-checkout-cross-sells">
-						<h2><?php _e( 'You may be interested in&hellip;', 'woocommerce' ) ?></h2>
-						<?php woocommerce_product_loop_start(); ?>
-						<?php while ( $products->have_posts() ) : $products->the_post(); ?>
-							<?php wc_get_template_part( 'content', 'product' ); ?>
-						<?php endwhile; // end of the loop. ?>
-						<?php woocommerce_product_loop_end(); ?>
-					</div>
-
-				<?php endif;
-				wp_reset_query();
-				// Remove change the button filter
-				remove_filter( 'woocommerce_loop_add_to_cart_link', array( $this, 'filter_add_to_cart_button' ) );
-			}
+			echo WC()->session->get( 'klarna_cross_sells' );
 		}
 
 		do_action( 'klarna_after_kco_cross_sells', $order_id, $klarna_order );
