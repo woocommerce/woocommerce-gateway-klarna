@@ -124,6 +124,7 @@ class WC_Gateway_Klarna_Cross_Sells {
 		parse_str( $parsed_url['query'], $query_params );
 
 		$wc_order = wc_get_order( $query_params['order-received'] );
+		$product_id = (int) $_REQUEST['product_id'];
 		$product = wc_get_product( $_REQUEST['product_id'] );
 
 		do_action( 'klarna_before_adding_kco_cross_sell', $wc_order->id, $product->id );
@@ -139,7 +140,11 @@ class WC_Gateway_Klarna_Cross_Sells {
 			// Remove the item from WC order
 			wc_delete_order_item( $item_id );
 
-			$data['message'] = __( "We're sorry, the item couldn't be added to your order. Please try creating a new order instead.", 'woocommerce-gateway-klarna' );
+			$data['message'] = __( "We're sorry, the item couldn't be added to your order. A new order will be created instead.", 'woocommerce-gateway-klarna' );
+			global $klarna_checkout_url;
+			$data['checkout_url'] = $klarna_checkout_url;
+			WC()->cart->add_to_cart( $product_id );
+
 			wp_send_json_error( $data );
 		} else {
 			wp_send_json_success();

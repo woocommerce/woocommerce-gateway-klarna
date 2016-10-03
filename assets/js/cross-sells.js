@@ -48,6 +48,7 @@ jQuery(document).ready(function ($) {
 								$(clicked_button).after('<p>' + kcoCrossSells.added_to_order_text + '</p>');
 							} else {
 								$(clicked_button).after('<p>' + response.data.message + '</p>');
+								window.location.replace(response.data.checkout_url);
 							}
 
 							$(ancestor).unblock();
