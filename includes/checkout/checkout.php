@@ -161,6 +161,10 @@ if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 		$sessionId = $klarna_order['id'];
 	}
 
+	// Setting these here because cross-sells need them
+	update_post_meta( $local_order_id, '_klarna_order_id', $klarna_order['order_id'], true );
+	update_post_meta( $local_order_id, '_billing_country', WC()->session->get( 'klarna_country' ), true );
+
 	// Set session values for Klarna order ID and Klarna order country
 	WC()->session->set( 'klarna_checkout', $sessionId );
 	WC()->session->set( 'klarna_checkout_country', WC()->customer->get_country() );
