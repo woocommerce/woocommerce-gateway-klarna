@@ -159,6 +159,39 @@ return apply_filters( 'klarna_checkout_form_fields', array(
 		'desc_tip'    => false
 	),
 
+	'dk_settings_title'             => array(
+		'title' => __( 'Denmark', 'woocommerce-gateway-klarna' ),
+		'type'  => 'title',
+	),
+	'eid_dk'                        => array(
+		'title'       => __( 'Eid - Denmark', 'woocommerce-gateway-klarna' ),
+		'type'        => 'text',
+		'description' => __( 'Please enter your Klarna Eid for Denmark. Leave blank to disable.', 'woocommerce-gateway-klarna' ),
+		'default'     => '',
+		'desc_tip'    => true
+	),
+	'secret_dk'                     => array(
+		'title'       => __( 'Shared Secret - Denmark', 'woocommerce-gateway-klarna' ),
+		'type'        => 'text',
+		'description' => __( 'Please enter your Klarna Shared Secret for Denmark.', 'woocommerce-gateway-klarna' ),
+		'default'     => '',
+		'desc_tip'    => true
+	),
+	'klarna_checkout_url_dk'        => array(
+		'title'       => __( 'Custom Checkout Page - Denmark', 'woocommerce-gateway-klarna' ),
+		'type'        => 'text',
+		'description' => __( 'Please enter the URL to the page that acts as Checkout Page for Klarna Checkout Denmark. This page must contain the shortcode [woocommerce_klarna_checkout].', 'woocommerce-gateway-klarna' ),
+		'default'     => '',
+		'desc_tip'    => false
+	),
+	'klarna_checkout_thanks_url_dk' => array(
+		'title'       => __( 'Custom Thanks Page - Denmark', 'woocommerce-gateway-klarna' ),
+		'type'        => 'text',
+		'description' => __( 'Enter the URL to the page that acts as Thanks Page for Klarna Checkout Denmark. This page must contain the shortcode [woocommerce_klarna_checkout]. Leave blank to use the Custom Checkout Page as Thanks Page.', 'woocommerce-gateway-klarna' ),
+		'default'     => '',
+		'desc_tip'    => false
+	),
+
 	'germany_settings_title'        => array(
 		'title' => __( 'Germany', 'woocommerce-gateway-klarna' ),
 		'type'  => 'title',

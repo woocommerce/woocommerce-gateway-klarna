@@ -680,20 +680,20 @@ class WC_Gateway_Klarna_Order {
 		 * Need to send local order to constructor and Klarna order to method
 		 */
 		if ( $klarna_settings['testmode'] == 'yes' ) {
-			if ( 'gb' == strtolower( $billing_country ) ) {
+			if ( 'gb' == strtolower( $billing_country ) || 'dk' == strtolower( $billing_country ) ) {
 				$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_TEST_BASE_URL;
 			} elseif ( 'us' == strtolower( $billing_country ) ) {
 				$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::NA_TEST_BASE_URL;
 			}
 		} else {
-			if ( 'gb' == strtolower( $billing_country ) ) {
+			if ( 'gb' == strtolower( $billing_country ) || 'dk' == strtolower( $billing_country ) ) {
 				$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_BASE_URL;
 			} elseif ( 'us' == strtolower( $billing_country ) ) {
 				$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::NA_BASE_URL;
 			}
 		}
 
-		if ( 'gb' == strtolower( $billing_country ) ) {
+		if ( 'gb' == strtolower( $billing_country ) || 'dk' == strtolower( $billing_country ) ) {
 			$connector = Klarna\Rest\Transport\Connector::create( $klarna_settings['eid_uk'], html_entity_decode( $klarna_settings['secret_uk'] ), $klarna_server_url );
 		} elseif ( 'us' == strtolower( $billing_country ) ) {
 			$connector = Klarna\Rest\Transport\Connector::create( $klarna_settings['eid_us'], html_entity_decode( $klarna_settings['secret_us'] ), $klarna_server_url );
@@ -808,20 +808,20 @@ class WC_Gateway_Klarna_Order {
 		 * Need to send local order to constructor and Klarna order to method
 		 */
 		if ( $klarna_settings['testmode'] == 'yes' ) {
-			if ( 'gb' == strtolower( $billing_country ) ) {
+			if ( 'gb' == strtolower( $billing_country ) || 'dk' == strtolower( $billing_country ) ) {
 				$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_TEST_BASE_URL;
 			} elseif ( 'us' == strtolower( $billing_country ) ) {
 				$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::NA_TEST_BASE_URL;
 			}
 		} else {
-			if ( 'gb' == strtolower( $billing_country ) ) {
+			if ( 'gb' == strtolower( $billing_country ) || 'dk' == strtolower( $billing_country ) ) {
 				$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_BASE_URL;
 			} elseif ( 'us' == strtolower( $billing_country ) ) {
 				$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::NA_BASE_URL;
 			}
 		}
 
-		if ( 'gb' == strtolower( $billing_country ) ) {
+		if ( 'gb' == strtolower( $billing_country ) || 'dk' == strtolower( $billing_country ) ) {
 			$connector = Klarna\Rest\Transport\Connector::create( $klarna_settings['eid_uk'], html_entity_decode( $klarna_settings['secret_uk'] ), $klarna_server_url );
 		} elseif ( 'us' == strtolower( $billing_country ) ) {
 			$connector = Klarna\Rest\Transport\Connector::create( $klarna_settings['eid_us'], html_entity_decode( $klarna_settings['secret_us'] ), $klarna_server_url );
@@ -1190,20 +1190,20 @@ class WC_Gateway_Klarna_Order {
 		 * Need to send local order to constructor and Klarna order to method
 		 */
 		if ( $klarna_settings['testmode'] == 'yes' ) {
-			if ( 'gb' == strtolower( $billing_country ) ) {
+			if ( 'gb' == strtolower( $billing_country ) || 'dk' == strtolower( $billing_country ) ) {
 				$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_TEST_BASE_URL;
 			} elseif ( 'us' == strtolower( $billing_country ) ) {
 				$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::NA_TEST_BASE_URL;
 			}
 		} else {
-			if ( 'gb' == strtolower( $billing_country ) ) {
+			if ( 'gb' == strtolower( $billing_country ) || 'dk' == strtolower( $billing_country ) ) {
 				$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_BASE_URL;
 			} elseif ( 'us' == strtolower( $billing_country ) ) {
 				$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::NA_BASE_URL;
 			}
 		}
 
-		if ( 'gb' == strtolower( $billing_country ) ) {
+		if ( 'gb' == strtolower( $billing_country ) || 'dk' == strtolower( $billing_country ) ) {
 			$connector = Klarna\Rest\Transport\Connector::create( $klarna_settings['eid_uk'], html_entity_decode( $klarna_settings['secret_uk'] ), $klarna_server_url );
 		} elseif ( 'us' == strtolower( $billing_country ) ) {
 			$connector = Klarna\Rest\Transport\Connector::create( $klarna_settings['eid_us'], html_entity_decode( $klarna_settings['secret_us'] ), $klarna_server_url );

@@ -1178,13 +1178,13 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 
 		if ( $this->is_rest() ) {
 			if ( $this->testmode == 'yes' ) {
-				if ( 'gb' == $this->klarna_country ) {
+				if ( 'gb' == $this->klarna_country || 'dk' == $this->klarna_country ) {
 					$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_TEST_BASE_URL;
 				} elseif ( 'us' == $this->klarna_country ) {
 					$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::NA_TEST_BASE_URL;
 				}
 			} else {
-				if ( 'gb' == $this->klarna_country ) {
+				if ( 'gb' == $this->klarna_country || 'dk' == $this->klarna_country ) {
 					$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_BASE_URL;
 				} elseif ( 'us' == $this->klarna_country ) {
 					$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::NA_BASE_URL;
@@ -1659,6 +1659,10 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 				$klarna_secret = $this->secret_at;
 				$klarna_eid    = $this->eid_at;
 				break;
+			case 'dk' :
+				$klarna_secret = $this->secret_dk;
+				$klarna_eid    = $this->eid_dk;
+				break;
 			case 'gb' :
 				$klarna_secret = $this->secret_uk;
 				$klarna_eid    = $this->eid_uk;
@@ -1871,20 +1875,20 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 				 * Need to send local order to constructor and Klarna order to method
 				 */
 				if ( $this->testmode == 'yes' ) {
-					if ( 'gb' == strtolower( $country ) ) {
+					if ( 'gb' == strtolower( $country ) || 'dk' == strtolower( $country ) ) {
 						$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_TEST_BASE_URL;
 					} elseif ( 'us' == strtolower( $country ) ) {
 						$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::NA_TEST_BASE_URL;
 					}
 				} else {
-					if ( 'gb' == strtolower( $country ) ) {
+					if ( 'gb' == strtolower( $country ) || 'dk' == strtolowe( $country ) ) {
 						$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_BASE_URL;
 					} elseif ( 'us' == strtolower( $country ) ) {
 						$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::NA_BASE_URL;
 					}
 				}
 
-				if ( 'gb' == strtolower( $country ) ) {
+				if ( 'gb' == strtolower( $country ) || 'dk' == strtolower( $country ) ) {
 					$connector = Klarna\Rest\Transport\Connector::create( $this->eid_uk, $this->secret_uk, $klarna_server_url );
 				} elseif ( 'us' == strtolower( $country ) ) {
 					$connector = Klarna\Rest\Transport\Connector::create( $this->eid_us, $this->secret_us, $klarna_server_url );
@@ -1914,7 +1918,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 * @since  2.0.0
 	 */
 	function is_rest() {
-		if ( 'GB' == $this->klarna_country || 'gb' == $this->klarna_country || 'US' == $this->klarna_country || 'us' == $this->klarna_country ) {
+		if ( 'GB' == $this->klarna_country || 'gb' == $this->klarna_country || 'US' == $this->klarna_country || 'us' == $this->klarna_country || 'DK' == $this->klarna_country || 'dk' == $this->klarna_country ) {
 			// Set it in session as well, to be used in Shortcodes class
 			WC()->session->set( 'klarna_is_rest', true );
 
@@ -2416,7 +2420,7 @@ class WC_Gateway_Klarna_Checkout_Extra {
 	function is_rest() {
 		$this->klarna_country = WC()->session->get( 'klarna_country' );
 
-		if ( 'GB' == $this->klarna_country || 'gb' == $this->klarna_country || 'US' == $this->klarna_country || 'us' == $this->klarna_country ) {
+		if ( 'GB' == $this->klarna_country || 'gb' == $this->klarna_country || 'US' == $this->klarna_country || 'us' == $this->klarna_country|| 'DK' == $this->klarna_country || 'dk' == $this->klarna_country ) {
 			// Set it in session as well, to be used in Shortcodes class
 			WC()->session->set( 'klarna_is_rest', true );
 

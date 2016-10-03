@@ -32,6 +32,11 @@ $this->secret_fi                     = ( isset( $this->settings['secret_fi'] ) )
 $this->klarna_checkout_url_fi        = ( isset( $this->settings['klarna_checkout_url_fi'] ) ) ? $this->settings['klarna_checkout_url_fi'] : '';
 $this->klarna_checkout_thanks_url_fi = ( isset( $this->settings['klarna_checkout_thanks_url_fi'] ) ) ? $this->settings['klarna_checkout_thanks_url_fi'] : '';
 
+$this->eid_dk                        = ( isset( $this->settings['eid_dk'] ) ) ? $this->settings['eid_dk'] : '';
+$this->secret_dk                     = ( isset( $this->settings['secret_dk'] ) ) ? html_entity_decode( $this->settings['secret_dk'] ) : '';
+$this->klarna_checkout_url_dk        = ( isset( $this->settings['klarna_checkout_url_dk'] ) ) ? $this->settings['klarna_checkout_url_dk'] : '';
+$this->klarna_checkout_thanks_url_dk = ( isset( $this->settings['klarna_checkout_thanks_url_dk'] ) ) ? $this->settings['klarna_checkout_thanks_url_dk'] : '';
+
 $this->eid_de                        = ( isset( $this->settings['eid_de'] ) ) ? $this->settings['eid_de'] : '';
 $this->secret_de                     = ( isset( $this->settings['secret_de'] ) ) ? $this->settings['secret_de'] : '';
 $this->klarna_checkout_url_de        = ( isset( $this->settings['klarna_checkout_url_de'] ) ) ? $this->settings['klarna_checkout_url_de'] : '';
@@ -130,6 +135,9 @@ switch ( get_woocommerce_currency() ) {
 	case 'SEK' :
 		$klarna_country = 'SE';
 		break;
+	case 'DKK' :
+		$klarna_country = 'DK';
+		break;
 	case 'GBP' :
 		$klarna_country = 'GB';
 		break;
@@ -196,6 +204,20 @@ switch ( $this->shop_country ) {
 			$klarna_checkout_thanks_url = $this->klarna_checkout_url_se;
 		} else {
 			$klarna_checkout_thanks_url = $this->klarna_checkout_thanks_url_se;
+		}
+		break;
+	case 'DK' :
+		$klarna_country = 'dk';
+
+		$klarna_language     = 'da-dk';
+		$klarna_currency     = 'DKK';
+		$klarna_eid          = $this->eid_dk;
+		$klarna_secret       = $this->secret_dk;
+		$klarna_checkout_url = $this->klarna_checkout_url_dk;
+		if ( $this->klarna_checkout_thanks_url_dk == '' ) {
+			$klarna_checkout_thanks_url = $this->klarna_checkout_url_dk;
+		} else {
+			$klarna_checkout_thanks_url = $this->klarna_checkout_thanks_url_dk;
 		}
 		break;
 	case 'DE' :
@@ -273,6 +295,9 @@ if ( ! empty( $this->eid_no ) ) {
 }
 if ( ! empty( $this->eid_fi ) ) {
 	$this->authorized_countries[] = 'FI';
+}
+if ( ! empty( $this->eid_dk ) ) {
+	$this->authorized_countries[] = 'DK';
 }
 if ( ! empty( $this->eid_de ) ) {
 	$this->authorized_countries[] = 'DE';

@@ -342,13 +342,13 @@ class WC_Gateway_Klarna_K2WC {
 		if ( sanitize_key( $_GET['klarna-api'] ) && 'rest' == sanitize_key( $_GET['klarna-api'] ) ) {
 			$klarna_country = sanitize_key( $_GET['scountry'] );
 			if ( $this->klarna_test_mode == 'yes' ) {
-				if ( 'gb' == $klarna_country ) {
+				if ( 'gb' == $klarna_country || 'dk' == $klarna_country ) {
 					$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_TEST_BASE_URL;
 				} elseif ( 'us' == $klarna_country ) {
 					$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::NA_TEST_BASE_URL;
 				}
 			} else {
-				if ( 'gb' == $klarna_country ) {
+				if ( 'gb' == $klarna_country || 'dk' == $klarna_country ) {
 					$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_BASE_URL;
 				} elseif ( 'us' == $klarna_country ) {
 					$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::NA_BASE_URL;
