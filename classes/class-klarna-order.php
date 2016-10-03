@@ -1224,7 +1224,7 @@ class WC_Gateway_Klarna_Order {
 			return true;
 		} catch ( Exception $e ) {
 			if ( $this->debug == 'yes' ) {
-				$this->log->add( 'klarna', 'Klarna API error: ' . var_export( $e, true ) );
+				$this->log->add( 'klarna', 'Klarna API error: ' . $e->getMessage() );
 			}
 
 			$order->add_order_note( sprintf( __( 'Klarna order update failed. Error code %s. Error message %s', 'woocommerce-gateway-klarna' ), $e->getCode(), utf8_encode( $e->getMessage() ) ) );

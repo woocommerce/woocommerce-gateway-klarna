@@ -103,7 +103,7 @@ class WC_Gateway_Klarna_Cross_Sells {
 		// Check if cart update is allowed by Klarna
 		if (
 			( isset( $klarna_order['cart_update_allowed'] ) && $klarna_order['cart_update_allowed'] )
-			// || ( isset( $klarna_order['payment_type_allows_increase'] ) && $klarna_order['payment_type_allows_increase'] )
+			|| ( isset( $klarna_order['payment_type_allows_increase'] ) && $klarna_order['payment_type_allows_increase'] )
 		) {
 			echo WC()->session->get( 'klarna_cross_sells' );
 		}
