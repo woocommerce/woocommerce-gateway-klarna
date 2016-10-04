@@ -25,7 +25,6 @@ class WC_Gateway_Klarna_Cross_Sells {
 		if ( $this->cross_sells_enabled ) {
 			add_action( 'klarna_after_kco_checkout', array( $this, 'add_cross_sells_ids_to_session' ) );
 			add_action( 'klarna_after_kco_confirmation', array( $this, 'display_cross_sells' ), 10, 2 );
-			add_action( 'klarna_after_kco_confirmation', array( $this, 'remove_cross_sells_ids_from_session' ), 9999 );
 			add_action( 'wp_enqueue_scripts', array( $this, 'klarna_checkout_cross_sells_enqueuer' ) );
 			add_action( 'wp_ajax_klarna_checkout_cross_sells_add', array( $this, 'cross_sells_process' ) );
 			add_action( 'wp_ajax_nopriv_klarna_checkout_cross_sells_add', array( $this, 'cross_sells_process' ) );
@@ -50,11 +49,6 @@ class WC_Gateway_Klarna_Cross_Sells {
 			// Remove change the button filter
 			remove_filter( 'woocommerce_loop_add_to_cart_link', array( $this, 'filter_add_to_cart_button' ) );
 		}
-	}
-
-	function remove_cross_sells_ids_from_session() {
-		// @TODO: Uncomment it
-		// WC()->session->__unset( 'klarna_cross_sells' );
 	}
 
 	function klarna_checkout_cross_sells_enqueuer() {
