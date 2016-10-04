@@ -16,13 +16,20 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class WC_Gateway_Klarna_Cross_Sells {
 
+	private $cross_sells_enabled;
+
 	public function __construct() {
-		add_action( 'klarna_after_kco_checkout', array( $this, 'add_cross_sells_ids_to_session' ) );
-		add_action( 'klarna_after_kco_confirmation', array( $this, 'display_cross_sells' ), 10, 2 );
-		add_action( 'klarna_after_kco_confirmation', array( $this, 'remove_cross_sells_ids_from_session' ), 9999 );
-		add_action( 'wp_enqueue_scripts', array( $this, 'klarna_checkout_cross_sells_enqueuer' ) );
-		add_action( 'wp_ajax_klarna_checkout_cross_sells_add', array( $this, 'cross_sells_process' ) );
-		add_action( 'wp_ajax_nopriv_klarna_checkout_cross_sells_add', array( $this, 'cross_sells_process' ) );
+		$checkout_settings = get_option( 'woocommerce_klarna_checkout_settings' );
+		$this->cross_sells_enabled = ( isset( $checkout_settings['enable_cross_sells'] ) && 'yes' === $checkout_settings['enable_cross_sells'] ) ? true : false;
+
+		if ( $this->cross_sells_enabled ) {
+			add_action( 'klarna_after_kco_checkout', array( $this, 'add_cross_sells_ids_to_session' ) );
+			add_action( 'klarna_after_kco_confirmation', array( $this, 'display_cross_sells' ), 10, 2 );
+			add_action( 'klarna_after_kco_confirmation', array( $this, 'remove_cross_sells_ids_from_session' ), 9999 );
+			add_action( 'wp_enqueue_scripts', array( $this, 'klarna_checkout_cross_sells_enqueuer' ) );
+			add_action( 'wp_ajax_klarna_checkout_cross_sells_add', array( $this, 'cross_sells_process' ) );
+			add_action( 'wp_ajax_nopriv_klarna_checkout_cross_sells_add', array( $this, 'cross_sells_process' ) );
+		}
 	} // End constructor
 
 	function add_cross_sells_ids_to_session() {
@@ -51,7 +58,6 @@ class WC_Gateway_Klarna_Cross_Sells {
 	}
 
 	function klarna_checkout_cross_sells_enqueuer() {
-		// @TODO: Enqueue on checkout pages as well, in case a merchant doesn't have separate TY page
 		if ( is_page() ) {
 			$checkout_settings = get_option( 'woocommerce_klarna_checkout_settings' );
 			$checkout_pages    = array();
