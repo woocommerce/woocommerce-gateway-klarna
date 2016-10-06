@@ -827,7 +827,7 @@ class WC_Gateway_Klarna_Order {
 	 * @param bool $itemid
 	 * @param bool $skip_address
 	 */
-	function update_order( $orderid, $itemid = false, $skip_address = false ) {
+	function update_order( $orderid, $itemid = false ) {
 		$order       = wc_get_order( $orderid );
 		$this->order = $order;
 		$rno            = get_post_meta( $orderid, '_klarna_order_reservation', true );
@@ -836,7 +836,7 @@ class WC_Gateway_Klarna_Order {
 		$klarna = new Klarna();
 		$this->configure_klarna( $klarna, $country, $payment_method );
 		$this->klarna = $klarna;
-		if ( ! $skip_address ) {
+		if ( 'AT' !== $country  && 'DE' !== $country ) {
 			$this->add_addresses();
 		}
 		$this->process_order_items( $itemid );

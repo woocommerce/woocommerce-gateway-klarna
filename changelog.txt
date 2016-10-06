@@ -1,6 +1,6 @@
 *** WooCommerce Gateway Klarna Changelog ***
 
-2016.10.xx  - version 2.2
+2016.10.06  - version 2.2
 * Fix       - Fixes a PHP notice in shortcodes class.
 * Fix       - Gets rid of code duplication in KCO widget.
 * Fix       - Uses KCO shipping address for shipping calculation, when WooCommerce is set to this option.

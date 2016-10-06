@@ -188,7 +188,7 @@ class WC_Gateway_Klarna_Cross_Sells {
 		if ( 'rest' == get_post_meta( $wc_order->id, '_klarna_api', true ) ) {
 			$result = $klarna_order->update_order_rest( $wc_order->id );
 		} else {
-			$result = $klarna_order->update_order( $wc_order->id, false, true );
+			$result = $klarna_order->update_order( $wc_order->id );
 		}
 
 		return $result;
