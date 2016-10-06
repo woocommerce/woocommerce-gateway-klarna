@@ -955,7 +955,7 @@ class WC_Gateway_Klarna_Order {
 	 *
 	 * @since  2.0
 	 **/
-	function update_order( $orderid, $itemid = false ) {
+	function update_order( $orderid, $itemid = false, $skip_address = false ) {
 		$order       = wc_get_order( $orderid );
 		$this->order = $order;
 
@@ -967,7 +967,9 @@ class WC_Gateway_Klarna_Order {
 		$this->configure_klarna( $klarna, $country, $payment_method );
 		$this->klarna = $klarna;
 
-		$this->add_addresses();
+		if ( ! $skip_address ) {
+			$this->add_addresses();
+		}
 		$this->process_order_items( $itemid );
 		$this->process_fees();
 		$this->process_shipping();
