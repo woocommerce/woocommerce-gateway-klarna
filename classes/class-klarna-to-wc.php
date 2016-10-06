@@ -188,7 +188,7 @@ class WC_Gateway_Klarna_K2WC {
 	 * @since  2.0.0
 	 * @access public
 	 *
-	 * @param  $customer_email KCO incomplete customer email
+	 * @param  $customer_email incomplete order customer email
 	 *
 	 * @return int
 	 */

@@ -260,10 +260,10 @@ class WC_Gateway_Klarna_Shortcodes {
 	 * Gets Klarna checkout widget HTML.
 	 * Used in KCO widget.
 	 *
-	 * @param  $atts Attributes passed to shortcode
+	 * @param  $atts attributes passed to shortcode
 	 *
 	 * @since  2.0
-	 * @return HTML string
+	 * @return string
 	 */
 	function klarna_checkout_get_kco_widget_html( $atts = null ) {
 		global $woocommerce;

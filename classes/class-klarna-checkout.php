@@ -1096,11 +1096,10 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	//
 	//
 	//
+
 	/**
 	 * Gets Klarna checkout widget HTML.
 	 * Used in KCO widget.
-	 *
-	 * @param  $atts Array
 	 *
 	 * @return String shortcode output
 	 *

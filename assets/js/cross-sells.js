@@ -6,7 +6,7 @@ jQuery(document).ready(function ($) {
 	var countdown_timer = function countdown_timer() {
 		update_possible = false;
 		$('#klarna-checkout-cross-sells').remove();
-	}
+	};
 	var timer = setTimeout(countdown_timer, 30 * 60 * 60 * 1000);
 
 	$('.klarna-cross-sells-button:not(.disabled)').on('click', function(event) {

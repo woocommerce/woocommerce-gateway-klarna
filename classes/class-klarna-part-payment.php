@@ -132,9 +132,10 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 	/**
 	 * Add Klarna's shipping details to order confirmation page.
 	 *
-	 * @param  $text  Default order confirmation text
+	 * @param  $text order confirmation text
 	 *
 	 * @since  2.0.0
+	 * @return order|string
 	 */
 	public function output_klarna_details_confirmation( $text, $order ) {
 		if ( $this->id == $order->payment_method ) {

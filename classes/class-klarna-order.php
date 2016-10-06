@@ -22,8 +22,8 @@ class WC_Gateway_Klarna_Order {
 	 *
 	 * @since 2.0.0
 	 *
-	 * @param  $order  WooCoommerce order object
-	 * @param  $klarna Klarna object in V2, not needed for Rest
+	 * @param bool|order $order order object
+	 * @param bool|Klarna $klarna Klarna object in V2, not needed for Rest
 	 */
 	public function __construct( $order = false, $klarna = false ) {
 		$this->order  = $order;
@@ -99,8 +99,7 @@ class WC_Gateway_Klarna_Order {
 	/**
 	 * Process cart contents.
 	 *
-	 * @param  $skip_item Item ID to skip from adding, used when item is removed from cart widget
-	 *
+	 * @param  $skip_item item ID to skip from adding, used when item is removed from cart widget
 	 * @since  2.0
 	 **/
 	function process_order_items( $skip_item = null ) {
@@ -1074,7 +1073,7 @@ class WC_Gateway_Klarna_Order {
 	 *
 	 * @since  2.0
 	 *
-	 * @param  $order  WooCoommerce order object
+	 * @param  $order object
 	 *
 	 * @return WC_Order
 	 */
