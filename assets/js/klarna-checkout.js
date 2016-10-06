@@ -320,6 +320,7 @@ jQuery(document).ready(function ($) {
 	// End KCO widget
 
 	var returned_data_v2 = '';
+	var returned_shipping_data_v2 = '';
 	// Address change (email, postal code) v2
 	if (typeof window._klarnaCheckout == 'function') {
 		window._klarnaCheckout(function (api) {
@@ -327,9 +328,13 @@ jQuery(document).ready(function ($) {
 			if ('v2' == kcoAjax.version) {
 				var customerEmail = '';
 				var customerPostal = '';
+				var customerShippingCountry = '';
+				var customerShippingPostal = '';
 
 				api.on({
 					'change': function (data) {
+						// console.log(data);
+
 						// Check if the data actually changed
 						if ( returned_data_v2 !== JSON.stringify(data) ) {
 							returned_data_v2 = JSON.stringify(data);
@@ -344,7 +349,6 @@ jQuery(document).ready(function ($) {
 										api.suspend();
 									});
 
-
 									// Check if email is not defined (AT and DE only) and set it to this value
 									// For AT and DE, email field is not captured inside data object
 									if (data.email === undefined) {
@@ -352,7 +356,7 @@ jQuery(document).ready(function ($) {
 									}
 
 									if ('' != data.email) {
-										kco_widget = $('#klarna-checkout-widget');
+										var kco_widget = $('#klarna-checkout-widget');
 
 										$(document.body).trigger('kco_widget_update', data);
 
@@ -371,7 +375,6 @@ jQuery(document).ready(function ($) {
 												success: function (response) {
 													// Check if a product is out of stock
 													if (false === response.success) {
-														// console.log('false');
 														location.reload();
 														return;
 													}
@@ -401,6 +404,55 @@ jQuery(document).ready(function ($) {
 						$(document.body).trigger('kco_change', data);
 					},
 					shipping_address_change: function(data) {
+						if ( returned_shipping_data_v2 !== JSON.stringify(data) ) {
+							returned_shipping_data_v2 = JSON.stringify(data);
+
+							if ('' != data.country && '' != data.postal_code) {
+								// Check if purchase country and postal code have changed since last 'change' event
+								if (customerShippingCountry != data.country || customerShippingPostal != data.postal_code) {
+									customerShippingCountry = data.country;
+									customerShippingPostal = data.postal_code;
+
+									window._klarnaCheckout(function (api) {
+										api.suspend();
+									});
+
+									var kco_widget = $('#klarna-checkout-widget');
+									$(document.body).trigger('kco_widget_update', data);
+
+									$.ajax(
+										kcoAjax.ajaxurl,
+										{
+											type: 'POST',
+											dataType: 'json',
+											data: {
+												action: 'kco_iframe_v2_shipping_address_change_cb',
+												postal_country: customerShippingCountry,
+												postal_code: customerShippingPostal,
+												nonce: kcoAjax.klarna_checkout_nonce
+											},
+											success: function (response) {
+												$(kco_widget).html(response.data.widget_html);
+												$(document.body).trigger('kco_widget_updated', response);
+
+												window._klarnaCheckout(function (api) {
+													api.resume();
+												});
+											},
+											error: function (response) {
+												console.log('shipping address change AJAX error');
+												console.log(response);
+
+												window._klarnaCheckout(function (api) {
+													api.resume();
+												});
+											}
+										}
+									);
+								}
+							}
+						}
+
 						$(document.body).trigger('kco_shipping_address_change', data);
 					},
 					order_total_change: function(data) {

@@ -188,7 +188,9 @@ class WC_Gateway_Klarna_K2WC {
 	 * @since  2.0.0
 	 * @access public
 	 *
-	 * @param  $customer_email KCO incomplete customer email
+	 * @param  $customer_email incomplete order customer email
+	 *
+	 * @return int
 	 */
 	public function prepare_wc_order( $customer_email ) {
 		global $woocommerce;
@@ -208,18 +210,35 @@ class WC_Gateway_Klarna_K2WC {
 		if ( isset( $order ) ) {
 			// Need to clean up the order first, to avoid duplicate items
 			$order->remove_order_items();
+
 			// Add order items
-			$this->add_order_items( $order );
+			if ( empty( $order->get_items( array( 'line_item' ) ) ) ) {
+				$this->add_order_items( $order );
+			}
+
 			// Add order fees
-			$this->add_order_fees( $order );
+			if ( empty( $order->get_items( array( 'fee' ) ) ) ) {
+				$this->add_order_fees( $order );
+			}
+
 			// Add order shipping
-			$this->add_order_shipping( $order );
+			if ( empty( $order->get_items( array( 'shipping' ) ) ) ) {
+				$this->add_order_shipping( $order );
+			}
+
 			// Add order taxes
-			$this->add_order_tax_rows( $order );
+			if ( empty( $order->get_items( array( 'tax' ) ) ) ) {
+				$this->add_order_tax_rows( $order );
+			}
+
 			// Store coupons
-			$this->add_order_coupons( $order );
+			if ( empty( $order->get_items( array( 'coupon' ) ) ) ) {
+				$this->add_order_coupons( $order );
+			}
+
 			// Store payment method
 			$this->add_order_payment_method( $order );
+
 			// Calculate order totals
 			$this->set_order_totals( $order );
 			// Tie this order to a user
@@ -323,13 +342,13 @@ class WC_Gateway_Klarna_K2WC {
 		if ( sanitize_key( $_GET['klarna-api'] ) && 'rest' == sanitize_key( $_GET['klarna-api'] ) ) {
 			$klarna_country = sanitize_key( $_GET['scountry'] );
 			if ( $this->klarna_test_mode == 'yes' ) {
-				if ( 'gb' == $klarna_country ) {
+				if ( 'gb' == $klarna_country || 'dk' == $klarna_country ) {
 					$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_TEST_BASE_URL;
 				} elseif ( 'us' == $klarna_country ) {
 					$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::NA_TEST_BASE_URL;
 				}
 			} else {
-				if ( 'gb' == $klarna_country ) {
+				if ( 'gb' == $klarna_country || 'dk' == $klarna_country ) {
 					$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_BASE_URL;
 				} elseif ( 'us' == $klarna_country ) {
 					$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::NA_BASE_URL;
@@ -530,6 +549,7 @@ class WC_Gateway_Klarna_K2WC {
 			$received__billing_address_1  = $klarna_order['billing_address']['street_address'];
 			$received__shipping_address_1 = $klarna_order['shipping_address']['street_address'];
 		}
+
 		// Add customer billing address - retrieved from callback from Klarna
 		update_post_meta( $order_id, '_billing_first_name', $klarna_order['billing_address']['given_name'] );
 		update_post_meta( $order_id, '_billing_last_name', $klarna_order['billing_address']['family_name'] );
@@ -542,6 +562,7 @@ class WC_Gateway_Klarna_K2WC {
 		update_post_meta( $order_id, '_billing_country', strtoupper( $klarna_order['billing_address']['country'] ) );
 		update_post_meta( $order_id, '_billing_email', $klarna_order['billing_address']['email'] );
 		update_post_meta( $order_id, '_billing_phone', $klarna_order['billing_address']['phone'] );
+
 		// Add customer shipping address - retrieved from callback from Klarna
 		$allow_separate_shipping = ( isset( $klarna_order['options']['allow_separate_shipping_address'] ) ) ? $klarna_order['options']['allow_separate_shipping_address'] : '';
 		update_post_meta( $order_id, '_shipping_first_name', $klarna_order['shipping_address']['given_name'] );
@@ -553,6 +574,7 @@ class WC_Gateway_Klarna_K2WC {
 		update_post_meta( $order_id, '_shipping_postcode', $klarna_order['shipping_address']['postal_code'] );
 		update_post_meta( $order_id, '_shipping_city', $klarna_order['shipping_address']['city'] );
 		update_post_meta( $order_id, '_shipping_country', strtoupper( $klarna_order['shipping_address']['country'] ) );
+
 		// Store Klarna locale
 		update_post_meta( $order_id, '_klarna_locale', $klarna_order['locale'] );
 	}
@@ -769,7 +791,7 @@ class WC_Gateway_Klarna_K2WC {
 					update_user_meta( $new_customer, 'billing_phone', $klarna_order['billing_address']['phone'] );
 					// Add customer shipping address - retrieved from callback from Klarna
 					$allow_separate_shipping = ( isset( $klarna_order['options']['allow_separate_shipping_address'] ) ) ? $klarna_order['options']['allow_separate_shipping_address'] : '';
-					if ( $allow_separate_shipping == 'true' || $_GET['scountry'] == 'DE' || $_GET['scountry'] == 'AT' ) {
+					if ( $allow_separate_shipping == 'true' && ( $_GET['scountry'] == 'DE' || $_GET['scountry'] == 'AT' ) ) {
 						update_user_meta( $new_customer, 'shipping_first_name', $klarna_order['shipping_address']['given_name'] );
 						update_user_meta( $new_customer, 'shipping_last_name', $klarna_order['shipping_address']['family_name'] );
 						update_user_meta( $new_customer, 'shipping_address_1', $received_shipping_address_1 );

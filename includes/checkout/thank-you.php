@@ -31,13 +31,13 @@ $orderUri     = $_GET['klarna_order'];
 // Connect to Klarna
 if ( $this->is_rest() ) {
 	if ( $this->testmode == 'yes' ) {
-		if ( 'gb' == $this->klarna_country ) {
+		if ( 'gb' == $this->klarna_country || 'dk' == $this->klarna_country ) {
 			$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_TEST_BASE_URL;
 		} elseif ( 'us' == $this->klarna_country ) {
 			$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::NA_TEST_BASE_URL;
 		}
 	} else {
-		if ( 'gb' == $this->klarna_country ) {
+		if ( 'gb' == $this->klarna_country || 'dk' == $this->klarna_country ) {
 			$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_BASE_URL;
 		} elseif ( 'us' == $this->klarna_country ) {
 			$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::NA_BASE_URL;
@@ -83,7 +83,7 @@ do_action( 'klarna_before_kco_confirmation', intval( $_GET['sid'] ) );
 
 echo $snippet;
 
-do_action( 'klarna_after_kco_confirmation', intval( $_GET['sid'] ) );
+do_action( 'klarna_after_kco_confirmation', intval( $_GET['sid'] ), $klarna_order );
 do_action( 'woocommerce_thankyou', intval( $_GET['sid'] ) );
 
 // Clear session and empty cart

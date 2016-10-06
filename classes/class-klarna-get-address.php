@@ -241,7 +241,7 @@ class WC_Klarna_Get_Address {
 										$(".klarna-get-address-message").hide();
 
 										//if(klarna_client_type == "company"){
-										var adresses = new Array();
+										var adresses = [];
 										adresses.push(response);
 
 										var res = "";

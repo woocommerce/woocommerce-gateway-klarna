@@ -105,13 +105,13 @@ if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 	// Initiate Klarna
 	if ( $this->is_rest() ) {
 		if ( $this->testmode == 'yes' ) {
-			if ( 'gb' == $this->klarna_country ) {
+			if ( 'gb' == $this->klarna_country || 'dk' == $this->klarna_country ) {
 				$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_TEST_BASE_URL;
 			} elseif ( 'us' == $this->klarna_country ) {
 				$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::NA_TEST_BASE_URL;
 			}
 		} else {
-			if ( 'gb' == $this->klarna_country ) {
+			if ( 'gb' == $this->klarna_country || 'dk' == $this->klarna_country ) {
 				$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_BASE_URL;
 			} elseif ( 'us' == $this->klarna_country ) {
 				$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::NA_BASE_URL;
@@ -161,6 +161,10 @@ if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 		$sessionId = $klarna_order['id'];
 	}
 
+	// Setting these here because cross-sells need them
+	update_post_meta( $local_order_id, '_klarna_order_id', $klarna_order['order_id'], true );
+	update_post_meta( $local_order_id, '_billing_country', WC()->session->get( 'klarna_country' ), true );
+
 	// Set session values for Klarna order ID and Klarna order country
 	WC()->session->set( 'klarna_checkout', $sessionId );
 	WC()->session->set( 'klarna_checkout_country', WC()->customer->get_country() );
@@ -173,6 +177,7 @@ if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 		$snippet = $klarna_order['gui']['snippet'];
 	}
 	echo '<div>' . apply_filters( 'klarna_kco_checkout', $snippet ) . '</div>';
+
 	do_action( 'klarna_after_kco_checkout' );
 } else {
 	// If cart is empty, clear these variables

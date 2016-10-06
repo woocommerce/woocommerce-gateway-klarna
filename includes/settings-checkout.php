@@ -159,6 +159,39 @@ return apply_filters( 'klarna_checkout_form_fields', array(
 		'desc_tip'    => false
 	),
 
+	'dk_settings_title'             => array(
+		'title' => __( 'Denmark', 'woocommerce-gateway-klarna' ),
+		'type'  => 'title',
+	),
+	'eid_dk'                        => array(
+		'title'       => __( 'Eid - Denmark', 'woocommerce-gateway-klarna' ),
+		'type'        => 'text',
+		'description' => __( 'Please enter your Klarna Eid for Denmark. Leave blank to disable.', 'woocommerce-gateway-klarna' ),
+		'default'     => '',
+		'desc_tip'    => true
+	),
+	'secret_dk'                     => array(
+		'title'       => __( 'Shared Secret - Denmark', 'woocommerce-gateway-klarna' ),
+		'type'        => 'text',
+		'description' => __( 'Please enter your Klarna Shared Secret for Denmark.', 'woocommerce-gateway-klarna' ),
+		'default'     => '',
+		'desc_tip'    => true
+	),
+	'klarna_checkout_url_dk'        => array(
+		'title'       => __( 'Custom Checkout Page - Denmark', 'woocommerce-gateway-klarna' ),
+		'type'        => 'text',
+		'description' => __( 'Please enter the URL to the page that acts as Checkout Page for Klarna Checkout Denmark. This page must contain the shortcode [woocommerce_klarna_checkout].', 'woocommerce-gateway-klarna' ),
+		'default'     => '',
+		'desc_tip'    => false
+	),
+	'klarna_checkout_thanks_url_dk' => array(
+		'title'       => __( 'Custom Thanks Page - Denmark', 'woocommerce-gateway-klarna' ),
+		'type'        => 'text',
+		'description' => __( 'Enter the URL to the page that acts as Thanks Page for Klarna Checkout Denmark. This page must contain the shortcode [woocommerce_klarna_checkout]. Leave blank to use the Custom Checkout Page as Thanks Page.', 'woocommerce-gateway-klarna' ),
+		'default'     => '',
+		'desc_tip'    => false
+	),
+
 	'germany_settings_title'        => array(
 		'title' => __( 'Germany', 'woocommerce-gateway-klarna' ),
 		'type'  => 'title',
@@ -412,6 +445,12 @@ return apply_filters( 'klarna_checkout_form_fields', array(
 		'type'        => 'checkbox',
 		'label'       => __( 'If you enable this option discounts will be sent to Klarna as separate cart items instead of being applied to regular cart items.', 'woocommerce-gateway-klarna' ),
 		'description' => __( 'Use this if you encounter rounding issues that cause WooCommerce order total not to match Klarna order total.', 'klarna' ),
+		'default'     => 'no'
+	),
+	'enable_cross_sells' => array(
+		'title'       => __( 'Enable cross-sells in Klarna Checkout thank you page', 'woocommerce-gateway-klarna' ),
+		'type'        => 'checkbox',
+		'label'       => sprintf( __( 'If this option is checked cross-sell product will be shown in Klarna Checkout thank you page, allowing customers to add them to the order they just completed. Cross-sell products must be <a href="%s">configured in WooCommerce</a> first.', 'woocommerce-gateway-klarna' ), 'https://docs.woocommerce.com/document/related-products-up-sells-and-cross-sells/' ),
 		'default'     => 'no'
 	),
 
