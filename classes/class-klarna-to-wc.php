@@ -586,6 +586,8 @@ class WC_Gateway_Klarna_K2WC {
 	 * @access public
 	 *
 	 * @param  object $order Local WC order.
+	 *
+	 * @throws Exception
 	 */
 	public function add_order_tax_rows( $order ) {
 		if ( $this->klarna_debug == 'yes' ) {
