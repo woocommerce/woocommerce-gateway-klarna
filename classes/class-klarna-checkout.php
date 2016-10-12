@@ -154,8 +154,6 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		// V2
 		add_action( 'wp_ajax_kco_iframe_change_cb', array( $this, 'kco_iframe_change_cb' ) );
 		add_action( 'wp_ajax_nopriv_kco_iframe_change_cb', array( $this, 'kco_iframe_change_cb' ) );
-		add_action( 'wp_ajax_kco_iframe_v2_shipping_address_change_cb', array( $this, 'kco_iframe_v2_shipping_address_change_cb' ) );
-		add_action( 'wp_ajax_nopriv_kco_iframe_v2_shipping_address_change_cb', array( $this, 'kco_iframe_v2_shipping_address_change_cb' ) );
 		// V3
 		add_action( 'wp_ajax_kco_iframe_shipping_address_change_cb', array(
 			$this,
@@ -906,43 +904,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	}
 
 	/**
-	 * Klarna order shipping address change callback function for API V2.
-	 *
-	 * @since  2.0
-	 **/
-	function kco_iframe_v2_shipping_address_change_cb() {
-		if ( ! wp_verify_nonce( $_REQUEST['nonce'], 'klarna_checkout_nonce' ) ) {
-			exit( 'Nonce can not be verified.' );
-		}
-
-		$data = array();
-
-		// Capture postal code
-		if ( isset( $_REQUEST['postal_code'] ) && is_string( $_REQUEST['postal_code'] ) ) {
-			WC()->customer->set_shipping_postcode( $_REQUEST['postal_code'] );
-		}
-		if ( isset( $_REQUEST['postal_country'] ) && is_string( $_REQUEST['postal_country'] ) ) {
-			WC()->customer->set_shipping_country( substr( strtoupper( $_REQUEST['postal_country'] ), 0, 2 ) );
-		}
-		if ( ! defined( 'WOOCOMMERCE_CART' ) ) {
-			define( 'WOOCOMMERCE_CART', true );
-		}
-
-		WC()->cart->calculate_shipping();
-		WC()->cart->calculate_fees();
-		WC()->cart->calculate_totals();
-		$this->update_or_create_local_order();
-
-		$data['widget_html'] = $this->klarna_checkout_get_kco_widget_html();
-		if ( WC()->session->get( 'klarna_checkout' ) ) {
-			$this->ajax_update_klarna_order();
-		}
-		wp_send_json_success( $data );
-		wp_die();
-	}
-
-	/**
-	 * Klarna order shipping address change callback function.
+	 * Klarna order shipping address change callback function (V3).
 	 *
 	 * @since  2.0
 	 **/
