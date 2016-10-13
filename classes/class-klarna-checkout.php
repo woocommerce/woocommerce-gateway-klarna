@@ -154,6 +154,14 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		// V2
 		add_action( 'wp_ajax_kco_iframe_change_cb', array( $this, 'kco_iframe_change_cb' ) );
 		add_action( 'wp_ajax_nopriv_kco_iframe_change_cb', array( $this, 'kco_iframe_change_cb' ) );
+		add_action( 'wp_ajax_kco_iframe_shipping_address_change_v2_cb', array(
+			$this,
+			'kco_iframe_shipping_address_change_v2_cb'
+		) );
+		add_action( 'wp_ajax_nopriv_kco_iframe_shipping_address_change_v2_cb', array(
+			$this,
+			'kco_iframe_shipping_address_change_v2_cb'
+		) );
 		// V3
 		add_action( 'wp_ajax_kco_iframe_shipping_address_change_cb', array(
 			$this,
@@ -904,6 +912,62 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	}
 
 	/**
+	 * Klarna order shipping address change callback function (V2).
+	 *
+	 * @since  2.0
+	 **/
+	function kco_iframe_shipping_address_change_v2_cb() {
+		if ( ! wp_verify_nonce( $_REQUEST['nonce'], 'klarna_checkout_nonce' ) ) {
+			exit( 'Nonce can not be verified.' );
+		}
+		global $woocommerce;
+		$data = array();
+		// Capture postal code
+		if ( isset( $_REQUEST['postal_code'] ) && is_string( $_REQUEST['postal_code'] ) ) {
+			$woocommerce->customer->set_shipping_postcode( $_REQUEST['postal_code'] );
+		}
+		/*
+		if ( isset( $_REQUEST['country'] ) && is_string( $_REQUEST['country'] ) ) {
+			$shipping_country = strtoupper( $_REQUEST['country'] );
+			switch ( $shipping_country ) {
+				case 'SWE' :
+					$formatted_country = 'SE';
+					break;
+				case 'NOR' :
+					$formatted_country = 'NO';
+					break;
+				case 'AUT' :
+					$formatted_country = 'AT';
+					break;
+				case 'FIN' :
+					$formatted_country = 'FI';
+					break;
+				case 'DEU' :
+					$formatted_country = 'DE';
+					break;
+			}
+
+			if ( isset( $formatted_country ) ) {
+				$woocommerce->customer->set_shipping_country( $formatted_country );
+			}
+		}
+		*/
+		if ( ! defined( 'WOOCOMMERCE_CART' ) ) {
+			define( 'WOOCOMMERCE_CART', true );
+		}
+		$woocommerce->cart->calculate_shipping();
+		$woocommerce->cart->calculate_fees();
+		$woocommerce->cart->calculate_totals();
+		$this->update_or_create_local_order();
+		$data['widget_html'] = $this->klarna_checkout_get_kco_widget_html();
+		if ( WC()->session->get( 'klarna_checkout' ) ) {
+			$this->ajax_update_klarna_order();
+		}
+		wp_send_json_success( $data );
+		wp_die();
+	}
+
+	/**
 	 * Klarna order shipping address change callback function (V3).
 	 *
 	 * @since  2.0
@@ -930,6 +994,9 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			} elseif ( 'usa' == $_REQUEST['country'] ) {
 				$woocommerce->customer->set_country( 'US' );
 				$woocommerce->customer->set_shipping_country( 'US' );
+			} elseif ( 'dnk' == $_REQUEST['country'] ) {
+				$woocommerce->customer->set_country( 'DK' );
+				$woocommerce->customer->set_shipping_country( 'DK' );
 			}
 		}
 		if ( ! defined( 'WOOCOMMERCE_CART' ) ) {

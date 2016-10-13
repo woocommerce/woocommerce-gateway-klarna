@@ -320,6 +320,7 @@ jQuery(document).ready(function ($) {
 	// End KCO widget
 
 	var returned_data_v2 = '';
+	var returned_shipping_data_v2 = '';
 	// Address change (email, postal code) v2
 	if (typeof window._klarnaCheckout == 'function') {
 		window._klarnaCheckout(function (api) {
@@ -401,7 +402,44 @@ jQuery(document).ready(function ($) {
 						$(document.body).trigger('kco_change', data);
 					},
 					shipping_address_change: function(data) {
-						$(document.body).trigger('kco_shipping_address_change', data);
+						if ( returned_shipping_data_v2 !== JSON.stringify(data) ) {
+							returned_shipping_data_v2 = JSON.stringify(data);
+
+							// Check if email and postal code have changed since last 'change' event
+							if ('' != data.email && '' != data.postal_code) {
+								window._klarnaCheckout(function (api) {
+									api.suspend();
+								});
+
+								$.ajax(
+									kcoAjax.ajaxurl,
+									{
+										type: 'POST',
+										dataType: 'json',
+										data: {
+											action: 'kco_iframe_shipping_address_change_v2_cb',
+											postal_code: data.postal_code,
+											country: data.country,
+											nonce: kcoAjax.klarna_checkout_nonce
+										},
+										success: function (response) {
+											$(kco_widget).html(response.data.widget_html);
+										},
+										error: function (response) {
+											console.log('shipping_address_change_v2 AJAX error');
+											console.log(response);
+										},
+										complete: function (response) {
+											window._klarnaCheckout(function (api) {
+												api.resume();
+											});
+										}
+									}
+								);
+							}
+
+							$(document.body).trigger('kco_shipping_address_change', data);
+						}
 					},
 					order_total_change: function(data) {
 						$(document.body).trigger('kco_order_total_change', data);

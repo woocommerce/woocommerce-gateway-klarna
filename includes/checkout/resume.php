@@ -245,7 +245,6 @@ try {
 			*/
 		}
 
-		// $update['options']['allow_separate_shipping_address'] = true;
 		$klarna_order->update( apply_filters( 'kco_update_order', $update ) );
 
 	} // End if country change
