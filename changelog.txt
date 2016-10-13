@@ -1,5 +1,8 @@
 *** WooCommerce Gateway Klarna Changelog ***
 
+2016.10.xx  - version 2.2.2
+* Fix       - Adds back shipping cost calculation based on shipping postal code returned from Klarna in KCO.
+
 2016.10.12  - version 2.2.1
 * Fix       - Fixes KCO tax calculation bug in local order introduced in 2.2
 
