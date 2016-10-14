@@ -213,7 +213,7 @@ class WC_Gateway_Klarna_Order {
 				// apply_filters to item price so we can filter this if needed
 				$klarna_item_price_including_tax = $item['line_total'] + $item['line_tax'];
 				$item_price                      = apply_filters( 'klarna_fee_price_including_tax', $klarna_item_price_including_tax );
-				$klarna->addArticle( $qty = 1, $artNo = '', $title = $item['name'], $price = $item_price, $vat = round( $item_tax_percentage ), $discount = 0, $flags = $klarna_flags );
+				$klarna->addArticle( $qty = 1, $artNo = '', $title = utf8_decode( $item['name'] ), $price = $item_price, $vat = round( $item_tax_percentage ), $discount = 0, $flags = $klarna_flags );
 			}
 		}
 	}
