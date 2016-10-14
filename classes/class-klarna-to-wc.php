@@ -212,27 +212,32 @@ class WC_Gateway_Klarna_K2WC {
 			$order->remove_order_items();
 
 			// Add order items
-			if ( empty( $order->get_items( array( 'line_item' ) ) ) ) {
+			$order_items = $order->get_items( array( 'line_item' ) );
+			if ( empty( $order_items ) ) {
 				$this->add_order_items( $order );
 			}
 
 			// Add order fees
-			if ( empty( $order->get_items( array( 'fee' ) ) ) ) {
+			$order_fees = $order->get_items( array( 'fee' ) );
+			if ( empty( $order_fees ) ) {
 				$this->add_order_fees( $order );
 			}
 
 			// Add order shipping
-			if ( empty( $order->get_items( array( 'shipping' ) ) ) ) {
+			$order_shipping = $order->get_items( array( 'shipping' ) );
+			if ( empty( $order_shipping ) ) {
 				$this->add_order_shipping( $order );
 			}
 
 			// Add order taxes
-			if ( empty( $order->get_items( array( 'tax' ) ) ) ) {
+			$order_taxes = $order->get_items( array( 'tax' ) );
+			if ( empty( $order_taxes ) ) {
 				$this->add_order_tax_rows( $order );
 			}
 
 			// Store coupons
-			if ( empty( $order->get_items( array( 'coupon' ) ) ) ) {
+			$order_coupons = $order->get_items( array( 'coupon' ) );
+			if ( empty( $order_coupons ) ) {
 				$this->add_order_coupons( $order );
 			}
 
