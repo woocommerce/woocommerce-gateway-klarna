@@ -508,7 +508,7 @@ class WC_Gateway_Klarna_Order {
 		// Check if option is enabled
 		if ( 'yes' == $payment_method_option['push_completion'] ) {
 			// If this reservation was already cancelled, do nothing.
-			if ( get_post_meta( $orderid, '_klarna_order_activated', true ) ) {
+			if ( get_post_meta( $orderid, '_klarna_order_activated', true ) && ! get_post_meta( $orderid, '_klarna_order_skip_activated_note', true ) ) {
 				$order->add_order_note( __( 'Could not activate Klarna reservation, Klarna reservation is already activated.', 'woocommerce-gateway-klarna' ) );
 
 				return;
