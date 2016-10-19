@@ -1,6 +1,6 @@
 *** WooCommerce Gateway Klarna Changelog ***
 
-2016.10.xx  - version 2.2.2
+2016.10.19  - version 2.2.2
 * Fix       - Adds back shipping cost calculation based on shipping postal code returned from Klarna in KCO.
 * Fix       - Fixes empty incompatibility with PHP 5.4.
 * Fix       - Changes locale for KCO US to en-US.
