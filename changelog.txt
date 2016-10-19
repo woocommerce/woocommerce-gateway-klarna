@@ -3,6 +3,8 @@
 2016.10.xx  - version 2.2.2
 * Fix       - Adds back shipping cost calculation based on shipping postal code returned from Klarna in KCO.
 * Fix       - Fixes empty incompatibility with PHP 5.4.
+* Fix       - Changes locale for KCO US to en-US.
+* Feature   - Adds option to show only shipping in KCO cart widget (use attribute only_shipping="yes").
 
 2016.10.12  - version 2.2.1
 * Fix       - Fixes KCO tax calculation bug in local order introduced in 2.2
