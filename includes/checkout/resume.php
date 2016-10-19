@@ -73,7 +73,11 @@ try {
 
 		$kco_session_locale  = '';
 		if ( ( 'en_US' == get_locale() || 'en_GB' == get_locale() ) && 'DE' != $kco_session_country ) {
-			$kco_session_locale = 'en-gb';
+			if ( 'en_US' == get_locale() ) {
+				$kco_session_locale = 'en-US';
+			} else {
+				$kco_session_locale = 'en-gb';
+			}
 		} elseif ( '' != $kco_session_country ) {
 			if ( 'DE' == $kco_session_country ) {
 				$kco_session_locale = 'de-de';
@@ -245,7 +249,6 @@ try {
 			*/
 		}
 
-		// $update['options']['allow_separate_shipping_address'] = true;
 		$klarna_order->update( apply_filters( 'kco_update_order', $update ) );
 
 	} // End if country change

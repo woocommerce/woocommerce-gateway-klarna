@@ -213,7 +213,7 @@ class WC_Gateway_Klarna_Order {
 				// apply_filters to item price so we can filter this if needed
 				$klarna_item_price_including_tax = $item['line_total'] + $item['line_tax'];
 				$item_price                      = apply_filters( 'klarna_fee_price_including_tax', $klarna_item_price_including_tax );
-				$klarna->addArticle( $qty = 1, $artNo = '', $title = $item['name'], $price = $item_price, $vat = round( $item_tax_percentage ), $discount = 0, $flags = $klarna_flags );
+				$klarna->addArticle( $qty = 1, $artNo = '', $title = utf8_decode( $item['name'] ), $price = $item_price, $vat = round( $item_tax_percentage ), $discount = 0, $flags = $klarna_flags );
 			}
 		}
 	}
@@ -508,7 +508,7 @@ class WC_Gateway_Klarna_Order {
 		// Check if option is enabled
 		if ( 'yes' == $payment_method_option['push_completion'] ) {
 			// If this reservation was already cancelled, do nothing.
-			if ( get_post_meta( $orderid, '_klarna_order_activated', true ) ) {
+			if ( get_post_meta( $orderid, '_klarna_order_activated', true ) && ! get_post_meta( $orderid, '_klarna_order_skip_activated_note', true ) ) {
 				$order->add_order_note( __( 'Could not activate Klarna reservation, Klarna reservation is already activated.', 'woocommerce-gateway-klarna' ) );
 
 				return;

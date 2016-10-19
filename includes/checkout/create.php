@@ -18,7 +18,11 @@ $local_order_id      = WC()->session->get( 'ongoing_klarna_order' );
 $kco_session_locale  = '';
 
 if ( ( 'en_US' == get_locale() || 'en_GB' == get_locale() ) && 'DE' != $kco_session_country ) {
-	$kco_session_locale = 'en-gb';
+	if ( 'en_US' == get_locale() ) {
+		$kco_session_locale = 'en-US';
+	} else {
+		$kco_session_locale = 'en-gb';
+	}
 } elseif ( '' != $kco_session_country ) {
 	if ( 'DE' == $kco_session_country ) {
 		$kco_session_locale = 'de-de';
