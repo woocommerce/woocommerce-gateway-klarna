@@ -2098,11 +2098,15 @@ class WC_Gateway_Klarna_Checkout_Extra {
 			// Get arrays of checkout and thank you pages for all countries
 			if ( is_array( $checkout_settings ) ) {
 				foreach ( $checkout_settings as $cs_key => $cs_value ) {
-					if ( strpos( $cs_key, 'klarna_checkout_url_' ) !== false ) {
-						$checkout_pages[ $cs_key ] = substr( $cs_value, 0 - $length );
+					if ( strpos( $cs_key, 'klarna_checkout_url_' ) !== false && '' != $cs_value ) {
+						$clean_checkout_uri = explode( '?', $cs_value );
+						$clean_checkout_uri = $clean_checkout_uri[0];
+						$checkout_pages[ $cs_key ] = substr( $clean_checkout_uri, 0 - $length );
 					}
-					if ( strpos( $cs_key, 'klarna_checkout_thanks_url_' ) !== false ) {
-						$thank_you_pages[ $cs_key ] = substr( $cs_value, 0 - $length );
+					if ( strpos( $cs_key, 'klarna_checkout_thanks_url_' ) !== false && '' != $cs_value ) {
+						$clean_thank_you_uri = explode( '?', $cs_value );
+						$clean_thank_you_uri = $clean_checkout_uri[0];
+						$thank_you_pages[ $cs_key ] = substr( $clean_thank_you_uri, 0 - $length );
 					}
 				}
 			}
