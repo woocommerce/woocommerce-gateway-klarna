@@ -146,6 +146,9 @@ if ( $this->testmode !== 'yes' ) {
 }
 
 $create['gui']['layout'] = $klarna_checkout_layout;
+if ( wp_is_mobile() ) {
+	$create['gui']['options'] = array( 'disable_autofocus' );
+}
 
 $klarna_order_total = 0;
 $klarna_tax_total   = 0;

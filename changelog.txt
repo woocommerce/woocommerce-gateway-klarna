@@ -2,6 +2,7 @@
 
 2016.10.xx  - version 2.2.3
 * Fix       - Fixes the error in settings page when using Klarna and MasterPass plugins together.
+* Update    - Disables Klarna Checkout autofocus on mobile.
 
 2016.10.19  - version 2.2.2
 * Fix       - Adds back shipping cost calculation based on shipping postal code returned from Klarna in KCO.
