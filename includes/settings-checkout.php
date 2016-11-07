@@ -453,6 +453,12 @@ return apply_filters( 'klarna_checkout_form_fields', array(
 		'label'       => sprintf( __( 'If this option is checked cross-sell product will be shown in Klarna Checkout thank you page, allowing customers to add them to the order they just completed. Cross-sell products must be <a href="%s">configured in WooCommerce</a> first.', 'woocommerce-gateway-klarna' ), 'https://docs.woocommerce.com/document/related-products-up-sells-and-cross-sells/' ),
 		'default'     => 'no'
 	),
+	'filter_is_order_received' => array(
+		'title'       => __( 'Overwrite is_order_received_page to return true in Klarna thank you page', 'woocommerce-gateway-klarna' ),
+		'type'        => 'checkbox',
+		'label'       => __( 'Several other plugins rely on is_order_received_page() function returning true in WooCommerce thank you page. Checking this option will make sure is_order_received_page() returns true in Klarna\'s custom thank you page as well.', 'woocommerce-gateway-klarna' ),
+		'default'     => 'no'
+	),
 
 	'color_settings_title'     => array(
 		'title' => __( 'Color Settings', 'woocommerce-gateway-klarna' ),

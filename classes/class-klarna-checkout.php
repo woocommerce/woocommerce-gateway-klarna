@@ -2105,7 +2105,7 @@ class WC_Gateway_Klarna_Checkout_Extra {
 					}
 					if ( strpos( $cs_key, 'klarna_checkout_thanks_url_' ) !== false && '' != $cs_value ) {
 						$clean_thank_you_uri = explode( '?', $cs_value );
-						$clean_thank_you_uri = $clean_checkout_uri[0];
+						$clean_thank_you_uri = $clean_thank_you_uri[0];
 						$thank_you_pages[ $cs_key ] = substr( $clean_thank_you_uri, 0 - $length );
 					}
 				}

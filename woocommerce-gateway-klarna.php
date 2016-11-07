@@ -111,9 +111,9 @@ function init_klarna_gateway() {
 	/**
 	 * Define plugin constants
 	 */
-	define( 'KLARNA_DIR', dirname( __FILE__ ) . '/' );         // Root dir
-	define( 'KLARNA_LIB', dirname( __FILE__ ) . '/library/' ); // Klarna library dir
-	define( 'KLARNA_URL', plugin_dir_url( __FILE__ ) );      // Plugin folder URL
+	define( 'KLARNA_DIR', dirname( __FILE__ ) . '/' );          // Root dir
+	define( 'KLARNA_LIB', dirname( __FILE__ ) . '/library/' );  // Klarna library dir
+	define( 'KLARNA_URL', plugin_dir_url( __FILE__ ) );         // Plugin folder URL
 
 	// Set CURLOPT_SSL_VERIFYPEER via constant in library/src/Klarna/Checkout/HTTP/CURLTransport.php.
 	// No need to set it to true if the store doesn't use https.
@@ -341,4 +341,35 @@ if ( ! empty( $_POST ) ) {
 	add_action( 'woocommerce_settings_saved', 'klarna_checkout_admin_error_notices' );
 } else {
 	add_action( 'admin_init', 'klarna_checkout_admin_error_notices' );
+}
+
+
+// Check if is_order_received_page function needs to be overwritten
+$checkout_settings = get_option( 'woocommerce_klarna_checkout_settings' );
+$should_filter = isset( $checkout_settings['filter_is_order_received'] ) ? $checkout_settings['filter_is_order_received'] : 'no';
+if ( 'yes' === $should_filter ) {
+	$thank_you_pages   = array();
+
+	// Clean request URI to remove all parameters
+	$clean_req_uri = explode( '?', $_SERVER['REQUEST_URI'] );
+	$clean_req_uri = $clean_req_uri[0];
+	$clean_req_uri = trailingslashit( $clean_req_uri );
+	$length        = strlen( $clean_req_uri );
+
+	// Get arrays of checkout and thank you pages for all countries
+	if ( is_array( $checkout_settings ) ) {
+		foreach ( $checkout_settings as $cs_key => $cs_value ) {
+			if ( strpos( $cs_key, 'klarna_checkout_thanks_url_' ) !== false && '' != $cs_value ) {
+				$clean_thank_you_uri = explode( '?', $cs_value );
+				$clean_thank_you_uri = $clean_thank_you_uri[0];
+				$thank_you_pages[ $cs_key ] = substr( $clean_thank_you_uri, 0 - $length );
+			}
+		}
+	}
+	// Overwrite is_order_received_page() only in Klarna Checkout thank you pages
+	if ( in_array( $clean_req_uri, $thank_you_pages ) ) {
+		function is_order_received_page() {
+			return true;
+		}
+	}
 }
