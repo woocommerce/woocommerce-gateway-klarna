@@ -1969,23 +1969,25 @@ class WC_Gateway_Klarna_Checkout_Extra {
 	 *
 	 **/
 	function change_checkout_url( $url ) {
-		global $woocommerce;
-		global $klarna_checkout_url;
-		$checkout_settings            = get_option( 'woocommerce_klarna_checkout_settings' );
-		$enabled                      = $checkout_settings['enabled'];
-		$modify_standard_checkout_url = $checkout_settings['modify_standard_checkout_url'];
-		$klarna_country               = WC()->session->get( 'klarna_country' );
-		$available_countries          = $this->get_authorized_countries();
-		// Change the Checkout URL if this is enabled in the settings
-		if ( $modify_standard_checkout_url == 'yes' && $enabled == 'yes' && ! empty( $klarna_checkout_url ) && in_array( strtoupper( $klarna_country ), $available_countries ) && array_key_exists( strtoupper( $klarna_country ), WC()->countries->get_allowed_countries() ) ) {
-			if ( class_exists( 'WC_Subscriptions_Cart' ) && WC_Subscriptions_Cart::cart_contains_subscription() ) {
-				if ( in_array( strtoupper( $klarna_country ), array( 'SE', 'FI', 'NO' ) ) ) {
-					$url = $klarna_checkout_url;
+		if ( ! is_admin() ) {
+			global $woocommerce;
+			global $klarna_checkout_url;
+			$checkout_settings            = get_option( 'woocommerce_klarna_checkout_settings' );
+			$enabled                      = $checkout_settings['enabled'];
+			$modify_standard_checkout_url = $checkout_settings['modify_standard_checkout_url'];
+			$klarna_country               = WC()->session->get( 'klarna_country' );
+			$available_countries          = $this->get_authorized_countries();
+			// Change the Checkout URL if this is enabled in the settings
+			if ( $modify_standard_checkout_url == 'yes' && $enabled == 'yes' && ! empty( $klarna_checkout_url ) && in_array( strtoupper( $klarna_country ), $available_countries ) && array_key_exists( strtoupper( $klarna_country ), WC()->countries->get_allowed_countries() ) ) {
+				if ( class_exists( 'WC_Subscriptions_Cart' ) && WC_Subscriptions_Cart::cart_contains_subscription() ) {
+					if ( in_array( strtoupper( $klarna_country ), array( 'SE', 'FI', 'NO' ) ) ) {
+						$url = $klarna_checkout_url;
+					} else {
+						return $url;
+					}
 				} else {
-					return $url;
+					$url = $klarna_checkout_url;
 				}
-			} else {
-				$url = $klarna_checkout_url;
 			}
 		}
 
@@ -2096,11 +2098,15 @@ class WC_Gateway_Klarna_Checkout_Extra {
 			// Get arrays of checkout and thank you pages for all countries
 			if ( is_array( $checkout_settings ) ) {
 				foreach ( $checkout_settings as $cs_key => $cs_value ) {
-					if ( strpos( $cs_key, 'klarna_checkout_url_' ) !== false ) {
-						$checkout_pages[ $cs_key ] = substr( $cs_value, 0 - $length );
+					if ( strpos( $cs_key, 'klarna_checkout_url_' ) !== false && '' != $cs_value ) {
+						$clean_checkout_uri = explode( '?', $cs_value );
+						$clean_checkout_uri = $clean_checkout_uri[0];
+						$checkout_pages[ $cs_key ] = substr( $clean_checkout_uri, 0 - $length );
 					}
-					if ( strpos( $cs_key, 'klarna_checkout_thanks_url_' ) !== false ) {
-						$thank_you_pages[ $cs_key ] = substr( $cs_value, 0 - $length );
+					if ( strpos( $cs_key, 'klarna_checkout_thanks_url_' ) !== false && '' != $cs_value ) {
+						$clean_thank_you_uri = explode( '?', $cs_value );
+						$clean_thank_you_uri = $clean_thank_you_uri[0];
+						$thank_you_pages[ $cs_key ] = substr( $clean_thank_you_uri, 0 - $length );
 					}
 				}
 			}
