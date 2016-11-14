@@ -1,10 +1,11 @@
 *** WooCommerce Gateway Klarna Changelog ***
 
-2016.10.xx  - version 2.2.3
+2016.11.14  - version 2.2.3
 * Fix       - Fixes the error in settings page when using Klarna and MasterPass plugins together.
 * Update    - Disables Klarna Checkout autofocus on mobile.
 * Fix       - Adds Klarna Checkout setting that allows is_order_received_page() to return true on KCO thank you page.
 * Fix       - Adds JS fix for duplicate order items in KCO.
+* Update    - Adds only_shipping="yes" attribute to woocommerce_klarna_checkout_widget shortcode allowing it to only show shipping.
 
 2016.10.19  - version 2.2.2
 * Fix       - Adds back shipping cost calculation based on shipping postal code returned from Klarna in KCO.
