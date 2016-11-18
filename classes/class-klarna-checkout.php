@@ -2095,6 +2095,7 @@ class WC_Gateway_Klarna_Checkout_Extra {
 			$clean_req_uri = $clean_req_uri[0];
 			$clean_req_uri = trailingslashit( $clean_req_uri );
 			$length        = strlen( $clean_req_uri );
+
 			// Get arrays of checkout and thank you pages for all countries
 			if ( is_array( $checkout_settings ) ) {
 				foreach ( $checkout_settings as $cs_key => $cs_value ) {
@@ -2110,17 +2111,20 @@ class WC_Gateway_Klarna_Checkout_Extra {
 					}
 				}
 			}
+
 			// Start session if on a KCO or KCO Thank You page and KCO enabled
-			if ( in_array( $clean_req_uri, $checkout_pages ) || in_array( $clean_req_uri, $thank_you_pages ) ) {
-				wp_enqueue_script( 'jquery' );
-				wp_enqueue_script( 'wc-checkout', $frontend_script_path . 'checkout' . $suffix . '.js', array(
-					'jquery',
-					'woocommerce',
-					'wc-country-select',
-					'wc-address-i18n'
-				) );
-				wp_enqueue_script( 'klarna_checkout' );
-				wp_enqueue_style( 'klarna_checkout' );
+			if ( $length > 1 ) {
+				if ( in_array( $clean_req_uri, $checkout_pages ) || in_array( $clean_req_uri, $thank_you_pages ) ) {
+					wp_enqueue_script( 'jquery' );
+					wp_enqueue_script( 'wc-checkout', $frontend_script_path . 'checkout' . $suffix . '.js', array(
+						'jquery',
+						'woocommerce',
+						'wc-country-select',
+						'wc-address-i18n'
+					) );
+					wp_enqueue_script( 'klarna_checkout' );
+					wp_enqueue_style( 'klarna_checkout' );
+				}
 			}
 		}
 	}
