@@ -128,7 +128,8 @@ jQuery(document).ready(function ($) {
 						nonce: kcoAjax.klarna_checkout_nonce
 					},
 					success: function (response) {
-						$(kco_widget).html(response.data.widget_html);
+						$(kco_widget).empty().html(response.data.widget_html);
+                                                $(window).trigger("kco_widget_changed",response);
 					},
 					error: function (response) {
 						console.log('update shipping AJAX error');
@@ -178,7 +179,8 @@ jQuery(document).ready(function ($) {
 						nonce: kcoAjax.klarna_checkout_nonce
 					},
 					success: function (response) {
-						$(kco_widget).html(response.data.widget_html);
+						$(kco_widget).empty().html(response.data.widget_html);
+                                                $(window).trigger("kco_widget_changed",response);
 					},
 					error: function (response) {
 						console.log('update cart item AJAX error');
@@ -231,7 +233,8 @@ jQuery(document).ready(function ($) {
 						if (0 == response.data.item_count) {
 							location.reload();
 						} else {
-							$(kco_widget).html(response.data.widget_html);
+							$(kco_widget).empty().html(response.data.widget_html);
+                                                        $(window).trigger("kco_widget_changed",response);
 							$(item_row).remove();
 
 							if (typeof window._klarnaCheckout != 'function') {
@@ -296,7 +299,8 @@ jQuery(document).ready(function ($) {
 
 							$('tr#kco-page-total').before(html_string);
 							$(input_field).val('');
-							$(kco_widget).html(response.data.widget_html);
+							$(kco_widget).empty().html(response.data.widget_html);
+                                                        $(window).trigger("kco_widget_changed",response);
 
 							if (typeof window._klarnaCheckout != 'function') {
 								location.reload();
@@ -356,7 +360,8 @@ jQuery(document).ready(function ($) {
 					},
 					success: function (response) {
 						$(clicked_el).closest('tr').remove();
-						$(kco_widget).html(response.data.widget_html);
+						$(kco_widget).empty().html(response.data.widget_html);
+                                                $(window).trigger("kco_widget_changed",response);
 
 						// Remove WooCommerce notification
 						$('#klarna-checkout-widget .woocommerce-info + .woocommerce-message').remove();
@@ -439,7 +444,7 @@ jQuery(document).ready(function ($) {
 														return;
 													}
 
-													$(kco_widget).html(response.data.widget_html);
+													$(kco_widget).empty().html(response.data.widget_html);
 													$(document.body).trigger('kco_widget_updated', response);
 
 													window._klarnaCheckout(function (api) {
@@ -485,7 +490,8 @@ jQuery(document).ready(function ($) {
 											nonce: kcoAjax.klarna_checkout_nonce
 										},
 										success: function (response) {
-											$(kco_widget).html(response.data.widget_html);
+											$(kco_widget).empty().html(response.data.widget_html);
+                                                                                        $(window).trigger("kco_widget_changed",response);
 										},
 										error: function (response) {
 											console.log('shipping_address_change_v2 AJAX error');
@@ -538,7 +544,8 @@ jQuery(document).ready(function ($) {
 											nonce: kcoAjax.klarna_checkout_nonce
 										},
 										success: function (response) {
-											$(kco_widget).html(response.data.widget_html);
+											$(kco_widget).empty().html(response.data.widget_html);
+                                                                                        $(window).trigger("kco_widget_changed",response);
 										},
 										error: function (response) {
 											console.log('shipping_address_change AJAX error');
@@ -577,7 +584,8 @@ jQuery(document).ready(function ($) {
 								nonce: kcoAjax.klarna_checkout_nonce
 							},
 							success: function (response) {
-								$(kco_widget).html(response.data.widget_html);
+								$(kco_widget).empty().html(response.data.widget_html);
+                                                                $(window).trigger("kco_widget_changed",response);
 							},
 							error: function (response) {
 								console.log('shipping_option_change AJAX error');
