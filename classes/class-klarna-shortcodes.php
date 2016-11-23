@@ -359,6 +359,8 @@ class WC_Gateway_Klarna_Shortcodes {
 					</form>
 				</div>
 			<?php }
+                        
+                         echo apply_filters("kco_add_custom_fields",$this);
 
 			do_action('kco_widget_after', $atts ); ?>
 		<?php }
