@@ -171,7 +171,7 @@ class WC_Gateway_Klarna_Order {
 			// apply_filters to order discount so we can filter this if needed
 			$klarna_order_discount = $order->order_discount;
 			$order_discount = apply_filters( 'klarna_order_discount', $klarna_order_discount );
-		
+
 			$klarna->addArticle(
 			    $qty = 1,
 			    $artNo = '',
@@ -746,19 +746,12 @@ class WC_Gateway_Klarna_Order {
 		", $itemid ) );
 		$orderid = $item_row->order_id;
 		$order   = wc_get_order( $orderid );
-		$payment_method             = $this->get_order_payment_method( $order );
-		$payment_method_option_name = 'woocommerce_' . $payment_method . '_settings';
-		$payment_method_option      = get_option( $payment_method_option_name );
-		// Check if option is enabled
-		if ( 'yes' == $payment_method_option['push_update'] ) {
-			// Check if and order is on hold so it can be edited, and if it hasn't been captured or cancelled
-			if ( 'on-hold' == $order->get_status() && ! get_post_meta( $orderid, '_klarna_order_cancelled', true ) && ! get_post_meta( $orderid, '_klarna_order_activated', true ) ) {
-				if ( 'rest' == get_post_meta( $order->id, '_klarna_api', true ) ) {
-					$this->update_order_rest( $orderid );
-					// Activation for KCO V2 and KPM orders
-				} else {
-					$this->update_order( $orderid );
-				}
+		if ( $this->order_is_updatable( $order ) ) {
+			if ( 'rest' == get_post_meta( $order->id, '_klarna_api', true ) ) {
+				$this->update_order_rest( $orderid );
+				// Activation for KCO V2 and KPM orders
+			} else {
+				$this->update_order( $orderid );
 			}
 		}
 	}
