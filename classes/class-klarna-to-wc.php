@@ -786,7 +786,12 @@ class WC_Gateway_Klarna_K2WC {
 						$received_billing_address_1  = $klarna_order['billing_address']['street_address'];
 						$received_shipping_address_1 = $klarna_order['shipping_address']['street_address'];
 					}
-					// Add customer billing address - retrieved from callback from Klarna
+
+					// Add customer name.
+					update_user_meta( $new_customer, 'first_name', $klarna_order['billing_address']['given_name'] );
+					update_user_meta( $new_customer, 'last_name', $klarna_order['billing_address']['family_name'] );
+
+					// Add customer billing address - retrieved from callback from Klarna.
 					update_user_meta( $new_customer, 'billing_first_name', $klarna_order['billing_address']['given_name'] );
 					update_user_meta( $new_customer, 'billing_last_name', $klarna_order['billing_address']['family_name'] );
 					update_user_meta( $new_customer, 'billing_address_1', $received_billing_address_1 );
@@ -796,7 +801,8 @@ class WC_Gateway_Klarna_K2WC {
 					update_user_meta( $new_customer, 'billing_country', $klarna_order['billing_address']['country'] );
 					update_user_meta( $new_customer, 'billing_email', $klarna_order['billing_address']['email'] );
 					update_user_meta( $new_customer, 'billing_phone', $klarna_order['billing_address']['phone'] );
-					// Add customer shipping address - retrieved from callback from Klarna
+
+					// Add customer shipping address - retrieved from callback from Klarna.
 					$allow_separate_shipping = ( isset( $klarna_order['options']['allow_separate_shipping_address'] ) ) ? $klarna_order['options']['allow_separate_shipping_address'] : '';
 					if ( $allow_separate_shipping == 'true' && ( $_GET['scountry'] == 'DE' || $_GET['scountry'] == 'AT' ) ) {
 						update_user_meta( $new_customer, 'shipping_first_name', $klarna_order['shipping_address']['given_name'] );
