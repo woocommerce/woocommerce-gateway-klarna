@@ -248,7 +248,7 @@ try {
 			$update['shipping_options'] = $shipping_options;
 			*/
 		}
-
+		
 		$klarna_order->update( apply_filters( 'kco_update_order', $update ) );
 
 	} // End if country change
