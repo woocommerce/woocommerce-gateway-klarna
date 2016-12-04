@@ -525,5 +525,18 @@ return apply_filters( 'klarna_checkout_form_fields', array(
 		'description' => sprintf( __( 'Log Klarna events, in <code>%s</code>', 'woocommerce' ), wc_get_log_file_path( 'klarna' ) ),
 		'default'     => 'no'
 	),
+	'allowed_customer_types'	=> array(
+		'title'       => __( 'Allowed Customer Types', 'woocommerce-gateway-klarna' ),
+		'type'        => 'select',
+		'options'     => array(
+			'B2C' => __( 'B2C only', 'woocommerce-gateway-klarna' ),
+			'B2B' => __( 'B2B only', 'woocommerce-gateway-klarna' ),
+			'B2CB' => __( 'B2C & B2B (defaults to B2C)', 'woocommerce-gateway-klarna' ),
+			'B2BC' => __( 'B2B & B2C (defaults to B2B)', 'woocommerce-gateway-klarna' )
+		),
+		'description' => __( 'Select if you want to sell both to consumers and companies or only to one of them.', 'woocommerce-gateway-klarna' ),
+		'default'     => 'B2C',
+		'desc_tip'    => true
+	),
 
 ) );
