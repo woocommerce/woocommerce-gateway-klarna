@@ -3,6 +3,7 @@
 2016.11.xx  - version 2.2.4
 * Fix       - Fixes character encoding issue in customer address on order update.
 * Tweak     - Stores first_name and last_name for new user in KCO.
+* Tweak     - Adds plugin version to enqueued CSS and JS files for KCO.
 
 2016.11.14  - version 2.2.3
 * Fix       - Fixes the error in settings page when using Klarna and MasterPass plugins together.

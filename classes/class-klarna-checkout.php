@@ -2076,7 +2076,7 @@ class WC_Gateway_Klarna_Checkout_Extra {
 		} else {
 			$version = 'v2';
 		}
-		wp_register_script( 'klarna_checkout', KLARNA_URL . 'assets/js/klarna-checkout.js', array(), false, true );
+		wp_register_script( 'klarna_checkout', KLARNA_URL . 'assets/js/klarna-checkout.js', array(), WC_KLARNA_VER, true );
 		wp_localize_script( 'klarna_checkout', 'kcoAjax', array(
 			'ajaxurl'               => admin_url( 'admin-ajax.php' ),
 			'klarna_checkout_nonce' => wp_create_nonce( 'klarna_checkout_nonce' ),
@@ -2084,7 +2084,7 @@ class WC_Gateway_Klarna_Checkout_Extra {
 			'coupon_success'        => __( 'Coupon added.', 'woocommerce-gateway-klarna' ),
 			'coupon_fail'           => __( 'Coupon could not be added.', 'woocommerce-gateway-klarna' )
 		) );
-		wp_register_style( 'klarna_checkout', KLARNA_URL . 'assets/css/klarna-checkout.css' );
+		wp_register_style( 'klarna_checkout', KLARNA_URL . 'assets/css/klarna-checkout.css', array(), WC_KLARNA_VER );
 		if ( is_page() ) {
 			global $post;
 			$checkout_settings = get_option( 'woocommerce_klarna_checkout_settings' );
