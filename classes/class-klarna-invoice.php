@@ -640,6 +640,12 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 			$klarna_shipping['house_number']    = '';
 			$klarna_shipping['house_extension'] = '';
 		}
+
+		// Add filters for both the shipping and the billing address, so they can be overridden
+		// This can be useful for when you have custom fields; ie. for the house number
+		apply_filters( 'klarna_shipping_invoice_fields', $klarna_shipping );
+		apply_filters( 'klarna_billing_invoice_fields', $klarna_billing );
+
 		$klarna = new Klarna();
 		/**
 		 * Setup Klarna configuration
