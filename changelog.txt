@@ -3,6 +3,7 @@
 2016.11.xx  - version 2.2.4
 * Fix       - Fixes character encoding issue in customer address on order update.
 * Tweak     - Stores first_name and last_name for new user in KCO.
+* Tweak     - Adds plugin version to enqueued CSS and JS files for KCO.
 * Tweak     - Applied klarna_shipping_invoice_fields and klarna_billing_invoice_fields for billing and shipping invoice fields
 * Tweak     - Applied klarna_shipping_part_payment_fields and klarna_billing_part_payment_fields for billing and shipping part payment fields
 

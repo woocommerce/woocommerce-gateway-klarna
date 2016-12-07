@@ -27,6 +27,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
 
+if ( !defined( 'WC_KLARNA_VER' ) ) {
+	define( 'WC_KLARNA_VER', '2.2.4' );
+}
+
 /**
  * Register activation hook
  */
