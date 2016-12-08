@@ -534,7 +534,7 @@ return apply_filters( 'klarna_checkout_form_fields', array(
 			'B2CB' => __( 'B2C & B2B (defaults to B2C)', 'woocommerce-gateway-klarna' ),
 			'B2BC' => __( 'B2B & B2C (defaults to B2B)', 'woocommerce-gateway-klarna' )
 		),
-		'description' => __( 'Select if you want to sell both to consumers and companies or only to one of them.', 'woocommerce-gateway-klarna' ),
+		'description' => sprintf( __( 'Select if you want to sell both to consumers and companies or only to one of them (available for SE, NO and FI). Learn more and <a href="%s">sign up for Klarna Checkout B2B here</a>.', 'woocommerce-gateway-klarna' ), 'https://www.klarna.com/se/foretag/klarna-checkout/klarna-checkout-foretag-form' ) ),
 		'default'     => 'B2C',
 		'desc_tip'    => true
 	),
