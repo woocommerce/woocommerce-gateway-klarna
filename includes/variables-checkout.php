@@ -77,6 +77,8 @@ $this->account_signup_text = ( isset( $this->settings['account_signup_text'] ) )
 $this->account_login_text  = ( isset( $this->settings['account_login_text'] ) ) ? $this->settings['account_login_text'] : '';
 
 $this->validate_stock = $this->get_option( 'validate_stock' );
+$this->allowed_customer_types  = ( isset( $this->settings['allowed_customer_types'] ) ) ? $this->settings['allowed_customer_types'] : '';
+
 
 // Helper function to make sure colors start with '#' character
 if ( ! function_exists( 'wc_klarna_add_hash_to_color' ) ) {

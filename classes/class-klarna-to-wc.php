@@ -568,6 +568,14 @@ class WC_Gateway_Klarna_K2WC {
 			'email'      => $klarna_order['billing_address']['email'],
 			'phone'      => $klarna_order['billing_address']['phone']
 		);
+		// Company
+		if( 'organization' == $klarna_order['customer']['type'] ) {
+			$billing_address['company'] = $klarna_order['billing_address']['organization_name'];
+			$reference = isset( $klarna_order['billing_address']['reference'] ) ? $klarna_order['billing_address']['reference'] : '';
+			update_post_meta( $order_id, 'klarna_organization_reference', $reference );
+			update_post_meta( $order_id, 'klarna_organization_registration_id', $klarna_order['customer']['organization_registration_id'] );
+		}
+		
 		$order->set_address( apply_filters( 'wc_klarna_returned_billing_address', $billing_address ), 'billing' );
 
 		// Add customer shipping address - retrieved from callback from Klarna
@@ -583,6 +591,12 @@ class WC_Gateway_Klarna_K2WC {
 			'city'       => $klarna_order['shipping_address']['city'],
 			'country'    => strtoupper( $klarna_order['shipping_address']['country'] )
 		);
+		
+		// Company
+		if( 'organization' == $klarna_order['customer']['type'] ) {
+			$shipping_address['company'] = $klarna_order['shipping_address']['organization_name'];
+		}
+		
 		$order->set_address( apply_filters( 'wc_klarna_returned_shipping_address', $shipping_address ), 'shipping' );
 
 		// Store Klarna locale
