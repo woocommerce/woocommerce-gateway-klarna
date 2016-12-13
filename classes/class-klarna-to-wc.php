@@ -855,6 +855,7 @@ class WC_Gateway_Klarna_K2WC {
 					'merchant_reference1' => ltrim( $order->get_order_number(), '#' )
 				) );
 				$order->calculate_totals( false );
+				$order->update_status( 'pending' ); // Set status to Pending Payment before completing the order.
 				$order->payment_complete( $klarna_order['klarna_reference'] );
 				delete_post_meta( $order->id, '_kco_incomplete_customer_email' );
 				add_post_meta( $order->id, '_kco_payment_created', time() );
@@ -872,6 +873,7 @@ class WC_Gateway_Klarna_K2WC {
 			$klarna_order->update( $update );
 			// Confirm local order
 			$order->calculate_totals( false );
+			$order->update_status( 'pending' ); // Set status to Pending Payment before completing the order.
 			$order->payment_complete( $klarna_order['reservation'] );
 			delete_post_meta( $order->id, '_kco_incomplete_customer_email' );
 		}
