@@ -194,9 +194,11 @@ class WC_Gateway_Klarna_K2WC {
 	 */
 	public function prepare_wc_order( $customer_email ) {
 		global $woocommerce;
+
 		if ( ! defined( 'WOOCOMMERCE_CART' ) ) {
 			define( 'WOOCOMMERCE_CART', true );
 		}
+
 		if ( $woocommerce->session->get( 'ongoing_klarna_order' ) && wc_get_order( $woocommerce->session->get( 'ongoing_klarna_order' ) ) ) {
 			$orderid = $woocommerce->session->get( 'ongoing_klarna_order' );
 			$order   = wc_get_order( $orderid );
@@ -206,6 +208,7 @@ class WC_Gateway_Klarna_K2WC {
 			update_post_meta( $order->id, '_kco_incomplete_customer_email', $customer_email, true );
 			$woocommerce->session->set( 'ongoing_klarna_order', $order->id );
 		}
+
 		// If there's an order at this point, proceed
 		if ( isset( $order ) ) {
 			// Need to clean up the order first, to avoid duplicate items
@@ -246,14 +249,17 @@ class WC_Gateway_Klarna_K2WC {
 
 			// Calculate order totals
 			$this->set_order_totals( $order );
+
 			// Tie this order to a user
 			if ( email_exists( $customer_email ) ) {
 				$user    = get_user_by( 'email', $customer_email );
 				$user_id = $user->ID;
 				update_post_meta( $order->id, '_customer_user', $user_id );
 			}
+
 			// Let plugins add meta
 			do_action( 'woocommerce_checkout_update_order_meta', $order->id, array() );
+
 			// Store which KCO API was used
 			if ( $this->is_rest ) {
 				update_post_meta( $order->id, '_klarna_api', 'rest' );
@@ -685,22 +691,31 @@ class WC_Gateway_Klarna_K2WC {
 		if ( $this->klarna_debug == 'yes' ) {
 			$this->klarna_log->add( 'klarna', 'Setting order totals...' );
 		}
+
 		global $woocommerce;
+
 		if ( ! defined( 'WOOCOMMERCE_CHECKOUT' ) ) {
 			define( 'WOOCOMMERCE_CHECKOUT', true );
 		}
+
 		if ( ! defined( 'WOOCOMMERCE_CART' ) ) {
 			define( 'WOOCOMMERCE_CART', true );
 		}
+
 		$woocommerce->cart->calculate_shipping();
 		$woocommerce->cart->calculate_fees();
 		$woocommerce->cart->calculate_totals();
+
+		/*
 		$order->set_total( $woocommerce->cart->shipping_total, 'shipping' );
 		$order->set_total( $woocommerce->cart->get_cart_discount_total(), 'order_discount' );
 		$order->set_total( $woocommerce->cart->get_cart_discount_total(), 'cart_discount' );
 		$order->set_total( $woocommerce->cart->tax_total, 'tax' );
 		$order->set_total( $woocommerce->cart->shipping_tax_total, 'shipping_tax' );
 		$order->set_total( $woocommerce->cart->total );
+		*/
+
+		$order->calculate_totals();
 	}
 
 	/**

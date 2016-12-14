@@ -1133,9 +1133,9 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 * @since  2.0
 	 **/
 	function klarna_checkout_get_kco_widget_html() {
-		$klarna_shortchodes = new WC_Gateway_Klarna_Shortcodes();
+		$klarna_shortcodes = new WC_Gateway_Klarna_Shortcodes();
 
-		return $klarna_shortchodes->klarna_checkout_get_kco_widget_html();
+		return $klarna_shortcodes->klarna_checkout_get_kco_widget_html();
 	}
 
 	/**
@@ -1831,7 +1831,6 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 class WC_Gateway_Klarna_Checkout_Extra {
 
 	public function __construct() {
-		add_action( 'init', array( $this, 'start_session' ), 1 );
 		add_action( 'before_woocommerce_init', array( $this, 'prevent_caching' ) );
 		add_filter( 'woocommerce_get_checkout_url', array( $this, 'change_checkout_url' ), 20 );
 		add_action( 'woocommerce_register_form_start', array( $this, 'add_account_signup_text' ) );
@@ -1903,43 +1902,6 @@ class WC_Gateway_Klarna_Checkout_Extra {
 		if ( 'yes' == $checkout_settings['enabled'] && '' != $checkout_settings['klarna_checkout_button_label'] && 'yes' == $checkout_settings['add_klarna_checkout_button'] ) {
 			echo '<div class="woocommerce"><a style="margin-top:1em" href="' . $klarna_checkout_url . '" class="button std-checkout-button">' . $checkout_settings['klarna_checkout_button_label'] . '</a></div>';
 		}
-	}
-
-	// Set session
-	function start_session() {
-		$data = new WC_Gateway_Klarna_Checkout; // Still need to initiate it here, otherwise shortcode won't work
-		// if ( ! is_admin() || defined( 'DOING_AJAX' ) ) {
-		/*
-		$checkout_settings = get_option( 'woocommerce_klarna_checkout_settings' );
-		$is_enabled        = ( isset( $checkout_settings['enabled'] ) ) ? $checkout_settings['enabled'] : '';
-
-		$checkout_pages  = array();
-		$thank_you_pages = array();
-
-		// Clean request URI to remove all parameters
-		$clean_req_uri = explode( '?', $_SERVER['REQUEST_URI'] );
-		$clean_req_uri = $clean_req_uri[0];
-		$clean_req_uri = trailingslashit( $clean_req_uri );
-		$length        = strlen( $clean_req_uri );
-
-		// Get arrays of checkout and thank you pages for all countries
-		if ( is_array( $checkout_settings ) ) {
-			foreach ( $checkout_settings as $cs_key => $cs_value ) {
-				if ( strpos( $cs_key, 'klarna_checkout_url_' ) !== false ) {
-					$checkout_pages[ $cs_key ] = substr( trailingslashit( $cs_value ), 0 - $length );
-				}
-				if ( strpos( $cs_key, 'klarna_checkout_thanks_url_' ) !== false ) {
-					$thank_you_pages[ $cs_key ] = substr( trailingslashit( $cs_value ), 0 - $length );
-				}
-			}
-		}
-
-		// Start session if on a KCO or KCO Thank You page and KCO enabled
-		if ( ( in_array( $clean_req_uri, $checkout_pages ) || in_array( $clean_req_uri, $thank_you_pages ) ) && 'yes' == $is_enabled ) {
-			session_start();
-		}
-		// }
-		*/
 	}
 
 	function klarna_checkout_css() {

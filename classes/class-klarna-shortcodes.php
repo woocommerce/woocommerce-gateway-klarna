@@ -23,12 +23,10 @@ class WC_Gateway_Klarna_Shortcodes {
 	 * @since 1.0.0
 	 */
 	public function __construct() {
-
 		add_shortcode( 'woocommerce_klarna_checkout', array( $this, 'klarna_checkout_page' ) );
 		add_shortcode( 'woocommerce_klarna_checkout_order_note', array( $this, 'klarna_checkout_order_note' ) );
 		add_shortcode( 'woocommerce_klarna_country', array( $this, 'klarna_checkout_country' ) );
 		add_shortcode( 'woocommerce_klarna_checkout_widget', array( $this, 'klarna_checkout_widget' ) );
-
 	}
 
 
@@ -63,7 +61,6 @@ class WC_Gateway_Klarna_Shortcodes {
 			echo '</div>';
 		} else {
 			$data = new WC_Gateway_Klarna_Checkout;
-
 			return '<div class="klarna_checkout ' . $widget_class . '">' . $data->get_klarna_checkout_page() . '</div>';
 		}
 	}
