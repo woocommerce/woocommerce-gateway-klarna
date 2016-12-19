@@ -203,64 +203,72 @@ class WC_Gateway_Klarna_K2WC {
 			$orderid = $woocommerce->session->get( 'ongoing_klarna_order' );
 			$order   = wc_get_order( $orderid );
 		} else {
-			// Create order in WooCommerce if we have an email
+			// Create order in WooCommerce if we have an email.
 			$order = $this->create_order();
 			update_post_meta( $order->id, '_kco_incomplete_customer_email', $customer_email, true );
 			$woocommerce->session->set( 'ongoing_klarna_order', $order->id );
 		}
 
-		// If there's an order at this point, proceed
+		// If there's an order at this point, proceed.
 		if ( isset( $order ) ) {
-			// Need to clean up the order first, to avoid duplicate items
+			// Need to clean up the order first, to avoid duplicate items.
 			$order->remove_order_items();
 
-			// Add order items
+			if ( 'yes' === $this->klarna_debug ) {
+				$this->klarna_log->add( 'klarna', "Removed order items from order $order->id..." );
+				if ( get_post_meta( $order->id, '_customer_user_agent', true ) ) {
+					$customer_user_agent = get_post_meta( $order->id, '_customer_user_agent', true );
+					$this->klarna_log->add( 'klarna', "Customer user agent for $order->id: $customer_user_agent" );
+				}
+			}
+
+			// Add order items.
 			$order_items = $order->get_items( array( 'line_item' ) );
 			if ( empty( $order_items ) ) {
 				$this->add_order_items( $order );
 			}
 
-			// Add order fees
+			// Add order fees.
 			$order_fees = $order->get_items( array( 'fee' ) );
 			if ( empty( $order_fees ) ) {
 				$this->add_order_fees( $order );
 			}
 
-			// Add order shipping
+			// Add order shipping.
 			$order_shipping = $order->get_items( array( 'shipping' ) );
 			if ( empty( $order_shipping ) ) {
 				$this->add_order_shipping( $order );
 			}
 
-			// Add order taxes
+			// Add order taxes.
 			$order_taxes = $order->get_items( array( 'tax' ) );
 			if ( empty( $order_taxes ) ) {
 				$this->add_order_tax_rows( $order );
 			}
 
-			// Store coupons
+			// Store coupons.
 			$order_coupons = $order->get_items( array( 'coupon' ) );
 			if ( empty( $order_coupons ) ) {
 				$this->add_order_coupons( $order );
 			}
 
-			// Store payment method
+			// Store payment method.
 			$this->add_order_payment_method( $order );
 
-			// Calculate order totals
+			// Calculate order totals.
 			$this->set_order_totals( $order );
 
-			// Tie this order to a user
+			// Tie this order to a user.
 			if ( email_exists( $customer_email ) ) {
 				$user    = get_user_by( 'email', $customer_email );
 				$user_id = $user->ID;
 				update_post_meta( $order->id, '_customer_user', $user_id );
 			}
 
-			// Let plugins add meta
+			// Let plugins add meta.
 			do_action( 'woocommerce_checkout_update_order_meta', $order->id, array() );
 
-			// Store which KCO API was used
+			// Store which KCO API was used.
 			if ( $this->is_rest ) {
 				update_post_meta( $order->id, '_klarna_api', 'rest' );
 			} else {
@@ -435,16 +443,14 @@ class WC_Gateway_Klarna_K2WC {
 	 * @access public
 	 *
 	 * @param  object $order Local WC order.
-	 *
-	 * @throws Exception
+	 * @throws Exception PHP Exception.
 	 */
 	public function add_order_items( $order ) {
-		if ( $this->klarna_debug == 'yes' ) {
-			$this->klarna_log->add( 'klarna', 'Adding order items...' );
+		if ( 'yes' === $this->klarna_debug ) {
+			$this->klarna_log->add( 'klarna', "Adding items to order $order->id..." );
 		}
-		global $woocommerce;
-		$order_id = $order->id;
-		foreach ( $woocommerce->cart->get_cart() as $cart_item_key => $values ) {
+
+		foreach ( WC()->cart->get_cart() as $cart_item_key => $values ) {
 			$item_id = $order->add_product( $values['data'], $values['quantity'], array(
 				'variation' => $values['variation'],
 				'totals'    => array(
@@ -452,17 +458,28 @@ class WC_Gateway_Klarna_K2WC {
 					'subtotal_tax' => $values['line_subtotal_tax'],
 					'total'        => $values['line_total'],
 					'tax'          => $values['line_tax'],
-					'tax_data'     => $values['line_tax_data'] // Since 2.2
-				)
+					'tax_data'     => $values['line_tax_data'],
+				),
 			) );
+
 			if ( ! $item_id ) {
-				if ( $this->klarna_debug == 'yes' ) {
+				if ( 'yes' === $this->klarna_debug ) {
 					$this->klarna_log->add( 'klarna', 'Unable to add order item.' );
 				}
-				throw new Exception( __( 'Error: Unable to add order item. Please try again.', 'woocommerce' ) );
+
+				throw new Exception( __( 'Error: Unable to add item. Please try again.', 'woocommerce' ) );
+			} else {
+				if ( 'yes' === $this->klarna_debug ) {
+					$this->klarna_log->add( 'klarna', "Added item $item_id (cart item key: $cart_item_key) to order $order->id..." );
+				}
 			}
-			// Allow plugins to add order item meta
+
+			// Allow plugins to add order item meta.
 			do_action( 'woocommerce_add_order_item_meta', $item_id, $values, $cart_item_key );
+		}
+
+		if ( 'yes' === $this->klarna_debug ) {
+			$this->klarna_log->add( 'klarna', "Finished adding items to order $order->id..." );
 		}
 	}
 
@@ -473,25 +490,34 @@ class WC_Gateway_Klarna_K2WC {
 	 * @access public
 	 *
 	 * @param  object $order Local WC order.
-	 *
-	 * @throws Exception
+	 * @throws Exception PHP Exception.
 	 */
 	public function add_order_fees( $order ) {
-		if ( $this->klarna_debug == 'yes' ) {
-			$this->klarna_log->add( 'klarna', 'Adding order fees...' );
+		if ( 'yes' === $this->klarna_debug ) {
+			$this->klarna_log->add( 'klarna', "Adding fees to order $order->id..." );
 		}
-		global $woocommerce;
-		$order_id = $order->id;
-		foreach ( $woocommerce->cart->get_fees() as $fee_key => $fee ) {
+
+		foreach ( WC()->cart->get_fees() as $fee_key => $fee ) {
 			$item_id = $order->add_fee( $fee );
+
 			if ( ! $item_id ) {
-				if ( $this->klarna_debug == 'yes' ) {
-					$this->klarna_log->add( 'klarna', 'Unable to add order fee.' );
+				if ( 'yes' === $this->klarna_debug ) {
+					$this->klarna_log->add( 'klarna', 'Unable to add fee.' );
 				}
+
 				throw new Exception( __( 'Error: Unable to create order. Please try again.', 'woocommerce' ) );
+			} else {
+				if ( 'yes' === $this->klarna_debug ) {
+					$this->klarna_log->add( 'klarna', "Added fee $item_id (fee key: $fee_key) to order $order->id..." );
+				}
 			}
-			// Allow plugins to add order item meta to fees
-			do_action( 'woocommerce_add_order_fee_meta', $order_id, $item_id, $fee, $fee_key );
+
+			// Allow plugins to add order item meta to fees.
+			do_action( 'woocommerce_add_order_fee_meta', $order->id, $item_id, $fee, $fee_key );
+		}
+
+		if ( 'yes' === $this->klarna_debug ) {
+			$this->klarna_log->add( 'klarna', "Finished adding fees to order $order->id..." );
 		}
 	}
 
@@ -503,35 +529,47 @@ class WC_Gateway_Klarna_K2WC {
 	 *
 	 * @param  object $order Local WC order.
 	 *
-	 * @throws Exception
-	 * @internal param object $klarna_order Klarna order.
+	 * @throws Exception PHP Exception.
 	 */
 	public function add_order_shipping( $order ) {
-		if ( $this->klarna_debug == 'yes' ) {
-			$this->klarna_log->add( 'klarna', 'Adding order shipping...' );
+		if ( 'yes' === $this->klarna_debug ) {
+			$this->klarna_log->add( 'klarna', "Adding shipping to order $order->id..." );
 		}
-		global $woocommerce;
+
 		if ( ! defined( 'WOOCOMMERCE_CART' ) ) {
 			define( 'WOOCOMMERCE_CART', true );
 		}
-		$woocommerce->cart->calculate_shipping();
-		$woocommerce->cart->calculate_fees();
-		$woocommerce->cart->calculate_totals();
-		$order_id              = $order->id;
-		$this_shipping_methods = $woocommerce->session->get( 'chosen_shipping_methods' );
-		// Store shipping for all packages
-		foreach ( $woocommerce->shipping->get_packages() as $package_key => $package ) {
+
+		WC()->cart->calculate_shipping();
+		WC()->cart->calculate_fees();
+		WC()->cart->calculate_totals();
+
+		$this_shipping_methods = WC()->session->get( 'chosen_shipping_methods' );
+
+		// Store shipping for all packages.
+		foreach ( WC()->shipping->get_packages() as $package_key => $package ) {
 			if ( isset( $package['rates'][ $this_shipping_methods[ $package_key ] ] ) ) {
 				$item_id = $order->add_shipping( $package['rates'][ $this_shipping_methods[ $package_key ] ] );
+
 				if ( ! $item_id ) {
-					if ( $this->klarna_debug == 'yes' ) {
+					if ( 'yes' === $this->klarna_debug ) {
 						$this->klarna_log->add( 'klarna', 'Unable to add shipping item.' );
 					}
+
 					throw new Exception( __( 'Error: Unable to create order. Please try again.', 'woocommerce' ) );
+				} else {
+					if ( 'yes' === $this->klarna_debug ) {
+						$this->klarna_log->add( 'klarna', "Added shipping $item_id (package key: $package_key) to order $order->id..." );
+					}
 				}
-				// Allows plugins to add order item meta to shipping
-				do_action( 'woocommerce_add_shipping_order_item', $order_id, $item_id, $package_key );
+
+				// Allows plugins to add order item meta to shipping.
+				do_action( 'woocommerce_add_shipping_order_item', $order->id, $item_id, $package_key );
 			}
+		}
+
+		if ( 'yes' === $this->klarna_debug ) {
+			$this->klarna_log->add( 'klarna', "Finished adding shipping to order $order->id..." );
 		}
 	}
 
@@ -545,15 +583,15 @@ class WC_Gateway_Klarna_K2WC {
 	 * @param  object $klarna_order Klarna order.
 	 */
 	public function add_order_addresses( $order, $klarna_order ) {
-		if ( $this->klarna_debug == 'yes' ) {
-			$this->klarna_log->add( 'klarna', 'Adding order addresses...' );
+		if ( 'yes' === $this->klarna_debug ) {
+			$this->klarna_log->add( 'klarna', "Adding addresses to order $order->id..." );
 			$this->klarna_log->add( 'klarna', var_export( $klarna_order, true ) );
 		}
 
 		$order_id = $order->id;
 
-		// Different names on the returned street address if it's a German purchase or not
-		if ( $_GET['scountry'] == 'DE' || $_GET['scountry'] == 'AT' ) {
+		// Different names on the returned street address if it's a German purchase or not.
+		if ( 'DE' === $_GET['scountry'] || 'AT' === $_GET['scountry'] ) { // Input var okay.
 			$received__billing_address_1  = $klarna_order['billing_address']['street_name'] . ' ' . $klarna_order['billing_address']['street_number'];
 			$received__shipping_address_1 = $klarna_order['shipping_address']['street_name'] . ' ' . $klarna_order['shipping_address']['street_number'];
 		} else {
@@ -561,7 +599,7 @@ class WC_Gateway_Klarna_K2WC {
 			$received__shipping_address_1 = $klarna_order['shipping_address']['street_address'];
 		}
 
-		// Add customer billing address - retrieved from callback from Klarna
+		// Add customer billing address - retrieved from callback from Klarna.
 		$billing_care_of = isset( $klarna_order['billing_address']['care_of'] ) ? $klarna_order['billing_address']['care_of'] : '';
 		$billing_address = array(
 			'first_name' => $klarna_order['billing_address']['given_name'],
@@ -572,20 +610,18 @@ class WC_Gateway_Klarna_K2WC {
 			'city'       => $klarna_order['billing_address']['city'],
 			'country'    => strtoupper( $klarna_order['billing_address']['country'] ),
 			'email'      => $klarna_order['billing_address']['email'],
-			'phone'      => $klarna_order['billing_address']['phone']
+			'phone'      => $klarna_order['billing_address']['phone'],
 		);
-		// Company
-		if( 'organization' == $klarna_order['customer']['type'] ) {
+
+		// Company.
+		if ( 'organization' === $klarna_order['customer']['type'] ) {
 			$billing_address['company'] = $klarna_order['billing_address']['organization_name'];
 			$reference = isset( $klarna_order['billing_address']['reference'] ) ? $klarna_order['billing_address']['reference'] : '';
 			update_post_meta( $order_id, 'klarna_organization_reference', $reference );
 			update_post_meta( $order_id, 'klarna_organization_registration_id', $klarna_order['customer']['organization_registration_id'] );
 		}
-		
-		$order->set_address( apply_filters( 'wc_klarna_returned_billing_address', $billing_address ), 'billing' );
 
-		// Add customer shipping address - retrieved from callback from Klarna
-		// $allow_separate_shipping = ( isset( $klarna_order['options']['allow_separate_shipping_address'] ) ) ? $klarna_order['options']['allow_separate_shipping_address'] : '';
+		$order->set_address( apply_filters( 'wc_klarna_returned_billing_address', $billing_address ), 'billing' );
 
 		$shipping_care_of = isset( $klarna_order['shipping_address']['care_of'] ) ? $klarna_order['shipping_address']['care_of'] : '';
 		$shipping_address = array(
@@ -595,17 +631,17 @@ class WC_Gateway_Klarna_K2WC {
 			'address_2'  => $shipping_care_of,
 			'postcode'   => $klarna_order['shipping_address']['postal_code'],
 			'city'       => $klarna_order['shipping_address']['city'],
-			'country'    => strtoupper( $klarna_order['shipping_address']['country'] )
+			'country'    => strtoupper( $klarna_order['shipping_address']['country'] ),
 		);
-		
-		// Company
-		if( 'organization' == $klarna_order['customer']['type'] ) {
+
+		// Company.
+		if( 'organization' === $klarna_order['customer']['type'] ) {
 			$shipping_address['company'] = $klarna_order['shipping_address']['organization_name'];
 		}
 		
 		$order->set_address( apply_filters( 'wc_klarna_returned_shipping_address', $shipping_address ), 'shipping' );
 
-		// Store Klarna locale
+		// Store Klarna locale.
 		update_post_meta( $order_id, '_klarna_locale', $klarna_order['locale'] );
 	}
 
@@ -620,17 +656,27 @@ class WC_Gateway_Klarna_K2WC {
 	 * @throws Exception
 	 */
 	public function add_order_tax_rows( $order ) {
-		if ( $this->klarna_debug == 'yes' ) {
-			$this->klarna_log->add( 'klarna', 'Adding order tax...' );
+		if ( 'yes' === $this->klarna_debug ) {
+			$this->klarna_log->add( 'klarna', "Adding tax rows to order $order->id..." );
 		}
+
 		// Store tax rows
 		foreach ( array_keys( WC()->cart->taxes + WC()->cart->shipping_taxes ) as $tax_rate_id ) {
 			if ( $tax_rate_id && ! $order->add_tax( $tax_rate_id, WC()->cart->get_tax_amount( $tax_rate_id ), WC()->cart->get_shipping_tax_amount( $tax_rate_id ) ) && apply_filters( 'woocommerce_cart_remove_taxes_zero_rate_id', 'zero-rated' ) !== $tax_rate_id ) {
 				if ( $this->klarna_debug == 'yes' ) {
 					$this->klarna_log->add( 'klarna', 'Unable to add taxes.' );
 				}
+
 				throw new Exception( sprintf( __( 'Error %d: Unable to create order. Please try again.', 'woocommerce' ), 405 ) );
+			} else {
+				if ( 'yes' === $this->klarna_debug ) {
+					$this->klarna_log->add( 'klarna', "Added tax rate $tax_rate_id to order $order->id..." );
+				}
 			}
+		}
+
+		if ( 'yes' === $this->klarna_debug ) {
+			$this->klarna_log->add( 'klarna', "Finished adding tax rows to order $order->id..." );
 		}
 	}
 
@@ -641,21 +687,29 @@ class WC_Gateway_Klarna_K2WC {
 	 * @access public
 	 *
 	 * @param  object $order Local WC order.
-	 *
-	 * @throws Exception
+	 * @throws Exception PHP Exception.
 	 */
 	public function add_order_coupons( $order ) {
-		if ( $this->klarna_debug == 'yes' ) {
-			$this->klarna_log->add( 'klarna', 'Adding order coupons...' );
+		if ( 'yes' === $this->klarna_debug ) {
+			$this->klarna_log->add( 'klarna', "Adding coupons to order $order->id..." );
 		}
-		global $woocommerce;
-		foreach ( $woocommerce->cart->get_coupons() as $code => $coupon ) {
-			if ( ! $order->add_coupon( $code, $woocommerce->cart->get_coupon_discount_amount( $code ) ) ) {
-				if ( $this->klarna_debug == 'yes' ) {
+
+		foreach ( WC()->cart->get_coupons() as $code => $coupon ) {
+			if ( ! $order->add_coupon( $code, WC()->cart->get_coupon_discount_amount( $code ) ) ) {
+				if ( 'yes' === $this->klarna_debug ) {
 					$this->klarna_log->add( 'klarna', 'Unable to add coupons.' );
 				}
+
 				throw new Exception( __( 'Error: Unable to create order. Please try again.', 'woocommerce' ) );
+			} else {
+				if ( 'yes' === $this->klarna_debug ) {
+					$this->klarna_log->add( 'klarna', "Added coupon $code to order $order->id..." );
+				}
 			}
+		}
+
+		if ( 'yes' === $this->klarna_debug ) {
+			$this->klarna_log->add( 'klarna', "Finished adding coupons to order $order->id..." );
 		}
 	}
 
