@@ -188,6 +188,28 @@ if ( '' != $this->color_link ) {
 	$create['options']['color_link'] = $this->color_link;
 }
 
+// Customer types
+if ( 'SE' == $this->klarna_country || 'NO' == $this->klarna_country || 'FI' == $this->klarna_country ) {
+	
+	// B2B purchases is not available for subscriptions. allowed_customer_types defaults to person.
+	// Just don't send allowed_customer_types if the order contains a subscription.
+	if ( class_exists( 'WC_Subscriptions_Cart' ) && WC_Subscriptions_Cart::cart_contains_subscription() ) {
+		// The sound of one hand clapping
+	} else {
+		if ( 'B2B' == $this->allowed_customer_types ) {
+			$create['options']['allowed_customer_types'] = array('organization');
+		} elseif ( 'B2BC' == $this->allowed_customer_types ) {
+			$create['options']['allowed_customer_types'] = array('person', 'organization');
+			$create['customer']['type'] = 'organization';
+		} elseif ( 'B2CB' == $this->allowed_customer_types ) {
+			$create['options']['allowed_customer_types'] = array('person', 'organization');
+			$create['customer']['type'] = 'person';
+		} else {
+			$create['options']['allowed_customer_types'] = array('person');
+		}
+	}
+}
+
 // Check if there's a subscription product in cart
 if ( class_exists( 'WC_Subscriptions_Cart' ) && WC_Subscriptions_Cart::cart_contains_subscription() ) {
 	$create['recurring'] = true;

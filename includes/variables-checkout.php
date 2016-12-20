@@ -77,6 +77,8 @@ $this->account_signup_text = ( isset( $this->settings['account_signup_text'] ) )
 $this->account_login_text  = ( isset( $this->settings['account_login_text'] ) ) ? $this->settings['account_login_text'] : '';
 
 $this->validate_stock = $this->get_option( 'validate_stock' );
+$this->allowed_customer_types  = ( isset( $this->settings['allowed_customer_types'] ) ) ? $this->settings['allowed_customer_types'] : '';
+
 
 // Helper function to make sure colors start with '#' character
 if ( ! function_exists( 'wc_klarna_add_hash_to_color' ) ) {
@@ -112,7 +114,18 @@ else :
 endif;
 
 // Set current country based on used currency
-switch ( get_woocommerce_currency() ) {
+
+// We need to check if WPML is active
+if(!is_admin()) {
+	if( $woocommerce->session->get('client_currency') ) {
+		$customer_selected_currency = $woocommerce->session->get('client_currency');
+	} else {
+		$customer_selected_currency = get_woocommerce_currency();
+	}
+} else {
+	$customer_selected_currency = get_woocommerce_currency();
+}
+switch ( $customer_selected_currency ) {
 	case 'NOK' :
 		$klarna_country = 'NO';
 		break;

@@ -1133,9 +1133,9 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 * @since  2.0
 	 **/
 	function klarna_checkout_get_kco_widget_html() {
-		$klarna_shortchodes = new WC_Gateway_Klarna_Shortcodes();
+		$klarna_shortcodes = new WC_Gateway_Klarna_Shortcodes();
 
-		return $klarna_shortchodes->klarna_checkout_get_kco_widget_html();
+		return $klarna_shortcodes->klarna_checkout_get_kco_widget_html();
 	}
 
 	/**
@@ -2076,7 +2076,7 @@ class WC_Gateway_Klarna_Checkout_Extra {
 		} else {
 			$version = 'v2';
 		}
-		wp_register_script( 'klarna_checkout', KLARNA_URL . 'assets/js/klarna-checkout.js', array(), false, true );
+		wp_register_script( 'klarna_checkout', KLARNA_URL . 'assets/js/klarna-checkout.js', array(), WC_KLARNA_VER, true );
 		wp_localize_script( 'klarna_checkout', 'kcoAjax', array(
 			'ajaxurl'               => admin_url( 'admin-ajax.php' ),
 			'klarna_checkout_nonce' => wp_create_nonce( 'klarna_checkout_nonce' ),
@@ -2084,7 +2084,7 @@ class WC_Gateway_Klarna_Checkout_Extra {
 			'coupon_success'        => __( 'Coupon added.', 'woocommerce-gateway-klarna' ),
 			'coupon_fail'           => __( 'Coupon could not be added.', 'woocommerce-gateway-klarna' )
 		) );
-		wp_register_style( 'klarna_checkout', KLARNA_URL . 'assets/css/klarna-checkout.css' );
+		wp_register_style( 'klarna_checkout', KLARNA_URL . 'assets/css/klarna-checkout.css', array(), WC_KLARNA_VER );
 		if ( is_page() ) {
 			global $post;
 			$checkout_settings = get_option( 'woocommerce_klarna_checkout_settings' );
@@ -2095,6 +2095,7 @@ class WC_Gateway_Klarna_Checkout_Extra {
 			$clean_req_uri = $clean_req_uri[0];
 			$clean_req_uri = trailingslashit( $clean_req_uri );
 			$length        = strlen( $clean_req_uri );
+
 			// Get arrays of checkout and thank you pages for all countries
 			if ( is_array( $checkout_settings ) ) {
 				foreach ( $checkout_settings as $cs_key => $cs_value ) {
@@ -2110,17 +2111,20 @@ class WC_Gateway_Klarna_Checkout_Extra {
 					}
 				}
 			}
+
 			// Start session if on a KCO or KCO Thank You page and KCO enabled
-			if ( in_array( $clean_req_uri, $checkout_pages ) || in_array( $clean_req_uri, $thank_you_pages ) ) {
-				wp_enqueue_script( 'jquery' );
-				wp_enqueue_script( 'wc-checkout', $frontend_script_path . 'checkout' . $suffix . '.js', array(
-					'jquery',
-					'woocommerce',
-					'wc-country-select',
-					'wc-address-i18n'
-				) );
-				wp_enqueue_script( 'klarna_checkout' );
-				wp_enqueue_style( 'klarna_checkout' );
+			if ( $length > 1 ) {
+				if ( in_array( $clean_req_uri, $checkout_pages ) || in_array( $clean_req_uri, $thank_you_pages ) ) {
+					wp_enqueue_script( 'jquery' );
+					wp_enqueue_script( 'wc-checkout', $frontend_script_path . 'checkout' . $suffix . '.js', array(
+						'jquery',
+						'woocommerce',
+						'wc-country-select',
+						'wc-address-i18n'
+					) );
+					wp_enqueue_script( 'klarna_checkout' );
+					wp_enqueue_style( 'klarna_checkout' );
+				}
 			}
 		}
 	}

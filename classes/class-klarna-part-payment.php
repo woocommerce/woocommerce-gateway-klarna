@@ -649,6 +649,11 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 			$klarna_shipping['house_extension'] = '';
 		}
 
+		// Add filters for both the shipping and the billing address, so they can be overridden
+		// This can be useful for when you have custom fields; ie. for the house number
+		apply_filters( 'klarna_shipping_part_payment_fields', $klarna_shipping );
+		apply_filters( 'klarna_billing_part_payment_fields', $klarna_billing );
+
 		$klarna = new Klarna();
 
 		/**

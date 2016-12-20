@@ -65,29 +65,35 @@ class WC_Gateway_Klarna_Order {
 	function add_addresses() {
 		$order  = $this->order;
 		$klarna = $this->klarna;
+		if ( get_post_meta( $order->id, '_billing_address_2', true ) ) {
+			$billing_address = get_post_meta( $order->id, '_billing_address_1', true ) . ' ' . get_post_meta( $order->id, '_billing_address_2', true );
+		}
+		if ( get_post_meta( $order->id, '_billing_address_2', true ) ) {
+			$shipping_address = get_post_meta( $order->id, '_shipping_address_1', true ) . ' ' . get_post_meta( $order->id, '_shipping_address_2', true );
+		}
 		$billing_addr = new KlarnaAddr( get_post_meta( $order->id, '_billing_email', true ), // Email address
 			'', // Telephone number, only one phone number is needed
-			get_post_meta( $order->id, '_billing_phone', true ), // Cell phone number
-			get_post_meta( $order->id, '_billing_first_name', true ), // First name (given name)
-			get_post_meta( $order->id, '_billing_last_name', true ), // Last name (family name)
+			utf8_decode( get_post_meta( $order->id, '_billing_phone', true ) ), // Cell phone number
+			utf8_decode( get_post_meta( $order->id, '_billing_first_name', true ) ), // First name (given name)
+			utf8_decode( get_post_meta( $order->id, '_billing_last_name', true ) ), // Last name (family name)
 			'', // No care of, C/O
-			get_post_meta( $order->id, '_billing_address_1', true ), // Street address
-			get_post_meta( $order->id, '_billing_postcode', true ), // Zip code
-			get_post_meta( $order->id, '_billing_city', true ), // City
-			get_post_meta( $order->id, '_billing_country', true ), // Country
+			utf8_decode( $billing_address ), // Street address
+			utf8_decode( get_post_meta( $order->id, '_billing_postcode', true ) ), // Zip code
+			utf8_decode( get_post_meta( $order->id, '_billing_city', true ) ), // City
+			utf8_decode( get_post_meta( $order->id, '_billing_country', true ) ), // Country
 			null, // House number (AT/DE/NL only)
 			null // House extension (NL only)
 		);
 		$shipping_addr = new KlarnaAddr( get_post_meta( $order->id, '_shipping_email', true ), // Email address
 			'', // Telephone number, only one phone number is needed
-			get_post_meta( $order->id, '_shipping_phone', true ), // Cell phone number
-			get_post_meta( $order->id, '_shipping_first_name', true ), // First name (given name)
-			get_post_meta( $order->id, '_shipping_last_name', true ), // Last name (family name)
+			utf8_decode( get_post_meta( $order->id, '_shipping_phone', true ) ), // Cell phone number
+			utf8_decode( get_post_meta( $order->id, '_shipping_first_name', true ) ), // First name (given name)
+			utf8_decode( get_post_meta( $order->id, '_shipping_last_name', true ) ), // Last name (family name)
 			'', // No care of, C/O
-			get_post_meta( $order->id, '_shipping_address_1', true ), // Street address
-			get_post_meta( $order->id, '_shipping_postcode', true ), // Zip code
-			get_post_meta( $order->id, '_shipping_city', true ), // City
-			get_post_meta( $order->id, '_shipping_country', true ), // Country
+			utf8_decode( $shipping_address ), // Street address
+			utf8_decode( get_post_meta( $order->id, '_shipping_postcode', true ) ), // Zip code
+			utf8_decode( get_post_meta( $order->id, '_shipping_city', true ) ), // City
+			utf8_decode( get_post_meta( $order->id, '_shipping_country', true ) ), // Country
 			null, // House number (AT/DE/NL only)
 			null // House extension (NL only)
 		);
@@ -165,7 +171,7 @@ class WC_Gateway_Klarna_Order {
 			// apply_filters to order discount so we can filter this if needed
 			$klarna_order_discount = $order->order_discount;
 			$order_discount = apply_filters( 'klarna_order_discount', $klarna_order_discount );
-		
+
 			$klarna->addArticle(
 			    $qty = 1,
 			    $artNo = '',
@@ -740,19 +746,12 @@ class WC_Gateway_Klarna_Order {
 		", $itemid ) );
 		$orderid = $item_row->order_id;
 		$order   = wc_get_order( $orderid );
-		$payment_method             = $this->get_order_payment_method( $order );
-		$payment_method_option_name = 'woocommerce_' . $payment_method . '_settings';
-		$payment_method_option      = get_option( $payment_method_option_name );
-		// Check if option is enabled
-		if ( 'yes' == $payment_method_option['push_update'] ) {
-			// Check if and order is on hold so it can be edited, and if it hasn't been captured or cancelled
-			if ( 'on-hold' == $order->get_status() && ! get_post_meta( $orderid, '_klarna_order_cancelled', true ) && ! get_post_meta( $orderid, '_klarna_order_activated', true ) ) {
-				if ( 'rest' == get_post_meta( $order->id, '_klarna_api', true ) ) {
-					$this->update_order_rest( $orderid );
-					// Activation for KCO V2 and KPM orders
-				} else {
-					$this->update_order( $orderid );
-				}
+		if ( $this->order_is_updatable( $order ) ) {
+			if ( 'rest' == get_post_meta( $order->id, '_klarna_api', true ) ) {
+				$this->update_order_rest( $orderid );
+				// Activation for KCO V2 and KPM orders
+			} else {
+				$this->update_order( $orderid );
 			}
 		}
 	}
@@ -772,19 +771,12 @@ class WC_Gateway_Klarna_Order {
 		", $itemid ) );
 		$orderid = $item_row->order_id;
 		$order   = wc_get_order( $orderid );
-		$payment_method             = $this->get_order_payment_method( $order );
-		$payment_method_option_name = 'woocommerce_' . $payment_method . '_settings';
-		$payment_method_option      = get_option( $payment_method_option_name );
-		// Check if option is enabled
-		if ( 'yes' == $payment_method_option['push_update'] ) {
-			// Check if order is on hold so it can be edited, and if it hasn't been captured or cancelled
-			if ( 'on-hold' == $order->get_status() && ! get_post_meta( $orderid, '_klarna_order_cancelled', true ) && ! get_post_meta( $orderid, '_klarna_order_activated', true ) ) {
-				if ( 'rest' == get_post_meta( $order->id, '_klarna_api', true ) ) {
-					$this->update_order_rest( $orderid, $itemid );
-					// Activation for KCO V2 and KPM orders
-				} else {
-					$this->update_order( $orderid, $itemid );
-				}
+		if ( $this->order_is_updatable( $order ) ) {
+			if ( 'rest' == get_post_meta( $order->id, '_klarna_api', true ) ) {
+				$this->update_order_rest( $orderid, $itemid );
+				// Activation for KCO V2 and KPM orders
+			} else {
+				$this->update_order( $orderid, $itemid );
 			}
 		}
 	}
@@ -796,26 +788,37 @@ class WC_Gateway_Klarna_Order {
 	 */
 	function update_klarna_order_edit_item( $orderid, $items ) {
 		$order = wc_get_order( $orderid );
-		$payment_method             = $this->get_order_payment_method( $order );
-		$payment_method_option_name = 'woocommerce_' . $payment_method . '_settings';
-		$payment_method_option      = get_option( $payment_method_option_name );
 		// Check if option is enabled
-		if ( 'yes' == $payment_method_option['push_update'] ) {
-			// Check if order is on hold so it can be edited, and if it hasn't been captured or cancelled
-			if ( 'on-hold' == $order->get_status() && ! get_post_meta( $orderid, '_klarna_order_cancelled', true ) && ! get_post_meta( $orderid, '_klarna_order_activated', true ) ) {
-				if ( defined( 'DOING_AJAX' ) && DOING_AJAX ) {
-					// Check if order was created using this method
-					if ( 'on-hold' == $order->get_status() ) {
-						if ( 'rest' == get_post_meta( $order->id, '_klarna_api', true ) ) {
-							$this->update_order_rest( $orderid );
-							// Activation for KCO V2 and KPM orders
-						} else {
-							$this->update_order( $orderid );
-						}
+		if ( $this->order_is_updatable( $order ) ) {
+			if ( defined( 'DOING_AJAX' ) && DOING_AJAX ) {
+				// Check if order was created using this method
+				if ( 'on-hold' == $order->get_status() ) {
+					if ( 'rest' == get_post_meta( $order->id, '_klarna_api', true ) ) {
+						$this->update_order_rest( $orderid );
+						// Activation for KCO V2 and KPM orders
+					} else {
+						$this->update_order( $orderid );
 					}
 				}
 			}
 		}
+	}
+
+	protected function order_is_updatable( $order ) {
+		$payment_method             = $this->get_order_payment_method( $order );
+		$payment_method_option_name = 'woocommerce_' . $payment_method . '_settings';
+		$payment_method_option      = get_option( $payment_method_option_name );
+
+		$updatable = false;
+		// Check if option is enabled
+		if ( 'yes' == $payment_method_option['push_update'] ) {
+			// Check if order is on hold so it can be edited, and if it hasn't been captured or cancelled
+			if ( 'on-hold' == $order->get_status() && ! get_post_meta( $order->id, '_klarna_order_cancelled', true ) && ! get_post_meta( $order->id, '_klarna_order_activated', true ) ) {
+				$updatable = true;
+			}
+		}
+		// Allow themes and plugins to interact before returning
+		return apply_filters( 'klarna_order_is_updatable', $updatable, $order );
 	}
 
 	/**
@@ -825,7 +828,6 @@ class WC_Gateway_Klarna_Order {
 	 *
 	 * @param $orderid
 	 * @param bool $itemid
-	 * @param bool $skip_address
 	 */
 	function update_order( $orderid, $itemid = false ) {
 		$order       = wc_get_order( $orderid );
