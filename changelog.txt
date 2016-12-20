@@ -1,11 +1,12 @@
 *** WooCommerce Gateway Klarna Changelog ***
 
-2016.12.xx  - version 2.2.4
+2016.12.20  - version 2.2.4
 * Fix       - Fixes character encoding issue in customer address on order update.
 * Tweak     - Stores first_name and last_name for new user in KCO.
 * Tweak     - Adds plugin version to enqueued CSS and JS files for KCO.
 * Tweak     - Applied klarna_shipping_invoice_fields and klarna_billing_invoice_fields for billing and shipping invoice fields
 * Tweak     - Applied klarna_shipping_part_payment_fields and klarna_billing_part_payment_fields for billing and shipping part payment fields.
+* Feature   - Adds Klarna Checkout support for B2B purchases.
 
 2016.11.14  - version 2.2.3
 * Fix       - Fixes the error in settings page when using Klarna and MasterPass plugins together.
