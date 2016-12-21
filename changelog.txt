@@ -1,5 +1,8 @@
 *** WooCommerce Gateway Klarna Changelog ***
 
+2016.12.xx  - version 2.2.5
+* Fix       - Uses correct credentials for Get Address feature.
+
 2016.12.20  - version 2.2.4
 * Fix       - Fixes character encoding issue in customer address on order update.
 * Tweak     - Stores first_name and last_name for new user in KCO.
