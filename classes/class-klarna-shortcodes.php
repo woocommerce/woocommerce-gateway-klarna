@@ -326,7 +326,9 @@ class WC_Gateway_Klarna_Shortcodes {
 					<?php echo $this->klarna_checkout_get_coupon_rows_html(); // Coupons ?>
 
 					<?php echo $this->klarna_checkout_get_taxes_rows_html(); // Taxes ?>
-
+					
+					<?php do_action( 'kco_widget_before_cart_total', $atts ); ?>
+					
 					<?php /* Cart total */ ?>
 					<tr id="kco-page-total">
 						<td class="kco-bold"><?php _e( 'Total', 'woocommerce-gateway-klarna' ); ?></a></td>
