@@ -299,7 +299,7 @@ class WC_Gateway_Klarna_WC2K {
 			}
 		}
 
-		return $cart;
+		return apply_filters( 'klarna_process_cart_contents', $cart);
 	}
 
 	/**
