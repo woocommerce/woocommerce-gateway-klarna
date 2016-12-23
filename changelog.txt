@@ -1,7 +1,11 @@
 *** WooCommerce Gateway Klarna Changelog ***
 
-2016.12.xx  - version 2.2.5
+2016.12.23  - version 2.2.5
 * Fix       - Uses correct credentials for Get Address feature.
+* Fix       - Fixes missing address issue on order update.
+* Update    - Changes login URL to go to My Account page.
+* Update    - Adds kco_widget_before_cart_total action hook before cart totals in KCO cart widget.
+* Update    - Adds klarna_process_cart_contents filter hook.
 
 2016.12.20  - version 2.2.4
 * Fix       - Fixes character encoding issue in customer address on order update.
