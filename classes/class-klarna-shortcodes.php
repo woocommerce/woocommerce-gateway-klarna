@@ -51,9 +51,9 @@ class WC_Gateway_Klarna_Shortcodes {
 				'klarna_checkout_must_be_logged_in_message',
 				sprintf(
 					__( 'You must be logged in to checkout. %s or %s.', 'woocommerce' ),
-					'<a href="' . wp_login_url() . '" title="' . __( 'Login', 'woocommerce-gateway-klarna'
+					'<a href="' . esc_url( wc_get_page_permalink( 'myaccount' ) ) . '" title="' . __( 'Login', 'woocommerce-gateway-klarna'
 					) . '">' . __( 'Login', 'woocommerce-gateway-klarna' ) . '</a>',
-					'<a href="' . wp_registration_url() . '" title="' . __( 'create an account',
+					'<a href="' . esc_url( wc_get_page_permalink( 'myaccount' ) ) . '" title="' . __( 'create an account',
 						'woocommerce-gateway-klarna' ) . '">' . __( 'create an account', 'woocommerce-gateway-klarna'
 					) . '</a>'
 				)
@@ -326,7 +326,9 @@ class WC_Gateway_Klarna_Shortcodes {
 					<?php echo $this->klarna_checkout_get_coupon_rows_html(); // Coupons ?>
 
 					<?php echo $this->klarna_checkout_get_taxes_rows_html(); // Taxes ?>
-
+					
+					<?php do_action( 'kco_widget_before_cart_total', $atts ); ?>
+					
 					<?php /* Cart total */ ?>
 					<tr id="kco-page-total">
 						<td class="kco-bold"><?php _e( 'Total', 'woocommerce-gateway-klarna' ); ?></a></td>
