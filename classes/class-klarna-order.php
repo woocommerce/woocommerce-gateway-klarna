@@ -65,38 +65,49 @@ class WC_Gateway_Klarna_Order {
 	function add_addresses() {
 		$order  = $this->order;
 		$klarna = $this->klarna;
+
 		if ( get_post_meta( $order->id, '_billing_address_2', true ) ) {
 			$billing_address = get_post_meta( $order->id, '_billing_address_1', true ) . ' ' . get_post_meta( $order->id, '_billing_address_2', true );
+		} else {
+			$billing_address = get_post_meta( $order->id, '_billing_address_1', true );
 		}
-		if ( get_post_meta( $order->id, '_billing_address_2', true ) ) {
+
+		if ( get_post_meta( $order->id, '_shipping_address_2', true ) ) {
 			$shipping_address = get_post_meta( $order->id, '_shipping_address_1', true ) . ' ' . get_post_meta( $order->id, '_shipping_address_2', true );
+		} else {
+			$shipping_address = get_post_meta( $order->id, '_shipping_address_1', true );
 		}
-		$billing_addr = new KlarnaAddr( get_post_meta( $order->id, '_billing_email', true ), // Email address
-			'', // Telephone number, only one phone number is needed
-			utf8_decode( get_post_meta( $order->id, '_billing_phone', true ) ), // Cell phone number
-			utf8_decode( get_post_meta( $order->id, '_billing_first_name', true ) ), // First name (given name)
-			utf8_decode( get_post_meta( $order->id, '_billing_last_name', true ) ), // Last name (family name)
-			'', // No care of, C/O
-			utf8_decode( $billing_address ), // Street address
-			utf8_decode( get_post_meta( $order->id, '_billing_postcode', true ) ), // Zip code
-			utf8_decode( get_post_meta( $order->id, '_billing_city', true ) ), // City
-			utf8_decode( get_post_meta( $order->id, '_billing_country', true ) ), // Country
-			null, // House number (AT/DE/NL only)
-			null // House extension (NL only)
+
+		$billing_addr = new KlarnaAddr(
+			get_post_meta( $order->id, '_billing_email', true ), // Email address.
+			'', // Telephone number, only one phone number is needed.
+			utf8_decode( get_post_meta( $order->id, '_billing_phone', true ) ), // Cell phone number.
+			utf8_decode( get_post_meta( $order->id, '_billing_first_name', true ) ), // First name (given name).
+			utf8_decode( get_post_meta( $order->id, '_billing_last_name', true ) ), // Last name (family name).
+			'', // No care of, C/O.
+			utf8_decode( $billing_address ), // Street address.
+			utf8_decode( get_post_meta( $order->id, '_billing_postcode', true ) ), // Zip code.
+			utf8_decode( get_post_meta( $order->id, '_billing_city', true ) ), // City.
+			utf8_decode( get_post_meta( $order->id, '_billing_country', true ) ), // Country.
+			null, // House number (AT/DE/NL only).
+			null // House extension (NL only).
 		);
-		$shipping_addr = new KlarnaAddr( get_post_meta( $order->id, '_shipping_email', true ), // Email address
-			'', // Telephone number, only one phone number is needed
-			utf8_decode( get_post_meta( $order->id, '_shipping_phone', true ) ), // Cell phone number
-			utf8_decode( get_post_meta( $order->id, '_shipping_first_name', true ) ), // First name (given name)
-			utf8_decode( get_post_meta( $order->id, '_shipping_last_name', true ) ), // Last name (family name)
-			'', // No care of, C/O
-			utf8_decode( $shipping_address ), // Street address
-			utf8_decode( get_post_meta( $order->id, '_shipping_postcode', true ) ), // Zip code
-			utf8_decode( get_post_meta( $order->id, '_shipping_city', true ) ), // City
-			utf8_decode( get_post_meta( $order->id, '_shipping_country', true ) ), // Country
-			null, // House number (AT/DE/NL only)
-			null // House extension (NL only)
+
+		$shipping_addr = new KlarnaAddr(
+			get_post_meta( $order->id, '_shipping_email', true ), // Email address.
+			'', // Telephone number, only one phone number is needed.
+			utf8_decode( get_post_meta( $order->id, '_shipping_phone', true ) ), // Cell phone number.
+			utf8_decode( get_post_meta( $order->id, '_shipping_first_name', true ) ), // First name (given name).
+			utf8_decode( get_post_meta( $order->id, '_shipping_last_name', true ) ), // Last name (family name).
+			'', // No care of, C/O.
+			utf8_decode( $shipping_address ), // Street address.
+			utf8_decode( get_post_meta( $order->id, '_shipping_postcode', true ) ), // Zip code.
+			utf8_decode( get_post_meta( $order->id, '_shipping_city', true ) ), // City.
+			utf8_decode( get_post_meta( $order->id, '_shipping_country', true ) ), // Country.
+			null, // House number (AT/DE/NL only).
+			null // House extension (NL only).
 		);
+
 		$klarna->setAddress( KlarnaFlags::IS_BILLING, $billing_addr );
 		$klarna->setAddress( KlarnaFlags::IS_SHIPPING, $shipping_addr );
 		$klarna->setEstoreInfo( $orderid1 = ltrim( $order->get_order_number(), '#' ), $orderid2 = $order->id );
