@@ -1,5 +1,148 @@
 jQuery(document).ready(function ($) {
 
+	// AjaxQ jQuery Plugin
+	// Copyright (c) 2012 Foliotek Inc.
+	// MIT License
+	// https://github.com/Foliotek/ajaxq
+	var queues = {};
+	var activeReqs = {};
+
+	// Register an $.ajaxq function, which follows the $.ajax interface, but allows a queue name which will force only one request per queue to fire.
+	$.ajaxq = function(qname, opts) {
+
+		if (typeof opts === "undefined") {
+			throw ("AjaxQ: queue name is not provided");
+		}
+
+		// Will return a Deferred promise object extended with success/error/callback, so that this function matches the interface of $.ajax
+		var deferred = $.Deferred(),
+			promise = deferred.promise();
+
+		promise.success = promise.done;
+		promise.error = promise.fail;
+		promise.complete = promise.always;
+
+		// Create a deep copy of the arguments, and enqueue this request.
+		var clonedOptions = $.extend(true, {}, opts);
+		enqueue(function() {
+			// Send off the ajax request now that the item has been removed from the queue
+			var jqXHR = $.ajax.apply(window, [clonedOptions]);
+
+			// Notify the returned deferred object with the correct context when the jqXHR is done or fails
+			// Note that 'always' will automatically be fired once one of these are called: http://api.jquery.com/category/deferred-object/.
+			jqXHR.done(function() {
+				deferred.resolve.apply(this, arguments);
+			});
+			jqXHR.fail(function() {
+				deferred.reject.apply(this, arguments);
+			});
+
+			jqXHR.always(dequeue); // make sure to dequeue the next request AFTER the done and fail callbacks are fired
+			return jqXHR;
+		});
+
+		return promise;
+
+
+		// If there is no queue, create an empty one and instantly process this item.
+		// Otherwise, just add this item onto it for later processing.
+		function enqueue(cb) {
+			if (!queues[qname]) {
+				queues[qname] = [];
+				var xhr = cb();
+				activeReqs[qname] = xhr;
+			}
+			else {
+				queues[qname].push(cb);
+			}
+		}
+
+		// Remove the next callback from the queue and fire it off.
+		// If the queue was empty (this was the last item), delete it from memory so the next one can be instantly processed.
+		function dequeue() {
+			if (!queues[qname]) {
+				return;
+			}
+			var nextCallback = queues[qname].shift();
+			if (nextCallback) {
+				var xhr = nextCallback();
+				activeReqs[qname] = xhr;
+			}
+			else {
+				delete queues[qname];
+				delete activeReqs[qname];
+			}
+		}
+	};
+
+	// Register a $.postq and $.getq method to provide shortcuts for $.get and $.post
+	// Copied from jQuery source to make sure the functions share the same defaults as $.get and $.post.
+	$.each( [ "getq", "postq" ], function( i, method ) {
+		$[ method ] = function( qname, url, data, callback, type ) {
+
+			if ( $.isFunction( data ) ) {
+				type = type || callback;
+				callback = data;
+				data = undefined;
+			}
+
+			return $.ajaxq(qname, {
+				type: method === "postq" ? "post" : "get",
+				url: url,
+				data: data,
+				success: callback,
+				dataType: type
+			});
+		};
+	});
+
+	var isQueueRunning = function(qname) {
+		return queues.hasOwnProperty(qname);
+	};
+
+	var isAnyQueueRunning = function() {
+		for (var i in queues) {
+			if (isQueueRunning(i)) return true;
+		}
+		return false;
+	};
+
+	$.ajaxq.isRunning = function(qname) {
+		if (qname) return isQueueRunning(qname);
+		else return isAnyQueueRunning();
+	};
+
+	$.ajaxq.getActiveRequest = function(qname) {
+		if (!qname) throw ("AjaxQ: queue name is required");
+
+		return activeReqs[qname];
+	};
+
+	$.ajaxq.abort = function(qname) {
+		if (!qname) throw ("AjaxQ: queue name is required");
+
+		var current = $.ajaxq.getActiveRequest(qname);
+		delete queues[qname];
+		delete activeReqs[qname];
+		if (current) current.abort();
+	};
+
+	$.ajaxq.clear = function(qname) {
+		if (!qname) {
+			for (var i in queues) {
+				if (queues.hasOwnProperty(i)) {
+					queues[i] = [];
+				}
+			}
+		}
+		else {
+			if (queues[qname]) {
+				queues[qname] = [];
+			}
+		}
+	};
+
+
 	var performingAjax = false;
 
 	var blockCartWidget = function blockCartWidget() {
@@ -419,43 +562,41 @@ jQuery(document).ready(function ($) {
 
 										$(document.body).trigger('kco_widget_update', data);
 
-										$.ajax(
-											kcoAjax.ajaxurl,
-											{
-												type: 'POST',
-												dataType: 'json',
-												data: {
-													action: 'kco_iframe_change_cb',
-													email: data.email,
-													postal_code: data.postal_code,
-													country: data.country,
-													nonce: kcoAjax.klarna_checkout_nonce
-												},
-												success: function (response) {
-													// Check if a product is out of stock
-													if (false === response.success) {
-														// console.log('false');
-														location.reload();
-														return;
-													}
 
-													$(kco_widget).html(response.data.widget_html);
-													$(document.body).trigger('kco_widget_updated', response);
-
-													window._klarnaCheckout(function (api) {
-														api.resume();
-													});
-												},
-												error: function (response) {
-													console.log('change AJAX error');
-													console.log(response);
-
-													window._klarnaCheckout(function (api) {
-														api.resume();
-													});
-												}
+										$.ajaxq('KCOQueue', {
+											url: kcoAjax.ajaxurl,
+											type: 'POST',
+											dataType: 'json',
+											data: {
+												action: 'kco_iframe_change_cb',
+												email: data.email,
+												postal_code: data.postal_code,
+												country: data.country,
+												nonce: kcoAjax.klarna_checkout_nonce
 											}
-										);
+										})
+											.done(function (response) {
+												// Check if a product is out of stock
+												if (false === response.success) {
+													location.reload();
+													return;
+												}
+
+												$(kco_widget).html(response.data.widget_html);
+												$(document.body).trigger('kco_widget_updated', response);
+
+												window._klarnaCheckout(function (api) {
+													api.resume();
+												});
+											})
+											.fail(function (response) {
+												console.log('change AJAX error');
+												console.log(response);
+
+												window._klarnaCheckout(function (api) {
+													api.resume();
+												});
+											});
 									}
 								}
 							}
@@ -473,31 +614,32 @@ jQuery(document).ready(function ($) {
 									api.suspend();
 								});
 
-								$.ajax(
-									kcoAjax.ajaxurl,
-									{
-										type: 'POST',
-										dataType: 'json',
-										data: {
-											action: 'kco_iframe_shipping_address_change_v2_cb',
-											postal_code: data.postal_code,
-											country: data.country,
-											nonce: kcoAjax.klarna_checkout_nonce
-										},
-										success: function (response) {
-											$(kco_widget).html(response.data.widget_html);
-										},
-										error: function (response) {
-											console.log('shipping_address_change_v2 AJAX error');
-											console.log(response);
-										},
-										complete: function (response) {
-											window._klarnaCheckout(function (api) {
-												api.resume();
-											});
-										}
+								$.ajaxq('KCOQueue', {
+									url: kcoAjax.ajaxurl,
+									type: 'POST',
+									dataType: 'json',
+									data: {
+										action: 'kco_iframe_shipping_address_change_v2_cb',
+										postal_code: data.postal_code,
+										country: data.country,
+										nonce: kcoAjax.klarna_checkout_nonce
 									}
-								);
+								})
+									.done(function (response) {
+										$(kco_widget).html(response.data.widget_html);
+
+										window._klarnaCheckout(function (api) {
+											api.resume();
+										});
+									})
+									.fail(function (response) {
+										console.log('shipping_address_change_v2 AJAX error');
+										console.log(response);
+
+										window._klarnaCheckout(function (api) {
+											api.resume();
+										});
+									});
 							}
 
 							$(document.body).trigger('kco_shipping_address_change', data);
@@ -560,9 +702,6 @@ jQuery(document).ready(function ($) {
 
 			api.on({
 				'shipping_option_change': function (data) {
-					// var seconds = new Date().getTime() / 1000;
-					// console.log( 'Shipping option change: ' + seconds );
-
 					new_method = data.id;
 					kco_widget = $('#klarna-checkout-widget');
 
