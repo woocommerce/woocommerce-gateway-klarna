@@ -562,7 +562,7 @@ jQuery(document).ready(function ($) {
 
 										$(document.body).trigger('kco_widget_update', data);
 
-										console.log('before change AJAX');
+
 										$.ajaxq('KCOQueue', {
 											url: kcoAjax.ajaxurl,
 											type: 'POST',
@@ -573,13 +573,11 @@ jQuery(document).ready(function ($) {
 												postal_code: data.postal_code,
 												country: data.country,
 												nonce: kcoAjax.klarna_checkout_nonce
-											},
-											beforeSend: function() { console.log('beforeSend change'); }
+											}
 										})
 											.done(function (response) {
 												// Check if a product is out of stock
 												if (false === response.success) {
-													// console.log('false');
 													location.reload();
 													return;
 												}
@@ -590,8 +588,6 @@ jQuery(document).ready(function ($) {
 												window._klarnaCheckout(function (api) {
 													api.resume();
 												});
-
-												console.log('completed change');
 											})
 											.fail(function (response) {
 												console.log('change AJAX error');
@@ -618,7 +614,6 @@ jQuery(document).ready(function ($) {
 									api.suspend();
 								});
 
-								console.log('before shipping change AJAX');
 								$.ajaxq('KCOQueue', {
 									url: kcoAjax.ajaxurl,
 									type: 'POST',
@@ -628,8 +623,7 @@ jQuery(document).ready(function ($) {
 										postal_code: data.postal_code,
 										country: data.country,
 										nonce: kcoAjax.klarna_checkout_nonce
-									},
-									beforeSend: function() { console.log('beforeSend shipping change'); }
+									}
 								})
 									.done(function (response) {
 										$(kco_widget).html(response.data.widget_html);
@@ -637,8 +631,6 @@ jQuery(document).ready(function ($) {
 										window._klarnaCheckout(function (api) {
 											api.resume();
 										});
-
-										console.log('completed shipping change');
 									})
 									.fail(function (response) {
 										console.log('shipping_address_change_v2 AJAX error');
@@ -710,9 +702,6 @@ jQuery(document).ready(function ($) {
 
 			api.on({
 				'shipping_option_change': function (data) {
-					// var seconds = new Date().getTime() / 1000;
-					// console.log( 'Shipping option change: ' + seconds );
-
 					new_method = data.id;
 					kco_widget = $('#klarna-checkout-widget');
 
