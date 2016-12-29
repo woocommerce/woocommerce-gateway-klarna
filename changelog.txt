@@ -1,5 +1,8 @@
 *** WooCommerce Gateway Klarna Changelog ***
 
+2016.12.29  - version 2.2.6
+* Fix       - Uses AjaxQ library (MIT license: https://foliotek.github.io/AjaxQ/) to fix duplicate order items issue.
+
 2016.12.23  - version 2.2.5
 * Fix       - Uses correct credentials for Get Address feature.
 * Fix       - Fixes missing address issue on order update.
