@@ -866,43 +866,50 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		if ( ! wp_verify_nonce( $_REQUEST['nonce'], 'klarna_checkout_nonce' ) ) {
 			exit( 'Nonce can not be verified.' );
 		}
-		global $woocommerce;
+
 		$data = array();
-		// Check stock
-		if ( is_wp_error( $woocommerce->cart->check_cart_item_stock() ) ) {
+
+		// Check stock.
+		if ( is_wp_error( WC()->cart->check_cart_item_stock() ) ) {
 			wp_send_json_error();
 			wp_die();
 		}
-		// Capture email
+
+		// Capture email.
 		if ( isset( $_REQUEST['email'] ) && is_string( $_REQUEST['email'] ) && ! is_user_logged_in() ) {
 			$this->update_or_create_local_order( $_REQUEST['email'] );
-			$orderid         = $woocommerce->session->get( 'ongoing_klarna_order' );
+			$orderid         = WC()->session->get( 'ongoing_klarna_order' );
 			$data['orderid'] = $orderid;
 			$connector       = Klarna_Checkout_Connector::create( $this->klarna_secret, $this->klarna_server );
 			$klarna_order    = new Klarna_Checkout_Order( $connector, WC()->session->get( 'klarna_checkout' ) );
+
 			$klarna_order->fetch();
-			$update['merchant']['push_uri']         = add_query_arg( array(
-				'sid' => $orderid
-			), $klarna_order['merchant']['push_uri'] );
+
+			$update['merchant']['push_uri'] = add_query_arg( array( 'sid' => $orderid ), $klarna_order['merchant']['push_uri'] );
 			$update['merchant']['confirmation_uri'] = add_query_arg( array(
 				'sid'            => $orderid,
 				'order-received' => $orderid
 			), $klarna_order['merchant']['confirmation_uri'] );
+
 			$klarna_order->update( $update );
 		}
-		// Capture postal code
+
+		// Capture postal code.
 		if ( isset( $_REQUEST['postal_code'] ) && is_string( $_REQUEST['postal_code'] ) && WC_Validation::is_postcode( $_REQUEST['postal_code'], $this->klarna_country ) ) {
-			$woocommerce->customer->set_shipping_postcode( $_REQUEST['postal_code'] );
+			WC()->customer->set_shipping_postcode( $_REQUEST['postal_code'] );
 			if ( ! defined( 'WOOCOMMERCE_CART' ) ) {
 				define( 'WOOCOMMERCE_CART', true );
 			}
-			// Update user session
-			$woocommerce->cart->calculate_shipping();
-			$woocommerce->cart->calculate_fees();
-			$woocommerce->cart->calculate_totals();
-			// Update ongoing WooCommerce order
+
+			// Update user session.
+			WC()->cart->calculate_shipping();
+			WC()->cart->calculate_fees();
+			WC()->cart->calculate_totals();
+
+			// Update ongoing WooCommerce order.
 			$this->update_or_create_local_order();
 			$data['widget_html'] = $this->klarna_checkout_get_kco_widget_html();
+
 			if ( WC()->session->get( 'klarna_checkout' ) ) {
 				$this->ajax_update_klarna_order();
 			}
@@ -920,49 +927,29 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		if ( ! wp_verify_nonce( $_REQUEST['nonce'], 'klarna_checkout_nonce' ) ) {
 			exit( 'Nonce can not be verified.' );
 		}
-		global $woocommerce;
-		$data = array();
-		// Capture postal code
-		if ( isset( $_REQUEST['postal_code'] ) && is_string( $_REQUEST['postal_code'] ) ) {
-			$woocommerce->customer->set_shipping_postcode( $_REQUEST['postal_code'] );
-		}
-		/*
-		if ( isset( $_REQUEST['country'] ) && is_string( $_REQUEST['country'] ) ) {
-			$shipping_country = strtoupper( $_REQUEST['country'] );
-			switch ( $shipping_country ) {
-				case 'SWE' :
-					$formatted_country = 'SE';
-					break;
-				case 'NOR' :
-					$formatted_country = 'NO';
-					break;
-				case 'AUT' :
-					$formatted_country = 'AT';
-					break;
-				case 'FIN' :
-					$formatted_country = 'FI';
-					break;
-				case 'DEU' :
-					$formatted_country = 'DE';
-					break;
-			}
 
-			if ( isset( $formatted_country ) ) {
-				$woocommerce->customer->set_shipping_country( $formatted_country );
-			}
+		$data = array();
+
+		// Capture postal code.
+		if ( isset( $_REQUEST['postal_code'] ) && is_string( $_REQUEST['postal_code'] ) ) {
+			WC()->customer->set_shipping_postcode( $_REQUEST['postal_code'] );
 		}
-		*/
+
 		if ( ! defined( 'WOOCOMMERCE_CART' ) ) {
 			define( 'WOOCOMMERCE_CART', true );
 		}
-		$woocommerce->cart->calculate_shipping();
-		$woocommerce->cart->calculate_fees();
-		$woocommerce->cart->calculate_totals();
+
+		WC()->cart->calculate_shipping();
+		WC()->cart->calculate_fees();
+		WC()->cart->calculate_totals();
+
 		$this->update_or_create_local_order();
 		$data['widget_html'] = $this->klarna_checkout_get_kco_widget_html();
+
 		if ( WC()->session->get( 'klarna_checkout' ) ) {
 			$this->ajax_update_klarna_order();
 		}
+
 		wp_send_json_success( $data );
 		wp_die();
 	}
