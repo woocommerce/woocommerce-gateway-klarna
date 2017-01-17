@@ -18,7 +18,7 @@
  * Developer URI:   http://krokedil.com/
  * Text Domain:     woocommerce-gateway-klarna
  * Domain Path:     /languages
- * Copyright:       © 2009-2017 WooCommerce / Automattic.
+ * Copyright:       © 2009-2017 WooCommerce.
  * License:         GNU General Public License v3.0
  * License URI:     http://www.gnu.org/licenses/gpl-3.0.html
  */
