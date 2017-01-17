@@ -12,7 +12,7 @@
  * Plugin URI:      https://woocommerce.com/products/klarna/
  * Description:     Extends WooCommerce. Provides a <a href="http://www.klarna.se" target="_blank">Klarna</a> gateway for WooCommerce.
  * Version:         2.2.6
- * Author:          Automattic
+ * Author:          WooCommerce
  * Author URI:      https://woocommerce.com/
  * Developer:       Krokedil
  * Developer URI:   http://krokedil.com/
