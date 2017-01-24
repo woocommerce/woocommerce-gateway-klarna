@@ -79,6 +79,7 @@ if ( $this->is_rest() ) {
 	$snippet = '<div class="klarna-thank-you-snippet">' . $klarna_order['gui']['snippet'] . '</div>';
 }
 
+do_action( 'woocommerce_checkout_order_processed', intval( $_GET['sid'] ), false );
 do_action( 'klarna_before_kco_confirmation', intval( $_GET['sid'] ) );
 
 echo $snippet;
