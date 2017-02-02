@@ -26,7 +26,6 @@ class WC_Klarna_PMS {
 	public function __construct() {
 
 		add_action( 'wp_enqueue_scripts', array( $this, 'load_scripts' ) );
-		add_action( 'wp_enqueue_scripts', 'add_thickbox' );
 	}
 
 	/**
@@ -34,6 +33,7 @@ class WC_Klarna_PMS {
 	 */
 	function load_scripts() {
 		if ( is_checkout() ) {
+			add_thickbox();
 			wp_register_script( 'klarna-pms-js', KLARNA_URL . 'assets/js/klarnapms.js', array( 'jquery' ), '1.0', false );
 			wp_enqueue_script( 'klarna-pms-js' );
 		}
@@ -182,7 +182,6 @@ class WC_Klarna_PMS {
 					} else {
 						$read_more_text = 'Read more';
 					}
-					add_thickbox();
 					$payment_options_details_output .= '<div class="klarna-pms-terms-uri" style="margin-bottom:1em;"><a class="thickbox" href="' . $klarna_terms_uri . '" target="_blank">' . $read_more_text . '</a></div>';
 				}
 
