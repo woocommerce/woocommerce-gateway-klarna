@@ -2054,7 +2054,6 @@ class WC_Gateway_Klarna_Checkout_Extra {
 	 * @since  2.0
 	 **/
 	function klarna_checkout_enqueuer() {
-		global $woocommerce;
 		$suffix               = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
 		$assets_path          = str_replace( array( 'http:', 'https:' ), '', WC()->plugin_url() ) . '/assets/';
 		$frontend_script_path = $assets_path . 'js/frontend/';
@@ -2072,8 +2071,8 @@ class WC_Gateway_Klarna_Checkout_Extra {
 			'coupon_fail'           => __( 'Coupon could not be added.', 'woocommerce-gateway-klarna' )
 		) );
 		wp_register_style( 'klarna_checkout', KLARNA_URL . 'assets/css/klarna-checkout.css', array(), WC_KLARNA_VER );
+
 		if ( is_page() ) {
-			global $post;
 			$checkout_settings = get_option( 'woocommerce_klarna_checkout_settings' );
 			$checkout_pages    = array();
 			$thank_you_pages   = array();
@@ -2088,12 +2087,12 @@ class WC_Gateway_Klarna_Checkout_Extra {
 				foreach ( $checkout_settings as $cs_key => $cs_value ) {
 					if ( strpos( $cs_key, 'klarna_checkout_url_' ) !== false && '' != $cs_value ) {
 						$clean_checkout_uri = explode( '?', $cs_value );
-						$clean_checkout_uri = $clean_checkout_uri[0];
+						$clean_checkout_uri = trailingslashit( $clean_checkout_uri[0] );
 						$checkout_pages[ $cs_key ] = substr( $clean_checkout_uri, 0 - $length );
 					}
 					if ( strpos( $cs_key, 'klarna_checkout_thanks_url_' ) !== false && '' != $cs_value ) {
 						$clean_thank_you_uri = explode( '?', $cs_value );
-						$clean_thank_you_uri = $clean_thank_you_uri[0];
+						$clean_thank_you_uri = trailingslashit( $clean_thank_you_uri[0] );
 						$thank_you_pages[ $cs_key ] = substr( $clean_thank_you_uri, 0 - $length );
 					}
 				}
