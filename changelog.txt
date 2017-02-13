@@ -3,6 +3,8 @@
 2017.02.xx  - version 2.3
 * Fix       - Moves woocommerce_checkout_order_processed from notification listener to thank you page (AWP and GA plugins fix).
 * Update    - Updates WordPress plugin header.
+* Update    - Stores shipping phone number as order meta field in KCO notification listener.
+* Fix       - Adds trailinglashit to compared URLs in KCO enqueue scripts function.
 
 2016.12.29  - version 2.2.6
 * Fix       - Uses AjaxQ library (MIT license: https://foliotek.github.io/AjaxQ/) to fix duplicate order items issue.
