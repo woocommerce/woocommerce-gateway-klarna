@@ -656,6 +656,7 @@ class WC_Gateway_Klarna_K2WC {
 			'postcode'   => $klarna_order['shipping_address']['postal_code'],
 			'city'       => $klarna_order['shipping_address']['city'],
 			'country'    => strtoupper( $klarna_order['shipping_address']['country'] ),
+			'phone'      => $klarna_order['shipping_address']['phone'],
 		);
 
 		// Company.
