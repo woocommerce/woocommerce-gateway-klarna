@@ -2,23 +2,23 @@
 /**
  * WooCommerce Klarna Gateway
  *
- * @link http://www.woothemes.com/products/klarna/
+ * @link https://woocommerce.com/products/klarna/
  * @since 0.3
  *
  * @package WC_Gateway_Klarna
  *
  * @wordpress-plugin
  * Plugin Name:     WooCommerce Klarna Gateway
- * Plugin URI:      http://woothemes.com/woocommerce
+ * Plugin URI:      https://woocommerce.com/products/klarna/
  * Description:     Extends WooCommerce. Provides a <a href="http://www.klarna.se" target="_blank">Klarna</a> gateway for WooCommerce.
- * Version:         2.2.6
- * Author:          WooThemes
- * Author URI:      http://woothemes.com/
+ * Version:         2.3
+ * Author:          WooCommerce
+ * Author URI:      https://woocommerce.com/
  * Developer:       Krokedil
  * Developer URI:   http://krokedil.com/
  * Text Domain:     woocommerce-gateway-klarna
  * Domain Path:     /languages
- * Copyright:       © 2009-2015 WooThemes.
+ * Copyright:       © 2009-2017 WooCommerce.
  * License:         GNU General Public License v3.0
  * License URI:     http://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -28,7 +28,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 if ( !defined( 'WC_KLARNA_VER' ) ) {
-	define( 'WC_KLARNA_VER', '2.2.6' );
+	define( 'WC_KLARNA_VER', '2.3' );
 }
 
 /**

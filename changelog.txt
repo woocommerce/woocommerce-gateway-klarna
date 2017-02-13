@@ -1,5 +1,9 @@
 *** WooCommerce Gateway Klarna Changelog ***
 
+2017.02.xx  - version 2.3
+* Fix       - Moves woocommerce_checkout_order_processed from notification listener to thank you page (AWP and GA plugins fix).
+* Update    - Updates WordPress plugin header.
+
 2016.12.29  - version 2.2.6
 * Fix       - Uses AjaxQ library (MIT license: https://foliotek.github.io/AjaxQ/) to fix duplicate order items issue.
 
