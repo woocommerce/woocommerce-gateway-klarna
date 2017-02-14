@@ -5,6 +5,7 @@
 * Update    - Updates WordPress plugin header.
 * Update    - Stores shipping phone number as order meta field in KCO notification listener.
 * Fix       - Adds trailinglashit to compared URLs in KCO enqueue scripts function.
+* Fix       - Fixes order note not being stored into WooCommerce order for KCO.
 
 2016.12.29  - version 2.2.6
 * Fix       - Uses AjaxQ library (MIT license: https://foliotek.github.io/AjaxQ/) to fix duplicate order items issue.
