@@ -10,6 +10,10 @@
 
 -
 
+### Klarna plugin version
+
+-
+
 ### WordPress version
 
 -
