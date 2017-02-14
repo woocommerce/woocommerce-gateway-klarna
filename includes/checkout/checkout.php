@@ -129,14 +129,54 @@ if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 	 */
 	$orderid = $this->update_or_create_local_order();
 
-	// Add GA cookie as custom field for GA Ecommerce plugin
+	// Add GA cookie as custom field for GA Ecommerce plugin.
 	if ( class_exists( 'Yoast_GA_Woo_eCommerce_Tracking' ) && isset( $_COOKIE['_ga'] ) ) {
 		// The _ga cookie consists of GA[version_number][user_id], we are only interested in the user_id
 		// so strip the version number.
 		$cookie = preg_replace( '/^(GA\d\.\d\.)/', '', $_COOKIE['_ga'] );
-
 		update_post_meta( $orderid, '_yoast_gau_uuid', $cookie );
 	}
+
+	// Add GA cookie as custom field for GA Ecommerce plugin.
+	if ( class_exists( 'MonsterInsights_eCommerce' ) && isset( $_COOKIE['_ga'] ) ) {
+		// The _ga cookie consists of GA[version_number][user_id], we are only interested in the user_id
+		// so strip the version number.
+		$cookie       = '';
+		$ga_cookie    = $_COOKIE['_ga'];
+		$cookie_parts = explode( '.', $ga_cookie );
+		if ( is_array( $cookie_parts ) && ! empty( $cookie_parts[2] ) && ! empty( $cookie_parts[3] ) ) {
+			$uuid = (string) $cookie_parts[2] . '.' . (string) $cookie_parts[3];
+			if ( is_string( $uuid ) ) {
+				$cookie = $uuid;
+			} else {
+				$cookie = false;
+			}
+		} else {
+			$cookie = false;
+		}
+		update_post_meta( $orderid, '_yoast_gau_uuid', $cookie );
+
+		$cookie = '';
+		if ( empty( $_COOKIE['_ga'] ) ) {
+			$cookie = 'FCE';
+		} else {
+			$ga_cookie    = $_COOKIE['_ga'];
+			$cookie_parts = explode( '.', $ga_cookie );
+			if ( is_array( $cookie_parts ) && ! empty( $cookie_parts[2] ) && ! empty( $cookie_parts[3] ) ) {
+				$uuid = (string) $cookie_parts[2] . '.' . (string) $cookie_parts[3];
+				if ( is_string( $uuid ) ) {
+					$cookie = $ga_cookie;
+				} else {
+					$cookie = 'FA';
+				}
+			} else {
+				$cookie = 'FAE';
+			}
+		}
+		update_post_meta( $orderid, '_monsterinsights_cookie', $cookie );
+	}
+
+
 
 	// WC Subscriptions 2.0 needs this
 	if ( class_exists( 'WC_Subscriptions_Cart' ) && WC_Subscriptions_Cart::cart_contains_subscription() ) {
