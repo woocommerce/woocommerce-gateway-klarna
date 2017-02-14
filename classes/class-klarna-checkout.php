@@ -799,27 +799,33 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		if ( ! wp_verify_nonce( $_REQUEST['nonce'], 'klarna_checkout_nonce' ) ) {
 			exit( 'Nonce can not be verified.' );
 		}
-		global $woocommerce;
+
 		$data = array();
-		// Adding coupon
+
+		// Adding order note.
 		if ( isset( $_REQUEST['order_note'] ) && is_string( $_REQUEST['order_note'] ) ) {
 			$order_note         = sanitize_text_field( $_REQUEST['order_note'] );
 			$data['order_note'] = $order_note;
 			if ( WC()->session->get( 'klarna_checkout' ) ) {
-				$woocommerce->cart->calculate_shipping();
-				$woocommerce->cart->calculate_fees();
-				$woocommerce->cart->calculate_totals();
-				$orderid       = $this->update_or_create_local_order();
+				WC()->cart->calculate_shipping();
+				WC()->cart->calculate_fees();
+				WC()->cart->calculate_totals();
+
+				$orderid = $this->update_or_create_local_order();
+
 				$order_details = array(
 					'ID'           => $orderid,
 					'post_excerpt' => $order_note
 				);
+
 				$order_update  = wp_update_post( $order_details );
+
 				if ( $this->debug == 'yes' ) {
 					$this->log->add( 'klarna', 'ORDERID: ' . $orderid );
 				}
-				$this->ajax_update_klarna_order();
+
 				WC()->session->set( 'klarna_order_note', $order_note );
+				$this->ajax_update_klarna_order();
 			}
 		}
 		wp_send_json_success( $data );
@@ -1036,7 +1042,6 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 * @since  2.0
 	 **/
 	function ajax_update_klarna_order() {
-		global $woocommerce;
 		// Check if Euro is selected, get correct country
 		if ( 'EUR' == get_woocommerce_currency() && WC()->session->get( 'klarna_euro_country' ) ) {
 			$klarna_c     = strtolower( WC()->session->get( 'klarna_euro_country' ) );
@@ -1046,6 +1051,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			$eid          = $this->klarna_eid;
 			$sharedSecret = $this->klarna_secret;
 		}
+
 		if ( $this->is_rest() ) {
 			if ( $this->testmode == 'yes' ) {
 				if ( 'gb' == $this->klarna_country || 'dk' == $this->klarna_country ) {
@@ -1067,10 +1073,13 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			$klarna_order = new Klarna_Checkout_Order( $connector, WC()->session->get( 'klarna_checkout' ) );
 			$klarna_order->fetch();
 		}
+
 		// Process cart contents and prepare them for Klarna
 		include_once( KLARNA_DIR . 'classes/class-wc-to-klarna.php' );
+
 		$wc_to_klarna = new WC_Gateway_Klarna_WC2K( $this->is_rest(), $this->klarna_country );
 		$cart         = $wc_to_klarna->process_cart_contents();
+
 		if ( 0 == count( $cart ) ) {
 			$klarna_order = null;
 		} else {
@@ -1097,6 +1106,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 					$update['cart']['items'][] = $item;
 				}
 			}
+
 			try {
 				$klarna_order->update( apply_filters( 'kco_update_order', $update ) );
 			} catch ( Exception $e ) {
