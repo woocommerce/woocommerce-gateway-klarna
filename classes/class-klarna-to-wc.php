@@ -594,12 +594,18 @@ class WC_Gateway_Klarna_K2WC {
 		}
 
 		// Add customer billing address - retrieved from callback from Klarna.
-		$billing_care_of = isset( $klarna_order['billing_address']['care_of'] ) ? $klarna_order['billing_address']['care_of'] : '';
+		if ( isset( $klarna_order['billing_address']['care_of'] ) ) {
+			$billing_address_2 = $klarna_order['billing_address']['care_of'];
+		} elseif ( isset( $klarna_order['billing_address']['street_address2'] ) ) {
+			$billing_address_2 = $klarna_order['billing_address']['street_address2'];
+		} else {
+			$billing_address_2 = '';
+		}
 		$billing_address = array(
 			'first_name' => $klarna_order['billing_address']['given_name'],
 			'last_name'  => $klarna_order['billing_address']['family_name'],
 			'address_1'  => $received__billing_address_1,
-			'address_2'  => $billing_care_of,
+			'address_2'  => $billing_address_2,
 			'postcode'   => $klarna_order['billing_address']['postal_code'],
 			'city'       => $klarna_order['billing_address']['city'],
 			'country'    => strtoupper( $klarna_order['billing_address']['country'] ),
@@ -617,12 +623,18 @@ class WC_Gateway_Klarna_K2WC {
 
 		$order->set_address( apply_filters( 'wc_klarna_returned_billing_address', $billing_address ), 'billing' );
 
-		$shipping_care_of = isset( $klarna_order['shipping_address']['care_of'] ) ? $klarna_order['shipping_address']['care_of'] : '';
+		if ( isset( $klarna_order['shipping_address']['care_of'] ) ) {
+			$shipping_address_2 = $klarna_order['shipping_address']['care_of'];
+		} elseif ( isset( $klarna_order['shipping_address']['street_address2'] ) ) {
+			$shipping_address_2 = $klarna_order['shipping_address']['street_address2'];
+		} else {
+			$shipping_address_2 = '';
+		}
 		$shipping_address = array(
 			'first_name' => $klarna_order['shipping_address']['given_name'],
 			'last_name'  => $klarna_order['shipping_address']['family_name'],
 			'address_1'  => $received__shipping_address_1,
-			'address_2'  => $shipping_care_of,
+			'address_2'  => $shipping_address_2,
 			'postcode'   => $klarna_order['shipping_address']['postal_code'],
 			'city'       => $klarna_order['shipping_address']['city'],
 			'country'    => strtoupper( $klarna_order['shipping_address']['country'] ),
