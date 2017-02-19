@@ -446,7 +446,7 @@ class WC_Gateway_Klarna_Shortcodes {
 							'min_value'   => '1'
 						), $_product, false );
 					}
-					echo apply_filters( 'woocommerce_cart_item_quantity', $product_quantity, $cart_item_key );
+					echo apply_filters( 'woocommerce_cart_item_quantity', $product_quantity, $cart_item_key, $cart_item );
 					echo '</td>';
 					echo '<td class="product-total kco-rightalign"><span class="amount">';
 					echo apply_filters( 'woocommerce_cart_item_subtotal', $woocommerce->cart->get_product_subtotal( $_product, $cart_item['quantity'] ), $cart_item, $cart_item_key );
