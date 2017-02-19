@@ -9,6 +9,7 @@
 * Fix       - Fixes MonsterInsights support.
 * Fix       - Fixes address line 2 not being stored in WooCommerce orders for KCO UK.
 * Fix       - Fixes shipping order line item details for subscription orders for KCO.
+* Fix       - Adds an argument to woocommerce_cart_item_quantity filter.
 
 2016.12.29  - version 2.2.6
 * Fix       - Uses AjaxQ library (MIT license: https://foliotek.github.io/AjaxQ/) to fix duplicate order items issue.
