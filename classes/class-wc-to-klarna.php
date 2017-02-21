@@ -671,12 +671,12 @@ class WC_Gateway_Klarna_WC2K {
 		global $woocommerce;
 
 		if ( 'us' == $this->klarna_country ) {
-			$shipping_amount = (int) number_format( $woocommerce->cart->shipping_total * 100, 0, '', '' );
+			$shipping_amount = $woocommerce->cart->shipping_total;
 		} else {
-			$shipping_amount = (int) number_format( ( $woocommerce->cart->shipping_total + $woocommerce->cart->shipping_tax_total ) * 100, 0, '', '' );
+			$shipping_amount = $woocommerce->cart->shipping_total + $woocommerce->cart->shipping_tax_total;
 		}
 
-		return (int) $shipping_amount;
+		return round( $shipping_amount * 100 );
 	}
 
 	/**

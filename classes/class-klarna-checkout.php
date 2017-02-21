@@ -570,26 +570,26 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 					}
 					$recurring_price = $order->get_item_total( $item, true ) * 100;
 					if ( $item['line_total'] > 0 ) {
-						$recurring_tax_rate = ( $item['line_tax'] / $item['line_total'] ) * 10000;
+						$recurring_tax_rate = round( ( $item['line_tax'] / $item['line_total'] ) * 10000 );
 					} else {
 						$recurring_tax_rate = 0;
 					}
 					$cart[] = array(
 						'reference'     => strval( $reference ),
 						'name'          => utf8_decode( $item['name'] ),
-						'quantity'      => (int) $item['qty'],
-						'unit_price'    => (int) $recurring_price,
+						'quantity'      => intval( $item['qty'] ),
+						'unit_price'    => intval( $recurring_price ),
 						'discount_rate' => 0,
-						'tax_rate'      => (int) $recurring_tax_rate
+						'tax_rate'      => intval( $recurring_tax_rate )
 					);
 				}
 			}
 		}
 		// Shipping
 		if ( $order->get_total_shipping() > 0 ) {
-			$shipping_price = ( $order->get_total_shipping() + $order->get_shipping_tax() ) * 100;
+			$shipping_price = round(( $order->get_total_shipping() + $order->get_shipping_tax() ) * 100);
 			if ( $order->get_total_shipping() > 0 ) {
-				$shipping_tax_rate = ( $order->get_shipping_tax() / $order->get_total_shipping() ) * 10000;
+				$shipping_tax_rate = round( $order->get_shipping_tax() / $order->get_total_shipping() * 10000 );
 			} else {
 				$shipping_tax_rate = 0;
 			}
@@ -598,8 +598,8 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 				'reference'  => 'SHIPPING',
 				'name'       => __( 'Shipping Fee', 'woocommerce-gateway-klarna' ),
 				'quantity'   => 1,
-				'unit_price' => (int) $shipping_price,
-				'tax_rate'   => (int) $shipping_tax_rate
+				'unit_price' => intval( $shipping_price ),
+				'tax_rate'   => intval( $shipping_tax_rate )
 			);
 		}
 		$create = array();
