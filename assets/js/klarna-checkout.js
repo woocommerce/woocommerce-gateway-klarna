@@ -173,29 +173,27 @@ jQuery(document).ready(function ($) {
 
 			new_country = $(this).val();
 
-			$.ajax(
-				kcoAjax.ajaxurl,
-				{
-					type: 'POST',
-					dataType: 'json',
-					data: {
-						action: 'klarna_checkout_country_callback',
-						new_country: new_country,
-						nonce: kcoAjax.klarna_checkout_nonce
-					},
-					success: function (response) {
-						document.location.assign(response.data.new_url);
-					},
-					error: function (response) {
-						console.log('select euro country AJAX error');
-						console.log(response);
-					},
-					complete: function () {
-						performingAjax = false;
-						unblockCartWidget();
-					}
+			$.ajaxq('KCOQueue', {
+				url: kcoAjax.ajaxurl,
+				type: 'POST',
+				dataType: 'json',
+				data: {
+					action: 'klarna_checkout_country_callback',
+					new_country: new_country,
+					nonce: kcoAjax.klarna_checkout_nonce
+				},
+				success: function (response) {
+					document.location.assign(response.data.new_url);
+				},
+				error: function (response) {
+					console.log('select euro country AJAX error');
+					console.log(response);
+				},
+				complete: function () {
+					performingAjax = false;
+					unblockCartWidget();
 				}
-			);
+			});
 		}
 	});
 
@@ -213,9 +211,9 @@ jQuery(document).ready(function ($) {
 
 			order_note = $(this).val();
 
-			$.ajax(
-				kcoAjax.ajaxurl,
+			$.ajaxq('KCOQueue',
 				{
+					url: kcoAjax.ajaxurl,
 					type: 'POST',
 					dataType: 'json',
 					data: {
@@ -260,9 +258,9 @@ jQuery(document).ready(function ($) {
 
 			$(document.body).trigger('kco_widget_update_shipping', new_method);
 
-			$.ajax(
-				kcoAjax.ajaxurl,
+			$.ajaxq('KCOQueue',
 				{
+					url: kcoAjax.ajaxurl,
 					type: 'POST',
 					dataType: 'json',
 					data: {
@@ -309,9 +307,9 @@ jQuery(document).ready(function ($) {
 			new_quantity = $(this).val();
 			kco_widget = $('#klarna-checkout-widget');
 
-			$.ajax(
-				kcoAjax.ajaxurl,
+			$.ajaxq('KCOQueue',
 				{
+					url: kcoAjax.ajaxurl,
 					type: 'POST',
 					dataType: 'json',
 					data: {
@@ -360,9 +358,9 @@ jQuery(document).ready(function ($) {
 			kco_widget = $('#klarna-checkout-widget');
 			cart_item_key_remove = $(ancestor).data('cart_item_key');
 
-			$.ajax(
-				kcoAjax.ajaxurl,
+			$.ajaxq('KCOQueue',
 				{
+					url: kcoAjax.ajaxurl,
 					type: 'POST',
 					dataType: 'json',
 					data: {
@@ -421,9 +419,9 @@ jQuery(document).ready(function ($) {
 			kco_widget = $('#klarna-checkout-widget');
 			input_field = $(this).find('#coupon_code');
 
-			$.ajax(
-				kcoAjax.ajaxurl,
+			$.ajaxq('KCOQueue',
 				{
+					url: kcoAjax.ajaxurl,
 					type: 'POST',
 					dataType: 'json',
 					data: {
@@ -487,9 +485,9 @@ jQuery(document).ready(function ($) {
 			clicked_el = $(this);
 			kco_widget = $('#klarna-checkout-widget');
 
-			$.ajax(
-				kcoAjax.ajaxurl,
+			$.ajaxq('KCOQueue',
 				{
+					url: kcoAjax.ajaxurl,
 					type: 'POST',
 					dataType: 'json',
 					data: {
@@ -667,9 +665,9 @@ jQuery(document).ready(function ($) {
 
 								kco_widget = $('#klarna-checkout-widget');
 
-								$.ajax(
-									kcoAjax.ajaxurl,
+								$.ajaxq('KCOQueue',
 									{
+										url: kcoAjax.ajaxurl,
 										type: 'POST',
 										dataType: 'json',
 										data: {
@@ -705,9 +703,9 @@ jQuery(document).ready(function ($) {
 					new_method = data.id;
 					kco_widget = $('#klarna-checkout-widget');
 
-					$.ajax(
-						kcoAjax.ajaxurl,
+					$.ajaxq('KCOQueue',
 						{
+							url: kcoAjax.ajaxurl,
 							type: 'POST',
 							dataType: 'json',
 							data: {

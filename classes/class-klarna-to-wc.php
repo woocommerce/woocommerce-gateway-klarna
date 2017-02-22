@@ -325,36 +325,6 @@ class WC_Gateway_Klarna_K2WC {
 			$klarna_order = $this->confirm_klarna_order( $order, $klarna_order );
 			$order->calculate_totals( false );
 
-			// Other plugins need this hook.
-			do_action( 'woocommerce_checkout_order_processed', $order->id, false );
-
-			// Process subscriptions for order.
-			if ( class_exists( 'WC_Subscriptions_Checkout' ) && get_post_meta( $order->id, '_klarna_recurring_carts', true ) ) {
-				// First clear out any subscriptions created for a failed payment to give us a clean slate for creating new subscriptions.
-				$subscriptions = wcs_get_subscriptions_for_order( $order->id, array( 'order_type' => 'parent' ) );
-
-				if ( ! empty( $subscriptions ) ) {
-					foreach ( $subscriptions as $subscription ) {
-						wp_delete_post( $subscription->id );
-					}
-				}
-
-				// Create new subscriptions for each group of subscription products in the cart (that is not a renewal).
-				foreach ( get_post_meta( $order->id, '_klarna_recurring_carts', true ) as $recurring_cart ) {
-					$subscription = WC_Subscriptions_Checkout::create_subscription( $order, $recurring_cart ); // Exceptions are caught by WooCommerce.
-					$subscription->payment_complete();
-
-					if ( is_wp_error( $subscription ) ) {
-						throw new Exception( $subscription->get_error_message() );
-					}
-
-					do_action( 'woocommerce_checkout_subscription_created', $subscription, $order, $recurring_cart );
-				}
-
-				delete_post_meta( $order->id, '_klarna_recurring_carts' );
-				do_action( 'subscriptions_created_for_order', $order->id ); // Backward compatibility.
-			}
-
 			// Other plugins and themes can hook into here.
 			do_action( 'klarna_after_kco_push_notification', $order->id, $klarna_order );
 		}
@@ -624,12 +594,18 @@ class WC_Gateway_Klarna_K2WC {
 		}
 
 		// Add customer billing address - retrieved from callback from Klarna.
-		$billing_care_of = isset( $klarna_order['billing_address']['care_of'] ) ? $klarna_order['billing_address']['care_of'] : '';
+		if ( isset( $klarna_order['billing_address']['care_of'] ) ) {
+			$billing_address_2 = $klarna_order['billing_address']['care_of'];
+		} elseif ( isset( $klarna_order['billing_address']['street_address2'] ) ) {
+			$billing_address_2 = $klarna_order['billing_address']['street_address2'];
+		} else {
+			$billing_address_2 = '';
+		}
 		$billing_address = array(
 			'first_name' => $klarna_order['billing_address']['given_name'],
 			'last_name'  => $klarna_order['billing_address']['family_name'],
 			'address_1'  => $received__billing_address_1,
-			'address_2'  => $billing_care_of,
+			'address_2'  => $billing_address_2,
 			'postcode'   => $klarna_order['billing_address']['postal_code'],
 			'city'       => $klarna_order['billing_address']['city'],
 			'country'    => strtoupper( $klarna_order['billing_address']['country'] ),
@@ -647,15 +623,22 @@ class WC_Gateway_Klarna_K2WC {
 
 		$order->set_address( apply_filters( 'wc_klarna_returned_billing_address', $billing_address ), 'billing' );
 
-		$shipping_care_of = isset( $klarna_order['shipping_address']['care_of'] ) ? $klarna_order['shipping_address']['care_of'] : '';
+		if ( isset( $klarna_order['shipping_address']['care_of'] ) ) {
+			$shipping_address_2 = $klarna_order['shipping_address']['care_of'];
+		} elseif ( isset( $klarna_order['shipping_address']['street_address2'] ) ) {
+			$shipping_address_2 = $klarna_order['shipping_address']['street_address2'];
+		} else {
+			$shipping_address_2 = '';
+		}
 		$shipping_address = array(
 			'first_name' => $klarna_order['shipping_address']['given_name'],
 			'last_name'  => $klarna_order['shipping_address']['family_name'],
 			'address_1'  => $received__shipping_address_1,
-			'address_2'  => $shipping_care_of,
+			'address_2'  => $shipping_address_2,
 			'postcode'   => $klarna_order['shipping_address']['postal_code'],
 			'city'       => $klarna_order['shipping_address']['city'],
 			'country'    => strtoupper( $klarna_order['shipping_address']['country'] ),
+			'phone'      => $klarna_order['shipping_address']['phone'],
 		);
 
 		// Company.

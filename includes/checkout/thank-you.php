@@ -79,6 +79,10 @@ if ( $this->is_rest() ) {
 	$snippet = '<div class="klarna-thank-you-snippet">' . $klarna_order['gui']['snippet'] . '</div>';
 }
 
+// Need to calculate totals because of woocommerce_checkout_order_processed hook below, plugins like WCS need totals calculated.
+WC()->cart->calculate_shipping();
+WC()->cart->calculate_totals();
+do_action( 'woocommerce_checkout_order_processed', intval( $_GET['sid'] ), false );
 do_action( 'klarna_before_kco_confirmation', intval( $_GET['sid'] ) );
 
 echo $snippet;
@@ -91,4 +95,4 @@ WC()->session->__unset( 'klarna_checkout' );
 WC()->session->__unset( 'klarna_checkout_country' );
 WC()->session->__unset( 'ongoing_klarna_order' );
 WC()->session->__unset( 'klarna_order_note' );
-WC()->cart->empty_cart(); // Remove cart
+wc_clear_cart_after_payment(); // Clear cart.
