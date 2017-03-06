@@ -1,5 +1,8 @@
 *** WooCommerce Gateway Klarna Changelog ***
 
+2017.03.06  - version 2.3.1
+* Fix       - Fixes "Can't use method return value in write context" error for PHP <= 5.4 in KCO class.
+
 2017.02.22  - version 2.3
 * Fix       - Moves woocommerce_checkout_order_processed from notification listener to thank you page (AWP and GA plugins fix).
 * Update    - Updates WordPress plugin header.

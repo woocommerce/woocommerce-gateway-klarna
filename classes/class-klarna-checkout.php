@@ -231,7 +231,8 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 * @throws Exception
 	 */
 	function finalize_subscription( $subscription, $order, $cart ) {
-		if ( $this->id === $subscription->payment_method && empty( $subscription->get_shipping_methods() ) ) {
+		$subscription_shipping_methods = $subscription->get_shipping_methods();
+		if ( $this->id === $subscription->payment_method && empty( $subscription_shipping_methods ) ) {
 			WC_Subscriptions_Cart::set_calculation_type( 'recurring_total' );
 
 			foreach ( $cart->get_shipping_packages() as $base_package ) {
