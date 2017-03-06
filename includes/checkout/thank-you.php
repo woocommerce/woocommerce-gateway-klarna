@@ -31,15 +31,15 @@ $orderUri     = $_GET['klarna_order'];
 // Connect to Klarna
 if ( $this->is_rest() ) {
 	if ( $this->testmode == 'yes' ) {
-		if ( 'gb' == $this->klarna_country || 'dk' == $this->klarna_country ) {
+		if ( in_array( strtoupper( $this->klarna_country ), apply_filters( 'klarna_is_rest_countries_eu', array( 'DK', 'GB' ) ) ) ) {
 			$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_TEST_BASE_URL;
-		} elseif ( 'us' == $this->klarna_country ) {
+		} elseif ( in_array( strtoupper( $this->klarna_country ), apply_filters( 'klarna_is_rest_countries_na', array( 'US' ) ) ) ) {
 			$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::NA_TEST_BASE_URL;
 		}
 	} else {
-		if ( 'gb' == $this->klarna_country || 'dk' == $this->klarna_country ) {
+		if ( in_array( strtoupper( $this->klarna_country ), apply_filters( 'klarna_is_rest_countries_eu', array( 'DK', 'GB' ) ) ) ) {
 			$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_BASE_URL;
-		} elseif ( 'us' == $this->klarna_country ) {
+		} elseif ( in_array( strtoupper( $this->klarna_country ), apply_filters( 'klarna_is_rest_countries_na', array( 'US' ) ) ) ) {
 			$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::NA_BASE_URL;
 		}
 	}

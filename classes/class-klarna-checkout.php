@@ -1108,15 +1108,15 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 
 		if ( $this->is_rest() ) {
 			if ( $this->testmode == 'yes' ) {
-				if ( 'gb' == $this->klarna_country || 'dk' == $this->klarna_country ) {
+				if ( in_array( strtoupper( $this->klarna_country ), apply_filters( 'klarna_is_rest_countries_eu', array( 'DK', 'GB' ) ) ) ) {
 					$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_TEST_BASE_URL;
-				} elseif ( 'us' == $this->klarna_country ) {
+				} elseif ( in_array( strtoupper( $this->klarna_country ), apply_filters( 'klarna_is_rest_countries_na', array( 'US' ) ) ) ) {
 					$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::NA_TEST_BASE_URL;
 				}
 			} else {
-				if ( 'gb' == $this->klarna_country || 'dk' == $this->klarna_country ) {
+				if ( in_array( strtoupper( $this->klarna_country ), apply_filters( 'klarna_is_rest_countries_eu', array( 'DK', 'GB' ) ) ) ) {
 					$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_BASE_URL;
-				} elseif ( 'us' == $this->klarna_country ) {
+				} elseif ( in_array( strtoupper( $this->klarna_country ), apply_filters( 'klarna_is_rest_countries_na', array( 'US' ) ) ) ) {
 					$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::NA_BASE_URL;
 				}
 			}
@@ -1779,7 +1779,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 * @since  2.0.0
 	 */
 	function is_rest() {
-		if ( 'GB' == $this->klarna_country || 'gb' == $this->klarna_country || 'US' == $this->klarna_country || 'us' == $this->klarna_country || 'DK' == $this->klarna_country || 'dk' == $this->klarna_country ) {
+		if ( in_array( strtoupper( $this->klarna_country ), apply_filters( 'klarna_is_rest_countries', array( 'US', 'DK', 'GB' ) ) ) ) {
 			// Set it in session as well, to be used in Shortcodes class
 			WC()->session->set( 'klarna_is_rest', true );
 
@@ -2229,7 +2229,7 @@ class WC_Gateway_Klarna_Checkout_Extra {
 	 */
 	function is_rest() {
 		$this->klarna_country = WC()->session->get( 'klarna_country' );
-		if ( 'GB' == $this->klarna_country || 'gb' == $this->klarna_country || 'US' == $this->klarna_country || 'us' == $this->klarna_country || 'DK' == $this->klarna_country || 'dk' == $this->klarna_country ) {
+		if ( in_array( strtoupper( $this->klarna_country ), apply_filters( 'klarna_is_rest_countries', array( 'US', 'DK', 'GB' ) ) ) ) {
 			// Set it in session as well, to be used in Shortcodes class
 			WC()->session->set( 'klarna_is_rest', true );
 
