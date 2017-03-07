@@ -1,5 +1,8 @@
 *** WooCommerce Gateway Klarna Changelog ***
 
+2017.03.xx  - version 2.3.2
+* Fix       - Fixed compatibility with WooCommerce Min/Max plugin.
+
 2017.03.06  - version 2.3.1
 * Fix       - Fixes "Can't use method return value in write context" error for PHP <= 5.4 in KCO class.
 
