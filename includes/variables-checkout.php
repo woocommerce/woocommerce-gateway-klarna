@@ -170,7 +170,6 @@ switch ( $this->shop_country ) {
 		//case 'NOK' :
 		$klarna_country      = 'NO';
 		$klarna_language     = 'nb-no';
-		$klarna_currency     = 'NOK';
 		$klarna_eid          = $this->eid_no;
 		$klarna_secret       = $this->secret_no;
 		$klarna_checkout_url = $this->klarna_checkout_url_no;
@@ -193,7 +192,6 @@ switch ( $this->shop_country ) {
 			$klarna_language = 'fi-fi';
 		}
 
-		$klarna_currency     = 'EUR';
 		$klarna_eid          = $this->eid_fi;
 		$klarna_secret       = $this->secret_fi;
 		$klarna_checkout_url = $this->klarna_checkout_url_fi;
@@ -209,7 +207,6 @@ switch ( $this->shop_country ) {
 		$klarna_country = 'SE';
 
 		$klarna_language     = 'sv-se';
-		$klarna_currency     = 'SEK';
 		$klarna_eid          = $this->eid_se;
 		$klarna_secret       = $this->secret_se;
 		$klarna_checkout_url = $this->klarna_checkout_url_se;
@@ -223,7 +220,6 @@ switch ( $this->shop_country ) {
 		$klarna_country = 'dk';
 
 		$klarna_language     = 'da-dk';
-		$klarna_currency     = 'DKK';
 		$klarna_eid          = $this->eid_dk;
 		$klarna_secret       = $this->secret_dk;
 		$klarna_checkout_url = $this->klarna_checkout_url_dk;
@@ -236,7 +232,6 @@ switch ( $this->shop_country ) {
 	case 'DE' :
 		$klarna_country      = 'DE';
 		$klarna_language     = 'de-de';
-		$klarna_currency     = 'EUR';
 		$klarna_eid          = $this->eid_de;
 		$klarna_secret       = $this->secret_de;
 		$klarna_checkout_url = $this->klarna_checkout_url_de;
@@ -249,7 +244,6 @@ switch ( $this->shop_country ) {
 	case 'AT' :
 		$klarna_country      = 'AT';
 		$klarna_language     = 'de-at';
-		$klarna_currency     = 'EUR';
 		$klarna_eid          = $this->eid_at;
 		$klarna_secret       = $this->secret_at;
 		$klarna_checkout_url = $this->klarna_checkout_url_at;
@@ -263,7 +257,6 @@ switch ( $this->shop_country ) {
 	case 'gb' :
 		$klarna_country      = 'gb';
 		$klarna_language     = 'en-gb';
-		$klarna_currency     = 'gbp';
 		$klarna_eid          = $this->eid_uk;
 		$klarna_secret       = $this->secret_uk;
 		$klarna_checkout_url = $this->klarna_checkout_url_uk;
@@ -277,7 +270,6 @@ switch ( $this->shop_country ) {
 	case 'us' :
 		$klarna_country      = 'us';
 		$klarna_language     = 'en-us';
-		$klarna_currency     = 'usd';
 		$klarna_eid          = $this->eid_us;
 		$klarna_secret       = $this->secret_us;
 		$klarna_checkout_url = $this->klarna_checkout_url_us;
@@ -290,7 +282,6 @@ switch ( $this->shop_country ) {
 	default:
 		$klarna_country             = '';
 		$klarna_language            = '';
-		$klarna_currency            = '';
 		$klarna_eid                 = '';
 		$klarna_secret              = '';
 		$klarna_checkout_url        = '';
@@ -334,7 +325,6 @@ if ( ! is_admin() && ! empty( $klarna_country ) ) {
 // Apply filters to Country and language
 $this->klarna_country             = apply_filters( 'klarna_country', $klarna_country );
 $this->klarna_language            = apply_filters( 'klarna_language', $klarna_language );
-$this->klarna_currency            = apply_filters( 'klarna_currency', $klarna_currency );
 $this->klarna_eid                 = apply_filters( 'klarna_eid', $klarna_eid );
 $this->klarna_secret              = apply_filters( 'klarna_secret', $klarna_secret );
 $this->klarna_checkout_url        = apply_filters( 'klarna_checkout_url', $klarna_checkout_url );

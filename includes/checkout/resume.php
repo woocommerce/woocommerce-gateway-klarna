@@ -95,9 +95,15 @@ try {
 		// Update the order WC id.
 		$kco_country = ( '' !== $kco_session_country ) ? $kco_session_country : $this->klarna_country;
 		$kco_locale  = ( '' !== $kco_session_locale ) ? $kco_session_locale : $this->klarna_language;
+		
+		if ( $this->is_rest() ) {
+			$kco_currency = strtolower( get_woocommerce_currency() );
+		} else {
+			$kco_currency = get_woocommerce_currency();
+		}
 
 		$update['purchase_country']  = $kco_country;
-		$update['purchase_currency'] = $this->klarna_currency;
+		$update['purchase_currency'] = $kco_currency;
 		$update['locale']            = $kco_locale;
 
 		// Set Euro country session value.
