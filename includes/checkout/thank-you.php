@@ -27,6 +27,8 @@ if ( $this->debug == 'yes' ) {
 $merchantId   = $this->klarna_eid;
 $sharedSecret = $this->klarna_secret;
 $orderUri     = $_GET['klarna_order'];
+$order_id     = $_GET['order-received'];
+$order        = wc_get_order( $order_id );
 
 // Connect to Klarna
 if ( $this->is_rest() ) {
@@ -82,6 +84,30 @@ if ( $this->is_rest() ) {
 // Need to calculate totals because of woocommerce_checkout_order_processed hook below, plugins like WCS need totals calculated.
 WC()->cart->calculate_shipping();
 WC()->cart->calculate_totals();
+
+// Add user ID, in case listener did not do it already.
+if ( $order->get_user_id() === 0 ) {
+	if ( email_exists( $klarna_order['billing_address']['email'] ) ) {
+		$user        = get_user_by( 'email', $klarna_order['billing_address']['email'] );
+		$customer_id = $user->ID;
+		update_post_meta( $order_id, '_customer_user', $customer_id );
+	} else {
+		// Create new user.
+		$checkout_settings = get_option( 'woocommerce_klarna_checkout_settings' );
+		if ( 'yes' === $checkout_settings['create_customer_account'] ) {
+			$password = wp_generate_password();
+			$customer_id = wc_create_new_customer( $klarna_order['billing_address']['email'], '', $password );
+			update_post_meta( $order_id, '_customer_user', $customer_id );
+		}
+	}
+}
+
+// Log the user in.
+if ( $order->get_user_id() > 0 ) {
+	wp_set_current_user( $order->get_user_id() );
+	wc_set_customer_auth_cookie( $order->get_user_id() );
+}
+
 do_action( 'woocommerce_checkout_order_processed', intval( $_GET['sid'] ), false );
 do_action( 'klarna_before_kco_confirmation', intval( $_GET['sid'] ) );
 

@@ -857,6 +857,8 @@ class WC_Gateway_Klarna_K2WC {
 	 * @param  object $klarna_order Klarna order.
 	 */
 	public function add_order_customer_info( $order, $klarna_order ) {
+		$customer_id = 0;
+
 		// Store user id in order so the user can keep track of track it in My account.
 		if ( email_exists( $klarna_order['billing_address']['email'] ) ) {
 			if ( 'yes' === $this->klarna_debug ) {
@@ -876,61 +878,55 @@ class WC_Gateway_Klarna_K2WC {
 			$checkout_settings = get_option( 'woocommerce_klarna_checkout_settings' );
 
 			if ( 'yes' === $checkout_settings['create_customer_account'] ) {
-				$password     = '';
-				$new_customer = $this->create_new_customer( $klarna_order['billing_address']['email'], $klarna_order['billing_address']['email'], $password );
-
-				if ( 0 === $new_customer ) { // Creation failed.
-					$order->add_order_note( sprintf( __( 'Customer creation failed. Check error log for more details.', 'klarna' ) ) );
-					$customer_id = 0;
-				} else { // Creation succeeded.
-					$order->add_order_note( sprintf( __( 'New customer created (user ID %s).', 'klarna' ), $new_customer, $klarna_order['id'] ) );
-					if ( 'DE' === $_GET['scountry'] || 'AT' === $_GET['scountry'] ) { // Input var okay.
-						$received_billing_address_1  = $klarna_order['billing_address']['street_name'] . ' ' . $klarna_order['billing_address']['street_number'];
-						$received_shipping_address_1 = $klarna_order['shipping_address']['street_name'] . ' ' . $klarna_order['shipping_address']['street_number'];
-					} else {
-						$received_billing_address_1  = $klarna_order['billing_address']['street_address'];
-						$received_shipping_address_1 = $klarna_order['shipping_address']['street_address'];
-					}
-
-					// Add customer name.
-					update_user_meta( $new_customer, 'first_name', $klarna_order['billing_address']['given_name'] );
-					update_user_meta( $new_customer, 'last_name', $klarna_order['billing_address']['family_name'] );
-
-					// Add customer billing address - retrieved from callback from Klarna.
-					update_user_meta( $new_customer, 'billing_first_name', $klarna_order['billing_address']['given_name'] );
-					update_user_meta( $new_customer, 'billing_last_name', $klarna_order['billing_address']['family_name'] );
-					update_user_meta( $new_customer, 'billing_address_1', $received_billing_address_1 );
-					update_user_meta( $new_customer, 'billing_address_2', $klarna_order['billing_address']['care_of'] );
-					update_user_meta( $new_customer, 'billing_postcode', $klarna_order['billing_address']['postal_code'] );
-					update_user_meta( $new_customer, 'billing_city', $klarna_order['billing_address']['city'] );
-					update_user_meta( $new_customer, 'billing_country', $klarna_order['billing_address']['country'] );
-					update_user_meta( $new_customer, 'billing_email', $klarna_order['billing_address']['email'] );
-					update_user_meta( $new_customer, 'billing_phone', $klarna_order['billing_address']['phone'] );
-
-					// Add customer shipping address - retrieved from callback from Klarna.
-					$allow_separate_shipping = ( isset( $klarna_order['options']['allow_separate_shipping_address'] ) ) ? $klarna_order['options']['allow_separate_shipping_address'] : '';
-					if ( 'true' == $allow_separate_shipping && ( 'DE' === $_GET['scountry'] || 'AT' === $_GET['scountry'] ) ) { // Input var okay.
-						update_user_meta( $new_customer, 'shipping_first_name', $klarna_order['shipping_address']['given_name'] );
-						update_user_meta( $new_customer, 'shipping_last_name', $klarna_order['shipping_address']['family_name'] );
-						update_user_meta( $new_customer, 'shipping_address_1', $received_shipping_address_1 );
-						update_user_meta( $new_customer, 'shipping_address_2', $klarna_order['shipping_address']['care_of'] );
-						update_user_meta( $new_customer, 'shipping_postcode', $klarna_order['shipping_address']['postal_code'] );
-						update_user_meta( $new_customer, 'shipping_city', $klarna_order['shipping_address']['city'] );
-						update_user_meta( $new_customer, 'shipping_country', $klarna_order['shipping_address']['country'] );
-					} else {
-						update_user_meta( $new_customer, 'shipping_first_name', $klarna_order['billing_address']['given_name'] );
-						update_user_meta( $new_customer, 'shipping_last_name', $klarna_order['billing_address']['family_name'] );
-						update_user_meta( $new_customer, 'shipping_address_1', $received_billing_address_1 );
-						update_user_meta( $new_customer, 'shipping_address_2', $klarna_order['billing_address']['care_of'] );
-						update_user_meta( $new_customer, 'shipping_postcode', $klarna_order['billing_address']['postal_code'] );
-						update_user_meta( $new_customer, 'shipping_city', $klarna_order['billing_address']['city'] );
-						update_user_meta( $new_customer, 'shipping_country', $klarna_order['billing_address']['country'] );
-					}
-
-					$customer_id = $new_customer;
-				}
-
+				$password = wp_generate_password();
+				$customer_id = wc_create_new_customer( $klarna_order['billing_address']['email'], '', $password );
 				update_post_meta( $order->id, '_customer_user', $customer_id );
+			}
+		}
+
+		if ( $customer_id > 0 ) {
+			$order->add_order_note( sprintf( __( 'New customer created (user ID %s).', 'klarna' ), $customer_id, $klarna_order['id'] ) );
+			if ( 'DE' === $_GET['scountry'] || 'AT' === $_GET['scountry'] ) { // Input var okay.
+				$received_billing_address_1  = $klarna_order['billing_address']['street_name'] . ' ' . $klarna_order['billing_address']['street_number'];
+				$received_shipping_address_1 = $klarna_order['shipping_address']['street_name'] . ' ' . $klarna_order['shipping_address']['street_number'];
+			} else {
+				$received_billing_address_1  = $klarna_order['billing_address']['street_address'];
+				$received_shipping_address_1 = $klarna_order['shipping_address']['street_address'];
+			}
+
+			// Add customer name.
+			update_user_meta( $customer_id, 'first_name', $klarna_order['billing_address']['given_name'] );
+			update_user_meta( $customer_id, 'last_name', $klarna_order['billing_address']['family_name'] );
+
+			// Add customer billing address - retrieved from callback from Klarna.
+			update_user_meta( $customer_id, 'billing_first_name', $klarna_order['billing_address']['given_name'] );
+			update_user_meta( $customer_id, 'billing_last_name', $klarna_order['billing_address']['family_name'] );
+			update_user_meta( $customer_id, 'billing_address_1', $received_billing_address_1 );
+			update_user_meta( $customer_id, 'billing_address_2', $klarna_order['billing_address']['care_of'] );
+			update_user_meta( $customer_id, 'billing_postcode', $klarna_order['billing_address']['postal_code'] );
+			update_user_meta( $customer_id, 'billing_city', $klarna_order['billing_address']['city'] );
+			update_user_meta( $customer_id, 'billing_country', $klarna_order['billing_address']['country'] );
+			update_user_meta( $customer_id, 'billing_email', $klarna_order['billing_address']['email'] );
+			update_user_meta( $customer_id, 'billing_phone', $klarna_order['billing_address']['phone'] );
+
+			// Add customer shipping address - retrieved from callback from Klarna.
+			$allow_separate_shipping = ( isset( $klarna_order['options']['allow_separate_shipping_address'] ) ) ? $klarna_order['options']['allow_separate_shipping_address'] : '';
+			if ( 'true' == $allow_separate_shipping && ( 'DE' === $_GET['scountry'] || 'AT' === $_GET['scountry'] ) ) { // Input var okay.
+				update_user_meta( $customer_id, 'shipping_first_name', $klarna_order['shipping_address']['given_name'] );
+				update_user_meta( $customer_id, 'shipping_last_name', $klarna_order['shipping_address']['family_name'] );
+				update_user_meta( $customer_id, 'shipping_address_1', $received_shipping_address_1 );
+				update_user_meta( $customer_id, 'shipping_address_2', $klarna_order['shipping_address']['care_of'] );
+				update_user_meta( $customer_id, 'shipping_postcode', $klarna_order['shipping_address']['postal_code'] );
+				update_user_meta( $customer_id, 'shipping_city', $klarna_order['shipping_address']['city'] );
+				update_user_meta( $customer_id, 'shipping_country', $klarna_order['shipping_address']['country'] );
+			} else {
+				update_user_meta( $customer_id, 'shipping_first_name', $klarna_order['billing_address']['given_name'] );
+				update_user_meta( $customer_id, 'shipping_last_name', $klarna_order['billing_address']['family_name'] );
+				update_user_meta( $customer_id, 'shipping_address_1', $received_billing_address_1 );
+				update_user_meta( $customer_id, 'shipping_address_2', $klarna_order['billing_address']['care_of'] );
+				update_user_meta( $customer_id, 'shipping_postcode', $klarna_order['billing_address']['postal_code'] );
+				update_user_meta( $customer_id, 'shipping_city', $klarna_order['billing_address']['city'] );
+				update_user_meta( $customer_id, 'shipping_country', $klarna_order['billing_address']['country'] );
 			}
 		}
 	}
