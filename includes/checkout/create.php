@@ -43,8 +43,15 @@ if ( ( 'en_US' == get_locale() || 'en_GB' == get_locale() ) && 'DE' != $kco_sess
 $kco_country = ( '' != $kco_session_country ) ? $kco_session_country : $this->klarna_country;
 $kco_locale  = ( '' != $kco_session_locale ) ? $kco_session_locale : $this->klarna_language;
 
+if ( $this->is_rest() ) {
+	$kco_currency = strtolower( get_woocommerce_currency() );
+	$kco_country = strtolower( $kco_country );
+} else {
+	$kco_currency = get_woocommerce_currency();
+}
+
 $create['purchase_country']  = $kco_country;
-$create['purchase_currency'] = $this->klarna_currency;
+$create['purchase_currency'] = $kco_currency;
 $create['locale']            = $kco_locale;
 
 // Set Euro country session value

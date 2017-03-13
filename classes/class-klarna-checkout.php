@@ -1099,8 +1099,17 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		// Check if Euro is selected, get correct country
 		if ( 'EUR' == get_woocommerce_currency() && WC()->session->get( 'klarna_euro_country' ) ) {
 			$klarna_c     = strtolower( WC()->session->get( 'klarna_euro_country' ) );
-			$eid          = $this->settings["eid_$klarna_c"];
-			$sharedSecret = $this->settings["secret_$klarna_c"];
+			
+			if( in_array( strtoupper( $klarna_c ), array( 'DE', 'FI' ) )  ) {
+				// Add correct EID & secret specific to country if the curency is EUR and the country is DE or FI.
+				$eid          = $this->settings["eid_$klarna_c"];
+				$sharedSecret = $this->settings["secret_$klarna_c"];
+			} else {
+				// Otherwise use the general eid and secret (filterable) if we're using EUR as currency for a global KCO checkout
+				$eid          = $this->klarna_eid;
+				$sharedSecret = $this->klarna_secret;
+			}
+			
 		} else {
 			$eid          = $this->klarna_eid;
 			$sharedSecret = $this->klarna_secret;
@@ -1108,15 +1117,15 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 
 		if ( $this->is_rest() ) {
 			if ( $this->testmode == 'yes' ) {
-				if ( 'gb' == $this->klarna_country || 'dk' == $this->klarna_country ) {
+				if ( in_array( strtoupper( $this->klarna_country ), apply_filters( 'klarna_is_rest_countries_eu', array( 'DK', 'GB' ) ) ) ) {
 					$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_TEST_BASE_URL;
-				} elseif ( 'us' == $this->klarna_country ) {
+				} elseif ( in_array( strtoupper( $this->klarna_country ), apply_filters( 'klarna_is_rest_countries_na', array( 'US' ) ) ) ) {
 					$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::NA_TEST_BASE_URL;
 				}
 			} else {
-				if ( 'gb' == $this->klarna_country || 'dk' == $this->klarna_country ) {
+				if ( in_array( strtoupper( $this->klarna_country ), apply_filters( 'klarna_is_rest_countries_eu', array( 'DK', 'GB' ) ) ) ) {
 					$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_BASE_URL;
-				} elseif ( 'us' == $this->klarna_country ) {
+				} elseif ( in_array( strtoupper( $this->klarna_country ), apply_filters( 'klarna_is_rest_countries_na', array( 'US' ) ) ) ) {
 					$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::NA_BASE_URL;
 				}
 			}
@@ -1779,7 +1788,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 * @since  2.0.0
 	 */
 	function is_rest() {
-		if ( 'GB' == $this->klarna_country || 'gb' == $this->klarna_country || 'US' == $this->klarna_country || 'us' == $this->klarna_country || 'DK' == $this->klarna_country || 'dk' == $this->klarna_country ) {
+		if ( in_array( strtoupper( $this->klarna_country ), apply_filters( 'klarna_is_rest_countries', array( 'US', 'DK', 'GB' ) ) ) ) {
 			// Set it in session as well, to be used in Shortcodes class
 			WC()->session->set( 'klarna_is_rest', true );
 
@@ -2216,7 +2225,7 @@ class WC_Gateway_Klarna_Checkout_Extra {
 			$this->authorized_countries[] = 'US';
 		}
 
-		return $this->authorized_countries;
+		return apply_filters( 'klarna_authorized_countries', $this->authorized_countries );
 	}
 
 	/**
@@ -2229,7 +2238,7 @@ class WC_Gateway_Klarna_Checkout_Extra {
 	 */
 	function is_rest() {
 		$this->klarna_country = WC()->session->get( 'klarna_country' );
-		if ( 'GB' == $this->klarna_country || 'gb' == $this->klarna_country || 'US' == $this->klarna_country || 'us' == $this->klarna_country || 'DK' == $this->klarna_country || 'dk' == $this->klarna_country ) {
+		if ( in_array( strtoupper( $this->klarna_country ), apply_filters( 'klarna_is_rest_countries', array( 'US', 'DK', 'GB' ) ) ) ) {
 			// Set it in session as well, to be used in Shortcodes class
 			WC()->session->set( 'klarna_is_rest', true );
 
