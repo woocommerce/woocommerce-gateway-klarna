@@ -1100,8 +1100,15 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		if ( 'EUR' == get_woocommerce_currency() && WC()->session->get( 'klarna_euro_country' ) ) {
 			$klarna_c     = strtolower( WC()->session->get( 'klarna_euro_country' ) );
 			
-			$eid          = $this->settings["eid_$klarna_c"];
-			$sharedSecret = $this->settings["secret_$klarna_c"];
+			if( in_array( strtoupper( $klarna_c ), array( 'DE', 'FI' ) )  ) {
+				// Add correct EID & secret specific to country if the curency is EUR and the country is DE or FI.
+				$eid          = $this->settings["eid_$klarna_c"];
+				$sharedSecret = $this->settings["secret_$klarna_c"];
+			} else {
+				// Otherwise use the general eid and secret (filterable) if we're using EUR as currency for a global KCO checkout
+				$eid          = $this->klarna_eid;
+				$sharedSecret = $this->klarna_secret;
+			}
 			
 		} else {
 			$eid          = $this->klarna_eid;
