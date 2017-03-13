@@ -16,8 +16,7 @@ if ( ! $this->show_kco() ) {
 
 // Check if selected Klarna country is in WooCommerce allowed countries
 if ( ! array_key_exists( strtoupper( $this->get_klarna_country() ), WC()->countries->get_allowed_countries() ) ) {
-	global $woocommerce;
-	$checkout_url = $woocommerce->cart->get_checkout_url();
+	$checkout_url = wc_get_checkout_url();
 	wp_safe_redirect( $checkout_url );
 	exit;
 }
@@ -25,41 +24,41 @@ if ( ! array_key_exists( strtoupper( $this->get_klarna_country() ), WC()->countr
 // Check if there are any recurring items in the cart and if it's a "recurring" country
 if ( class_exists( 'WC_Subscriptions_Cart' ) && WC_Subscriptions_Cart::cart_contains_subscription() ) {
 	if ( ! in_array( strtoupper( $this->get_klarna_country() ), array( 'SE', 'NO' ) ) ) {
-		global $woocommerce;
-		$checkout_url = $woocommerce->cart->get_checkout_url();
+		$checkout_url = wc_get_checkout_url();
 		wp_safe_redirect( $checkout_url );
 		exit;
 	}
 }
 
-// Let other plugins (like min/max) add their notices
-do_action('woocommerce_check_cart_items');
+// Let other plugins (like min/max) add their notices.
+do_action( 'woocommerce_check_cart_items' );
+
 if ( wc_notice_count( 'error' ) > 0 ) {
 	wp_safe_redirect( wc_get_cart_url() );
 } else {
-// Process order via Klarna Checkout page
+	// Process order via Klarna Checkout page.
 	if ( ! defined( 'WOOCOMMERCE_CHECKOUT' ) ) {
 		define( 'WOOCOMMERCE_CHECKOUT', true );
 	}
 
-// Process order via Klarna Checkout page
+	// Process order via Klarna Checkout page.
 	if ( ! defined( 'WOOCOMMERCE_KLARNA_CHECKOUT' ) ) {
 		define( 'WOOCOMMERCE_KLARNA_CHECKOUT', true );
 	}
 
-// Set Klarna Checkout as the chosen payment method in the WC session
+	// Set Klarna Checkout as the chosen payment method in the WC session.
 	WC()->session->set( 'chosen_payment_method', 'klarna_checkout' );
 
-// Set customer country so taxes and shipping can be calculated properly
+	// Set customer country so taxes and shipping can be calculated properly.
 	WC()->customer->set_country( strtoupper( $this->get_klarna_country() ) );
 	WC()->customer->set_shipping_country( strtoupper( $this->get_klarna_country() ) );
 
-// Debug
+	// Debug.
 	if ( $this->debug == 'yes' ) {
 		$this->log->add( 'klarna', 'Rendering Checkout page...' );
 	}
 
-// Mobile or desktop browser
+	// Mobile or desktop browser.
 	if ( wp_is_mobile() ) {
 		$klarna_checkout_layout = 'mobile';
 	} else {
@@ -73,14 +72,14 @@ if ( wc_notice_count( 'error' ) > 0 ) {
 	global $add_klarna_window_size_script;
 	$add_klarna_window_size_script = true;
 
-// Recheck cart items so that they are in stock
-	$result = $woocommerce->cart->check_cart_item_stock();
+	// Recheck cart items so that they are in stock
+	$result = WC()->cart->check_cart_item_stock();
 	if ( is_wp_error( $result ) ) {
 		return $result->get_error_message();
 	}
 
-// Check if there's anything in the cart
-	if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
+	// Check if there's anything in the cart.
+	if ( sizeof( WC()->cart->get_cart() ) > 0 ) {
 
 		if ( isset( $_GET['no_shipping'] ) ) {
 			echo '<div class="woocommerce-error">';
@@ -88,8 +87,8 @@ if ( wc_notice_count( 'error' ) > 0 ) {
 			echo '</div>';
 		}
 
-		// Add button to Standard Checkout Page if this is enabled in the settings
-		if ( $this->add_std_checkout_button == 'yes' ) {
+		// Add button to Standard Checkout Page if this is enabled in the settings.
+		if ( 'yes' === $this->add_std_checkout_button ) {
 			echo '<div class="woocommerce">';
 			echo '<a href="' . get_permalink( get_option( 'woocommerce_checkout_page_id' ) ) . '" class="button std-checkout-button">';
 			echo $this->std_checkout_button_label;
@@ -97,27 +96,27 @@ if ( wc_notice_count( 'error' ) > 0 ) {
 			echo '</div>';
 		}
 
-		// Get Klarna credentials
+		// Get Klarna credentials.
 		$eid          = $this->klarna_eid;
 		$sharedSecret = $this->klarna_secret;
 
-		// Process cart contents and prepare them for Klarna
+		// Process cart contents and prepare them for Klarna.
 		include_once( KLARNA_DIR . 'classes/class-wc-to-klarna.php' );
 		$wc_to_klarna = new WC_Gateway_Klarna_WC2K( $this->is_rest(), $this->klarna_country );
 		$cart         = $wc_to_klarna->process_cart_contents();
 
-		// Initiate Klarna
+		// Initiate Klarna.
 		if ( $this->is_rest() ) {
-			if ( $this->testmode == 'yes' ) {
-				if ( 'gb' == $this->klarna_country || 'dk' == $this->klarna_country ) {
+			if ( 'yes' === $this->testmode ) {
+				if ( in_array( strtoupper( $this->klarna_country ), apply_filters( 'klarna_is_rest_countries_eu', array( 'DK', 'GB' ) ) ) ) {
 					$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_TEST_BASE_URL;
-				} elseif ( 'us' == $this->klarna_country ) {
+				} elseif ( in_array( strtoupper( $this->klarna_country ), apply_filters( 'klarna_is_rest_countries_na', array( 'US' ) ) ) ) {
 					$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::NA_TEST_BASE_URL;
 				}
 			} else {
-				if ( 'gb' == $this->klarna_country || 'dk' == $this->klarna_country ) {
+				if ( in_array( strtoupper( $this->klarna_country ), apply_filters( 'klarna_is_rest_countries_eu', array( 'DK', 'GB' ) ) ) ) {
 					$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_BASE_URL;
-				} elseif ( 'us' == $this->klarna_country ) {
+				} elseif ( in_array( strtoupper( $this->klarna_country ), apply_filters( 'klarna_is_rest_countries_na', array( 'US' ) ) ) ) {
 					$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::NA_BASE_URL;
 				}
 			}
@@ -229,6 +228,6 @@ if ( wc_notice_count( 'error' ) > 0 ) {
 		WC()->session->__unset( 'klarna_checkout_country' ); // Klarna order ID
 		WC()->session->__unset( 'ongoing_klarna_order' ); // WooCommerce order ID
 		WC()->session->__unset( 'klarna_order_note' ); // Order note
-		wp_redirect( $woocommerce->cart->get_cart_url() ); // Redirect to cart page
+		wp_redirect( wc_get_cart_url() ); // Redirect to cart page
 	} // End if sizeof cart
 }
