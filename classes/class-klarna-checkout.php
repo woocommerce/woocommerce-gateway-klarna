@@ -1099,8 +1099,10 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		// Check if Euro is selected, get correct country
 		if ( 'EUR' == get_woocommerce_currency() && WC()->session->get( 'klarna_euro_country' ) ) {
 			$klarna_c     = strtolower( WC()->session->get( 'klarna_euro_country' ) );
+			
 			$eid          = $this->settings["eid_$klarna_c"];
 			$sharedSecret = $this->settings["secret_$klarna_c"];
+			
 		} else {
 			$eid          = $this->klarna_eid;
 			$sharedSecret = $this->klarna_secret;
@@ -2216,7 +2218,7 @@ class WC_Gateway_Klarna_Checkout_Extra {
 			$this->authorized_countries[] = 'US';
 		}
 
-		return $this->authorized_countries;
+		return apply_filters( 'klarna_authorized_countries', $this->authorized_countries );
 	}
 
 	/**
