@@ -37,6 +37,11 @@ $this->secret_dk                     = ( isset( $this->settings['secret_dk'] ) )
 $this->klarna_checkout_url_dk        = ( isset( $this->settings['klarna_checkout_url_dk'] ) ) ? $this->settings['klarna_checkout_url_dk'] : '';
 $this->klarna_checkout_thanks_url_dk = ( isset( $this->settings['klarna_checkout_thanks_url_dk'] ) ) ? $this->settings['klarna_checkout_thanks_url_dk'] : '';
 
+$this->eid_nl                        = ( isset( $this->settings['eid_nl'] ) ) ? $this->settings['eid_nl'] : '';
+$this->secret_nl                     = ( isset( $this->settings['secret_nl'] ) ) ? html_entity_decode( $this->settings['secret_nl'] ) : '';
+$this->klarna_checkout_url_nl        = ( isset( $this->settings['klarna_checkout_url_nl'] ) ) ? $this->settings['klarna_checkout_url_nl'] : '';
+$this->klarna_checkout_thanks_url_nl = ( isset( $this->settings['klarna_checkout_thanks_url_nl'] ) ) ? $this->settings['klarna_checkout_thanks_url_nl'] : '';
+
 $this->eid_de                        = ( isset( $this->settings['eid_de'] ) ) ? $this->settings['eid_de'] : '';
 $this->secret_de                     = ( isset( $this->settings['secret_de'] ) ) ? $this->settings['secret_de'] : '';
 $this->klarna_checkout_url_de        = ( isset( $this->settings['klarna_checkout_url_de'] ) ) ? $this->settings['klarna_checkout_url_de'] : '';
@@ -117,8 +122,8 @@ endif;
 
 // We need to check if WPML is active
 if(!is_admin()) {
-	if( $woocommerce->session->get('client_currency') ) {
-		$customer_selected_currency = $woocommerce->session->get('client_currency');
+	if( WC()->session->get('client_currency') ) {
+		$customer_selected_currency = WC()->session->get('client_currency');
 	} else {
 		$customer_selected_currency = get_woocommerce_currency();
 	}
@@ -140,6 +145,8 @@ switch ( $customer_selected_currency ) {
 				$klarna_country = 'FI';
 			} elseif ( get_locale() == 'de_AT' && '' != $this->eid_at && '' != $this->secret_at ) {
 				$klarna_country = 'AT';
+			}  elseif ( get_locale() == 'nl_NL' && '' != $this->eid_nl && '' != $this->secret_nl ) {
+				$klarna_country = 'NL';
 			} else {
 				$klarna_country = $this->default_eur_contry;
 			}
@@ -229,6 +236,20 @@ switch ( $this->shop_country ) {
 			$klarna_checkout_thanks_url = $this->klarna_checkout_thanks_url_dk;
 		}
 		break;
+	case 'nl' :
+	case 'NL' :
+		$klarna_country = 'nl';
+
+		$klarna_language     = 'nl-NL';
+		$klarna_eid          = $this->eid_nl;
+		$klarna_secret       = $this->secret_nl;
+		$klarna_checkout_url = $this->klarna_checkout_url_nl;
+		if ( $this->klarna_checkout_thanks_url_nl == '' ) {
+			$klarna_checkout_thanks_url = $this->klarna_checkout_url_nl;
+		} else {
+			$klarna_checkout_thanks_url = $this->klarna_checkout_thanks_url_nl;
+		}
+		break;
 	case 'DE' :
 		$klarna_country      = 'DE';
 		$klarna_language     = 'de-de';
@@ -302,6 +323,9 @@ if ( ! empty( $this->eid_fi ) ) {
 }
 if ( ! empty( $this->eid_dk ) ) {
 	$this->authorized_countries[] = 'DK';
+}
+if ( ! empty( $this->eid_nl ) ) {
+	$this->authorized_countries[] = 'NL';
 }
 if ( ! empty( $this->eid_de ) ) {
 	$this->authorized_countries[] = 'DE';

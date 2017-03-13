@@ -33,13 +33,13 @@ $order        = wc_get_order( $order_id );
 // Connect to Klarna
 if ( $this->is_rest() ) {
 	if ( $this->testmode == 'yes' ) {
-		if ( in_array( strtoupper( $this->klarna_country ), apply_filters( 'klarna_is_rest_countries_eu', array( 'DK', 'GB' ) ) ) ) {
+		if ( in_array( strtoupper( $this->klarna_country ), apply_filters( 'klarna_is_rest_countries_eu', array( 'DK', 'GB', 'NL' ) ) ) ) {
 			$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_TEST_BASE_URL;
 		} elseif ( in_array( strtoupper( $this->klarna_country ), apply_filters( 'klarna_is_rest_countries_na', array( 'US' ) ) ) ) {
 			$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::NA_TEST_BASE_URL;
 		}
 	} else {
-		if ( in_array( strtoupper( $this->klarna_country ), apply_filters( 'klarna_is_rest_countries_eu', array( 'DK', 'GB' ) ) ) ) {
+		if ( in_array( strtoupper( $this->klarna_country ), apply_filters( 'klarna_is_rest_countries_eu', array( 'DK', 'GB', 'NL' ) ) ) ) {
 			$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_BASE_URL;
 		} elseif ( in_array( strtoupper( $this->klarna_country ), apply_filters( 'klarna_is_rest_countries_na', array( 'US' ) ) ) ) {
 			$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::NA_BASE_URL;

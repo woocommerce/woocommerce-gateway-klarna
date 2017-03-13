@@ -192,6 +192,39 @@ return apply_filters( 'klarna_checkout_form_fields', array(
 		'desc_tip'    => false
 	),
 
+	'nl_settings_title'             => array(
+		'title' => __( 'Netherlands', 'woocommerce-gateway-klarna' ),
+		'type'  => 'title',
+	),
+	'eid_nl'                        => array(
+		'title'       => __( 'Eid - Netherlands', 'woocommerce-gateway-klarna' ),
+		'type'        => 'text',
+		'description' => __( 'Please enter your Klarna Eid for Netherlands. Leave blank to disable.', 'woocommerce-gateway-klarna' ),
+		'default'     => '',
+		'desc_tip'    => true
+	),
+	'secret_nl'                     => array(
+		'title'       => __( 'Shared Secret - Netherlands', 'woocommerce-gateway-klarna' ),
+		'type'        => 'text',
+		'description' => __( 'Please enter your Klarna Shared Secret for Netherlands.', 'woocommerce-gateway-klarna' ),
+		'default'     => '',
+		'desc_tip'    => true
+	),
+	'klarna_checkout_url_nl'        => array(
+		'title'       => __( 'Custom Checkout Page - Netherlands', 'woocommerce-gateway-klarna' ),
+		'type'        => 'text',
+		'description' => __( 'Please enter the URL to the page that acts as Checkout Page for Klarna Checkout Netherlands. This page must contain the shortcode [woocommerce_klarna_checkout].', 'woocommerce-gateway-klarna' ),
+		'default'     => '',
+		'desc_tip'    => false
+	),
+	'klarna_checkout_thanks_url_nl' => array(
+		'title'       => __( 'Custom Thanks Page - Netherlands', 'woocommerce-gateway-klarna' ),
+		'type'        => 'text',
+		'description' => __( 'Enter the URL to the page that acts as Thanks Page for Klarna Checkout Netherlands. This page must contain the shortcode [woocommerce_klarna_checkout]. Leave blank to use the Custom Checkout Page as Thanks Page.', 'woocommerce-gateway-klarna' ),
+		'default'     => '',
+		'desc_tip'    => false
+	),
+
 	'germany_settings_title'        => array(
 		'title' => __( 'Germany', 'woocommerce-gateway-klarna' ),
 		'type'  => 'title',
@@ -361,7 +394,8 @@ return apply_filters( 'klarna_checkout_form_fields', array(
 		'options'     => array(
 			'DE' => __( 'Germany', 'woocommerce-gateway-klarna' ),
 			'FI' => __( 'Finland', 'woocommerce-gateway-klarna' ),
-			'AT' => __( 'Austria', 'woocommerce-gateway-klarna' )
+			'AT' => __( 'Austria', 'woocommerce-gateway-klarna' ),
+			'NL' => __( 'Netherlands', 'woocommerce-gateway-klarna' )
 		),
 		'description' => __( 'Used by the payment gateway to determine which country should be the default Checkout country if Euro is the selected currency, you as a merchant has an agreement with multiple countries that use Euro and the selected language cant be of help for this decision.', 'woocommerce-gateway-klarna' ),
 		'default'     => 'DE',
