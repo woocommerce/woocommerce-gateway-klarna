@@ -45,6 +45,7 @@ $kco_locale  = ( '' != $kco_session_locale ) ? $kco_session_locale : $this->klar
 
 if ( $this->is_rest() ) {
 	$kco_currency = strtolower( get_woocommerce_currency() );
+	$kco_country = strtolower( $kco_country );
 } else {
 	$kco_currency = get_woocommerce_currency();
 }
