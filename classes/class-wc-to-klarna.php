@@ -452,7 +452,7 @@ class WC_Gateway_Klarna_WC2K {
 	 * @return integer $item_discount_amount Cart item discount.
 	 */
 	public function get_item_discount_amount( $cart_item ) {
-		if ( $cart_item['line_subtotal'] > $cart_item['line_total'] ) {
+		if ( round( $cart_item['line_subtotal'], 2 ) > round( $cart_item['line_total'], 2 ) ) {
 			$item_price           = $this->get_item_price( $cart_item );
 			$item_total_amount    = $this->get_item_total_amount( $cart_item );
 			$item_discount_amount = ( $item_price * $cart_item['quantity'] - $item_total_amount );
