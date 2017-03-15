@@ -18,13 +18,19 @@ $local_order_id      = WC()->session->get( 'ongoing_klarna_order' );
 $kco_session_locale  = '';
 
 if ( ( 'en_US' == get_locale() || 'en_GB' == get_locale() ) && 'DE' != $kco_session_country ) {
-	if ( 'en_US' == get_locale() ) {
-		$kco_session_locale = 'en-US';
+	if ( 'nl' === $kco_session_country ) {
+		$kco_session_locale = 'en-nl';
 	} else {
-		$kco_session_locale = 'en-gb';
+		if ( 'en_US' == get_locale() ) {
+			$kco_session_locale = 'en-US';
+		} else {
+			$kco_session_locale = 'en-gb';
+		}
 	}
 } elseif ( '' != $kco_session_country ) {
-	if ( 'DE' == $kco_session_country ) {
+	if ( 'nl' === $kco_session_country ) {
+		$kco_session_locale = 'nl-nl';
+	} elseif ( 'DE' == $kco_session_country ) {
 		$kco_session_locale = 'de-de';
 	} elseif ( 'AT' == $kco_session_country ) {
 		$kco_session_locale = 'de-at';
@@ -265,6 +271,8 @@ if ( $this->is_rest() ) {
 	$checkout_settings = get_option( 'woocommerce_klarna_checkout_settings' );
 	if ( 'gb' == $this->klarna_country && 'yes' == $checkout_settings['uk_ship_only_to_base'] ) {
 		$create['shipping_countries'] = array();
+	} elseif ( 'nl' == $this->klarna_country ) {
+		$create['shipping_countries'] = array( 'NL' );
 	} else {
 		// Add shipping countries
 		$wc_countries                 = new WC_Countries();

@@ -881,11 +881,11 @@ class WC_Gateway_Klarna_K2WC {
 				$password = wp_generate_password();
 				$customer_id = wc_create_new_customer( $klarna_order['billing_address']['email'], '', $password );
 				update_post_meta( $order->id, '_customer_user', $customer_id );
+				$order->add_order_note( sprintf( __( 'New customer created (user ID %s).', 'klarna' ), $customer_id, $klarna_order['id'] ) );
 			}
 		}
 
 		if ( $customer_id > 0 ) {
-			$order->add_order_note( sprintf( __( 'New customer created (user ID %s).', 'klarna' ), $customer_id, $klarna_order['id'] ) );
 			if ( 'DE' === $_GET['scountry'] || 'AT' === $_GET['scountry'] ) { // Input var okay.
 				$received_billing_address_1  = $klarna_order['billing_address']['street_name'] . ' ' . $klarna_order['billing_address']['street_number'];
 				$received_shipping_address_1 = $klarna_order['shipping_address']['street_name'] . ' ' . $klarna_order['shipping_address']['street_number'];

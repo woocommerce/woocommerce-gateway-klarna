@@ -613,7 +613,17 @@ class WC_Gateway_Klarna_Order {
 			}
 		}
 		if ( 'gb' === strtolower( $billing_country ) || 'dk' === strtolower( $billing_country ) || 'nl' === strtolower( $billing_country ) ) {
-			$connector = Klarna\Rest\Transport\Connector::create( $klarna_settings['eid_uk'], html_entity_decode( $klarna_settings['secret_uk'] ), $klarna_server_url );
+			if ( 'gb' === strtolower( $billing_country ) ) {
+				$eid = $klarna_settings['eid_uk'];
+				$secret = html_entity_decode( $klarna_settings['secret_uk'] );
+			} elseif ( 'dk' === strtolower( $billing_country ) ) {
+				$eid = $klarna_settings['eid_dk'];
+				$secret = html_entity_decode( $klarna_settings['secret_dk'] );
+			} elseif ( 'nl' === strtolower( $billing_country ) ) {
+				$eid = $klarna_settings['eid_nl'];
+				$secret = html_entity_decode( $klarna_settings['secret_nl'] );
+			}
+			$connector = Klarna\Rest\Transport\Connector::create( $eid, $secret, $klarna_server_url );
 		} elseif ( 'us' === strtolower( $billing_country ) ) {
 			$connector = Klarna\Rest\Transport\Connector::create( $klarna_settings['eid_us'], html_entity_decode( $klarna_settings['secret_us'] ), $klarna_server_url );
 		}
@@ -723,7 +733,18 @@ class WC_Gateway_Klarna_Order {
 			}
 		}
 		if ( 'gb' === strtolower( $billing_country ) || 'dk' === strtolower( $billing_country ) || 'nl' === strtolower( $billing_country ) ) {
-			$connector = Klarna\Rest\Transport\Connector::create( $klarna_settings['eid_uk'], html_entity_decode( $klarna_settings['secret_uk'] ), $klarna_server_url );
+			if ( 'gb' === strtolower( $billing_country ) ) {
+				$eid = $klarna_settings['eid_uk'];
+				$secret = html_entity_decode( $klarna_settings['secret_uk'] );
+			} elseif ( 'dk' === strtolower( $billing_country ) ) {
+				$eid = $klarna_settings['eid_dk'];
+				$secret = html_entity_decode( $klarna_settings['secret_dk'] );
+			} elseif ( 'nl' === strtolower( $billing_country ) ) {
+				$eid = $klarna_settings['eid_nl'];
+				$secret = html_entity_decode( $klarna_settings['secret_nl'] );
+			}
+
+			$connector = Klarna\Rest\Transport\Connector::create( $eid, $secret, $klarna_server_url );
 		} elseif ( 'us' === strtolower( $billing_country ) ) {
 			$connector = Klarna\Rest\Transport\Connector::create( $klarna_settings['eid_us'], html_entity_decode( $klarna_settings['secret_us'] ), $klarna_server_url );
 		}
@@ -1054,7 +1075,18 @@ class WC_Gateway_Klarna_Order {
 			}
 		}
 		if ( 'gb' === strtolower( $billing_country ) || 'dk' === strtolower( $billing_country ) || 'nl' === strtolower( $billing_country ) ) {
-			$connector = Klarna\Rest\Transport\Connector::create( $klarna_settings['eid_uk'], html_entity_decode( $klarna_settings['secret_uk'] ), $klarna_server_url );
+			if ( 'gb' === strtolower( $billing_country ) ) {
+				$eid = $klarna_settings['eid_uk'];
+				$secret = html_entity_decode( $klarna_settings['secret_uk'] );
+			} elseif ( 'dk' === strtolower( $billing_country ) ) {
+				$eid = $klarna_settings['eid_dk'];
+				$secret = html_entity_decode( $klarna_settings['secret_dk'] );
+			} elseif ( 'nl' === strtolower( $billing_country ) ) {
+				$eid = $klarna_settings['eid_nl'];
+				$secret = html_entity_decode( $klarna_settings['secret_nl'] );
+			}
+
+			$connector = Klarna\Rest\Transport\Connector::create( $eid, $secret, $klarna_server_url );
 		} elseif ( 'us' === strtolower( $billing_country ) ) {
 			$connector = Klarna\Rest\Transport\Connector::create( $klarna_settings['eid_us'], html_entity_decode( $klarna_settings['secret_us'] ), $klarna_server_url );
 		}

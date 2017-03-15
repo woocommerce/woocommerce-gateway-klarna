@@ -1106,16 +1106,16 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			if( in_array( strtoupper( $klarna_c ), array( 'DE', 'FI', 'NL' ) )  ) {
 				// Add correct EID & secret specific to country if the curency is EUR and the country is DE or FI.
 				$eid          = $this->settings["eid_$klarna_c"];
-				$sharedSecret = $this->settings["secret_$klarna_c"];
+				$sharedSecret = html_entity_decode ( $this->settings["secret_$klarna_c"] );
 			} else {
 				// Otherwise use the general eid and secret (filterable) if we're using EUR as currency for a global KCO checkout
 				$eid          = $this->klarna_eid;
-				$sharedSecret = $this->klarna_secret;
+				$sharedSecret = html_entity_decode ( $this->klarna_secret );
 			}
 			
 		} else {
 			$eid          = $this->klarna_eid;
-			$sharedSecret = $this->klarna_secret;
+			$sharedSecret = html_entity_decode ( $this->klarna_secret );
 		}
 
 		if ( $this->is_rest() ) {
@@ -1771,7 +1771,18 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 					}
 				}
 				if ( 'gb' === strtolower( $country ) || 'dk' === strtolower( $country ) || 'nl' === strtolower( $country ) ) {
-					$connector = Klarna\Rest\Transport\Connector::create( $this->eid_uk, $this->secret_uk, $klarna_server_url );
+					if ( 'gb' === strtolower( $country ) ) {
+						$eid = $this->eid_uk;
+						$secret = html_entity_decode( $this->secret_uk );
+					} elseif ( 'dk' === strtolower( $country ) ) {
+						$eid = $this->eid_dk;
+						$secret = html_entity_decode( $this->secret_dk );
+					} elseif ( 'nl' === strtolower( $country ) ) {
+						$eid = $this->eid_nl;
+						$secret = html_entity_decode( $this->secret_nl );
+					}
+
+					$connector = Klarna\Rest\Transport\Connector::create( $eid, $secret, $klarna_server_url );
 				} elseif ( 'us' === strtolower( $country ) ) {
 					$connector = Klarna\Rest\Transport\Connector::create( $this->eid_us, $this->secret_us, $klarna_server_url );
 				}
