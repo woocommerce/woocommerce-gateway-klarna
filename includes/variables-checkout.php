@@ -348,6 +348,7 @@ if ( ! is_admin() && ! empty( $klarna_country ) ) {
 
 // Apply filters to Country and language
 $this->klarna_country             = apply_filters( 'klarna_country', $klarna_country );
+$this->klarna_credentials_country = apply_filters( 'klarna_credentials_country', $klarna_country );
 $this->klarna_language            = apply_filters( 'klarna_language', $klarna_language );
 $this->klarna_eid                 = apply_filters( 'klarna_eid', $klarna_eid );
 $this->klarna_secret              = apply_filters( 'klarna_secret', $klarna_secret );

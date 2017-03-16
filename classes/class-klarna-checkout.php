@@ -1511,6 +1511,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		$klarna_to_wc->set_klarna_debug( $this->debug );
 		$klarna_to_wc->set_klarna_test_mode( $this->testmode );
 		$klarna_to_wc->set_klarna_server( $this->klarna_server );
+		$klarna_to_wc->set_klarna_credentials_country( $this->klarna_credentials_country );
 		if ( $customer_email ) {
 			$orderid = $klarna_to_wc->prepare_wc_order( $customer_email );
 		} else {
@@ -1530,45 +1531,64 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		if ( isset( $_GET['validate'] ) ) {
 			exit;
 		}
-		switch ( $_GET['scountry'] ) {
-			case 'SE':
-				$klarna_secret = $this->secret_se;
-				$klarna_eid    = $this->eid_se;
-				break;
-			case 'FI' :
-				$klarna_secret = $this->secret_fi;
-				$klarna_eid    = $this->eid_se;
-				break;
-			case 'NO' :
-				$klarna_secret = $this->secret_no;
-				$klarna_eid    = $this->eid_no;
-				break;
-			case 'DE' :
-				$klarna_secret = $this->secret_de;
-				$klarna_eid    = $this->eid_de;
-				break;
-			case 'AT' :
-				$klarna_secret = $this->secret_at;
-				$klarna_eid    = $this->eid_at;
-				break;
-			case 'dk' :
-				$klarna_secret = $this->secret_dk;
-				$klarna_eid    = $this->eid_dk;
-				break;
-			case 'nl' :
-				$klarna_secret = $this->secret_nl;
-				$klarna_eid    = $this->eid_nl;
-				break;
-			case 'gb' :
-				$klarna_secret = $this->secret_uk;
-				$klarna_eid    = $this->eid_uk;
-				break;
-			case 'us' :
-				$klarna_secret = $this->secret_us;
-				$klarna_eid    = $this->eid_us;
-				break;
-			default:
-				$klarna_secret = '';
+		$klarna_eid = false;
+		$klarna_secret = false;
+		
+		// Retrieve Eid & Secret from order if it exist
+		if ( isset( $_GET['sid'] ) ) {
+			$order_id = sanitize_key( $_GET['sid'] );
+			$klarna_credentials_country =  get_post_meta( $order_id, '_klarna_credentials_country', true );
+			
+			if( $klarna_credentials_country ) {
+				$klarna_credentials_country	= strtolower( $klarna_credentials_country );
+				$klarna_eid          		= $this->settings["eid_$klarna_credentials_country"];
+				$klarna_secret 				= html_entity_decode ( $this->settings["secret_$klarna_credentials_country"] );
+			}
+		}
+		
+		// If we don't get an Eid from the order then we can grab the data from the returned country
+		// @TODO - this can be removed over time since the credential country now is stored as post meta in the order.
+		if( empty( $klarna_eid ) ) {
+			switch ( $_GET['scountry'] ) {
+				case 'SE':
+					$klarna_secret = $this->secret_se;
+					$klarna_eid    = $this->eid_se;
+					break;
+				case 'FI' :
+					$klarna_secret = $this->secret_fi;
+					$klarna_eid    = $this->eid_se;
+					break;
+				case 'NO' :
+					$klarna_secret = $this->secret_no;
+					$klarna_eid    = $this->eid_no;
+					break;
+				case 'DE' :
+					$klarna_secret = $this->secret_de;
+					$klarna_eid    = $this->eid_de;
+					break;
+				case 'AT' :
+					$klarna_secret = $this->secret_at;
+					$klarna_eid    = $this->eid_at;
+					break;
+				case 'dk' :
+					$klarna_secret = $this->secret_dk;
+					$klarna_eid    = $this->eid_dk;
+					break;
+				case 'nl' :
+					$klarna_secret = $this->secret_nl;
+					$klarna_eid    = $this->eid_nl;
+					break;
+				case 'gb' :
+					$klarna_secret = $this->secret_uk;
+					$klarna_eid    = $this->eid_uk;
+					break;
+				case 'us' :
+					$klarna_secret = $this->secret_us;
+					$klarna_eid    = $this->eid_us;
+					break;
+				default:
+					$klarna_secret = '';
+			}
 		}
 		// Process cart contents and prepare them for Klarna
 		if ( isset( $_GET['klarna_order'] ) ) {
@@ -1582,6 +1602,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			$klarna_to_wc->set_klarna_test_mode( $this->testmode );
 			$klarna_to_wc->set_klarna_debug( $this->debug );
 			$klarna_to_wc->set_klarna_server( $this->klarna_server );
+			$klarna_to_wc->set_klarna_credentials_country( $this->klarna_credentials_country );
 			$klarna_to_wc->listener();
 		}
 	} // End function check_checkout_listener

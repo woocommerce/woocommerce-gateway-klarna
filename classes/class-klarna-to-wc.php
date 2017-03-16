@@ -89,6 +89,15 @@ class WC_Gateway_Klarna_K2WC {
 	 * @var    string, yes or no
 	 */
 	public $klarna_server;
+	
+	/**
+	 * Klarna credentials country.
+	 *
+	 * @since  2.3.3
+	 * @access public
+	 * @var    string
+	 */
+	public $klarna_credentials_country;
 
 	/**
 	 * Set is_rest value
@@ -168,6 +177,16 @@ class WC_Gateway_Klarna_K2WC {
 	 */
 	public function set_klarna_server( $klarna_server ) {
 		$this->klarna_server = $klarna_server;
+	}
+	
+	/**
+	 * Set klarna_credentials_country
+	 *
+	 * @since 2.3.3
+	 * @param string $klarna_credentials_country Used credentials country for purchase.
+	 */
+	public function set_klarna_credentials_country( $klarna_credentials_country ) {
+		$this->klarna_credentials_country = $klarna_credentials_country;
 	}
 
 	/**
@@ -267,7 +286,10 @@ class WC_Gateway_Klarna_K2WC {
 			} else {
 				update_post_meta( $order->id, '_klarna_api', 'v2' );
 			}
-
+			
+			// Store which KCO credentials country was used.
+			update_post_meta( $order->id, '_klarna_credentials_country', $this->klarna_credentials_country );
+			
 			return $order->id;
 		} else {
 			return false;
