@@ -1102,7 +1102,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		// Check if Euro is selected, get correct country
 		if ( 'EUR' == get_woocommerce_currency() && WC()->session->get( 'klarna_euro_country' ) ) {
 			$klarna_c     = strtolower( WC()->session->get( 'klarna_euro_country' ) );
-			
+
 			if( in_array( strtoupper( $klarna_c ), array( 'DE', 'FI', 'NL' ) )  ) {
 				// Add correct EID & secret specific to country if the curency is EUR and the country is DE or FI.
 				$eid          = $this->settings["eid_$klarna_c"];
@@ -1112,7 +1112,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 				$eid          = $this->klarna_eid;
 				$sharedSecret = html_entity_decode ( $this->klarna_secret );
 			}
-			
+
 		} else {
 			$eid          = $this->klarna_eid;
 			$sharedSecret = html_entity_decode ( $this->klarna_secret );
