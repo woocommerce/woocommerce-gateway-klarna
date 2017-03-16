@@ -345,15 +345,15 @@ class WC_Gateway_Klarna_K2WC {
 			$klarna_country = sanitize_key( $_GET['scountry'] ); // Input var okay.
 
 			if ( 'yes' === $this->klarna_test_mode ) {
-				if ( 'gb' === $klarna_country || 'dk' === $klarna_country || 'nl' === $klarna_country ) {
+				if ( in_array( strtoupper( $klarna_country ), apply_filters( 'klarna_is_rest_countries_eu', array( 'DK', 'GB', 'NL' ), sanitize_key($_GET['sid'] ) ) ) ) {
 					$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_TEST_BASE_URL;
-				} elseif ( 'us' === $klarna_country ) {
+				} elseif ( in_array( strtoupper( $klarna_country ), apply_filters( 'klarna_is_rest_countries_na', array( 'US' ), sanitize_key( $_GET['sid'] ) ) ) ) {
 					$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::NA_TEST_BASE_URL;
 				}
 			} else {
-				if ( 'gb' === $klarna_country || 'dk' === $klarna_country || 'nl' === $klarna_country ) {
+				if ( in_array( strtoupper( $klarna_country ), apply_filters( 'klarna_is_rest_countries_eu', array( 'DK', 'GB', 'NL' ), sanitize_key($_GET['sid'] ) ) ) ) {
 					$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_BASE_URL;
-				} elseif ( 'us' === $klarna_country ) {
+				} elseif ( in_array( strtoupper( $klarna_country ), apply_filters( 'klarna_is_rest_countries_na', array( 'US' ), sanitize_key( $_GET['sid'] ) ) ) ) {
 					$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::NA_BASE_URL;
 				}
 			}
