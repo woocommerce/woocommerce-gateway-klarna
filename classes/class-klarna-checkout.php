@@ -1539,6 +1539,11 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			$order_id = sanitize_key( $_GET['sid'] );
 			$klarna_credentials_country =  get_post_meta( $order_id, '_klarna_credentials_country', true );
 			
+			// Hack for UK/GB. We store the settings as UK but Klarna is using GB
+			if( 'gb' == strtolower( $klarna_credentials_country ) ) {
+				$klarna_credentials_country = 'uk';
+			}
+			
 			if( $klarna_credentials_country ) {
 				$klarna_credentials_country	= strtolower( $klarna_credentials_country );
 				$klarna_eid          		= $this->settings["eid_$klarna_credentials_country"];
