@@ -1779,7 +1779,13 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 				$klarna_order = new WC_Gateway_Klarna_Order( $order, $klarna );
 				$refund_order = $klarna_order->refund_order( $amount, $reason, $invNo );
 			} elseif ( 'rest' == get_post_meta( $order->id, '_klarna_api', true ) ) {
-				$country = get_post_meta( $orderid, '_billing_country', true );
+				
+				if( get_post_meta( $orderid, '_klarna_credentials_country', true ) ) {
+					$country =  get_post_meta( $orderid, '_klarna_credentials_country', true );
+				} else {
+					$country = get_post_meta( $orderid, '_billing_country', true );
+				}
+				
 				/**
 				 * Need to send local order to constructor and Klarna order to method
 				 */
