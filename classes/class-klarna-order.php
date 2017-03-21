@@ -352,11 +352,11 @@ class WC_Gateway_Klarna_Order {
 				$tax_rate = (int) ($order->get_total_tax() / ( $order->get_total() - $order->get_total_tax() ) * 100);
 				try {
 					$ocr = $klarna->returnAmount( // returns 1 on success
-						$invNo,               // Invoice number
-						$amount,              // Amount given as a discount.
-						$tax_rate,            // VAT (%)
-						KlarnaFlags::INC_VAT, // Amount including VAT.
-						$reason               // Description
+						$invNo,                // Invoice number
+						$amount,               // Amount given as a discount.
+						$tax_rate,             // VAT (%)
+						KlarnaFlags::INC_VAT,  // Amount including VAT.
+						utf8_encode( $reason ) // Description
 					);
 					if ( $ocr ) {
 						$order->add_order_note( sprintf( __( 'Klarna order partially refunded. Refund amount: %s.', 'woocommerce-gateway-klarna' ), wc_price( $amount, array( 'currency' => $order->get_order_currency() ) ) ) );
@@ -395,7 +395,7 @@ class WC_Gateway_Klarna_Order {
 		try {
 			$k_order->refund( array(
 				'refunded_amount' => $amount * 100,
-				'description'     => $reason,
+				'description'     => utf8_encode( $reason ),
 			) );
 			$order->add_order_note( sprintf( __( 'Klarna order refunded. Refund amount: %s.', 'woocommerce-gateway-klarna' ), wc_price( $amount, array( 'currency' => $order->get_order_currency() ) ) ) );
 
