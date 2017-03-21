@@ -349,7 +349,7 @@ class WC_Gateway_Klarna_Order {
 			 * If yes, go ahead with good-will refund.
 			 */
 			if ( 1 == count( $order->get_taxes() ) ) {
-				$tax_rate = $order->get_cart_tax() / ( $order->get_total() - $order->get_cart_tax() ) * 100;
+				$tax_rate = (int) ($order->get_total_tax() / ( $order->get_total() - $order->get_total_tax() ) * 100);
 				try {
 					$ocr = $klarna->returnAmount( // returns 1 on success
 						$invNo,               // Invoice number
