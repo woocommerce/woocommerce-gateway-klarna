@@ -95,15 +95,14 @@ if ( $order->get_user_id() === 0 ) {
 		// Create new user.
 		$checkout_settings = get_option( 'woocommerce_klarna_checkout_settings' );
 		if ( 'yes' === $checkout_settings['create_customer_account'] ) {
-			$password = wp_generate_password();
-			$customer_id = wc_create_new_customer( $klarna_order['billing_address']['email'], '', $password );
+			$customer_id = wc_create_new_customer( $klarna_order['billing_address']['email'] );
 			update_post_meta( $order_id, '_customer_user', $customer_id );
 		}
 	}
 }
 
 // Log the user in.
-if ( $order->get_user_id() > 0 ) {
+if ( ! is_user_logged_in() && $order->get_user_id() > 0 ) {
 	wp_set_current_user( $order->get_user_id() );
 	wc_set_customer_auth_cookie( $order->get_user_id() );
 }

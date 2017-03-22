@@ -786,16 +786,14 @@ class WC_Gateway_Klarna_K2WC {
 		WC()->cart->calculate_fees();
 		WC()->cart->calculate_totals();
 
-		/*
-		$order->set_total( $woocommerce->cart->shipping_total, 'shipping' );
-		$order->set_total( $woocommerce->cart->get_cart_discount_total(), 'order_discount' );
-		$order->set_total( $woocommerce->cart->get_cart_discount_total(), 'cart_discount' );
-		$order->set_total( $woocommerce->cart->tax_total, 'tax' );
-		$order->set_total( $woocommerce->cart->shipping_tax_total, 'shipping_tax' );
-		$order->set_total( $woocommerce->cart->total );
-		*/
+		$order->set_total( WC()->cart->shipping_total, 'shipping' );
+		$order->set_total( WC()->cart->get_cart_discount_total(), 'cart_discount' );
+		$order->set_total( WC()->cart->get_cart_discount_tax_total(), 'cart_discount_tax' );
+		$order->set_total( WC()->cart->tax_total, 'tax' );
+		$order->set_total( WC()->cart->shipping_tax_total, 'shipping_tax' );
+		$order->set_total( WC()->cart->total );
 
-		$order->calculate_totals();
+		// $order->calculate_totals();
 	}
 
 	/**
@@ -900,8 +898,7 @@ class WC_Gateway_Klarna_K2WC {
 			$checkout_settings = get_option( 'woocommerce_klarna_checkout_settings' );
 
 			if ( 'yes' === $checkout_settings['create_customer_account'] ) {
-				$password = wp_generate_password();
-				$customer_id = wc_create_new_customer( $klarna_order['billing_address']['email'], '', $password );
+				$customer_id = wc_create_new_customer( $klarna_order['billing_address']['email'] );
 				update_post_meta( $order->id, '_customer_user', $customer_id );
 				$order->add_order_note( sprintf( __( 'New customer created (user ID %s).', 'klarna' ), $customer_id, $klarna_order['id'] ) );
 			}
