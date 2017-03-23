@@ -204,8 +204,8 @@ if ( wc_notice_count( 'error' ) > 0 ) {
 		}
 
 		// Setting these here because cross-sells need them
-		update_post_meta( $local_order_id, '_klarna_order_id', $klarna_order['order_id'], true );
-		update_post_meta( $local_order_id, '_billing_country', WC()->session->get( 'klarna_country' ), true );
+		update_post_meta( $local_order_id, '_klarna_order_id', $sessionId );
+		update_post_meta( $local_order_id, '_billing_country', WC()->session->get( 'klarna_country' ) );
 
 		// Set session values for Klarna order ID and Klarna order country
 		WC()->session->set( 'klarna_checkout', $sessionId );
