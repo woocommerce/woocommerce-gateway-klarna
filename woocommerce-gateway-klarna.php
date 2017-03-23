@@ -27,8 +27,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
 
-if ( !defined( 'WC_KLARNA_VER' ) ) {
-	define( 'WC_KLARNA_VER', '2.3.1' );
+if ( ! defined( 'WC_KLARNA_VER' ) ) {
+	define( 'WC_KLARNA_VER', '2.3.2' );
 }
 
 /**
