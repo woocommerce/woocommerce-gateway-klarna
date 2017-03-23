@@ -64,8 +64,7 @@ class WC_Gateway_Klarna_WC2K {
 	 * @param string $klarna_country
 	 */
 	public function __construct( $is_rest = false, $klarna_country = '' ) {
-		global $woocommerce;
-		$this->cart           = $woocommerce->cart->get_cart();
+		$this->cart           = WC()->cart->get_cart();
 		$this->is_rest        = $is_rest;
 		$this->klarna_country = $klarna_country;
 	}
@@ -99,17 +98,15 @@ class WC_Gateway_Klarna_WC2K {
 	 * @return array $cart_contents Formatted array ready for Klarna.
 	 */
 	public function process_cart_contents() {
-		global $woocommerce;
-
-		$woocommerce->cart->calculate_shipping();
-		$woocommerce->cart->calculate_totals();
+		WC()->cart->calculate_shipping();
+		WC()->cart->calculate_totals();
 
 		$cart = array();
 
 		// We need to keep track of order total, in case a smart coupon exceeds it
 		$order_total = 0;
 
-		foreach ( $woocommerce->cart->get_cart() as $cart_item ) {
+		foreach ( WC()->cart->get_cart() as $cart_item ) {
 			if ( $cart_item['quantity'] ) {
 				if ( $cart_item['variation_id'] ) {
 					$_product = wc_get_product( $cart_item['variation_id'] );
@@ -155,8 +152,8 @@ class WC_Gateway_Klarna_WC2K {
 		}
 
 		// Process fees
-		if ( $woocommerce->cart->fee_total > 0 ) {
-			foreach ( $woocommerce->cart->get_fees() as $cart_fee ) {
+		if ( WC()->cart->fee_total > 0 ) {
+			foreach ( WC()->cart->get_fees() as $cart_fee ) {
 				$fee_name         = $this->get_fee_name( $cart_fee );
 				$fee_reference    = $this->get_fee_reference( $cart_fee );
 				$fee_type         = 'surcharge';
@@ -193,7 +190,7 @@ class WC_Gateway_Klarna_WC2K {
 		}
 
 		// Process shipping
-		if ( $woocommerce->shipping->get_packages() && $woocommerce->session->get( 'chosen_shipping_methods' ) ) {
+		if ( WC()->shipping->get_packages() && WC()->session->get( 'chosen_shipping_methods' ) ) {
 			$shipping_name       = $this->get_shipping_name();
 			$shipping_reference  = $this->get_shipping_reference();
 			$shipping_amount     = $this->get_shipping_amount();
@@ -233,7 +230,7 @@ class WC_Gateway_Klarna_WC2K {
 
 		// Process sales tax for US
 		if ( $this->is_rest && 'us' == $this->klarna_country ) {
-			$sales_tax = round( ( $woocommerce->cart->tax_total + $woocommerce->cart->shipping_tax_total ) * 100 );
+			$sales_tax = round( ( WC()->cart->tax_total + WC()->cart->shipping_tax_total ) * 100 );
 
 			// Add sales tax line item
 			$cart[] = array(
@@ -452,7 +449,7 @@ class WC_Gateway_Klarna_WC2K {
 	 * @return integer $item_discount_amount Cart item discount.
 	 */
 	public function get_item_discount_amount( $cart_item ) {
-		if ( $cart_item['line_subtotal'] > $cart_item['line_total'] ) {
+		if ( round( $cart_item['line_subtotal'], 2 ) > round( $cart_item['line_total'], 2 ) ) {
 			$item_price           = $this->get_item_price( $cart_item );
 			$item_total_amount    = $this->get_item_total_amount( $cart_item );
 			$item_discount_amount = ( $item_price * $cart_item['quantity'] - $item_total_amount );
@@ -604,11 +601,9 @@ class WC_Gateway_Klarna_WC2K {
 	 * @return string $shipping_name Name for selected shipping method.
 	 */
 	public function get_shipping_name() {
-		global $woocommerce;
-
-		$shipping_packages = $woocommerce->shipping->get_packages();
+		$shipping_packages = WC()->shipping->get_packages();
 		foreach ( $shipping_packages as $i => $package ) {
-			$chosen_method = isset( $woocommerce->session->chosen_shipping_methods[ $i ] ) ? $woocommerce->session->chosen_shipping_methods[ $i ] : '';
+			$chosen_method = isset( WC()->session->chosen_shipping_methods[ $i ] ) ? WC()->session->chosen_shipping_methods[ $i ] : '';
 
 			if ( '' != $chosen_method ) {
 				$package_rates = $package['rates'];
@@ -636,11 +631,9 @@ class WC_Gateway_Klarna_WC2K {
 	 * @return string $shipping_reference Reference for selected shipping method.
 	 */
 	public function get_shipping_reference() {
-		global $woocommerce;
-
-		$shipping_packages = $woocommerce->shipping->get_packages();
+		$shipping_packages = WC()->shipping->get_packages();
 		foreach ( $shipping_packages as $i => $package ) {
-			$chosen_method = isset( $woocommerce->session->chosen_shipping_methods[ $i ] ) ? $woocommerce->session->chosen_shipping_methods[ $i ] : '';
+			$chosen_method = isset( WC()->session->chosen_shipping_methods[ $i ] ) ? WC()->session->chosen_shipping_methods[ $i ] : '';
 
 			if ( '' != $chosen_method ) {
 				$package_rates = $package['rates'];
@@ -668,12 +661,10 @@ class WC_Gateway_Klarna_WC2K {
 	 * @return integer $shipping_amount Amount for selected shipping method.
 	 */
 	public function get_shipping_amount() {
-		global $woocommerce;
-
 		if ( 'us' == $this->klarna_country ) {
-			$shipping_amount = $woocommerce->cart->shipping_total;
+			$shipping_amount = WC()->cart->shipping_total;
 		} else {
-			$shipping_amount = $woocommerce->cart->shipping_total + $woocommerce->cart->shipping_tax_total;
+			$shipping_amount = WC()->cart->shipping_total + WC()->cart->shipping_tax_total;
 		}
 
 		return round( $shipping_amount * 100 );
@@ -688,15 +679,13 @@ class WC_Gateway_Klarna_WC2K {
 	 * @return integer $shipping_tax_rate Tax rate for selected shipping method.
 	 */
 	public function get_shipping_tax_rate() {
-		global $woocommerce;
-
-		if ( $woocommerce->cart->shipping_tax_total > 0 && 'us' != $this->klarna_country ) {
-			$shipping_tax_rate = round( $woocommerce->cart->shipping_tax_total / $woocommerce->cart->shipping_total, 2 ) * 100;
+		if ( WC()->cart->shipping_tax_total > 0 && 'us' != $this->klarna_country ) {
+			$shipping_tax_rate = round( WC()->cart->shipping_tax_total / WC()->cart->shipping_total * 100 * 100 );
 		} else {
 			$shipping_tax_rate = 00;
 		}
 
-		return intval( $shipping_tax_rate . '00' );
+		return intval( $shipping_tax_rate );
 	}
 
 	/**
@@ -708,12 +697,10 @@ class WC_Gateway_Klarna_WC2K {
 	 * @return integer $shipping_tax_amount Tax amount for selected shipping method.
 	 */
 	public function get_shipping_tax_amount() {
-		global $woocommerce;
-
 		if ( 'us' == $this->klarna_country ) {
 			$shipping_tax_amount = 0;
 		} else {
-			$shipping_tax_amount = $woocommerce->cart->shipping_tax_total * 100;
+			$shipping_tax_amount = WC()->cart->shipping_tax_total * 100;
 		}
 
 		return (int) $shipping_tax_amount;

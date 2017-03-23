@@ -70,13 +70,19 @@ try {
 
 		$kco_session_locale  = '';
 		if ( ( 'en_US' === get_locale() || 'en_GB' === get_locale() ) && 'DE' !== $kco_session_country ) {
-			if ( 'en_US' === get_locale() ) {
-				$kco_session_locale = 'en-US';
+			if ( 'nl' === $kco_session_country ) {
+				$kco_session_locale = 'en-nl';
 			} else {
-				$kco_session_locale = 'en-gb';
+				if ( 'en_US' === get_locale() ) {
+					$kco_session_locale = 'en-US';
+				} else {
+					$kco_session_locale = 'en-gb';
+				}
 			}
 		} elseif ( '' !== $kco_session_country ) {
-			if ( 'DE' === $kco_session_country ) {
+			if ( 'nl' === $kco_session_country ) {
+				$kco_session_locale = 'nl-nl';
+			} elseif ( 'DE' === $kco_session_country ) {
 				$kco_session_locale = 'de-de';
 			} elseif ( 'AT' === $kco_session_country ) {
 				$kco_session_locale = 'de-at';
@@ -95,9 +101,16 @@ try {
 		// Update the order WC id.
 		$kco_country = ( '' !== $kco_session_country ) ? $kco_session_country : $this->klarna_country;
 		$kco_locale  = ( '' !== $kco_session_locale ) ? $kco_session_locale : $this->klarna_language;
+		
+		if ( $this->is_rest() ) {
+			$kco_currency 	= strtolower( get_woocommerce_currency() );
+			$kco_country 	= strtolower( $kco_country );
+		} else {
+			$kco_currency = get_woocommerce_currency();
+		}
 
 		$update['purchase_country']  = $kco_country;
-		$update['purchase_currency'] = $this->klarna_currency;
+		$update['purchase_currency'] = $kco_currency;
 		$update['locale']            = $kco_locale;
 
 		// Set Euro country session value.
@@ -199,6 +212,8 @@ try {
 			$checkout_settings = get_option( 'woocommerce_klarna_checkout_settings' );
 			if ( 'gb' === $this->klarna_country && 'yes' === $checkout_settings['uk_ship_only_to_base'] ) {
 				$update['shipping_countries'] = array();
+			} elseif ( 'nl' == $this->klarna_country ) {
+				$update['shipping_countries'] = array( 'NL' );
 			} else {
 				$wc_countries                 = new WC_Countries();
 				$update['shipping_countries'] = array_keys( $wc_countries->get_shipping_countries() );

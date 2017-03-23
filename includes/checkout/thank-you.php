@@ -27,19 +27,21 @@ if ( $this->debug == 'yes' ) {
 $merchantId   = $this->klarna_eid;
 $sharedSecret = $this->klarna_secret;
 $orderUri     = $_GET['klarna_order'];
+$order_id     = $_GET['order-received'];
+$order        = wc_get_order( $order_id );
 
 // Connect to Klarna
 if ( $this->is_rest() ) {
 	if ( $this->testmode == 'yes' ) {
-		if ( 'gb' == $this->klarna_country || 'dk' == $this->klarna_country ) {
+		if ( in_array( strtoupper( $this->klarna_country ), apply_filters( 'klarna_is_rest_countries_eu', array( 'DK', 'GB', 'NL' ) ) ) ) {
 			$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_TEST_BASE_URL;
-		} elseif ( 'us' == $this->klarna_country ) {
+		} elseif ( in_array( strtoupper( $this->klarna_country ), apply_filters( 'klarna_is_rest_countries_na', array( 'US' ) ) ) ) {
 			$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::NA_TEST_BASE_URL;
 		}
 	} else {
-		if ( 'gb' == $this->klarna_country || 'dk' == $this->klarna_country ) {
+		if ( in_array( strtoupper( $this->klarna_country ), apply_filters( 'klarna_is_rest_countries_eu', array( 'DK', 'GB', 'NL' ) ) ) ) {
 			$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_BASE_URL;
-		} elseif ( 'us' == $this->klarna_country ) {
+		} elseif ( in_array( strtoupper( $this->klarna_country ), apply_filters( 'klarna_is_rest_countries_na', array( 'US' ) ) ) ) {
 			$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::NA_BASE_URL;
 		}
 	}
@@ -82,6 +84,29 @@ if ( $this->is_rest() ) {
 // Need to calculate totals because of woocommerce_checkout_order_processed hook below, plugins like WCS need totals calculated.
 WC()->cart->calculate_shipping();
 WC()->cart->calculate_totals();
+
+// Add user ID, in case listener did not do it already.
+if ( $order->get_user_id() === 0 ) {
+	if ( email_exists( $klarna_order['billing_address']['email'] ) ) {
+		$user        = get_user_by( 'email', $klarna_order['billing_address']['email'] );
+		$customer_id = $user->ID;
+		update_post_meta( $order_id, '_customer_user', $customer_id );
+	} else {
+		// Create new user.
+		$checkout_settings = get_option( 'woocommerce_klarna_checkout_settings' );
+		if ( 'yes' === $checkout_settings['create_customer_account'] ) {
+			$customer_id = wc_create_new_customer( $klarna_order['billing_address']['email'] );
+			update_post_meta( $order_id, '_customer_user', $customer_id );
+		}
+	}
+}
+
+// Log the user in.
+if ( ! is_user_logged_in() && $order->get_user_id() > 0 ) {
+	wp_set_current_user( $order->get_user_id() );
+	wc_set_customer_auth_cookie( $order->get_user_id() );
+}
+
 do_action( 'woocommerce_checkout_order_processed', intval( $_GET['sid'] ), false );
 do_action( 'klarna_before_kco_confirmation', intval( $_GET['sid'] ) );
 

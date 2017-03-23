@@ -125,6 +125,12 @@ class WC_Gateway_Klarna_Shortcodes {
 			if ( ! empty( $checkout_settings['eid_us'] ) ) {
 				$authorized_countries[] = 'US';
 			}
+			if ( ! empty( $checkout_settings['eid_dk'] ) ) {
+				$authorized_countries[] = 'DK';
+			}
+			if ( ! empty( $checkout_settings['eid_nl'] ) ) {
+				$authorized_countries[] = 'NL';
+			}
 
 			// Get array of Euro Klarna Checkout countries with Eid and secret defined
 			$klarna_checkout_countries = array();
@@ -136,6 +142,9 @@ class WC_Gateway_Klarna_Shortcodes {
 			}
 			if ( in_array( 'AT', $authorized_countries ) ) {
 				$klarna_checkout_countries['AT'] = __( 'Austria', 'woocommerce-gateway-klarna' );
+			}
+			if ( in_array( 'NL', $authorized_countries ) ) {
+				$klarna_checkout_countries['NL'] = __( 'Netherlands', 'woocommerce-gateway-klarna' );
 			}
 
 			/*
@@ -173,7 +182,7 @@ class WC_Gateway_Klarna_Shortcodes {
 			echo '<br />';
 			echo '<select id="klarna-checkout-euro-country" name="klarna-checkout-euro-country">';
 			foreach ( $klarna_checkout_enabled_countries as $klarna_checkout_enabled_country_code => $klarna_checkout_enabled_country ) {
-				echo '<option value="' . $klarna_checkout_enabled_country_code . '"' . selected( $klarna_checkout_enabled_country_code, $kco_euro_country, false ) . '>' . $klarna_checkout_enabled_country . '</option>';
+				echo '<option value="' . $klarna_checkout_enabled_country_code . '"' . selected( strtoupper( $klarna_checkout_enabled_country_code ), strtoupper( $kco_euro_country ), false ) . '>' . $klarna_checkout_enabled_country . '</option>';
 			}
 			echo '</select>';
 			echo '</label>';

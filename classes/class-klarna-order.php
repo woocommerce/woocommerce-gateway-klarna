@@ -349,14 +349,14 @@ class WC_Gateway_Klarna_Order {
 			 * If yes, go ahead with good-will refund.
 			 */
 			if ( 1 == count( $order->get_taxes() ) ) {
-				$tax_rate = $order->get_cart_tax() / ( $order->get_total() - $order->get_cart_tax() ) * 100;
+				$tax_rate = (int) ($order->get_total_tax() / ( $order->get_total() - $order->get_total_tax() ) * 100);
 				try {
 					$ocr = $klarna->returnAmount( // returns 1 on success
-						$invNo,               // Invoice number
-						$amount,              // Amount given as a discount.
-						$tax_rate,            // VAT (%)
-						KlarnaFlags::INC_VAT, // Amount including VAT.
-						$reason               // Description
+						$invNo,                // Invoice number
+						$amount,               // Amount given as a discount.
+						$tax_rate,             // VAT (%)
+						KlarnaFlags::INC_VAT,  // Amount including VAT.
+						utf8_encode( $reason ) // Description
 					);
 					if ( $ocr ) {
 						$order->add_order_note( sprintf( __( 'Klarna order partially refunded. Refund amount: %s.', 'woocommerce-gateway-klarna' ), wc_price( $amount, array( 'currency' => $order->get_order_currency() ) ) ) );
@@ -395,7 +395,7 @@ class WC_Gateway_Klarna_Order {
 		try {
 			$k_order->refund( array(
 				'refunded_amount' => $amount * 100,
-				'description'     => $reason,
+				'description'     => utf8_encode( $reason ),
 			) );
 			$order->add_order_note( sprintf( __( 'Klarna order refunded. Refund amount: %s.', 'woocommerce-gateway-klarna' ), wc_price( $amount, array( 'currency' => $order->get_order_currency() ) ) ) );
 
@@ -483,7 +483,7 @@ class WC_Gateway_Klarna_Order {
 				break;
 			case 'NL' :
 				$klarna_country  = 'NL';
-				$klarna_language = 'nl-nl';
+				$klarna_language = 'nl-NL';
 				$klarna_currency = 'EUR';
 				$klarna_eid      = $klarna_settings['eid_nl'];
 				$klarna_secret   = $klarna_settings['secret_nl'];
@@ -558,8 +558,13 @@ class WC_Gateway_Klarna_Order {
 		$order = wc_get_order( $orderid );
 		if ( get_post_meta( $orderid, '_klarna_order_reservation', true ) && get_post_meta( $orderid, '_billing_country', true ) ) {
 			$rno            = get_post_meta( $orderid, '_klarna_order_reservation', true );
-			$country        = get_post_meta( $orderid, '_billing_country', true );
 			$payment_method = get_post_meta( $orderid, '_payment_method', true );
+			// Get country - either from stored _klarna_credentials_country or _billing_country (backwords compat)
+			if( get_post_meta( $orderid, '_klarna_credentials_country', true ) ) {
+				$country =  get_post_meta( $orderid, '_klarna_credentials_country', true );
+			} else {
+				$country = get_post_meta( $orderid, '_billing_country', true );
+			}
 			// Check if this is a subscription order
 			if ( class_exists( 'WC_Subscriptions_Renewal_Order' ) && WC_Subscriptions_Renewal_Order::is_renewal( $order ) ) {
 				if ( ! get_post_meta( $orderid, '_klarna_order_reservation_recurring', true ) ) {
@@ -595,26 +600,41 @@ class WC_Gateway_Klarna_Order {
 	function activate_order_rest( $orderid ) {
 		$order           = wc_get_order( $orderid );
 		$klarna_settings = get_option( 'woocommerce_klarna_checkout_settings' );
-		$billing_country = get_post_meta( $orderid, '_billing_country', true );
+		// Get country - either from stored _klarna_credentials_country or _billing_country (backwords compat)
+		if( get_post_meta( $orderid, '_klarna_credentials_country', true ) ) {
+			$country =  get_post_meta( $orderid, '_klarna_credentials_country', true );
+		} else {
+			$country = get_post_meta( $orderid, '_billing_country', true );
+		}
 		/**
 		 * Need to send local order to constructor and Klarna order to method
 		 */
 		if ( $klarna_settings['testmode'] == 'yes' ) {
-			if ( 'gb' == strtolower( $billing_country ) || 'dk' == strtolower( $billing_country ) ) {
+			if ( 'gb' === strtolower( $country ) || 'dk' === strtolower( $country ) || 'nl' === strtolower( $country ) ) {
 				$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_TEST_BASE_URL;
-			} elseif ( 'us' == strtolower( $billing_country ) ) {
+			} elseif ( 'us' === strtolower( $country ) ) {
 				$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::NA_TEST_BASE_URL;
 			}
 		} else {
-			if ( 'gb' == strtolower( $billing_country ) || 'dk' == strtolower( $billing_country ) ) {
+			if ( 'gb' === strtolower( $country ) || 'dk' === strtolower( $country ) || 'nl' === strtolower( $country ) ) {
 				$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_BASE_URL;
-			} elseif ( 'us' == strtolower( $billing_country ) ) {
+			} elseif ( 'us' === strtolower( $country ) ) {
 				$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::NA_BASE_URL;
 			}
 		}
-		if ( 'gb' == strtolower( $billing_country ) || 'dk' == strtolower( $billing_country ) ) {
-			$connector = Klarna\Rest\Transport\Connector::create( $klarna_settings['eid_uk'], html_entity_decode( $klarna_settings['secret_uk'] ), $klarna_server_url );
-		} elseif ( 'us' == strtolower( $billing_country ) ) {
+		if ( 'gb' === strtolower( $country ) || 'dk' === strtolower( $country ) || 'nl' === strtolower( $country ) ) {
+			if ( 'gb' === strtolower( $country ) ) {
+				$eid = $klarna_settings['eid_uk'];
+				$secret = html_entity_decode( $klarna_settings['secret_uk'] );
+			} elseif ( 'dk' === strtolower( $country ) ) {
+				$eid = $klarna_settings['eid_dk'];
+				$secret = html_entity_decode( $klarna_settings['secret_dk'] );
+			} elseif ( 'nl' === strtolower( $country ) ) {
+				$eid = $klarna_settings['eid_nl'];
+				$secret = html_entity_decode( $klarna_settings['secret_nl'] );
+			}
+			$connector = Klarna\Rest\Transport\Connector::create( $eid, $secret, $klarna_server_url );
+		} elseif ( 'us' === strtolower( $country ) ) {
 			$connector = Klarna\Rest\Transport\Connector::create( $klarna_settings['eid_us'], html_entity_decode( $klarna_settings['secret_us'] ), $klarna_server_url );
 		}
 		$klarna_order_id = get_post_meta( $orderid, '_klarna_order_id', true );
@@ -680,7 +700,12 @@ class WC_Gateway_Klarna_Order {
 		// Klarna reservation number and billing country must be set
 		if ( get_post_meta( $orderid, '_klarna_order_reservation', true ) && get_post_meta( $orderid, '_billing_country', true ) && ! get_post_meta( $orderid, '_klarna_order_activated', true ) ) {
 			$rno            = get_post_meta( $orderid, '_klarna_order_reservation', true );
-			$country        = get_post_meta( $orderid, '_billing_country', true );
+			// Get country - either from stored _klarna_credentials_country or _billing_country (backwords compat)
+			if( get_post_meta( $orderid, '_klarna_credentials_country', true ) ) {
+				$country =  get_post_meta( $orderid, '_klarna_credentials_country', true );
+			} else {
+				$country = get_post_meta( $orderid, '_billing_country', true );
+			}
 			$payment_method = get_post_meta( $orderid, '_payment_method', true );
 			$klarna = new Klarna();
 			$this->configure_klarna( $klarna, $country, $payment_method );
@@ -705,26 +730,42 @@ class WC_Gateway_Klarna_Order {
 	function cancel_order_rest( $orderid ) {
 		$order           = wc_get_order( $orderid );
 		$klarna_settings = get_option( 'woocommerce_klarna_checkout_settings' );
-		$billing_country = get_post_meta( $orderid, '_billing_country', true );
+		// Get country - either from stored _klarna_credentials_country or _billing_country (backwords compat)
+		if( get_post_meta( $orderid, '_klarna_credentials_country', true ) ) {
+			$country =  get_post_meta( $orderid, '_klarna_credentials_country', true );
+		} else {
+			$country = get_post_meta( $orderid, '_billing_country', true );
+		}
 		/**
 		 * Need to send local order to constructor and Klarna order to method
 		 */
 		if ( $klarna_settings['testmode'] == 'yes' ) {
-			if ( 'gb' == strtolower( $billing_country ) || 'dk' == strtolower( $billing_country ) ) {
+			if ( 'gb' === strtolower( $country ) || 'dk' === strtolower( $country ) || 'nl' === strtolower( $country ) ) {
 				$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_TEST_BASE_URL;
-			} elseif ( 'us' == strtolower( $billing_country ) ) {
+			} elseif ( 'us' === strtolower( $country ) ) {
 				$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::NA_TEST_BASE_URL;
 			}
 		} else {
-			if ( 'gb' == strtolower( $billing_country ) || 'dk' == strtolower( $billing_country ) ) {
+			if ( 'gb' === strtolower( $country ) || 'dk' === strtolower( $country ) || 'nl' === strtolower( $country ) ) {
 				$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_BASE_URL;
-			} elseif ( 'us' == strtolower( $billing_country ) ) {
+			} elseif ( 'us' === strtolower( $country ) ) {
 				$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::NA_BASE_URL;
 			}
 		}
-		if ( 'gb' == strtolower( $billing_country ) || 'dk' == strtolower( $billing_country ) ) {
-			$connector = Klarna\Rest\Transport\Connector::create( $klarna_settings['eid_uk'], html_entity_decode( $klarna_settings['secret_uk'] ), $klarna_server_url );
-		} elseif ( 'us' == strtolower( $billing_country ) ) {
+		if ( 'gb' === strtolower( $country ) || 'dk' === strtolower( $country ) || 'nl' === strtolower( $country ) ) {
+			if ( 'gb' === strtolower( $country ) ) {
+				$eid = $klarna_settings['eid_uk'];
+				$secret = html_entity_decode( $klarna_settings['secret_uk'] );
+			} elseif ( 'dk' === strtolower( $country ) ) {
+				$eid = $klarna_settings['eid_dk'];
+				$secret = html_entity_decode( $klarna_settings['secret_dk'] );
+			} elseif ( 'nl' === strtolower( $country ) ) {
+				$eid = $klarna_settings['eid_nl'];
+				$secret = html_entity_decode( $klarna_settings['secret_nl'] );
+			}
+
+			$connector = Klarna\Rest\Transport\Connector::create( $eid, $secret, $klarna_server_url );
+		} elseif ( 'us' === strtolower( $country ) ) {
 			$connector = Klarna\Rest\Transport\Connector::create( $klarna_settings['eid_us'], html_entity_decode( $klarna_settings['secret_us'] ), $klarna_server_url );
 		}
 		$klarna_order_id = get_post_meta( $orderid, '_klarna_order_id', true );
@@ -844,8 +885,13 @@ class WC_Gateway_Klarna_Order {
 		$order       = wc_get_order( $orderid );
 		$this->order = $order;
 		$rno            = get_post_meta( $orderid, '_klarna_order_reservation', true );
-		$country        = get_post_meta( $orderid, '_billing_country', true );
 		$payment_method = get_post_meta( $orderid, '_payment_method', true );
+		// Get country - either from stored _klarna_credentials_country or _billing_country (backwords compat)
+		if( get_post_meta( $orderid, '_klarna_credentials_country', true ) ) {
+			$country =  get_post_meta( $orderid, '_klarna_credentials_country', true );
+		} else {
+			$country = get_post_meta( $orderid, '_billing_country', true );
+		}
 		$klarna = new Klarna();
 		$this->configure_klarna( $klarna, $country, $payment_method );
 		$this->klarna = $klarna;
@@ -882,7 +928,12 @@ class WC_Gateway_Klarna_Order {
 	function update_order_rest( $orderid, $itemid = false ) {
 		$order           = wc_get_order( $orderid );
 		$klarna_settings = get_option( 'woocommerce_klarna_checkout_settings' );
-		$billing_country = get_post_meta( $orderid, '_billing_country', true );
+		// Get country - either from stored _klarna_credentials_country or _billing_country (backwords compat)
+		if( get_post_meta( $orderid, '_klarna_credentials_country', true ) ) {
+			$country =  get_post_meta( $orderid, '_klarna_credentials_country', true );
+		} else {
+			$country = get_post_meta( $orderid, '_billing_country', true );
+		}
 		$updated_order_lines = array();
 		$updated_order_total = 0;
 		$updated_tax_total   = 0;
@@ -1041,21 +1092,32 @@ class WC_Gateway_Klarna_Order {
 		 * Need to send local order to constructor and Klarna order to method
 		 */
 		if ( $klarna_settings['testmode'] == 'yes' ) {
-			if ( 'gb' == strtolower( $billing_country ) || 'dk' == strtolower( $billing_country ) ) {
+			if ( 'gb' === strtolower( $country ) || 'dk' === strtolower( $country ) || 'nl' === strtolower( $country ) ) {
 				$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_TEST_BASE_URL;
-			} elseif ( 'us' == strtolower( $billing_country ) ) {
+			} elseif ( 'us' === strtolower( $country ) ) {
 				$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::NA_TEST_BASE_URL;
 			}
 		} else {
-			if ( 'gb' == strtolower( $billing_country ) || 'dk' == strtolower( $billing_country ) ) {
+			if ( 'gb' === strtolower( $country ) || 'dk' === strtolower( $country ) || 'nl' === strtolower( $country ) ) {
 				$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_BASE_URL;
-			} elseif ( 'us' == strtolower( $billing_country ) ) {
+			} elseif ( 'us' === strtolower( $country ) ) {
 				$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::NA_BASE_URL;
 			}
 		}
-		if ( 'gb' == strtolower( $billing_country ) || 'dk' == strtolower( $billing_country ) ) {
-			$connector = Klarna\Rest\Transport\Connector::create( $klarna_settings['eid_uk'], html_entity_decode( $klarna_settings['secret_uk'] ), $klarna_server_url );
-		} elseif ( 'us' == strtolower( $billing_country ) ) {
+		if ( 'gb' === strtolower( $country ) || 'dk' === strtolower( $country ) || 'nl' === strtolower( $country ) ) {
+			if ( 'gb' === strtolower( $country ) ) {
+				$eid = $klarna_settings['eid_uk'];
+				$secret = html_entity_decode( $klarna_settings['secret_uk'] );
+			} elseif ( 'dk' === strtolower( $country ) ) {
+				$eid = $klarna_settings['eid_dk'];
+				$secret = html_entity_decode( $klarna_settings['secret_dk'] );
+			} elseif ( 'nl' === strtolower( $country ) ) {
+				$eid = $klarna_settings['eid_nl'];
+				$secret = html_entity_decode( $klarna_settings['secret_nl'] );
+			}
+
+			$connector = Klarna\Rest\Transport\Connector::create( $eid, $secret, $klarna_server_url );
+		} elseif ( 'us' === strtolower( $country ) ) {
 			$connector = Klarna\Rest\Transport\Connector::create( $klarna_settings['eid_us'], html_entity_decode( $klarna_settings['secret_us'] ), $klarna_server_url );
 		}
 		$klarna_order_id = get_post_meta( $orderid, '_klarna_order_id', true );
