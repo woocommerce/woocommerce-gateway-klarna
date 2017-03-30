@@ -899,8 +899,12 @@ class WC_Gateway_Klarna_K2WC {
 
 			if ( 'yes' === $checkout_settings['create_customer_account'] ) {
 				$customer_id = wc_create_new_customer( $klarna_order['billing_address']['email'] );
-				update_post_meta( $order->id, '_customer_user', $customer_id );
-				$order->add_order_note( sprintf( __( 'New customer created (user ID %s).', 'klarna' ), $customer_id, $klarna_order['id'] ) );
+				if ( is_int( $customer_id ) ) {
+					update_post_meta( $order->id, '_customer_user', $customer_id );
+					$order->add_order_note( sprintf( __( 'New customer created (user ID %s).', 'klarna' ), $customer_id, $klarna_order['id'] ) );
+				} elseif ( is_wp_error( $customer_id ) ) {
+					$this->klarna_log->add( 'klarna', 'Error creating new customer account: ' . $customer_id->get_error_code() . ' - ' . get_error_message() );
+				}
 			}
 		}
 

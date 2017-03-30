@@ -96,7 +96,10 @@ if ( $order->get_user_id() === 0 ) {
 		$checkout_settings = get_option( 'woocommerce_klarna_checkout_settings' );
 		if ( 'yes' === $checkout_settings['create_customer_account'] ) {
 			$customer_id = wc_create_new_customer( $klarna_order['billing_address']['email'] );
-			update_post_meta( $order_id, '_customer_user', $customer_id );
+
+			if ( is_int( $customer_id ) ) {
+				update_post_meta( $order_id, '_customer_user', $customer_id );
+			}
 		}
 	}
 }
