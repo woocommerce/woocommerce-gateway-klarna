@@ -2,6 +2,7 @@
 
 2017.03.30  - version 2.3.3
 * Fix       - Fixes catchable fatal error on customer creation for KCO.
+* Fix       - Removes order status filtering (causes error with WC 3.0).
 
 2017.03.23  - version 2.3.2
 * Fix       - Fixed compatibility with WooCommerce Min/Max plugin.
