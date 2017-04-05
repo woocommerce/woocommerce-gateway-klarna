@@ -108,7 +108,7 @@ $this->color_link               = ( isset( $this->settings['color_link'] ) ) ? w
 $this->activate_recurring = ( isset( $this->settings['activate_recurring'] ) ) ? $this->settings['activate_recurring'] : '';
 
 if ( empty( $this->terms_url ) ) {
-	$this->terms_url = esc_url( get_permalink( woocommerce_get_page_id( 'terms' ) ) );
+	$this->terms_url = esc_url( get_permalink( wc_get_page_id( 'terms' ) ) );
 }
 
 // Check if this is test mode or not
