@@ -286,10 +286,10 @@ class WC_Gateway_Klarna_K2WC {
 			} else {
 				update_post_meta( $order->id, '_klarna_api', 'v2' );
 			}
-			
+
 			// Store which KCO credentials country was used.
 			update_post_meta( $order->id, '_klarna_credentials_country', $this->klarna_credentials_country );
-			
+
 			return $order->id;
 		} else {
 			return false;
@@ -736,8 +736,21 @@ class WC_Gateway_Klarna_K2WC {
 			}
 		}
 
+		// Store smart coupons plugin meta field
+		if ( WC()->cart->applied_coupons ) {
+			$smart_coupons_contribution = array();
+			foreach( WC()->cart->applied_coupons as $code ) {
+				$smart_coupon = new WC_Coupon( $code );
+				if ( $smart_coupon->is_type( 'smart_coupon' ) ) {
+					$smart_coupons_contribution[ $code ] = WC()->cart->coupon_discount_amounts[ $code ];
+					update_post_meta( $order->get_id(), 'smart_coupons_contribution', $smart_coupons_contribution );
+				}
+			}
+		}
+
 		if ( 'yes' === $this->klarna_debug ) {
-			$this->klarna_log->add( 'klarna', microtime() . ": Finished adding coupons to order $order->id..." );
+			$wc_order_id = $order->get_id();
+			$this->klarna_log->add( 'klarna', microtime() . ": Finished adding coupons to order $wc_order_id..." );
 		}
 	}
 
@@ -903,7 +916,7 @@ class WC_Gateway_Klarna_K2WC {
 					update_post_meta( $order->id, '_customer_user', $customer_id );
 					$order->add_order_note( sprintf( __( 'New customer created (user ID %s).', 'klarna' ), $customer_id, $klarna_order['id'] ) );
 				} elseif ( is_wp_error( $customer_id ) ) {
-					$this->klarna_log->add( 'klarna', 'Error creating new customer account: ' . $customer_id->get_error_code() . ' - ' . get_error_message() );
+					$this->klarna_log->add( 'klarna', 'Error creating new customer account: ' . $customer_id->get_error_code() . ' - ' . $customer_id->get_error_message() );
 				}
 			}
 		}

@@ -19,7 +19,6 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 * @since 1.0.0
 	 */
 	public function __construct() {
-		global $woocommerce;
 		parent::__construct();
 		$this->id           = 'klarna_checkout';
 		$this->method_title = __( 'Klarna Checkout', 'woocommerce-gateway-klarna' );
@@ -561,7 +560,6 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 				$_product = $order->get_product_from_item( $item );
 				if ( $_product->exists() && $item['qty'] ) {
 					// Get SKU or product id
-					$reference = '';
 					if ( $_product->get_sku() ) {
 						$reference = $_product->get_sku();
 					} elseif ( $_product->variation_id ) {
@@ -681,9 +679,8 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		}
 		$cart_items      = $woocommerce->cart->get_cart();
 		$updated_item    = $cart_items[ $updated_item_key ];
-		$updated_product = wc_get_product( $updated_item['product_id'] );
+
 		// Update WooCommerce cart and transient order item
-		$klarna_sid = $woocommerce->session->get( 'klarna_sid' );
 		$woocommerce->cart->set_quantity( $updated_item_key, $new_quantity );
 		$woocommerce->cart->calculate_shipping();
 		$woocommerce->cart->calculate_fees();
@@ -710,10 +707,11 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		if ( ! defined( 'WOOCOMMERCE_CART' ) ) {
 			define( 'WOOCOMMERCE_CART', true );
 		}
-		$cart_items = $woocommerce->cart->get_cart();
+
 		// Remove line item row
 		$removed_item_key = esc_attr( $_REQUEST['cart_item_key_remove'] );
 		$woocommerce->cart->remove_cart_item( $removed_item_key );
+
 		if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 			$woocommerce->cart->calculate_shipping();
 			$woocommerce->cart->calculate_fees();
@@ -725,14 +723,17 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 				$woocommerce->session->__unset( 'ongoing_klarna_order' );
 			}
 		}
+
 		// This needs to be sent back to JS, so cart widget can be updated
 		$data['item_count']  = $woocommerce->cart->get_cart_contents_count();
 		$data['cart_url']    = $woocommerce->cart->get_cart_url();
 		$data['widget_html'] = $this->klarna_checkout_get_kco_widget_html();
+
 		// Update ongoing Klarna order
 		if ( WC()->session->get( 'klarna_checkout' ) ) {
 			$this->ajax_update_klarna_order();
 		}
+
 		wp_send_json_success( $data );
 		wp_die();
 	}
@@ -763,7 +764,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			$woocommerce->cart->calculate_fees();
 			$woocommerce->cart->calculate_totals();
 			$this->update_or_create_local_order();
-			$coupon_object          = new WC_Coupon( $coupon );
+
 			$amount                 = wc_price( $woocommerce->cart->get_coupon_discount_amount( $coupon, $woocommerce->cart->display_cart_ex_tax ) );
 			$data['amount']         = $amount;
 			$data['coupon_success'] = $coupon_success;
@@ -872,7 +873,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 					'post_excerpt' => $order_note
 				);
 
-				$order_update  = wp_update_post( $order_details );
+				wp_update_post( $order_details );
 
 				if ( $this->debug == 'yes' ) {
 					$this->log->add( 'klarna', 'ORDERID: ' . $orderid );
@@ -1238,8 +1239,8 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 					// apply_filters to item price so we can filter this if needed
 					$klarna_item_price_including_tax = $cart_item['line_subtotal'] + $cart_item['line_subtotal_tax'];
 					$item_price                      = apply_filters( 'klarna_item_price_including_tax', $klarna_item_price_including_tax );
+
 					// Get SKU or product id
-					$reference = '';
 					if ( $_product->get_sku() ) {
 						$reference = $_product->get_sku();
 					} elseif ( $_product->variation_id ) {
@@ -1247,8 +1248,10 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 					} else {
 						$reference = $_product->id;
 					}
+
 					$total_amount = (int) ( $cart_item['line_total'] + $cart_item['line_tax'] ) * 100;
 					$item_price   = number_format( $item_price * 100, 0, '', '' ) / $cart_item['quantity'];
+
 					// Check if there's a discount applied
 					if ( $cart_item['line_subtotal'] > $cart_item['line_total'] ) {
 						$item_discount_rate = round( 1 - ( $cart_item['line_total'] / $cart_item['line_subtotal'] ), 2 ) * 10000;
@@ -1257,6 +1260,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 						$item_discount_rate = 0;
 						$item_discount      = 0;
 					}
+
 					if ( $this->is_rest() ) {
 						$klarna_item = array(
 							'reference'             => strval( $reference ),
@@ -1278,6 +1282,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 							'discount_rate' => $item_discount_rate
 						);
 					}
+
 					$cart[] = $klarna_item;
 				} // End if qty
 			} // End foreach
@@ -1395,14 +1400,12 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		switch ( $country ) {
 			case 'NO' :
 			case 'NB' :
-				$klarna_country  = 'NO';
 				$klarna_language = 'nb-no';
 				$klarna_currency = 'NOK';
 				$klarna_eid      = $this->eid_no;
 				$klarna_secret   = $this->secret_no;
 				break;
 			case 'FI' :
-				$klarna_country = 'FI';
 				// Check if WPML is used and determine if Finnish or Swedish is used as language
 				if ( class_exists( 'woocommerce_wpml' ) && defined( 'ICL_LANGUAGE_CODE' ) && strtoupper( ICL_LANGUAGE_CODE ) == 'SV' ) {
 					$klarna_language = 'sv-fi'; // Swedish
@@ -1415,35 +1418,30 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 				break;
 			case 'SE' :
 			case 'SV' :
-				$klarna_country  = 'SE';
 				$klarna_language = 'sv-se';
 				$klarna_currency = 'SEK';
 				$klarna_eid      = $this->eid_se;
 				$klarna_secret   = $this->secret_se;
 				break;
 			case 'DE' :
-				$klarna_country  = 'DE';
 				$klarna_language = 'de-de';
 				$klarna_currency = 'EUR';
 				$klarna_eid      = $this->eid_de;
 				$klarna_secret   = $this->secret_de;
 				break;
 			case 'AT' :
-				$klarna_country  = 'AT';
 				$klarna_language = 'de-at';
 				$klarna_currency = 'EUR';
 				$klarna_eid      = $this->eid_at;
 				$klarna_secret   = $this->secret_at;
 				break;
 			case 'GB' :
-				$klarna_country  = 'gb';
 				$klarna_language = 'en-gb';
 				$klarna_currency = 'gbp';
 				$klarna_eid      = $this->eid_uk;
 				$klarna_secret   = $this->secret_uk;
 				break;
 			default:
-				$klarna_country  = '';
 				$klarna_language = '';
 				$klarna_currency = '';
 				$klarna_eid      = '';
@@ -1458,8 +1456,6 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 * @since 1.0.0
 	 */
 	function get_klarna_checkout_page() {
-		global $woocommerce;
-		$current_user = wp_get_current_user();
 		// Debug
 		if ( $this->debug == 'yes' ) {
 			$this->log->add( 'klarna', 'KCO page about to render...' );
@@ -2018,7 +2014,7 @@ class WC_Gateway_Klarna_Checkout_Extra {
 
 	// Set session
 	function start_session() {
-		$data = new WC_Gateway_Klarna_Checkout; // Still need to initiate it here, otherwise shortcode won't work
+		new WC_Gateway_Klarna_Checkout; // Still need to initiate it here, otherwise shortcode won't work
 		// if ( ! is_admin() || defined( 'DOING_AJAX' ) ) {
 		/*
 		$checkout_settings = get_option( 'woocommerce_klarna_checkout_settings' );
@@ -2081,7 +2077,6 @@ class WC_Gateway_Klarna_Checkout_Extra {
 	 **/
 	function change_checkout_url( $url ) {
 		if ( ! is_admin() ) {
-			global $woocommerce;
 			global $klarna_checkout_url;
 			$checkout_settings            = get_option( 'woocommerce_klarna_checkout_settings' );
 			$enabled                      = $checkout_settings['enabled'];

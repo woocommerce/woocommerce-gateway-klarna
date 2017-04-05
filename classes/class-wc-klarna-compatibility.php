@@ -195,7 +195,7 @@ if ( ! class_exists( 'WC_Klarna_Compatibility' ) ) :
 
 			} else {
 
-				return get_product( $the_product, $args );
+				return wc_get_product( $the_product, $args );
 			}
 		}
 

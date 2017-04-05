@@ -586,13 +586,13 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 
 		// Collect the dob different depending on country
 		if ( isset( $_POST['billing_country'] ) && ( $_POST['billing_country'] == 'NL' || $_POST['billing_country'] == 'DE' ) ) {
-			$klarna_pno_day   = isset( $_POST['klarna_part_payment_date_of_birth_day'] ) ? woocommerce_clean( $_POST['klarna_part_payment_date_of_birth_day'] ) : '';
-			$klarna_pno_month = isset( $_POST['klarna_part_payment_date_of_birth_month'] ) ? woocommerce_clean( $_POST['klarna_part_payment_date_of_birth_month'] ) : '';
-			$klarna_pno_year  = isset( $_POST['klarna_part_payment_date_of_birth_year'] ) ? woocommerce_clean( $_POST['klarna_part_payment_date_of_birth_year'] ) : '';
+			$klarna_pno_day   = isset( $_POST['klarna_part_payment_date_of_birth_day'] ) ? wc_clean( $_POST['klarna_part_payment_date_of_birth_day'] ) : '';
+			$klarna_pno_month = isset( $_POST['klarna_part_payment_date_of_birth_month'] ) ? wc_clean( $_POST['klarna_part_payment_date_of_birth_month'] ) : '';
+			$klarna_pno_year  = isset( $_POST['klarna_part_payment_date_of_birth_year'] ) ? wc_clean( $_POST['klarna_part_payment_date_of_birth_year'] ) : '';
 
 			$klarna_pno = $klarna_pno_day . $klarna_pno_month . $klarna_pno_year;
 		} else {
-			$klarna_pno = isset( $_POST['klarna_part_payment_pno'] ) ? woocommerce_clean( $_POST['klarna_part_payment_pno'] ) : '';
+			$klarna_pno = isset( $_POST['klarna_part_payment_pno'] ) ? wc_clean( $_POST['klarna_part_payment_pno'] ) : '';
 		}
 
 		return $klarna_pno;
@@ -616,9 +616,9 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 		// Collect the DoB
 		$klarna_pno = $this->collect_dob( $order_id );
 
-		$klarna_pclass           = isset( $_POST['klarna_part_payment_pclass'] ) ? woocommerce_clean( $_POST['klarna_part_payment_pclass'] ) : '';
-		$klarna_gender           = isset( $_POST['klarna_part_payment_gender'] ) ? woocommerce_clean( $_POST['klarna_part_payment_gender'] ) : '';
-		$klarna_de_consent_terms = isset( $_POST['klarna_part_payment_de_consent_terms'] ) ? woocommerce_clean( $_POST['klarna_part_payment_de_consent_terms'] ) : '';
+		$klarna_pclass           = isset( $_POST['klarna_part_payment_pclass'] ) ? wc_clean( $_POST['klarna_part_payment_pclass'] ) : '';
+		$klarna_gender           = isset( $_POST['klarna_part_payment_gender'] ) ? wc_clean( $_POST['klarna_part_payment_gender'] ) : '';
+		$klarna_de_consent_terms = isset( $_POST['klarna_part_payment_de_consent_terms'] ) ? wc_clean( $_POST['klarna_part_payment_de_consent_terms'] ) : '';
 
 		// Split address into House number and House extension for NL & DE customers
 		$klarna_billing  = array();
