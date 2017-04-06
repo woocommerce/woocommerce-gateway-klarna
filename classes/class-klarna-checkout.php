@@ -1456,6 +1456,9 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 * @since 1.0.0
 	 */
 	function get_klarna_checkout_page() {
+		global $woocommerce;
+ 		$current_user = wp_get_current_user();
+
 		// Debug
 		if ( $this->debug == 'yes' ) {
 			$this->log->add( 'klarna', 'KCO page about to render...' );

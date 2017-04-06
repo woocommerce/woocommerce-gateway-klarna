@@ -1,5 +1,8 @@
 *** WooCommerce Gateway Klarna Changelog ***
 
+2017.04.06  - version 2.3.5
+* Hotfix    - Fixes undeclared global variable from previous version, in get_checkout_page() method.
+
 2017.04.05  - version 2.3.4
 * Fix       - Removes deprecated functions (woocommerce_clean, WC()->cart->get_cart_url(), WC()->cart->get_checkout_url(), woocommerce_get_page_id, get_product)
 * Fix       - Fixes error handling error in WC_Gateway_Klarna_K2WC class.
