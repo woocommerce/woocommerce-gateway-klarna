@@ -1,5 +1,8 @@
 *** WooCommerce Gateway Klarna Changelog ***
 
+2017.04.06  - version 2.3.6
+* Fix       - Fixes problem with $order->get_id() in K2WC class.
+
 2017.04.06  - version 2.3.5
 * Hotfix    - Fixes undeclared global variable from previous version, in get_checkout_page() method.
 

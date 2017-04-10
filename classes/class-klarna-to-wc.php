@@ -743,13 +743,13 @@ class WC_Gateway_Klarna_K2WC {
 				$smart_coupon = new WC_Coupon( $code );
 				if ( $smart_coupon->is_type( 'smart_coupon' ) ) {
 					$smart_coupons_contribution[ $code ] = WC()->cart->coupon_discount_amounts[ $code ];
-					update_post_meta( $order->get_id(), 'smart_coupons_contribution', $smart_coupons_contribution );
+					update_post_meta( $order->id, 'smart_coupons_contribution', $smart_coupons_contribution );
 				}
 			}
 		}
 
 		if ( 'yes' === $this->klarna_debug ) {
-			$wc_order_id = $order->get_id();
+			$wc_order_id = $order->id;
 			$this->klarna_log->add( 'klarna', microtime() . ": Finished adding coupons to order $wc_order_id..." );
 		}
 	}
