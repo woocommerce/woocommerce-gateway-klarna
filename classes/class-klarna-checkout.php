@@ -1619,7 +1619,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			return;
 		}
 		if ( isset( $_GET['stock_validate_failed'] ) ) {
-			wc_add_notice( __( 'This product is currently out of stock and unavailable.', 'woocommerce' ), 'error' );
+			wc_add_notice( __( 'This product is currently out of stock and unavailable.', 'woocommerce-gateway-klarna' ), 'error' );
 		}
 	}
 
@@ -1869,7 +1869,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		$checkout = $woocommerce->checkout();
 		if ( ! $checkout->enable_guest_checkout && ! is_user_logged_in() ) {
 			echo '<div>';
-			echo apply_filters( 'klarna_checkout_must_be_logged_in_message', sprintf( __( 'You must be logged in to checkout. %s or %s.', 'woocommerce' ), '<a href="' . wp_login_url() . '" title="' . __( 'Login', 'woocommerce-gateway-klarna' ) . '">' . __( 'Login', 'woocommerce-gateway-klarna' ) . '</a>', '<a href="' . wp_registration_url() . '" title="' . __( 'create an account', 'woocommerce-gateway-klarna' ) . '">' . __( 'create an account', 'woocommerce-gateway-klarna' ) . '</a>' ) );
+			echo apply_filters( 'klarna_checkout_must_be_logged_in_message', sprintf( __( 'You must be logged in to checkout. %s or %s.', 'woocommerce-gateway-klarna' ), '<a href="' . wp_login_url() . '" title="' . __( 'Login', 'woocommerce-gateway-klarna' ) . '">' . __( 'Login', 'woocommerce-gateway-klarna' ) . '</a>', '<a href="' . wp_registration_url() . '" title="' . __( 'create an account', 'woocommerce-gateway-klarna' ) . '">' . __( 'create an account', 'woocommerce-gateway-klarna' ) . '</a>' ) );
 			echo '</div>';
 			WC()->session->set( 'klarna_show_kco', false );
 

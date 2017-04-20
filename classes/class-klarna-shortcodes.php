@@ -50,7 +50,7 @@ class WC_Gateway_Klarna_Shortcodes {
 			echo apply_filters(
 				'klarna_checkout_must_be_logged_in_message',
 				sprintf(
-					__( 'You must be logged in to checkout. %s or %s.', 'woocommerce' ),
+					__( 'You must be logged in to checkout. %s or %s.', 'woocommerce-gateway-klarna' ),
 					'<a href="' . esc_url( wc_get_page_permalink( 'myaccount' ) ) . '" title="' . __( 'Login', 'woocommerce-gateway-klarna'
 					) . '">' . __( 'Login', 'woocommerce-gateway-klarna' ) . '</a>',
 					'<a href="' . esc_url( wc_get_page_permalink( 'myaccount' ) ) . '" title="' . __( 'create an account',
@@ -71,8 +71,8 @@ class WC_Gateway_Klarna_Shortcodes {
 
 		$field = array(
 			'type'        => 'textarea',
-			'label'       => __( 'Order Notes', 'woocommerce' ),
-			'placeholder' => _x( 'Notes about your order, e.g. special notes for delivery.', 'placeholder', 'woocommerce' ),
+			'label'       => __( 'Order Notes', 'woocommerce-gateway-klarna' ),
+			'placeholder' => _x( 'Notes about your order, e.g. special notes for delivery.', 'placeholder', 'woocommerce-gateway-klarna' ),
 			'class'       => array( 'notes' ),
 		);
 		if ( WC()->session->get( 'klarna_order_note' ) ) {
@@ -601,7 +601,7 @@ class WC_Gateway_Klarna_Shortcodes {
 			<tr class="kco-applied-coupon">
 				<td>
 					<?php echo apply_filters( 'woocommerce_cart_totals_coupon_label', esc_html( __( 'Coupon:',
-							'woocommerce' ) . ' ' . $coupon->code ), $coupon ); ?>
+							'woocommerce-gateway-klarna' ) . ' ' . $coupon->code ), $coupon ); ?>
 					<a class="kco-remove-coupon" data-coupon="<?php echo $coupon->code; ?>"
 					   href="#"><?php _e( '(remove)', 'woocommerce-gateway-klarna' ); ?></a>
 				</td>

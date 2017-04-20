@@ -418,7 +418,7 @@ class WC_Gateway_Klarna_K2WC {
 		$order = wc_create_order( $order_data );
 
 		if ( is_wp_error( $order ) ) {
-			throw new Exception( __( 'Error: Unable to create order. Please try again.', 'woocommerce' ) );
+			throw new Exception( __( 'Error: Unable to create order. Please try again.', 'woocommerce-gateway-klarna' ) );
 		}
 
 		if ( 'yes' === $this->klarna_debug ) {
@@ -483,7 +483,7 @@ class WC_Gateway_Klarna_K2WC {
 					$this->klarna_log->add( 'klarna', microtime() . ': Unable to add order item.' );
 				}
 
-				throw new Exception( __( 'Error: Unable to add item. Please try again.', 'woocommerce' ) );
+				throw new Exception( __( 'Error: Unable to add item. Please try again.', 'woocommerce-gateway-klarna' ) );
 			} else {
 				if ( 'yes' === $this->klarna_debug ) {
 					$this->klarna_log->add( 'klarna', microtime() . ": Added item $item_id (cart item key: $cart_item_key) to order $order->id..." );
@@ -521,7 +521,7 @@ class WC_Gateway_Klarna_K2WC {
 					$this->klarna_log->add( 'klarna', microtime() . ': Unable to add fee.' );
 				}
 
-				throw new Exception( __( 'Error: Unable to create order. Please try again.', 'woocommerce' ) );
+				throw new Exception( __( 'Error: Unable to create order. Please try again.', 'woocommerce-gateway-klarna' ) );
 			} else {
 				if ( 'yes' === $this->klarna_debug ) {
 					$this->klarna_log->add( 'klarna', microtime() . ": Added fee $item_id (fee key: $fee_key) to order $order->id..." );
@@ -572,7 +572,7 @@ class WC_Gateway_Klarna_K2WC {
 						$this->klarna_log->add( 'klarna', microtime() . ': Unable to add shipping item.' );
 					}
 
-					throw new Exception( __( 'Error: Unable to create order. Please try again.', 'woocommerce' ) );
+					throw new Exception( __( 'Error: Unable to create order. Please try again.', 'woocommerce-gateway-klarna' ) );
 				} else {
 					if ( 'yes' === $this->klarna_debug ) {
 						$this->klarna_log->add( 'klarna', microtime() . ": Added shipping $item_id (package key: $package_key) to order $order->id..." );
@@ -695,7 +695,7 @@ class WC_Gateway_Klarna_K2WC {
 					$this->klarna_log->add( 'klarna', microtime() . ': Unable to add taxes.' );
 				}
 
-				throw new Exception( sprintf( __( 'Error %d: Unable to create order. Please try again.', 'woocommerce' ), 405 ) );
+				throw new Exception( sprintf( __( 'Error %d: Unable to create order. Please try again.', 'woocommerce-gateway-klarna' ), 405 ) );
 			} else {
 				if ( 'yes' === $this->klarna_debug ) {
 					$this->klarna_log->add( 'klarna', microtime() . ": Added tax rate $tax_rate_id to order $order->id..." );
@@ -728,7 +728,7 @@ class WC_Gateway_Klarna_K2WC {
 					$this->klarna_log->add( 'klarna', microtime() . ': Unable to add coupons.' );
 				}
 
-				throw new Exception( __( 'Error: Unable to create order. Please try again.', 'woocommerce' ) );
+				throw new Exception( __( 'Error: Unable to create order. Please try again.', 'woocommerce-gateway-klarna' ) );
 			} else {
 				if ( 'yes' === $this->klarna_debug ) {
 					$this->klarna_log->add( 'klarna', microtime() . ": Added coupon $code to order $order->id..." );
@@ -821,11 +821,11 @@ class WC_Gateway_Klarna_K2WC {
 	function create_new_customer( $email, $username = '', $password = '' ) {
 		// Check the e-mail address.
 		if ( empty( $email ) || ! is_email( $email ) ) {
-			return new WP_Error( 'registration-error', __( 'Please provide a valid email address.', 'woocommerce' ) );
+			return new WP_Error( 'registration-error', __( 'Please provide a valid email address.', 'woocommerce-gateway-klarna' ) );
 		}
 
 		if ( email_exists( $email ) ) {
-			return new WP_Error( 'registration-error', __( 'An account is already registered with your email address. Please login.', 'woocommerce' ) );
+			return new WP_Error( 'registration-error', __( 'An account is already registered with your email address. Please login.', 'woocommerce-gateway-klarna' ) );
 		}
 
 		// Handle username creation.
@@ -864,7 +864,7 @@ class WC_Gateway_Klarna_K2WC {
 		$customer_id = wp_insert_user( $new_customer_data );
 
 		if ( is_wp_error( $customer_id ) ) {
-			$validation_errors->add( 'registration-error', '<strong>' . __( 'ERROR', 'woocommerce' ) . '</strong>: ' . __( 'Couldn&#8217;t register you&hellip; please contact us if you continue to have problems.', 'woocommerce' ) );
+			$validation_errors->add( 'registration-error', '<strong>' . __( 'ERROR', 'woocommerce-gateway-klarna' ) . '</strong>: ' . __( 'Couldn&#8217;t register you&hellip; please contact us if you continue to have problems.', 'woocommerce-gateway-klarna' ) );
 			$this->klarna_log->add( 'klarna', __( 'Customer creation error', 'woocommerce-gateway-klarna' ) . ' - ' . $validation_errors->get_error_code() );
 
 			return 0;

@@ -32,7 +32,7 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 		$this->method_title       = __( 'Klarna Part Payment', 'woocommerce-gateway-klarna' );
 		$this->method_description = sprintf( __( 'With Klarna your customers can pay by invoice. Klarna works by adding extra personal information fields and then sending the details to Klarna for verification. Documentation <a href="%s" target="_blank">can be found here</a>.', 'woocommerce-gateway-klarna' ), 'https://docs.woothemes.com/document/klarna/' );
 		$this->has_fields         = true;
-		$this->order_button_text  = apply_filters( 'klarna_order_button_text', __( 'Place order', 'woocommerce' ) );
+		$this->order_button_text  = apply_filters( 'klarna_order_button_text', __( 'Place order', 'woocommerce-gateway-klarna' ) );
 		$this->pclass_type        = array( 0, 1 ); // Part payment flexible and part payment fixed
 
 		// Load the form fields.

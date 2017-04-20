@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<thead>
 	<tr>
 		<th colspan="3" data-export-label="Klarna">
-			<h2><?php _e( 'Klarna Checkout', 'woocommerce' ); ?><?php echo wc_help_tip( __( 'Klarna Checkout System Status.', 'woocommerce-gateway-klarna' ) ); ?></h2>
+			<h2><?php _e( 'Klarna Checkout', 'woocommerce-gateway-klarna' ); ?><?php echo wc_help_tip( __( 'Klarna Checkout System Status.', 'woocommerce-gateway-klarna' ) ); ?></h2>
 		</th>
 	</tr>
 	</thead>
