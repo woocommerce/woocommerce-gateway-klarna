@@ -362,7 +362,7 @@ class WC_Gateway_Klarna_WC2K {
 		$item_name      = $cart_item_data->post->post_title;
 
 		// Get variations as a string and remove line breaks
-		$item_variations = rtrim( WC()->cart->get_item_data( $cart_item, true ) ); // Removes new line at the end
+		$item_variations = html_entity_decode( rtrim( WC()->cart->get_item_data( $cart_item, true ) ) ); // Removes new line at the end
 		$item_variations = str_replace( "\n", ', ', $item_variations ); // Replaces all other line breaks with commas
 
 		// Add variations to name
