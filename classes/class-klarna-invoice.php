@@ -721,16 +721,20 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 					break;
 			}
 		} catch ( Exception $e ) {
+			// The purchase was denied or something went wrong, print the message:
+			wc_add_notice( sprintf( __( '%s (Error code: %s)', 'woocommerce-gateway-klarna' ), utf8_encode( $e->getMessage() ), $e->getCode() ), 'error' );
+
 			if ( $this->debug == 'yes' ) {
 				$this->log->add( 'klarna', 'Klarna API error: ' . var_export( $e, true ) );
 			}
-			// The purchase was denied or something went wrong, print the message:
-			wc_add_notice( sprintf( __( '%s (Error code: %s)', 'woocommerce-gateway-klarna' ), utf8_encode( $e->getMessage() ), $e->getCode() ), 'error' );
-			if ( $this->debug == 'yes' ) {
-				$this->log->add( 'klarna', sprintf( __( '%s (Error code: %s)', 'woocommerce-gateway-klarna' ), utf8_encode( $e->getMessage() ), $e->getCode() ) );
-			}
 
-			return false;
+			$order->update_status( 'failed', sprintf( __( '%s (Error code: %s).', 'woocommerce-gateway-klarna' ), utf8_encode( $e->getMessage() ), $e->getCode() ) );
+
+			// Return failure if something went wrong.
+			return array(
+				'result'   => 'failure',
+				'redirect' => '',
+			);
 		}
 	}
 

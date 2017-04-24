@@ -748,7 +748,13 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 				$this->log->add( 'klarna', 'Klarna API error: ' . var_export( $e, true ) );
 			}
 
-			return false;
+			$order->update_status( 'failed', sprintf( __( '%s (Error code: %s).', 'woocommerce-gateway-klarna' ), utf8_encode( $e->getMessage() ), $e->getCode() ) );
+
+			// Return failure if something went wrong.
+			return array(
+				'result'   => 'failure',
+				'redirect' => '',
+			);
 		}
 
 	}
