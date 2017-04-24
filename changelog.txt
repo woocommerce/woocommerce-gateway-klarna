@@ -3,6 +3,7 @@
 2017.04.xx  - version 2.3.7
 * Fix       - Changes allowed response status for KCO V3 refund (201, 204).
 * Update    - Updates translation domain for some strings to woocommerce-gateway-klarna.
+* Fix       - Fixes response to failed purchase in KPM methods (issue-58).
 
 2017.04.06  - version 2.3.6
 * Fix       - Fixes problem with $order->get_id() in K2WC class.
