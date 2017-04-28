@@ -466,32 +466,37 @@ class WC_Gateway_Klarna_K2WC {
 			$this->klarna_log->add( 'klarna', microtime() . ": Adding items to order $order->id..." );
 		}
 
-		foreach ( WC()->cart->get_cart() as $cart_item_key => $values ) {
-			$item_id = $order->add_product( $values['data'], $values['quantity'], array(
-				'variation' => $values['variation'],
-				'totals'    => array(
-					'subtotal'     => $values['line_subtotal'],
-					'subtotal_tax' => $values['line_subtotal_tax'],
-					'total'        => $values['line_total'],
-					'tax'          => $values['line_tax'],
-					'tax_data'     => $values['line_tax_data'],
-				),
-			) );
+		if ( version_compare( WOOCOMMERCE_VERSION, '3.0', '>=' ) ) {
+			WC()->checkout->create_order_line_items( $order, WC()->cart );
+			$order->save();
+		} else {
+			foreach ( WC()->cart->get_cart() as $cart_item_key => $values ) {
+				$item_id = $order->add_product( $values['data'], $values['quantity'], array(
+					'variation' => $values['variation'],
+					'totals'    => array(
+						'subtotal'     => $values['line_subtotal'],
+						'subtotal_tax' => $values['line_subtotal_tax'],
+						'total'        => $values['line_total'],
+						'tax'          => $values['line_tax'],
+						'tax_data'     => $values['line_tax_data'],
+					),
+				) );
 
-			if ( ! $item_id ) {
-				if ( 'yes' === $this->klarna_debug ) {
-					$this->klarna_log->add( 'klarna', microtime() . ': Unable to add order item.' );
+				if ( ! $item_id ) {
+					if ( 'yes' === $this->klarna_debug ) {
+						$this->klarna_log->add( 'klarna', microtime() . ': Unable to add order item.' );
+					}
+
+					throw new Exception( __( 'Error: Unable to add item. Please try again.', 'woocommerce-gateway-klarna' ) );
+				} else {
+					if ( 'yes' === $this->klarna_debug ) {
+						$this->klarna_log->add( 'klarna', microtime() . ": Added item $item_id (cart item key: $cart_item_key) to order $order->id..." );
+					}
 				}
 
-				throw new Exception( __( 'Error: Unable to add item. Please try again.', 'woocommerce-gateway-klarna' ) );
-			} else {
-				if ( 'yes' === $this->klarna_debug ) {
-					$this->klarna_log->add( 'klarna', microtime() . ": Added item $item_id (cart item key: $cart_item_key) to order $order->id..." );
-				}
+				// Allow plugins to add order item meta.
+				do_action( 'woocommerce_add_order_item_meta', $item_id, $values, $cart_item_key );
 			}
-
-			// Allow plugins to add order item meta.
-			do_action( 'woocommerce_add_order_item_meta', $item_id, $values, $cart_item_key );
 		}
 
 		if ( 'yes' === $this->klarna_debug ) {
