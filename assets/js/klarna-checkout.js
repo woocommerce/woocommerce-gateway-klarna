@@ -672,9 +672,15 @@ jQuery(document).ready(function ($) {
 										dataType: 'json',
 										data: {
 											action: 'kco_iframe_shipping_address_change_cb',
-											region: data.region,
-											postal_code: data.postal_code,
+											city: data.city,
 											country: data.country,
+											email: data.email,
+											family_name: data.family_name,
+											given_name: data.given_name,
+											phone: data.phone,
+											postal_code: data.postal_code,
+											region: data.region,
+											street_address: data.street_address,
 											nonce: kcoAjax.klarna_checkout_nonce
 										},
 										success: function (response) {
