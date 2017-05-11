@@ -362,7 +362,7 @@ class WC_Gateway_Klarna_WC2K {
 		$item_name      = $cart_item_data->post->post_title;
 
 		// Get variations as a string and remove line breaks
-		$item_variations = rtrim( WC()->cart->get_item_data( $cart_item, true ) ); // Removes new line at the end
+		$item_variations = html_entity_decode( rtrim( WC()->cart->get_item_data( $cart_item, true ) ) ); // Removes new line at the end
 		$item_variations = str_replace( "\n", ', ', $item_variations ); // Replaces all other line breaks with commas
 
 		// Add variations to name
@@ -607,9 +607,11 @@ class WC_Gateway_Klarna_WC2K {
 
 			if ( '' != $chosen_method ) {
 				$package_rates = $package['rates'];
-				foreach ( $package_rates as $rate_key => $rate_value ) {
-					if ( $rate_key == $chosen_method ) {
-						$shipping_name = $rate_value->label;
+				if ( is_array( $package_rates ) ) {
+					foreach ( $package_rates as $rate_key => $rate_value ) {
+						if ( $rate_key == $chosen_method ) {
+							$shipping_name = $rate_value->label;
+						}
 					}
 				}
 			}
@@ -637,9 +639,11 @@ class WC_Gateway_Klarna_WC2K {
 
 			if ( '' != $chosen_method ) {
 				$package_rates = $package['rates'];
-				foreach ( $package_rates as $rate_key => $rate_value ) {
-					if ( $rate_key == $chosen_method ) {
-						$shipping_reference = $rate_value->id;
+				if ( is_array( $package_rates ) ) {
+					foreach ( $package_rates as $rate_key => $rate_value ) {
+						if ( $rate_key == $chosen_method ) {
+							$shipping_reference = $rate_value->id;
+						}
 					}
 				}
 			}

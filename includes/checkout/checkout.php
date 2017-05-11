@@ -50,8 +50,21 @@ if ( wc_notice_count( 'error' ) > 0 ) {
 	WC()->session->set( 'chosen_payment_method', 'klarna_checkout' );
 
 	// Set customer country so taxes and shipping can be calculated properly.
-	WC()->customer->set_country( strtoupper( $this->get_klarna_country() ) );
-	WC()->customer->set_shipping_country( strtoupper( $this->get_klarna_country() ) );
+	if ( version_compare( WOOCOMMERCE_VERSION, '3.0', '<' ) ) {
+		WC()->customer->set_country( strtoupper( $this->get_klarna_country() ) );
+		WC()->customer->set_shipping_country( strtoupper( $this->get_klarna_country() ) );
+	} else {
+		if ( WC()->customer->get_id() ) {
+			$wc_customer = new WC_Customer( WC()->customer->get_id() );
+			$wc_customer->set_billing_country( strtoupper( $this->get_klarna_country() ) );
+			$wc_customer->set_shipping_country( strtoupper( $this->get_klarna_country() ) );
+			$wc_customer->save();
+		} else {
+			WC()->customer->set_billing_country( strtoupper( $this->get_klarna_country() ) );
+			WC()->customer->set_shipping_country( strtoupper( $this->get_klarna_country() ) );
+			WC()->customer->save();
+		}
+	}
 
 	// Debug.
 	if ( $this->debug == 'yes' ) {

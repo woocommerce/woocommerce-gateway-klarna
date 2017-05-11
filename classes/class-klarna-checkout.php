@@ -1024,43 +1024,112 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		if ( ! wp_verify_nonce( $_REQUEST['nonce'], 'klarna_checkout_nonce' ) ) {
 			exit( 'Nonce can not be verified.' );
 		}
-		global $woocommerce;
+
 		$data = array();
+
+		$wc_customer = WC()->customer;
+
 		// Capture postal code
 		if ( isset( $_REQUEST['postal_code'] ) && is_string( $_REQUEST['postal_code'] ) ) {
-			$woocommerce->customer->set_postcode( $_REQUEST['postal_code'] );
-			$woocommerce->customer->set_shipping_postcode( $_REQUEST['postal_code'] );
+			$wc_customer->set_postcode( $_REQUEST['postal_code'] );
+			$wc_customer->set_shipping_postcode( $_REQUEST['postal_code'] );
 		}
 		if ( isset( $_REQUEST['region'] ) && is_string( $_REQUEST['region'] ) ) {
-			$woocommerce->customer->set_state( $_REQUEST['region'] );
-			$woocommerce->customer->set_shipping_state( $_REQUEST['region'] );
+			$wc_customer->set_state( $_REQUEST['region'] );
+			$wc_customer->set_shipping_state( $_REQUEST['region'] );
 		}
 		if ( isset( $_REQUEST['country'] ) && is_string( $_REQUEST['country'] ) ) {
 			if ( 'gbr' == $_REQUEST['country'] ) {
-				$woocommerce->customer->set_country( 'GB' );
-				$woocommerce->customer->set_shipping_country( 'GB' );
+				$wc_customer->set_country( 'GB' );
+				$wc_customer->set_shipping_country( 'GB' );
 			} elseif ( 'usa' == $_REQUEST['country'] ) {
-				$woocommerce->customer->set_country( 'US' );
-				$woocommerce->customer->set_shipping_country( 'US' );
+				$wc_customer->set_country( 'US' );
+				$wc_customer->set_shipping_country( 'US' );
 			} elseif ( 'dnk' == $_REQUEST['country'] ) {
-				$woocommerce->customer->set_country( 'DK' );
-				$woocommerce->customer->set_shipping_country( 'DK' );
+				$wc_customer->set_country( 'DK' );
+				$wc_customer->set_shipping_country( 'DK' );
 			} elseif ( 'nld' == $_REQUEST['country'] ) {
-				$woocommerce->customer->set_country( 'NL' );
-				$woocommerce->customer->set_shipping_country( 'NL' );
+				$wc_customer->set_country( 'NL' );
+				$wc_customer->set_shipping_country( 'NL' );
 			}
 		}
+
+		if ( version_compare( WOOCOMMERCE_VERSION, '3.0', '>=' ) ) {
+			$wc_customer->save();
+		}
+
 		if ( ! defined( 'WOOCOMMERCE_CART' ) ) {
 			define( 'WOOCOMMERCE_CART', true );
 		}
-		$woocommerce->cart->calculate_shipping();
-		$woocommerce->cart->calculate_fees();
-		$woocommerce->cart->calculate_totals();
-		$this->update_or_create_local_order();
+
+		WC()->cart->calculate_shipping();
+		WC()->cart->calculate_fees();
+		WC()->cart->calculate_totals();
+
+		$order_id = $this->update_or_create_local_order();
+
+		if ( version_compare( WOOCOMMERCE_VERSION, '3.0', '>=' ) ) {
+			$order = wc_get_order( $order_id );
+
+			if ( isset( $_REQUEST['city'] ) && is_string( $_REQUEST['city'] ) ) {
+				$order->set_billing_city( $_REQUEST['city'] );
+			}
+
+			if ( isset( $_REQUEST['country'] ) && is_string( $_REQUEST['country'] ) ) {
+				if ( 'gbr' == $_REQUEST['country'] ) {
+					$order->set_billing_country( 'GB' );
+					$order->set_shipping_country( 'GB' );
+				} elseif ( 'usa' == $_REQUEST['country'] ) {
+					$order->set_billing_country( 'US' );
+					$order->set_shipping_country( 'US' );
+				} elseif ( 'dnk' == $_REQUEST['country'] ) {
+					$order->set_billing_country( 'DK' );
+					$order->set_shipping_country( 'DK' );
+				} elseif ( 'nld' == $_REQUEST['country'] ) {
+					$order->set_billing_country( 'NL' );
+					$order->set_shipping_country( 'NL' );
+				}
+			}
+
+			if ( isset( $_REQUEST['email'] ) && is_string( $_REQUEST['email'] ) ) {
+				$order->set_billing_email( $_REQUEST['email'] );
+			}
+
+			if ( isset( $_REQUEST['given_name'] ) && is_string( $_REQUEST['given_name'] ) ) {
+				$order->set_billing_first_name( $_REQUEST['given_name'] );
+			}
+
+			if ( isset( $_REQUEST['family_name'] ) && is_string( $_REQUEST['family_name'] ) ) {
+				$order->set_billing_last_name( $_REQUEST['family_name'] );
+			}
+
+			if ( isset( $_REQUEST['phone'] ) && is_string( $_REQUEST['phone'] ) ) {
+				$order->set_billing_phone( $_REQUEST['phone'] );
+			}
+
+			if ( isset( $_REQUEST['postal_code'] ) && is_string( $_REQUEST['postal_code'] ) ) {
+				$order->set_billing_postcode( $_REQUEST['postal_code'] );
+				$order->set_shipping_postcode( $_REQUEST['postal_code'] );
+			}
+
+			if ( isset( $_REQUEST['region'] ) && is_string( $_REQUEST['region'] ) ) {
+				$order->set_billing_state( $_REQUEST['region'] );
+				$order->set_shipping_state( $_REQUEST['region'] );
+			}
+			if ( isset( $_REQUEST['street_address'] ) && is_string( $_REQUEST['street_address'] ) ) {
+				$order->set_billing_address_1( $_REQUEST['street_address'] );
+			}
+
+			$order->calculate_totals();
+			$order->save();
+		}
+
 		$data['widget_html'] = $this->klarna_checkout_get_kco_widget_html();
+
 		if ( WC()->session->get( 'klarna_checkout' ) ) {
 			$this->ajax_update_klarna_order();
 		}
+
 		wp_send_json_success( $data );
 		wp_die();
 	}
@@ -1619,7 +1688,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			return;
 		}
 		if ( isset( $_GET['stock_validate_failed'] ) ) {
-			wc_add_notice( __( 'This product is currently out of stock and unavailable.', 'woocommerce' ), 'error' );
+			wc_add_notice( __( 'This product is currently out of stock and unavailable.', 'woocommerce-gateway-klarna' ), 'error' );
 		}
 	}
 
@@ -1869,7 +1938,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		$checkout = $woocommerce->checkout();
 		if ( ! $checkout->enable_guest_checkout && ! is_user_logged_in() ) {
 			echo '<div>';
-			echo apply_filters( 'klarna_checkout_must_be_logged_in_message', sprintf( __( 'You must be logged in to checkout. %s or %s.', 'woocommerce' ), '<a href="' . wp_login_url() . '" title="' . __( 'Login', 'woocommerce-gateway-klarna' ) . '">' . __( 'Login', 'woocommerce-gateway-klarna' ) . '</a>', '<a href="' . wp_registration_url() . '" title="' . __( 'create an account', 'woocommerce-gateway-klarna' ) . '">' . __( 'create an account', 'woocommerce-gateway-klarna' ) . '</a>' ) );
+			echo apply_filters( 'klarna_checkout_must_be_logged_in_message', sprintf( __( 'You must be logged in to checkout. %s or %s.', 'woocommerce-gateway-klarna' ), '<a href="' . wp_login_url() . '" title="' . __( 'Login', 'woocommerce-gateway-klarna' ) . '">' . __( 'Login', 'woocommerce-gateway-klarna' ) . '</a>', '<a href="' . wp_registration_url() . '" title="' . __( 'create an account', 'woocommerce-gateway-klarna' ) . '">' . __( 'create an account', 'woocommerce-gateway-klarna' ) . '</a>' ) );
 			echo '</div>';
 			WC()->session->set( 'klarna_show_kco', false );
 

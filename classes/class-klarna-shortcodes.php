@@ -50,7 +50,7 @@ class WC_Gateway_Klarna_Shortcodes {
 			echo apply_filters(
 				'klarna_checkout_must_be_logged_in_message',
 				sprintf(
-					__( 'You must be logged in to checkout. %s or %s.', 'woocommerce' ),
+					__( 'You must be logged in to checkout. %s or %s.', 'woocommerce-gateway-klarna' ),
 					'<a href="' . esc_url( wc_get_page_permalink( 'myaccount' ) ) . '" title="' . __( 'Login', 'woocommerce-gateway-klarna'
 					) . '">' . __( 'Login', 'woocommerce-gateway-klarna' ) . '</a>',
 					'<a href="' . esc_url( wc_get_page_permalink( 'myaccount' ) ) . '" title="' . __( 'create an account',
@@ -71,8 +71,8 @@ class WC_Gateway_Klarna_Shortcodes {
 
 		$field = array(
 			'type'        => 'textarea',
-			'label'       => __( 'Order Notes', 'woocommerce' ),
-			'placeholder' => _x( 'Notes about your order, e.g. special notes for delivery.', 'placeholder', 'woocommerce' ),
+			'label'       => __( 'Order Notes', 'woocommerce-gateway-klarna' ),
+			'placeholder' => _x( 'Notes about your order, e.g. special notes for delivery.', 'placeholder', 'woocommerce-gateway-klarna' ),
 			'class'       => array( 'notes' ),
 		);
 		if ( WC()->session->get( 'klarna_order_note' ) ) {
@@ -431,10 +431,16 @@ class WC_Gateway_Klarna_Shortcodes {
 						}
 					}
 
-					if ( ! $_product->is_visible() ) {
-						echo apply_filters( 'woocommerce_cart_item_name', $_product->get_title(), $cart_item, $cart_item_key ) . '&nbsp;';
+					if ( version_compare( WOOCOMMERCE_VERSION, '3.0', '<' ) ) {
+						$product_name = $_product->get_title();
 					} else {
-						echo apply_filters( 'woocommerce_cart_item_name', sprintf( '<a href="%s">%s </a>', $_product->get_permalink( $cart_item ), $_product->get_title() ), $cart_item, $cart_item_key );
+						$product_name = $_product->get_name();
+					}
+
+					if ( ! $_product->is_visible() ) {
+						echo apply_filters( 'woocommerce_cart_item_name', $product_name, $cart_item, $cart_item_key ) . '&nbsp;';
+					} else {
+						echo apply_filters( 'woocommerce_cart_item_name', sprintf( '<a href="%s">%s </a>', $_product->get_permalink( $cart_item ), $product_name ), $cart_item, $cart_item_key );
 					}
 					// Meta data
 					echo $woocommerce->cart->get_item_data( $cart_item );
@@ -601,7 +607,7 @@ class WC_Gateway_Klarna_Shortcodes {
 			<tr class="kco-applied-coupon">
 				<td>
 					<?php echo apply_filters( 'woocommerce_cart_totals_coupon_label', esc_html( __( 'Coupon:',
-							'woocommerce' ) . ' ' . $coupon->code ), $coupon ); ?>
+							'woocommerce-gateway-klarna' ) . ' ' . $coupon->code ), $coupon ); ?>
 					<a class="kco-remove-coupon" data-coupon="<?php echo $coupon->code; ?>"
 					   href="#"><?php _e( '(remove)', 'woocommerce-gateway-klarna' ); ?></a>
 				</td>

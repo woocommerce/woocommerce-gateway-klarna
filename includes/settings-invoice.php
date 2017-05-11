@@ -235,7 +235,7 @@ return apply_filters( 'klarna_invoice_form_fields', array(
 		'title'       => __( 'Debug', 'woocommerce-gateway-klarna' ),
 		'type'        => 'checkbox',
 		'label'       => __( 'Enable logging.', 'woocommerce-gateway-klarna' ),
-		'description' => sprintf( __( 'Log Klarna events, in <code>%s</code>', 'woocommerce' ), wc_get_log_file_path( 'klarna' ) ),
+		'description' => sprintf( __( 'Log Klarna events, in <code>%s</code>', 'woocommerce-gateway-klarna' ), wc_get_log_file_path( 'klarna' ) ),
 		'default'     => 'no'
 	),
 ) );

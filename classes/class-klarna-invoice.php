@@ -27,7 +27,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 		$this->method_title       = __( 'Klarna Invoice', 'woocommerce-gateway-klarna' );
 		$this->method_description = sprintf( __( 'With Klarna your customers can pay by invoice. Klarna works by adding extra personal information fields and then sending the details to Klarna for verification. Documentation <a href="%s" target="_blank">can be found here</a>.', 'woocommerce-gateway-klarna' ), 'https://docs.woothemes.com/document/klarna/' );
 		$this->has_fields         = true;
-		$this->order_button_text  = apply_filters( 'klarna_order_button_text', __( 'Place order', 'woocommerce' ) );
+		$this->order_button_text  = apply_filters( 'klarna_order_button_text', __( 'Place order', 'woocommerce-gateway-klarna' ) );
 		$this->pclass_type        = array( 2 );
 		// Load the form fields.
 		$this->init_form_fields();
@@ -721,16 +721,20 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 					break;
 			}
 		} catch ( Exception $e ) {
+			// The purchase was denied or something went wrong, print the message:
+			wc_add_notice( sprintf( __( '%s (Error code: %s)', 'woocommerce-gateway-klarna' ), utf8_encode( $e->getMessage() ), $e->getCode() ), 'error' );
+
 			if ( $this->debug == 'yes' ) {
 				$this->log->add( 'klarna', 'Klarna API error: ' . var_export( $e, true ) );
 			}
-			// The purchase was denied or something went wrong, print the message:
-			wc_add_notice( sprintf( __( '%s (Error code: %s)', 'woocommerce-gateway-klarna' ), utf8_encode( $e->getMessage() ), $e->getCode() ), 'error' );
-			if ( $this->debug == 'yes' ) {
-				$this->log->add( 'klarna', sprintf( __( '%s (Error code: %s)', 'woocommerce-gateway-klarna' ), utf8_encode( $e->getMessage() ), $e->getCode() ) );
-			}
 
-			return false;
+			$order->update_status( 'failed', sprintf( __( '%s (Error code: %s).', 'woocommerce-gateway-klarna' ), utf8_encode( $e->getMessage() ), $e->getCode() ) );
+
+			// Return failure if something went wrong.
+			return array(
+				'result'   => 'failure',
+				'redirect' => '',
+			);
 		}
 	}
 
