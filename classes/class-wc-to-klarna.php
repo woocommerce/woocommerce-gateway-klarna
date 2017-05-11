@@ -607,9 +607,11 @@ class WC_Gateway_Klarna_WC2K {
 
 			if ( '' != $chosen_method ) {
 				$package_rates = $package['rates'];
-				foreach ( $package_rates as $rate_key => $rate_value ) {
-					if ( $rate_key == $chosen_method ) {
-						$shipping_name = $rate_value->label;
+				if ( is_array( $package_rates ) ) {
+					foreach ( $package_rates as $rate_key => $rate_value ) {
+						if ( $rate_key == $chosen_method ) {
+							$shipping_name = $rate_value->label;
+						}
 					}
 				}
 			}
@@ -637,9 +639,11 @@ class WC_Gateway_Klarna_WC2K {
 
 			if ( '' != $chosen_method ) {
 				$package_rates = $package['rates'];
-				foreach ( $package_rates as $rate_key => $rate_value ) {
-					if ( $rate_key == $chosen_method ) {
-						$shipping_reference = $rate_value->id;
+				if ( is_array( $package_rates ) ) {
+					foreach ( $package_rates as $rate_key => $rate_value ) {
+						if ( $rate_key == $chosen_method ) {
+							$shipping_reference = $rate_value->id;
+						}
 					}
 				}
 			}
