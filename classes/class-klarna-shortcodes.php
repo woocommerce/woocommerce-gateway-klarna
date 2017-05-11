@@ -431,10 +431,16 @@ class WC_Gateway_Klarna_Shortcodes {
 						}
 					}
 
-					if ( ! $_product->is_visible() ) {
-						echo apply_filters( 'woocommerce_cart_item_name', $_product->get_title(), $cart_item, $cart_item_key ) . '&nbsp;';
+					if ( version_compare( WOOCOMMERCE_VERSION, '3.0', '<' ) ) {
+						$product_name = $_product->get_title();
 					} else {
-						echo apply_filters( 'woocommerce_cart_item_name', sprintf( '<a href="%s">%s </a>', $_product->get_permalink( $cart_item ), $_product->get_title() ), $cart_item, $cart_item_key );
+						$product_name = $_product->get_name();
+					}
+
+					if ( ! $_product->is_visible() ) {
+						echo apply_filters( 'woocommerce_cart_item_name', $product_name, $cart_item, $cart_item_key ) . '&nbsp;';
+					} else {
+						echo apply_filters( 'woocommerce_cart_item_name', sprintf( '<a href="%s">%s </a>', $_product->get_permalink( $cart_item ), $product_name ), $cart_item, $cart_item_key );
 					}
 					// Meta data
 					echo $woocommerce->cart->get_item_data( $cart_item );
