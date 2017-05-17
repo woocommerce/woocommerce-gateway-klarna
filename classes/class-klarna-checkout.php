@@ -2288,10 +2288,10 @@ class WC_Gateway_Klarna_Checkout_Extra {
 					}
 				}
 			}
-
+			
 			// Start session if on a KCO or KCO Thank You page and KCO enabled
 			if ( $length > 1 ) {
-				if ( in_array( $clean_req_uri, $checkout_pages ) || in_array( $clean_req_uri, $thank_you_pages ) ) {
+				if ( in_array( $clean_req_uri, $checkout_pages ) || in_array( $clean_req_uri, $thank_you_pages ) || apply_filters( 'klarna_checkout_enqueuer', '' ) ) {
 					wp_enqueue_script( 'jquery' );
 					wp_enqueue_script( 'wc-checkout', $frontend_script_path . 'checkout' . $suffix . '.js', array(
 						'jquery',
