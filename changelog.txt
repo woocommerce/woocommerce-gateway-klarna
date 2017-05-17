@@ -1,5 +1,8 @@
 *** WooCommerce Gateway Klarna Changelog ***
 
+2017.05.17  - version 2.3.8
+
+
 2017.05.11  - version 2.3.7
 * Fix       - Changes allowed response status for KCO V3 refund (201, 204).
 * Update    - Updates translation domain for some strings to woocommerce-gateway-klarna.

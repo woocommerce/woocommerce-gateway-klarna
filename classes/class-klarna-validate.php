@@ -9,7 +9,7 @@
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit; // Exit if accessed directly.
 }
 
 /**
@@ -24,10 +24,10 @@ class WC_Gateway_Klarna_Order_Validate {
 	 * @since 1.0.0
 	 */
 	public static function validate_checkout_listener() {
-		// Read the post body
+		// Read the post body.
 		$post_body = file_get_contents( 'php://input' );
 
-		// Convert post body into native object
+		// Convert post body into native object.
 		$data = json_decode( $post_body, true );
 
 		do_action( 'kco_before_validate_checkout', $data );
@@ -36,24 +36,26 @@ class WC_Gateway_Klarna_Order_Validate {
 		$shipping_chosen = false;
 
 		if ( is_array( $data['order_lines'] ) ) {
-			$cart_items = $data['order_lines']; // V3
+			$cart_items = $data['order_lines']; // V3.
 		} elseif ( is_array( $data['cart']['items'] ) ) {
-			$cart_items = $data['cart']['items']; // V2
+			$cart_items = $data['cart']['items']; // V2.
 		}
 
 		foreach ( $cart_items as $cart_item ) {
-			if ( 'physical' == $cart_item['type'] ) {
-				// Get product by SKU or ID
+			if ( 'physical' === $cart_item['type'] ) {
+				// Get product by SKU or ID.
 				if ( wc_get_product_id_by_sku( $cart_item['reference'] ) ) {
 					$cart_item_product = wc_get_product( wc_get_product_id_by_sku( $cart_item['reference'] ) );
 				} else {
 					$cart_item_product = wc_get_product( $cart_item['reference'] );
 				}
 
-				if ( ! $cart_item_product->has_enough_stock( $cart_item['quantity'] ) ) {
-					$all_in_stock = false;
+				if ( $cart_item_product ) {
+					if ( ! $cart_item_product->has_enough_stock( $cart_item['quantity'] ) ) {
+						$all_in_stock = false;
+					}
 				}
-			} elseif ( 'shipping_fee' == $cart_item['type'] ) {
+			} elseif ( 'shipping_fee' === $cart_item['type'] ) {
 				$shipping_chosen = true;
 			}
 		}
@@ -74,7 +76,7 @@ class WC_Gateway_Klarna_Order_Validate {
 		}
 
 		do_action( 'kco_after_validate_checkout', $data, $all_in_stock, $shipping_chosen );
-	} // End function validate_checkout_listener
+	} // End function validate_checkout_listener.
 
 }
 $wc_gateway_klarna_order_validate = new WC_Gateway_Klarna_Order_Validate();
