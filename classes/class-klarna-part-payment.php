@@ -710,7 +710,7 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 					if ( $this->debug == 'yes' ) {
 						$this->log->add( 'klarna', __( 'Order is PENDING APPROVAL by Klarna. Please visit Klarna Online for the latest status on this order. Klarna reservation number: ', 'woocommerce-gateway-klarna' ) . $invno );
 					}
-					$order->payment_complete(); // Payment complete
+					$order->update_status( 'on-hold' ); // Change order status to On Hold
 					$woocommerce->cart->empty_cart(); // Remove cart
 					// Return thank you redirect
 					return array(
