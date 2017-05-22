@@ -257,14 +257,11 @@ class WC_Klarna_Payment_Method_Widget {
 	 * Register and Enqueue Klarna scripts
 	 */
 	function enqueue_scripts() {
-		//$this->show_monthly_cost = 'yes';
-		//$this->enabled = 'yes';
-
-		// Part Payment Widget js
-		//if ( is_product() && $this->show_monthly_cost == 'yes' && $this->enabled == 'yes' ) {
-		wp_register_script( 'klarna-part-payment-widget-js', 'https://cdn.klarna.com/1.0/code/client/all.js', array( 'jquery' ), '1.0', true );
-		wp_enqueue_script( 'klarna-part-payment-widget-js' );
-		//}
+		// Payment Widget js.
+		if ( is_product() ) {
+			wp_register_script( 'klarna-part-payment-widget-js', 'https://cdn.klarna.com/1.0/code/client/all.js', array( 'jquery' ), '1.0', true );
+			wp_enqueue_script( 'klarna-part-payment-widget-js' );
+		}
 
 	} // End function
 
