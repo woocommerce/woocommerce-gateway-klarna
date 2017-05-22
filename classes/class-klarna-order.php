@@ -539,7 +539,7 @@ class WC_Gateway_Klarna_Order {
 			// Check if this order hasn't been activated already
 			if ( ! get_post_meta( $orderid, '_klarna_invoice_number', true ) ) {
 				// Activation for orders created with KCO Rest
-				if ( 'rest' == get_post_meta( $order->id, '_klarna_api', true ) ) {
+				if ( 'rest' == get_post_meta( $orderid, '_klarna_api', true ) ) {
 					$this->activate_order_rest( $orderid );
 					// Activation for KCO V2 and KPM orders
 				} else {
@@ -676,7 +676,7 @@ class WC_Gateway_Klarna_Order {
 			// Check if this order hasn't been activated already
 			if ( ! get_post_meta( $orderid, '_klarna_order_cancelled', true ) ) {
 				// Activation for orders created with KCO Rest
-				if ( 'rest' == get_post_meta( $order->id, '_klarna_api', true ) ) {
+				if ( 'rest' == get_post_meta( $orderid, '_klarna_api', true ) ) {
 					$this->cancel_order_rest( $orderid );
 					// Activation for KCO V2 and KPM orders
 				} else {
@@ -799,7 +799,7 @@ class WC_Gateway_Klarna_Order {
 		$orderid = $item_row->order_id;
 		$order   = wc_get_order( $orderid );
 		if ( $this->order_is_updatable( $order ) ) {
-			if ( 'rest' == get_post_meta( $order->id, '_klarna_api', true ) ) {
+			if ( 'rest' == get_post_meta( $orderid, '_klarna_api', true ) ) {
 				$this->update_order_rest( $orderid );
 				// Activation for KCO V2 and KPM orders
 			} else {
@@ -824,7 +824,7 @@ class WC_Gateway_Klarna_Order {
 		$orderid = $item_row->order_id;
 		$order   = wc_get_order( $orderid );
 		if ( $this->order_is_updatable( $order ) ) {
-			if ( 'rest' == get_post_meta( $order->id, '_klarna_api', true ) ) {
+			if ( 'rest' == get_post_meta( $orderid, '_klarna_api', true ) ) {
 				$this->update_order_rest( $orderid, $itemid );
 				// Activation for KCO V2 and KPM orders
 			} else {
@@ -845,7 +845,7 @@ class WC_Gateway_Klarna_Order {
 			if ( defined( 'DOING_AJAX' ) && DOING_AJAX ) {
 				// Check if order was created using this method
 				if ( 'on-hold' == $order->get_status() ) {
-					if ( 'rest' == get_post_meta( $order->id, '_klarna_api', true ) ) {
+					if ( 'rest' == get_post_meta( $orderid, '_klarna_api', true ) ) {
 						$this->update_order_rest( $orderid );
 						// Activation for KCO V2 and KPM orders
 					} else {

@@ -103,12 +103,6 @@ if ( $order->get_user_id() === 0 ) {
 	}
 }
 
-// Log the user in.
-if ( ! is_user_logged_in() && $order->get_user_id() > 0 ) {
-	wp_set_current_user( $order->get_user_id() );
-	wc_set_customer_auth_cookie( $order->get_user_id() );
-}
-
 // Add "posted" data from Klarna order.
 $posted_data = array(
 	'terms'               => true,

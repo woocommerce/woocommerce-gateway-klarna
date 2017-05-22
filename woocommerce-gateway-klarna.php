@@ -209,6 +209,8 @@ function init_klarna_gateway() {
 	require_once 'classes/class-klarna-status.php'; // WooCommerce status page extension
 	require_once 'classes/class-klarna-cross-sells.php'; // Klarna Checkout cross-sells
 
+	require_once 'includes/klarna-wc-30-compatibility-functions.php'; // WooCommerce 3.0 compatibility methods
+
 	// register Klarna Payment Method Display widget
 	function register_klarna_pmd_widget() {
 		register_widget( 'WC_Klarna_Payment_Method_Display_Widget' );
@@ -237,9 +239,9 @@ function init_klarna_gateway() {
 		$kco_mailer = WC()->mailer();
 		$kco_mails  = $kco_mailer->get_emails();
 		foreach ( $kco_mails as $kco_mail ) {
-			$order = new WC_Order( $orderid );
-			if ( 'new_order' == $kco_mail->id || 'customer_processing_order' == $kco_mail->id ) {
-				$kco_mail->trigger( $order->id );
+			$order = wc_get_order( $orderid );
+			if ( 'new_order' === $kco_mail->id || 'customer_processing_order' === $kco_mail->id ) {
+				$kco_mail->trigger( $orderid );
 			}
 		}
 	}
