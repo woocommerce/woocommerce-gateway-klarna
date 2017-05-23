@@ -123,6 +123,19 @@ $posted_data = array(
 	'shipping_postcode'   => $klarna_order['billing_address']['postal_code'],
 );
 
+// Log the user in.
+if ( WC()->session->get( 'ongoing_klarna_order' ) ) {
+	$ongoing_klarna_order = wc_get_order( WC()->session->get( 'ongoing_klarna_order' ) );
+	if ( $ongoing_klarna_order ) {
+		if ( ! is_user_logged_in() && $ongoing_klarna_order->get_user_id() > 0 ) {
+			$ongoing_order_customer_id = $ongoing_klarna_order->get_user_id();
+
+			wp_set_current_user( $ongoing_klarna_order->get_user_id() );
+			wc_set_customer_auth_cookie( $ongoing_klarna_order->get_user_id() );
+		}
+	}
+}
+
 do_action( 'woocommerce_checkout_order_processed', $order_id, $posted_data, $order );
 do_action( 'klarna_before_kco_confirmation', $order_id );
 
