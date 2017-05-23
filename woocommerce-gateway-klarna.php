@@ -192,11 +192,6 @@ function init_klarna_gateway() {
 	// Composer autoloader
 	require_once __DIR__ . '/vendor/autoload.php';
 
-
-	// Include the WooCommerce Compatibility Utility class
-	// The purpose of this class is to provide a single point of compatibility functions for dealing with supporting multiple versions of WooCommerce (currently 2.0.x and 2.1)
-	require_once 'classes/class-wc-klarna-compatibility.php';
-
 	// Include our Klarna classes
 	require_once 'classes/class-klarna-part-payment.php'; // KPM Part Payment
 	require_once 'classes/class-klarna-invoice.php'; // KPM Invoice
@@ -207,11 +202,10 @@ function init_klarna_gateway() {
 	require_once 'classes/class-klarna-order.php'; // Handles Klarna orders
 	require_once 'classes/class-klarna-payment-method-display-widget.php'; // WordPress widget
 	require_once 'classes/class-klarna-status.php'; // WooCommerce status page extension
-	require_once 'classes/class-klarna-cross-sells.php'; // Klarna Checkout cross-sells
+	require_once 'classes/class-klarna-cross-sells.php'; // Klarna Checkout cross-sells.
+	require_once 'includes/klarna-wc-30-compatibility-functions.php'; // WooCommerce 3.0 compatibility methods.
 
-	require_once 'includes/klarna-wc-30-compatibility-functions.php'; // WooCommerce 3.0 compatibility methods
-
-	// register Klarna Payment Method Display widget
+	// register Klarna Payment Method Display widget.
 	function register_klarna_pmd_widget() {
 		register_widget( 'WC_Klarna_Payment_Method_Display_Widget' );
 	}
