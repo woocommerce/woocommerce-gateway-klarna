@@ -9,7 +9,7 @@
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit; // Exit if accessed directly.
 }
 
 /**
@@ -60,8 +60,8 @@ class WC_Gateway_Klarna_WC2K {
 	 *
 	 * @since 2.0.0
 	 *
-	 * @param bool $is_rest
-	 * @param string $klarna_country
+	 * @param bool   $is_rest        Rest API ir not.
+	 * @param string $klarna_country Klarna purchase country.
 	 */
 	public function __construct( $is_rest = false, $klarna_country = '' ) {
 		$this->cart           = WC()->cart->get_cart();
@@ -80,7 +80,7 @@ class WC_Gateway_Klarna_WC2K {
 	 * @return boolean
 	 */
 	public function is_cart_not_empty() {
-		if ( sizeof( $this->cart ) > 0 ) {
+		if ( count( $this->cart ) > 0 ) {
 			return true;
 		} else {
 			return false;
@@ -103,7 +103,7 @@ class WC_Gateway_Klarna_WC2K {
 
 		$cart = array();
 
-		// We need to keep track of order total, in case a smart coupon exceeds it
+		// We need to keep track of order total, in case a smart coupon exceeds it.
 		$order_total = 0;
 
 		foreach ( WC()->cart->get_cart() as $cart_item ) {
@@ -133,7 +133,7 @@ class WC_Gateway_Klarna_WC2K {
 						'tax_rate'              => $item_tax_rate,
 						'total_amount'          => $item_total_amount,
 						'total_tax_amount'      => $item_tax_amount,
-						'total_discount_amount' => $item_discount_amount
+						'total_discount_amount' => $item_discount_amount,
 					);
 				} else {
 					$klarna_item = array(
@@ -142,16 +142,16 @@ class WC_Gateway_Klarna_WC2K {
 						'quantity'      => $item_quantity,
 						'unit_price'    => $item_price,
 						'tax_rate'      => $item_tax_rate,
-						'discount_rate' => $item_discount_rate
+						'discount_rate' => $item_discount_rate,
 					);
 				}
 
-				$cart[] = $klarna_item;
+				$cart[]      = $klarna_item;
 				$order_total += $item_quantity * $item_price;
-			}
-		}
+			} // End if().
+		} // End foreach().
 
-		// Process fees
+		// Process fees.
 		if ( WC()->cart->fee_total > 0 ) {
 			foreach ( WC()->cart->get_fees() as $cart_fee ) {
 				$fee_name         = $this->get_fee_name( $cart_fee );
@@ -172,7 +172,7 @@ class WC_Gateway_Klarna_WC2K {
 						'unit_price'       => $fee_unit_price,
 						'total_amount'     => $fee_total_amount,
 						'tax_rate'         => $fee_tax_rate,
-						'total_tax_amount' => $fee_tax_amount
+						'total_tax_amount' => $fee_tax_amount,
 					);
 				} else {
 					$klarna_fee_item = array(
@@ -180,16 +180,16 @@ class WC_Gateway_Klarna_WC2K {
 						'name'       => $fee_name,
 						'quantity'   => $fee_quantity,
 						'unit_price' => $fee_unit_price,
-						'tax_rate'   => $fee_tax_rate
+						'tax_rate'   => $fee_tax_rate,
 					);
 				}
 
-				$cart[] = $klarna_fee_item;
+				$cart[]      = $klarna_fee_item;
 				$order_total += (int) $cart_fee->amount * 100;
 			}
-		}
+		} // End if().
 
-		// Process shipping
+		// Process shipping.
 		if ( WC()->shipping->get_packages() && WC()->session->get( 'chosen_shipping_methods' ) ) {
 			$shipping_name       = $this->get_shipping_name();
 			$shipping_reference  = $this->get_shipping_reference();
@@ -212,7 +212,7 @@ class WC_Gateway_Klarna_WC2K {
 					'unit_price'       => $shipping_amount,
 					'tax_rate'         => $shipping_tax_rate,
 					'total_amount'     => $shipping_amount,
-					'total_tax_amount' => $shipping_tax_amount
+					'total_tax_amount' => $shipping_tax_amount,
 				);
 			} else {
 				$shipping = array(
@@ -221,18 +221,18 @@ class WC_Gateway_Klarna_WC2K {
 					'name'       => $shipping_name,
 					'quantity'   => 1,
 					'unit_price' => $shipping_amount,
-					'tax_rate'   => $shipping_tax_rate
+					'tax_rate'   => $shipping_tax_rate,
 				);
 			}
-			$cart[] = $shipping;
+			$cart[]      = $shipping;
 			$order_total += $shipping_amount;
-		}
+		} // End if().
 
-		// Process sales tax for US
-		if ( $this->is_rest && 'us' == $this->klarna_country ) {
+		// Process sales tax for US.
+		if ( $this->is_rest && 'us' === $this->klarna_country ) {
 			$sales_tax = round( ( WC()->cart->tax_total + WC()->cart->shipping_tax_total ) * 100 );
 
-			// Add sales tax line item
+			// Add sales tax line item.
 			$cart[] = array(
 				'type'                  => 'sales_tax',
 				'reference'             => __( 'Sales Tax', 'woocommerce-gateway-klarna' ),
@@ -242,13 +242,13 @@ class WC_Gateway_Klarna_WC2K {
 				'tax_rate'              => 0,
 				'total_amount'          => $sales_tax,
 				'total_discount_amount' => 0,
-				'total_tax_amount'      => 0
+				'total_tax_amount'      => 0,
 			);
 
 			$order_total += $sales_tax;
 		}
 
-		// Process discounts
+		// Process discounts.
 		if ( WC()->cart->applied_coupons ) {
 			foreach ( WC()->cart->applied_coupons as $code ) {
 				$coupon = new WC_Coupon( $code );
@@ -258,14 +258,14 @@ class WC_Gateway_Klarna_WC2K {
 				}
 
 				$klarna_settings = get_option( 'woocommerce_klarna_checkout_settings' );
-				if ( 'yes' != $klarna_settings['send_discounts_separately'] && $coupon->discount_type != 'smart_coupon' ) {
+				if ( 'yes' !== $klarna_settings['send_discounts_separately'] && 'smart_coupon' !== $coupon->discount_type ) {
 					break;
 				}
 
 				$coupon_name   = $this->get_coupon_name( $coupon );
 				$coupon_amount = $this->get_coupon_amount( $coupon );
 
-				// Check if coupon amount exceeds order total
+				// Check if coupon amount exceeds order total.
 				if ( $order_total < $coupon_amount ) {
 					$coupon_amount = $order_total;
 				}
@@ -293,10 +293,10 @@ class WC_Gateway_Klarna_WC2K {
 					);
 					$order_total = $order_total - $coupon_amount;
 				}
-			}
-		}
+			} // End foreach().
+		} // End if().
 
-		return apply_filters( 'klarna_process_cart_contents', $cart);
+		return apply_filters( 'klarna_process_cart_contents', $cart );
 	}
 
 	/**
@@ -310,7 +310,7 @@ class WC_Gateway_Klarna_WC2K {
 	 * @return integer $item_tax_amount Item tax amount.
 	 */
 	public function get_item_tax_amount( $cart_item ) {
-		if ( 'us' == $this->klarna_country ) {
+		if ( 'us' === $this->klarna_country ) {
 			$item_tax_amount = 00;
 		} else {
 			$item_tax_amount = $cart_item['line_tax'] * 100;
@@ -325,19 +325,18 @@ class WC_Gateway_Klarna_WC2K {
 	 * @since  2.0.0
 	 * @access public
 	 *
-	 * @param  array $cart_item Cart item.
+	 * @param  array  $cart_item Cart item.
 	 * @param  object $_product Product object.
 	 *
 	 * @return integer $item_tax_rate Item tax percentage formatted for Klarna.
 	 */
 	public function get_item_tax_rate( $cart_item, $_product ) {
-		// We manually calculate the tax percentage here
+		// We manually calculate the tax percentage here.
 		if ( $_product->is_taxable() && $cart_item['line_subtotal_tax'] > 0 ) {
-			// Calculate tax rate
-			if ( 'us' == $this->klarna_country ) {
+			// Calculate tax rate.
+			if ( 'us' === $this->klarna_country ) {
 				$item_tax_rate = 00;
 			} else {
-				// $item_tax_rate = round( $cart_item['line_subtotal_tax'] / $cart_item['line_subtotal'], 2 ) * 100;
 				$item_tax_rate = round( $cart_item['line_subtotal_tax'] / $cart_item['line_subtotal'] * 100 * 100 );
 			}
 		} else {
@@ -362,11 +361,11 @@ class WC_Gateway_Klarna_WC2K {
 		$item_name      = $cart_item_data->post->post_title;
 
 		// Get variations as a string and remove line breaks
-		$item_variations = html_entity_decode( rtrim( WC()->cart->get_item_data( $cart_item, true ) ) ); // Removes new line at the end
-		$item_variations = str_replace( "\n", ', ', $item_variations ); // Replaces all other line breaks with commas
+		$item_variations = html_entity_decode( rtrim( WC()->cart->get_item_data( $cart_item, true ) ) ); // Removes new line at the end.
+		$item_variations = str_replace( "\n", ', ', $item_variations ); // Replaces all other line breaks with commas.
 
-		// Add variations to name
-		if ( '' != $item_variations ) {
+		// Add variations to name.
+		if ( '' !== $item_variations ) {
 			$item_name .= ' [' . $item_variations . ']';
 		}
 
@@ -384,16 +383,14 @@ class WC_Gateway_Klarna_WC2K {
 	 * @return integer $item_price Cart item price.
 	 */
 	public function get_item_price( $cart_item ) {
-		// apply_filters to item price so we can filter this if needed
-		if ( 'us' == $this->klarna_country ) {
+		// apply_filters to item price so we can filter this if needed.
+		if ( 'us' === $this->klarna_country ) {
 			$item_price_including_tax = $cart_item['line_subtotal'];
 		} else {
 			$item_price_including_tax = $cart_item['line_subtotal'] + $cart_item['line_subtotal_tax'];
 		}
 		$item_price = apply_filters( 'klarna_item_price_including_tax', $item_price_including_tax );
 		$item_price = number_format( $item_price * 100, 0, '', '' ) / $cart_item['quantity'];
-
-		// $item_price = $item_price * 100 / $cart_item['quantity'];
 
 		return round( $item_price );
 	}
@@ -420,13 +417,11 @@ class WC_Gateway_Klarna_WC2K {
 	 * @since  2.0.0
 	 * @access public
 	 *
-	 * @param  object $product Product object.
+	 * @param  object $_product WC_Product.
 	 *
 	 * @return string $item_reference Cart item reference.
 	 */
 	public function get_item_reference( $_product ) {
-		$item_reference = '';
-
 		if ( $_product->get_sku() ) {
 			$item_reference = $_product->get_sku();
 		} elseif ( $_product->variation_id ) {
@@ -473,7 +468,7 @@ class WC_Gateway_Klarna_WC2K {
 	public function get_item_discount_rate( $cart_item ) {
 		$klarna_settings = get_option( 'woocommerce_klarna_checkout_settings' );
 
-		if ( 'yes' != $klarna_settings['send_discounts_separately'] && $cart_item['line_subtotal'] > $cart_item['line_total'] ) {
+		if ( 'yes' !== $klarna_settings['send_discounts_separately'] && $cart_item['line_subtotal'] > $cart_item['line_total'] ) {
 			$item_discount_rate = ( 1 - ( $cart_item['line_total'] / $cart_item['line_subtotal'] ) ) * 10000;
 		} else {
 			$item_discount_rate = 0;
@@ -493,7 +488,7 @@ class WC_Gateway_Klarna_WC2K {
 	 * @return integer $item_total_amount Cart item total amount.
 	 */
 	public function get_item_total_amount( $cart_item ) {
-		if ( 'us' == $this->klarna_country ) {
+		if ( 'us' === $this->klarna_country ) {
 			$item_total_amount = ( $cart_item['line_total'] * 100 );
 		} else {
 			$item_total_amount = ( ( $cart_item['line_total'] + $cart_item['line_tax'] ) * 100 );
@@ -541,7 +536,7 @@ class WC_Gateway_Klarna_WC2K {
 	 * @return int   $cart_fee_amount Cart fee name.
 	 */
 	public function get_fee_amount( $cart_fee ) {
-		if ( 'us' == $this->klarna_country ) {
+		if ( 'us' === $this->klarna_country ) {
 			$cart_fee_amount = (int) ( $cart_fee->amount * 100 );
 		} else {
 			$cart_fee_amount = (int) ( ( $cart_fee->amount + $cart_fee->tax ) * 100 );
@@ -561,7 +556,7 @@ class WC_Gateway_Klarna_WC2K {
 	 * @return int   $cart_fee_tax_amount Cart fee tax amount.
 	 */
 	public function get_fee_tax_amount( $cart_fee ) {
-		if ( $cart_fee->taxable && 'us' != $this->klarna_country ) {
+		if ( $cart_fee->taxable && 'us' !== $this->klarna_country ) {
 			$cart_fee_tax_amount = (int) ( $cart_fee->tax * 100 );
 		} else {
 			$cart_fee_tax_amount = 0;
@@ -581,7 +576,7 @@ class WC_Gateway_Klarna_WC2K {
 	 * @return int   $cart_fee_tax_rate Cart fee tax rate.
 	 */
 	public function get_fee_tax_rate( $cart_fee ) {
-		if ( $cart_fee->taxable && 'us' != $this->klarna_country ) {
+		if ( $cart_fee->taxable && 'us' !== $this->klarna_country ) {
 			$cart_fee_tax_rate = $cart_fee->tax / $cart_fee->amount * 100 * 100;
 		} else {
 			$cart_fee_tax_rate = 0;
@@ -605,11 +600,11 @@ class WC_Gateway_Klarna_WC2K {
 		foreach ( $shipping_packages as $i => $package ) {
 			$chosen_method = isset( WC()->session->chosen_shipping_methods[ $i ] ) ? WC()->session->chosen_shipping_methods[ $i ] : '';
 
-			if ( '' != $chosen_method ) {
+			if ( '' !== $chosen_method ) {
 				$package_rates = $package['rates'];
 				if ( is_array( $package_rates ) ) {
 					foreach ( $package_rates as $rate_key => $rate_value ) {
-						if ( $rate_key == $chosen_method ) {
+						if ( $rate_key === $chosen_method ) {
 							$shipping_name = $rate_value->label;
 						}
 					}
@@ -637,11 +632,11 @@ class WC_Gateway_Klarna_WC2K {
 		foreach ( $shipping_packages as $i => $package ) {
 			$chosen_method = isset( WC()->session->chosen_shipping_methods[ $i ] ) ? WC()->session->chosen_shipping_methods[ $i ] : '';
 
-			if ( '' != $chosen_method ) {
+			if ( '' !== $chosen_method ) {
 				$package_rates = $package['rates'];
 				if ( is_array( $package_rates ) ) {
 					foreach ( $package_rates as $rate_key => $rate_value ) {
-						if ( $rate_key == $chosen_method ) {
+						if ( $rate_key === $chosen_method ) {
 							$shipping_reference = $rate_value->id;
 						}
 					}
@@ -665,7 +660,7 @@ class WC_Gateway_Klarna_WC2K {
 	 * @return integer $shipping_amount Amount for selected shipping method.
 	 */
 	public function get_shipping_amount() {
-		if ( 'us' == $this->klarna_country ) {
+		if ( 'us' === $this->klarna_country ) {
 			$shipping_amount = WC()->cart->shipping_total;
 		} else {
 			$shipping_amount = WC()->cart->shipping_total + WC()->cart->shipping_tax_total;
@@ -683,7 +678,7 @@ class WC_Gateway_Klarna_WC2K {
 	 * @return integer $shipping_tax_rate Tax rate for selected shipping method.
 	 */
 	public function get_shipping_tax_rate() {
-		if ( WC()->cart->shipping_tax_total > 0 && 'us' != $this->klarna_country ) {
+		if ( WC()->cart->shipping_tax_total > 0 && 'us' !== $this->klarna_country ) {
 			$shipping_tax_rate = round( WC()->cart->shipping_tax_total / WC()->cart->shipping_total * 100 * 100 );
 		} else {
 			$shipping_tax_rate = 00;
@@ -701,7 +696,7 @@ class WC_Gateway_Klarna_WC2K {
 	 * @return integer $shipping_tax_amount Tax amount for selected shipping method.
 	 */
 	public function get_shipping_tax_amount() {
-		if ( 'us' == $this->klarna_country ) {
+		if ( 'us' === $this->klarna_country ) {
 			$shipping_tax_amount = 0;
 		} else {
 			$shipping_tax_amount = WC()->cart->shipping_tax_total * 100;
@@ -716,6 +711,8 @@ class WC_Gateway_Klarna_WC2K {
 	 * @since  2.0.0
 	 * @access public
 	 *
+	 * @param object $coupon WC_Coupon.
+	 *
 	 * @return string $coupon_name Name for selected coupon method.
 	 */
 	public function get_coupon_name( $coupon ) {
@@ -729,6 +726,8 @@ class WC_Gateway_Klarna_WC2K {
 	 *
 	 * @since  2.0.0
 	 * @access public
+	 *
+	 * @param object $coupon WC_Coupon.
 	 *
 	 * @return integer $coupon_amount Amount for selected coupon method.
 	 */
