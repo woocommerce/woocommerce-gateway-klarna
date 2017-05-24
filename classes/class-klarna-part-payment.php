@@ -214,7 +214,7 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 	 * @since  2.0.0
 	 */
 	public function can_refund_order( $order ) {
-		if ( get_post_meta( $order->id, '_klarna_invoice_number', true ) ) {
+		if ( get_post_meta( klarna_wc_get_order_id( $order ), '_klarna_invoice_number', true ) ) {
 			return true;
 		}
 
@@ -250,7 +250,7 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 
 			$klarna = new Klarna();
 			$this->configure_klarna( $klarna, $country );
-			$invNo = get_post_meta( $order->id, '_klarna_invoice_number', true );
+			$invNo = get_post_meta( $orderid, '_klarna_invoice_number', true );
 
 			$klarna_order = new WC_Gateway_Klarna_Order( $order, $klarna );
 			$refund_order = $klarna_order->refund_order( $amount, $reason = '', $invNo );
@@ -710,7 +710,7 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 					if ( $this->debug == 'yes' ) {
 						$this->log->add( 'klarna', __( 'Order is PENDING APPROVAL by Klarna. Please visit Klarna Online for the latest status on this order. Klarna reservation number: ', 'woocommerce-gateway-klarna' ) . $invno );
 					}
-					$order->payment_complete(); // Payment complete
+					$order->update_status( 'on-hold' ); // Change order status to On Hold
 					$woocommerce->cart->empty_cart(); // Remove cart
 					// Return thank you redirect
 					return array(

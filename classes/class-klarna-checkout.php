@@ -1315,7 +1315,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 					} elseif ( $_product->variation_id ) {
 						$reference = $_product->variation_id;
 					} else {
-						$reference = $_product->id;
+						$reference = klarna_wc_get_product_id( $_product );
 					}
 
 					$total_amount = (int) ( $cart_item['line_total'] + $cart_item['line_tax'] ) * 100;
@@ -1615,7 +1615,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			if( $klarna_credentials_country ) {
 				$klarna_credentials_country	= strtolower( $klarna_credentials_country );
 				$klarna_eid          		= $this->settings["eid_$klarna_credentials_country"];
-				$klarna_secret 				= html_entity_decode ( $this->settings["secret_$klarna_credentials_country"] );
+				$klarna_secret 				= html_entity_decode( $this->settings["secret_$klarna_credentials_country"] );
 			}
 		}
 		
@@ -1810,7 +1810,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 * @since  2.0.0
 	 */
 	public function can_refund_order( $order ) {
-		if ( get_post_meta( $order->id, '_klarna_invoice_number', true ) ) {
+		if ( get_post_meta( klarna_wc_get_order_id( $order ), '_klarna_invoice_number', true ) ) {
 			return true;
 		}
 
@@ -1839,14 +1839,14 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 
 				return new WP_Error( 'error', __( 'This order cannot be refunded. Please make sure it is activated.', 'woocommerce-gateway-klarna' ) );
 			}
-			if ( 'v2' == get_post_meta( $order->id, '_klarna_api', true ) ) {
+			if ( 'v2' == get_post_meta( $orderid, '_klarna_api', true ) ) {
 				$country = get_post_meta( $orderid, '_billing_country', true );
 				$klarna  = new Klarna();
 				$this->configure_klarna( $klarna, $country );
-				$invNo        = get_post_meta( $order->id, '_klarna_invoice_number', true );
+				$invNo        = get_post_meta( $orderid, '_klarna_invoice_number', true );
 				$klarna_order = new WC_Gateway_Klarna_Order( $order, $klarna );
 				$refund_order = $klarna_order->refund_order( $amount, $reason, $invNo );
-			} elseif ( 'rest' == get_post_meta( $order->id, '_klarna_api', true ) ) {
+			} elseif ( 'rest' == get_post_meta( $orderid, '_klarna_api', true ) ) {
 				
 				if( get_post_meta( $orderid, '_klarna_credentials_country', true ) ) {
 					$country =  get_post_meta( $orderid, '_klarna_credentials_country', true );
@@ -1972,7 +1972,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 */
 	public function get_transaction_url( $order ) {
 		// Check if order is completed
-		if ( get_post_meta( $order->id, '_klarna_order_activated', true ) ) {
+		if ( get_post_meta( klarna_wc_get_order_id( $order ), '_klarna_order_activated', true ) ) {
 			if ( $this->testmode == 'yes' ) {
 				$this->view_transaction_url = 'https://testdrive.klarna.com/invoices/%s.pdf';
 			} else {

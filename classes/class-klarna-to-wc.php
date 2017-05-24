@@ -211,26 +211,27 @@ class WC_Gateway_Klarna_K2WC {
 		} else {
 			// Create order in WooCommerce if we have an email.
 			$order = $this->create_order();
-			update_post_meta( $order->id, '_kco_incomplete_customer_email', $customer_email, true );
-			WC()->session->set( 'ongoing_klarna_order', $order->id );
+			update_post_meta( klarna_wc_get_order_id( $order ), '_kco_incomplete_customer_email', $customer_email, true );
+			WC()->session->set( 'ongoing_klarna_order', klarna_wc_get_order_id( $order ) );
 		}
 
 		// If there's an order at this point, proceed.
 		if ( isset( $order ) ) {
+			$order_id = klarna_wc_get_order_id( $order );
 			if ( 'yes' === $this->klarna_debug ) {
-				$this->klarna_log->add( 'klarna', microtime() . ": Current action for preparing order $order->id: " . current_action() );
+				$this->klarna_log->add( 'klarna', microtime() . ": Current action for preparing order $order_id: " . current_action() );
 				$e = new Exception();
-				$this->klarna_log->add( 'klarna', microtime() . ": Debug backtrace for preparing order $order->id: " . $e->getTraceAsString() );
+				$this->klarna_log->add( 'klarna', microtime() . ": Debug backtrace for preparing order $order_id: " . $e->getTraceAsString() );
 			}
 
 			// Need to clean up the order first, to avoid duplicate items.
 			$order->remove_order_items();
 
 			if ( 'yes' === $this->klarna_debug ) {
-				$this->klarna_log->add( 'klarna', microtime() . ": Removed order items from order $order->id..." );
-				if ( get_post_meta( $order->id, '_customer_user_agent', true ) ) {
-					$customer_user_agent = get_post_meta( $order->id, '_customer_user_agent', true );
-					$this->klarna_log->add( 'klarna', microtime() . ": Customer user agent for $order->id: $customer_user_agent" );
+				$this->klarna_log->add( 'klarna', microtime() . ": Removed order items from order $order_id..." );
+				if ( get_post_meta( $order_id, '_customer_user_agent', true ) ) {
+					$customer_user_agent = get_post_meta( $order_id, '_customer_user_agent', true );
+					$this->klarna_log->add( 'klarna', microtime() . ": Customer user agent for $order_id: $customer_user_agent" );
 				}
 			}
 
@@ -274,23 +275,23 @@ class WC_Gateway_Klarna_K2WC {
 			if ( email_exists( $customer_email ) ) {
 				$user    = get_user_by( 'email', $customer_email );
 				$user_id = $user->ID;
-				update_post_meta( $order->id, '_customer_user', $user_id );
+				update_post_meta( $order_id, '_customer_user', $user_id );
 			}
 
 			// Let plugins add meta.
-			do_action( 'woocommerce_checkout_update_order_meta', $order->id, array() );
+			do_action( 'woocommerce_checkout_update_order_meta', $order_id, array() );
 
 			// Store which KCO API was used.
 			if ( $this->is_rest ) {
-				update_post_meta( $order->id, '_klarna_api', 'rest' );
+				update_post_meta( $order_id, '_klarna_api', 'rest' );
 			} else {
-				update_post_meta( $order->id, '_klarna_api', 'v2' );
+				update_post_meta( $order_id, '_klarna_api', 'v2' );
 			}
 
 			// Store which KCO credentials country was used.
-			update_post_meta( $order->id, '_klarna_credentials_country', $this->klarna_credentials_country );
+			update_post_meta( $order_id, '_klarna_credentials_country', $this->klarna_credentials_country );
 
-			return $order->id;
+			return $order_id;
 		} else {
 			return false;
 		}
@@ -320,13 +321,13 @@ class WC_Gateway_Klarna_K2WC {
 
 			// Check if order was recurring.
 			if ( isset( $klarna_order['recurring_token'] ) ) {
-				update_post_meta( $order->id, '_klarna_recurring_token', $klarna_order['recurring_token'] );
+				update_post_meta( $local_order_id, '_klarna_recurring_token', $klarna_order['recurring_token'] );
 			}
 			if ( sanitize_key( $_GET['klarna-api'] ) && 'rest' === sanitize_key( $_GET['klarna-api'] ) ) { // Input var okay.
-				update_post_meta( $order->id, '_klarna_order_id', $klarna_order['order_id'] );
+				update_post_meta( $local_order_id, '_klarna_order_id', $klarna_order['order_id'] );
 				$order->add_order_note( sprintf( __( 'Klarna order ID: %s.', 'woocommerce-gateway-klarna' ), $klarna_order['order_id'] ) );
 			} else {
-				update_post_meta( $order->id, '_klarna_order_reservation', $klarna_order['reservation'] );
+				update_post_meta( $local_order_id, '_klarna_order_reservation', $klarna_order['reservation'] );
 			}
 
 			// Change order currency.
@@ -341,14 +342,14 @@ class WC_Gateway_Klarna_K2WC {
 			// Add order customer info.
 			$this->add_order_customer_info( $order, $klarna_order );
 
-			do_action( 'kco_before_confirm_order', $order->id );
+			do_action( 'kco_before_confirm_order', $local_order_id );
 
 			// Confirm the order in Klarna's system.
 			$klarna_order = $this->confirm_klarna_order( $order, $klarna_order );
 			$order->calculate_totals( false );
 
 			// Other plugins and themes can hook into here.
-			do_action( 'klarna_after_kco_push_notification', $order->id, $klarna_order );
+			do_action( 'klarna_after_kco_push_notification', $local_order_id, $klarna_order );
 		}
 	}
 
@@ -416,13 +417,14 @@ class WC_Gateway_Klarna_K2WC {
 
 		// Create the order.
 		$order = wc_create_order( $order_data );
+		$order_id = klarna_wc_get_order_id( $order );
 
 		if ( is_wp_error( $order ) ) {
 			throw new Exception( __( 'Error: Unable to create order. Please try again.', 'woocommerce-gateway-klarna' ) );
 		}
 
 		if ( 'yes' === $this->klarna_debug ) {
-			$this->klarna_log->add( 'klarna', 'Local order created, order ID: ' . $order->id );
+			$this->klarna_log->add( 'klarna', 'Local order created, order ID: ' . $order_id );
 		}
 
 		return $order;
@@ -448,7 +450,7 @@ class WC_Gateway_Klarna_K2WC {
 				$this->klarna_log->add( 'klarna', 'Updating order currency...' );
 			}
 
-			update_post_meta( $order->id, '_order_currency', strtoupper( $klarna_order['purchase_currency'] ) );
+			update_post_meta( klarna_wc_get_order_id( $order ), '_order_currency', strtoupper( $klarna_order['purchase_currency'] ) );
 		}
 	}
 

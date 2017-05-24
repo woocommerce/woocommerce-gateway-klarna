@@ -249,7 +249,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 							} elseif ( $_product->variation_id ) {
 								$reference = $_product->variation_id;
 							} else {
-								$reference = $_product->id;
+								$reference = klarna_wc_get_product_id( $_product );
 							}
 							$klarna->addArticle( $qty = $item['qty'],                  // Quantity
 								$artNo = strval( $reference ),          // Article number
@@ -287,7 +287,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 	 * @since  2.0.0
 	 */
 	public function can_refund_order( $order ) {
-		if ( get_post_meta( $order->id, '_klarna_invoice_number', true ) ) {
+		if ( get_post_meta( klarna_wc_get_order_id( $order ), '_klarna_invoice_number', true ) ) {
 			return true;
 		}
 
@@ -319,7 +319,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 			$country = get_post_meta( $orderid, '_billing_country', true );
 			$klarna = new Klarna();
 			$this->configure_klarna( $klarna, $country );
-			$invNo = get_post_meta( $order->id, '_klarna_invoice_number', true );
+			$invNo = get_post_meta( $orderid, '_klarna_invoice_number', true );
 			$klarna_order = new WC_Gateway_Klarna_Order( $order, $klarna );
 			$refund_order = $klarna_order->refund_order( $amount, $reason = '', $invNo );
 			if ( $refund_order ) {

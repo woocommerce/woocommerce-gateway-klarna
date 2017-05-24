@@ -127,7 +127,7 @@ class WC_Gateway_Klarna_Cross_Sells {
 		$product_id = (int) $_REQUEST['product_id'];
 		$product = wc_get_product( $_REQUEST['product_id'] );
 
-		do_action( 'klarna_before_adding_kco_cross_sell', $wc_order->id, $product->id );
+		do_action( 'klarna_before_adding_kco_cross_sell', klarna_wc_get_order_id( $wc_order ), klarna_wc_get_product_id( $product ) );
 
 		// Add to WooCommerce order first, so in next step we can use WC_Gateway_Klarna_Order
 		$item_id = $this->cross_sells_add_woocommerce( $wc_order, $product );
@@ -151,7 +151,7 @@ class WC_Gateway_Klarna_Cross_Sells {
 		}
 		wp_die();
 
-		do_action( 'klarna_after_adding_kco_cross_sell', $wc_order->id, $product->id );
+		do_action( 'klarna_after_adding_kco_cross_sell', klarna_wc_get_order_id( $wc_order ), klarna_wc_get_product_id( $product ) );
 	}
 
 	/**
