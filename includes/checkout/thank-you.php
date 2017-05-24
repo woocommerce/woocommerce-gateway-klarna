@@ -128,10 +128,13 @@ if ( WC()->session->get( 'ongoing_klarna_order' ) ) {
 	$ongoing_klarna_order = wc_get_order( WC()->session->get( 'ongoing_klarna_order' ) );
 	if ( $ongoing_klarna_order ) {
 		if ( ! is_user_logged_in() && $ongoing_klarna_order->get_user_id() > 0 ) {
-			$ongoing_order_customer_id = $ongoing_klarna_order->get_user_id();
+			// Make sure user is not store manager ot above.
+			if ( ! user_can( $ongoing_klarna_order->get_user_id(), 'manage_woocommerce' ) ) {
+				$ongoing_order_customer_id = $ongoing_klarna_order->get_user_id();
 
-			wp_set_current_user( $ongoing_klarna_order->get_user_id() );
-			wc_set_customer_auth_cookie( $ongoing_klarna_order->get_user_id() );
+				wp_set_current_user( $ongoing_klarna_order->get_user_id() );
+				wc_set_customer_auth_cookie( $ongoing_klarna_order->get_user_id() );
+			}
 		}
 	}
 }

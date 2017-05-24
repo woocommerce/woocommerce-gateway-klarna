@@ -1,5 +1,9 @@
 *** WooCommerce Gateway Klarna Changelog ***
 
+2017.05.18  - version 2.3.10
+* Update    - Removes old WC compatibility class.
+* Update    - Adds WC 3.0 compatibility functions.
+
 2017.05.18  - version 2.3.9
 * Fix       - Removes auto login after KCO purchase.
 
