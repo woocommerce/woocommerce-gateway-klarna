@@ -153,11 +153,11 @@ jQuery(document).ready(function ($) {
 				opacity: 0.6
 			}
 		});
-	}
+	};
 
 	var unblockCartWidget = function unblockCartWidget() {
 		$('#klarna-checkout-widget').css( 'opacity', '1' ).unblock();
-	}
+	};
 
 	// Update country
 	$(document).on('change', 'select#klarna-checkout-euro-country', function (event) {
