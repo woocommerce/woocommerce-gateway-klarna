@@ -216,6 +216,7 @@ function init_klarna_gateway() {
 	require_once 'classes/class-klarna-checkout.php';
 	require_once 'classes/class-klarna-shortcodes.php';
 	require_once 'classes/class-klarna-validate.php';
+	require_once 'includes/klarna-template-hooks.php';
 
 	// Send customer and merchant emails for KCO Incomplete > Processing status change
 
@@ -343,7 +344,15 @@ if ( ! empty( $_POST ) ) {
 	add_action( 'admin_init', 'klarna_checkout_admin_error_notices' );
 }
 
+/**
+ * Function used to Init Klarna Template Functions - This makes them pluggable by plugins and themes.
+ */
+add_action( 'after_setup_theme', 'wc_klarna_include_template_functions', 11 );
+function wc_klarna_include_template_functions() {
+	include_once( 'includes/klarna-template-functions.php' );
+}
 
+			
 // Check if is_order_received_page function needs to be overwritten
 $checkout_settings = get_option( 'woocommerce_klarna_checkout_settings' );
 $should_filter = isset( $checkout_settings['filter_is_order_received'] ) ? $checkout_settings['filter_is_order_received'] : 'no';
