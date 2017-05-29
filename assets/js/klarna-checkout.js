@@ -242,7 +242,7 @@ jQuery(document).ready(function ($) {
 	});
 
 	// Update shipping (v2)
-	$(document).on('change', 'table#kco-totals #kco-page-shipping input[type="radio"]', function (event) {
+	$(document).on('change', 'table#kco-totals #kco-page-shipping input[type="radio"], .woocommerce-checkout-review-order-table #shipping_method input[type="radio"]', function (event) {
 		if (!performingAjax) {
 			performingAjax = true;
 			blockCartWidget();
