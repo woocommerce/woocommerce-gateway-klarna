@@ -353,7 +353,7 @@ jQuery(document).ready(function ($) {
 				});
 			}
 
-			ancestor = $(this).closest('tr').find('td.product-quantity');
+			ancestor = $(this).closest('tr').find('.product-quantity');
 			item_row = $(this).closest('tr');
 			kco_widget = $('#klarna-checkout-widget');
 			cart_item_key_remove = $(ancestor).data('cart_item_key');
