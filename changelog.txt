@@ -1,6 +1,6 @@
 *** WooCommerce Gateway Klarna Changelog ***
 
-2017.05.30  - version 2.4
+2017.05.30  - version 2.3.10
 * Fix       - Moves klarna_after_adding_kco_cross_sell hook before wp_die().
 * Update    - Remove the need to have td named .product-quantity in KCO cart widget JS code.
 * Update    - Added template functions/hooks to KCO cart widget.
