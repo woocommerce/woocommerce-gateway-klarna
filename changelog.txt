@@ -1,5 +1,13 @@
 *** WooCommerce Gateway Klarna Changelog ***
 
+2017.05.30  - version 2.3.10
+* Fix       - Moves klarna_after_adding_kco_cross_sell hook before wp_die().
+* Update    - Remove the need to have td named .product-quantity in KCO cart widget JS code.
+* Update    - Added template functions/hooks to KCO cart widget.
+* Update    - Add feature to be able to hide coupon form via shortcode attribute.
+* Update    - Introduces kco_cart_widget_use_woocommerce_order_review filter that makes it possible to use woocommerce_order_review() instead of KCO cart widget code to show cart items.
+* Update    - Updates UX around PHP version check (issue #60).
+
 2017.05.24  - version 2.3.9
 * Update    - Removes old WC compatibility class.
 * Update    - Adds WC 3.0 compatibility functions.
