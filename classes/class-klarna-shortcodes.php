@@ -313,7 +313,7 @@ class WC_Gateway_Klarna_Shortcodes {
 				<?php woocommerce_checkout_coupon_form(); ?>
 			<?php }; ?>
 
-			<?php if ( apply_filters( 'kco_cart_widget_use_woocommerce_order_review', true ) ) { ?>
+			<?php if ( apply_filters( 'kco_cart_widget_use_woocommerce_order_review', false ) ) { ?>
 				<?php woocommerce_order_review(); ?>
 			<?php } else { ?>
 
