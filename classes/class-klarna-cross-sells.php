@@ -119,7 +119,7 @@ class WC_Gateway_Klarna_Cross_Sells {
 			exit( 'Nonce can not be verified.' );
 		}
 
-		// This is an AJAX request, so we need to retrieve thank you page URL to grab Klarna order and WC order
+		// This is an AJAX request, so we need to retrieve thank you page URL to grab Klarna order and WC order.
 		$parsed_url = parse_url( $_SERVER['HTTP_REFERER'] );
 		parse_str( $parsed_url['query'], $query_params );
 
@@ -129,15 +129,15 @@ class WC_Gateway_Klarna_Cross_Sells {
 
 		do_action( 'klarna_before_adding_kco_cross_sell', klarna_wc_get_order_id( $wc_order ), klarna_wc_get_product_id( $product ) );
 
-		// Add to WooCommerce order first, so in next step we can use WC_Gateway_Klarna_Order
+		// Add to WooCommerce order first, so in next step we can use WC_Gateway_Klarna_Order.
 		$item_id = $this->cross_sells_add_woocommerce( $wc_order, $product );
 
-		// Add to Klarna order
+		// Add to Klarna order.
 		$result = $this->cross_sells_add_klarna( $wc_order );
 
 		$data = array();
 		if ( is_wp_error( $result ) ) {
-			// Remove the item from WC order
+			// Remove the item from WC order.
 			wc_delete_order_item( $item_id );
 
 			$data['message'] = __( "We're sorry, the item couldn't be added to your order. A new order will be created instead.", 'woocommerce-gateway-klarna' );
@@ -147,11 +147,11 @@ class WC_Gateway_Klarna_Cross_Sells {
 
 			wp_send_json_error( $data );
 		} else {
+			do_action( 'klarna_after_adding_kco_cross_sell', klarna_wc_get_order_id( $wc_order ), klarna_wc_get_product_id( $product ) );
 			wp_send_json_success();
 		}
-		wp_die();
 
-		do_action( 'klarna_after_adding_kco_cross_sell', klarna_wc_get_order_id( $wc_order ), klarna_wc_get_product_id( $product ) );
+		wp_die();
 	}
 
 	/**

@@ -1,5 +1,8 @@
 *** WooCommerce Gateway Klarna Changelog ***
 
+2017.05.30  - version 2.4
+* Fix       - Moves klarna_after_adding_kco_cross_sell hook before wp_die().
+
 2017.05.24  - version 2.3.9
 * Update    - Removes old WC compatibility class.
 * Update    - Adds WC 3.0 compatibility functions.
