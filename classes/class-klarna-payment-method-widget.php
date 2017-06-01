@@ -29,6 +29,7 @@ class WC_Klarna_Payment_Method_Widget {
 		add_filter( 'woocommerce_get_sections_products', array( $this, 'add_section' ) );
 		add_filter( 'woocommerce_get_settings_products', array( $this, 'add_settings' ), 10, 2 );
 
+        $this->klarna_helper = new WC_Gateway_Klarna_Helper($this);
 	}
 
 
@@ -36,8 +37,8 @@ class WC_Klarna_Payment_Method_Widget {
 
 		global $woocommerce;
 
-		if ( $woocommerce->customer->get_country() ) {
-			$klarna_country = $woocommerce->customer->get_country();
+		if ( $this->klarna_helper->get_customer_country() ) {
+			$klarna_country = $this->klarna_helper->get_customer_country();
 		} else {
 			// Get current customers selected language if this is a multi language site
 			$iso_code       = explode( '_', get_locale() );
