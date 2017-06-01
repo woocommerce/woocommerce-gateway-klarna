@@ -36,6 +36,16 @@ class WC_Gateway_Klarna_Helper {
 		return $this->parent->enabled;
 	}
 
+    function get_customer_country($fallback = "") {
+        global $woocommerce;
+
+        if ( version_compare( $woocommerce->version, "3.0", ">=" ) ) {
+			return $woocommerce->customer->get_billing_country() ?: $fallback;
+		} else {
+            return $woocommerce->customer->get_country() ?: $fallback;
+        }
+    }
+
 
 	/**
 	 * Helper function, gets Klarna locale based on current locale.
@@ -99,11 +109,7 @@ class WC_Gateway_Klarna_Helper {
 		global $woocommerce;
 
 		if ( empty( $country ) ) {
-            if ( version_compare( $woocommerce->version, "3.0", ">=" ) ) {
-                $country = $woocommerce->customer->get_billing_country() ?: $this->parent->shop_country;
-    		} else {
-                $country = $woocommerce->customer->get_country() ?: $this->parent->shop_country;
-            }
+            $country = $this->get_customer_country($this->parent->shop_country);
 		}
 
 		switch ( $country ) {
@@ -223,11 +229,7 @@ class WC_Gateway_Klarna_Helper {
 	function get_klarna_country() {
 		global $woocommerce;
 
-        if ( version_compare( $woocommerce->version, "3.0", ">=" ) ) {
-            $klarna_country = $woocommerce->customer->get_billing_country();
-        } else {
-            $klarna_country = $woocommerce->customer->get_country();
-        }
+        $klarna_country = $this->get_customer_country(false);
         
 		if ( !$klarna_country ) {
 			$klarna_country = $this->parent->shop_language;
@@ -257,11 +259,7 @@ class WC_Gateway_Klarna_Helper {
 	function get_account_icon() {
 		global $woocommerce;
 
-        if ( version_compare( $woocommerce->version, "3.0", ">=" ) ) {
-    		$country = $woocommerce->customer->get_billing_country() ?: '';
-        } else {
-            $country = $woocommerce->customer->get_country() ?: '';
-        }
+        $country = $this->get_customer_country("");
 
 		if ( empty( $country ) ) {
 			$country = $this->parent->shop_country;
@@ -309,11 +307,7 @@ class WC_Gateway_Klarna_Helper {
 		global $woocommerce;
 
 		if ( empty( $country ) ) {
-            if ( version_compare( $woocommerce->version, "3.0", ">=" ) ) {
-    			$country = $woocommerce->customer->get_billing_country() ?: $this->parent->shop_country;
-            } else {
-                $country = $woocommerce->customer->get_country() ?: $this->parent->shop_country;
-            }
+            $country = $this->get_customer_country($this->parent->shop_country);
 		}
 
 		switch ( $country ) {
