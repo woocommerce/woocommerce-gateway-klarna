@@ -477,12 +477,12 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 
 			// Only activate the payment gateway if the customers country is the same as 
 			// the filtered shop country ($this->klarna_country)
-			if ( $woocommerce->customer->get_country() == true && ! in_array( $woocommerce->customer->get_country(), $this->authorized_countries ) ) {
+			if ( $this->klarna_helper->get_customer_country(false) == true && ! in_array( $this->klarna_helper->get_customer_country(), $this->authorized_countries ) ) {
 				return false;
 			}
 
 			// Don't allow orders over the amount of €250 for Dutch customers
-			if ( ( $woocommerce->customer->get_country() == true && $woocommerce->customer->get_country() == 'NL' ) && $woocommerce->cart->total >= 251 ) {
+			if ( ( $this->klarna_helper->get_customer_country(false) == true && $this->klarna_helper->get_customer_country() == 'NL' ) && $woocommerce->cart->total >= 251 ) {
 				return false;
 			}
 		}
@@ -502,7 +502,7 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 			global $woocommerce;
 
 			// Currency check
-			$currency_for_country = $this->klarna_helper->get_currency_for_country( $woocommerce->customer->get_country() );
+			$currency_for_country = $this->klarna_helper->get_currency_for_country( $this->klarna_helper->get_customer_country() );
 			if ( ! empty( $currency_for_country ) && $currency_for_country !== $this->selected_currency ) {
 				return false;
 			}
