@@ -505,7 +505,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 		global $woocommerce;
 		// Only activate the payment gateway if the customers country is the same as
 		// the filtered shop country ($this->klarna_country)
-		if ( $woocommerce->customer->get_country() == true && ! in_array( $woocommerce->customer->get_country(), $this->authorized_countries ) ) {
+		if ( $this->klarna_helper->get_customer_country(false) == true && ! in_array( $this->klarna_helper->get_customer_country(), $this->authorized_countries ) ) {
 			return false;
 		}
 
@@ -520,7 +520,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 	function check_customer_currency() {
 		global $woocommerce;
 		// Currency check
-		$currency_for_country = $this->klarna_helper->get_currency_for_country( $woocommerce->customer->get_country() );
+		$currency_for_country = $this->klarna_helper->get_currency_for_country( $this->klarna_helper->get_customer_country() );
 		if ( ! empty( $currency_for_country ) && $currency_for_country !== $this->selected_currency ) {
 			return false;
 		}
