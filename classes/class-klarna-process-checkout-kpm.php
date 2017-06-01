@@ -46,16 +46,14 @@ class WC_Gateway_Klarna_Process_Checkout_KPM {
 				add_action( 'woocommerce_before_checkout_process', array( $this, 'maybe_update_country' ) );
 			}
 		}
-
-        $this->klarna_helper = new WC_Gateway_Klarna_Helper($this);
 	}
 
 	/**
 	 * Checks if customer country is set before processing checkout.
 	 */
 	public function maybe_update_country() {
-		if ( $this->klarna_helper->get_customer_country(false) ) {
-			$this->klarna_shop_country =  $this->klarna_helper->get_customer_country();
+		if ( WC()->customer->get_country() ) {
+			$this->klarna_shop_country =  WC()->customer->get_country();
 		}
 	}
 
