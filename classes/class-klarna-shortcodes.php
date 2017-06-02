@@ -511,8 +511,8 @@ class WC_Gateway_Klarna_Shortcodes {
 			<tr class="kco-applied-coupon">
 				<td>
 					<?php echo apply_filters( 'woocommerce_cart_totals_coupon_label', esc_html( __( 'Coupon:',
-							'woocommerce-gateway-klarna' ) . ' ' . $coupon->code ), $coupon ); ?>
-					<a class="kco-remove-coupon" data-coupon="<?php echo $coupon->code; ?>"
+							'woocommerce-gateway-klarna' ) . ' ' . klarna_wc_get_coupon_code( $coupon ) ), $coupon ); ?>
+					<a class="kco-remove-coupon" data-coupon="<?php echo klarna_wc_get_coupon_code( $coupon ); ?>"
 					   href="#"><?php _e( '(remove)', 'woocommerce-gateway-klarna' ); ?></a>
 				</td>
 				<td class="kco-rightalign">
