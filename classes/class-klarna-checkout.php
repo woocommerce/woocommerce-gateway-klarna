@@ -673,28 +673,37 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		if ( ! wp_verify_nonce( $_REQUEST['nonce'], 'klarna_checkout_nonce' ) ) {
 			exit( 'Nonce can not be verified.' );
 		}
-		global $woocommerce;
+
 		$updated_item_key = $_REQUEST['cart_item_key'];
 		$new_quantity     = $_REQUEST['new_quantity'];
+
 		if ( ! defined( 'WOOCOMMERCE_CART' ) ) {
 			define( 'WOOCOMMERCE_CART', true );
 		}
+
 		if ( ! defined( 'WOOCOMMERCE_CHECKOUT' ) ) {
 			define( 'WOOCOMMERCE_CHECKOUT', true );
 		}
-		$cart_items      = $woocommerce->cart->get_cart();
-		$updated_item    = $cart_items[ $updated_item_key ];
 
 		// Update WooCommerce cart and transient order item
-		$woocommerce->cart->set_quantity( $updated_item_key, $new_quantity );
-		$woocommerce->cart->calculate_shipping();
-		$woocommerce->cart->calculate_fees();
-		$woocommerce->cart->calculate_totals();
+		WC()->cart->set_quantity( $updated_item_key, $new_quantity );
+		WC()->cart->calculate_shipping();
+		WC()->cart->calculate_fees();
+		WC()->cart->calculate_totals();
+
+		if ( 'true' === $_REQUEST['min_max_flag'] ) {
+			$data['cart_url'] = wc_get_page_permalink( 'cart' );
+			wp_send_json_error( $data );
+			wp_die();
+		}
+
 		$this->update_or_create_local_order();
 		$data['widget_html'] = $this->klarna_checkout_get_kco_widget_html();
+
 		if ( WC()->session->get( 'klarna_checkout' ) ) {
 			$this->ajax_update_klarna_order();
 		}
+
 		wp_send_json_success( $data );
 		wp_die();
 	}

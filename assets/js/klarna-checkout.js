@@ -292,6 +292,22 @@ jQuery(document).ready(function ($) {
 
 	// Update cart (v2)
 	$(document).on('change', 'td.product-quantity input[type=number]', function (event) {
+		var minMaxFlag = false;
+
+		// Check max value
+		if ($(this).attr('max')) {
+			if($(this).val() > $(this).attr('max')) {
+				minMaxFlag = true;
+			}
+		}
+
+		// Check min value
+		if ($(this).attr('max')) {
+			if($(this).val() < $(this).attr('min')) {
+				minMaxFlag = true;
+			}
+		}
+
 		if (!performingAjax) {
 			performingAjax = true;
 			blockCartWidget();
@@ -316,10 +332,15 @@ jQuery(document).ready(function ($) {
 						action: 'klarna_checkout_cart_callback_update',
 						cart_item_key: cart_item_key,
 						new_quantity: new_quantity,
+						min_max_flag: minMaxFlag,
 						nonce: kcoAjax.klarna_checkout_nonce
 					},
 					success: function (response) {
-						$(kco_widget).html(response.data.widget_html);
+						if (response.success) {
+							$(kco_widget).html(response.data.widget_html);
+						} else {
+							window.location.href = response.data.cart_url;
+						}
 					},
 					error: function (response) {
 						console.log('update cart item AJAX error');
