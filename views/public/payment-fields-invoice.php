@@ -112,7 +112,8 @@ if ( 'NO' == $this->klarna_helper->get_klarna_country() ) { ?>
 			        style="max-width:100%;width:100% !important;">
 
 				<?php
-				$country = ( isset( $woocommerce->customer->country ) ) ? $woocommerce->customer->country : $this->klarna_helper->shop_country;
+				$customer_country = klarna_wc_get_customer_country( WC()->customer );
+				$country = ( isset( $customer_country ) ) ? $customer_country : $this->klarna_helper->shop_country;
 				switch ( $country ) {
 					case 'DK' :
 						$invoice_string = 'Betal om 14 dage';

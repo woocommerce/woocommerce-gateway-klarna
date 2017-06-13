@@ -33,15 +33,12 @@ class WC_Klarna_Payment_Method_Widget {
 
 
 	function get_customer_country() {
-
-		global $woocommerce;
-
-		if ( $woocommerce->customer->get_country() ) {
-			$klarna_country = $woocommerce->customer->get_country();
+		if ( klarna_wc_get_customer_country( WC()->customer ) ) {
+			$klarna_country = klarna_wc_get_customer_country( WC()->customer );
 		} else {
-			// Get current customers selected language if this is a multi language site
+			// Get current customers selected language if this is a multi language site.
 			$iso_code       = explode( '_', get_locale() );
-			$shop_language  = strtoupper( $iso_code[0] ); // Country ISO code (SE)
+			$shop_language  = strtoupper( $iso_code[0] ); // Country ISO code (SE).
 			$klarna_country = $shop_language;
 			switch ( $this->parent->shop_country ) {
 				case 'NB' :

@@ -140,7 +140,7 @@ if ( WC()->session->get( 'ongoing_klarna_order' ) ) {
 }
 
 do_action( 'woocommerce_checkout_order_processed', $order_id, $posted_data, $order );
-do_action( 'klarna_before_kco_confirmation', $order_id );
+do_action( 'klarna_before_kco_confirmation', $order_id, $klarna_order );
 
 echo $snippet;
 

@@ -1,5 +1,12 @@
 *** WooCommerce Gateway Klarna Changelog ***
 
+2017.06.13  - version 2.3.11
+* Fix       - Fixes missing SKU in Klarna Invoice.
+* Fix       - Fixes accessing customer country property directly in WC 3.0.
+* Fix       - Fixes several WC 3.0 compatibility notices.
+* Update    - Adds $klarna_order argument to klarna_before_kco_confirmation hook in Klarna Checkout thank you page.
+* Fix       - Fixed issue with Min/Max quantities plugin.
+
 2017.05.30  - version 2.3.10
 * Fix       - Moves klarna_after_adding_kco_cross_sell hook before wp_die().
 * Update    - Remove the need to have td named .product-quantity in KCO cart widget JS code.

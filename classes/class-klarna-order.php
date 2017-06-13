@@ -65,52 +65,53 @@ class WC_Gateway_Klarna_Order {
 	function add_addresses() {
 		$order  = $this->order;
 		$klarna = $this->klarna;
+		$order_id = klarna_wc_get_order_id( $order );
 
-		if ( get_post_meta( $order->id, '_billing_address_2', true ) ) {
-			$billing_address = get_post_meta( $order->id, '_billing_address_1', true ) . ' ' . get_post_meta( $order->id, '_billing_address_2', true );
+		if ( get_post_meta( $order_id, '_billing_address_2', true ) ) {
+			$billing_address = get_post_meta( $order_id, '_billing_address_1', true ) . ' ' . get_post_meta( $order_id, '_billing_address_2', true );
 		} else {
-			$billing_address = get_post_meta( $order->id, '_billing_address_1', true );
+			$billing_address = get_post_meta( $order_id, '_billing_address_1', true );
 		}
 
-		if ( get_post_meta( $order->id, '_shipping_address_2', true ) ) {
-			$shipping_address = get_post_meta( $order->id, '_shipping_address_1', true ) . ' ' . get_post_meta( $order->id, '_shipping_address_2', true );
+		if ( get_post_meta( $order_id, '_shipping_address_2', true ) ) {
+			$shipping_address = get_post_meta( $order_id, '_shipping_address_1', true ) . ' ' . get_post_meta( $order_id, '_shipping_address_2', true );
 		} else {
-			$shipping_address = get_post_meta( $order->id, '_shipping_address_1', true );
+			$shipping_address = get_post_meta( $order_id, '_shipping_address_1', true );
 		}
 
 		$billing_addr = new KlarnaAddr(
-			get_post_meta( $order->id, '_billing_email', true ), // Email address.
+			get_post_meta( $order_id, '_billing_email', true ), // Email address.
 			'', // Telephone number, only one phone number is needed.
-			utf8_decode( get_post_meta( $order->id, '_billing_phone', true ) ), // Cell phone number.
-			utf8_decode( get_post_meta( $order->id, '_billing_first_name', true ) ), // First name (given name).
-			utf8_decode( get_post_meta( $order->id, '_billing_last_name', true ) ), // Last name (family name).
+			utf8_decode( get_post_meta( $order_id, '_billing_phone', true ) ), // Cell phone number.
+			utf8_decode( get_post_meta( $order_id, '_billing_first_name', true ) ), // First name (given name).
+			utf8_decode( get_post_meta( $order_id, '_billing_last_name', true ) ), // Last name (family name).
 			'', // No care of, C/O.
 			utf8_decode( $billing_address ), // Street address.
-			utf8_decode( get_post_meta( $order->id, '_billing_postcode', true ) ), // Zip code.
-			utf8_decode( get_post_meta( $order->id, '_billing_city', true ) ), // City.
-			utf8_decode( get_post_meta( $order->id, '_billing_country', true ) ), // Country.
+			utf8_decode( get_post_meta( $order_id, '_billing_postcode', true ) ), // Zip code.
+			utf8_decode( get_post_meta( $order_id, '_billing_city', true ) ), // City.
+			utf8_decode( get_post_meta( $order_id, '_billing_country', true ) ), // Country.
 			null, // House number (AT/DE/NL only).
 			null // House extension (NL only).
 		);
 
 		$shipping_addr = new KlarnaAddr(
-			get_post_meta( $order->id, '_shipping_email', true ), // Email address.
+			get_post_meta( $order_id, '_shipping_email', true ), // Email address.
 			'', // Telephone number, only one phone number is needed.
-			utf8_decode( get_post_meta( $order->id, '_shipping_phone', true ) ), // Cell phone number.
-			utf8_decode( get_post_meta( $order->id, '_shipping_first_name', true ) ), // First name (given name).
-			utf8_decode( get_post_meta( $order->id, '_shipping_last_name', true ) ), // Last name (family name).
+			utf8_decode( get_post_meta( $order_id, '_shipping_phone', true ) ), // Cell phone number.
+			utf8_decode( get_post_meta( $order_id, '_shipping_first_name', true ) ), // First name (given name).
+			utf8_decode( get_post_meta( $order_id, '_shipping_last_name', true ) ), // Last name (family name).
 			'', // No care of, C/O.
 			utf8_decode( $shipping_address ), // Street address.
-			utf8_decode( get_post_meta( $order->id, '_shipping_postcode', true ) ), // Zip code.
-			utf8_decode( get_post_meta( $order->id, '_shipping_city', true ) ), // City.
-			utf8_decode( get_post_meta( $order->id, '_shipping_country', true ) ), // Country.
+			utf8_decode( get_post_meta( $order_id, '_shipping_postcode', true ) ), // Zip code.
+			utf8_decode( get_post_meta( $order_id, '_shipping_city', true ) ), // City.
+			utf8_decode( get_post_meta( $order_id, '_shipping_country', true ) ), // Country.
 			null, // House number (AT/DE/NL only).
 			null // House extension (NL only).
 		);
 
 		$klarna->setAddress( KlarnaFlags::IS_BILLING, $billing_addr );
 		$klarna->setAddress( KlarnaFlags::IS_SHIPPING, $shipping_addr );
-		$klarna->setEstoreInfo( $orderid1 = ltrim( $order->get_order_number(), '#' ), $orderid2 = $order->id );
+		$klarna->setEstoreInfo( $orderid1 = ltrim( $order->get_order_number(), '#' ), $orderid2 = $order_id );
 	}
 
 	/**
@@ -142,10 +143,10 @@ class WC_Gateway_Klarna_Order {
 						$reference = '';
 						if ( $_product->get_sku() ) {
 							$reference = $_product->get_sku();
-						} elseif ( $_product->variation_id ) {
-							$reference = $_product->variation_id;
+						} elseif ( klarna_wc_get_product_variation_id( $_product ) ) {
+							$reference = klarna_wc_get_product_variation_id( $_product );
 						} else {
-							$reference = $_product->id;
+							$reference = klarna_wc_get_product_id( $_product );
 						}
 						$klarna->addArticle( $qty = $item['qty'],                  // Quantity
 							$artNo = strval( $reference ),          // Article number
@@ -172,7 +173,7 @@ class WC_Gateway_Klarna_Order {
 		if ( WC()->cart->applied_coupons ) {
 			foreach ( WC()->cart->applied_coupons as $code ) {
 				$smart_coupon = new WC_Coupon( $code );
-				if ( $smart_coupon->is_valid() && $smart_coupon->discount_type == 'smart_coupon' ) {
+				if ( $smart_coupon->is_valid() && klarna_wc_get_coupon_discount_type( $smart_coupon ) === 'smart_coupon' ) {
 					$klarna->addArticle( $qty = 1, $artNo = '', $title = __( 'Discount', 'woocommerce-gateway-klarna' ), $price = - WC()->cart->coupon_discount_amounts[ $code ], $vat = 0, $discount = 0, $flags = KlarnaFlags::INC_VAT );
 				}
 			}
@@ -221,6 +222,12 @@ class WC_Gateway_Klarna_Order {
 				} else {
 					$invoice_fee_name = '';
 				}
+				if ( $invoice_fee_product->get_sku() ) {
+					$artNo = $invoice_fee_product->get_sku();
+				}
+				else {
+					$artNo = '';
+				}
 				// Invoice fee or regular fee
 				if ( $invoice_fee_name == $item['name'] ) {
 					$klarna_flags = KlarnaFlags::INC_VAT + KlarnaFlags::IS_HANDLING; // Price is including VAT and is handling/invoice fee
@@ -230,7 +237,7 @@ class WC_Gateway_Klarna_Order {
 				// apply_filters to item price so we can filter this if needed
 				$klarna_item_price_including_tax = $item['line_total'] + $item['line_tax'];
 				$item_price                      = apply_filters( 'klarna_fee_price_including_tax', $klarna_item_price_including_tax );
-				$klarna->addArticle( $qty = 1, $artNo = '', $title = utf8_decode( $item['name'] ), $price = $item_price, $vat = round( $item_tax_percentage ), $discount = 0, $flags = $klarna_flags );
+				$klarna->addArticle( $qty = 1, $artNo, $title = utf8_decode( $item['name'] ), $price = $item_price, $vat = round( $item_tax_percentage ), $discount = 0, $flags = $klarna_flags );
 			}
 		}
 	}
@@ -390,8 +397,8 @@ class WC_Gateway_Klarna_Order {
 	 * @since  2.0
 	 **/
 	function refund_order_rest( $amount, $reason = '', $k_order ) {
-		$order   = $this->order;
-		$orderid = $order->id;
+		$order    = $this->order;
+		$order_id = klarna_wc_get_order_id( $order );
 		try {
 			$k_order->refund( array(
 				'refunded_amount' => $amount * 100,
@@ -860,12 +867,13 @@ class WC_Gateway_Klarna_Order {
 		$payment_method             = $this->get_order_payment_method( $order );
 		$payment_method_option_name = 'woocommerce_' . $payment_method . '_settings';
 		$payment_method_option      = get_option( $payment_method_option_name );
+		$order_id = klarna_wc_get_order_id( $order );
 
 		$updatable = false;
 		// Check if option is enabled
 		if ( 'yes' == $payment_method_option['push_update'] ) {
 			// Check if order is on hold so it can be edited, and if it hasn't been captured or cancelled
-			if ( 'on-hold' == $order->get_status() && ! get_post_meta( $order->id, '_klarna_order_cancelled', true ) && ! get_post_meta( $order->id, '_klarna_order_activated', true ) ) {
+			if ( 'on-hold' == $order->get_status() && ! get_post_meta( $order_id, '_klarna_order_cancelled', true ) && ! get_post_meta( $order_id, '_klarna_order_activated', true ) ) {
 				$updatable = true;
 			}
 		}
@@ -1051,7 +1059,7 @@ class WC_Gateway_Klarna_Order {
 				break;
 			}
 			$klarna_settings = get_option( 'woocommerce_klarna_checkout_settings' );
-			if ( 'yes' != $klarna_settings['send_discounts_separately'] && $coupon->discount_type != 'smart_coupon' ) {
+			if ( 'yes' !== $klarna_settings['send_discounts_separately'] && 'smart_coupon' !== klarna_wc_get_coupon_discount_type( $coupon ) ) {
 				break;
 			}
 			$coupon_name   = $coupon_data['name'];

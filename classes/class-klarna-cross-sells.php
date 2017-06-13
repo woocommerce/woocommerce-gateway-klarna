@@ -94,7 +94,8 @@ class WC_Gateway_Klarna_Cross_Sells {
 	 * @return string
 	 */
 	function filter_add_to_cart_button( $output, $product ) {
-		return sprintf( '<a rel="nofollow" href="#" data-product_id="%s" class="button klarna-cross-sells-button">%s</a>', esc_attr( $product->id ), __( 'Add to order', 'woocommerce-gateway-klarna' ) );
+		$product_id = klarna_wc_get_product_id( $product );
+		return sprintf( '<a rel="nofollow" href="#" data-product_id="%s" class="button klarna-cross-sells-button">%s</a>', esc_attr( $product_id ), __( 'Add to order', 'woocommerce-gateway-klarna' ) );
 	}
 
 	function display_cross_sells( $order_id, $klarna_order ) {

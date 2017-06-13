@@ -201,7 +201,7 @@ if ( wc_notice_count( 'error' ) > 0 ) {
 		/**
 		 * Check if Klarna order already exists and if country was changed
 		 */
-		if ( WC()->session->get( 'klarna_checkout' ) && WC()->session->get( 'klarna_checkout_country' ) == WC()->customer->get_country() ) {
+		if ( WC()->session->get( 'klarna_checkout' ) && WC()->session->get( 'klarna_checkout_country' ) === klarna_wc_get_customer_country( WC()->customer ) ) {
 			include( KLARNA_DIR . 'includes/checkout/resume.php' );
 		}
 		// If it doesn't, create Klarna order
@@ -222,7 +222,7 @@ if ( wc_notice_count( 'error' ) > 0 ) {
 
 		// Set session values for Klarna order ID and Klarna order country
 		WC()->session->set( 'klarna_checkout', $sessionId );
-		WC()->session->set( 'klarna_checkout_country', WC()->customer->get_country() );
+		WC()->session->set( 'klarna_checkout_country', klarna_wc_get_customer_country( WC()->customer ) );
 
 		// Display checkout
 		do_action( 'klarna_before_kco_checkout' );
