@@ -122,7 +122,8 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 	 */
 	public function output_klarna_details_confirmation( $text = false, $order ) {
 		if ( $this->id == $order->payment_method ) {
-			return $text . $this->get_klarna_shipping_info( $order->id );
+			$order_id = klarna_wc_get_order_id( $order );
+			return $text . $this->get_klarna_shipping_info( $order_id );
 		} else {
 			return $text;
 		}
@@ -135,7 +136,8 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 	 */
 	public function output_klarna_details_confirmation_email( $order, $sent_to_admin, $plain_text ) {
 		if ( $this->id == $order->payment_method ) {
-			echo $this->get_klarna_shipping_info( $order->id );
+			$order_id = klarna_wc_get_order_id( $order );
+			echo $this->get_klarna_shipping_info( $order_id );
 		}
 	}
 
@@ -246,8 +248,8 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 							$reference = '';
 							if ( $_product->get_sku() ) {
 								$reference = $_product->get_sku();
-							} elseif ( $_product->variation_id ) {
-								$reference = $_product->variation_id;
+							} elseif ( klarna_wc_get_product_variation_id( $_product ) ) {
+								$reference = klarna_wc_get_product_variation_id( $_product );
 							} else {
 								$reference = klarna_wc_get_product_id( $_product );
 							}
@@ -502,10 +504,9 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 	 * @since  2.0
 	 **/
 	function check_customer_country() {
-		global $woocommerce;
 		// Only activate the payment gateway if the customers country is the same as
 		// the filtered shop country ($this->klarna_country)
-		if ( $woocommerce->customer->get_country() == true && ! in_array( $woocommerce->customer->get_country(), $this->authorized_countries ) ) {
+		if ( klarna_wc_get_customer_country( WC()->customer ) === true && ! in_array( klarna_wc_get_customer_country( WC()->customer ), $this->authorized_countries, true ) ) {
 			return false;
 		}
 
@@ -518,9 +519,8 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 	 * @since  2.0
 	 **/
 	function check_customer_currency() {
-		global $woocommerce;
 		// Currency check
-		$currency_for_country = $this->klarna_helper->get_currency_for_country( $woocommerce->customer->get_country() );
+		$currency_for_country = $this->klarna_helper->get_currency_for_country( klarna_wc_get_customer_country( WC()->customer ) );
 		if ( ! empty( $currency_for_country ) && $currency_for_country !== $this->selected_currency ) {
 			return false;
 		}

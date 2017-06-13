@@ -52,8 +52,8 @@ class WC_Gateway_Klarna_Process_Checkout_KPM {
 	 * Checks if customer country is set before processing checkout.
 	 */
 	public function maybe_update_country() {
-		if ( WC()->customer->get_country() ) {
-			$this->klarna_shop_country =  WC()->customer->get_country();
+		if ( klarna_wc_get_customer_country( WC()->customer ) ) {
+			$this->klarna_shop_country = klarna_wc_get_customer_country( WC()->customer );
 		}
 	}
 

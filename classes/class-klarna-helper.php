@@ -96,10 +96,10 @@ class WC_Gateway_Klarna_Helper {
 	 * @return string $current_secret
 	 **/
 	function get_secret( $country = '' ) {
-		global $woocommerce;
+		$customer_country = klarna_wc_get_customer_country( WC()->customer );
 
 		if ( empty( $country ) ) {
-			$country = ( isset( $woocommerce->customer->country ) ) ? $woocommerce->customer->country : $this->parent->shop_country;
+			$country = ( isset( $customer_country ) ) ? $customer_country : $this->parent->shop_country;
 		}
 
 		switch ( $country ) {
@@ -217,10 +217,8 @@ class WC_Gateway_Klarna_Helper {
 	 * @return string $klarna_country
 	 **/
 	function get_klarna_country() {
-		global $woocommerce;
-
-		if ( $woocommerce->customer->get_country() ) {
-			$klarna_country = $woocommerce->customer->get_country();
+		if ( klarna_wc_get_customer_country( WC()->customer ) ) {
+			$klarna_country = klarna_wc_get_customer_country( WC()->customer );
 		} else {
 			$klarna_country = $this->parent->shop_language;
 			switch ( $this->parent->shop_country ) {
@@ -247,9 +245,9 @@ class WC_Gateway_Klarna_Helper {
 	 * @since 1.0.0
 	 **/
 	function get_account_icon() {
-		global $woocommerce;
+		$customer_country = klarna_wc_get_customer_country( WC()->customer );
 
-		$country = ( isset( $woocommerce->customer->country ) ) ? $woocommerce->customer->country : '';
+		$country = ( isset( $customer_country ) ) ? $customer_country : '';
 
 		if ( empty( $country ) ) {
 			$country = $this->parent->shop_country;
@@ -294,10 +292,8 @@ class WC_Gateway_Klarna_Helper {
 	 * @return integer $current_eid
 	 **/
 	function get_eid( $country = '' ) {
-		global $woocommerce;
-
 		if ( empty( $country ) ) {
-			$country = ( isset( $woocommerce->customer->country ) ) ? $woocommerce->customer->country : $this->parent->shop_country;
+			$country = ( null === klarna_wc_get_customer_country( WC()->customer ) ) ? klarna_wc_get_customer_country( WC()->customer ) : $this->parent->shop_country;
 		}
 
 		switch ( $country ) {

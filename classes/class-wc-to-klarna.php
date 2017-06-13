@@ -258,7 +258,7 @@ class WC_Gateway_Klarna_WC2K {
 				}
 
 				$klarna_settings = get_option( 'woocommerce_klarna_checkout_settings' );
-				if ( 'yes' !== $klarna_settings['send_discounts_separately'] && 'smart_coupon' !== $coupon->discount_type ) {
+				if ( 'yes' !== $klarna_settings['send_discounts_separately'] && 'smart_coupon' !== klarna_wc_get_coupon_discount_type( $coupon ) ) {
 					break;
 				}
 
@@ -358,7 +358,8 @@ class WC_Gateway_Klarna_WC2K {
 	 */
 	public function get_item_name( $cart_item ) {
 		$cart_item_data = $cart_item['data'];
-		$item_name      = $cart_item_data->post->post_title;
+		$cart_item_post = klarna_wc_get_cart_item_post( $cart_item_data );
+		$item_name      = $cart_item_post->post_title;
 
 		// Get variations as a string and remove line breaks
 		$item_variations = html_entity_decode( rtrim( WC()->cart->get_item_data( $cart_item, true ) ) ); // Removes new line at the end.
@@ -424,10 +425,10 @@ class WC_Gateway_Klarna_WC2K {
 	public function get_item_reference( $_product ) {
 		if ( $_product->get_sku() ) {
 			$item_reference = $_product->get_sku();
-		} elseif ( $_product->variation_id ) {
-			$item_reference = $_product->variation_id;
+		} elseif ( klarna_wc_get_product_variation_id( $_product ) ) {
+			$item_reference = klarna_wc_get_product_variation_id( $_product );
 		} else {
-			$item_reference = $_product->id;
+			$item_reference = klarna_wc_get_product_id( $_product );
 		}
 
 		return strval( $item_reference );
@@ -716,7 +717,7 @@ class WC_Gateway_Klarna_WC2K {
 	 * @return string $coupon_name Name for selected coupon method.
 	 */
 	public function get_coupon_name( $coupon ) {
-		$coupon_name = $coupon->code;
+		$coupon_name = klarna_wc_get_coupon_code( $coupon );
 
 		return $coupon_name;
 	}
@@ -732,7 +733,7 @@ class WC_Gateway_Klarna_WC2K {
 	 * @return integer $coupon_amount Amount for selected coupon method.
 	 */
 	public function get_coupon_amount( $coupon ) {
-		$coupon_amount = WC()->cart->get_coupon_discount_amount( $coupon->code, false );
+		$coupon_amount = WC()->cart->get_coupon_discount_amount( klarna_wc_get_coupon_code( $coupon ), false );
 		$coupon_amount = (int) number_format( ( $coupon_amount ) * 100, 0, '', '' );
 
 		return $coupon_amount;
