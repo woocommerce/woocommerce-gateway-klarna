@@ -139,6 +139,13 @@ if ( WC()->session->get( 'ongoing_klarna_order' ) ) {
 	}
 }
 
+// In some cases the order confirmation callback from Klarna happens after the display of the thankyou page. 
+// In these cases we need to add customer address to the order here. Plugins like WCS needs this when woocommerce_checkout_order_processed hook is run.
+if( '' == get_post_meta( $order_id, '_billing_address_1', true ) ) {
+	include_once( KLARNA_DIR . 'classes/class-klarna-to-wc.php' );
+	WC_Gateway_Klarna_K2WC::add_order_addresses( $order, $klarna_order );
+}
+
 do_action( 'woocommerce_checkout_order_processed', $order_id, $posted_data, $order );
 do_action( 'klarna_before_kco_confirmation', $order_id, $klarna_order );
 
