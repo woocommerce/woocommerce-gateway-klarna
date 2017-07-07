@@ -83,6 +83,7 @@ $this->account_login_text  = ( isset( $this->settings['account_login_text'] ) ) 
 
 $this->validate_stock = $this->get_option( 'validate_stock' );
 $this->allowed_customer_types  = ( isset( $this->settings['allowed_customer_types'] ) ) ? $this->settings['allowed_customer_types'] : '';
+$this->allow_separate_shipping_address = ( isset( $this->settings['allow_separate_shipping_address'] ) ) ? $this->settings['allow_separate_shipping_address'] : '';
 
 
 // Helper function to make sure colors start with '#' character

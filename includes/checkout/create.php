@@ -326,6 +326,12 @@ if ( $this->is_rest() ) {
 
 	$klarna_order = new \Klarna\Rest\Checkout\Order( $connector );
 } else {
+	
+	// Allow separate shipping address
+	if( 'yes' == $this->allow_separate_shipping_address ) {
+		$create['options']['allow_separate_shipping_address'] = true;
+	}
+
 	// Klarna_Checkout_Order::$baseUri = $this->klarna_server;
 	// Klarna_Checkout_Order::$contentType = 'application/vnd.klarna.checkout.aggregated-order-v2+json';
 	$klarna_order = new Klarna_Checkout_Order( $connector, $this->klarna_server );

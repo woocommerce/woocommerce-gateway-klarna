@@ -205,41 +205,42 @@ class WC_Gateway_Klarna_Order {
 	function process_fees() {
 		$order  = $this->order;
 		$klarna = $this->klarna;
-		if ( sizeof( $order->get_fees() ) > 0 ) {
+
+		if ( count( $order->get_fees() ) > 0 ) {
 			foreach ( $order->get_fees() as $item ) {
-				// We manually calculate the tax percentage here
 				if ( $order->get_total_tax() > 0 ) {
-					// Calculate tax percentage
 					$item_tax_percentage = number_format( ( $item['line_tax'] / $item['line_total'] ) * 100, 2, '.', '' );
 				} else {
 					$item_tax_percentage = 0.00;
 				}
+
 				$invoice_settings    = get_option( 'woocommerce_klarna_invoice_settings' );
 				$invoice_fee_id      = $invoice_settings['invoice_fee_id'];
 				$invoice_fee_product = wc_get_product( $invoice_fee_id );
+				$invoice_art_no      = '';
+
 				if ( $invoice_fee_product ) {
 					$invoice_fee_name = $invoice_fee_product->get_title();
+					if ( $invoice_fee_product->get_sku() ) {
+						$invoice_art_no = $invoice_fee_product->get_sku();
+					}
 				} else {
 					$invoice_fee_name = '';
 				}
-				if ( $invoice_fee_product->get_sku() ) {
-					$artNo = $invoice_fee_product->get_sku();
-				}
-				else {
-					$artNo = '';
-				}
-				// Invoice fee or regular fee
-				if ( $invoice_fee_name == $item['name'] ) {
-					$klarna_flags = KlarnaFlags::INC_VAT + KlarnaFlags::IS_HANDLING; // Price is including VAT and is handling/invoice fee
+
+				// Invoice fee or regular fee.
+				if ( $invoice_fee_name === $item['name'] ) {
+					$klarna_flags = KlarnaFlags::INC_VAT + KlarnaFlags::IS_HANDLING; // Price is including VAT and is handling/invoice fee.
 				} else {
-					$klarna_flags = KlarnaFlags::INC_VAT; // Price is including VAT
+					$klarna_flags = KlarnaFlags::INC_VAT; // Price is including VAT.
 				}
-				// apply_filters to item price so we can filter this if needed
+
+				// apply_filters to item price so we can filter this if needed.
 				$klarna_item_price_including_tax = $item['line_total'] + $item['line_tax'];
 				$item_price                      = apply_filters( 'klarna_fee_price_including_tax', $klarna_item_price_including_tax );
-				$klarna->addArticle( $qty = 1, $artNo, $title = utf8_decode( $item['name'] ), $price = $item_price, $vat = round( $item_tax_percentage ), $discount = 0, $flags = $klarna_flags );
-			}
-		}
+				$klarna->addArticle( 1, $invoice_art_no, utf8_decode( $item['name'] ), $item_price, round( $item_tax_percentage ), 0, $klarna_flags );
+			} // End foreach().
+		} // End if().
 	}
 
 	/**

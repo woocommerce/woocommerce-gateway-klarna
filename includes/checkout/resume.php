@@ -224,6 +224,11 @@ try {
 			} else {
 				$update['options']['allow_separate_shipping_address'] = false;
 			}
+		} else {
+			// Allow separate shipping address
+			if( 'yes' == $this->allow_separate_shipping_address ) {
+				$create['options']['allow_separate_shipping_address'] = true;
+			}
 		}
 
 		$klarna_order->update( apply_filters( 'kco_update_order', $update ) );

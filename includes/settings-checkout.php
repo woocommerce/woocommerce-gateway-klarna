@@ -452,6 +452,13 @@ return apply_filters( 'klarna_checkout_form_fields', array(
 		'default'     => 'B2C',
 		'desc_tip'    => false
 	),
+	'allow_separate_shipping_address'   => array(
+		'title'   => __( 'Separate Shipping Address', 'woocommerce-gateway-klarna' ),
+		'type'    => 'checkbox',
+		'label'   => __( 'Allow customer to enter a separate shipping address.', 'woocommerce-gateway-klarna' ),
+		'description' => __( 'Applies to SE, NO, FI, DE & AT. For other countries - use the WooCommerce Shipping options settings.', 'woocommerce-gateway-klarna' ),
+		'default' => 'no'
+	),
 	'create_customer_account'   => array(
 		'title'   => __( 'Create customer account', 'woocommerce-gateway-klarna' ),
 		'type'    => 'checkbox',

@@ -334,7 +334,7 @@ class WC_Gateway_Klarna_K2WC {
 			$this->change_order_currency( $order, $klarna_order );
 
 			// Add order addresses.
-			$this->add_order_addresses( $order, $klarna_order );
+			self::add_order_addresses( $order, $klarna_order );
 
 			// Store payment method.
 			$this->add_order_payment_method( $order );
@@ -631,13 +631,9 @@ class WC_Gateway_Klarna_K2WC {
 	 * @param  object $order Local WC order.
 	 * @param  object $klarna_order Klarna order.
 	 */
-	public function add_order_addresses( $order, $klarna_order ) {
+	public static function add_order_addresses( $order, $klarna_order ) {
 		$order_id = klarna_wc_get_order_id( $order );
 
-		if ( 'yes' === $this->klarna_debug ) {
-			$this->klarna_log->add( 'klarna', microtime() . ": Adding addresses to order $order_id..." );
-			$this->klarna_log->add( 'klarna', var_export( $klarna_order, true ) );
-		}
 
 		$order_id = $order_id;
 

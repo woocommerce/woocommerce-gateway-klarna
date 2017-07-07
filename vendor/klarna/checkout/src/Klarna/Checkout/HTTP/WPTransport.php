@@ -95,7 +95,9 @@ class Klarna_Checkout_HTTP_WPTransport implements Klarna_Checkout_HTTP_Transport
 
 		// For GET requests we need to get Klarna order URI, set in WC session
 		if ( 'GET' == $request->getMethod() && WC()->session->get( 'klarna_request_uri' ) ) {
-			$req_url = WC()->session->get( 'klarna_request_uri' );
+			if ( method_exists( WC()->session, 'get' ) ) {
+				$req_url = WC()->session->get( 'klarna_request_uri' );
+			}
 		} else {
 			$req_url = $request->getURL();
 		}
@@ -105,7 +107,9 @@ class Klarna_Checkout_HTTP_WPTransport implements Klarna_Checkout_HTTP_Transport
 		// Set order URI as session value for GET request
 		if ( 'POST' == $request->getMethod() ) {
 			if ( class_exists( 'WC_Session' ) ) {
-				WC()->session->__unset( 'klarna_request_uri' );
+				if ( method_exists( WC()->session, '__unset' ) ) {
+					WC()->session->__unset( 'klarna_request_uri' );
+				}
 
 				if ( is_wp_error( $my_response ) ) {
 					error_log( var_export( $my_response, true ) );
@@ -115,7 +119,9 @@ class Klarna_Checkout_HTTP_WPTransport implements Klarna_Checkout_HTTP_Transport
 					$klarna_request_uri = $request->getURL();
 				}
 
-				WC()->session->set( 'klarna_request_uri', $klarna_request_uri );
+				if ( method_exists( WC()->session, 'set' ) ) {
+					WC()->session->set( 'klarna_request_uri', $klarna_request_uri );
+				}
 			}
 		}
 
