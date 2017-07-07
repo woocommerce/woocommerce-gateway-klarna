@@ -1,5 +1,10 @@
 *** WooCommerce Gateway Klarna Changelog ***
 
+2017.07.07  - version 2.3.12
+* Update	- Adds setting for Allow separate shipping address (KCO V2).
+* Fix		- Fixes WooCommerce Subscriptions issue - adds customer address to order before woocommerce_checkout_order_processed hook is run.
+* Fix		- Fixes WooCommerce Subscriptions issue - adds check to activate subscription if parent order already has been set to processing/completed when subscription is created.
+
 2017.06.13  - version 2.3.11
 * Fix       - Fixes missing SKU in Klarna Invoice.
 * Fix       - Fixes accessing customer country property directly in WC 3.0.
