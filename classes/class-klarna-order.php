@@ -1162,7 +1162,7 @@ class WC_Gateway_Klarna_Order {
 	 * @return WC_Order
 	 */
 	function get_order_payment_method( $order ) {
-		$payment_method = $order->payment_method;
+		$payment_method = klarna_wc_get_order_payment_method( $order );
 
 		return $payment_method;
 	}

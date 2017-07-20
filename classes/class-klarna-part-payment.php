@@ -138,7 +138,7 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 	 * @return order|string
 	 */
 	public function output_klarna_details_confirmation( $text, $order ) {
-		if ( $this->id == $order->payment_method ) {
+		if ( klarna_wc_get_order_payment_method( $order ) === $this->id ) {
 			return $text . $this->get_klarna_shipping_info( klarna_wc_get_order_id( $order ) );
 		} else {
 			return $text;
@@ -152,7 +152,7 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 	 * @since  2.0.0
 	 */
 	public function output_klarna_details_confirmation_email( $order, $sent_to_admin, $plain_text ) {
-		if ( $this->id == $order->payment_method ) {
+		if ( klarna_wc_get_order_payment_method( $order ) === $this->id ) {
 			echo $this->get_klarna_shipping_info( klarna_wc_get_order_id( $order ) );
 		}
 	}

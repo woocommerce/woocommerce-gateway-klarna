@@ -218,7 +218,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	}
 
 	/**
-	 * Since KCO is processes checkout differently, we need to add shipping to it, if WCS wasn't able to do it when
+	 * Since KCO processes checkout differently, we need to add shipping to it, if WCS wasn't able to do it when
 	 * subscription was created.
 	 *
 	 * @param $subscription
@@ -231,39 +231,32 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 */
 	function finalize_subscription( $subscription, $order, $cart ) {
 		$subscription_shipping_methods = $subscription->get_shipping_methods();
-		if ( $this->id === $subscription->payment_method ) {
+		if ( klarna_wc_get_order_payment_method( $subscription ) === $this->id ) {
 			if ( empty( $subscription_shipping_methods ) ) {
 				WC_Subscriptions_Cart::set_calculation_type( 'recurring_total' );
-	
 				foreach ( $cart->get_shipping_packages() as $base_package ) {
-	
 					$package = WC()->shipping->calculate_shipping_for_package( $base_package );
-	
 					foreach ( WC()->shipping->get_packages() as $package_key => $package_to_ignore ) {
-	
 						$chosen_shipping_methods = WC()->session->get( 'chosen_shipping_methods' );
 						if ( isset( $package['rates'][ $chosen_shipping_methods[ $package_key ] ] ) ) {
-	
 							$item_id = $subscription->add_shipping( $package['rates'][ $chosen_shipping_methods[ $package_key ] ] );
-	
 							if ( ! $item_id ) {
 								throw new Exception( __( 'Error: Unable to create subscription. Please try again.', 'woocommerce-subscriptions' ) );
 							}
-	
 							// Allows plugins to add order item meta to shipping.
 							do_action( 'woocommerce_add_shipping_order_item', $subscription->id, $item_id, $package_key );
 							do_action( 'woocommerce_subscriptions_add_recurring_shipping_order_item', $subscription->id, $item_id, $package_key );
 						}
 					}
 				}
-	
+
 				WC_Subscriptions_Cart::set_calculation_type( 'none' );
-	
+
 				$subscription->calculate_shipping();
 				$subscription->calculate_totals( true );
 				$subscription->payment_complete();
 			}
-			
+
 			// In some cases the parent order is set to Processing/Completed (on a callback from Klarna) before the subscription is created.
 			// In these cases we ned to activate the subscription ourselves.
 			if ( $order->has_status( array( 'processing', 'completed' ) ) ) {
