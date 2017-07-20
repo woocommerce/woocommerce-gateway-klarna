@@ -20,6 +20,21 @@ function klarna_wc_get_order_id( $order ) {
 }
 
 /**
+ * Gets WooCommerce order payment method in WC 3.0 and in previous versions
+ *
+ * @param $order WC_Order
+ *
+ * @return mixed | WC_Order payment method
+ */
+function klarna_wc_get_order_payment_method( $order ) {
+	if ( method_exists( $order, 'get_payment_method' ) ) {
+		return $order->get_payment_method();
+	} else {
+		return $order->payment_method;
+	}
+}
+
+/**
  * Gets WooCommerce order ID in WC 3.0 and in previous versions
  *
  * @param $product WC_Product
