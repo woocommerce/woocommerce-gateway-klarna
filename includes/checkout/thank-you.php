@@ -98,6 +98,9 @@ if ( $order->get_user_id() === 0 ) {
 
 			if ( is_int( $customer_id ) ) {
 				update_post_meta( $order_id, '_customer_user', $customer_id );
+
+				wp_set_current_user( $customer_id );
+				wc_set_customer_auth_cookie( $customer_id );
 			}
 		}
 	}
@@ -123,25 +126,9 @@ $posted_data = array(
 	'shipping_postcode'   => $klarna_order['billing_address']['postal_code'],
 );
 
-// Log the user in.
-if ( WC()->session->get( 'ongoing_klarna_order' ) ) {
-	$ongoing_klarna_order = wc_get_order( WC()->session->get( 'ongoing_klarna_order' ) );
-	if ( $ongoing_klarna_order ) {
-		if ( ! is_user_logged_in() && $ongoing_klarna_order->get_user_id() > 0 ) {
-			// Make sure user is not store manager ot above.
-			if ( ! user_can( $ongoing_klarna_order->get_user_id(), 'manage_woocommerce' ) ) {
-				$ongoing_order_customer_id = $ongoing_klarna_order->get_user_id();
-
-				wp_set_current_user( $ongoing_klarna_order->get_user_id() );
-				wc_set_customer_auth_cookie( $ongoing_klarna_order->get_user_id() );
-			}
-		}
-	}
-}
-
-// In some cases the order confirmation callback from Klarna happens after the display of the thankyou page. 
+// In some cases the order confirmation callback from Klarna happens after the display of the thankyou page.
 // In these cases we need to add customer address to the order here. Plugins like WCS needs this when woocommerce_checkout_order_processed hook is run.
-if( '' == get_post_meta( $order_id, '_billing_address_1', true ) ) {
+if ( '' === get_post_meta( $order_id, '_billing_address_1', true ) ) {
 	include_once( KLARNA_DIR . 'classes/class-klarna-to-wc.php' );
 	WC_Gateway_Klarna_K2WC::add_order_addresses( $order, $klarna_order );
 }
