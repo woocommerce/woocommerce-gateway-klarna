@@ -1,5 +1,8 @@
 *** WooCommerce Gateway Klarna Changelog ***
 
+2017.07.xx  - version 2.3.14
+* Update    - Updates Guzzle dependency to 5.3.1.
+
 2017.07.24  - version 2.3.14
 * Fix       - Restricts post-checkout KCO user login to new accounts.
 
