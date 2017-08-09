@@ -139,7 +139,10 @@ do_action( 'klarna_before_kco_confirmation', $order_id, $klarna_order );
 echo $snippet;
 
 do_action( 'klarna_after_kco_confirmation', $order_id, $klarna_order );
-do_action( 'woocommerce_thankyou', $order_id );
+
+if ( ! did_action( 'woocommerce_thankyou' ) ) {
+	do_action( 'woocommerce_thankyou', $order_id );
+}
 
 // Clear session and empty cart.
 WC()->session->__unset( 'klarna_checkout' );
