@@ -65,7 +65,7 @@ $this->secret_us                     = ( isset( $this->settings['secret_us'] ) )
 $this->klarna_checkout_url_us        = ( isset( $this->settings['klarna_checkout_url_us'] ) ) ? $this->settings['klarna_checkout_url_us'] : '';
 $this->klarna_checkout_thanks_url_us = ( isset( $this->settings['klarna_checkout_thanks_url_us'] ) ) ? $this->settings['klarna_checkout_thanks_url_us'] : '';
 
-$this->default_eur_contry = ( isset( $this->settings['default_eur_contry'] ) ) ? $this->settings['default_eur_contry'] : '';
+$this->default_eur_country = ( isset( $this->settings['default_eur_country'] ) ) ? $this->settings['default_eur_country'] : '';
 
 $this->terms_url = ( isset( $this->settings['terms_url'] ) ) ? $this->settings['terms_url'] : '';
 $this->testmode  = ( isset( $this->settings['testmode'] ) ) ? $this->settings['testmode'] : '';
@@ -149,7 +149,7 @@ switch ( $customer_selected_currency ) {
 			}  elseif ( get_locale() == 'nl_NL' && '' != $this->eid_nl && '' != $this->secret_nl ) {
 				$klarna_country = 'NL';
 			} else {
-				$klarna_country = $this->default_eur_contry;
+				$klarna_country = $this->default_eur_country;
 			}
 		}
 		break;

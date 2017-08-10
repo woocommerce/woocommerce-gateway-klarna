@@ -388,7 +388,7 @@ return apply_filters( 'klarna_checkout_form_fields', array(
 		'title' => __( 'Checkout settings', 'woocommerce-gateway-klarna' ),
 		'type'  => 'title',
 	),
-	'default_eur_contry'           => array(
+	'default_eur_country'           => array(
 		'title'       => __( 'Default Euro Checkout Country', 'woocommerce-gateway-klarna' ),
 		'type'        => 'select',
 		'options'     => array(
