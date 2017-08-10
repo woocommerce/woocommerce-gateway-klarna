@@ -3,6 +3,7 @@
 2017.07.xx  - version 2.3.14
 * Update    - Updates Guzzle dependency to 5.3.1.
 * Fix		- Adds DK & NL to get_authorized_countries() (used for filter url to checkout page).
+* Fix       - Adds check if it already has run for woocommerce_thankyou action hook in KCO thank you page.
 
 2017.07.24  - version 2.3.14
 * Fix       - Restricts post-checkout KCO user login to new accounts.
@@ -14,6 +15,7 @@
 * Update    - Adds setting for Allow separate shipping address (KCO V2).
 * Fix       - Fixes WooCommerce Subscriptions issue - adds customer address to order before woocommerce_checkout_order_processed hook is run.
 * Fix       - Fixes WooCommerce Subscriptions issue - adds check to activate subscription if parent order already has been set to processing/completed when subscription is created.
+* Fix       - Fixes invoice fee (no product) issue.
 
 2017.06.13  - version 2.3.11
 * Fix       - Fixes missing SKU in Klarna Invoice.

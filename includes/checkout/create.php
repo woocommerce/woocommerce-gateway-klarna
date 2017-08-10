@@ -86,6 +86,7 @@ if ( $this->is_rest() ) {
 	$merchant_confirmation_uri = add_query_arg( array(
 		'klarna_order'   => '{checkout.order.id}',
 		'sid'            => $local_order_id,
+		'scountry'     => $this->klarna_country,
 		'order-received' => $local_order_id,
 		'thankyou'       => 'yes',
 		'key'            => $order_key
@@ -106,6 +107,7 @@ if ( $this->is_rest() ) {
 	$merchant_confirmation_uri = add_query_arg( array(
 		'klarna_order'   => '{checkout.order.id}',
 		'sid'            => $local_order_id,
+		'scountry'     => $this->klarna_country,
 		'order-received' => $local_order_id,
 		'thankyou'       => 'yes',
 		'key'            => $order_key
