@@ -2,6 +2,7 @@
 
 2017.07.xx  - version 2.3.14
 * Update    - Updates Guzzle dependency to 5.3.1.
+* Fix       - Adds check if it already has run for woocommerce_thankyou action hook in KCO thank you page.
 
 2017.07.24  - version 2.3.14
 * Fix       - Restricts post-checkout KCO user login to new accounts.
