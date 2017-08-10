@@ -2416,6 +2416,8 @@ class WC_Gateway_Klarna_Checkout_Extra {
 		$this->eid_at               = ( isset( $checkout_settings['eid_at'] ) ) ? $checkout_settings['eid_at'] : '';
 		$this->eid_uk               = ( isset( $checkout_settings['eid_uk'] ) ) ? $checkout_settings['eid_uk'] : '';
 		$this->eid_us               = ( isset( $checkout_settings['eid_us'] ) ) ? $checkout_settings['eid_us'] : '';
+		$this->eid_dk               = ( isset( $checkout_settings['eid_dk'] ) ) ? $checkout_settings['eid_dk'] : '';
+		$this->eid_nl               = ( isset( $checkout_settings['eid_nl'] ) ) ? $checkout_settings['eid_nl'] : '';
 		$this->authorized_countries = array();
 		if ( ! empty( $this->eid_se ) ) {
 			$this->authorized_countries[] = 'SE';
@@ -2437,6 +2439,12 @@ class WC_Gateway_Klarna_Checkout_Extra {
 		}
 		if ( ! empty( $this->eid_us ) ) {
 			$this->authorized_countries[] = 'US';
+		}
+		if ( ! empty( $this->eid_dk ) ) {
+			$this->authorized_countries[] = 'DK';
+		}
+		if ( ! empty( $this->eid_nl ) ) {
+			$this->authorized_countries[] = 'NL';
 		}
 
 		return apply_filters( 'klarna_authorized_countries', $this->authorized_countries );
