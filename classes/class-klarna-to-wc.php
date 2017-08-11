@@ -667,11 +667,13 @@ class WC_Gateway_Klarna_K2WC {
 		);
 
 		// Company.
-		if ( 'organization' === $klarna_order['customer']['type'] ) {
-			$billing_address['company'] = $klarna_order['billing_address']['organization_name'];
-			$reference = isset( $klarna_order['billing_address']['reference'] ) ? $klarna_order['billing_address']['reference'] : '';
-			update_post_meta( $order_id, 'klarna_organization_reference', $reference );
-			update_post_meta( $order_id, 'klarna_organization_registration_id', $klarna_order['customer']['organization_registration_id'] );
+		if ( isset( $klarna_order['customer']['type'] ) ) {
+			if ( 'organization' === $klarna_order['customer']['type'] ) {
+				$billing_address['company'] = $klarna_order['billing_address']['organization_name'];
+				$reference                  = isset( $klarna_order['billing_address']['reference'] ) ? $klarna_order['billing_address']['reference'] : '';
+				update_post_meta( $order_id, 'klarna_organization_reference', $reference );
+				update_post_meta( $order_id, 'klarna_organization_registration_id', $klarna_order['customer']['organization_registration_id'] );
+			}
 		}
 
 		$order->set_address( apply_filters( 'wc_klarna_returned_billing_address', $billing_address ), 'billing' );
@@ -695,8 +697,10 @@ class WC_Gateway_Klarna_K2WC {
 		);
 
 		// Company.
-		if ( 'organization' === $klarna_order['customer']['type'] ) {
-			$shipping_address['company'] = $klarna_order['shipping_address']['organization_name'];
+		if ( isset( $klarna_order['customer']['type'] ) ) {
+			if ( 'organization' === $klarna_order['customer']['type'] ) {
+				$shipping_address['company'] = $klarna_order['shipping_address']['organization_name'];
+			}
 		}
 
 		$order->set_address( apply_filters( 'wc_klarna_returned_shipping_address', $shipping_address ), 'shipping' );

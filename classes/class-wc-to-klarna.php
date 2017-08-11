@@ -60,7 +60,7 @@ class WC_Gateway_Klarna_WC2K {
 	 *
 	 * @since 2.0.0
 	 *
-	 * @param bool   $is_rest        Rest API ir not.
+	 * @param bool   $is_rest Rest API ir not.
 	 * @param string $klarna_country Klarna purchase country.
 	 */
 	public function __construct( $is_rest = false, $klarna_country = '' ) {
@@ -262,8 +262,10 @@ class WC_Gateway_Klarna_WC2K {
 					break;
 				}
 
-				$coupon_name   = $this->get_coupon_name( $coupon );
-				$coupon_amount = $this->get_coupon_amount( $coupon );
+				$coupon_name       = $this->get_coupon_name( $code );
+				$coupon_amount     = $this->get_coupon_amount( $code );
+				$coupon_tax_amount = $this->get_coupon_tax_amount( $code );
+				$coupon_tax_rate   = $this->get_coupon_tax_rate( $code );
 
 				// Check if coupon amount exceeds order total.
 				if ( $order_total < $coupon_amount ) {
@@ -276,10 +278,10 @@ class WC_Gateway_Klarna_WC2K {
 						'reference'        => 'DISCOUNT',
 						'name'             => $coupon_name,
 						'quantity'         => 1,
-						'unit_price'       => - $coupon_amount,
-						'total_amount'     => - $coupon_amount,
-						'tax_rate'         => 0,
-						'total_tax_amount' => 0,
+						'unit_price'       => - ( $coupon_amount + $coupon_tax_amount ),
+						'total_amount'     => - ( $coupon_amount + $coupon_tax_amount ),
+						'tax_rate'         => $coupon_tax_rate,
+						'total_tax_amount' => - $coupon_tax_amount,
 					);
 					$order_total = $order_total - $coupon_amount;
 				} else {
@@ -288,14 +290,13 @@ class WC_Gateway_Klarna_WC2K {
 						'reference'  => 'DISCOUNT',
 						'name'       => $coupon_name,
 						'quantity'   => 1,
-						'unit_price' => - $coupon_amount,
-						'tax_rate'   => 0,
+						'unit_price' => - ( $coupon_amount + $coupon_tax_amount ),
+						'tax_rate'   => $coupon_tax_rate,
 					);
-					$order_total = $order_total - $coupon_amount;
+					$order_total = $order_total - $coupon_amount - $coupon_tax_amount;
 				}
 			} // End foreach().
 		} // End if().
-
 		return apply_filters( 'klarna_process_cart_contents', $cart );
 	}
 
@@ -445,7 +446,9 @@ class WC_Gateway_Klarna_WC2K {
 	 * @return integer $item_discount_amount Cart item discount.
 	 */
 	public function get_item_discount_amount( $cart_item ) {
-		if ( round( $cart_item['line_subtotal'], 2 ) > round( $cart_item['line_total'], 2 ) ) {
+		$klarna_settings = get_option( 'woocommerce_klarna_checkout_settings' );
+
+		if ( 'yes' !== $klarna_settings['send_discounts_separately'] && round( $cart_item['line_subtotal'], 2 ) > round( $cart_item['line_total'], 2 ) ) {
 			$item_price           = $this->get_item_price( $cart_item );
 			$item_total_amount    = $this->get_item_total_amount( $cart_item );
 			$item_discount_amount = ( $item_price * $cart_item['quantity'] - $item_total_amount );
@@ -489,10 +492,20 @@ class WC_Gateway_Klarna_WC2K {
 	 * @return integer $item_total_amount Cart item total amount.
 	 */
 	public function get_item_total_amount( $cart_item ) {
-		if ( 'us' === $this->klarna_country ) {
-			$item_total_amount = ( $cart_item['line_total'] * 100 );
+		$klarna_settings = get_option( 'woocommerce_klarna_checkout_settings' );
+
+		if ( 'yes' !== $klarna_settings['send_discounts_separately'] ) {
+			if ( 'us' === $this->klarna_country ) {
+				$item_total_amount = ( $cart_item['line_total'] * 100 );
+			} else {
+				$item_total_amount = ( ( $cart_item['line_total'] + $cart_item['line_tax'] ) * 100 );
+			}
 		} else {
-			$item_total_amount = ( ( $cart_item['line_total'] + $cart_item['line_tax'] ) * 100 );
+			if ( 'us' === $this->klarna_country ) {
+				$item_total_amount = ( $cart_item['line_subtotal'] * 100 );
+			} else {
+				$item_total_amount = ( ( $cart_item['line_subtotal'] + $cart_item['line_subtotal_tax'] ) * 100 );
+			}
 		}
 
 		return round( $item_total_amount );
@@ -712,31 +725,79 @@ class WC_Gateway_Klarna_WC2K {
 	 * @since  2.0.0
 	 * @access public
 	 *
-	 * @param object $coupon WC_Coupon.
+	 * @param string $coupon_code WC_Coupon code.
 	 *
 	 * @return string $coupon_name Name for selected coupon method.
 	 */
-	public function get_coupon_name( $coupon ) {
-		$coupon_name = klarna_wc_get_coupon_code( $coupon );
-
-		return $coupon_name;
+	public function get_coupon_name( $coupon_code ) {
+		return $coupon_code;
 	}
 
 	/**
-	 * Get coupon method amount.
+	 * Get coupon amount.
 	 *
 	 * @since  2.0.0
 	 * @access public
 	 *
-	 * @param object $coupon WC_Coupon.
+	 * @param string $coupon_code WC_Coupon code.
 	 *
 	 * @return integer $coupon_amount Amount for selected coupon method.
 	 */
-	public function get_coupon_amount( $coupon ) {
-		$coupon_amount = WC()->cart->get_coupon_discount_amount( klarna_wc_get_coupon_code( $coupon ), false );
+	public function get_coupon_amount( $coupon_code ) {
+		$coupon_amount = WC()->cart->get_coupon_discount_amount( $coupon_code, true );
+
 		$coupon_amount = (int) number_format( ( $coupon_amount ) * 100, 0, '', '' );
 
 		return $coupon_amount;
+	}
+
+	/**
+	 * Get coupon tax amount.
+	 *
+	 * @since  2.0.0
+	 * @access public
+	 *
+	 * @param string $coupon_code WC_Coupon code.
+	 *
+	 * @return integer $coupon_amount Amount for selected coupon method.
+	 */
+	public function get_coupon_tax_amount( $coupon_code ) {
+		if ( 'us' === $this->klarna_country ) {
+			$coupon_tax_amount = 00;
+		} else {
+			$coupon_tax_amount = WC()->cart->get_coupon_discount_tax_amount( $coupon_code );
+		}
+		$coupon_tax_amount = (int) number_format( ( $coupon_tax_amount ) * 100, 0, '', '' );
+
+		return $coupon_tax_amount;
+	}
+
+	/**
+	 * Get coupon tax amount.
+	 *
+	 * @since  2.0.0
+	 * @access public
+	 *
+	 * @param string $coupon_code WC_Coupon code.
+	 *
+	 * @return integer $coupon_amount Amount for selected coupon method.
+	 */
+	public function get_coupon_tax_rate( $coupon_code ) {
+		$coupon_amount     = WC()->cart->get_coupon_discount_amount( $coupon_code, true );
+		$coupon_tax_amount = WC()->cart->get_coupon_discount_tax_amount( $coupon_code );
+
+		if ( $coupon_tax_amount > 0 ) {
+			// Calculate tax rate.
+			if ( 'us' === $this->klarna_country ) {
+				$coupon_tax_rate = 00;
+			} else {
+				$coupon_tax_rate = round( $coupon_tax_amount / $coupon_amount * 100 * 100 );
+			}
+		} else {
+			$coupon_tax_rate = 00;
+		}
+
+		return round( $coupon_tax_rate / 10 ) * 10;
 	}
 
 }
