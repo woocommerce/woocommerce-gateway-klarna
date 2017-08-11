@@ -1,10 +1,11 @@
 *** WooCommerce Gateway Klarna Changelog ***
 
-2017.08.10  - version 2.3.14
+2017.08.11  - version 2.4.0
 * Update    - Updates Guzzle dependency to 5.3.1.
 * Fix		- Adds DK & NL to get_authorized_countries() (used for filter url to checkout page).
 * Fix       - Adds check if it already has run for woocommerce_thankyou action hook in KCO thank you page.
 * Fix       - Checks coupon usage limits in Klarna Checkout page.
+* Update    - Loads Klarna checkout scrips also when WOOCOMMERCE_CHECKOUT is defined.
 
 2017.07.24  - version 2.3.14
 * Fix       - Restricts post-checkout KCO user login to new accounts.
