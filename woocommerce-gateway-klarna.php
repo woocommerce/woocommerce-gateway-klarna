@@ -178,7 +178,7 @@ function init_klarna_gateway() {
 		function klarna_load_scripts() {
 			wp_enqueue_script( 'jquery' );
 
-			if ( is_checkout() ) {
+			if ( is_checkout() || defined( 'WOOCOMMERCE_CHECKOUT' ) ) {
 				wp_register_script( 'klarna-base-js', 'https://cdn.klarna.com/public/kitt/core/v1.0/js/klarna.min.js', array( 'jquery' ), '1.0', false );
 				wp_register_script( 'klarna-terms-js', 'https://cdn.klarna.com/public/kitt/toc/v1.1/js/klarna.terms.min.js', array( 'klarna-base-js' ), '1.0', false );
 				wp_enqueue_script( 'klarna-base-js' );
