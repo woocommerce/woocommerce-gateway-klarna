@@ -292,8 +292,10 @@ class WC_Gateway_Klarna_Helper {
 	 * @return integer $current_eid
 	 **/
 	function get_eid( $country = '' ) {
+		$customer_country = klarna_wc_get_customer_country( WC()->customer );
+
 		if ( empty( $country ) ) {
-			$country = ( null === klarna_wc_get_customer_country( WC()->customer ) ) ? klarna_wc_get_customer_country( WC()->customer ) : $this->parent->shop_country;
+			$country = ( isset( $customer_country ) ) ? $customer_country : $this->parent->shop_country;
 		}
 
 		switch ( $country ) {
