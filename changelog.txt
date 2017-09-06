@@ -2,7 +2,8 @@
 
 2017.09.06  - version 2.4.1
 * Fix       - Fixes status code comparison issue in KCO V3.
-* Fix       - Fixes tax rate rounding in KCO.
+* Fix       - Fixes tax rate rounding in Klarna Checkout.
+* Fix       - Fixes coupon validation in Klarna Checkout.
 * Update    - Adds error handling in WPTransport class.
 
 2017.08.11  - version 2.4.0

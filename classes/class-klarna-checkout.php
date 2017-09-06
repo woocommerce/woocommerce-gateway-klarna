@@ -762,6 +762,10 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			exit( 'Nonce can not be verified.' );
 		}
 
+		if ( ! defined( 'WOOCOMMERCE_CART' ) ) {
+			define( 'WOOCOMMERCE_CART', true );
+		}
+
 		$data                = array();
 		$data['widget_html'] = '';
 
@@ -775,10 +779,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			WC()->cart->calculate_totals();
 			wc_clear_notices(); // This notice handled by Klarna plugin
 
-			if ( ! defined( 'WOOCOMMERCE_CART' ) ) {
-				define( 'WOOCOMMERCE_CART', true );
-			}
-
+			/*
 			if ( sizeof( WC()->cart->get_applied_coupons() ) > 0 ) {
 				if ( WC()->customer->get_billing_email() ) {
 					$coupons_before = sizeof( WC()->cart->get_applied_coupons() );
@@ -789,14 +790,14 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 					}
 				}
 			}
+			*/
 
-
-			$woocommerce->cart->calculate_shipping();
-			$woocommerce->cart->calculate_fees();
-			$woocommerce->cart->calculate_totals();
+			WC()->cart->calculate_shipping();
+			WC()->cart->calculate_fees();
+			WC()->cart->calculate_totals();
 			$this->update_or_create_local_order();
 
-			$amount                 = wc_price( $woocommerce->cart->get_coupon_discount_amount( $coupon, $woocommerce->cart->display_cart_ex_tax ) );
+			$amount                 = wc_price( WC()->cart->get_coupon_discount_amount( $coupon, WC()->cart->display_cart_ex_tax ) );
 			$data['amount']         = $amount;
 			$data['coupon_success'] = $coupon_success;
 			$data['coupon']         = $coupon;
