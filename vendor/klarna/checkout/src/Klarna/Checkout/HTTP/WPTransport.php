@@ -105,9 +105,6 @@ class Klarna_Checkout_HTTP_WPTransport implements Klarna_Checkout_HTTP_Transport
 		$my_response = wp_remote_request( $req_url, $args );
 
 		if ( is_wp_error( $my_response ) ) {
-			error_log( 'wp_remote_request error in WPTransport.php' );
-			error_log( var_export( $my_response, true ) );
-
 			$error_code    = $my_response->get_error_code();
 			$error_message = $my_response->get_error_message( $error_code );
 			throw new Klarna_Checkout_ConnectionErrorException(
