@@ -758,19 +758,21 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 * @since  2.0
 	 **/
 	function klarna_checkout_coupons_callback() {
-		global $woocommerce;
 		if ( ! wp_verify_nonce( $_REQUEST['nonce'], 'klarna_checkout_nonce' ) ) {
 			exit( 'Nonce can not be verified.' );
 		}
+
 		$data                = array();
 		$data['widget_html'] = '';
+
 		// Adding coupon
 		if ( ! empty( $_REQUEST['coupon'] ) && is_string( $_REQUEST['coupon'] ) ) {
 			$coupon          = $_REQUEST['coupon'];
-			$coupon_success  = $woocommerce->cart->add_discount( $coupon );
-			$applied_coupons = $woocommerce->cart->applied_coupons;
-			$woocommerce->session->set( 'applied_coupons', $applied_coupons );
-			$woocommerce->cart->calculate_totals();
+			$coupon_success  = WC()->cart->add_discount( $coupon );
+			$applied_coupons = WC()->cart->applied_coupons;
+
+			WC()->session->set( 'applied_coupons', $applied_coupons );
+			WC()->cart->calculate_totals();
 			wc_clear_notices(); // This notice handled by Klarna plugin
 
 			if ( ! defined( 'WOOCOMMERCE_CART' ) ) {
@@ -799,9 +801,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			$data['coupon_success'] = $coupon_success;
 			$data['coupon']         = $coupon;
 			$data['widget_html']    .= $this->klarna_checkout_get_kco_widget_html();
-			if ( ! defined( 'WOOCOMMERCE_CART' ) ) {
-				define( 'WOOCOMMERCE_CART', true );
-			}
+
 			if ( WC()->session->get( 'klarna_checkout' ) ) {
 				$this->ajax_update_klarna_order();
 			}
