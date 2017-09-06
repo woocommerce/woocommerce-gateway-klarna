@@ -255,25 +255,25 @@ class WC_Gateway_Klarna_Helper {
 
 		switch ( $country ) {
 			case 'DK':
-				$klarna_part_payment_icon = 'https://cdn.klarna.com/1.0/shared/image/generic/logo/da_dk/basic/blue-black.png?width=100&eid=' . $this->get_eid();
+				$klarna_part_payment_icon = 'https://cdn.klarna.com/1.0/shared/image/generic/logo/da_dk/basic/logo_black.png?width=100&eid=' . $this->get_eid();
 				break;
 			case 'DE':
-				$klarna_part_payment_icon = 'https://cdn.klarna.com/1.0/shared/image/generic/logo/de_de/basic/blue-black.png?width=100&eid=' . $this->get_eid();
+				$klarna_part_payment_icon = 'https://cdn.klarna.com/1.0/shared/image/generic/logo/de_de/basic/logo_black.png?width=100&eid=' . $this->get_eid();
 				break;
 			case 'NL':
-				$klarna_part_payment_icon = 'https://cdn.klarna.com/1.0/shared/image/generic/logo/nl_nl/basic/blue-black.png?width=100&eid=' . $this->get_eid();
+				$klarna_part_payment_icon = 'https://cdn.klarna.com/1.0/shared/image/generic/logo/nl_nl/basic/logo_black.png?width=100&eid=' . $this->get_eid();
 				break;
 			case 'NO':
 				$klarna_part_payment_icon = false;
 				break;
 			case 'FI':
-				$klarna_part_payment_icon = 'https://cdn.klarna.com/1.0/shared/image/generic/logo/fi_fi/basic/blue-black.png?width=100&eid=' . $this->get_eid();
+				$klarna_part_payment_icon = 'https://cdn.klarna.com/1.0/shared/image/generic/logo/fi_fi/basic/logo_black.png?width=100&eid=' . $this->get_eid();
 				break;
 			case 'SE':
-				$klarna_part_payment_icon = 'https://cdn.klarna.com/1.0/shared/image/generic/logo/sv_se/basic/blue-black.png?width=100&eid=' . $this->get_eid();
+				$klarna_part_payment_icon = 'https://cdn.klarna.com/1.0/shared/image/generic/logo/sv_se/basic/logo_black.png?width=100&eid=' . $this->get_eid();
 				break;
 			case 'AT':
-				$klarna_part_payment_icon = 'https://cdn.klarna.com/1.0/shared/image/generic/logo/de_at/basic/blue-black.png?width=100&eid=' . $this->get_eid();
+				$klarna_part_payment_icon = 'https://cdn.klarna.com/1.0/shared/image/generic/logo/de_at/basic/logo_black.png?width=100&eid=' . $this->get_eid();
 				break;
 			default:
 				$klarna_part_payment_icon = '';

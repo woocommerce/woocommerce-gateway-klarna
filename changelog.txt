@@ -5,6 +5,7 @@
 * Fix       - Fixes tax rate rounding in Klarna Checkout.
 * Fix       - Fixes coupon validation in Klarna Checkout.
 * Update    - Adds error handling in WPTransport class.
+* Update    - Updates Klarna logos for invoice and part payment.
 
 2017.08.11  - version 2.4.0
 * Update    - Updates Guzzle dependency to 5.3.1.
