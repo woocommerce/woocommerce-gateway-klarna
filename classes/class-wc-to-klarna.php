@@ -297,6 +297,7 @@ class WC_Gateway_Klarna_WC2K {
 				}
 			} // End foreach().
 		} // End if().
+
 		return apply_filters( 'klarna_process_cart_contents', $cart );
 	}
 
@@ -336,12 +337,21 @@ class WC_Gateway_Klarna_WC2K {
 		if ( $_product->is_taxable() && $cart_item['line_subtotal_tax'] > 0 ) {
 			// Calculate tax rate.
 			if ( 'us' === $this->klarna_country ) {
-				$item_tax_rate = 00;
+				$item_tax_rate = 0;
 			} else {
-				$item_tax_rate = round( $cart_item['line_subtotal_tax'] / $cart_item['line_subtotal'] * 100 * 100 );
+				$_tax      = new WC_Tax();
+				$tmp_rates = $_tax->get_rates( $_product->get_tax_class() );
+				$_vat      = array_shift( $tmp_rates );
+
+				// Check what kind of tax rate we have.
+				if ( $_product->is_taxable() && isset( $_vat['rate'] ) ) {
+					$item_tax_rate = round( $_vat['rate'] * 100 );
+				} else {
+					$item_tax_rate = 0;
+				}
 			}
 		} else {
-			$item_tax_rate = 00;
+			$item_tax_rate = 0;
 		}
 
 		return intval( $item_tax_rate );
