@@ -1,5 +1,12 @@
 *** WooCommerce Gateway Klarna Changelog ***
 
+2017.09.07  - version 2.4.1
+* Fix       - Fixes status code comparison issue in KCO V3.
+* Fix       - Fixes tax rate rounding in Klarna Checkout.
+* Fix       - Fixes coupon validation in Klarna Checkout.
+* Update    - Adds error handling in WPTransport class.
+* Update    - Updates Klarna logos for invoice and part payment.
+
 2017.08.11  - version 2.4.0
 * Update    - Updates Guzzle dependency to 5.3.1.
 * Fix		- Adds DK & NL to get_authorized_countries() (used for filter url to checkout page).

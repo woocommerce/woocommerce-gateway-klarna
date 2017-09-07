@@ -93,7 +93,7 @@ class Klarna_Checkout_HTTP_WPTransport implements Klarna_Checkout_HTTP_Transport
 			'timeout' => apply_filters( 'kco_http_request_timeout', $this->getTimeout() ),
 		);
 
-		// For GET requests we need to get Klarna order URI, set in WC session
+		// For GET requests we need to get Klarna order URI, set in WC session.
 		if ( 'GET' == $request->getMethod() && WC()->session->get( 'klarna_request_uri' ) ) {
 			if ( method_exists( WC()->session, 'get' ) ) {
 				$req_url = WC()->session->get( 'klarna_request_uri' );
@@ -104,16 +104,22 @@ class Klarna_Checkout_HTTP_WPTransport implements Klarna_Checkout_HTTP_Transport
 
 		$my_response = wp_remote_request( $req_url, $args );
 
-		// Set order URI as session value for GET request
+		if ( is_wp_error( $my_response ) ) {
+			$error_code    = $my_response->get_error_code();
+			$error_message = $my_response->get_error_message( $error_code );
+			throw new Klarna_Checkout_ConnectionErrorException(
+				"wp_remote_request_error {$error_code} - {$error_message}, (url: ${$req_url})"
+			);
+		}
+
+		// Set order URI as session value for GET request.
 		if ( 'POST' == $request->getMethod() ) {
 			if ( class_exists( 'WC_Session' ) ) {
 				if ( method_exists( WC()->session, '__unset' ) ) {
 					WC()->session->__unset( 'klarna_request_uri' );
 				}
 
-				if ( is_wp_error( $my_response ) ) {
-					error_log( var_export( $my_response, true ) );
-				} elseif ( isset( $my_response['headers']['location'] ) ) {
+				if ( isset( $my_response['headers']['location'] ) ) {
 					$klarna_request_uri = $my_response['headers']['location'];
 				} else {
 					$klarna_request_uri = $request->getURL();
@@ -125,13 +131,9 @@ class Klarna_Checkout_HTTP_WPTransport implements Klarna_Checkout_HTTP_Transport
 			}
 		}
 
-		if ( ! is_wp_error( $my_response ) ) {
-			$response = new Klarna_Checkout_HTTP_Response( $request, $request->getHeaders(), intval( $my_response['response']['code'] ), strval( $my_response['body'] ) );
-			return $response;
-		} else {
-			return $my_response;
-		}
+		$response = new Klarna_Checkout_HTTP_Response( $request, $request->getHeaders(), intval( $my_response['response']['code'] ), strval( $my_response['body'] ) );
 
+		return $response;
 	}
 
 	/**
