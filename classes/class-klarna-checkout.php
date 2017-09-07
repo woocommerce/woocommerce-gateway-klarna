@@ -2503,9 +2503,7 @@ class WC_Gateway_Klarna_Checkout_Extra {
 				'country'    => strtoupper( $data['billing_address']['country'] ),
 				'first_name' => $data['billing_address']['given_name'],
 				'last_name'  => $data['billing_address']['family_name'],
-				// 'company'    => $data['billing_address']['company'],
 				'address_1'  => $data['billing_address']['street_address'],
-				'address_2'  => $data['billing_address']['street_address2'],
 				'postcode'   => $data['billing_address']['postal_code'],
 				'city'       => $data['billing_address']['city'],
 				'state'      => $data['billing_address']['region'],
@@ -2516,15 +2514,22 @@ class WC_Gateway_Klarna_Checkout_Extra {
 				'country'    => strtoupper( $data['shipping_address']['country'] ),
 				'first_name' => $data['shipping_address']['given_name'],
 				'last_name'  => $data['shipping_address']['family_name'],
-				// 'company'    => $data['shipping_address']['company'],
 				'address_1'  => $data['shipping_address']['street_address'],
-				'address_2'  => $data['shipping_address']['street_address2'],
 				'postcode'   => $data['shipping_address']['postal_code'],
 				'city'       => $data['shipping_address']['city'],
 				'state'      => $data['shipping_address']['region'],
 				'email'      => $data['shipping_address']['email'],
 				'phone'      => $data['shipping_address']['phone'],
 			);
+
+			if ( isset( $data['billing_address']['street_address2'] ) ) {
+				$billing_address['address_2'] = $data['billing_address']['street_address2'];
+			}
+
+			if ( isset( $data['shipping_address']['street_address2'] ) ) {
+				$billing_address['address_2'] = $data['shipping_address']['street_address2'];
+			}
+
 			$order->set_address( $billing_address, 'billing' );
 			$order->set_address( apply_filters( 'kco_set_shipping_address', $shipping_address, $order, $data ), 'shipping' );
 			$order->calculate_taxes();
