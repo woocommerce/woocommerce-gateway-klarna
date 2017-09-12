@@ -935,6 +935,12 @@ class WC_Gateway_Klarna_Invoice_Extra {
 	 * Calculate fees on checkout form.
 	 */
 	public function calculate_fees( $cart ) {
+		
+		$invo_settings        = get_option( 'woocommerce_klarna_invoice_settings' );
+		if ( 'yes' != $invo_settings['enabled'] ) {
+			return;
+		}
+		
 		global $woocommerce;
 		$current_gateway = '';
 		if ( is_checkout() || defined( 'WOOCOMMERCE_CHECKOUT' ) ) {
