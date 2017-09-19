@@ -976,11 +976,11 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 				WC()->customer->save();
 			}
 
-			if ( sizeof( WC()->cart->get_applied_coupons() ) > 0 ) {
+			if ( count( WC()->cart->get_applied_coupons() ) > 0 ) {
 				if ( WC()->customer->get_billing_email() ) {
-					$coupons_before = sizeof( WC()->cart->get_applied_coupons() );
+					$coupons_before = count( WC()->cart->get_applied_coupons() );
 					WC()->cart->check_customer_coupons( array( 'billing_email' => WC()->customer->get_billing_email() ) );
-					if ( sizeof( WC()->cart->get_applied_coupons() ) < $coupons_before ) {
+					if ( count( WC()->cart->get_applied_coupons() ) < $coupons_before ) {
 						$coupon              = new WC_Coupon();
 						$data['widget_html'] .= '<div class="woocommerce-error">' . $coupon->get_coupon_error( WC_Coupon::E_WC_COUPON_USAGE_LIMIT_REACHED ) . '</div>';
 					}

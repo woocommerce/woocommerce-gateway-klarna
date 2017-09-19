@@ -333,8 +333,7 @@ class WC_Gateway_Klarna_WC2K {
 	 * @return integer $item_tax_rate Item tax percentage formatted for Klarna.
 	 */
 	public function get_item_tax_rate( $cart_item, $_product ) {
-		// We manually calculate the tax percentage here.
-		if ( $_product->is_taxable() && $cart_item['line_subtotal_tax'] > 0 ) {
+		if ( $cart_item['line_subtotal_tax'] > 0 && $_product->is_taxable() ) {
 			// Calculate tax rate.
 			if ( 'us' === $this->klarna_country ) {
 				$item_tax_rate = 0;
@@ -344,7 +343,7 @@ class WC_Gateway_Klarna_WC2K {
 				$_vat      = array_shift( $tmp_rates );
 
 				// Check what kind of tax rate we have.
-				if ( $_product->is_taxable() && isset( $_vat['rate'] ) ) {
+				if ( null !== $_vat['rate'] && $_product->is_taxable() ) {
 					$item_tax_rate = round( $_vat['rate'] * 100 );
 				} else {
 					$item_tax_rate = 0;
@@ -354,7 +353,7 @@ class WC_Gateway_Klarna_WC2K {
 			$item_tax_rate = 0;
 		}
 
-		return intval( $item_tax_rate );
+		return (int) $item_tax_rate;
 	}
 
 	/**
@@ -672,7 +671,7 @@ class WC_Gateway_Klarna_WC2K {
 			$shipping_reference = __( 'Shipping', 'woocommerce-gateway-klarna' );
 		}
 
-		return strval( $shipping_reference );
+		return (string) $shipping_reference;
 	}
 
 	/**
@@ -702,13 +701,16 @@ class WC_Gateway_Klarna_WC2K {
 	 * @return integer $shipping_tax_rate Tax rate for selected shipping method.
 	 */
 	public function get_shipping_tax_rate() {
-		if ( WC()->cart->shipping_tax_total > 0 && 'us' !== $this->klarna_country ) {
-			$shipping_tax_rate = round( WC()->cart->shipping_tax_total / WC()->cart->shipping_total * 100 * 100 );
+		if ( 'us' !== $this->klarna_country && WC()->cart->shipping_tax_total > 0 ) {
+			$shipping_tax_rates = WC_Tax::get_shipping_tax_rates();
+			$first_rate = array_shift( $shipping_tax_rates );
+
+			$shipping_tax_rate = round( $first_rate['rate'] * 100 );
 		} else {
 			$shipping_tax_rate = 00;
 		}
 
-		return intval( $shipping_tax_rate );
+		return (int) $shipping_tax_rate;
 	}
 
 	/**
