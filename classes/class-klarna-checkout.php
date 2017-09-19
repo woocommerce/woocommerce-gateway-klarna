@@ -969,16 +969,18 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 
 		// Check coupons.
 		if ( isset( $_REQUEST['email'] ) && is_email( $_REQUEST['email'] ) ) {
-			WC()->customer->set_billing_email( $_REQUEST['email'] );
+			if ( is_callable( array( WC()->customer, 'set_billing_email' ) ) ) {
+				WC()->customer->set_billing_email( $_REQUEST['email'] );
+			}
 			if ( is_callable( array( WC()->customer, 'save' ) ) ) {
 				WC()->customer->save();
 			}
 
-			if ( sizeof( WC()->cart->get_applied_coupons() ) > 0 ) {
+			if ( count( WC()->cart->get_applied_coupons() ) > 0 ) {
 				if ( WC()->customer->get_billing_email() ) {
-					$coupons_before = sizeof( WC()->cart->get_applied_coupons() );
+					$coupons_before = count( WC()->cart->get_applied_coupons() );
 					WC()->cart->check_customer_coupons( array( 'billing_email' => WC()->customer->get_billing_email() ) );
-					if ( sizeof( WC()->cart->get_applied_coupons() ) < $coupons_before ) {
+					if ( count( WC()->cart->get_applied_coupons() ) < $coupons_before ) {
 						$coupon              = new WC_Coupon();
 						$data['widget_html'] .= '<div class="woocommerce-error">' . $coupon->get_coupon_error( WC_Coupon::E_WC_COUPON_USAGE_LIMIT_REACHED ) . '</div>';
 					}
@@ -1120,7 +1122,9 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 
 		// Check coupons.
 		if ( isset( $_REQUEST['email'] ) && is_email( $_REQUEST['email'] ) ) {
-			WC()->customer->set_billing_email( $_REQUEST['email'] );
+			if ( is_callable( array( WC()->customer, 'set_billing_email' ) ) ) {
+				WC()->customer->set_billing_email( $_REQUEST['email'] );
+			}
 			if ( is_callable( array( WC()->customer, 'save' ) ) ) {
 				WC()->customer->save();
 			}
@@ -1174,8 +1178,10 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 				}
 			}
 
-			if ( isset( $_REQUEST['email'] ) && is_string( $_REQUEST['email'] ) ) {
-				$order->set_billing_email( $_REQUEST['email'] );
+			if ( is_callable( array( WC()->customer, 'set_billing_email' ) ) ) {
+				if ( isset( $_REQUEST['email'] ) && is_string( $_REQUEST['email'] ) ) {
+					$order->set_billing_email( $_REQUEST['email'] );
+				}
 			}
 
 			if ( isset( $_REQUEST['given_name'] ) && is_string( $_REQUEST['given_name'] ) ) {
@@ -1361,137 +1367,6 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		$klarna_shortcodes = new WC_Gateway_Klarna_Shortcodes();
 
 		return $klarna_shortcodes->klarna_checkout_get_kco_widget_html();
-	}
-
-	/**
-	 * WooCommerce cart to Klarna cart items.
-	 *
-	 * Helper functions that format WooCommerce cart items for Klarna order items.
-	 *
-	 * @since  2.0
-	 **/
-	function cart_to_klarna() {
-		global $woocommerce;
-		$woocommerce->cart->calculate_shipping();
-		$woocommerce->cart->calculate_totals();
-		/**
-		 * Process cart contents
-		 */
-		if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
-			foreach ( $woocommerce->cart->get_cart() as $cart_item ) {
-				if ( $cart_item['quantity'] ) {
-					$_product = wc_get_product( $cart_item['product_id'] );
-					// We manually calculate the tax percentage here
-					if ( $_product->is_taxable() && $cart_item['line_subtotal_tax'] > 0 ) {
-						// Calculate tax percentage
-						$item_tax_percentage = round( $cart_item['line_subtotal_tax'] / $cart_item['line_subtotal'], 2 ) * 100;
-					} else {
-						$item_tax_percentage = 00;
-					}
-					$cart_item_data = $cart_item['data'];
-					$cart_item_post = klarna_wc_get_cart_item_post( $cart_item_data );
-					$cart_item_name = $cart_item_post->post_title;
-					if ( isset( $cart_item['item_meta'] ) ) {
-						$item_meta = new WC_Order_Item_Meta( $cart_item['item_meta'] );
-						if ( $meta = $item_meta->display( true, true ) ) {
-							$cart_item_name .= ' ( ' . $meta . ' )';
-						}
-					}
-					// apply_filters to item price so we can filter this if needed
-					$klarna_item_price_including_tax = $cart_item['line_subtotal'] + $cart_item['line_subtotal_tax'];
-					$item_price                      = apply_filters( 'klarna_item_price_including_tax', $klarna_item_price_including_tax );
-
-					// Get SKU or product id
-					if ( $_product->get_sku() ) {
-						$reference = $_product->get_sku();
-					} elseif ( klarna_wc_get_product_variation_id( $_product ) ) {
-						$reference = klarna_wc_get_product_variation_id( $_product );
-					} else {
-						$reference = klarna_wc_get_product_id( $_product );
-					}
-
-					$total_amount = (int) ( $cart_item['line_total'] + $cart_item['line_tax'] ) * 100;
-					$item_price   = number_format( $item_price * 100, 0, '', '' ) / $cart_item['quantity'];
-
-					// Check if there's a discount applied
-					if ( $cart_item['line_subtotal'] > $cart_item['line_total'] ) {
-						$item_discount_rate = round( 1 - ( $cart_item['line_total'] / $cart_item['line_subtotal'] ), 2 ) * 10000;
-						$item_discount      = ( $item_price * $cart_item['quantity'] - $total_amount );
-					} else {
-						$item_discount_rate = 0;
-						$item_discount      = 0;
-					}
-
-					if ( $this->is_rest() ) {
-						$klarna_item = array(
-							'reference'             => strval( $reference ),
-							'name'                  => strip_tags( $cart_item_name ),
-							'quantity'              => (int) $cart_item['quantity'],
-							'unit_price'            => (int) $item_price,
-							'tax_rate'              => intval( $item_tax_percentage . '00' ),
-							'total_amount'          => $total_amount,
-							'total_tax_amount'      => $cart_item['line_subtotal_tax'] * 100,
-							'total_discount_amount' => $item_discount
-						);
-					} else {
-						$klarna_item = array(
-							'reference'     => strval( $reference ),
-							'name'          => strip_tags( $cart_item_name ),
-							'quantity'      => (int) $cart_item['quantity'],
-							'unit_price'    => (int) $item_price,
-							'tax_rate'      => intval( $item_tax_percentage . '00' ),
-							'discount_rate' => $item_discount_rate
-						);
-					}
-
-					$cart[] = $klarna_item;
-				} // End if qty
-			} // End foreach
-		} // End if sizeof get_items()
-		/**
-		 * Process shipping
-		 */
-		if ( $woocommerce->cart->shipping_total > 0 ) {
-			// We manually calculate the tax percentage here
-			if ( $woocommerce->cart->shipping_tax_total > 0 ) {
-				// Calculate tax percentage
-				$shipping_tax_percentage = round( $woocommerce->cart->shipping_tax_total / $woocommerce->cart->shipping_total, 2 ) * 100;
-			} else {
-				$shipping_tax_percentage = 00;
-			}
-			$shipping_price = number_format( ( $woocommerce->cart->shipping_total + $woocommerce->cart->shipping_tax_total ) * 100, 0, '', '' );
-			// Get shipping method name
-			$shipping_packages = $woocommerce->shipping->get_packages();
-			foreach ( $shipping_packages as $i => $package ) {
-				$chosen_method = isset( $woocommerce->session->chosen_shipping_methods[ $i ] ) ? $woocommerce->session->chosen_shipping_methods[ $i ] : '';
-				if ( '' != $chosen_method ) {
-					$package_rates = $package['rates'];
-					foreach ( $package_rates as $rate_key => $rate_value ) {
-						if ( $rate_key == $chosen_method ) {
-							$klarna_shipping_method = $rate_value->label;
-						}
-					}
-				}
-			}
-			if ( ! isset( $klarna_shipping_method ) ) {
-				$klarna_shipping_method = __( 'Shipping', 'woocommerce-gateway-klarna' );
-			}
-			$shipping = array(
-				'type'       => 'shipping_fee',
-				'reference'  => 'SHIPPING',
-				'name'       => $klarna_shipping_method,
-				'quantity'   => 1,
-				'unit_price' => (int) $shipping_price,
-				'tax_rate'   => intval( $shipping_tax_percentage . '00' )
-			);
-			if ( $this->is_rest() ) {
-				$shipping['total_amount']     = (int) $shipping_price;
-				$shipping['total_tax_amount'] = $woocommerce->cart->shipping_tax_total * 100;
-			}
-			$cart[] = $shipping;
-		}
-
-		return $cart;
 	}
 
 	/**
@@ -2503,9 +2378,7 @@ class WC_Gateway_Klarna_Checkout_Extra {
 				'country'    => strtoupper( $data['billing_address']['country'] ),
 				'first_name' => $data['billing_address']['given_name'],
 				'last_name'  => $data['billing_address']['family_name'],
-				// 'company'    => $data['billing_address']['company'],
 				'address_1'  => $data['billing_address']['street_address'],
-				'address_2'  => $data['billing_address']['street_address2'],
 				'postcode'   => $data['billing_address']['postal_code'],
 				'city'       => $data['billing_address']['city'],
 				'state'      => $data['billing_address']['region'],
@@ -2516,15 +2389,22 @@ class WC_Gateway_Klarna_Checkout_Extra {
 				'country'    => strtoupper( $data['shipping_address']['country'] ),
 				'first_name' => $data['shipping_address']['given_name'],
 				'last_name'  => $data['shipping_address']['family_name'],
-				// 'company'    => $data['shipping_address']['company'],
 				'address_1'  => $data['shipping_address']['street_address'],
-				'address_2'  => $data['shipping_address']['street_address2'],
 				'postcode'   => $data['shipping_address']['postal_code'],
 				'city'       => $data['shipping_address']['city'],
 				'state'      => $data['shipping_address']['region'],
 				'email'      => $data['shipping_address']['email'],
 				'phone'      => $data['shipping_address']['phone'],
 			);
+
+			if ( isset( $data['billing_address']['street_address2'] ) ) {
+				$billing_address['address_2'] = $data['billing_address']['street_address2'];
+			}
+
+			if ( isset( $data['shipping_address']['street_address2'] ) ) {
+				$billing_address['address_2'] = $data['shipping_address']['street_address2'];
+			}
+
 			$order->set_address( $billing_address, 'billing' );
 			$order->set_address( apply_filters( 'kco_set_shipping_address', $shipping_address, $order, $data ), 'shipping' );
 			$order->calculate_taxes();
