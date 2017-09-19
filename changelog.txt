@@ -1,5 +1,11 @@
 *** WooCommerce Gateway Klarna Changelog ***
 
+2017.09.19  - version 2.4.2
+* Fix       - Fixes accessing WC_Customer set_billing_email for WooCommerce lower than 3.0.
+* Fix       - Fixes Klarna Checkout shipping tax rate rounding problem.
+* Fix       - Fixes deprecated WC_Order_Item_Meta notice.
+* Fix       - Fixes WC_Product::get_display_price notice.
+
 2017.09.07  - version 2.4.1
 * Fix       - Fixes status code comparison issue in KCO V3.
 * Fix       - Fixes tax rate rounding in Klarna Checkout.
