@@ -953,28 +953,48 @@ class WC_Gateway_Klarna_Order {
 			if ( $order_item['qty'] && isset( $itemid ) && $item_key != $itemid ) {
 				// Item name
 				$item_name = $order_item['name'];
-				if ( isset( $order_item['item_meta'] ) ) { // Append item meta to the title, if it exists
-					$item_meta = new WC_Order_Item_Meta( $order_item['item_meta'] );
-					if ( $meta = $item_meta->display( true, true ) ) {
-						$item_name .= ' (' . $meta . ')';
+
+				if ( function_exists( 'wc_display_item_meta' ) ) {
+					$meta_args = array(
+						'echo' => false,
+						'before' => '(',
+						'after' => ')',
+						'separator' => ', '
+					);
+					$item_meta = wc_display_item_meta( $order_item, $meta_args );
+
+					$item_name .= ' ' . wp_strip_all_tags( $item_meta );
+				} else {
+					if ( isset( $order_item['item_meta'] ) ) { // Append item meta to the title, if it exists
+						$item_meta  = new WC_Order_Item_Meta( $order_item['item_meta'] );
+						if ( $meta = $item_meta->display( true, true ) ) {
+							$item_name .= ' (' . $meta . ')';
+						}
 					}
 				}
+
 				// Item reference
-				$item_reference = strval( $order_item['product_id'] );
+				$item_reference = (string) $order_item['product_id'];
+
 				// Item price
 				$item_price = 'us' == strtolower( $order_billing_country ) ? round( number_format( ( $order_item['line_subtotal'] ) * 100, 0, '', '' ) / $order_item['qty'] ) : round( number_format( ( $order_item['line_subtotal'] + $order_item['line_subtotal_tax'] ) * 100, 0, '', '' ) / $order_item['qty'] );
+
 				// Item quantity
 				$item_quantity = (int) $order_item['qty'];
+
 				// Item total amount
 				$item_total_amount = 'us' == strtolower( $order_billing_country ) ? round( ( $order_item['line_total'] ) * 100 ) : round( ( $order_item['line_total'] + $order_item['line_tax'] ) * 100 );
+
 				// Item discount
 				if ( $order_item['line_subtotal'] > $order_item['line_total'] ) {
 					$item_discount_amount = ( $order_item['line_subtotal'] + $order_item['line_subtotal_tax'] - $order_item['line_total'] - $order_item['line_tax'] ) * 100;
 				} else {
 					$item_discount_amount = 0;
 				}
+
 				// Item tax amount
 				$item_tax_amount = 'us' == strtolower( $order_billing_country ) ? 0 : round( $order_item['line_tax'] * 100 );
+
 				// Item tax rate
 				$item_tax_rate = 'us' == strtolower( $order_billing_country ) ? 0 : round( $order_item['line_subtotal_tax'] / $order_item['line_subtotal'], 2 ) * 100 * 100;
 				$klarna_item = array(
@@ -993,7 +1013,7 @@ class WC_Gateway_Klarna_Order {
 			}
 		}
 		// Process fees
-		if ( sizeof( $order->get_fees() ) > 0 ) {
+		if ( count( $order->get_fees() ) > 0 ) {
 			foreach ( $order->get_fees() as $item ) {
 				// We manually calculate the tax percentage here
 				if ( $order->get_total_tax() > 0 ) {
