@@ -969,7 +969,9 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 
 		// Check coupons.
 		if ( isset( $_REQUEST['email'] ) && is_email( $_REQUEST['email'] ) ) {
-			WC()->customer->set_billing_email( $_REQUEST['email'] );
+			if ( is_callable( array( WC()->customer, 'set_billing_email' ) ) ) {
+				WC()->customer->set_billing_email( $_REQUEST['email'] );
+			}
 			if ( is_callable( array( WC()->customer, 'save' ) ) ) {
 				WC()->customer->save();
 			}
@@ -1120,7 +1122,9 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 
 		// Check coupons.
 		if ( isset( $_REQUEST['email'] ) && is_email( $_REQUEST['email'] ) ) {
-			WC()->customer->set_billing_email( $_REQUEST['email'] );
+			if ( is_callable( array( WC()->customer, 'set_billing_email' ) ) ) {
+				WC()->customer->set_billing_email( $_REQUEST['email'] );
+			}
 			if ( is_callable( array( WC()->customer, 'save' ) ) ) {
 				WC()->customer->save();
 			}
@@ -1174,8 +1178,10 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 				}
 			}
 
-			if ( isset( $_REQUEST['email'] ) && is_string( $_REQUEST['email'] ) ) {
-				$order->set_billing_email( $_REQUEST['email'] );
+			if ( is_callable( array( WC()->customer, 'set_billing_email' ) ) ) {
+				if ( isset( $_REQUEST['email'] ) && is_string( $_REQUEST['email'] ) ) {
+					$order->set_billing_email( $_REQUEST['email'] );
+				}
 			}
 
 			if ( isset( $_REQUEST['given_name'] ) && is_string( $_REQUEST['given_name'] ) ) {
