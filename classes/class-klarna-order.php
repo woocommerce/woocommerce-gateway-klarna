@@ -79,7 +79,7 @@ class WC_Gateway_Klarna_Order {
 			$shipping_address = get_post_meta( $order_id, '_shipping_address_1', true );
 		}
 
-		$billing_addr = new KlarnaAddr(
+		$billing_addr = new Klarna\XMLRPC\Address(
 			get_post_meta( $order_id, '_billing_email', true ), // Email address.
 			'', // Telephone number, only one phone number is needed.
 			utf8_decode( get_post_meta( $order_id, '_billing_phone', true ) ), // Cell phone number.
@@ -94,7 +94,7 @@ class WC_Gateway_Klarna_Order {
 			null // House extension (NL only).
 		);
 
-		$shipping_addr = new KlarnaAddr(
+		$shipping_addr = new Klarna\XMLRPC\Address(
 			get_post_meta( $order_id, '_shipping_email', true ), // Email address.
 			'', // Telephone number, only one phone number is needed.
 			utf8_decode( get_post_meta( $order_id, '_shipping_phone', true ) ), // Cell phone number.
@@ -109,8 +109,8 @@ class WC_Gateway_Klarna_Order {
 			null // House extension (NL only).
 		);
 
-		$klarna->setAddress( KlarnaFlags::IS_BILLING, $billing_addr );
-		$klarna->setAddress( KlarnaFlags::IS_SHIPPING, $shipping_addr );
+		$klarna->setAddress( Klarna\XMLRPC\Flags::IS_BILLING, $billing_addr );
+		$klarna->setAddress( Klarna\XMLRPC\Flags::IS_SHIPPING, $shipping_addr );
 		$klarna->setEstoreInfo( $orderid1 = ltrim( $order->get_order_number(), '#' ), $orderid2 = $order_id );
 	}
 
@@ -154,7 +154,7 @@ class WC_Gateway_Klarna_Order {
 							$price = $item_price,                   // Price including tax
 							$vat = round( $item_tax_percentage ), // Tax
 							$discount = 0,                             // Discount is applied later
-							$flags = KlarnaFlags::INC_VAT           // Price is including VAT.
+							$flags = Klarna\XMLRPC\Flags::INC_VAT           // Price is including VAT.
 						);
 					}
 				}
@@ -174,7 +174,7 @@ class WC_Gateway_Klarna_Order {
 			foreach ( WC()->cart->applied_coupons as $code ) {
 				$smart_coupon = new WC_Coupon( $code );
 				if ( $smart_coupon->is_valid() && klarna_wc_get_coupon_discount_type( $smart_coupon ) === 'smart_coupon' ) {
-					$klarna->addArticle( $qty = 1, $artNo = '', $title = __( 'Discount', 'woocommerce-gateway-klarna' ), $price = - WC()->cart->coupon_discount_amounts[ $code ], $vat = 0, $discount = 0, $flags = KlarnaFlags::INC_VAT );
+					$klarna->addArticle( $qty = 1, $artNo = '', $title = __( 'Discount', 'woocommerce-gateway-klarna' ), $price = - WC()->cart->coupon_discount_amounts[ $code ], $vat = 0, $discount = 0, $flags = Klarna\XMLRPC\Flags::INC_VAT );
 				}
 			}
 		}
@@ -191,7 +191,7 @@ class WC_Gateway_Klarna_Order {
 			    $price = -$order_discount,
 			    $vat = 0,
 			    $discount = 0,
-			    $flags = KlarnaFlags::INC_VAT
+			    $flags = Klarna\XMLRPC\Flags::INC_VAT
 			);
 		}
 		*/
@@ -230,9 +230,9 @@ class WC_Gateway_Klarna_Order {
 
 				// Invoice fee or regular fee.
 				if ( $invoice_fee_name === $item['name'] ) {
-					$klarna_flags = KlarnaFlags::INC_VAT + KlarnaFlags::IS_HANDLING; // Price is including VAT and is handling/invoice fee.
+					$klarna_flags = Klarna\XMLRPC\Flags::INC_VAT + Klarna\XMLRPC\Flags::IS_HANDLING; // Price is including VAT and is handling/invoice fee.
 				} else {
-					$klarna_flags = KlarnaFlags::INC_VAT; // Price is including VAT.
+					$klarna_flags = Klarna\XMLRPC\Flags::INC_VAT; // Price is including VAT.
 				}
 
 				// apply_filters to item price so we can filter this if needed.
@@ -258,7 +258,7 @@ class WC_Gateway_Klarna_Order {
 			// apply_filters to Shipping so we can filter this if needed
 			$klarna_shipping_price_including_tax = $order->get_total_shipping() * $calculated_shipping_tax_decimal;
 			$shipping_price                      = apply_filters( 'klarna_shipping_price_including_tax', $klarna_shipping_price_including_tax );
-			$klarna->addArticle( $qty = 1, $artNo = 'SHIPPING', $title = $order->get_shipping_method(), $price = $shipping_price, $vat = round( $calculated_shipping_tax_percentage ), $discount = 0, $flags = KlarnaFlags::INC_VAT + KlarnaFlags::IS_SHIPMENT // Price is including VAT and is shipment fee
+			$klarna->addArticle( $qty = 1, $artNo = 'SHIPPING', $title = $order->get_shipping_method(), $price = $shipping_price, $vat = round( $calculated_shipping_tax_percentage ), $discount = 0, $flags = Klarna\XMLRPC\Flags::INC_VAT + Klarna\XMLRPC\Flags::IS_SHIPMENT // Price is including VAT and is shipment fee
 			);
 		}
 	}
@@ -278,7 +278,7 @@ class WC_Gateway_Klarna_Order {
 		$klarna_shipping_house_number    = $klarna_shipping['house_number'];
 		$klarna_shipping_house_extension = $klarna_shipping['house_extension'];
 		// Billing address
-		$addr_billing = new KlarnaAddr( $email = $order->billing_email, $telno = '', // We skip the normal land line phone, only one is needed.
+		$addr_billing = new Klarna\XMLRPC\Address( $email = $order->billing_email, $telno = '', // We skip the normal land line phone, only one is needed.
 			$cellno = $order->billing_phone, $fname = utf8_decode( $order->billing_first_name ), $lname = utf8_decode( $order->billing_last_name ), $careof = utf8_decode( $order->billing_address_2 ),  // No care of, C/O.
 			$street = utf8_decode( $klarna_billing_address ), // For DE and NL specify street number in houseNo.
 			$zip = utf8_decode( $order->billing_postcode ), $city = utf8_decode( $order->billing_city ), $country = utf8_decode( $order->billing_country ), $houseNo = utf8_decode( $klarna_billing_house_number ), // For DE and NL we need to specify houseNo.
@@ -291,7 +291,7 @@ class WC_Gateway_Klarna_Order {
 		// Shipping address
 		if ( $order->get_shipping_method() == '' || $ship_to_billing_address == 'yes' ) {
 			// Use billing address if Shipping is disabled in Woocommerce
-			$addr_shipping = new KlarnaAddr( $email = $order->billing_email, $telno = '', //We skip the normal land line phone, only one is needed.
+			$addr_shipping = new Klarna\XMLRPC\Address( $email = $order->billing_email, $telno = '', //We skip the normal land line phone, only one is needed.
 				$cellno = $order->billing_phone, $fname = utf8_decode( $order->billing_first_name ), $lname = utf8_decode( $order->billing_last_name ), $careof = utf8_decode( $order->billing_address_2 ),  // No care of, C/O.
 				$street = utf8_decode( $klarna_billing_address ), // For DE and NL specify street number in houseNo.
 				$zip = utf8_decode( $order->billing_postcode ), $city = utf8_decode( $order->billing_city ), $country = utf8_decode( $order->billing_country ), $houseNo = utf8_decode( $klarna_billing_house_number ), // For DE and NL we need to specify houseNo.
@@ -302,7 +302,7 @@ class WC_Gateway_Klarna_Order {
 				$addr_shipping->setCompanyName( utf8_decode( $order->billing_company ) );
 			}
 		} else {
-			$addr_shipping = new KlarnaAddr( $email = $order->billing_email, $telno = '', //We skip the normal land line phone, only one is needed.
+			$addr_shipping = new Klarna\XMLRPC\Address( $email = $order->billing_email, $telno = '', //We skip the normal land line phone, only one is needed.
 				$cellno = $order->billing_phone, $fname = utf8_decode( $order->shipping_first_name ), $lname = utf8_decode( $order->shipping_last_name ), $careof = utf8_decode( $order->shipping_address_2 ),  // No care of, C/O.
 				$street = utf8_decode( $klarna_shipping_address ), // For DE and NL specify street number in houseNo.
 				$zip = utf8_decode( $order->shipping_postcode ), $city = utf8_decode( $order->shipping_city ), $country = utf8_decode( $order->shipping_country ), $houseNo = utf8_decode( $klarna_shipping_house_number ), // For DE and NL we need to specify houseNo.
@@ -314,8 +314,8 @@ class WC_Gateway_Klarna_Order {
 			}
 		}
 		// Next we tell the Klarna instance to use the address in the next order.
-		$klarna->setAddress( KlarnaFlags::IS_BILLING, $addr_billing ); // Billing / invoice address
-		$klarna->setAddress( KlarnaFlags::IS_SHIPPING, $addr_shipping ); // Shipping / delivery address
+		$klarna->setAddress( Klarna\XMLRPC\Flags::IS_BILLING, $addr_billing ); // Billing / invoice address
+		$klarna->setAddress( Klarna\XMLRPC\Flags::IS_SHIPPING, $addr_shipping ); // Shipping / delivery address
 	}
 
 	/**
@@ -363,7 +363,7 @@ class WC_Gateway_Klarna_Order {
 						$invNo,                // Invoice number
 						$amount,               // Amount given as a discount.
 						$tax_rate,             // VAT (%)
-						KlarnaFlags::INC_VAT,  // Amount including VAT.
+						Klarna\XMLRPC\Flags::INC_VAT,  // Amount including VAT.
 						utf8_encode( $reason ) // Description
 					);
 					if ( $ocr ) {
@@ -507,7 +507,7 @@ class WC_Gateway_Klarna_Order {
 		if ( $klarna_settings['testmode'] == 'yes' ) {
 			// Disable SSL if in testmode
 			$klarna_ssl  = 'false';
-			$klarna_mode = Klarna::BETA;
+			$klarna_mode = Klarna\XMLRPC\Klarna::BETA;
 		} else {
 			// Set SSL if used in webshop
 			if ( is_ssl() ) {
@@ -515,7 +515,7 @@ class WC_Gateway_Klarna_Order {
 			} else {
 				$klarna_ssl = 'false';
 			}
-			$klarna_mode = Klarna::LIVE;
+			$klarna_mode = Klarna\XMLRPC\Klarna::LIVE;
 		}
 		$klarna->config( $eid = $klarna_eid, $secret = $klarna_secret, $country = $country, $language = $klarna_language, $currency = $klarna_currency, $mode = $klarna_mode, $pcStorage = 'json', $pcURI = '/srv/pclasses.json', $ssl = $klarna_ssl, $candice = false );
 	}
@@ -580,11 +580,11 @@ class WC_Gateway_Klarna_Order {
 				}
 				$rno = get_post_meta( $orderid, '_klarna_order_reservation_recurring', true );
 			}
-			$klarna = new Klarna();
+			$klarna = new Klarna\XMLRPC\Klarna();
 			$this->configure_klarna( $klarna, $country, $payment_method );
 			try {
 				$result = $klarna->activate( $rno, null, // OCR Number
-					KlarnaFlags::RSRV_SEND_BY_EMAIL );
+					Klarna\XMLRPC\Flags::RSRV_SEND_BY_EMAIL );
 				$risk   = $result[0]; // returns 'ok' or 'no_risk'
 				$invNo  = $result[1]; // returns invoice number
 				$order->add_order_note( sprintf( __( 'Klarna order activated. Invoice number %s - risk status %s.', 'woocommerce-gateway-klarna' ), $invNo, $risk ) );
@@ -715,7 +715,7 @@ class WC_Gateway_Klarna_Order {
 				$country = get_post_meta( $orderid, '_billing_country', true );
 			}
 			$payment_method = get_post_meta( $orderid, '_payment_method', true );
-			$klarna = new Klarna();
+			$klarna = new Klarna\XMLRPC\Klarna();
 			$this->configure_klarna( $klarna, $country, $payment_method );
 			try {
 				$klarna->cancelReservation( $rno );
@@ -901,7 +901,7 @@ class WC_Gateway_Klarna_Order {
 		} else {
 			$country = get_post_meta( $orderid, '_billing_country', true );
 		}
-		$klarna = new Klarna();
+		$klarna = new Klarna\XMLRPC\Klarna();
 		$this->configure_klarna( $klarna, $country, $payment_method );
 		$this->klarna = $klarna;
 		if ( 'AT' !== $country  && 'DE' !== $country ) {

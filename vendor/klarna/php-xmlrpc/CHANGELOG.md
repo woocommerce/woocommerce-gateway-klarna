@@ -1,3 +1,6 @@
+## v5.0.0 - 2016-03-16
+- **NEW META-102** Support for PHP 7.0 - *Joakim.L & Christer.G*
+
 ## v4.0.0 - 2015-05-27
 - **NEW MINT-2176** Make SDK available on composer - *Joakim.L*
 - **FIX MINT-2089** Fix URI for BETA mode with checkoutService - *Joakim.L*

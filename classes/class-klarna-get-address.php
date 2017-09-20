@@ -344,13 +344,13 @@ class WC_Klarna_Get_Address {
 
 			// Test mode or Live mode.
 			if ( 'yes' === $klarna_testmode ) {
-				$klarna_mode = Klarna::BETA;
+				$klarna_mode = Klarna\XMLRPC\Klarna::BETA;
 			} else {
 
-				$klarna_mode = Klarna::LIVE;
+				$klarna_mode = Klarna\XMLRPC\Klarna::LIVE;
 			}
 
-			$k = new Klarna();
+			$k = new Klarna\XMLRPC\Klarna();
 
 			$k->config(
 				$klarna_eid,                  // EID.

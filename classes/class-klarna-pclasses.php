@@ -21,7 +21,6 @@ class WC_Gateway_Klarna_PClasses {
 	 * @since 1.0.0
 	 */
 	public function __construct( $klarna = false, $type = false, $country = false ) {
-
 		$this->klarna  = $klarna;
 		$this->country = $country;
 		$this->type    = $type;
@@ -81,15 +80,17 @@ class WC_Gateway_Klarna_PClasses {
 	function fetch_pclasses() {
 		$klarna = $this->klarna;
 
+		// _transient_klarna_pclasses_SE
+
 		if ( $klarna->getPClasses() ) {
-			return $klarna->getAllPClasses();
+			return $klarna->getPClasses();
 		} else {
 			try {
-				// You can specify country (and language, currency if you wish) if you don't want 
+				// You can specify country (and language, currency if you wish) if you don't want
 				// to use the configured country.
-				$klarna->fetchPClasses( $this->country );
+				$klarna->getPClasses( $this->country );
 
-				return $klarna->getAllPClasses();
+				return $klarna->getPClasses();
 			} catch ( Exception $e ) {
 				return false;
 			}
