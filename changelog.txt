@@ -1,5 +1,8 @@
 *** WooCommerce Gateway Klarna Changelog ***
 
+2017.09.xx  - version 2.4.3
+* Update    - Updated Klarna PHP-XMLRPC SDK to 5.0.
+
 2017.09.19  - version 2.4.2
 * Fix       - Fixes accessing WC_Customer set_billing_email for WooCommerce lower than 3.0.
 * Fix       - Fixes Klarna Checkout shipping tax rate rounding problem.
