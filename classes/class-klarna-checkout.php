@@ -1081,26 +1081,79 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		$data = array();
 		$data['widget_html'] = '';
 
-		$wc_customer = WC()->customer;
+		// Add customer data to WC_Order
+		$orderid = WC()->session->get( 'ongoing_klarna_order' );
+		$order = wc_get_order( $orderid );
+		if ( $order ) {
+			$address = array();
+
+			if ( isset( $_REQUEST['given_name'] ) && is_string( $_REQUEST['given_name'] ) ) {
+				$address['first_name'] =  $_REQUEST['given_name'];
+			}
+
+			if ( isset( $_REQUEST['family_name'] ) && is_string( $_REQUEST['family_name'] ) ) {
+				$address['last_name'] =  $_REQUEST['family_name'];
+			}
+
+			if ( isset( $_REQUEST['street_address'] ) && is_string( $_REQUEST['street_address'] ) ) {
+				$address['address_1'] =  $_REQUEST['street_address'];
+			}
+
+			if ( isset( $_REQUEST['street_address2'] ) && is_string( $_REQUEST['street_address2'] ) ) {
+				$address['address_2'] =  $_REQUEST['street_address2'];
+			}
+
+			if ( isset( $_REQUEST['city'] ) && is_string( $_REQUEST['city'] ) ) {
+				$address['city'] =  $_REQUEST['city'];
+			}
+
+			if ( isset( $_REQUEST['region'] ) && is_string( $_REQUEST['region'] ) ) {
+				$address['state'] =  $_REQUEST['region'];
+			}
+
+			if ( isset( $_REQUEST['postal_code'] ) && is_string( $_REQUEST['postal_code'] ) ) {
+				$address['postcode'] =  $_REQUEST['postal_code'];
+			}
+
+			if ( isset( $_REQUEST['country'] ) && is_string( $_REQUEST['country'] ) ) {
+				$address['country'] =  $_REQUEST['country'];
+			}
+
+			if ( isset( $_REQUEST['email'] ) && is_string( $_REQUEST['email'] ) ) {
+				$address['email'] =  $_REQUEST['email'];
+			}
+
+			if ( isset( $_REQUEST['phone'] ) && is_string( $_REQUEST['phone'] ) ) {
+				$address['phone'] =  $_REQUEST['phone'];
+			}
+
+			$order->set_address( $address );
+			$order->set_address( $address, 'shipping' );
+			if ( is_callable( array( $order, 'save' ) ) ) {
+				$order->save();
+			}
+		}
 
 		// Capture postal code
 		if ( isset( $_REQUEST['postal_code'] ) && is_string( $_REQUEST['postal_code'] ) ) {
 			if ( method_exists( $wc_customer, 'set_billing_postcode' ) ) {
-				$wc_customer->set_billing_postcode( $_REQUEST['postal_code'] );
+				WC()->customer->set_billing_postcode( $_REQUEST['postal_code'] );
 			} else {
-				$wc_customer->set_postcode( $_REQUEST['postal_code'] );
+				WC()->customer->set_postcode( $_REQUEST['postal_code'] );
 			}
-			$wc_customer->set_shipping_postcode( $_REQUEST['postal_code'] );
+			WC()->customer->set_shipping_postcode( $_REQUEST['postal_code'] );
 		}
+
 		if ( isset( $_REQUEST['region'] ) && is_string( $_REQUEST['region'] ) ) {
-			if ( method_exists( $wc_customer, 'set_billing_state' ) ) {
-				$wc_customer->set_billing_state( $_REQUEST['region'] );
+			if ( method_exists( WC()->customer, 'set_billing_state' ) ) {
+				WC()->customer->set_billing_state( $_REQUEST['region'] );
 			} else {
-				$wc_customer->set_state( $_REQUEST['region'] );
+				WC()->customer->set_state( $_REQUEST['region'] );
 			}
 
-			$wc_customer->set_shipping_state( $_REQUEST['region'] );
+			WC()->customer->set_shipping_state( $_REQUEST['region'] );
 		}
+
 		if ( isset( $_REQUEST['country'] ) && is_string( $_REQUEST['country'] ) ) {
 			if ( 'gbr' == $_REQUEST['country'] ) {
 				$country = 'GB';
@@ -1112,21 +1165,18 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 				$country = 'NL';
 			}
 
-			if ( method_exists( $wc_customer, 'set_billing_country' ) ) {
-				$wc_customer->set_billing_country( $country );
+			if ( method_exists( WC()->customer, 'set_billing_country' ) ) {
+				WC()->customer->set_billing_country( $country );
 			} else {
-				$wc_customer->set_country( $country );
+				WC()->customer->set_country( $country );
 			}
-			$wc_customer->set_shipping_country( $country );
+			WC()->customer->set_shipping_country( $country );
 		}
 
 		// Check coupons.
 		if ( isset( $_REQUEST['email'] ) && is_email( $_REQUEST['email'] ) ) {
 			if ( is_callable( array( WC()->customer, 'set_billing_email' ) ) ) {
 				WC()->customer->set_billing_email( $_REQUEST['email'] );
-			}
-			if ( is_callable( array( WC()->customer, 'save' ) ) ) {
-				WC()->customer->save();
 			}
 
 			if ( sizeof( WC()->cart->get_applied_coupons() ) > 0 ) {
@@ -1142,7 +1192,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		}
 
 		if ( version_compare( WOOCOMMERCE_VERSION, '3.0', '>=' ) ) {
-			$wc_customer->save();
+			WC()->customer->save();
 		}
 
 		if ( ! defined( 'WOOCOMMERCE_CART' ) ) {

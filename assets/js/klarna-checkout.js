@@ -702,6 +702,8 @@ jQuery(document).ready(function ($) {
 											postal_code: data.postal_code,
 											region: data.region,
 											street_address: data.street_address,
+											street_address2: data.street_address2,
+											title: data.title,
 											nonce: kcoAjax.klarna_checkout_nonce
 										},
 										success: function (response) {
