@@ -546,18 +546,31 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			'street_address' => get_post_meta( $order_id, '_billing_address_1', true ),
 			'phone'          => get_post_meta( $order_id, '_billing_phone', true )
 		);
-		$shipping_email           = get_post_meta( $order_id, '_shipping_email', true ) ? get_post_meta( $order_id, '_shipping_email', true ) : get_post_meta( $order_id, '_billing_email', true );
-		$shipping_phone           = get_post_meta( $order_id, '_shipping_phone', true ) ? get_post_meta( $order_id, '_shipping_phone', true ) : get_post_meta( $order_id, '_billing_phone', true );
-		$klarna_shipping          = array(
-			'postal_code'    => get_post_meta( $order_id, '_shipping_postcode', true ),
-			'email'          => $shipping_email,
-			'country'        => get_post_meta( $order_id, '_shipping_country', true ),
-			'city'           => get_post_meta( $order_id, '_shipping_city', true ),
-			'family_name'    => get_post_meta( $order_id, '_shipping_last_name', true ),
-			'given_name'     => get_post_meta( $order_id, '_shipping_first_name', true ),
-			'street_address' => get_post_meta( $order_id, '_shipping_address_1', true ),
-			'phone'          => $shipping_phone
-		);
+		if( wc_shipping_enabled() ) {
+			$shipping_email           = get_post_meta( $order_id, '_shipping_email', true ) ? get_post_meta( $order_id, '_shipping_email', true ) : get_post_meta( $order_id, '_billing_email', true );
+			$shipping_phone           = get_post_meta( $order_id, '_shipping_phone', true ) ? get_post_meta( $order_id, '_shipping_phone', true ) : get_post_meta( $order_id, '_billing_phone', true );
+			$klarna_shipping          = array(
+				'postal_code'    => get_post_meta( $order_id, '_shipping_postcode', true ),
+				'email'          => $shipping_email,
+				'country'        => get_post_meta( $order_id, '_shipping_country', true ),
+				'city'           => get_post_meta( $order_id, '_shipping_city', true ),
+				'family_name'    => get_post_meta( $order_id, '_shipping_last_name', true ),
+				'given_name'     => get_post_meta( $order_id, '_shipping_first_name', true ),
+				'street_address' => get_post_meta( $order_id, '_shipping_address_1', true ),
+				'phone'          => $shipping_phone
+			);
+		} else {
+			$klarna_shipping		= array(
+				'postal_code'    => get_post_meta( $order_id, '_billing_postcode', true ),
+				'email'          => get_post_meta( $order_id, '_billing_email', true ),
+				'country'        => get_post_meta( $order_id, '_billing_country', true ),
+				'city'           => get_post_meta( $order_id, '_billing_city', true ),
+				'family_name'    => get_post_meta( $order_id, '_billing_last_name', true ),
+				'given_name'     => get_post_meta( $order_id, '_billing_first_name', true ),
+				'street_address' => get_post_meta( $order_id, '_billing_address_1', true ),
+				'phone'          => get_post_meta( $order_id, '_billing_phone', true )
+			);
+		}
 		// Products in subscription
 		$cart = array();
 		if ( sizeof( $order->get_items() ) > 0 ) {
