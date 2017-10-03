@@ -80,6 +80,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			'subscription_amount_changes',
 			'subscription_date_changes',
 			'subscription_payment_method_change',
+			// 'subscription_payment_method_change_admin',
 			'multiple_subscriptions'
 		);
 		// Add link to KCO page in standard checkout
@@ -215,6 +216,22 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			remove_action( 'get_header', 'wc_clear_cart_after_payment' );
 		}
 		add_action( 'woocommerce_checkout_subscription_created', array( $this, 'finalize_subscription' ), 10, 3 );
+
+		// Use an existing order when paying for a manual subscription renewal via "Pay Order" page
+		add_action( 'template_redirect', array( $this, 'use_ongoing_order_for_kco' ) );
+	}
+
+	function use_ongoing_order_for_kco() {
+		global $wp;
+
+		if ( isset( $_GET['pay_for_order'] ) && isset( $_GET['key'] ) && isset( $wp->query_vars['order-pay'] ) ) {
+			$order_id = ( isset( $wp->query_vars['order-pay'] ) ) ? $wp->query_vars['order-pay'] : absint( $_GET['order_id'] );
+			$order    = wc_get_order( $wp->query_vars['order-pay'] );
+
+			if ( $order ) {
+				WC()->session->set( 'ongoing_klarna_order', $order_id );
+			}
+		}
 	}
 
 	/**
