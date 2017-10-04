@@ -988,6 +988,10 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			exit( 'Nonce can not be verified.' );
 		}
 
+		if ( ! defined( 'WOOCOMMERCE_CART' ) ) {
+			define( 'WOOCOMMERCE_CART', true );
+		}
+
 		$data                = array();
 		$data['widget_html'] = '';
 
@@ -1037,11 +1041,54 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			$klarna_order->update( $update );
 		}
 
+		$recalculate_shipping = false;
+
+		// Capture country
+		if ( isset( $_REQUEST['country'] ) && is_string( $_REQUEST['country'] ) ) {
+			$recalculate_shipping = true;
+
+			switch ( $_REQUEST['country'] ) {
+				case 'swe':
+					$req_country = 'SE';
+					break;
+				case 'nor':
+					$req_country = 'NO';
+					break;
+				case 'fin':
+					$req_country = 'FI';
+					break;
+				case 'aut':
+					$req_country = 'AT';
+					break;
+				case 'deu':
+				case 'get':
+				$req_country = 'DE';
+					break;
+			}
+
+			if ( $req_country ) {
+				WC()->customer->set_billing_country( $req_country );
+
+				if ( ! WC()->session->get( 'klarna_separate_shipping' ) ) {
+					WC()->customer->set_shipping_country( $req_country );
+				}
+			}
+		}
+
 		// Capture postal code.
 		if ( isset( $_REQUEST['postal_code'] ) && is_string( $_REQUEST['postal_code'] ) && WC_Validation::is_postcode( $_REQUEST['postal_code'], $this->klarna_country ) ) {
-			WC()->customer->set_shipping_postcode( $_REQUEST['postal_code'] );
-			if ( ! defined( 'WOOCOMMERCE_CART' ) ) {
-				define( 'WOOCOMMERCE_CART', true );
+			$recalculate_shipping = true;
+
+			WC()->customer->set_billing_postcode( $_REQUEST['postal_code'] );
+
+			if ( ! WC()->session->get( 'klarna_separate_shipping' ) ) {
+				WC()->customer->set_shipping_postcode( $_REQUEST['postal_code'] );
+			}
+		}
+
+		if ( $recalculate_shipping ) {
+			if ( is_callable( array( WC()->customer, 'save' ) ) ) {
+				WC()->customer->save();
 			}
 
 			// Update user session.
@@ -1057,6 +1104,11 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 				$this->ajax_update_klarna_order();
 			}
 		}
+
+		$this->log->add( 'klarna', 'OrderID: ' . WC()->session->get( 'ongoing_klarna_order' ) . '. Customer billing country: ' . WC()->customer->get_billing_country() );
+		$this->log->add( 'klarna', 'OrderID: ' . WC()->session->get( 'ongoing_klarna_order' ) . '. Customer billing postcode: ' . WC()->customer->get_billing_postcode() );
+		$this->log->add( 'klarna', 'OrderID: ' . WC()->session->get( 'ongoing_klarna_order' ) . '. Customer shipping country: ' . WC()->customer->get_billing_country() );
+		$this->log->add( 'klarna', 'OrderID: ' . WC()->session->get( 'ongoing_klarna_order' ) . '. Customer shipping postcode: ' . WC()->customer->get_shipping_postcode() );
 
 		wp_send_json_success( $data );
 		wp_die();
@@ -1077,6 +1129,12 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		// Capture postal code.
 		if ( isset( $_REQUEST['postal_code'] ) && is_string( $_REQUEST['postal_code'] ) ) {
 			WC()->customer->set_shipping_postcode( $_REQUEST['postal_code'] );
+
+			if ( is_callable( array( WC()->customer, 'save' ) ) ) {
+				WC()->customer->save();
+			}
+
+			WC()->session->set( 'klarna_separate_shipping', true );
 		}
 
 		if ( ! defined( 'WOOCOMMERCE_CART' ) ) {

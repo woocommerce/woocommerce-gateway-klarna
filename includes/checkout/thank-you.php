@@ -149,4 +149,6 @@ WC()->session->__unset( 'klarna_checkout' );
 WC()->session->__unset( 'klarna_checkout_country' );
 WC()->session->__unset( 'ongoing_klarna_order' );
 WC()->session->__unset( 'klarna_order_note' );
+WC()->session->__unset( 'klarna_separate_shipping' );
+
 wc_clear_cart_after_payment(); // Clear cart.
