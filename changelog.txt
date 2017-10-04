@@ -3,6 +3,8 @@
 2017.09.xx  - version 2.4.3
 * Update    - Updated Klarna PHP-XMLRPC SDK to 5.0.
 * Fix		- Send billing address as shipping address to Klarna in process_subscription_payment if shipping isn’t enabled.
+* Fix       - Makes it possible to process manual subscription renewals with Klarna Checkout.
+* Update    - Changes order creation date for Klarna Checkout orders to when customer processes checkout.
 
 2017.09.19  - version 2.4.2
 * Fix       - Fixes accessing WC_Customer set_billing_email for WooCommerce lower than 3.0.
