@@ -1105,10 +1105,12 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			}
 		}
 
-		$this->log->add( 'klarna', 'OrderID: ' . WC()->session->get( 'ongoing_klarna_order' ) . '. Customer billing country: ' . WC()->customer->get_billing_country() );
-		$this->log->add( 'klarna', 'OrderID: ' . WC()->session->get( 'ongoing_klarna_order' ) . '. Customer billing postcode: ' . WC()->customer->get_billing_postcode() );
-		$this->log->add( 'klarna', 'OrderID: ' . WC()->session->get( 'ongoing_klarna_order' ) . '. Customer shipping country: ' . WC()->customer->get_billing_country() );
-		$this->log->add( 'klarna', 'OrderID: ' . WC()->session->get( 'ongoing_klarna_order' ) . '. Customer shipping postcode: ' . WC()->customer->get_shipping_postcode() );
+		if ( $this->debug == 'yes' ) {
+			$this->log->add( 'klarna', 'OrderID: ' . WC()->session->get( 'ongoing_klarna_order' ) . '. Customer billing country: ' . WC()->customer->get_billing_country() );
+			$this->log->add( 'klarna', 'OrderID: ' . WC()->session->get( 'ongoing_klarna_order' ) . '. Customer billing postcode: ' . WC()->customer->get_billing_postcode() );
+			$this->log->add( 'klarna', 'OrderID: ' . WC()->session->get( 'ongoing_klarna_order' ) . '. Customer shipping country: ' . WC()->customer->get_billing_country() );
+			$this->log->add( 'klarna', 'OrderID: ' . WC()->session->get( 'ongoing_klarna_order' ) . '. Customer shipping postcode: ' . WC()->customer->get_shipping_postcode() );
+		}
 
 		wp_send_json_success( $data );
 		wp_die();
