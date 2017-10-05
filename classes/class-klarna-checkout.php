@@ -1067,7 +1067,11 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			}
 
 			if ( $req_country ) {
-				WC()->customer->set_billing_country( $req_country );
+				if ( is_callable( array( WC()->customer, 'set_billing_country' ) ) ) {
+					WC()->customer->set_billing_country( $req_country );
+				} else {
+					WC()->customer->set_country( $req_country );
+				}
 
 				if ( ! WC()->session->get( 'klarna_separate_shipping' ) ) {
 					WC()->customer->set_shipping_country( $req_country );
@@ -1255,7 +1259,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 				$country = 'NL';
 			}
 
-			if ( method_exists( WC()->customer, 'set_billing_country' ) ) {
+			if ( is_callable( array( WC()->customer, 'set_billing_country' ) ) ) {
 				WC()->customer->set_billing_country( $country );
 			} else {
 				WC()->customer->set_country( $country );
