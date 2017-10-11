@@ -32,6 +32,10 @@ class WC_Gateway_Klarna_Shortcodes {
 
 	// Shortcode KCO page
 	function klarna_checkout_page( $atts ) {
+		if ( ! WC()->cart ) {
+			return;
+		}
+
 		$atts = shortcode_atts( array(
 			'col' => '',
 		), $atts );
@@ -67,6 +71,10 @@ class WC_Gateway_Klarna_Shortcodes {
 
 	// Shortcode Order note
 	function klarna_checkout_order_note() {
+		if ( ! WC()->cart ) {
+			return;
+		}
+
 		global $woocommerce;
 
 		$field = array(
@@ -83,7 +91,7 @@ class WC_Gateway_Klarna_Shortcodes {
 
 		ob_start();
 
-		if ( sizeof( WC()->cart->get_cart() ) > 0 ) {
+		if ( count( WC()->cart->get_cart() ) > 0 ) {
 			echo '<div class="woocommerce"><form>';
 			woocommerce_form_field( 'kco_order_note', $field, $order_note );
 			echo '</form></div>';
@@ -98,7 +106,11 @@ class WC_Gateway_Klarna_Shortcodes {
 	 * @since  2.0
 	 **/
 	function klarna_checkout_country() {
-		if ( sizeof( WC()->cart->get_cart() ) > 0 && 'EUR' == get_woocommerce_currency() ) {
+		if ( ! WC()->cart ) {
+			return;
+		}
+
+		if ( count( WC()->cart->get_cart() ) > 0 && 'EUR' === get_woocommerce_currency() ) {
 			ob_start();
 
 			$checkout_settings = get_option( 'woocommerce_klarna_checkout_settings' );
@@ -204,6 +216,10 @@ class WC_Gateway_Klarna_Shortcodes {
 	 * @since  2.0
 	 **/
 	function klarna_checkout_widget( $atts ) {
+		if ( ! WC()->cart ) {
+			return;
+		}
+
 		// Don't show on thank you page
 		if ( isset( $_GET['thankyou'] ) && 'yes' == $_GET['thankyou'] ) {
 			return;
@@ -253,7 +269,7 @@ class WC_Gateway_Klarna_Shortcodes {
 			// exit();
 		}
 
-		if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
+		if ( count( $woocommerce->cart->get_cart() ) > 0 ) {
 			ob_start(); ?>
 
 			<div id="klarna-checkout-widget" class="woocommerce <?php echo $widget_class; ?>">
