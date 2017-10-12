@@ -46,12 +46,12 @@ if ( ( 'en_US' == get_locale() || 'en_GB' == get_locale() ) && 'DE' != $kco_sess
 	}
 }
 
-$kco_country = ( '' != $kco_session_country ) ? $kco_session_country : $this->klarna_country;
-$kco_locale  = ( '' != $kco_session_locale ) ? $kco_session_locale : $this->klarna_language;
+$kco_country = ( '' !== $kco_session_country ) ? $kco_session_country : $kco_klarna_country;
+$kco_locale  = ( '' !== $kco_session_locale ) ? $kco_session_locale : $kco_klarna_language;
 
-if ( $this->is_rest() ) {
+if ( $kco_is_rest ) {
 	$kco_currency = strtolower( get_woocommerce_currency() );
-	$kco_country = strtolower( $kco_country );
+	$kco_country  = strtolower( $kco_country );
 } else {
 	$kco_currency = get_woocommerce_currency();
 }
@@ -65,20 +65,20 @@ if ( 'eur' == strtolower( $create['purchase_currency'] ) ) {
 	WC()->session->set( 'klarna_euro_country', $create['purchase_country'] );
 }
 
-if ( ! $this->is_rest() ) {
+if ( ! $kco_is_rest ) {
 	$create['merchant']['id'] = $eid; // Only needed in V2 of API
 }
 
 // Merchant URIs
 $push_uri_base = get_home_url() . '/wc-api/WC_Gateway_Klarna_Checkout/';
-$order_key = get_post_meta( $local_order_id, '_order_key', true );
+$order_key     = get_post_meta( $local_order_id, '_order_key', true );
 // REST
-if ( $this->is_rest() ) {
-	$merchant_terms_uri        = $this->terms_url;
-	$merchant_checkout_uri     = esc_url_raw( add_query_arg( 'klarnaListener', 'checkout', $this->klarna_checkout_url ) );
+if ( $kco_is_rest ) {
+	$merchant_terms_uri        = $kco_terms_url;
+	$merchant_checkout_uri     = esc_url_raw( add_query_arg( 'klarnaListener', 'checkout', $kco_klarna_checkout_url ) );
 	$merchant_push_uri         = add_query_arg( array(
 		'sid'          => $local_order_id,
-		'scountry'     => $this->klarna_country,
+		'scountry'     => $kco_klarna_country,
 		'klarna_order' => '{checkout.order.id}',
 		'wc-api'       => 'WC_Gateway_Klarna_Checkout',
 		'klarna-api'   => 'rest'
@@ -86,43 +86,43 @@ if ( $this->is_rest() ) {
 	$merchant_confirmation_uri = add_query_arg( array(
 		'klarna_order'   => '{checkout.order.id}',
 		'sid'            => $local_order_id,
-		'scountry'     => $this->klarna_country,
+		'scountry'       => $kco_klarna_country,
 		'order-received' => $local_order_id,
 		'thankyou'       => 'yes',
 		'key'            => $order_key
-	), $this->klarna_checkout_thanks_url );
+	), $kco_klarna_checkout_thank_you_url );
 	$address_update_uri        = add_query_arg( array(
 		'address_update' => 'yes',
 		'sid'            => $local_order_id,
-	), $this->klarna_checkout_url );
+	), $kco_klarna_checkout_url );
 } else { // V2
-	$merchant_terms_uri        = $this->terms_url;
-	$merchant_checkout_uri     = esc_url_raw( add_query_arg( 'klarnaListener', 'checkout', $this->klarna_checkout_url ) );
+	$merchant_terms_uri        = $kco_terms_url;
+	$merchant_checkout_uri     = esc_url_raw( add_query_arg( 'klarnaListener', 'checkout', $kco_klarna_checkout_url ) );
 	$merchant_push_uri         = add_query_arg( array(
 		'sid'          => $local_order_id,
-		'scountry'     => $this->klarna_country,
+		'scountry'     => $kco_klarna_country,
 		'klarna_order' => '{checkout.order.id}',
 		'klarna-api'   => 'v2'
 	), $push_uri_base );
 	$merchant_confirmation_uri = add_query_arg( array(
 		'klarna_order'   => '{checkout.order.id}',
 		'sid'            => $local_order_id,
-		'scountry'     => $this->klarna_country,
+		'scountry'       => $kco_klarna_country,
 		'order-received' => $local_order_id,
 		'thankyou'       => 'yes',
 		'key'            => $order_key
-	), $this->klarna_checkout_thanks_url );
+	), $kco_klarna_checkout_thank_you_url );
 }
 
 // Different format for V3 and V2
-if ( $this->is_rest() ) {
+if ( $kco_is_rest ) {
 	$merchantUrls = array(
-		'terms'          => $merchant_terms_uri,
-		'checkout'       => $merchant_checkout_uri,
-		'confirmation'   => $merchant_confirmation_uri,
-		'push'           => $merchant_push_uri,
+		'terms'        => $merchant_terms_uri,
+		'checkout'     => $merchant_checkout_uri,
+		'confirmation' => $merchant_confirmation_uri,
+		'push'         => $merchant_push_uri,
 	);
-	if ( is_ssl() && 'yes' == $this->validate_stock ) {
+	if ( is_ssl() && 'yes' === $kco_validate_stock ) {
 		$merchantUrls['validation'] = get_home_url() . '/wc-api/WC_Gateway_Klarna_Order_Validate/';
 	}
 	if ( is_ssl() ) {
@@ -134,29 +134,29 @@ if ( $this->is_rest() ) {
 	$create['merchant']['checkout_uri']     = $merchant_checkout_uri;
 	$create['merchant']['confirmation_uri'] = $merchant_confirmation_uri;
 	$create['merchant']['push_uri']         = $merchant_push_uri;
-	if ( is_ssl() && 'yes' == $this->validate_stock ) {
-		$create['merchant']['validation_uri']   = get_home_url() . '/wc-api/WC_Gateway_Klarna_Order_Validate/';
+	if ( is_ssl() && 'yes' === $kco_validate_stock ) {
+		$create['merchant']['validation_uri'] = get_home_url() . '/wc-api/WC_Gateway_Klarna_Order_Validate/';
 	}
 }
 
 // Make phone a mandatory field for German stores?
-if ( $this->phone_mandatory_de == 'yes' ) {
+if ( 'yes' === $kco_phone_mandatory_de ) {
 	$create['options']['phone_mandatory'] = true;
 }
 
 // Enable DHL packstation feature for German stores?
-if ( $this->dhl_packstation_de == 'yes' ) {
+if ( 'yes' === $kco_dhl_packstation_de ) {
 	$create['options']['packstation_enabled'] = true;
 }
 
 // Customer info if logged in
-if ( $this->testmode !== 'yes' ) {
+if ( $kco_testmode !== 'yes' ) {
 	if ( $current_user->user_email ) {
 		$create['shipping_address']['email'] = $current_user->user_email;
 	}
 
-	if ( $woocommerce->customer->get_shipping_postcode() ) {
-		$create['shipping_address']['postal_code'] = $woocommerce->customer->get_shipping_postcode();
+	if ( WC()->customer->get_shipping_postcode() ) {
+		$create['shipping_address']['postal_code'] = WC()->customer->get_shipping_postcode();
 	}
 }
 
@@ -168,9 +168,9 @@ if ( wp_is_mobile() ) {
 $klarna_order_total = 0;
 $klarna_tax_total   = 0;
 foreach ( $cart as $item ) {
-	if ( $this->is_rest() ) {
+	if ( $kco_is_rest ) {
 		$create['order_lines'][] = $item;
-		$klarna_order_total += $item['total_amount'];
+		$klarna_order_total      += $item['total_amount'];
 
 		// Process sales_tax item differently
 		if ( array_key_exists( 'type', $item ) && 'sales_tax' == $item['type'] ) {
@@ -184,43 +184,43 @@ foreach ( $cart as $item ) {
 }
 
 // Colors
-if ( '' != $this->color_button ) {
-	$create['options']['color_button'] = $this->color_button;
+if ( '' !== $kco_color_options['color_button'] ) {
+	$create['options']['color_button'] = $kco_color_options['color_button'];
 }
-if ( '' != $this->color_button_text ) {
-	$create['options']['color_button_text'] = $this->color_button_text;
+if ( '' !== $kco_color_options['color_button_text'] ) {
+	$create['options']['color_button_text'] = $kco_color_options['color_button_text'];
 }
-if ( '' != $this->color_checkbox ) {
-	$create['options']['color_checkbox'] = $this->color_checkbox;
+if ( '' !== $kco_color_options['color_checkbox'] ) {
+	$create['options']['color_checkbox'] = $kco_color_options['color_checkbox'];
 }
-if ( '' != $this->color_checkbox_checkmark ) {
-	$create['options']['color_checkbox_checkmark'] = $this->color_checkbox_checkmark;
+if ( '' !== $kco_color_options['color_checkbox_checkmark'] ) {
+	$create['options']['color_checkbox_checkmark'] = $kco_color_options['color_checkbox_checkmark'];
 }
-if ( '' != $this->color_header ) {
-	$create['options']['color_header'] = $this->color_header;
+if ( '' !== $kco_color_options['color_header'] ) {
+	$create['options']['color_header'] = $kco_color_options['color_header'];
 }
-if ( '' != $this->color_link ) {
-	$create['options']['color_link'] = $this->color_link;
+if ( '' !== $kco_color_options['color_link'] ) {
+	$create['options']['color_link'] = $kco_color_options['color_link'];
 }
 
 // Customer types
-if ( 'SE' == $this->klarna_country || 'NO' == $this->klarna_country || 'FI' == $this->klarna_country ) {
-	
+if ( 'SE' == $kco_klarna_country || 'NO' == $kco_klarna_country || 'FI' == $kco_klarna_country ) {
+
 	// B2B purchases is not available for subscriptions. allowed_customer_types defaults to person.
 	// Just don't send allowed_customer_types if the order contains a subscription.
 	if ( class_exists( 'WC_Subscriptions_Cart' ) && WC_Subscriptions_Cart::cart_contains_subscription() ) {
 		// The sound of one hand clapping
 	} else {
-		if ( 'B2B' == $this->allowed_customer_types ) {
-			$create['options']['allowed_customer_types'] = array('organization');
-		} elseif ( 'B2BC' == $this->allowed_customer_types ) {
-			$create['options']['allowed_customer_types'] = array('person', 'organization');
-			$create['customer']['type'] = 'organization';
-		} elseif ( 'B2CB' == $this->allowed_customer_types ) {
-			$create['options']['allowed_customer_types'] = array('person', 'organization');
-			$create['customer']['type'] = 'person';
+		if ( 'B2B' == $kco_allowed_customer_types ) {
+			$create['options']['allowed_customer_types'] = array( 'organization' );
+		} elseif ( 'B2BC' == $kco_allowed_customer_types ) {
+			$create['options']['allowed_customer_types'] = array( 'person', 'organization' );
+			$create['customer']['type']                  = 'organization';
+		} elseif ( 'B2CB' == $kco_allowed_customer_types ) {
+			$create['options']['allowed_customer_types'] = array( 'person', 'organization' );
+			$create['customer']['type']                  = 'person';
 		} else {
-			$create['options']['allowed_customer_types'] = array('person');
+			$create['options']['allowed_customer_types'] = array( 'person' );
 		}
 	}
 }
@@ -230,8 +230,17 @@ if ( class_exists( 'WC_Subscriptions_Cart' ) && WC_Subscriptions_Cart::cart_cont
 	$create['recurring'] = true;
 
 	// Extra merchant data
-	$fetched_subscription_product_id = $this->get_subscription_product_id();
-	if ( $fetched_subscription_product_id ) {
+	$subscription_product_id = false;
+	if ( ! empty( $woocommerce->cart->cart_contents ) ) {
+		foreach ( $woocommerce->cart->cart_contents as $cart_item ) {
+			if ( WC_Subscriptions_Product::is_subscription( $cart_item['product_id'] ) ) {
+				$subscription_product_id = $cart_item['product_id'];
+				break;
+			}
+		}
+	}
+
+	if ( $subscription_product_id ) {
 		$subscription_expiration_time = WC_Subscriptions_Product::get_expiration_date( $fetched_subscription_product_id );
 		if ( 0 !== $subscription_expiration_time ) {
 			$end_time = date( 'Y-m-d\TH:i', strtotime( $subscription_expiration_time ) );
@@ -265,15 +274,15 @@ if ( class_exists( 'WC_Subscriptions_Cart' ) && WC_Subscriptions_Cart::cart_cont
 	}
 }
 
-if ( $this->is_rest() ) {
+if ( $kco_is_rest ) {
 	$create['order_amount']     = (int) $klarna_order_total;
 	$create['order_tax_amount'] = (int) $klarna_tax_total;
 
 	// Only add shipping options if the option is unchecked for UK
 	$checkout_settings = get_option( 'woocommerce_klarna_checkout_settings' );
-	if ( 'gb' == $this->klarna_country && 'yes' == $checkout_settings['uk_ship_only_to_base'] ) {
+	if ( 'gb' == $kco_klarna_country && 'yes' == $checkout_settings['uk_ship_only_to_base'] ) {
 		$create['shipping_countries'] = array();
-	} elseif ( 'nl' == $this->klarna_country ) {
+	} elseif ( 'nl' == $kco_klarna_country ) {
 		$create['shipping_countries'] = array( 'NL' );
 	} else {
 		// Add shipping countries
@@ -285,69 +294,26 @@ if ( $this->is_rest() ) {
 		$create['options']['allow_separate_shipping_address'] = true;
 	}
 
-	/* 
-	// Add shipping options
-	WC()->cart->calculate_shipping();
-	$packages = WC()->shipping->get_packages();
-
-	foreach ( $packages as $i => $package ) {
-		$chosen_method = isset( WC()->session->chosen_shipping_methods[ $i ] ) ? WC()->session->chosen_shipping_methods[ $i ] : '';
-		$available_methods = $package['rates'];
-		$show_package_details = sizeof( $packages ) > 1;
-
-		if ( ! empty( $available_methods ) ) {
-			if ( count( $available_methods ) > 1 ) {
-				$shipping_options = array();
-				$method = current( $available_methods );
-
-				foreach ( $available_methods as $method ) {
-					$preselected = ( $method->id == $chosen_method ? true : false );
-
-					// Avoid division by zero
-					if ( $method->cost == 0 ) {
-						$tax_rate = 0;
-					} else {
-						$tax_rate = round( array_sum( $method->taxes ) / $method->cost * 100 ) * 100;
-					}
-
-					$shipping_options[] = array(
-						'id'          => $method->id,
-						'name'        => $method->label,
-						'price'       => round( ( $method->cost + array_sum( $method->taxes ) ) * 100 ),
-						'tax_amount'  => round( array_sum( $method->taxes ) * 100 ),
-						'tax_rate'    => $tax_rate,
-						'description' => '',
-						'preselected' => $preselected
-					);
-				}
-			}
-		}
-	}
-	$create['shipping_options'] = $shipping_options;
-	*/
-
 	$klarna_order = new \Klarna\Rest\Checkout\Order( $connector );
 } else {
-	
+
 	// Allow separate shipping address
-	if( 'yes' == $this->allow_separate_shipping_address ) {
+	if ( 'yes' === $kco_allow_separate_shipping ) {
 		$create['options']['allow_separate_shipping_address'] = true;
 	}
 
-	// Klarna_Checkout_Order::$baseUri = $this->klarna_server;
-	// Klarna_Checkout_Order::$contentType = 'application/vnd.klarna.checkout.aggregated-order-v2+json';
-	$klarna_order = new Klarna_Checkout_Order( $connector, $this->klarna_server );
+	$klarna_order = new Klarna_Checkout_Order( $connector, $kco_klarna_server );
 }
 
 try {
 	$klarna_order->create( apply_filters( 'kco_create_order', $create ) );
 	$klarna_order->fetch();
 } catch ( Exception $e ) {
-	if ( $this->debug == 'yes' ) {
-		$this->log->add( 'klarna', 'Klarna API error: ' . var_export( $e, true ) );
+	if ( $kco_debug == 'yes' ) {
+		$kco_log->add( 'klarna', 'Klarna API error: ' . var_export( $e, true ) );
 	}
 
-	if ( is_user_logged_in() && $this->debug ) {
+	if ( is_user_logged_in() && $kco_debug ) {
 		// The purchase was denied or something went wrong, print the message:
 		echo '<div class="woocommerce-error">';
 		print_r( $e->getMessage() );

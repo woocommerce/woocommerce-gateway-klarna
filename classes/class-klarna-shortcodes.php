@@ -64,8 +64,12 @@ class WC_Gateway_Klarna_Shortcodes {
 			);
 			echo '</div>';
 		} else {
-			$data = new WC_Gateway_Klarna_Checkout;
-			return '<div class="klarna_checkout ' . $widget_class . '">' . $data->get_klarna_checkout_page() . '</div>';
+			if ( isset( $_GET['klarna_order'] ) ) { // Display Order response/thank you page via iframe from Klarna
+				return WC_Gateway_Klarna_Checkout::get_klarna_thank_you_page();
+			} else {
+				$data = new WC_Gateway_Klarna_Checkout;
+				return '<div class="klarna_checkout ' . $widget_class . '">' . $data->get_klarna_checkout_page() . '</div>';
+			}
 		}
 	}
 

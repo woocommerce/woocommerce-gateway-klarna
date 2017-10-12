@@ -1635,28 +1635,26 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 *
 	 * @since 1.0.0
 	 */
-	function get_klarna_checkout_page() {
+	public function get_klarna_checkout_page() {
 		global $woocommerce;
 		$current_user = wp_get_current_user();
 
-		// Debug
-		if ( $this->debug == 'yes' ) {
-			$this->log->add( 'klarna', 'KCO page about to render...' );
-		}
-		// Check if Klarna order exists, if it does display thank you page
-		// otherwise display checkout page
-		if ( isset( $_GET['klarna_order'] ) ) { // Display Order response/thank you page via iframe from Klarna
-			ob_start();
-			include( KLARNA_DIR . 'includes/checkout/thank-you.php' );
+		// Display Checkout page
+		ob_start();
+		include( KLARNA_DIR . 'includes/checkout/checkout.php' );
 
-			return ob_get_clean();
-		} else { // Display Checkout page
-			ob_start();
-			include( KLARNA_DIR . 'includes/checkout/checkout.php' );
-
-			return ob_get_clean();
-		} // End if isset($_GET['klarna_order'])
+		return ob_get_clean();
 	} // End Function
+
+	public static function get_klarna_thank_you_page() {
+		global $woocommerce;
+		$current_user = wp_get_current_user();
+
+		ob_start();
+		include( KLARNA_DIR . 'includes/checkout/thank-you.php' );
+
+		return ob_get_clean();
+	}
 
 	/**
 	 * Creates a WooCommerce order, or updates if already created
