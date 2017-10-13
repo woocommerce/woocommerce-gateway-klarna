@@ -726,7 +726,19 @@ class WC_Gateway_Klarna_K2WC {
 		}
 
 		// Store tax rows.
-		foreach ( array_keys( WC()->cart->taxes + WC()->cart->shipping_taxes ) as $tax_rate_id ) {
+		if ( is_callable( array( WC()->cart, 'get_cart_contents_taxes' ) ) ) {
+			$cart_contents_taxes = WC()->cart->get_cart_contents_taxes();
+		} else {
+			$cart_contents_taxes = WC()->cart->taxes;
+		}
+
+		if ( is_callable( array( WC()->cart, 'get_shipping_taxes' ) ) ) {
+			$cart_shipping_taxes = WC()->cart->get_shipping_taxes();
+		} else {
+			$cart_shipping_taxes = WC()->cart->shipping_taxes;
+		}
+
+		foreach ( array_keys( $cart_contents_taxes + $cart_shipping_taxes ) as $tax_rate_id ) {
 			if ( class_exists( 'WC_Order_Item_Tax' ) ) {
 				$item = new WC_Order_Item_Tax();
 				$item->set_props( array(

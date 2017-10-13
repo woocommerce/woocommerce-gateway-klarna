@@ -12,20 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class WC_Gateway_Klarna_Checkout_Variables {
 
-	/**
-	 * $this:
-	 * klarna_eid
-	 * klarna_secret
-	 * klarna_country
-	 * klarna_server
-	 * klarna_checkout_url
-	 * testmode
-	 * debug
-	 * log
-	 * is_rest()
-	 */
-
-	private static function get_klarna_checkout_settings() {
+	public static function get_klarna_checkout_settings() {
 		return get_option( 'woocommerce_klarna_checkout_settings' );
 	}
 
@@ -467,12 +454,12 @@ class WC_Gateway_Klarna_Checkout_Variables {
 		$settings      = self::get_klarna_checkout_settings();
 		$color_options = array();
 
-		$color_options['color_button']             = isset( $settings['color_button'] ) ? wc_klarna_add_hash_to_color( $settings['color_button'] ) : '';
-		$color_options['color_button_text']        = isset( $settings['color_button_text'] ) ? wc_klarna_add_hash_to_color( $settings['color_button_text'] ) : '';
-		$color_options['color_checkbox']           = isset( $settings['color_checkbox'] ) ? wc_klarna_add_hash_to_color( $settings['color_checkbox'] ) : '';
-		$color_options['color_checkbox_checkmark'] = isset( $settings['color_checkbox_checkmark'] ) ? wc_klarna_add_hash_to_color( $settings['color_checkbox_checkmark'] ) : '';
-		$color_options['color_header']             = isset( $settings['color_header'] ) ? wc_klarna_add_hash_to_color( $settings['color_header'] ) : '';
-		$color_options['color_link']               = isset( $settings['color_link'] ) ? wc_klarna_add_hash_to_color( $settings['color_link'] ) : '';
+		$color_options['color_button']             = isset( $settings['color_button'] ) ? self::add_hash_to_color( $settings['color_button'] ) : '';
+		$color_options['color_button_text']        = isset( $settings['color_button_text'] ) ? self::add_hash_to_color( $settings['color_button_text'] ) : '';
+		$color_options['color_checkbox']           = isset( $settings['color_checkbox'] ) ? self::add_hash_to_color( $settings['color_checkbox'] ) : '';
+		$color_options['color_checkbox_checkmark'] = isset( $settings['color_checkbox_checkmark'] ) ? self::add_hash_to_color( $settings['color_checkbox_checkmark'] ) : '';
+		$color_options['color_header']             = isset( $settings['color_header'] ) ? self::add_hash_to_color( $settings['color_header'] ) : '';
+		$color_options['color_link']               = isset( $settings['color_link'] ) ? self::add_hash_to_color( $settings['color_link'] ) : '';
 
 		return $color_options;
 	}
@@ -499,5 +486,14 @@ class WC_Gateway_Klarna_Checkout_Variables {
 		$settings = self::get_klarna_checkout_settings();
 
 		return isset( $settings['dhl_packstation_de'] ) ? $settings['dhl_packstation_de'] : '';;
+	}
+
+	public static function add_hash_to_color( $hex ) {
+		if ( '' != $hex ) {
+			$hex = str_replace( '#', '', $hex );
+			$hex = '#' . $hex;
+		}
+
+		return $hex;
 	}
 }

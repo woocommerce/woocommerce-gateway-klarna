@@ -215,19 +215,11 @@ function init_klarna_gateway() {
 
 	// Klarna Checkout classes.
 	require_once 'classes/class-klarna-checkout-variables.php';
+	require_once 'classes/class-klarna-checkout-ajax.php';
 	require_once 'classes/class-klarna-checkout.php';
 	require_once 'classes/class-klarna-shortcodes.php';
 	require_once 'classes/class-klarna-validate.php';
 	require_once 'includes/klarna-template-hooks.php';
-
-	add_action( 'wp_ajax_klarna_checkout_cart_callback_update', array(
-		'WC_Gateway_Klarna_Checkout',
-		'klarna_checkout_cart_callback_update'
-	) );
-	add_action( 'wp_ajax_nopriv_klarna_checkout_cart_callback_update', array(
-		'WC_Gateway_Klarna_Checkout',
-		'klarna_checkout_cart_callback_update'
-	) );
 
 	/**
 	 * Add kco-incomplete_to_processing to statuses that can send email.

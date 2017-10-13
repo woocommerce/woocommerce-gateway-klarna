@@ -18,20 +18,6 @@ if ( ! defined( 'WOOCOMMERCE_KLARNA_AVAILABLE' ) ) {
  * Display Klarna Checkout Thank You page
  */
 
-
-/**
- * $this:
- * klarna_eid
- * klarna_secret
- * klarna_country
- * testmode
- * klarna_server
- * debug
- * log
- * klarna_checkout_url
- * is_rest()
- */
-
 $ty_klarna_eid          = WC_Gateway_Klarna_Checkout_Variables::get_klarna_eid();
 $ty_klarna_secret       = WC_Gateway_Klarna_Checkout_Variables::get_klarna_secret();
 $ty_klarna_country      = WC_Gateway_Klarna_Checkout_Variables::get_klarna_country();

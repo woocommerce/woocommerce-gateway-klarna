@@ -173,6 +173,7 @@ if ( wc_notice_count( 'error' ) > 0 ) {
 		/**
 		 * Create WooCommerce order
 		 */
+		$customer_email = '';
 		if ( is_user_logged_in() ) {
 			global $current_user;
 			$customer_email = $current_user->user_email;
