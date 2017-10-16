@@ -457,6 +457,10 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		$order_id = klarna_wc_get_order_id( $order );
 
 		$klarna_recurring_token = get_post_meta( $order_id, '_klarna_recurring_token', true );
+		// If the recurring token isn't stored in the subscription, grab it from parent order.
+		if( empty( $klarna_recurring_token ) ) {
+			$klarna_recurring_token = get_post_meta( WC_Subscriptions_Renewal_Order::get_parent_order_id( $order_id ), '_klarna_recurring_token', true );	
+		}
 		$klarna_currency        = get_post_meta( $order_id, '_order_currency', true );
 		$klarna_country         = get_post_meta( $order_id, '_billing_country', true );
 		$klarna_locale          = get_post_meta( $order_id, '_klarna_locale', true );
