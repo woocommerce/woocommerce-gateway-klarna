@@ -144,6 +144,7 @@ class WC_Gateway_Klarna_Checkout_Ajax {
 
 			WC()->session->set( 'applied_coupons', $applied_coupons );
 			WC()->cart->calculate_totals();
+			
 			wc_clear_notices(); // This notice handled by Klarna plugin
 
 			WC()->cart->calculate_shipping();
@@ -276,7 +277,7 @@ class WC_Gateway_Klarna_Checkout_Ajax {
 
 		// This needs to be sent back to JS, so cart widget can be updated
 		$data['item_count']  = WC()->cart->get_cart_contents_count();
-		$data['cart_url']    = WC()->cart->get_cart_url();
+		$data['cart_url']    = wc_get_cart_url();
 		$data['widget_html'] = $this->klarna_checkout_get_kco_widget_html();
 
 		// Update ongoing Klarna order
@@ -300,6 +301,7 @@ class WC_Gateway_Klarna_Checkout_Ajax {
 
 		$new_method                = $_REQUEST['new_method'];
 		$chosen_shipping_methods[] = wc_clean( $new_method );
+
 		WC()->session->set( 'chosen_shipping_methods', $chosen_shipping_methods );
 
 		if ( ! defined( 'WOOCOMMERCE_CART' ) ) {
@@ -309,12 +311,15 @@ class WC_Gateway_Klarna_Checkout_Ajax {
 		WC()->cart->calculate_shipping();
 		WC()->cart->calculate_fees();
 		WC()->cart->calculate_totals();
+
 		$this->update_or_create_local_order();
 		$data['new_method']  = $new_method;
 		$data['widget_html'] = $this->klarna_checkout_get_kco_widget_html();
+
 		if ( WC()->session->get( 'klarna_checkout' ) ) {
 			$this->ajax_update_klarna_order();
 		}
+
 		wp_send_json_success( $data );
 		wp_die();
 	}
@@ -340,12 +345,15 @@ class WC_Gateway_Klarna_Checkout_Ajax {
 		WC()->cart->calculate_shipping();
 		WC()->cart->calculate_fees();
 		WC()->cart->calculate_totals();
+
 		$this->update_or_create_local_order();
 		$data['new_method']  = $new_method;
 		$data['widget_html'] = $this->klarna_checkout_get_kco_widget_html();
+
 		if ( WC()->session->get( 'klarna_checkout' ) ) {
 			$this->ajax_update_klarna_order();
 		}
+
 		wp_send_json_success( $data );
 		wp_die();
 	}
@@ -359,7 +367,9 @@ class WC_Gateway_Klarna_Checkout_Ajax {
 		if ( ! wp_verify_nonce( $_REQUEST['nonce'], 'klarna_checkout_nonce' ) ) {
 			exit( 'Nonce can not be verified.' );
 		}
+
 		$data = array();
+
 		if ( isset( $_REQUEST['new_country'] ) && is_string( $_REQUEST['new_country'] ) ) {
 			$new_country = sanitize_text_field( $_REQUEST['new_country'] );
 			// Reset session
@@ -375,6 +385,7 @@ class WC_Gateway_Klarna_Checkout_Ajax {
 			// Send data back to JS function
 			$data['klarna_euro_country'] = $new_country;
 		}
+
 		wp_send_json_success( $data );
 		wp_die();
 	}
