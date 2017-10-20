@@ -467,7 +467,9 @@ class WC_Gateway_Klarna_Checkout_Ajax {
 		// Check coupons.
 		if ( isset( $_REQUEST['email'] ) && is_email( $_REQUEST['email'] ) ) {
 			if ( is_callable( array( WC()->customer, 'set_billing_email' ) ) ) {
-				WC()->customer->set_billing_email( $_REQUEST['email'] );
+				if ( 'guest_checkout@klarna.com' !== $_REQUEST['email'] ) {
+					WC()->customer->set_billing_email( $_REQUEST['email'] );
+				}
 			}
 			if ( is_callable( array( WC()->customer, 'save' ) ) ) {
 				WC()->customer->save();
@@ -733,7 +735,9 @@ class WC_Gateway_Klarna_Checkout_Ajax {
 		// Check coupons.
 		if ( isset( $_REQUEST['email'] ) && is_email( $_REQUEST['email'] ) ) {
 			if ( is_callable( array( WC()->customer, 'set_billing_email' ) ) ) {
-				WC()->customer->set_billing_email( $_REQUEST['email'] );
+				if ( 'guest_checkout@klarna.com' !== $_REQUEST['email'] ) {
+					WC()->customer->set_billing_email( $_REQUEST['email'] );
+				}
 			}
 
 			if ( count( WC()->cart->get_applied_coupons() ) > 0 ) {
