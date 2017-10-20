@@ -1,10 +1,12 @@
 *** WooCommerce Gateway Klarna Changelog ***
 
-2017.09.xx  - version 2.4.3
+2017.10.xx  - version 2.5.0
 * Update    - Updated Klarna PHP-XMLRPC SDK to 5.0.
 * Fix		- Send billing address as shipping address to Klarna in process_subscription_payment if shipping isn’t enabled.
-* Fix       - Makes it possible to process manual subscription renewals with Klarna Checkout.
+* Fix       - Grabs recurring payment token from payment order if it doesn't exist in subscription (KCO).
 * Update    - Changes order creation date for Klarna Checkout orders to when customer processes checkout.
+* Update    - Refactoring of KCO class and KCO Shortcodes class, prevents gateway class from being instantiated twice.
+* Update    - Adds check for WC()->cart before rendering any of the shortcodes.
 
 2017.09.19  - version 2.4.2
 * Fix       - Fixes accessing WC_Customer set_billing_email for WooCommerce lower than 3.0.
