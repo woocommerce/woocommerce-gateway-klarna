@@ -195,7 +195,7 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 
 			if ( 200 == $klarna_info['response']['code'] ) {
 				$klarna_message       = json_decode( $klarna_info['body'] );
-				$klarna_shipping_info = wpautop( $klarna_message->template->text );
+				$klarna_shipping_info = $klarna_message->template->text;
 
 				return $klarna_shipping_info;
 			}

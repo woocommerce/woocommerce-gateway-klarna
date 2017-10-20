@@ -7,6 +7,7 @@
 * Update    - Changes order creation date for Klarna Checkout orders to when customer processes checkout.
 * Update    - Refactoring of KCO class and KCO Shortcodes class, prevents gateway class from being instantiated twice.
 * Update    - Adds check for WC()->cart before rendering any of the shortcodes.
+* Fix       - Removes unneeded wpautop from Klarna's shipping info message in Invoice and Part Payment.
 
 2017.09.19  - version 2.4.2
 * Fix       - Fixes accessing WC_Customer set_billing_email for WooCommerce lower than 3.0.
