@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Resume session.
-if ( $this->is_rest() ) {
+if ( $kco_is_rest ) {
 	$klarna_order = new \Klarna\Rest\Checkout\Order( $connector, WC()->session->get( 'klarna_checkout' ) );
 } else {
 	$klarna_order = new Klarna_Checkout_Order( $connector, WC()->session->get( 'klarna_checkout' ) );
@@ -22,7 +22,7 @@ try {
 	$klarna_order->fetch();
 
 	// Reset session if the country in the store has changed since last time the checkout was loaded.
-	if ( strtolower( $this->klarna_country ) !== strtolower( $klarna_order['purchase_country'] ) ) {
+	if ( strtolower( $kco_klarna_country ) !== strtolower( $klarna_order['purchase_country'] ) ) {
 		// Reset session.
 		$klarna_order = null;
 		WC()->session->__unset( 'klarna_checkout' );
@@ -33,7 +33,7 @@ try {
 		$klarna_tax_total   = 0;
 
 		foreach ( $cart as $item ) {
-			if ( $this->is_rest() ) {
+			if ( $kco_is_rest ) {
 				$update['order_lines'][] = $item;
 				$klarna_order_total += $item['total_amount'];
 
@@ -48,24 +48,24 @@ try {
 			}
 		}
 
-		// Colors.
-		if ( '' !== $this->color_button ) {
-			$update['options']['color_button'] = $this->color_button;
+		// Colors
+		if ( '' !== $kco_color_options['color_button'] ) {
+			$create['options']['color_button'] = $kco_color_options['color_button'];
 		}
-		if ( '' !== $this->color_button_text ) {
-			$update['options']['color_button_text'] = $this->color_button_text;
+		if ( '' !== $kco_color_options['color_button_text'] ) {
+			$create['options']['color_button_text'] = $kco_color_options['color_button_text'];
 		}
-		if ( '' !== $this->color_checkbox ) {
-			$update['options']['color_checkbox'] = $this->color_checkbox;
+		if ( '' !== $kco_color_options['color_checkbox'] ) {
+			$create['options']['color_checkbox'] = $kco_color_options['color_checkbox'];
 		}
-		if ( '' !== $this->color_checkbox_checkmark ) {
-			$update['options']['color_checkbox_checkmark'] = $this->color_checkbox_checkmark;
+		if ( '' !== $kco_color_options['color_checkbox_checkmark'] ) {
+			$create['options']['color_checkbox_checkmark'] = $kco_color_options['color_checkbox_checkmark'];
 		}
-		if ( '' !== $this->color_header ) {
-			$update['options']['color_header'] = $this->color_header;
+		if ( '' !== $kco_color_options['color_header'] ) {
+			$create['options']['color_header'] = $kco_color_options['color_header'];
 		}
-		if ( '' !== $this->color_link ) {
-			$update['options']['color_link'] = $this->color_link;
+		if ( '' !== $kco_color_options['color_link'] ) {
+			$create['options']['color_link'] = $kco_color_options['color_link'];
 		}
 
 		$kco_session_locale  = '';
@@ -99,10 +99,10 @@ try {
 		}
 
 		// Update the order WC id.
-		$kco_country = ( '' !== $kco_session_country ) ? $kco_session_country : $this->klarna_country;
-		$kco_locale  = ( '' !== $kco_session_locale ) ? $kco_session_locale : $this->klarna_language;
+		$kco_country = ( '' !== $kco_session_country ) ? $kco_session_country : $kco_klarna_country;
+		$kco_locale  = ( '' !== $kco_session_locale ) ? $kco_session_locale : $kco_klarna_language;
 		
-		if ( $this->is_rest() ) {
+		if ( $kco_is_rest ) {
 			$kco_currency 	= strtolower( get_woocommerce_currency() );
 			$kco_country 	= strtolower( $kco_country );
 		} else {
@@ -125,12 +125,12 @@ try {
 		$order_key = get_post_meta( $local_order_id, '_order_key', true );
 
 		// REST.
-		if ( $this->is_rest() ) {
-			$merchant_terms_uri        = $this->terms_url;
-			$merchant_checkout_uri     = esc_url_raw( add_query_arg( 'klarnaListener', 'checkout', $this->klarna_checkout_url ) );
+		if ( $kco_is_rest ) {
+			$merchant_terms_uri        = $kco_terms_url;
+			$merchant_checkout_uri     = esc_url_raw( add_query_arg( 'klarnaListener', 'checkout', $kco_klarna_checkout_url ) );
 			$merchant_push_uri         = add_query_arg( array(
 				'sid'          => $local_order_id,
-				'scountry'     => $this->klarna_country,
+				'scountry'     => $kco_klarna_country,
 				'klarna_order' => '{checkout.order.id}',
 				'wc-api'       => 'WC_Gateway_Klarna_Checkout',
 				'klarna-api'   => 'rest',
@@ -138,36 +138,36 @@ try {
 			$merchant_confirmation_uri = add_query_arg( array(
 				'klarna_order'   => '{checkout.order.id}',
 				'sid'            => $local_order_id,
-				'scountry'     => $this->klarna_country,
+				'scountry'     => $kco_klarna_country,
 				'order-received' => $local_order_id,
 				'thankyou'       => 'yes',
 				'key'            => $order_key,
-			), $this->klarna_checkout_thanks_url );
+			), $kco_klarna_checkout_thank_you_url );
 			$address_update_uri        = add_query_arg( array(
 				'address_update' => 'yes',
 				'sid'            => $local_order_id,
-			), $this->klarna_checkout_url );
+			), $kco_klarna_checkout_url );
 		} else { // V2.
-			$merchant_terms_uri        = $this->terms_url;
-			$merchant_checkout_uri     = esc_url_raw( add_query_arg( 'klarnaListener', 'checkout', $this->klarna_checkout_url ) );
+			$merchant_terms_uri        = $kco_terms_url;
+			$merchant_checkout_uri     = esc_url_raw( add_query_arg( 'klarnaListener', 'checkout', $kco_klarna_checkout_url ) );
 			$merchant_push_uri         = add_query_arg( array(
 				'sid'          => $local_order_id,
-				'scountry'     => $this->klarna_country,
+				'scountry'     => $kco_klarna_country,
 				'klarna_order' => '{checkout.order.id}',
 				'klarna-api'   => 'v2',
 			), $push_uri_base );
 			$merchant_confirmation_uri = add_query_arg( array(
 				'klarna_order'   => '{checkout.order.id}',
 				'sid'            => $local_order_id,
-				'scountry'     => $this->klarna_country,
+				'scountry'     => $kco_klarna_country,
 				'order-received' => $local_order_id,
 				'thankyou'       => 'yes',
 				'key'            => $order_key,
-			), $this->klarna_checkout_thanks_url );
+			), $kco_klarna_checkout_thank_you_url );
 		}
 
 		// Different format for V3 and V2.
-		if ( $this->is_rest() ) {
+		if ( $kco_is_rest ) {
 			$merchantUrls            = array(
 				'terms'          => $merchant_terms_uri,
 				'checkout'       => $merchant_checkout_uri,
@@ -175,7 +175,7 @@ try {
 				'push'           => $merchant_push_uri,
 			);
 
-			if ( is_ssl() && 'yes' === $this->validate_stock ) {
+			if ( is_ssl() && 'yes' === $kco_validate_stock ) {
 				$merchantUrls['validation'] = get_home_url() . '/wc-api/WC_Gateway_Klarna_Order_Validate/';
 			}
 
@@ -190,13 +190,13 @@ try {
 			$update['merchant']['confirmation_uri'] = $merchant_confirmation_uri;
 			$update['merchant']['push_uri']         = $merchant_push_uri;
 
-			if ( is_ssl() && 'yes' === $this->validate_stock ) {
+			if ( is_ssl() && 'yes' === $kco_validate_stock ) {
 				$update['merchant']['validation_uri']   = get_home_url() . '/wc-api/WC_Gateway_Klarna_Order_Validate/';
 			}
 		}
 
 		// Customer info if logged in.
-		if ( 'yes' !== $this->testmode && is_user_logged_in() ) {
+		if ( 'yes' !== $kco_testmode && is_user_logged_in() ) {
 			if ( $current_user->user_email ) {
 				$update['shipping_address']['email'] = $current_user->user_email;
 			}
@@ -206,15 +206,15 @@ try {
 			}
 		}
 
-		if ( $this->is_rest() ) {
+		if ( $kco_is_rest ) {
 			$update['order_amount']     = (int) $klarna_order_total;
 			$update['order_tax_amount'] = (int) $klarna_tax_total;
 
 			// Only add shipping options if the option is unchecked for UK.
 			$checkout_settings = get_option( 'woocommerce_klarna_checkout_settings' );
-			if ( 'gb' === $this->klarna_country && 'yes' === $checkout_settings['uk_ship_only_to_base'] ) {
+			if ( 'gb' === $kco_klarna_country && 'yes' === $checkout_settings['uk_ship_only_to_base'] ) {
 				$update['shipping_countries'] = array();
-			} elseif ( 'nl' == $this->klarna_country ) {
+			} elseif ( 'nl' == $kco_klarna_country ) {
 				$update['shipping_countries'] = array( 'NL' );
 			} else {
 				$wc_countries                 = new WC_Countries();
@@ -228,7 +228,7 @@ try {
 			}
 		} else {
 			// Allow separate shipping address
-			if( 'yes' == $this->allow_separate_shipping_address ) {
+			if( 'yes' == $kco_allow_separate_shipping ) {
 				$create['options']['allow_separate_shipping_address'] = true;
 			}
 		}
@@ -236,11 +236,11 @@ try {
 		$klarna_order->update( apply_filters( 'kco_update_order', $update ) );
 	} // End if country change.
 } catch ( Exception $e ) {
-	if ( 'yes' === $this->debug ) {
-		$this->log->add( 'klarna', 'Klarna API error: ' . var_export( $e, true ) );
+	if ( 'yes' === $kco_debug ) {
+		$kco_log->add( 'klarna', 'Klarna API error: ' . var_export( $e, true ) );
 	}
 
-	if ( is_user_logged_in() && $this->debug ) {
+	if ( is_user_logged_in() && $kco_debug ) {
 		// Something went wrong, print the message.
 		echo '<div class="woocommerce-error">';
 			echo wp_kses_post( $e->getMessage() );

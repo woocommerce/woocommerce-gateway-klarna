@@ -111,7 +111,7 @@ if ( 'NO' == $this->klarna_helper->get_klarna_country() ) { ?>
 		<p class="form-row form-row-wide">
 			<?php
 			$country = $this->klarna_helper->get_klarna_country();
-			$klarna  = new Klarna();
+			$klarna  = new Klarna\XMLRPC\Klarna();
 			$this->configure_klarna( $klarna, $country );
 
 			$klarna_pclasses = new WC_Gateway_Klarna_PClasses( $klarna, $pclass_type, $country );
@@ -131,10 +131,10 @@ if ( 'NO' == $this->klarna_helper->get_klarna_country() ) { ?>
 
 						if ( in_array( $pclass->getType(), $pclass_type ) ) {
 							// Get monthly cost for current pclass
-							$monthly_cost = KlarnaCalc::calc_monthly_cost( $sum, $pclass, $flag );
+							$monthly_cost = Klarna\XMLRPC\Calc::calcMonthlyCost( $sum, $pclass, $flag );
 
 							// Get total credit purchase cost for current pclass (only required in Norway)
-							$total_credit_purchase_cost = KlarnaCalc::total_credit_purchase_cost( $sum, $pclass, $flag );
+							$totalCreditPurchaseCost = Klarna\XMLRPC\Calc::totalCreditPurchaseCost( $sum, $pclass, $flag );
 
 							// Check that Cart total is larger than min amount for current PClass
 							if ( $sum > $pclass->getMinAmount() ) {

@@ -60,7 +60,7 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 		if ( $this->testmode == 'yes' ) {
 			// Disable SSL if in testmode
 			$this->klarna_ssl  = 'false';
-			$this->klarna_mode = Klarna::BETA;
+			$this->klarna_mode = Klarna\XMLRPC\Klarna::BETA;
 		} else {
 			// Set SSL if used in webshop
 			if ( is_ssl() ) {
@@ -68,7 +68,7 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 			} else {
 				$this->klarna_ssl = 'false';
 			}
-			$this->klarna_mode = Klarna::LIVE;
+			$this->klarna_mode = Klarna\XMLRPC\Klarna::LIVE;
 		}
 
 		// Apply filters to Country and language
@@ -195,7 +195,7 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 
 			if ( 200 == $klarna_info['response']['code'] ) {
 				$klarna_message       = json_decode( $klarna_info['body'] );
-				$klarna_shipping_info = wpautop( $klarna_message->template->text );
+				$klarna_shipping_info = $klarna_message->template->text;
 
 				return $klarna_shipping_info;
 			}
@@ -248,7 +248,7 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 
 			$country = get_post_meta( $orderid, '_billing_country', true );
 
-			$klarna = new Klarna();
+			$klarna = new Klarna\XMLRPC\Klarna();
 			$this->configure_klarna( $klarna, $country );
 			$invNo = get_post_meta( $orderid, '_klarna_invoice_number', true );
 
@@ -386,7 +386,7 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 	function check_pclasses() {
 
 		$country = $this->klarna_helper->get_klarna_country();
-		$klarna  = new Klarna();
+		$klarna  = new Klarna\XMLRPC\Klarna();
 		$this->configure_klarna( $klarna, $country );
 
 		$klarna_pclasses = new WC_Gateway_Klarna_PClasses( $klarna, false, $country );
@@ -542,7 +542,7 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 			<p><?php _e( 'TEST MODE ENABLED', 'woocommerce-gateway-klarna' ); ?></p>
 		<?php }
 
-		$klarna = new Klarna();
+		$klarna = new Klarna\XMLRPC\Klarna();
 
 		/**
 		 * Setup Klarna configuration
@@ -550,13 +550,13 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 		$country = $this->klarna_helper->get_klarna_country();
 		$this->configure_klarna( $klarna, $country );
 
-		Klarna::$xmlrpcDebug = false;
-		Klarna::$debug       = false;
+		Klarna\XMLRPC\Klarna::$xmlrpcDebug = false;
+		Klarna\XMLRPC\Klarna::$debug       = false;
 
 		// apply_filters to cart total so we can filter this if needed
 		$klarna_cart_total = $woocommerce->cart->total;
 		$sum               = apply_filters( 'klarna_cart_total', $klarna_cart_total ); // Cart total.
-		$flag              = KlarnaFlags::CHECKOUT_PAGE; // or KlarnaFlags::PRODUCT_PAGE, if you want to do it for one item.
+		$flag              = Klarna\XMLRPC\Flags::CHECKOUT_PAGE; // or Klarna\XMLRPC\Flags::PRODUCT_PAGE, if you want to do it for one item.
 
 		// Description
 		if ( $this->description ) {
@@ -650,7 +650,7 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 		apply_filters( 'klarna_shipping_part_payment_fields', $klarna_shipping );
 		apply_filters( 'klarna_billing_part_payment_fields', $klarna_billing );
 
-		$klarna = new Klarna();
+		$klarna = new Klarna\XMLRPC\Klarna();
 
 		/**
 		 * Setup Klarna configuration
@@ -671,7 +671,7 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 			$result = $klarna->reserveAmount( $klarna_pno,            // Date of birth.
 				$klarna_gender,            // Gender.
 				- 1,                    // Automatically calculate and reserve the cart total amount
-				KlarnaFlags::NO_FLAG,    // No specific behaviour like RETURN_OCR or TEST_MODE.
+				Klarna\XMLRPC\Flags::NO_FLAG,    // No specific behaviour like RETURN_OCR or TEST_MODE.
 				$klarna_pclass            // Get the pclass object that the customer has choosen.
 			);
 
@@ -685,7 +685,7 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 			$invno = $result[0];
 
 			switch ( $result[1] ) {
-				case KlarnaFlags::ACCEPTED :
+				case Klarna\XMLRPC\Flags::ACCEPTED :
 					$order->add_order_note( __( 'Klarna payment completed. Klarna Invoice number: ', 'woocommerce-gateway-klarna' ) . $invno );
 					if ( $this->debug == 'yes' ) {
 						$this->log->add( 'klarna', __( 'Klarna payment completed. Klarna Invoice number: ', 'woocommerce-gateway-klarna' ) . $invno );
@@ -701,7 +701,7 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 					);
 					break;
 
-				case KlarnaFlags::PENDING :
+				case Klarna\XMLRPC\Flags::PENDING :
 					$order->add_order_note( __( 'Order is PENDING APPROVAL by Klarna. Please visit Klarna Online for the latest status on this order. Klarna Invoice number: ', 'woocommerce-gateway-klarna' ) . $invno );
 					if ( $this->debug == 'yes' ) {
 						$this->log->add( 'klarna', __( 'Order is PENDING APPROVAL by Klarna. Please visit Klarna Online for the latest status on this order. Klarna reservation number: ', 'woocommerce-gateway-klarna' ) . $invno );
@@ -715,7 +715,7 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 					);
 					break;
 
-				case KlarnaFlags::DENIED : // Order is denied, store it in a database.
+				case Klarna\XMLRPC\Flags::DENIED : // Order is denied, store it in a database.
 					$order->add_order_note( __( 'Klarna payment denied.', 'woocommerce-gateway-klarna' ) );
 					if ( $this->debug == 'yes' ) {
 						$this->log->add( 'klarna', __( 'Klarna payment denied.', 'woocommerce-gateway-klarna' ) );

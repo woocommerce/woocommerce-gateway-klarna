@@ -21,7 +21,6 @@ class WC_Gateway_Klarna_PClasses {
 	 * @since 1.0.0
 	 */
 	public function __construct( $klarna = false, $type = false, $country = false ) {
-
 		$this->klarna  = $klarna;
 		$this->country = $country;
 		$this->type    = $type;
@@ -81,19 +80,56 @@ class WC_Gateway_Klarna_PClasses {
 	function fetch_pclasses() {
 		$klarna = $this->klarna;
 
-		if ( $klarna->getPClasses() ) {
-			return $klarna->getAllPClasses();
-		} else {
-			try {
-				// You can specify country (and language, currency if you wish) if you don't want 
-				// to use the configured country.
-				$klarna->fetchPClasses( $this->country );
-
-				return $klarna->getAllPClasses();
-			} catch ( Exception $e ) {
-				return false;
+		$transient = json_decode( get_transient( 'klarna_pclasses_' . $this->country ), true );
+		if ( count( $transient ) !== 0 ) {
+			$pclasses = array();
+			foreach ( $transient as $pclassarray ) {
+				$pclass = $this->setup_pclass( $pclassarray );
+				$pclasses[] = $pclass;
 			}
+		} else {
+			if ( $klarna->getPClasses() ) {
+				$pclasses = $klarna->getPClasses();
+			} else {
+				try {
+					// You can specify country (and language, currency if you wish) if you don't want
+					// to use the configured country.
+					$pclasses = $klarna->getPClasses( $this->country );
+				} catch ( Exception $e ) {
+					delete_transient( 'klarna_pclasses_' . $this->country );
+
+					return false;
+				}
+			}
+
+			$output = array();
+			foreach ( $pclasses as $pclass ) {
+				$pclass = $pclass->toArray();
+				$pclass['description'] = utf8_encode( $pclass['description'] );
+
+				$output[] = $pclass;
+			}
+
+			set_transient( 'klarna_pclasses_' . $this->country, json_encode( $output ), 12 * HOUR_IN_SECONDS );
 		}
+
+		return $pclasses;
+	}
+
+	public function setup_pclass( $pclassarray ) {
+		$pclass = new Klarna\XMLRPC\PClass();
+
+		$pclass->setDescription( $pclassarray['description'] );
+		$pclass->setMonths( $pclassarray['months'] );
+		$pclass->setStartFee( $pclassarray['startfee'] );
+		$pclass->setInvoiceFee( $pclassarray['invoicefee'] );
+		$pclass->setInterestRate( $pclassarray['interestrate'] );
+		$pclass->setMinAmount( $pclassarray['minamount'] );
+		$pclass->setCountry( $pclassarray['country'] );
+		$pclass->setId( $pclassarray['id'] );
+		$pclass->setType( $pclassarray['type'] );
+
+		return $pclass;
 	}
 
 }

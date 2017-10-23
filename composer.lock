@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "230fe63cc596e20aec6b61e842a78194",
+    "content-hash": "64e04304697dcad72e243cd679571508",
     "packages": [
         {
             "name": "guzzlehttp/guzzle",
@@ -247,22 +247,23 @@
         },
         {
             "name": "klarna/php-xmlrpc",
-            "version": "v4.0.0",
+            "version": "v5.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/klarna/php-xmlrpc.git",
-                "reference": "7fe154c30b390e544a0f4f885805ef563efbe147"
+                "reference": "c359520ce516b9172697e0355d89e000aede2934"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/klarna/php-xmlrpc/zipball/7fe154c30b390e544a0f4f885805ef563efbe147",
-                "reference": "7fe154c30b390e544a0f4f885805ef563efbe147",
+                "url": "https://api.github.com/repos/klarna/php-xmlrpc/zipball/c359520ce516b9172697e0355d89e000aede2934",
+                "reference": "c359520ce516b9172697e0355d89e000aede2934",
                 "shasum": ""
             },
             "require": {
                 "ext-curl": "*",
-                "php": ">=5.2.16",
-                "phpxmlrpc/phpxmlrpc": "~3.0"
+                "ext-xml": "*",
+                "php": ">=5.4.0",
+                "phpxmlrpc/phpxmlrpc": "~4.0"
             },
             "require-dev": {
                 "apigen/apigen": "4.0.*",
@@ -270,7 +271,7 @@
             },
             "type": "library",
             "autoload": {
-                "psr-0": {
+                "psr-4": {
                     "": "src/"
                 }
             },
@@ -286,31 +287,46 @@
             ],
             "description": "PHP SDK for Klarna's XMLRPC API",
             "homepage": "http://developers.klarna.com",
-            "time": "2015-06-02T13:11:21+00:00"
+            "time": "2016-03-16T11:55:44+00:00"
         },
         {
             "name": "phpxmlrpc/phpxmlrpc",
-            "version": "3.0.1",
+            "version": "4.2.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/gggeek/phpxmlrpc.git",
-                "reference": "490862c33009397151ac39c811b6ee8e24689692"
+                "reference": "42c180bece13d99ca97ebe842d059d7352d8e914"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/gggeek/phpxmlrpc/zipball/490862c33009397151ac39c811b6ee8e24689692",
-                "reference": "490862c33009397151ac39c811b6ee8e24689692",
+                "url": "https://api.github.com/repos/gggeek/phpxmlrpc/zipball/42c180bece13d99ca97ebe842d059d7352d8e914",
+                "reference": "42c180bece13d99ca97ebe842d059d7352d8e914",
                 "shasum": ""
             },
             "require": {
-                "php": ">=5.1.0"
+                "ext-xml": "*",
+                "php": ">=5.3.0"
+            },
+            "require-dev": {
+                "codeclimate/php-test-reporter": "dev-master",
+                "docbook/docbook-xsl": "~1.78",
+                "ext-curl": "*",
+                "ext-mbstring": "*",
+                "indeyets/pake": "~1.99",
+                "phpunit/phpunit": ">=4.0.0, <6.0.0",
+                "phpunit/phpunit-selenium": "*",
+                "sami/sami": "~3.1"
+            },
+            "suggest": {
+                "ext-curl": "Needed for HTTPS and HTTP 1.1 support, NTLM Auth etc...",
+                "ext-mbstring": "Needed to allow reception of requests/responses in character sets other than ASCII,LATIN-1,UTF-8",
+                "ext-zlib": "Needed for sending compressed requests and receiving compressed responses, if cURL is not available"
             },
             "type": "library",
             "autoload": {
-                "classmap": [
-                    "lib/xmlrpc.inc",
-                    "lib/xmlrpcs.inc"
-                ]
+                "psr-4": {
+                    "PhpXmlRpc\\": "src/"
+                }
             },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
@@ -322,7 +338,7 @@
                 "webservices",
                 "xmlrpc"
             ],
-            "time": "2015-04-19T00:17:47+00:00"
+            "time": "2017-09-03T19:15:39+00:00"
         },
         {
             "name": "react/promise",

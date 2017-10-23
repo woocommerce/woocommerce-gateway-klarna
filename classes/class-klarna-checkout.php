@@ -36,7 +36,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		if ( $this->testmode == 'yes' ) {
 			// Disable SSL if in testmode
 			$this->klarna_ssl  = 'false';
-			$this->klarna_mode = Klarna::BETA;
+			$this->klarna_mode = Klarna\XMLRPC\Klarna::BETA;
 		} else {
 			// Set SSL if used in webshop
 			if ( is_ssl() ) {
@@ -44,7 +44,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			} else {
 				$this->klarna_ssl = 'false';
 			}
-			$this->klarna_mode = Klarna::LIVE;
+			$this->klarna_mode = Klarna\XMLRPC\Klarna::LIVE;
 		}
 		// Actions
 		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array(
@@ -80,96 +80,10 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			'subscription_amount_changes',
 			'subscription_date_changes',
 			'subscription_payment_method_change',
+			// 'subscription_payment_method_change_admin',
 			'multiple_subscriptions'
 		);
 		// Add link to KCO page in standard checkout
-		/**
-		 * Checkout page AJAX
-		 */
-		// Add coupon
-		add_action( 'wp_ajax_klarna_checkout_coupons_callback', array( $this, 'klarna_checkout_coupons_callback' ) );
-		add_action( 'wp_ajax_nopriv_klarna_checkout_coupons_callback', array(
-			$this,
-			'klarna_checkout_coupons_callback'
-		) );
-		// Remove coupon
-		add_action( 'wp_ajax_klarna_checkout_remove_coupon_callback', array(
-			$this,
-			'klarna_checkout_remove_coupon_callback'
-		) );
-		add_action( 'wp_ajax_nopriv_klarna_checkout_remove_coupon_callback', array(
-			$this,
-			'klarna_checkout_remove_coupon_callback'
-		) );
-		// Cart quantity
-		add_action( 'wp_ajax_klarna_checkout_cart_callback_update', array(
-			$this,
-			'klarna_checkout_cart_callback_update'
-		) );
-		add_action( 'wp_ajax_nopriv_klarna_checkout_cart_callback_update', array(
-			$this,
-			'klarna_checkout_cart_callback_update'
-		) );
-		// Cart remove
-		add_action( 'wp_ajax_klarna_checkout_cart_callback_remove', array(
-			$this,
-			'klarna_checkout_cart_callback_remove'
-		) );
-		add_action( 'wp_ajax_nopriv_klarna_checkout_cart_callback_remove', array(
-			$this,
-			'klarna_checkout_cart_callback_remove'
-		) );
-		// Shipping method selector
-		add_action( 'wp_ajax_klarna_checkout_shipping_callback', array( $this, 'klarna_checkout_shipping_callback' ) );
-		add_action( 'wp_ajax_nopriv_klarna_checkout_shipping_callback', array(
-			$this,
-			'klarna_checkout_shipping_callback'
-		) );
-		// Shipping option inside KCO iframe
-		add_action( 'wp_ajax_kco_iframe_shipping_option_change_cb', array(
-			$this,
-			'kco_iframe_shipping_option_change_cb'
-		) );
-		add_action( 'wp_ajax_nopriv_kco_iframe_shipping_option_change_cb', array(
-			$this,
-			'kco_iframe_shipping_option_change_cb'
-		) );
-		// Country selector
-		add_action( 'wp_ajax_klarna_checkout_country_callback', array( $this, 'klarna_checkout_country_callback' ) );
-		add_action( 'wp_ajax_nopriv_klarna_checkout_country_callback', array(
-			$this,
-			'klarna_checkout_country_callback'
-		) );
-		// Order note
-		add_action( 'wp_ajax_klarna_checkout_order_note_callback', array(
-			$this,
-			'klarna_checkout_order_note_callback'
-		) );
-		add_action( 'wp_ajax_nopriv_klarna_checkout_order_note_callback', array(
-			$this,
-			'klarna_checkout_order_note_callback'
-		) );
-		// KCO iframe JS event callbacks
-		// V2
-		add_action( 'wp_ajax_kco_iframe_change_cb', array( $this, 'kco_iframe_change_cb' ) );
-		add_action( 'wp_ajax_nopriv_kco_iframe_change_cb', array( $this, 'kco_iframe_change_cb' ) );
-		add_action( 'wp_ajax_kco_iframe_shipping_address_change_v2_cb', array(
-			$this,
-			'kco_iframe_shipping_address_change_v2_cb'
-		) );
-		add_action( 'wp_ajax_nopriv_kco_iframe_shipping_address_change_v2_cb', array(
-			$this,
-			'kco_iframe_shipping_address_change_v2_cb'
-		) );
-		// V3
-		add_action( 'wp_ajax_kco_iframe_shipping_address_change_cb', array(
-			$this,
-			'kco_iframe_shipping_address_change_cb'
-		) );
-		add_action( 'wp_ajax_nopriv_kco_iframe_shipping_address_change_cb', array(
-			$this,
-			'kco_iframe_shipping_address_change_cb'
-		) );
 		if ( class_exists( 'WC_Subscriptions_Order' ) ) {
 			// Process subscription payment
 			// add_action( 'woocommerce_scheduled_subscription_renewal_klarna_checkout', array( $this, 'scheduled_subscription_payment' ), 10, 2 );
@@ -215,6 +129,22 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			remove_action( 'get_header', 'wc_clear_cart_after_payment' );
 		}
 		add_action( 'woocommerce_checkout_subscription_created', array( $this, 'finalize_subscription' ), 10, 3 );
+
+		// Use an existing order when paying for a manual subscription renewal via "Pay Order" page
+		add_action( 'template_redirect', array( $this, 'use_ongoing_order_for_kco' ) );
+	}
+
+	function use_ongoing_order_for_kco() {
+		global $wp;
+
+		if ( isset( $_GET['pay_for_order'] ) && isset( $_GET['key'] ) && isset( $wp->query_vars['order-pay'] ) ) {
+			$order_id = ( isset( $wp->query_vars['order-pay'] ) ) ? $wp->query_vars['order-pay'] : absint( $_GET['order_id'] );
+			$order    = wc_get_order( $wp->query_vars['order-pay'] );
+
+			if ( $order ) {
+				WC()->session->set( 'ongoing_klarna_order', $order_id );
+			}
+		}
 	}
 
 	/**
@@ -527,6 +457,10 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		$order_id = klarna_wc_get_order_id( $order );
 
 		$klarna_recurring_token = get_post_meta( $order_id, '_klarna_recurring_token', true );
+		// If the recurring token isn't stored in the subscription, grab it from parent order.
+		if( empty( $klarna_recurring_token ) ) {
+			$klarna_recurring_token = get_post_meta( WC_Subscriptions_Renewal_Order::get_parent_order_id( $order_id ), '_klarna_recurring_token', true );	
+		}
 		$klarna_currency        = get_post_meta( $order_id, '_order_currency', true );
 		$klarna_country         = get_post_meta( $order_id, '_billing_country', true );
 		$klarna_locale          = get_post_meta( $order_id, '_klarna_locale', true );
@@ -546,18 +480,31 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			'street_address' => get_post_meta( $order_id, '_billing_address_1', true ),
 			'phone'          => get_post_meta( $order_id, '_billing_phone', true )
 		);
-		$shipping_email           = get_post_meta( $order_id, '_shipping_email', true ) ? get_post_meta( $order_id, '_shipping_email', true ) : get_post_meta( $order_id, '_billing_email', true );
-		$shipping_phone           = get_post_meta( $order_id, '_shipping_phone', true ) ? get_post_meta( $order_id, '_shipping_phone', true ) : get_post_meta( $order_id, '_billing_phone', true );
-		$klarna_shipping          = array(
-			'postal_code'    => get_post_meta( $order_id, '_shipping_postcode', true ),
-			'email'          => $shipping_email,
-			'country'        => get_post_meta( $order_id, '_shipping_country', true ),
-			'city'           => get_post_meta( $order_id, '_shipping_city', true ),
-			'family_name'    => get_post_meta( $order_id, '_shipping_last_name', true ),
-			'given_name'     => get_post_meta( $order_id, '_shipping_first_name', true ),
-			'street_address' => get_post_meta( $order_id, '_shipping_address_1', true ),
-			'phone'          => $shipping_phone
-		);
+		if( wc_shipping_enabled() ) {
+			$shipping_email           = get_post_meta( $order_id, '_shipping_email', true ) ? get_post_meta( $order_id, '_shipping_email', true ) : get_post_meta( $order_id, '_billing_email', true );
+			$shipping_phone           = get_post_meta( $order_id, '_shipping_phone', true ) ? get_post_meta( $order_id, '_shipping_phone', true ) : get_post_meta( $order_id, '_billing_phone', true );
+			$klarna_shipping          = array(
+				'postal_code'    => get_post_meta( $order_id, '_shipping_postcode', true ),
+				'email'          => $shipping_email,
+				'country'        => get_post_meta( $order_id, '_shipping_country', true ),
+				'city'           => get_post_meta( $order_id, '_shipping_city', true ),
+				'family_name'    => get_post_meta( $order_id, '_shipping_last_name', true ),
+				'given_name'     => get_post_meta( $order_id, '_shipping_first_name', true ),
+				'street_address' => get_post_meta( $order_id, '_shipping_address_1', true ),
+				'phone'          => $shipping_phone
+			);
+		} else {
+			$klarna_shipping		= array(
+				'postal_code'    => get_post_meta( $order_id, '_billing_postcode', true ),
+				'email'          => get_post_meta( $order_id, '_billing_email', true ),
+				'country'        => get_post_meta( $order_id, '_billing_country', true ),
+				'city'           => get_post_meta( $order_id, '_billing_city', true ),
+				'family_name'    => get_post_meta( $order_id, '_billing_last_name', true ),
+				'given_name'     => get_post_meta( $order_id, '_billing_first_name', true ),
+				'street_address' => get_post_meta( $order_id, '_billing_address_1', true ),
+				'phone'          => get_post_meta( $order_id, '_billing_phone', true )
+			);
+		}
 		// Products in subscription
 		$cart = array();
 		if ( sizeof( $order->get_items() ) > 0 ) {
@@ -660,597 +607,6 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		return $order_meta_query;
 	}
 
-
-	//
-	// AJAX callbacks
-	//
-	/**
-	 * Klarna Checkout cart AJAX callback.
-	 *
-	 * @since  2.0
-	 **/
-	function klarna_checkout_cart_callback_update() {
-		if ( ! wp_verify_nonce( $_REQUEST['nonce'], 'klarna_checkout_nonce' ) ) {
-			exit( 'Nonce can not be verified.' );
-		}
-
-		$updated_item_key = $_REQUEST['cart_item_key'];
-		$new_quantity     = $_REQUEST['new_quantity'];
-
-		if ( ! defined( 'WOOCOMMERCE_CART' ) ) {
-			define( 'WOOCOMMERCE_CART', true );
-		}
-
-		if ( ! defined( 'WOOCOMMERCE_CHECKOUT' ) ) {
-			define( 'WOOCOMMERCE_CHECKOUT', true );
-		}
-
-		// Update WooCommerce cart and transient order item
-		WC()->cart->set_quantity( $updated_item_key, $new_quantity );
-		WC()->cart->calculate_shipping();
-		WC()->cart->calculate_fees();
-		WC()->cart->calculate_totals();
-
-		if ( 'true' === $_REQUEST['min_max_flag'] ) {
-			$data['cart_url'] = wc_get_page_permalink( 'cart' );
-			wp_send_json_error( $data );
-			wp_die();
-		}
-
-		$this->update_or_create_local_order();
-		$data['widget_html'] = $this->klarna_checkout_get_kco_widget_html();
-
-		if ( WC()->session->get( 'klarna_checkout' ) ) {
-			$this->ajax_update_klarna_order();
-		}
-
-		wp_send_json_success( $data );
-		wp_die();
-	}
-
-	/**
-	 * Klarna Checkout cart AJAX callback.
-	 *
-	 * @since  2.0
-	 **/
-	function klarna_checkout_cart_callback_remove() {
-		if ( ! wp_verify_nonce( $_REQUEST['nonce'], 'klarna_checkout_nonce' ) ) {
-			exit( 'Nonce can not be verified.' );
-		}
-		global $woocommerce;
-		if ( ! defined( 'WOOCOMMERCE_CART' ) ) {
-			define( 'WOOCOMMERCE_CART', true );
-		}
-
-		// Remove line item row
-		$removed_item_key = esc_attr( $_REQUEST['cart_item_key_remove'] );
-		$woocommerce->cart->remove_cart_item( $removed_item_key );
-
-		if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
-			$woocommerce->cart->calculate_shipping();
-			$woocommerce->cart->calculate_fees();
-			$woocommerce->cart->calculate_totals();
-			$this->update_or_create_local_order();
-		} else {
-			if ( $woocommerce->session->get( 'ongoing_klarna_order' ) ) {
-				wp_delete_post( $woocommerce->session->get( 'ongoing_klarna_order' ) );
-				$woocommerce->session->__unset( 'ongoing_klarna_order' );
-			}
-		}
-
-		// This needs to be sent back to JS, so cart widget can be updated
-		$data['item_count']  = $woocommerce->cart->get_cart_contents_count();
-		$data['cart_url']    = $woocommerce->cart->get_cart_url();
-		$data['widget_html'] = $this->klarna_checkout_get_kco_widget_html();
-
-		// Update ongoing Klarna order
-		if ( WC()->session->get( 'klarna_checkout' ) ) {
-			$this->ajax_update_klarna_order();
-		}
-
-		wp_send_json_success( $data );
-		wp_die();
-	}
-
-	/**
-	 * Klarna Checkout coupons AJAX callback.
-	 *
-	 * @since  2.0
-	 **/
-	function klarna_checkout_coupons_callback() {
-		if ( ! wp_verify_nonce( $_REQUEST['nonce'], 'klarna_checkout_nonce' ) ) {
-			exit( 'Nonce can not be verified.' );
-		}
-
-		if ( ! defined( 'WOOCOMMERCE_CART' ) ) {
-			define( 'WOOCOMMERCE_CART', true );
-		}
-
-		$data                = array();
-		$data['widget_html'] = '';
-
-		// Adding coupon
-		if ( ! empty( $_REQUEST['coupon'] ) && is_string( $_REQUEST['coupon'] ) ) {
-			$coupon          = $_REQUEST['coupon'];
-			$coupon_success  = WC()->cart->add_discount( $coupon );
-			$applied_coupons = WC()->cart->applied_coupons;
-
-			WC()->session->set( 'applied_coupons', $applied_coupons );
-			WC()->cart->calculate_totals();
-			wc_clear_notices(); // This notice handled by Klarna plugin
-
-			/*
-			if ( sizeof( WC()->cart->get_applied_coupons() ) > 0 ) {
-				if ( WC()->customer->get_billing_email() ) {
-					$coupons_before = sizeof( WC()->cart->get_applied_coupons() );
-					WC()->cart->check_customer_coupons( array( 'billing_email' => WC()->customer->get_billing_email() ) );
-					if ( sizeof( WC()->cart->get_applied_coupons() ) < $coupons_before ) {
-						$coupon              = new WC_Coupon();
-						$data['widget_html'] .= '<div class="woocommerce-error">' . $coupon->get_coupon_error( WC_Coupon::E_WC_COUPON_USAGE_LIMIT_REACHED ) . '</div>';
-					}
-				}
-			}
-			*/
-
-			WC()->cart->calculate_shipping();
-			WC()->cart->calculate_fees();
-			WC()->cart->calculate_totals();
-			$this->update_or_create_local_order();
-
-			$amount                 = wc_price( WC()->cart->get_coupon_discount_amount( $coupon, WC()->cart->display_cart_ex_tax ) );
-			$data['amount']         = $amount;
-			$data['coupon_success'] = $coupon_success;
-			$data['coupon']         = $coupon;
-			$data['widget_html']    .= $this->klarna_checkout_get_kco_widget_html();
-
-			if ( WC()->session->get( 'klarna_checkout' ) ) {
-				$this->ajax_update_klarna_order();
-			}
-		}
-		wp_send_json_success( $data );
-		wp_die();
-	}
-
-	/**
-	 * Klarna Checkout coupons AJAX callback.
-	 *
-	 * @since  2.0
-	 **/
-	function klarna_checkout_remove_coupon_callback() {
-		if ( ! wp_verify_nonce( $_REQUEST['nonce'], 'klarna_checkout_nonce' ) ) {
-			exit( 'Nonce can not be verified.' );
-		}
-		global $woocommerce;
-		$data = array();
-		// Removing coupon
-		if ( isset( $_REQUEST['remove_coupon'] ) ) {
-			$remove_coupon = $_REQUEST['remove_coupon'];
-			$woocommerce->cart->remove_coupon( $remove_coupon );
-			$applied_coupons = $woocommerce->cart->applied_coupons;
-			$woocommerce->session->set( 'applied_coupons', $applied_coupons );
-			$woocommerce->cart->calculate_totals();
-			wc_clear_notices(); // This notice handled by Klarna plugin
-			if ( ! defined( 'WOOCOMMERCE_CART' ) ) {
-				define( 'WOOCOMMERCE_CART', true );
-			}
-			$woocommerce->cart->calculate_shipping();
-			$woocommerce->cart->calculate_fees();
-			$woocommerce->cart->calculate_totals();
-			$this->update_or_create_local_order();
-			$data['widget_html'] = $this->klarna_checkout_get_kco_widget_html();
-			if ( WC()->session->get( 'klarna_checkout' ) ) {
-				$this->ajax_update_klarna_order();
-			}
-		}
-		wp_send_json_success( $data );
-		wp_die();
-	}
-
-	/**
-	 * Klarna Checkout shipping AJAX callback.
-	 *
-	 * @since  2.0
-	 **/
-	function klarna_checkout_shipping_callback() {
-		if ( ! wp_verify_nonce( $_REQUEST['nonce'], 'klarna_checkout_nonce' ) ) {
-			exit( 'Nonce can not be verified.' );
-		}
-		global $woocommerce;
-		$new_method                = $_REQUEST['new_method'];
-		$chosen_shipping_methods[] = wc_clean( $new_method );
-		$woocommerce->session->set( 'chosen_shipping_methods', $chosen_shipping_methods );
-		if ( ! defined( 'WOOCOMMERCE_CART' ) ) {
-			define( 'WOOCOMMERCE_CART', true );
-		}
-		$woocommerce->cart->calculate_shipping();
-		$woocommerce->cart->calculate_fees();
-		$woocommerce->cart->calculate_totals();
-		$this->update_or_create_local_order();
-		$data['new_method']  = $new_method;
-		$data['widget_html'] = $this->klarna_checkout_get_kco_widget_html();
-		if ( WC()->session->get( 'klarna_checkout' ) ) {
-			$this->ajax_update_klarna_order();
-		}
-		wp_send_json_success( $data );
-		wp_die();
-	}
-
-	/**
-	 * Klarna Checkout coupons AJAX callback.
-	 *
-	 * @since  2.0
-	 **/
-	function klarna_checkout_order_note_callback() {
-		if ( ! wp_verify_nonce( $_REQUEST['nonce'], 'klarna_checkout_nonce' ) ) {
-			exit( 'Nonce can not be verified.' );
-		}
-
-		$data = array();
-
-		// Adding order note.
-		if ( isset( $_REQUEST['order_note'] ) && is_string( $_REQUEST['order_note'] ) ) {
-			$order_note         = sanitize_text_field( $_REQUEST['order_note'] );
-			$data['order_note'] = $order_note;
-			if ( WC()->session->get( 'klarna_checkout' ) ) {
-				WC()->cart->calculate_shipping();
-				WC()->cart->calculate_fees();
-				WC()->cart->calculate_totals();
-
-				$orderid = $this->update_or_create_local_order();
-
-				$order_details = array(
-					'ID'           => $orderid,
-					'post_excerpt' => $order_note
-				);
-
-				wp_update_post( $order_details );
-
-				if ( $this->debug == 'yes' ) {
-					$this->log->add( 'klarna', 'ORDERID: ' . $orderid );
-				}
-
-				WC()->session->set( 'klarna_order_note', $order_note );
-				$this->ajax_update_klarna_order();
-			}
-		}
-		wp_send_json_success( $data );
-		wp_die();
-	}
-
-	/**
-	 * Klarna Checkout country selector AJAX callback.
-	 *
-	 * @since  2.0
-	 **/
-	function klarna_checkout_country_callback() {
-		if ( ! wp_verify_nonce( $_REQUEST['nonce'], 'klarna_checkout_nonce' ) ) {
-			exit( 'Nonce can not be verified.' );
-		}
-		$data = array();
-		if ( isset( $_REQUEST['new_country'] ) && is_string( $_REQUEST['new_country'] ) ) {
-			$new_country = sanitize_text_field( $_REQUEST['new_country'] );
-			// Reset session
-			$klarna_order = null;
-			WC()->session->__unset( 'klarna_checkout' );
-			WC()->session->__unset( 'klarna_checkout_country' );
-			// Store new country as WC session value
-			WC()->session->set( 'klarna_euro_country', $new_country );
-			// Get new checkout URL
-			$lowercase_country = strtolower( $new_country );
-			$checkout_settings = get_option( 'woocommerce_klarna_checkout_settings' );
-			$data['new_url']   = $checkout_settings["klarna_checkout_url_$lowercase_country"];
-			// Send data back to JS function
-			$data['klarna_euro_country'] = $new_country;
-		}
-		wp_send_json_success( $data );
-		wp_die();
-	}
-
-	/**
-	 * Pushes Klarna order update in AJAX calls.
-	 *
-	 * Used to capture customer address, recalculate tax and shipping for order and user session
-	 *
-	 * @since  2.0
-	 **/
-	function kco_iframe_change_cb() {
-		if ( ! wp_verify_nonce( $_REQUEST['nonce'], 'klarna_checkout_nonce' ) ) {
-			exit( 'Nonce can not be verified.' );
-		}
-
-		$data                = array();
-		$data['widget_html'] = '';
-
-		// Check stock.
-		if ( is_wp_error( WC()->cart->check_cart_item_stock() ) ) {
-			wp_send_json_error();
-			wp_die();
-		}
-
-		// Check coupons.
-		if ( isset( $_REQUEST['email'] ) && is_email( $_REQUEST['email'] ) ) {
-			if ( is_callable( array( WC()->customer, 'set_billing_email' ) ) ) {
-				WC()->customer->set_billing_email( $_REQUEST['email'] );
-			}
-			if ( is_callable( array( WC()->customer, 'save' ) ) ) {
-				WC()->customer->save();
-			}
-
-			if ( count( WC()->cart->get_applied_coupons() ) > 0 ) {
-				if ( WC()->customer->get_billing_email() ) {
-					$coupons_before = count( WC()->cart->get_applied_coupons() );
-					WC()->cart->check_customer_coupons( array( 'billing_email' => WC()->customer->get_billing_email() ) );
-					if ( count( WC()->cart->get_applied_coupons() ) < $coupons_before ) {
-						$coupon              = new WC_Coupon();
-						$data['widget_html'] .= '<div class="woocommerce-error">' . $coupon->get_coupon_error( WC_Coupon::E_WC_COUPON_USAGE_LIMIT_REACHED ) . '</div>';
-					}
-				}
-			}
-		}
-
-		// Capture email.
-		if ( isset( $_REQUEST['email'] ) && is_string( $_REQUEST['email'] ) && ! is_user_logged_in() ) {
-			$this->update_or_create_local_order( $_REQUEST['email'] );
-			$orderid         = WC()->session->get( 'ongoing_klarna_order' );
-			$data['orderid'] = $orderid;
-			$connector       = Klarna_Checkout_Connector::create( $this->klarna_secret, $this->klarna_server );
-			$klarna_order    = new Klarna_Checkout_Order( $connector, WC()->session->get( 'klarna_checkout' ) );
-
-			$klarna_order->fetch();
-
-			$update['merchant']['push_uri']         = add_query_arg( array( 'sid' => $orderid ), $klarna_order['merchant']['push_uri'] );
-			$update['merchant']['confirmation_uri'] = add_query_arg( array(
-				'sid'            => $orderid,
-				'order-received' => $orderid
-			), $klarna_order['merchant']['confirmation_uri'] );
-
-			$klarna_order->update( $update );
-		}
-
-		// Capture postal code.
-		if ( isset( $_REQUEST['postal_code'] ) && is_string( $_REQUEST['postal_code'] ) && WC_Validation::is_postcode( $_REQUEST['postal_code'], $this->klarna_country ) ) {
-			WC()->customer->set_shipping_postcode( $_REQUEST['postal_code'] );
-			if ( ! defined( 'WOOCOMMERCE_CART' ) ) {
-				define( 'WOOCOMMERCE_CART', true );
-			}
-
-			// Update user session.
-			WC()->cart->calculate_shipping();
-			WC()->cart->calculate_fees();
-			WC()->cart->calculate_totals();
-
-			// Update ongoing WooCommerce order.
-			$this->update_or_create_local_order();
-			$data['widget_html'] .= $this->klarna_checkout_get_kco_widget_html();
-
-			if ( WC()->session->get( 'klarna_checkout' ) ) {
-				$this->ajax_update_klarna_order();
-			}
-		}
-
-		wp_send_json_success( $data );
-		wp_die();
-	}
-
-	/**
-	 * Klarna order shipping address change callback function (V2).
-	 *
-	 * @since  2.0
-	 **/
-	function kco_iframe_shipping_address_change_v2_cb() {
-		if ( ! wp_verify_nonce( $_REQUEST['nonce'], 'klarna_checkout_nonce' ) ) {
-			exit( 'Nonce can not be verified.' );
-		}
-
-		$data = array();
-
-		// Capture postal code.
-		if ( isset( $_REQUEST['postal_code'] ) && is_string( $_REQUEST['postal_code'] ) ) {
-			WC()->customer->set_shipping_postcode( $_REQUEST['postal_code'] );
-		}
-
-		if ( ! defined( 'WOOCOMMERCE_CART' ) ) {
-			define( 'WOOCOMMERCE_CART', true );
-		}
-
-		WC()->cart->calculate_shipping();
-		WC()->cart->calculate_fees();
-		WC()->cart->calculate_totals();
-
-		$this->update_or_create_local_order();
-		$data['widget_html'] = $this->klarna_checkout_get_kco_widget_html();
-
-		if ( WC()->session->get( 'klarna_checkout' ) ) {
-			$this->ajax_update_klarna_order();
-		}
-
-		wp_send_json_success( $data );
-		wp_die();
-	}
-
-	/**
-	 * Klarna order shipping address change callback function (V3).
-	 *
-	 * @since  2.0
-	 **/
-	function kco_iframe_shipping_address_change_cb() {
-		if ( ! wp_verify_nonce( $_REQUEST['nonce'], 'klarna_checkout_nonce' ) ) {
-			exit( 'Nonce can not be verified.' );
-		}
-
-		$data = array();
-		$data['widget_html'] = '';
-
-		$wc_customer = WC()->customer;
-
-		// Capture postal code
-		if ( isset( $_REQUEST['postal_code'] ) && is_string( $_REQUEST['postal_code'] ) ) {
-			if ( method_exists( $wc_customer, 'set_billing_postcode' ) ) {
-				$wc_customer->set_billing_postcode( $_REQUEST['postal_code'] );
-			} else {
-				$wc_customer->set_postcode( $_REQUEST['postal_code'] );
-			}
-			$wc_customer->set_shipping_postcode( $_REQUEST['postal_code'] );
-		}
-		if ( isset( $_REQUEST['region'] ) && is_string( $_REQUEST['region'] ) ) {
-			if ( method_exists( $wc_customer, 'set_billing_state' ) ) {
-				$wc_customer->set_billing_state( $_REQUEST['region'] );
-			} else {
-				$wc_customer->set_state( $_REQUEST['region'] );
-			}
-
-			$wc_customer->set_shipping_state( $_REQUEST['region'] );
-		}
-		if ( isset( $_REQUEST['country'] ) && is_string( $_REQUEST['country'] ) ) {
-			if ( 'gbr' == $_REQUEST['country'] ) {
-				$country = 'GB';
-			} elseif ( 'usa' == $_REQUEST['country'] ) {
-				$country = 'US';
-			} elseif ( 'dnk' == $_REQUEST['country'] ) {
-				$country = 'DK';
-			} elseif ( 'nld' == $_REQUEST['country'] ) {
-				$country = 'NL';
-			}
-
-			if ( method_exists( $wc_customer, 'set_billing_country' ) ) {
-				$wc_customer->set_billing_country( $country );
-			} else {
-				$wc_customer->set_country( $country );
-			}
-			$wc_customer->set_shipping_country( $country );
-		}
-
-		// Check coupons.
-		if ( isset( $_REQUEST['email'] ) && is_email( $_REQUEST['email'] ) ) {
-			if ( is_callable( array( WC()->customer, 'set_billing_email' ) ) ) {
-				WC()->customer->set_billing_email( $_REQUEST['email'] );
-			}
-			if ( is_callable( array( WC()->customer, 'save' ) ) ) {
-				WC()->customer->save();
-			}
-
-			if ( sizeof( WC()->cart->get_applied_coupons() ) > 0 ) {
-				if ( WC()->customer->get_billing_email() ) {
-					$coupons_before = sizeof( WC()->cart->get_applied_coupons() );
-					WC()->cart->check_customer_coupons( array( 'billing_email' => WC()->customer->get_billing_email() ) );
-					if ( sizeof( WC()->cart->get_applied_coupons() ) < $coupons_before ) {
-						$coupon              = new WC_Coupon();
-						$data['widget_html'] .= '<div class="woocommerce-error">' . $coupon->get_coupon_error( WC_Coupon::E_WC_COUPON_USAGE_LIMIT_REACHED ) . '</div>';
-					}
-				}
-			}
-		}
-
-		if ( version_compare( WOOCOMMERCE_VERSION, '3.0', '>=' ) ) {
-			$wc_customer->save();
-		}
-
-		if ( ! defined( 'WOOCOMMERCE_CART' ) ) {
-			define( 'WOOCOMMERCE_CART', true );
-		}
-
-		WC()->cart->calculate_shipping();
-		WC()->cart->calculate_fees();
-		WC()->cart->calculate_totals();
-
-		$order_id = $this->update_or_create_local_order();
-
-		if ( version_compare( WOOCOMMERCE_VERSION, '3.0', '>=' ) ) {
-			$order = wc_get_order( $order_id );
-
-			if ( isset( $_REQUEST['city'] ) && is_string( $_REQUEST['city'] ) ) {
-				$order->set_billing_city( $_REQUEST['city'] );
-			}
-
-			if ( isset( $_REQUEST['country'] ) && is_string( $_REQUEST['country'] ) ) {
-				if ( 'gbr' == $_REQUEST['country'] ) {
-					$order->set_billing_country( 'GB' );
-					$order->set_shipping_country( 'GB' );
-				} elseif ( 'usa' == $_REQUEST['country'] ) {
-					$order->set_billing_country( 'US' );
-					$order->set_shipping_country( 'US' );
-				} elseif ( 'dnk' == $_REQUEST['country'] ) {
-					$order->set_billing_country( 'DK' );
-					$order->set_shipping_country( 'DK' );
-				} elseif ( 'nld' == $_REQUEST['country'] ) {
-					$order->set_billing_country( 'NL' );
-					$order->set_shipping_country( 'NL' );
-				}
-			}
-
-			if ( is_callable( array( WC()->customer, 'set_billing_email' ) ) ) {
-				if ( isset( $_REQUEST['email'] ) && is_string( $_REQUEST['email'] ) ) {
-					$order->set_billing_email( $_REQUEST['email'] );
-				}
-			}
-
-			if ( isset( $_REQUEST['given_name'] ) && is_string( $_REQUEST['given_name'] ) ) {
-				$order->set_billing_first_name( $_REQUEST['given_name'] );
-			}
-
-			if ( isset( $_REQUEST['family_name'] ) && is_string( $_REQUEST['family_name'] ) ) {
-				$order->set_billing_last_name( $_REQUEST['family_name'] );
-			}
-
-			if ( isset( $_REQUEST['phone'] ) && is_string( $_REQUEST['phone'] ) ) {
-				$order->set_billing_phone( $_REQUEST['phone'] );
-			}
-
-			if ( isset( $_REQUEST['postal_code'] ) && is_string( $_REQUEST['postal_code'] ) ) {
-				$order->set_billing_postcode( $_REQUEST['postal_code'] );
-				$order->set_shipping_postcode( $_REQUEST['postal_code'] );
-			}
-
-			if ( isset( $_REQUEST['region'] ) && is_string( $_REQUEST['region'] ) ) {
-				$order->set_billing_state( $_REQUEST['region'] );
-				$order->set_shipping_state( $_REQUEST['region'] );
-			}
-			if ( isset( $_REQUEST['street_address'] ) && is_string( $_REQUEST['street_address'] ) ) {
-				$order->set_billing_address_1( $_REQUEST['street_address'] );
-			}
-
-			$order->calculate_totals();
-			$order->save();
-		}
-
-		$data['widget_html'] .= $this->klarna_checkout_get_kco_widget_html();
-
-		if ( WC()->session->get( 'klarna_checkout' ) ) {
-			$this->ajax_update_klarna_order();
-		}
-
-		wp_send_json_success( $data );
-		wp_die();
-	}
-
-	/**
-	 * Klarna order shipping option change callback function.
-	 *
-	 * @since  2.0
-	 **/
-	function kco_iframe_shipping_option_change_cb() {
-		if ( ! wp_verify_nonce( $_REQUEST['nonce'], 'klarna_checkout_nonce' ) ) {
-			exit( 'Nonce can not be verified.' );
-		}
-		global $woocommerce;
-		$new_method                = $_REQUEST['new_method'];
-		$chosen_shipping_methods[] = wc_clean( $new_method );
-		$woocommerce->session->set( 'chosen_shipping_methods', $chosen_shipping_methods );
-		if ( ! defined( 'WOOCOMMERCE_CART' ) ) {
-			define( 'WOOCOMMERCE_CART', true );
-		}
-		$woocommerce->cart->calculate_shipping();
-		$woocommerce->cart->calculate_fees();
-		$woocommerce->cart->calculate_totals();
-		$this->update_or_create_local_order();
-		$data['new_method']  = $new_method;
-		$data['widget_html'] = $this->klarna_checkout_get_kco_widget_html();
-		if ( WC()->session->get( 'klarna_checkout' ) ) {
-			$this->ajax_update_klarna_order();
-		}
-		wp_send_json_success( $data );
-		wp_die();
-	}
 
 	/**
 	 * Pushes Klarna order update in AJAX calls.
@@ -1491,28 +847,26 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 *
 	 * @since 1.0.0
 	 */
-	function get_klarna_checkout_page() {
+	public static function get_klarna_checkout_page() {
 		global $woocommerce;
 		$current_user = wp_get_current_user();
 
-		// Debug
-		if ( $this->debug == 'yes' ) {
-			$this->log->add( 'klarna', 'KCO page about to render...' );
-		}
-		// Check if Klarna order exists, if it does display thank you page
-		// otherwise display checkout page
-		if ( isset( $_GET['klarna_order'] ) ) { // Display Order response/thank you page via iframe from Klarna
-			ob_start();
-			include( KLARNA_DIR . 'includes/checkout/thank-you.php' );
+		// Display Checkout page
+		ob_start();
+		include( KLARNA_DIR . 'includes/checkout/checkout.php' );
 
-			return ob_get_clean();
-		} else { // Display Checkout page
-			ob_start();
-			include( KLARNA_DIR . 'includes/checkout/checkout.php' );
-
-			return ob_get_clean();
-		} // End if isset($_GET['klarna_order'])
+		return ob_get_clean();
 	} // End Function
+
+	public static function get_klarna_thank_you_page() {
+		global $woocommerce;
+		$current_user = wp_get_current_user();
+
+		ob_start();
+		include( KLARNA_DIR . 'includes/checkout/thank-you.php' );
+
+		return ob_get_clean();
+	}
 
 	/**
 	 * Creates a WooCommerce order, or updates if already created
@@ -1808,7 +1162,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			}
 			if ( 'v2' == get_post_meta( $orderid, '_klarna_api', true ) ) {
 				$country = get_post_meta( $orderid, '_billing_country', true );
-				$klarna  = new Klarna();
+				$klarna  = new Klarna\XMLRPC\Klarna();
 				$this->configure_klarna( $klarna, $country );
 				$invNo        = get_post_meta( $orderid, '_klarna_invoice_number', true );
 				$klarna_order = new WC_Gateway_Klarna_Order( $order, $klarna );
@@ -2058,7 +1412,7 @@ class WC_Gateway_Klarna_Checkout_Extra {
 
 	// Set session
 	function start_session() {
-		new WC_Gateway_Klarna_Checkout; // Still need to initiate it here, otherwise shortcode won't work
+		// new WC_Gateway_Klarna_Checkout; // Still need to initiate it here, otherwise shortcode won't work
 		// if ( ! is_admin() || defined( 'DOING_AJAX' ) ) {
 		/*
 		$checkout_settings = get_option( 'woocommerce_klarna_checkout_settings' );

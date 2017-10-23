@@ -15,6 +15,10 @@ class ComposerStaticInitb30f53f6e8207a5323c472de4b590c63
         array (
             'React\\Promise\\' => 14,
         ),
+        'P' => 
+        array (
+            'PhpXmlRpc\\' => 10,
+        ),
         'G' => 
         array (
             'GuzzleHttp\\Stream\\' => 18,
@@ -27,6 +31,10 @@ class ComposerStaticInitb30f53f6e8207a5323c472de4b590c63
         'React\\Promise\\' => 
         array (
             0 => __DIR__ . '/..' . '/react/promise/src',
+        ),
+        'PhpXmlRpc\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/phpxmlrpc/phpxmlrpc/src',
         ),
         'GuzzleHttp\\Stream\\' => 
         array (
@@ -44,6 +52,7 @@ class ComposerStaticInitb30f53f6e8207a5323c472de4b590c63
 
     public static $fallbackDirsPsr4 = array (
         0 => __DIR__ . '/..' . '/klarna/kco_rest/src',
+        1 => __DIR__ . '/..' . '/klarna/php-xmlrpc/src',
     );
 
     public static $prefixesPsr0 = array (
@@ -56,18 +65,6 @@ class ComposerStaticInitb30f53f6e8207a5323c472de4b590c63
         ),
     );
 
-    public static $fallbackDirsPsr0 = array (
-        0 => __DIR__ . '/..' . '/klarna/php-xmlrpc/src',
-    );
-
-    public static $classMap = array (
-        'xmlrpc_client' => __DIR__ . '/..' . '/phpxmlrpc/phpxmlrpc/lib/xmlrpc.inc',
-        'xmlrpc_server' => __DIR__ . '/..' . '/phpxmlrpc/phpxmlrpc/lib/xmlrpcs.inc',
-        'xmlrpcmsg' => __DIR__ . '/..' . '/phpxmlrpc/phpxmlrpc/lib/xmlrpc.inc',
-        'xmlrpcresp' => __DIR__ . '/..' . '/phpxmlrpc/phpxmlrpc/lib/xmlrpc.inc',
-        'xmlrpcval' => __DIR__ . '/..' . '/phpxmlrpc/phpxmlrpc/lib/xmlrpc.inc',
-    );
-
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
@@ -75,8 +72,6 @@ class ComposerStaticInitb30f53f6e8207a5323c472de4b590c63
             $loader->prefixDirsPsr4 = ComposerStaticInitb30f53f6e8207a5323c472de4b590c63::$prefixDirsPsr4;
             $loader->fallbackDirsPsr4 = ComposerStaticInitb30f53f6e8207a5323c472de4b590c63::$fallbackDirsPsr4;
             $loader->prefixesPsr0 = ComposerStaticInitb30f53f6e8207a5323c472de4b590c63::$prefixesPsr0;
-            $loader->fallbackDirsPsr0 = ComposerStaticInitb30f53f6e8207a5323c472de4b590c63::$fallbackDirsPsr0;
-            $loader->classMap = ComposerStaticInitb30f53f6e8207a5323c472de4b590c63::$classMap;
 
         }, null, ClassLoader::class);
     }

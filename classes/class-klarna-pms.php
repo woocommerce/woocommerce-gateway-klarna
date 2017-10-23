@@ -58,14 +58,14 @@ class WC_Klarna_PMS {
 	function get_data(
 		$eid, $secret, $selected_currency, $shop_country, $cart_total, $payment_method_group, $select_id, $mode, $invoice_fee = false
 	) {
-		$klarna = new Klarna();
-		$config = new KlarnaConfig();
+		$klarna = new Klarna\XMLRPC\Klarna();
+		$config = new Klarna\XMLRPC\Config();
 
 		// Default required options
 		if ( $mode == 'test' ) {
 			$klarna_ssl      = 'false';
 			$klarna_endpoint = 'https://api-test.klarna.com/touchpoint/checkout/';
-			$klarna_mode     = Klarna::BETA;
+			$klarna_mode     = Klarna\XMLRPC\Klarna::BETA;
 		} else {
 			// Set SSL if used in webshop
 			if ( is_ssl() ) {
@@ -74,7 +74,7 @@ class WC_Klarna_PMS {
 				$klarna_ssl = 'false';
 			}
 			$klarna_endpoint = 'https://api.klarna.com/touchpoint/checkout/';
-			$klarna_mode     = Klarna::LIVE;
+			$klarna_mode     = Klarna\XMLRPC\Klarna::LIVE;
 		}
 
 		// Configuration needed for the checkout service
@@ -96,7 +96,7 @@ class WC_Klarna_PMS {
 				$selected_currency, // Currency used by the checkout
 				$klarna_pms_locale  // Locale used by the checkout
 			);
-		} catch ( KlarnaException $e ) {
+		} catch ( Exception $e ) {
 			// cURL exception
 			return false;
 		}

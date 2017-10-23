@@ -28,6 +28,8 @@ Example files can be found in the [docs/](docs/) directory.
 Documentation and more examples can be found at
 [developers.klarna.com](https://developers.klarna.com).
 
+## Upgrading
+If you are upgrading from version 4 or earlier you can read more about it in [docs/UPGRADE_v5.md](docs/UPGRADE_v5.md)
 
 ## Questions and feedback
 If you have any questions concerning this product or the implementation,

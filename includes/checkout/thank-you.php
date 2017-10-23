@@ -18,29 +18,47 @@ if ( ! defined( 'WOOCOMMERCE_KLARNA_AVAILABLE' ) ) {
  * Display Klarna Checkout Thank You page
  */
 
+$ty_klarna_eid          = WC_Gateway_Klarna_Checkout_Variables::get_klarna_eid();
+$ty_klarna_secret       = WC_Gateway_Klarna_Checkout_Variables::get_klarna_secret();
+$ty_klarna_country      = WC_Gateway_Klarna_Checkout_Variables::get_klarna_country();
+$ty_klarna_checkout_url = WC_Gateway_Klarna_Checkout_Variables::get_klarna_checkout_url();
+$ty_klarna_server       = WC_Gateway_Klarna_Checkout_Variables::get_klarna_server();
+$ty_testmode            = WC_Gateway_Klarna_Checkout_Variables::get_klarna_checkout_testmode();
+$ty_debug               = WC_Gateway_Klarna_Checkout_Variables::get_klarna_checkout_debug();
+$ty_log                 = WC_Gateway_Klarna_Checkout_Variables::get_klarna_checkout_log();
+$ty_is_rest             = WC_Gateway_Klarna_Checkout_Variables::is_rest();
+
 // Debug.
-if ( 'yes' === $this->debug ) {
-	$this->log->add( 'klarna', 'Rendering Thank you page...' );
+if ( 'yes' === $ty_debug ) {
+	$ty_log->add( 'klarna', 'Rendering Thank you page...' );
 }
 
-$merchant_id   = $this->klarna_eid;
-$shared_secret = $this->klarna_secret;
+$merchant_id   = $ty_klarna_eid;
+$shared_secret = $ty_klarna_secret;
 $order_uri     = $_GET['klarna_order'];
-$order_id      = intval( $_GET['order-received'] );
+$order_id      = (int) $_GET['order-received'];
 $order         = wc_get_order( $order_id );
 
 // Connect to Klarna.
-if ( $this->is_rest() ) {
-	if ( 'yes' === $this->testmode ) {
-		if ( in_array( strtoupper( $this->klarna_country ), apply_filters( 'klarna_is_rest_countries_eu', array( 'DK', 'GB', 'NL' ) ) ) ) {
+if ( $ty_is_rest ) {
+	if ( 'yes' === $ty_testmode ) {
+		if ( in_array( strtoupper( $ty_klarna_country ), apply_filters( 'klarna_is_rest_countries_eu', array(
+			'DK',
+			'GB',
+			'NL'
+		) ) ) ) {
 			$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_TEST_BASE_URL;
-		} elseif ( in_array( strtoupper( $this->klarna_country ), apply_filters( 'klarna_is_rest_countries_na', array( 'US' ) ) ) ) {
+		} elseif ( in_array( strtoupper( $ty_klarna_country ), apply_filters( 'klarna_is_rest_countries_na', array( 'US' ) ) ) ) {
 			$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::NA_TEST_BASE_URL;
 		}
 	} else {
-		if ( in_array( strtoupper( $this->klarna_country ), apply_filters( 'klarna_is_rest_countries_eu', array( 'DK', 'GB', 'NL' ) ) ) ) {
+		if ( in_array( strtoupper( $ty_klarna_country ), apply_filters( 'klarna_is_rest_countries_eu', array(
+			'DK',
+			'GB',
+			'NL'
+		) ) ) ) {
 			$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_BASE_URL;
-		} elseif ( in_array( strtoupper( $this->klarna_country ), apply_filters( 'klarna_is_rest_countries_na', array( 'US' ) ) ) ) {
+		} elseif ( in_array( strtoupper( $ty_klarna_country ), apply_filters( 'klarna_is_rest_countries_na', array( 'US' ) ) ) ) {
 			$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::NA_BASE_URL;
 		}
 	}
@@ -49,32 +67,32 @@ if ( $this->is_rest() ) {
 	$klarna_order = new Klarna\Rest\Checkout\Order( $connector, $order_uri );
 } else {
 	// Klarna_Checkout_Order::$contentType = 'application/vnd.klarna.checkout.aggregated-order-v2+json';.
-	$connector    = Klarna_Checkout_Connector::create( $shared_secret, $this->klarna_server );
+	$connector    = Klarna_Checkout_Connector::create( $shared_secret, $ty_klarna_server );
 	$klarna_order = new Klarna_Checkout_Order( $connector, $order_uri );
 }
 
 try {
 	$klarna_order->fetch();
 } catch ( Exception $e ) {
-	if ( 'yes' === $this->debug ) {
-		$this->log->add( 'klarna', 'Klarna API error: ' . var_export( $e, true ) );
+	if ( 'yes' === $ty_debug ) {
+		$ty_log->add( 'klarna', 'Klarna API error: ' . var_export( $e, true ) );
 	}
 
-	if ( is_user_logged_in() && $this->debug ) {
+	if ( is_user_logged_in() && $ty_debug ) {
 		// The purchase was denied or something went wrong, print the message.
 		echo '<div>';
-			echo esc_html( $e->getMessage() );
+		echo esc_html( $e->getMessage() );
 		echo '</div>';
 	}
 }
 
 if ( 'checkout_incomplete' === $klarna_order['status'] ) {
-	wp_safe_redirect( $this->klarna_checkout_url );
+	wp_safe_redirect( $ty_klarna_checkout_url );
 	exit;
 }
 
 // Display Klarna iframe.
-if ( $this->is_rest() ) {
+if ( $ty_is_rest ) {
 	$snippet = '<div>' . $klarna_order['html_snippet'] . '</div>';
 } else {
 	$snippet = '<div class="klarna-thank-you-snippet">' . $klarna_order['gui']['snippet'] . '</div>';
@@ -149,4 +167,6 @@ WC()->session->__unset( 'klarna_checkout' );
 WC()->session->__unset( 'klarna_checkout_country' );
 WC()->session->__unset( 'ongoing_klarna_order' );
 WC()->session->__unset( 'klarna_order_note' );
+WC()->session->__unset( 'klarna_separate_shipping' );
+
 wc_clear_cart_after_payment(); // Clear cart.

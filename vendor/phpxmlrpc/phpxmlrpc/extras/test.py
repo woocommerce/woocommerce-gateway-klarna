@@ -9,7 +9,7 @@ try:
     print "Got '" + server.examples.getStateName(32) + "'"
 
     r = server.mail.send("edd", "Test",
-                         "Bonjour. Je m'appelle", "freddy", "", "",
+                         "Bonjour. Je m'appelle Gérard. Mañana. ", "freddy", "", "", 
                          'text/plain; charset="iso-8859-1"')
     if r:
         print "Mail sent OK"

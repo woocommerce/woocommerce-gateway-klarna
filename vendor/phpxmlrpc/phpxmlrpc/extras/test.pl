@@ -15,7 +15,7 @@ print "Got '${resp}'\n";
 # now send a mail to nobody in particular
 
 $resp = $client->call("mail.send", ("edd", "Test",  
-	"Bonjour. Je m'appelle ", "freddy", "", "",
+	"Bonjour. Je m'appelle Gérard. Mañana. ", "freddy", "", "", 
 	'text/plain; charset="iso-8859-1"'));
 
 if ($resp->value()) {

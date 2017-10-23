@@ -9,13 +9,35 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
 
+$kco_klarna_eid                    = WC_Gateway_Klarna_Checkout_Variables::get_klarna_eid();
+$kco_klarna_secret                 = WC_Gateway_Klarna_Checkout_Variables::get_klarna_secret();
+$kco_klarna_country                = WC_Gateway_Klarna_Checkout_Variables::get_klarna_country();
+$kco_klarna_language               = WC_Gateway_Klarna_Checkout_Variables::get_klarna_language();
+$kco_klarna_checkout_url           = WC_Gateway_Klarna_Checkout_Variables::get_klarna_checkout_url();
+$kco_klarna_checkout_thank_you_url = WC_Gateway_Klarna_Checkout_Variables::get_klarna_checkout_thank_you_url();
+$kco_terms_url                     = WC_Gateway_Klarna_Checkout_Variables::get_terms_url();
+$kco_klarna_server                 = WC_Gateway_Klarna_Checkout_Variables::get_klarna_server();
+$kco_testmode                      = WC_Gateway_Klarna_Checkout_Variables::get_klarna_checkout_testmode();
+$kco_debug                         = WC_Gateway_Klarna_Checkout_Variables::get_klarna_checkout_debug();
+$kco_log                           = WC_Gateway_Klarna_Checkout_Variables::get_klarna_checkout_log();
+$kco_is_rest                       = WC_Gateway_Klarna_Checkout_Variables::is_rest();
+$kco_show_kco                      = WC_Gateway_Klarna_Checkout_Variables::show_kco();
+$kco_add_std_checkout_button       = WC_Gateway_Klarna_Checkout_Variables::add_std_checkout_button();
+$kco_add_std_checkout_button_label = WC_Gateway_Klarna_Checkout_Variables::add_std_checkout_button_label();
+$kco_validate_stock                = WC_Gateway_Klarna_Checkout_Variables::validate_stock();
+$kco_color_options                 = WC_Gateway_Klarna_Checkout_Variables::get_color_options();
+$kco_allowed_customer_types        = WC_Gateway_Klarna_Checkout_Variables::get_allowed_customer_types();
+$kco_allow_separate_shipping       = WC_Gateway_Klarna_Checkout_Variables::get_allow_separate_shipping();
+$kco_phone_mandatory_de            = WC_Gateway_Klarna_Checkout_Variables::get_phone_mandatory_de();
+$kco_dhl_packstation_de            = WC_Gateway_Klarna_Checkout_Variables::get_dhl_packstation_de();
+
 // Check if iframe needs to be displayed
-if ( ! $this->show_kco() ) {
+if ( ! $kco_show_kco ) {
 	return;
 }
 
 // Check if selected Klarna country is in WooCommerce allowed countries
-if ( ! array_key_exists( strtoupper( $this->get_klarna_country() ), WC()->countries->get_allowed_countries() ) ) {
+if ( ! array_key_exists( strtoupper( $kco_klarna_country ), WC()->countries->get_allowed_countries() ) ) {
 	$checkout_url = wc_get_checkout_url();
 	wp_safe_redirect( $checkout_url );
 	exit;
@@ -23,7 +45,7 @@ if ( ! array_key_exists( strtoupper( $this->get_klarna_country() ), WC()->countr
 
 // Check if there are any recurring items in the cart and if it's a "recurring" country
 if ( class_exists( 'WC_Subscriptions_Cart' ) && WC_Subscriptions_Cart::cart_contains_subscription() ) {
-	if ( ! in_array( strtoupper( $this->get_klarna_country() ), array( 'SE', 'NO' ) ) ) {
+	if ( ! in_array( strtoupper( $kco_klarna_country ), array( 'SE', 'NO' ), true ) ) {
 		$checkout_url = wc_get_checkout_url();
 		wp_safe_redirect( $checkout_url );
 		exit;
@@ -51,24 +73,24 @@ if ( wc_notice_count( 'error' ) > 0 ) {
 
 	// Set customer country so taxes and shipping can be calculated properly.
 	if ( version_compare( WOOCOMMERCE_VERSION, '3.0', '<' ) ) {
-		WC()->customer->set_country( strtoupper( $this->get_klarna_country() ) );
-		WC()->customer->set_shipping_country( strtoupper( $this->get_klarna_country() ) );
+		WC()->customer->set_country( strtoupper( $kco_klarna_country ) );
+		WC()->customer->set_shipping_country( strtoupper( $kco_klarna_country ) );
 	} else {
 		if ( WC()->customer->get_id() ) {
 			$wc_customer = new WC_Customer( WC()->customer->get_id() );
-			$wc_customer->set_billing_country( strtoupper( $this->get_klarna_country() ) );
-			$wc_customer->set_shipping_country( strtoupper( $this->get_klarna_country() ) );
+			$wc_customer->set_billing_country( strtoupper( $kco_klarna_country ) );
+			$wc_customer->set_shipping_country( strtoupper( $kco_klarna_country ) );
 			$wc_customer->save();
 		} else {
-			WC()->customer->set_billing_country( strtoupper( $this->get_klarna_country() ) );
-			WC()->customer->set_shipping_country( strtoupper( $this->get_klarna_country() ) );
+			WC()->customer->set_billing_country( strtoupper( $kco_klarna_country ) );
+			WC()->customer->set_shipping_country( strtoupper( $kco_klarna_country ) );
 			WC()->customer->save();
 		}
 	}
 
 	// Debug.
-	if ( $this->debug == 'yes' ) {
-		$this->log->add( 'klarna', 'Rendering Checkout page...' );
+	if ( $kco_debug == 'yes' ) {
+		$kco_log->add( 'klarna', 'Rendering Checkout page...' );
 	}
 
 	// Mobile or desktop browser.
@@ -92,7 +114,7 @@ if ( wc_notice_count( 'error' ) > 0 ) {
 	}
 
 	// Check if there's anything in the cart.
-	if ( sizeof( WC()->cart->get_cart() ) > 0 ) {
+	if ( count( WC()->cart->get_cart() ) > 0 ) {
 
 		if ( isset( $_GET['no_shipping'] ) ) {
 			echo '<div class="woocommerce-error">';
@@ -101,41 +123,49 @@ if ( wc_notice_count( 'error' ) > 0 ) {
 		}
 
 		// Add button to Standard Checkout Page if this is enabled in the settings.
-		if ( 'yes' === $this->add_std_checkout_button ) {
+		if ( 'yes' === $kco_add_std_checkout_button ) {
 			echo '<div class="woocommerce">';
 			echo '<a href="' . get_permalink( get_option( 'woocommerce_checkout_page_id' ) ) . '" class="button std-checkout-button">';
-			echo $this->std_checkout_button_label;
+			echo $kco_add_std_checkout_button_label;
 			echo '</a>';
 			echo '</div>';
 		}
 
 		// Get Klarna credentials.
-		$eid          = $this->klarna_eid;
-		$sharedSecret = $this->klarna_secret;
+		$eid          = $kco_klarna_eid;
+		$sharedSecret = $kco_klarna_secret;
 
 		// Process cart contents and prepare them for Klarna.
 		include_once( KLARNA_DIR . 'classes/class-wc-to-klarna.php' );
-		$wc_to_klarna = new WC_Gateway_Klarna_WC2K( $this->is_rest(), $this->klarna_country );
+		$wc_to_klarna = new WC_Gateway_Klarna_WC2K( $kco_is_rest, $kco_klarna_country );
 		$cart         = $wc_to_klarna->process_cart_contents();
 
 		// Initiate Klarna.
-		if ( $this->is_rest() ) {
-			if ( 'yes' === $this->testmode ) {
-				if ( in_array( strtoupper( $this->klarna_country ), apply_filters( 'klarna_is_rest_countries_eu', array( 'DK', 'GB', 'NL' ) ) ) ) {
+		if ( $kco_is_rest ) {
+			if ( 'yes' === $kco_testmode ) {
+				if ( in_array( strtoupper( $kco_klarna_country ), apply_filters( 'klarna_is_rest_countries_eu', array(
+					'DK',
+					'GB',
+					'NL'
+				) ) ) ) {
 					$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_TEST_BASE_URL;
-				} elseif ( in_array( strtoupper( $this->klarna_country ), apply_filters( 'klarna_is_rest_countries_na', array( 'US' ) ) ) ) {
+				} elseif ( in_array( strtoupper( $kco_klarna_country ), apply_filters( 'klarna_is_rest_countries_na', array( 'US' ) ) ) ) {
 					$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::NA_TEST_BASE_URL;
 				}
 			} else {
-				if ( in_array( strtoupper( $this->klarna_country ), apply_filters( 'klarna_is_rest_countries_eu', array( 'DK', 'GB', 'NL' ) ) ) ) {
+				if ( in_array( strtoupper( $kco_klarna_country ), apply_filters( 'klarna_is_rest_countries_eu', array(
+					'DK',
+					'GB',
+					'NL'
+				) ) ) ) {
 					$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_BASE_URL;
-				} elseif ( in_array( strtoupper( $this->klarna_country ), apply_filters( 'klarna_is_rest_countries_na', array( 'US' ) ) ) ) {
+				} elseif ( in_array( strtoupper( $kco_klarna_country ), apply_filters( 'klarna_is_rest_countries_na', array( 'US' ) ) ) ) {
 					$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::NA_BASE_URL;
 				}
 			}
 			$connector = Klarna\Rest\Transport\Connector::create( $eid, $sharedSecret, $klarna_server_url );
 		} else {
-			$connector = Klarna_Checkout_Connector::create( $sharedSecret, $this->klarna_server );
+			$connector = Klarna_Checkout_Connector::create( $sharedSecret, $kco_klarna_server );
 		}
 		$klarna_order = null;
 
@@ -143,7 +173,38 @@ if ( wc_notice_count( 'error' ) > 0 ) {
 		/**
 		 * Create WooCommerce order
 		 */
-		$orderid = $this->update_or_create_local_order();
+		$customer_email = '';
+		if ( is_user_logged_in() ) {
+			global $current_user;
+			$customer_email = $current_user->user_email;
+		}
+		if ( '' == $customer_email ) {
+			$customer_email = 'guest_checkout@klarna.com';
+		}
+		if ( ! is_email( $customer_email ) ) {
+			return;
+		}
+		// Check quantities
+		$result = WC()->cart->check_cart_item_stock();
+		if ( is_wp_error( $result ) ) {
+			return $result->get_error_message();
+		}
+		// Update the local order
+		include_once( KLARNA_DIR . 'classes/class-klarna-to-wc.php' );
+		$klarna_to_wc = new WC_Gateway_Klarna_K2WC();
+		$klarna_to_wc->set_rest( $kco_is_rest );
+		$klarna_to_wc->set_eid( $kco_klarna_eid );
+		$klarna_to_wc->set_secret( $kco_klarna_secret );
+		$klarna_to_wc->set_klarna_log( $kco_log );
+		$klarna_to_wc->set_klarna_debug( $kco_debug );
+		$klarna_to_wc->set_klarna_test_mode( $kco_testmode );
+		$klarna_to_wc->set_klarna_server( $kco_klarna_server );
+		$klarna_to_wc->set_klarna_credentials_country( $kco_klarna_country );
+		if ( $customer_email ) {
+			$orderid = $klarna_to_wc->prepare_wc_order( $customer_email );
+		} else {
+			$orderid = $klarna_to_wc->prepare_wc_order();
+		}
 
 		// Add GA cookie as custom field for GA Ecommerce plugin.
 		if ( class_exists( 'Yoast_GA_Woo_eCommerce_Tracking' ) && isset( $_COOKIE['_ga'] ) ) {
@@ -210,7 +271,7 @@ if ( wc_notice_count( 'error' ) > 0 ) {
 		}
 
 		// Store location of checkout session
-		if ( $this->is_rest() ) {
+		if ( $kco_is_rest ) {
 			$sessionId = $klarna_order['order_id'];
 		} else {
 			$sessionId = $klarna_order['id'];
@@ -226,7 +287,7 @@ if ( wc_notice_count( 'error' ) > 0 ) {
 
 		// Display checkout
 		do_action( 'klarna_before_kco_checkout' );
-		if ( $this->is_rest() ) {
+		if ( $kco_is_rest ) {
 			$snippet = $klarna_order['html_snippet'];
 		} else {
 			$snippet = $klarna_order['gui']['snippet'];

@@ -1,5 +1,15 @@
 *** WooCommerce Gateway Klarna Changelog ***
 
+2017.10.23  - version 2.5.0
+* Update    - Updated Klarna PHP-XMLRPC SDK to 5.0.
+* Fix		- Send billing address as shipping address to Klarna in process_subscription_payment if shipping isn’t enabled.
+* Fix       - Grabs recurring payment token from payment order if it doesn't exist in subscription (KCO).
+* Update    - Changes order creation date for Klarna Checkout orders to when customer processes checkout.
+* Update    - Refactoring of KCO class and KCO Shortcodes class, prevents gateway class from being instantiated twice.
+* Update    - Refactoring, new PHP class for AJAX requests.
+* Update    - Adds check for WC()->cart before rendering any of the shortcodes.
+* Fix       - Removes unneeded wpautop from Klarna's shipping info message in Invoice and Part Payment.
+
 2017.09.19  - version 2.4.2
 * Fix       - Fixes accessing WC_Customer set_billing_email for WooCommerce lower than 3.0.
 * Fix       - Fixes Klarna Checkout shipping tax rate rounding problem.
@@ -555,7 +565,7 @@ order status dropdown for KCO orders.
  * Bugfix - Better load of js in footer for Terms & Conditions popup (Invoice, Account, Special Campaign)
  * Bugfix - Lower and Upper Threshold (Account & Special Campaign) did not work properly.
  * Bugfix - PClass id sent to Klarna for Special Campaigns was wrong.
- * Changed payment status from "On Hold" to "Processing" when KlarnaFlags::PENDING is returned from Klarna. This because the customer should experience that the order is confirmed.
+ * Changed payment status from "On Hold" to "Processing" when Klarna\XMLRPC\Flags::PENDING is returned from Klarna. This because the customer should experience that the order is confirmed.
  * Added check: Cart total must be greater than current $pclass->getMinAmount() when displaying a PClass as a available Payment Plan on Checkout.
  * Added ability for companies to make purchases via Klarna Invoice
  * Changed Norwegian translation (Fødelsedato to Personnummer)

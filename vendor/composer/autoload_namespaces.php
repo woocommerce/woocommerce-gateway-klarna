@@ -7,5 +7,4 @@ $baseDir = dirname($vendorDir);
 
 return array(
     'Klarna' => array($vendorDir . '/klarna/checkout/src'),
-    '' => array($vendorDir . '/klarna/php-xmlrpc/src'),
 );
