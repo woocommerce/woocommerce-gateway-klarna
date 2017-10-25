@@ -1,5 +1,11 @@
 *** WooCommerce Gateway Klarna Changelog ***
 
+2017.10.25  - version 2.5.1
+* Update    - Stops purging all KCO Incomplete orders older than 2 weeks.
+* Fix       - Checks if WC->session exists in checkout-variables.
+* Hotfix    - Fixes issue with KCO Incomplete orders not being registered in time
+* Fix       - Fixes subscriptions manual renewal issue with KCO.
+
 2017.10.23  - version 2.5.0
 * Update    - Updated Klarna PHP-XMLRPC SDK to 5.0.
 * Fix		- Send billing address as shipping address to Klarna in process_subscription_payment if shipping isn’t enabled.

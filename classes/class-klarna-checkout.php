@@ -99,14 +99,14 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		add_action( 'klarna_purge_cron_job_hook', array( $this, 'purge_kco_incomplete' ) );
 		// Add activate settings field for recurring orders
 		add_filter( 'klarna_checkout_form_fields', array( $this, 'add_activate_recurring_option' ) );
+
 		// Register new order status
-		add_action( 'init', array( $this, 'register_klarna_incomplete_order_status' ) );
-		add_filter( 'wc_order_statuses', array( $this, 'add_kco_incomplete_to_order_statuses' ) );
 		add_filter( 'woocommerce_valid_order_statuses_for_payment_complete', array(
 			$this,
 			'kco_incomplete_payment_complete'
 		) );
 		add_filter( 'woocommerce_valid_order_statuses_for_payment', array( $this, 'kco_incomplete_payment_complete' ) );
+
 		// Hide "Refunded" and "KCO Incomplete" statuses for KCO orders
 		// add_filter( 'wc_order_statuses', array( $this, 'remove_refunded_and_kco_incomplete' ), 1000 );
 		// Hide "Manual Refund" button for KCO orders
@@ -325,6 +325,8 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			}
 		}
 		wp_reset_postdata();
+
+		/*
 		// Get all KCO Incomplete orders older than 2 weeks.
 		$kco_incomplete_args_1  = array(
 			'post_type'      => 'shop_order',
@@ -345,41 +347,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			}
 		}
 		wp_reset_postdata();
-	}
-
-	/**
-	 * Register KCO Incomplete order status
-	 *
-	 * @since  2.0
-	 **/
-	function register_klarna_incomplete_order_status() {
-		if ( 'yes' == $this->debug ) {
-			$show_in_admin_status_list = true;
-		} else {
-			$show_in_admin_status_list = false;
-		}
-		register_post_status( 'wc-kco-incomplete', array(
-			'label'                     => 'KCO incomplete',
-			'public'                    => false,
-			'exclude_from_search'       => false,
-			'show_in_admin_all_list'    => false,
-			'show_in_admin_status_list' => $show_in_admin_status_list,
-			'label_count'               => _n_noop( 'KCO incomplete <span class="count">(%s)</span>', 'KCO incomplete <span class="count">(%s)</span>' ),
-		) );
-	}
-
-	/**
-	 * Add KCO Incomplete to list of order status
-	 *
-	 * @since  2.0
-	 **/
-	function add_kco_incomplete_to_order_statuses( $order_statuses ) {
-		// Add this status only if not in account page (so it doesn't show in My Account list of orders)
-		if ( ! is_account_page() ) {
-			$order_statuses['wc-kco-incomplete'] = 'Incomplete Klarna Checkout';
-		}
-
-		return $order_statuses;
+		*/
 	}
 
 	/**

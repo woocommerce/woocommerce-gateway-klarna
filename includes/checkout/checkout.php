@@ -298,10 +298,12 @@ if ( wc_notice_count( 'error' ) > 0 ) {
 	} else {
 		// If cart is empty, clear these variables
 		wp_delete_post( WC()->session->get( 'ongoing_klarna_order' ), true ); // Delete WooCommerce order
+
 		WC()->session->__unset( 'klarna_checkout' ); // Klarna order ID
 		WC()->session->__unset( 'klarna_checkout_country' ); // Klarna order ID
 		WC()->session->__unset( 'ongoing_klarna_order' ); // WooCommerce order ID
 		WC()->session->__unset( 'klarna_order_note' ); // Order note
+
 		wp_redirect( wc_get_cart_url() ); // Redirect to cart page
 	} // End if sizeof cart
 }
