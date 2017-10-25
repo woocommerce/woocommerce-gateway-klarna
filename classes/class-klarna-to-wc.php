@@ -208,6 +208,9 @@ class WC_Gateway_Klarna_K2WC {
 		if ( WC()->session->get( 'ongoing_klarna_order' ) && wc_get_order( WC()->session->get( 'ongoing_klarna_order' ) ) ) {
 			$orderid = WC()->session->get( 'ongoing_klarna_order' );
 			$order   = wc_get_order( $orderid );
+		} elseif ( WC()->session->get( 'order_awaiting_payment' ) && wc_get_order( WC()->session->get( 'order_awaiting_payment' ) ) ) {
+			$orderid = WC()->session->get( 'order_awaiting_payment' );
+			$order   = wc_get_order( $orderid );
 		} else {
 			// Create order in WooCommerce if we have an email.
 			$order = $this->create_order();

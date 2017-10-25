@@ -169,7 +169,6 @@ function init_klarna_gateway() {
 
 			// Actions.
 			add_action( 'wp_enqueue_scripts', array( $this, 'klarna_load_scripts' ) );
-
 		}
 
 		/**
@@ -253,7 +252,6 @@ function init_klarna_gateway() {
 	add_action( 'woocommerce_order_status_kco-incomplete_to_processing_notification', 'wc_klarna_kco_incomplete_trigger' );
 
 }
-
 add_action( 'plugins_loaded', 'init_klarna_gateway', 2 );
 
 /**
@@ -276,6 +274,42 @@ function add_klarna_gateway( $methods ) {
 	return $methods;
 }
 add_filter( 'woocommerce_payment_gateways', 'add_klarna_gateway' );
+
+add_action( 'init', 'klarna_register_klarna_incomplete_order_status' );
+/**
+ * Register KCO Incomplete order status
+ *
+ * @since  2.0
+ **/
+function klarna_register_klarna_incomplete_order_status() {
+	$checkout_settings = get_option( 'woocommerce_klarna_checkout_settings' );
+	$show_status = 'yes' !== $checkout_settings['debug'];
+
+	register_post_status( 'wc-kco-incomplete', array(
+		'label'                     => 'KCO incomplete',
+		'public'                    => false,
+		'exclude_from_search'       => false,
+		'show_in_admin_all_list'    => false,
+		'show_in_admin_status_list' => $show_status,
+		'label_count'               => _n_noop( 'KCO incomplete <span class="count">(%s)</span>', 'KCO incomplete <span class="count">(%s)</span>' ),
+	) );
+}
+
+add_filter( 'wc_order_statuses', 'klarna_add_kco_incomplete_to_order_statuses' );
+/**
+ * Add KCO Incomplete to list of order status
+ *
+ * @since  2.0
+ **/
+function klarna_add_kco_incomplete_to_order_statuses( $order_statuses ) {
+	// Add this status only if not in account page (so it doesn't show in My Account list of orders)
+	if ( ! is_account_page() ) {
+		$order_statuses['wc-kco-incomplete'] = 'Incomplete Klarna Checkout';
+	}
+
+	return $order_statuses;
+}
+
 
 /**
  * Helper function that determines if we're at KCO page or not.
