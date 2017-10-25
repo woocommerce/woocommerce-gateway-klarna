@@ -325,6 +325,8 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			}
 		}
 		wp_reset_postdata();
+
+		/*
 		// Get all KCO Incomplete orders older than 2 weeks.
 		$kco_incomplete_args_1  = array(
 			'post_type'      => 'shop_order',
@@ -345,6 +347,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			}
 		}
 		wp_reset_postdata();
+		*/
 	}
 
 	/**

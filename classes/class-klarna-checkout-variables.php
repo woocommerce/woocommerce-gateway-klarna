@@ -126,7 +126,7 @@ class WC_Gateway_Klarna_Checkout_Variables {
 				break;
 			case 'EUR' :
 				// Check if Ajax country switcher set session value
-				if ( null !== WC()->session() && ! is_admin() && WC()->session->get( 'klarna_euro_country' ) ) {
+				if ( null !== WC()->session && ! is_admin() && WC()->session->get( 'klarna_euro_country' ) ) {
 					$klarna_country = WC()->session->get( 'klarna_euro_country' );
 				} else {
 					if ( '' !== $settings['eid_de'] && '' !== $settings['secret_de'] && ( get_locale() === 'de_DE' || get_locale() === 'de_DE_formal' ) ) {

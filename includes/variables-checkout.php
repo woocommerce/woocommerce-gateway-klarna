@@ -81,8 +81,8 @@ $this->send_new_account_email  = ( isset( $this->settings['send_new_account_emai
 $this->account_signup_text = ( isset( $this->settings['account_signup_text'] ) ) ? $this->settings['account_signup_text'] : '';
 $this->account_login_text  = ( isset( $this->settings['account_login_text'] ) ) ? $this->settings['account_login_text'] : '';
 
-$this->validate_stock = $this->get_option( 'validate_stock' );
-$this->allowed_customer_types  = ( isset( $this->settings['allowed_customer_types'] ) ) ? $this->settings['allowed_customer_types'] : '';
+$this->validate_stock                  = $this->get_option( 'validate_stock' );
+$this->allowed_customer_types          = ( isset( $this->settings['allowed_customer_types'] ) ) ? $this->settings['allowed_customer_types'] : '';
 $this->allow_separate_shipping_address = ( isset( $this->settings['allow_separate_shipping_address'] ) ) ? $this->settings['allow_separate_shipping_address'] : '';
 
 
@@ -122,15 +122,16 @@ endif;
 // Set current country based on used currency
 
 // We need to check if WPML is active
-if(!is_admin()) {
-	if( WC()->session->get('client_currency') ) {
-		$customer_selected_currency = WC()->session->get('client_currency');
+if ( ! is_admin() ) {
+	if ( null !== WC()->session && WC()->session->get( 'client_currency' ) ) {
+		$customer_selected_currency = WC()->session->get( 'client_currency' );
 	} else {
 		$customer_selected_currency = get_woocommerce_currency();
 	}
 } else {
 	$customer_selected_currency = get_woocommerce_currency();
 }
+
 switch ( $customer_selected_currency ) {
 	case 'NOK' :
 		$klarna_country = 'NO';
@@ -146,7 +147,7 @@ switch ( $customer_selected_currency ) {
 				$klarna_country = 'FI';
 			} elseif ( get_locale() == 'de_AT' && '' != $this->eid_at && '' != $this->secret_at ) {
 				$klarna_country = 'AT';
-			}  elseif ( get_locale() == 'nl_NL' && '' != $this->eid_nl && '' != $this->secret_nl ) {
+			} elseif ( get_locale() == 'nl_NL' && '' != $this->eid_nl && '' != $this->secret_nl ) {
 				$klarna_country = 'NL';
 			} else {
 				$klarna_country = $this->default_eur_country;
