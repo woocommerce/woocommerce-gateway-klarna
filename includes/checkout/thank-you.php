@@ -116,9 +116,6 @@ if ( $order->get_user_id() === 0 ) {
 
 			if ( is_int( $customer_id ) ) {
 				update_post_meta( $order_id, '_customer_user', $customer_id );
-
-				wp_set_current_user( $customer_id );
-				wc_set_customer_auth_cookie( $customer_id );
 			}
 		}
 	}

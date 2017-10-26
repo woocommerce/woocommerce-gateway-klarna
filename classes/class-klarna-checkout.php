@@ -1441,18 +1441,29 @@ class WC_Gateway_Klarna_Checkout_Extra {
 	 *  Alter the checkout url to the custom Klarna Checkout Checkout page.
 	 *
 	 **/
-	function change_checkout_url( $url ) {
+	public function change_checkout_url( $url ) {
 		if ( ! is_admin() ) {
-			global $klarna_checkout_url;
+			$klarna_checkout_url = WC_Gateway_Klarna_Checkout_Variables::get_klarna_checkout_url();
+			$klarna_country = WC_Gateway_Klarna_Checkout_Variables::get_klarna_country();
+
+			if ( ! $klarna_checkout_url || '' === $klarna_checkout_url ) {
+				return $url;
+			}
+
 			$checkout_settings            = get_option( 'woocommerce_klarna_checkout_settings' );
 			$enabled                      = $checkout_settings['enabled'];
 			$modify_standard_checkout_url = $checkout_settings['modify_standard_checkout_url'];
-			$klarna_country               = WC()->session->get( 'klarna_country' );
 			$available_countries          = $this->get_authorized_countries();
+
 			// Change the Checkout URL if this is enabled in the settings
-			if ( $modify_standard_checkout_url == 'yes' && $enabled == 'yes' && ! empty( $klarna_checkout_url ) && in_array( strtoupper( $klarna_country ), $available_countries ) && array_key_exists( strtoupper( $klarna_country ), WC()->countries->get_allowed_countries() ) ) {
+			if ( 'yes' === $modify_standard_checkout_url &&
+				 'yes' === $enabled &&
+				 ! empty( $klarna_checkout_url ) &&
+				 in_array( strtoupper( $klarna_country ), $available_countries, true ) &&
+				 array_key_exists( strtoupper( $klarna_country ), WC()->countries->get_allowed_countries() )
+			) {
 				if ( class_exists( 'WC_Subscriptions_Cart' ) && WC_Subscriptions_Cart::cart_contains_subscription() ) {
-					if ( in_array( strtoupper( $klarna_country ), array( 'SE', 'FI', 'NO' ) ) ) {
+					if ( in_array( strtoupper( $klarna_country ), array( 'SE', 'FI', 'NO' ), true ) ) {
 						$url = $klarna_checkout_url;
 					} else {
 						return $url;

@@ -158,6 +158,8 @@ class WC_Gateway_Klarna_Checkout_Variables {
 				$klarna_country = '';
 		}
 
+		WC()->session->set( 'klarna_country', apply_filters( 'klarna_country', $klarna_country ) );
+
 		return apply_filters( 'klarna_country', $klarna_country );
 	}
 
@@ -256,7 +258,6 @@ class WC_Gateway_Klarna_Checkout_Variables {
 			default:
 				$klarna_checkout_url = '';
 		}
-
 
 		return apply_filters( 'klarna_checkout_url', $klarna_checkout_url );
 	}
