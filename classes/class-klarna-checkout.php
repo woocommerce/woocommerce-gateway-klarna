@@ -1306,7 +1306,7 @@ class WC_Gateway_Klarna_Checkout_Extra {
 	public function __construct() {
 		add_action( 'init', array( $this, 'start_session' ), 1 );
 		add_action( 'before_woocommerce_init', array( $this, 'prevent_caching' ) );
-		add_filter( 'woocommerce_get_checkout_url', array( $this, 'change_checkout_url' ), 1 );
+		add_filter( 'woocommerce_get_checkout_url', array( $this, 'change_checkout_url' ), 20 );
 		add_action( 'woocommerce_register_form_start', array( $this, 'add_account_signup_text' ) );
 		add_action( 'woocommerce_login_form_start', array( $this, 'add_account_login_text' ) );
 		add_action( 'woocommerce_checkout_after_order_review', array( $this, 'klarna_add_link_to_kco_page' ) );
