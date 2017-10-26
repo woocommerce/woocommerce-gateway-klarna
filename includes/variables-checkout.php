@@ -11,6 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 // Define user set variables
 $this->enabled = ( isset( $this->settings['enabled'] ) ) ? $this->settings['enabled'] : '';
 $this->title   = ( isset( $this->settings['title'] ) ) ? $this->settings['title'] : '';
+$this->description = ( isset( $this->settings['description'] ) ) ? $this->settings['description'] : '';
 $this->log     = new WC_Logger();
 
 $this->push_completion   = ( isset( $this->settings['push_completion'] ) ) ? $this->settings['push_completion'] : '';
