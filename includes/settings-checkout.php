@@ -22,6 +22,12 @@ return apply_filters( 'klarna_checkout_form_fields', array(
 		'description' => __( 'This controls the title which the user sees during checkout.', 'woocommerce-gateway-klarna' ),
 		'default'     => __( 'Klarna Checkout', 'woocommerce-gateway-klarna' )
 	),
+	'description' => array(
+		'title'       => __( 'Description', 'woocommerce-gateway-klarna' ),
+		'type'        => 'textarea',
+		'description' => __( 'This controls the description which the user sees during checkout.', 'woocommerce-gateway-klarna' ),
+		'default'     => ''
+	),
 	/*
 	'paymentaction' => array(
 		'title'       => __( 'Payment Action', 'woocommerce' ),
