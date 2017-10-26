@@ -1,5 +1,9 @@
 *** WooCommerce Gateway Klarna Changelog ***
 
+2017.10.26  - version 2.5.2
+* Fix       - Fixes checkout URL modifier for KCO.
+* Update    - Adds description field to KCO settings page.
+
 2017.10.25  - version 2.5.1
 * Update    - Stops purging all KCO Incomplete orders older than 2 weeks.
 * Fix       - Checks if WC->session exists in checkout-variables.
