@@ -36,26 +36,37 @@ if ( ! $kco_show_kco ) {
 	return;
 }
 
-// Check if selected Klarna country is in WooCommerce allowed countries
-if ( ! array_key_exists( strtoupper( $kco_klarna_country ), WC()->countries->get_allowed_countries() ) ) {
-	$checkout_url = wc_get_checkout_url();
-	wp_safe_redirect( $checkout_url );
-	exit;
-}
-
 // Check if there are any recurring items in the cart and if it's a "recurring" country
 if ( class_exists( 'WC_Subscriptions_Cart' ) && WC_Subscriptions_Cart::cart_contains_subscription() ) {
 	if ( ! in_array( strtoupper( $kco_klarna_country ), array( 'SE', 'NO' ), true ) ) {
 		$checkout_url = wc_get_checkout_url();
+		ob_get_clean();
+		echo '<script>window.location.replace("' . $checkout_url . '")</script>';
+		return;
+
 		wp_safe_redirect( $checkout_url );
 		exit;
 	}
+}
+
+// Check if selected Klarna country is in WooCommerce allowed countries
+if ( ! array_key_exists( strtoupper( $kco_klarna_country ), WC()->countries->get_allowed_countries() ) ) {
+	$checkout_url = wc_get_checkout_url();
+	echo '<script>window.location.replace("' . $checkout_url . '")</script>';
+	return;
+
+	wp_safe_redirect( $checkout_url );
+	exit;
 }
 
 // Let other plugins (like min/max) add their notices.
 do_action( 'woocommerce_check_cart_items' );
 
 if ( wc_notice_count( 'error' ) > 0 ) {
+	$cart_url = wc_get_cart_url();
+	echo '<script>window.location.replace("' . $cart_url . '")</script>';
+	return;
+
 	wp_safe_redirect( wc_get_cart_url() );
 } else {
 	// Process order via Klarna Checkout page.
@@ -303,6 +314,10 @@ if ( wc_notice_count( 'error' ) > 0 ) {
 		WC()->session->__unset( 'klarna_checkout_country' ); // Klarna order ID
 		WC()->session->__unset( 'ongoing_klarna_order' ); // WooCommerce order ID
 		WC()->session->__unset( 'klarna_order_note' ); // Order note
+
+		$cart_url = wc_get_cart_url();
+		echo '<script>window.location.replace("' . $cart_url . '")</script>';
+		return;
 
 		wp_redirect( wc_get_cart_url() ); // Redirect to cart page
 	} // End if sizeof cart
