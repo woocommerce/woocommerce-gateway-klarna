@@ -36,13 +36,6 @@ if ( ! $kco_show_kco ) {
 	return;
 }
 
-// Check if selected Klarna country is in WooCommerce allowed countries
-if ( ! array_key_exists( strtoupper( $kco_klarna_country ), WC()->countries->get_allowed_countries() ) ) {
-	$checkout_url = wc_get_checkout_url();
-	wp_safe_redirect( $checkout_url );
-	exit;
-}
-
 // Check if there are any recurring items in the cart and if it's a "recurring" country
 if ( class_exists( 'WC_Subscriptions_Cart' ) && WC_Subscriptions_Cart::cart_contains_subscription() ) {
 	if ( ! in_array( strtoupper( $kco_klarna_country ), array( 'SE', 'NO' ), true ) ) {
@@ -50,6 +43,13 @@ if ( class_exists( 'WC_Subscriptions_Cart' ) && WC_Subscriptions_Cart::cart_cont
 		wp_safe_redirect( $checkout_url );
 		exit;
 	}
+}
+
+// Check if selected Klarna country is in WooCommerce allowed countries
+if ( ! array_key_exists( strtoupper( $kco_klarna_country ), WC()->countries->get_allowed_countries() ) ) {
+	$checkout_url = wc_get_checkout_url();
+	wp_safe_redirect( $checkout_url );
+	exit;
 }
 
 // Let other plugins (like min/max) add their notices.

@@ -1380,7 +1380,7 @@ class WC_Gateway_Klarna_Checkout_Extra {
 
 	// Set session
 	function start_session() {
-		// new WC_Gateway_Klarna_Checkout; // Still need to initiate it here, otherwise shortcode won't work
+		new WC_Gateway_Klarna_Checkout; // Still need to initiate it here, otherwise shortcode won't work
 		// if ( ! is_admin() || defined( 'DOING_AJAX' ) ) {
 		/*
 		$checkout_settings = get_option( 'woocommerce_klarna_checkout_settings' );

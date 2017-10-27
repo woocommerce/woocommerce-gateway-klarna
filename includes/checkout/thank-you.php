@@ -87,6 +87,9 @@ try {
 }
 
 if ( 'checkout_incomplete' === $klarna_order['status'] ) {
+	echo '<script>window.location.replace("' . $ty_klarna_checkout_url . '")</script>';
+	return;
+
 	wp_safe_redirect( $ty_klarna_checkout_url );
 	exit;
 }

@@ -1,7 +1,19 @@
 {
-	"require": {
-		"klarna/checkout": "4.0",
-		"klarna/kco_rest": "^2.1",
-		"klarna/php-xmlrpc": "^5.0"
-	}
+  "name": "krokedil/woocommerce-gateway-klarna",
+  "description": "A Klarna payments integration for WooCommerce.",
+  "homepage": "https://krokedil.com/klarna",
+  "keywords": [
+    "WooCommerce",
+    "Klarna",
+    "Gateway",
+    "Klarna Checkout"
+  ],
+  "type": "wordpress-plugin",
+  "version": "2.5.2",
+  "license": "GPL-3.0",
+  "require": {
+    "klarna/checkout": "4.0",
+    "klarna/kco_rest": "^2.1",
+    "klarna/php-xmlrpc": "^5.0"
+  }
 }

@@ -1,5 +1,9 @@
 *** WooCommerce Gateway Klarna Changelog ***
 
+2017.10.27  - version 2.5.3
+* Fix       - Temporarily instantiate KCO gateway class on init. Solves subscriptions not being created issue.
+* Update    - Adds Composer support (props @pelmered).
+
 2017.10.26  - version 2.5.2
 * Fix       - Fixes checkout URL modifier for KCO.
 * Update    - Adds description field to KCO settings page.
