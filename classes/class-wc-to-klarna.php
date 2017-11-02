@@ -380,7 +380,7 @@ class WC_Gateway_Klarna_WC2K {
 			$item_name .= ' [' . $item_variations . ']';
 		}
 
-		return strip_tags( $item_name );
+		return apply_filters('klarna_item_name', strip_tags( $item_name ));
 	}
 
 	/**
