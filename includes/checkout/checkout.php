@@ -38,7 +38,7 @@ if ( ! $kco_show_kco ) {
 
 // Check if there are any recurring items in the cart and if it's a "recurring" country
 if ( class_exists( 'WC_Subscriptions_Cart' ) && WC_Subscriptions_Cart::cart_contains_subscription() ) {
-	if ( ! in_array( strtoupper( $kco_klarna_country ), array( 'SE', 'NO' ), true ) ) {
+	if ( ! in_array( strtoupper( $kco_klarna_country ), array( 'SE', 'NO', 'FI' ), true ) ) {
 		$checkout_url = wc_get_checkout_url();
 		wp_safe_redirect( $checkout_url );
 		exit;
