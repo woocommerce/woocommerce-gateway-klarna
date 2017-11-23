@@ -325,7 +325,7 @@ class WC_Gateway_Klarna_Shortcodes {
 			</div>
 		<?php }  else { ?>
 			<?php do_action( 'kco_widget_before_coupon', $atts ); ?>
-			
+
 			<!-- Coupons -->
 			<?php if ( 'hide' !== $atts['coupon_form'] ) { ?>
 				<?php woocommerce_checkout_coupon_form(); ?>
@@ -396,7 +396,7 @@ class WC_Gateway_Klarna_Shortcodes {
 
 		return ob_get_clean();
 	}
-	
+
 
 	/**
 	 *

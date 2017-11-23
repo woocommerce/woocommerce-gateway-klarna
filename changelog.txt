@@ -1,5 +1,11 @@
 *** WooCommerce Gateway Klarna Changelog ***
 
+2017.11.23  - version 2.5.4
+* Fix       - Fixes email check in KCO ajax updates.
+* Update    - Adds filter (klarna_item_name) to make it possible to filter cart item name before sending it to Klarna.
+* Fix       - Fixes missing shipping issue for repeat customers.
+* Update    - Adds subscription support for Finnish customers for KCO.
+
 2017.10.27  - version 2.5.3
 * Fix       - Temporarily instantiate KCO gateway class on init. Solves subscriptions not being created issue.
 * Update    - Adds Composer support (props @pelmered).

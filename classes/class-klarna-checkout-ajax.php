@@ -847,7 +847,7 @@ class WC_Gateway_Klarna_Checkout_Ajax {
 			$customer_email = $current_user->user_email;
 		}
 
-		if ( $customer_email ) {
+		if ( ! $customer_email ) {
 			$customer_email = 'guest_checkout@klarna.com';
 		}
 

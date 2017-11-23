@@ -241,7 +241,7 @@ if ( class_exists( 'WC_Subscriptions_Cart' ) && WC_Subscriptions_Cart::cart_cont
 	}
 
 	if ( $subscription_product_id ) {
-		$subscription_expiration_time = WC_Subscriptions_Product::get_expiration_date( $fetched_subscription_product_id );
+		$subscription_expiration_time = WC_Subscriptions_Product::get_expiration_date( $subscription_product_id );
 		if ( 0 !== $subscription_expiration_time ) {
 			$end_time = date( 'Y-m-d\TH:i', strtotime( $subscription_expiration_time ) );
 		} else {
@@ -249,7 +249,7 @@ if ( class_exists( 'WC_Subscriptions_Cart' ) && WC_Subscriptions_Cart::cart_cont
 		}
 
 		$klarna_subscription_info = array(
-			'subscription_name'            => 'Subscription: ' . get_the_title( $fetched_subscription_product_id ),
+			'subscription_name'            => 'Subscription: ' . get_the_title( $subscription_product_id ),
 			'start_time'                   => date( 'Y-m-d\TH:i' ),
 			'end_time'                     => $end_time,
 			'auto_renewal_of_subscription' => true

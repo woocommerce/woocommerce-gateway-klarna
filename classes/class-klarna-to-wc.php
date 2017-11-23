@@ -1057,7 +1057,7 @@ class WC_Gateway_Klarna_K2WC {
 			update_user_meta( $customer_id, 'billing_address_2', $klarna_order['billing_address']['care_of'] );
 			update_user_meta( $customer_id, 'billing_postcode', $klarna_order['billing_address']['postal_code'] );
 			update_user_meta( $customer_id, 'billing_city', $klarna_order['billing_address']['city'] );
-			update_user_meta( $customer_id, 'billing_country', $klarna_order['billing_address']['country'] );
+			update_user_meta( $customer_id, 'billing_country', strtoupper( $klarna_order['billing_address']['country'] ) );
 			update_user_meta( $customer_id, 'billing_email', $klarna_order['billing_address']['email'] );
 			update_user_meta( $customer_id, 'billing_phone', $klarna_order['billing_address']['phone'] );
 
@@ -1078,7 +1078,7 @@ class WC_Gateway_Klarna_K2WC {
 				update_user_meta( $customer_id, 'shipping_address_2', $klarna_order['billing_address']['care_of'] );
 				update_user_meta( $customer_id, 'shipping_postcode', $klarna_order['billing_address']['postal_code'] );
 				update_user_meta( $customer_id, 'shipping_city', $klarna_order['billing_address']['city'] );
-				update_user_meta( $customer_id, 'shipping_country', $klarna_order['billing_address']['country'] );
+				update_user_meta( $customer_id, 'shipping_country', strtoupper( $klarna_order['billing_address']['country'] ) );
 			}
 		}
 	}
