@@ -44,19 +44,19 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 		// Define user set variables
 		include( KLARNA_DIR . 'includes/variables-part-payment.php' );
 
-		// Load shortcodes. 
-		// This is used so that the merchant easily can modify the displayed monthly 
+		// Load shortcodes.
+		// This is used so that the merchant easily can modify the displayed monthly
 		// cost text (on single product and shop page) via the settings page.
 		include_once( KLARNA_DIR . 'classes/class-klarna-shortcodes.php' );
 
-		// Klarna PClasses handling. 
+		// Klarna PClasses handling.
 		include_once( KLARNA_DIR . 'classes/class-klarna-pclasses.php' );
 
 		// Helper class
 		include_once( KLARNA_DIR . 'classes/class-klarna-helper.php' );
 		$this->klarna_helper = new WC_Gateway_Klarna_Helper( $this );
 
-		// Test mode or Live mode		
+		// Test mode or Live mode
 		if ( $this->testmode == 'yes' ) {
 			// Disable SSL if in testmode
 			$this->klarna_ssl  = 'false';
@@ -623,24 +623,24 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 			require_once( KLARNA_DIR . 'split-address.php' );
 
 			// Set up billing address array
-			$klarna_billing_address            = $order->billing_address_1;
+			$klarna_billing_address            = $order->get_billing_address_1();
 			$splitted_address                  = splitAddress( $klarna_billing_address );
 			$klarna_billing['address']         = $splitted_address[0];
 			$klarna_billing['house_number']    = $splitted_address[1];
 			$klarna_billing['house_extension'] = $splitted_address[2];
 
 			// Set up shipping address array
-			$klarna_shipping_address            = $order->shipping_address_1;
+			$klarna_shipping_address            = $order->get_shipping_address_1();
 			$splitted_address                   = splitAddress( $klarna_shipping_address );
 			$klarna_shipping['address']         = $splitted_address[0];
 			$klarna_shipping['house_number']    = $splitted_address[1];
 			$klarna_shipping['house_extension'] = $splitted_address[2];
 		} else {
-			$klarna_billing['address']         = $order->billing_address_1;
+			$klarna_billing['address']         = $order->get_billing_address_1();
 			$klarna_billing['house_number']    = '';
 			$klarna_billing['house_extension'] = '';
 
-			$klarna_shipping['address']         = $order->shipping_address_1;
+			$klarna_shipping['address']         = $order->get_shipping_address_1();
 			$klarna_shipping['house_number']    = '';
 			$klarna_shipping['house_extension'] = '';
 		}
@@ -693,7 +693,7 @@ class WC_Gateway_Klarna_Part_Payment extends WC_Gateway_Klarna {
 					update_post_meta( $order_id, '_klarna_order_reservation', $invno );
 					update_post_meta( $order_id, '_transaction_id', $invno );
 					$order->payment_complete(); // Payment complete
-					$woocommerce->cart->empty_cart(); // Remove cart	
+					$woocommerce->cart->empty_cart(); // Remove cart
 					// Return thank you redirect
 					return array(
 						'result'   => 'success',

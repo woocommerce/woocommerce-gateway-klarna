@@ -36,7 +36,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 		// Define user set variables
 		include( KLARNA_DIR . 'includes/variables-invoice.php' );
 		// Load shortcodes.
-		// This is used so that the merchant easily can modify the displayed monthly 
+		// This is used so that the merchant easily can modify the displayed monthly
 		// cost text (on single product and shop page) via the settings page.
 		include_once( KLARNA_DIR . 'classes/class-klarna-shortcodes.php' );
 		// Klarna PClasses handling.
@@ -197,26 +197,26 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 	function update_klarna_order( $orderid, $items ) {
 		$order = wc_get_order( $orderid );
 		$billing_address = array(
-			'first_name' => $order->billing_first_name,
-			'last_name'  => $order->billing_last_name,
-			'company'    => $order->billing_company,
-			'address_1'  => $order->billing_address_1,
-			'address_2'  => $order->billing_address_2,
-			'city'       => $order->billing_city,
-			'state'      => $order->billing_state,
-			'postcode'   => $order->billing_postcode,
-			'country'    => $order->billing_country
+			'first_name' => $order->get_billing_first_name(),
+			'last_name'  => $order->get_billing_last_name(),
+			'company'    => $order->get_billing_company(),
+			'address_1'  => $order->get_billing_address_1(),
+			'address_2'  => $order->get_billing_address_2(),
+			'city'       => $order->get_billing_city(),
+			'state'      => $order->get_billing_state(),
+			'postcode'   => $order->get_billing_postcode(),
+			'country'    => $order->get_billing_country()
 		);
 		$shipping_address = array(
-			'first_name' => $order->shipping_first_name,
-			'last_name'  => $order->shipping_last_name,
-			'company'    => $order->shipping_company,
-			'address_1'  => $order->shipping_address_1,
-			'address_2'  => $order->shipping_address_2,
-			'city'       => $order->shipping_city,
-			'state'      => $order->shipping_state,
-			'postcode'   => $order->shipping_postcode,
-			'country'    => $order->shipping_country
+			'first_name' => $order->get_shipping_first_name(),
+			'last_name'  => $order->get_shipping_last_name(),
+			'company'    => $order->get_shipping_company(),
+			'address_1'  => $order->get_shipping_address_1(),
+			'address_2'  => $order->get_shipping_address_2(),
+			'city'       => $order->get_shipping_city(),
+			'state'      => $order->get_shipping_state(),
+			'postcode'   => $order->get_shipping_postcode(),
+			'country'    => $order->get_shipping_country()
 		);
 		// Klarna reservation number and billing country must be set
 		if ( get_post_meta( $orderid, '_klarna_order_reservation', true ) && get_post_meta( $orderid, '_billing_country', true ) ) {
@@ -620,22 +620,22 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 		if ( isset( $_POST['billing_country'] ) && ( $_POST['billing_country'] == 'NL' || $_POST['billing_country'] == 'DE' ) ) {
 			require_once( KLARNA_DIR . 'split-address.php' );
 			// Set up billing address array
-			$klarna_billing_address            = $order->billing_address_1;
+			$klarna_billing_address            = $order->get_billing_address_1();
 			$splitted_address                  = splitAddress( $klarna_billing_address );
 			$klarna_billing['address']         = $splitted_address[0];
 			$klarna_billing['house_number']    = $splitted_address[1];
 			$klarna_billing['house_extension'] = $splitted_address[2];
 			// Set up shipping address array
-			$klarna_shipping_address            = $order->shipping_address_1;
+			$klarna_shipping_address            = $order->get_shipping_address_1();
 			$splitted_address                   = splitAddress( $klarna_shipping_address );
 			$klarna_shipping['address']         = $splitted_address[0];
 			$klarna_shipping['house_number']    = $splitted_address[1];
 			$klarna_shipping['house_extension'] = $splitted_address[2];
 		} else {
-			$klarna_billing['address']         = $order->billing_address_1;
+			$klarna_billing['address']         = $order->get_billing_address_1();
 			$klarna_billing['house_number']    = '';
 			$klarna_billing['house_extension'] = '';
-			$klarna_shipping['address']         = $order->shipping_address_1;
+			$klarna_shipping['address']         = $order->get_shipping_address_1();
 			$klarna_shipping['house_number']    = '';
 			$klarna_shipping['house_extension'] = '';
 		}
@@ -833,7 +833,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 
 							jQuery('.woocommerce-billing-fields #klarna-invoice-get-address').remove();
 
-							/* 
+							/*
 							 jQuery('#order_review').on('change', function() {
 							 if ( 'undefined' !== typeof pno_getadress ) {
 							 jQuery('input#klarna_invoice_pno').val(pno_getadress);
@@ -935,12 +935,12 @@ class WC_Gateway_Klarna_Invoice_Extra {
 	 * Calculate fees on checkout form.
 	 */
 	public function calculate_fees( $cart ) {
-		
+
 		$invo_settings        = get_option( 'woocommerce_klarna_invoice_settings' );
 		if ( 'yes' != $invo_settings['enabled'] ) {
 			return;
 		}
-		
+
 		global $woocommerce;
 		$current_gateway = '';
 		if ( is_checkout() || defined( 'WOOCOMMERCE_CHECKOUT' ) ) {

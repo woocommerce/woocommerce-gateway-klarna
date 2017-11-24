@@ -186,10 +186,10 @@ class WC_Gateway_Klarna_Cross_Sells {
 	 */
 	function cross_sells_add_klarna( $wc_order ) {
 		$klarna_order = new WC_Gateway_Klarna_Order();
-		if ( 'rest' == get_post_meta( $wc_order->id, '_klarna_api', true ) ) {
-			$result = $klarna_order->update_order_rest( $wc_order->id );
+		if ( 'rest' == get_post_meta( $wc_order->get_id(), '_klarna_api', true ) ) {
+			$result = $klarna_order->update_order_rest( $wc_order->get_id() );
 		} else {
-			$result = $klarna_order->update_order( $wc_order->id );
+			$result = $klarna_order->update_order( $wc_order->get_id() );
 		}
 
 		return $result;
