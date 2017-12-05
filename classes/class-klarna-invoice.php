@@ -237,7 +237,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 							// We manually calculate the tax percentage here
 							if ( $order->get_line_tax( $item ) !== 0 ) {
 								// Calculate tax percentage
-								$item_tax_percentage = @number_format( ( $order->get_line_tax( $item ) / $order->get_line_total( $item, false ) ) * 100, 2, '.', '' );
+								$item_tax_percentage = @number_format( ( $order->get_line_tax( $item ) / $order->get_line_total( $item, false, false ) ) * 100, 2, '.', '' );
 							} else {
 								$item_tax_percentage = 0.00;
 							}
