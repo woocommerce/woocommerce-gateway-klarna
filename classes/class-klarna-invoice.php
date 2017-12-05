@@ -242,7 +242,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 								$item_tax_percentage = 0.00;
 							}
 							// apply_filters to item price so we can filter this if needed
-							$klarna_item_price_including_tax = $order->get_item_total( $item, true );
+							$klarna_item_price_including_tax = $order->get_item_total( $item, true, false );
 							$item_price                      = apply_filters( 'klarna_item_price_including_tax', $klarna_item_price_including_tax );
 							// Get SKU or product id
 							$reference = '';
