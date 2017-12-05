@@ -427,7 +427,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		$klarna_recurring_token = get_post_meta( $order_id, '_klarna_recurring_token', true );
 		// If the recurring token isn't stored in the subscription, grab it from parent order.
 		if( empty( $klarna_recurring_token ) ) {
-			$klarna_recurring_token = get_post_meta( WC_Subscriptions_Renewal_Order::get_parent_order_id( $order_id ), '_klarna_recurring_token', true );	
+			$klarna_recurring_token = get_post_meta( WC_Subscriptions_Renewal_Order::get_parent_order_id( $order_id ), '_klarna_recurring_token', true );
 		}
 		$klarna_currency        = get_post_meta( $order_id, '_order_currency', true );
 		$klarna_country         = get_post_meta( $order_id, '_billing_country', true );
@@ -487,7 +487,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 					} else {
 						$reference = klarna_wc_get_product_id( $_product );
 					}
-					$recurring_price = $order->get_item_total( $item, true ) * 100;
+					$recurring_price = $order->get_item_total( $item, true, false ) * 100;
 					if ( $item['line_total'] > 0 ) {
 						$recurring_tax_rate = round( ( $item['line_tax'] / $item['line_total'] ) * 10000 );
 					} else {
