@@ -130,11 +130,11 @@ class WC_Gateway_Klarna_Order {
 					$_product = $order->get_product_from_item( $item );
 					if ( $_product->exists() && $item['qty'] ) {
 						// We manually calculate the tax percentage here
-						if ( $order->get_line_tax( $item ) !== 0 ) {
+						$item_tax_percentage = 0;
+						$item_total_tax = is_callable( array( $item, 'get_total_tax' ) ) ? $item->get_total_tax() : 0;
+						if ( $item_total_tax ) {
 							// Calculate tax percentage
-							$item_tax_percentage = @number_format( ( $order->get_line_tax( $item ) / $order->get_line_total( $item, false, false ) ) * 100, 2, '.', '' );
-						} else {
-							$item_tax_percentage = 0.00;
+							$item_tax_percentage = @number_format( $item_total_tax / $order->get_line_total( $item, false, false ) * 100, 2, '.', '' );
 						}
 						// apply_filters to item price so we can filter this if needed
 						$klarna_item_price_including_tax = $order->get_item_total( $item, true, false );
@@ -148,6 +148,7 @@ class WC_Gateway_Klarna_Order {
 						} else {
 							$reference = klarna_wc_get_product_id( $_product );
 						}
+
 						$klarna->addArticle( $qty = $item['qty'],                  // Quantity
 							$artNo = strval( $reference ),          // Article number
 							$title = utf8_decode( $item['name'] ),   // Article name/title
@@ -185,13 +186,13 @@ class WC_Gateway_Klarna_Order {
 			$order_discount = apply_filters( 'klarna_order_discount', $klarna_order_discount );
 
 			$klarna->addArticle(
-			    $qty = 1,
-			    $artNo = '',
-			    $title = __( 'Discount', 'woocommerce-gateway-klarna' ),
-			    $price = -$order_discount,
-			    $vat = 0,
-			    $discount = 0,
-			    $flags = Klarna\XMLRPC\Flags::INC_VAT
+					$qty = 1,
+					$artNo = '',
+					$title = __( 'Discount', 'woocommerce-gateway-klarna' ),
+					$price = -$order_discount,
+					$vat = 0,
+					$discount = 0,
+					$flags = Klarna\XMLRPC\Flags::INC_VAT
 			);
 		}
 		*/
