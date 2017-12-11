@@ -429,6 +429,11 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		if( empty( $klarna_recurring_token ) ) {
 			$klarna_recurring_token = get_post_meta( WC_Subscriptions_Renewal_Order::get_parent_order_id( $order_id ), '_klarna_recurring_token', true );	
 		}
+
+		if( empty( $klarna_recurring_token ) ) {
+			$order->add_order_note( __( 'Klarna recurring token could not be retreived.', 'woocommerce-gateway-klarna' ) );
+		}
+
 		$klarna_currency        = get_post_meta( $order_id, '_order_currency', true );
 		$klarna_country         = get_post_meta( $order_id, '_billing_country', true );
 		$klarna_locale          = get_post_meta( $order_id, '_klarna_locale', true );
@@ -559,7 +564,8 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 				$this->log->add( 'klarna', 'Klarna API error: ' . var_export( $e, true ) );
 			}
 			$order->add_order_note( sprintf( __( 'Klarna subscription payment failed. Error code %s. Error message %s', 'woocommerce-gateway-klarna' ), $e->getCode(), utf8_encode( $e->getMessage() ) ) );
-
+			add_post_meta( $order_id, 'klarna_subscription_error_info_1', var_export( $klarna_order, true ), true );
+			add_post_meta( $order_id, 'klarna_subscription_error_info_2', var_export( $create, true ), true );
 			return false;
 		}
 	}
