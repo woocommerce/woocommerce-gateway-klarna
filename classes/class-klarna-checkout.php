@@ -563,9 +563,16 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			if ( $this->debug == 'yes' ) {
 				$this->log->add( 'klarna', 'Klarna API error: ' . var_export( $e, true ) );
 			}
-			$order->add_order_note( sprintf( __( 'Klarna subscription payment failed. Error code %s. Error message %s', 'woocommerce-gateway-klarna' ), $e->getCode(), utf8_encode( $e->getMessage() ) ) );
+			$pay_load = $e->getPayload();
+			if( 402 == $e->getCode() ) {
+				$order->add_order_note( sprintf( __( 'Klarna subscription payment failed. Error code: %s. Reason: %s. Payment method: %s.', 'woocommerce-gateway-klarna' ), $e->getCode(), $pay_load['reason'], $pay_load['payment_method']['type'] ) );
+			} else {
+				$order->add_order_note( sprintf( __( 'Klarna subscription payment failed. Error code: %s. Reason: %s.', 'woocommerce-gateway-klarna' ), $e->getCode(), $pay_load['http_status_message'] ) );
+			}
+			
 			add_post_meta( $order_id, 'klarna_subscription_error_info_1', var_export( $klarna_order, true ), true );
 			add_post_meta( $order_id, 'klarna_subscription_error_info_2', var_export( $create, true ), true );
+			add_post_meta( $order_id, 'klarna_subscription_error_info_3', var_export( $pay_load, true ), true );
 			return false;
 		}
 	}
