@@ -253,8 +253,8 @@ class WC_Gateway_Klarna_Order {
 		$klarna = $this->klarna;
 		if ( $order->get_total_shipping() > 0 ) {
 			// We manually calculate the shipping tax percentage here
-			$calculated_shipping_tax_percentage = ( $order->order_shipping_tax / $order->get_total_shipping() ) * 100; //25.00
-			$calculated_shipping_tax_decimal    = ( $order->order_shipping_tax / $order->get_total_shipping() ) + 1; //0.25
+			$calculated_shipping_tax_percentage = ( $order->get_shipping_tax() / $order->get_total_shipping() ) * 100; //25.00
+			$calculated_shipping_tax_decimal    = ( $order->get_shipping_tax() / $order->get_total_shipping() ) + 1; //0.25
 			// apply_filters to Shipping so we can filter this if needed
 			$klarna_shipping_price_including_tax = $order->get_total_shipping() * $calculated_shipping_tax_decimal;
 			$shipping_price                      = apply_filters( 'klarna_shipping_price_including_tax', $klarna_shipping_price_including_tax );
@@ -278,39 +278,39 @@ class WC_Gateway_Klarna_Order {
 		$klarna_shipping_house_number    = $klarna_shipping['house_number'];
 		$klarna_shipping_house_extension = $klarna_shipping['house_extension'];
 		// Billing address
-		$addr_billing = new Klarna\XMLRPC\Address( $email = $order->billing_email, $telno = '', // We skip the normal land line phone, only one is needed.
-			$cellno = $order->billing_phone, $fname = utf8_decode( $order->billing_first_name ), $lname = utf8_decode( $order->billing_last_name ), $careof = utf8_decode( $order->billing_address_2 ),  // No care of, C/O.
+		$addr_billing = new Klarna\XMLRPC\Address( $email = $order->get_billing_email(), $telno = '', // We skip the normal land line phone, only one is needed.
+			$cellno = $order->get_billing_phone(), $fname = utf8_decode( $order->get_billing_first_name() ), $lname = utf8_decode( $order->get_billing_last_name() ), $careof = utf8_decode( $order->get_billing_address_2() ),  // No care of, C/O.
 			$street = utf8_decode( $klarna_billing_address ), // For DE and NL specify street number in houseNo.
-			$zip = utf8_decode( $order->billing_postcode ), $city = utf8_decode( $order->billing_city ), $country = utf8_decode( $order->billing_country ), $houseNo = utf8_decode( $klarna_billing_house_number ), // For DE and NL we need to specify houseNo.
+			$zip = utf8_decode( $order->get_billing_postcode() ), $city = utf8_decode( $order->get_billing_city() ), $country = utf8_decode( $order->get_billing_country() ), $houseNo = utf8_decode( $klarna_billing_house_number ), // For DE and NL we need to specify houseNo.
 			$houseExt = utf8_decode( $klarna_billing_house_extension ) // Only required for NL.
 		);
 		// Add Company if one is set
-		if ( $order->billing_company ) {
-			$addr_billing->setCompanyName( utf8_decode( $order->billing_company ) );
+		if ( $order->get_billing_company() ) {
+			$addr_billing->setCompanyName( utf8_decode( $order->get_billing_company() ) );
 		}
 		// Shipping address
 		if ( $order->get_shipping_method() == '' || $ship_to_billing_address == 'yes' ) {
 			// Use billing address if Shipping is disabled in Woocommerce
-			$addr_shipping = new Klarna\XMLRPC\Address( $email = $order->billing_email, $telno = '', //We skip the normal land line phone, only one is needed.
-				$cellno = $order->billing_phone, $fname = utf8_decode( $order->billing_first_name ), $lname = utf8_decode( $order->billing_last_name ), $careof = utf8_decode( $order->billing_address_2 ),  // No care of, C/O.
+			$addr_shipping = new Klarna\XMLRPC\Address( $email = $order->get_billing_email(), $telno = '', //We skip the normal land line phone, only one is needed.
+				$cellno = $order->get_billing_phone(), $fname = utf8_decode( $order->get_billing_first_name() ), $lname = utf8_decode( $order->get_billing_last_name() ), $careof = utf8_decode( $order->get_billing_address_2() ),  // No care of, C/O.
 				$street = utf8_decode( $klarna_billing_address ), // For DE and NL specify street number in houseNo.
-				$zip = utf8_decode( $order->billing_postcode ), $city = utf8_decode( $order->billing_city ), $country = utf8_decode( $order->billing_country ), $houseNo = utf8_decode( $klarna_billing_house_number ), // For DE and NL we need to specify houseNo.
+				$zip = utf8_decode( $order->get_billing_postcode() ), $city = utf8_decode( $order->get_billing_city() ), $country = utf8_decode( $order->get_billing_country() ), $houseNo = utf8_decode( $klarna_billing_house_number ), // For DE and NL we need to specify houseNo.
 				$houseExt = utf8_decode( $klarna_billing_house_extension ) // Only required for NL.
 			);
 			// Add Company if one is set
-			if ( $order->billing_company ) {
-				$addr_shipping->setCompanyName( utf8_decode( $order->billing_company ) );
+			if ( $order->get_billing_company() ) {
+				$addr_shipping->setCompanyName( utf8_decode( $order->get_billing_company() ) );
 			}
 		} else {
-			$addr_shipping = new Klarna\XMLRPC\Address( $email = $order->billing_email, $telno = '', //We skip the normal land line phone, only one is needed.
-				$cellno = $order->billing_phone, $fname = utf8_decode( $order->shipping_first_name ), $lname = utf8_decode( $order->shipping_last_name ), $careof = utf8_decode( $order->shipping_address_2 ),  // No care of, C/O.
+			$addr_shipping = new Klarna\XMLRPC\Address( $email = $order->get_billing_email(), $telno = '', //We skip the normal land line phone, only one is needed.
+				$cellno = $order->get_billing_phone(), $fname = utf8_decode( $order->get_shipping_first_name() ), $lname = utf8_decode( $order->get_shipping_last_name() ), $careof = utf8_decode( $order->get_shipping_address_2() ),  // No care of, C/O.
 				$street = utf8_decode( $klarna_shipping_address ), // For DE and NL specify street number in houseNo.
-				$zip = utf8_decode( $order->shipping_postcode ), $city = utf8_decode( $order->shipping_city ), $country = utf8_decode( $order->shipping_country ), $houseNo = utf8_decode( $klarna_shipping_house_number ), // For DE and NL we need to specify houseNo.
+				$zip = utf8_decode( $order->get_shipping_postcode() ), $city = utf8_decode( $order->get_shipping_city() ), $country = utf8_decode( $order->get_shipping_country() ), $houseNo = utf8_decode( $klarna_shipping_house_number ), // For DE and NL we need to specify houseNo.
 				$houseExt = utf8_decode( $klarna_shipping_house_extension ) // Only required for NL.
 			);
 			// Add Company if one is set
-			if ( $order->shipping_company ) {
-				$addr_shipping->setCompanyName( utf8_decode( $order->shipping_company ) );
+			if ( $order->get_shipping_company() ) {
+				$addr_shipping->setCompanyName( utf8_decode( $order->get_shipping_company() ) );
 			}
 		}
 		// Next we tell the Klarna instance to use the address in the next order.
@@ -947,7 +947,7 @@ class WC_Gateway_Klarna_Order {
 		$updated_order_total = 0;
 		$updated_tax_total   = 0;
 		// Tax is treated differently for US and UK
-		$order_billing_country = $order->billing_country;
+		$order_billing_country = $order->get_billing_country();
 		// Process order items
 		foreach ( $order->get_items() as $item_key => $order_item ) {
 			if ( $order_item['qty'] && isset( $itemid ) && $item_key != $itemid ) {
@@ -1054,10 +1054,10 @@ class WC_Gateway_Klarna_Order {
 		// Process shipping
 		if ( $order->get_total_shipping() > 0 ) {
 			// We manually calculate the shipping tax percentage here
-			$calculated_shipping_tax_percentage = ( $order->order_shipping_tax / $order->get_total_shipping() ) * 100;
+			$calculated_shipping_tax_percentage = ( $order->get_shipping_tax() / $order->get_total_shipping() ) * 100;
 			$tax_rate   = 'us' == strtolower( $order_billing_country ) ? 0 : round( $calculated_shipping_tax_percentage ) * 100;
-			$tax_amount = 'us' == strtolower( $order_billing_country ) ? 0 : round( $order->order_shipping_tax ) * 100;
-			$unit_price = 'us' == strtolower( $order_billing_country ) ? round( $order->get_total_shipping() * 100 ) : round( $order->get_total_shipping() + $order->order_shipping_tax ) * 100;
+			$tax_amount = 'us' == strtolower( $order_billing_country ) ? 0 : round( $order->get_shipping_tax() ) * 100;
+			$unit_price = 'us' == strtolower( $order_billing_country ) ? round( $order->get_total_shipping() * 100 ) : round( $order->get_total_shipping() + $order->get_shipping_tax() ) * 100;
 			$klarna_item = array(
 				'type'                  => 'shipping_fee',
 				'reference'             => 'SHIPPING',

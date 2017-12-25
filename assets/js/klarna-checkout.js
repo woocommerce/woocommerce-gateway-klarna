@@ -291,7 +291,7 @@ jQuery(document).ready(function ($) {
 	});
 
 	// Update cart (v2)
-	$(document).on('change', 'td.product-quantity input[type=number]', function (event) {
+	$(document).on('change', '.product-quantity input[type=number]', function (event) {
 		var minMaxFlag = false;
 
 		// Check max value
@@ -318,7 +318,7 @@ jQuery(document).ready(function ($) {
 				});
 			}
 
-			ancestor = $(this).closest('td.product-quantity');
+			ancestor = $(this).closest('.product-quantity');
 			cart_item_key = $(ancestor).data('cart_item_key');
 			new_quantity = $(this).val();
 			kco_widget = $('#klarna-checkout-widget');

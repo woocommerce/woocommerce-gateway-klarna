@@ -423,25 +423,42 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		}
 
 		$order_id = klarna_wc_get_order_id( $order );
-
+		
+		// Reccuring token
 		$klarna_recurring_token = get_post_meta( $order_id, '_klarna_recurring_token', true );
 		// If the recurring token isn't stored in the subscription, grab it from parent order.
 		if( empty( $klarna_recurring_token ) ) {
 			$klarna_recurring_token = get_post_meta( WC_Subscriptions_Renewal_Order::get_parent_order_id( $order_id ), '_klarna_recurring_token', true );	
 		}
+		if( empty( $klarna_recurring_token ) ) {
+			$order->add_order_note( __( 'Klarna recurring token could not be retrieved.', 'woocommerce-gateway-klarna' ) );
+		}
+		
+		// Locale
+		$klarna_locale          = get_post_meta( $order_id, '_klarna_locale', true );
+		// If the locale isn't stored in the subscription, grab it from parent order.
+		if( empty( $klarna_locale ) ) {
+			$klarna_locale = get_post_meta( WC_Subscriptions_Renewal_Order::get_parent_order_id( $order_id ), '_klarna_locale', true );	
+		}
+		if( empty( $klarna_locale ) ) {
+			$klarna_locale = 'en-gb';
+			$order->add_order_note( __( 'Klarna locale could not be retrieved, using English as fallback language.', 'woocommerce-gateway-klarna' ) );
+		}
+		
 		$klarna_currency        = get_post_meta( $order_id, '_order_currency', true );
 		$klarna_country         = get_post_meta( $order_id, '_billing_country', true );
-		$klarna_locale          = get_post_meta( $order_id, '_klarna_locale', true );
+		
 		// Can't use same methods to retrieve Eid and secret that are used in frontend.
 		// Need to use order billing country as base instead.
 		$klarna_checkout_settings = get_option( 'woocommerce_klarna_checkout_settings' );
 		$klarna_country_lowercase = strtolower( $klarna_country );
 		$klarna_eid               = $klarna_checkout_settings[ 'eid_' . $klarna_country_lowercase ];
 		$klarna_secret            = $klarna_checkout_settings[ 'secret_' . $klarna_country_lowercase ];
+		$billing_country 		  = get_post_meta( $order_id, '_billing_country', true );
 		$klarna_billing           = array(
 			'postal_code'    => get_post_meta( $order_id, '_billing_postcode', true ),
 			'email'          => get_post_meta( $order_id, '_billing_email', true ),
-			'country'        => get_post_meta( $order_id, '_billing_country', true ),
+			'country'        => strtolower( $billing_country ),
 			'city'           => get_post_meta( $order_id, '_billing_city', true ),
 			'family_name'    => get_post_meta( $order_id, '_billing_last_name', true ),
 			'given_name'     => get_post_meta( $order_id, '_billing_first_name', true ),
@@ -451,10 +468,11 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		if( wc_shipping_enabled() ) {
 			$shipping_email           = get_post_meta( $order_id, '_shipping_email', true ) ? get_post_meta( $order_id, '_shipping_email', true ) : get_post_meta( $order_id, '_billing_email', true );
 			$shipping_phone           = get_post_meta( $order_id, '_shipping_phone', true ) ? get_post_meta( $order_id, '_shipping_phone', true ) : get_post_meta( $order_id, '_billing_phone', true );
+			$shipping_country		  = get_post_meta( $order_id, '_shipping_country', true );
 			$klarna_shipping          = array(
 				'postal_code'    => get_post_meta( $order_id, '_shipping_postcode', true ),
 				'email'          => $shipping_email,
-				'country'        => get_post_meta( $order_id, '_shipping_country', true ),
+				'country'        => strtolower( $shipping_country ),
 				'city'           => get_post_meta( $order_id, '_shipping_city', true ),
 				'family_name'    => get_post_meta( $order_id, '_shipping_last_name', true ),
 				'given_name'     => get_post_meta( $order_id, '_shipping_first_name', true ),
@@ -465,7 +483,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			$klarna_shipping		= array(
 				'postal_code'    => get_post_meta( $order_id, '_billing_postcode', true ),
 				'email'          => get_post_meta( $order_id, '_billing_email', true ),
-				'country'        => get_post_meta( $order_id, '_billing_country', true ),
+				'country'        => strtolower( $billing_country ),
 				'city'           => get_post_meta( $order_id, '_billing_city', true ),
 				'family_name'    => get_post_meta( $order_id, '_billing_last_name', true ),
 				'given_name'     => get_post_meta( $order_id, '_billing_first_name', true ),
@@ -556,10 +574,18 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			return true;
 		} catch ( Klarna_Checkout_ApiErrorException $e ) {
 			if ( $this->debug == 'yes' ) {
-				$this->log->add( 'klarna', 'Klarna API error: ' . var_export( $e, true ) );
+				$this->log->add( 'klarna', 'Klarna subscription payment API error: ' . var_export( $e, true ) );
 			}
-			$order->add_order_note( sprintf( __( 'Klarna subscription payment failed. Error code %s. Error message %s', 'woocommerce-gateway-klarna' ), $e->getCode(), utf8_encode( $e->getMessage() ) ) );
-
+			$pay_load = $e->getPayload();
+			if( 402 == $e->getCode() ) {
+				$order->add_order_note( sprintf( __( 'Klarna subscription payment failed. Error code: %s. Reason: %s. Payment method: %s.', 'woocommerce-gateway-klarna' ), $e->getCode(), $pay_load['reason'], $pay_load['payment_method']['type'] ) );
+			} else {
+				$order->add_order_note( sprintf( __( 'Klarna subscription payment failed. Error code: %s. Reason: %s.', 'woocommerce-gateway-klarna' ), $e->getCode(), $pay_load['http_status_message'] ) );
+			}
+			
+			update_post_meta( $order_id, 'klarna_subscription_error_info_1', var_export( $klarna_order, true ) );
+			update_post_meta( $order_id, 'klarna_subscription_error_info_2', var_export( $create, true ) );
+			update_post_meta( $order_id, 'klarna_subscription_error_info_3', var_export( $pay_load, true ) );
 			return false;
 		}
 	}
