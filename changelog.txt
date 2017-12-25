@@ -1,5 +1,13 @@
 *** WooCommerce Gateway Klarna Changelog ***
 
+2017.12.26  - version 2.5.5
+* Update	- Add shipping email to order if it exist from Klarna.
+* Fix		- Get locale from parent order, if missing in subscription, when sending renewal order data to Klarna.
+* Fix		- Send country code with lowercase letters in subscription renewal order data.
+* Fix		- Improved subscription renewal error logging.
+* Update	- Remove need for td in js logic for quantity change on KCO page.
+* Fix		- WC 3.0 deprecated notices.
+
 2017.11.23  - version 2.5.4
 * Fix       - Fixes email check in KCO ajax updates.
 * Update    - Adds filter (klarna_item_name) to make it possible to filter cart item name before sending it to Klarna.
