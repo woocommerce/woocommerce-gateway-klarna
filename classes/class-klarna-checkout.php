@@ -468,7 +468,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		if( wc_shipping_enabled() ) {
 			$shipping_email           = get_post_meta( $order_id, '_shipping_email', true ) ? get_post_meta( $order_id, '_shipping_email', true ) : get_post_meta( $order_id, '_billing_email', true );
 			$shipping_phone           = get_post_meta( $order_id, '_shipping_phone', true ) ? get_post_meta( $order_id, '_shipping_phone', true ) : get_post_meta( $order_id, '_billing_phone', true );
-			$shipping_country		  = get_post_meta( $order_id, '_shipping_country', true );
+			$shipping_country         = get_post_meta( $order_id, '_shipping_country', true ) ? get_post_meta( $order_id, '_shipping_country', true ) : get_post_meta( $order_id, '_billing_country', true );
 			$klarna_shipping          = array(
 				'postal_code'    => get_post_meta( $order_id, '_shipping_postcode', true ),
 				'email'          => $shipping_email,
