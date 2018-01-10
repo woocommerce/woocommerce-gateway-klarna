@@ -435,7 +435,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		}
 		
 		// Locale
-		$klarna_locale          = get_post_meta( $order_id, '_klarna_locale', true );
+		$klarna_locale          	= get_post_meta( $order_id, '_klarna_locale', true );
 		// If the locale isn't stored in the subscription, grab it from parent order.
 		if( empty( $klarna_locale ) ) {
 			$klarna_locale = get_post_meta( WC_Subscriptions_Renewal_Order::get_parent_order_id( $order_id ), '_klarna_locale', true );	
@@ -445,8 +445,68 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			$order->add_order_note( __( 'Klarna locale could not be retrieved, using English as fallback language.', 'woocommerce-gateway-klarna' ) );
 		}
 		
-		$klarna_currency        = get_post_meta( $order_id, '_order_currency', true );
-		$klarna_country         = get_post_meta( $order_id, '_billing_country', true );
+		$klarna_currency        	= get_post_meta( $order_id, '_order_currency', true );
+		
+		// Country
+		if( get_post_meta( $order_id, '_klarna_credentials_country', true ) ) {
+			$klarna_country 		=  get_post_meta( $order_id, '_klarna_credentials_country', true );
+		} else {
+			$klarna_country 		= get_post_meta( $order_id, '_billing_country', true );
+		}
+		
+		// Billing country - including fallback check
+		$billing_country         	= get_post_meta( $order_id, '_billing_country', true ) ? get_post_meta( $order_id, '_billing_country', true ) : $klarna_country;
+		if( empty( $billing_country ) ) {
+			$billing_country = get_post_meta( WC_Subscriptions_Renewal_Order::get_parent_order_id( $order_id ), '_billing_country', true );	
+		}
+		
+		// Shipping country - including fallback check
+		$shipping_country         	= get_post_meta( $order_id, '_shipping_country', true ) ? get_post_meta( $order_id, '_shipping_country', true ) : $klarna_country;
+		if( empty( $shipping_country ) ) {
+			$shipping_country = get_post_meta( WC_Subscriptions_Renewal_Order::get_parent_order_id( $order_id ), '_billing_country', true );	
+		}
+		
+		// Billing postcode
+		$billing_postcode	= get_post_meta( $order_id, '_billing_postcode', true ) ? get_post_meta( $order_id, '_billing_postcode', true ) : get_post_meta( WC_Subscriptions_Renewal_Order::get_parent_order_id( $order_id ), '_billing_postcode', true );
+		
+		// Shipping postcode
+		$shipping_postcode	= get_post_meta( $order_id, '_shipping_postcode', true ) ? get_post_meta( $order_id, '_shipping_postcode', true ) : get_post_meta( WC_Subscriptions_Renewal_Order::get_parent_order_id( $order_id ), '_shipping_postcode', true );
+		
+		// Billing email
+		$billing_email	= get_post_meta( $order_id, '_billing_email', true ) ? get_post_meta( $order_id, '_billing_email', true ) : get_post_meta( WC_Subscriptions_Renewal_Order::get_parent_order_id( $order_id ), '_billing_email', true );
+		
+		// Shipping email
+		$shipping_email	= get_post_meta( $order_id, '_shipping_email', true ) ? get_post_meta( $order_id, '_shipping_email', true ) : $billing_email;
+		
+		// Billing city
+		$billing_city	= get_post_meta( $order_id, '_billing_city', true ) ? get_post_meta( $order_id, '_billing_city', true ) : get_post_meta( WC_Subscriptions_Renewal_Order::get_parent_order_id( $order_id ), '_billing_city', true );
+		
+		// Shipping city
+		$shipping_city	= get_post_meta( $order_id, '_shipping_city', true ) ? get_post_meta( $order_id, '_shipping_city', true ) : get_post_meta( WC_Subscriptions_Renewal_Order::get_parent_order_id( $order_id ), '_shipping_city', true );
+		
+		// Billing first name
+		$billing_first_name	= get_post_meta( $order_id, '_billing_first_name', true ) ? get_post_meta( $order_id, '_billing_first_name', true ) : get_post_meta( WC_Subscriptions_Renewal_Order::get_parent_order_id( $order_id ), '_billing_first_name', true );
+		
+		// Shipping first name
+		$shipping_first_name	= get_post_meta( $order_id, '_shipping_first_name', true ) ? get_post_meta( $order_id, '_shipping_first_name', true ) : get_post_meta( WC_Subscriptions_Renewal_Order::get_parent_order_id( $order_id ), '_shipping_first_name', true );
+		
+		// Billing last name
+		$billing_last_name	= get_post_meta( $order_id, '_billing_last_name', true ) ? get_post_meta( $order_id, '_billing_last_name', true ) : get_post_meta( WC_Subscriptions_Renewal_Order::get_parent_order_id( $order_id ), '_billing_last_name', true );
+		
+		// Shipping last name
+		$shipping_last_name	= get_post_meta( $order_id, '_shipping_last_name', true ) ? get_post_meta( $order_id, '_shipping_last_name', true ) : get_post_meta( WC_Subscriptions_Renewal_Order::get_parent_order_id( $order_id ), '_shipping_last_name', true );
+		
+		// Billing address 1
+		$billing_address_1	= get_post_meta( $order_id, '_billing_address_1', true ) ? get_post_meta( $order_id, '_billing_address_1', true ) : get_post_meta( WC_Subscriptions_Renewal_Order::get_parent_order_id( $order_id ), '_billing_address_1', true );
+		
+		// Shipping address 1
+		$shipping_address_1	= get_post_meta( $order_id, '_shipping_address_1', true ) ? get_post_meta( $order_id, '_shipping_address_1', true ) : get_post_meta( WC_Subscriptions_Renewal_Order::get_parent_order_id( $order_id ), '_shipping_address_1', true );
+		
+		// Billing phone
+		$billing_phone	= get_post_meta( $order_id, '_billing_phone', true ) ? get_post_meta( $order_id, '_billing_phone', true ) : get_post_meta( WC_Subscriptions_Renewal_Order::get_parent_order_id( $order_id ), '_billing_phone', true );
+		
+		// Shipping phone
+		$shipping_phone	= get_post_meta( $order_id, '_shipping_phone', true ) ? get_post_meta( $order_id, '_shipping_phone', true ) : $billing_phone;
 		
 		// Can't use same methods to retrieve Eid and secret that are used in frontend.
 		// Need to use order billing country as base instead.
@@ -454,41 +514,38 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		$klarna_country_lowercase = strtolower( $klarna_country );
 		$klarna_eid               = $klarna_checkout_settings[ 'eid_' . $klarna_country_lowercase ];
 		$klarna_secret            = $klarna_checkout_settings[ 'secret_' . $klarna_country_lowercase ];
-		$billing_country 		  = get_post_meta( $order_id, '_billing_country', true );
+		
 		$klarna_billing           = array(
-			'postal_code'    => get_post_meta( $order_id, '_billing_postcode', true ),
-			'email'          => get_post_meta( $order_id, '_billing_email', true ),
+			'postal_code'    => $billing_postcode,
+			'email'          => $billing_email,
 			'country'        => strtolower( $billing_country ),
-			'city'           => get_post_meta( $order_id, '_billing_city', true ),
-			'family_name'    => get_post_meta( $order_id, '_billing_last_name', true ),
-			'given_name'     => get_post_meta( $order_id, '_billing_first_name', true ),
-			'street_address' => get_post_meta( $order_id, '_billing_address_1', true ),
-			'phone'          => get_post_meta( $order_id, '_billing_phone', true )
+			'city'           => $billing_city,
+			'family_name'    => $billing_last_name,
+			'given_name'     => $billing_first_name,
+			'street_address' => $billing_address_1,
+			'phone'          => $billing_phone
 		);
 		if( wc_shipping_enabled() ) {
-			$shipping_email           = get_post_meta( $order_id, '_shipping_email', true ) ? get_post_meta( $order_id, '_shipping_email', true ) : get_post_meta( $order_id, '_billing_email', true );
-			$shipping_phone           = get_post_meta( $order_id, '_shipping_phone', true ) ? get_post_meta( $order_id, '_shipping_phone', true ) : get_post_meta( $order_id, '_billing_phone', true );
-			$shipping_country         = get_post_meta( $order_id, '_shipping_country', true ) ? get_post_meta( $order_id, '_shipping_country', true ) : get_post_meta( $order_id, '_billing_country', true );
 			$klarna_shipping          = array(
-				'postal_code'    => get_post_meta( $order_id, '_shipping_postcode', true ),
+				'postal_code'    => $shipping_postcode,
 				'email'          => $shipping_email,
 				'country'        => strtolower( $shipping_country ),
-				'city'           => get_post_meta( $order_id, '_shipping_city', true ),
-				'family_name'    => get_post_meta( $order_id, '_shipping_last_name', true ),
-				'given_name'     => get_post_meta( $order_id, '_shipping_first_name', true ),
-				'street_address' => get_post_meta( $order_id, '_shipping_address_1', true ),
+				'city'           => $shipping_city,
+				'family_name'    => $shipping_last_name,
+				'given_name'     => $shipping_first_name,
+				'street_address' => $shipping_address_1,
 				'phone'          => $shipping_phone
 			);
 		} else {
 			$klarna_shipping		= array(
-				'postal_code'    => get_post_meta( $order_id, '_billing_postcode', true ),
-				'email'          => get_post_meta( $order_id, '_billing_email', true ),
+				'postal_code'    => $billing_postcode,
+				'email'          => $billing_email,
 				'country'        => strtolower( $billing_country ),
-				'city'           => get_post_meta( $order_id, '_billing_city', true ),
-				'family_name'    => get_post_meta( $order_id, '_billing_last_name', true ),
-				'given_name'     => get_post_meta( $order_id, '_billing_first_name', true ),
-				'street_address' => get_post_meta( $order_id, '_billing_address_1', true ),
-				'phone'          => get_post_meta( $order_id, '_billing_phone', true )
+				'city'           => $billing_city,
+				'family_name'    => $billing_last_name,
+				'given_name'     => $billing_first_name,
+				'street_address' => $billing_address_1,
+				'phone'          => $billing_phone
 			);
 		}
 		// Products in subscription
