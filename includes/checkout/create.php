@@ -137,6 +137,9 @@ if ( $kco_is_rest ) {
 	if ( is_ssl() && 'yes' === $kco_validate_stock ) {
 		$create['merchant']['validation_uri'] = get_home_url() . '/wc-api/WC_Gateway_Klarna_Order_Validate/';
 	}
+	if( $kco_cancellation_terms_url ) {
+		$create['merchant']['cancellation_terms_uri'] = $kco_cancellation_terms_url;
+	}
 }
 
 // Make phone a mandatory field for German stores?

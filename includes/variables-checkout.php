@@ -18,55 +18,57 @@ $this->push_completion   = ( isset( $this->settings['push_completion'] ) ) ? $th
 $this->push_cancellation = ( isset( $this->settings['push_cancellation'] ) ) ? $this->settings['push_cancellation'] : '';
 $this->push_update       = ( isset( $this->settings['push_update'] ) ) ? $this->settings['push_update'] : '';
 
-$this->eid_se                        = ( isset( $this->settings['eid_se'] ) ) ? $this->settings['eid_se'] : '';
-$this->secret_se                     = ( isset( $this->settings['secret_se'] ) ) ? $this->settings['secret_se'] : '';
-$this->klarna_checkout_url_se        = ( isset( $this->settings['klarna_checkout_url_se'] ) ) ? $this->settings['klarna_checkout_url_se'] : '';
-$this->klarna_checkout_thanks_url_se = ( isset( $this->settings['klarna_checkout_thanks_url_se'] ) ) ? $this->settings['klarna_checkout_thanks_url_se'] : '';
+$this->eid_se                        				= ( isset( $this->settings['eid_se'] ) ) ? $this->settings['eid_se'] : '';
+$this->secret_se                     				= ( isset( $this->settings['secret_se'] ) ) ? $this->settings['secret_se'] : '';
+$this->klarna_checkout_url_se        				= ( isset( $this->settings['klarna_checkout_url_se'] ) ) ? $this->settings['klarna_checkout_url_se'] : '';
+$this->klarna_checkout_thanks_url_se 				= ( isset( $this->settings['klarna_checkout_thanks_url_se'] ) ) ? $this->settings['klarna_checkout_thanks_url_se'] : '';
 
-$this->eid_no                        = ( isset( $this->settings['eid_no'] ) ) ? $this->settings['eid_no'] : '';
-$this->secret_no                     = ( isset( $this->settings['secret_no'] ) ) ? $this->settings['secret_no'] : '';
-$this->klarna_checkout_url_no        = ( isset( $this->settings['klarna_checkout_url_no'] ) ) ? $this->settings['klarna_checkout_url_no'] : '';
-$this->klarna_checkout_thanks_url_no = ( isset( $this->settings['klarna_checkout_thanks_url_no'] ) ) ? $this->settings['klarna_checkout_thanks_url_no'] : '';
+$this->eid_no                        				= ( isset( $this->settings['eid_no'] ) ) ? $this->settings['eid_no'] : '';
+$this->secret_no                     				= ( isset( $this->settings['secret_no'] ) ) ? $this->settings['secret_no'] : '';
+$this->klarna_checkout_url_no        				= ( isset( $this->settings['klarna_checkout_url_no'] ) ) ? $this->settings['klarna_checkout_url_no'] : '';
+$this->klarna_checkout_thanks_url_no 				= ( isset( $this->settings['klarna_checkout_thanks_url_no'] ) ) ? $this->settings['klarna_checkout_thanks_url_no'] : '';
 
-$this->eid_fi                        = ( isset( $this->settings['eid_fi'] ) ) ? $this->settings['eid_fi'] : '';
-$this->secret_fi                     = ( isset( $this->settings['secret_fi'] ) ) ? $this->settings['secret_fi'] : '';
-$this->klarna_checkout_url_fi        = ( isset( $this->settings['klarna_checkout_url_fi'] ) ) ? $this->settings['klarna_checkout_url_fi'] : '';
-$this->klarna_checkout_thanks_url_fi = ( isset( $this->settings['klarna_checkout_thanks_url_fi'] ) ) ? $this->settings['klarna_checkout_thanks_url_fi'] : '';
+$this->eid_fi                        				= ( isset( $this->settings['eid_fi'] ) ) ? $this->settings['eid_fi'] : '';
+$this->secret_fi                     				= ( isset( $this->settings['secret_fi'] ) ) ? $this->settings['secret_fi'] : '';
+$this->klarna_checkout_url_fi        				= ( isset( $this->settings['klarna_checkout_url_fi'] ) ) ? $this->settings['klarna_checkout_url_fi'] : '';
+$this->klarna_checkout_thanks_url_fi 				= ( isset( $this->settings['klarna_checkout_thanks_url_fi'] ) ) ? $this->settings['klarna_checkout_thanks_url_fi'] : '';
 
-$this->eid_dk                        = ( isset( $this->settings['eid_dk'] ) ) ? $this->settings['eid_dk'] : '';
-$this->secret_dk                     = ( isset( $this->settings['secret_dk'] ) ) ? html_entity_decode( $this->settings['secret_dk'] ) : '';
-$this->klarna_checkout_url_dk        = ( isset( $this->settings['klarna_checkout_url_dk'] ) ) ? $this->settings['klarna_checkout_url_dk'] : '';
-$this->klarna_checkout_thanks_url_dk = ( isset( $this->settings['klarna_checkout_thanks_url_dk'] ) ) ? $this->settings['klarna_checkout_thanks_url_dk'] : '';
+$this->eid_dk                        				= ( isset( $this->settings['eid_dk'] ) ) ? $this->settings['eid_dk'] : '';
+$this->secret_dk                     				= ( isset( $this->settings['secret_dk'] ) ) ? html_entity_decode( $this->settings['secret_dk'] ) : '';
+$this->klarna_checkout_url_dk        				= ( isset( $this->settings['klarna_checkout_url_dk'] ) ) ? $this->settings['klarna_checkout_url_dk'] : '';
+$this->klarna_checkout_thanks_url_dk 				= ( isset( $this->settings['klarna_checkout_thanks_url_dk'] ) ) ? $this->settings['klarna_checkout_thanks_url_dk'] : '';
 
-$this->eid_nl                        = ( isset( $this->settings['eid_nl'] ) ) ? $this->settings['eid_nl'] : '';
-$this->secret_nl                     = ( isset( $this->settings['secret_nl'] ) ) ? html_entity_decode( $this->settings['secret_nl'] ) : '';
-$this->klarna_checkout_url_nl        = ( isset( $this->settings['klarna_checkout_url_nl'] ) ) ? $this->settings['klarna_checkout_url_nl'] : '';
-$this->klarna_checkout_thanks_url_nl = ( isset( $this->settings['klarna_checkout_thanks_url_nl'] ) ) ? $this->settings['klarna_checkout_thanks_url_nl'] : '';
+$this->eid_nl                        				= ( isset( $this->settings['eid_nl'] ) ) ? $this->settings['eid_nl'] : '';
+$this->secret_nl                     				= ( isset( $this->settings['secret_nl'] ) ) ? html_entity_decode( $this->settings['secret_nl'] ) : '';
+$this->klarna_checkout_url_nl        				= ( isset( $this->settings['klarna_checkout_url_nl'] ) ) ? $this->settings['klarna_checkout_url_nl'] : '';
+$this->klarna_checkout_thanks_url_nl 				= ( isset( $this->settings['klarna_checkout_thanks_url_nl'] ) ) ? $this->settings['klarna_checkout_thanks_url_nl'] : '';
 
-$this->eid_de                        = ( isset( $this->settings['eid_de'] ) ) ? $this->settings['eid_de'] : '';
-$this->secret_de                     = ( isset( $this->settings['secret_de'] ) ) ? $this->settings['secret_de'] : '';
-$this->klarna_checkout_url_de        = ( isset( $this->settings['klarna_checkout_url_de'] ) ) ? $this->settings['klarna_checkout_url_de'] : '';
-$this->klarna_checkout_thanks_url_de = ( isset( $this->settings['klarna_checkout_thanks_url_de'] ) ) ? $this->settings['klarna_checkout_thanks_url_de'] : '';
-$this->phone_mandatory_de            = ( isset( $this->settings['phone_mandatory_de'] ) ) ? $this->settings['phone_mandatory_de'] : '';
-$this->dhl_packstation_de            = ( isset( $this->settings['dhl_packstation_de'] ) ) ? $this->settings['dhl_packstation_de'] : '';
+$this->eid_de                        				= ( isset( $this->settings['eid_de'] ) ) ? $this->settings['eid_de'] : '';
+$this->secret_de                     				= ( isset( $this->settings['secret_de'] ) ) ? $this->settings['secret_de'] : '';
+$this->klarna_checkout_url_de        				= ( isset( $this->settings['klarna_checkout_url_de'] ) ) ? $this->settings['klarna_checkout_url_de'] : '';
+$this->klarna_checkout_thanks_url_de 				= ( isset( $this->settings['klarna_checkout_thanks_url_de'] ) ) ? $this->settings['klarna_checkout_thanks_url_de'] : '';
+$this->klarna_checkout_cancellation_terms_url_de 	= ( isset( $this->settings['klarna_checkout_cancellation_terms_url_de'] ) ) ? $this->settings['klarna_checkout_cancellation_terms_url_de'] : '';
+$this->phone_mandatory_de            				= ( isset( $this->settings['phone_mandatory_de'] ) ) ? $this->settings['phone_mandatory_de'] : '';
+$this->dhl_packstation_de            				= ( isset( $this->settings['dhl_packstation_de'] ) ) ? $this->settings['dhl_packstation_de'] : '';
 
-$this->eid_at                        = ( isset( $this->settings['eid_at'] ) ) ? $this->settings['eid_at'] : '';
-$this->secret_at                     = ( isset( $this->settings['secret_at'] ) ) ? $this->settings['secret_at'] : '';
-$this->klarna_checkout_url_at        = ( isset( $this->settings['klarna_checkout_url_at'] ) ) ? $this->settings['klarna_checkout_url_at'] : '';
-$this->klarna_checkout_thanks_url_at = ( isset( $this->settings['klarna_checkout_thanks_url_at'] ) ) ? $this->settings['klarna_checkout_thanks_url_at'] : '';
-$this->phone_mandatory_at            = ( isset( $this->settings['phone_mandatory_at'] ) ) ? $this->settings['phone_mandatory_at'] : '';
+$this->eid_at                        				= ( isset( $this->settings['eid_at'] ) ) ? $this->settings['eid_at'] : '';
+$this->secret_at                     				= ( isset( $this->settings['secret_at'] ) ) ? $this->settings['secret_at'] : '';
+$this->klarna_checkout_url_at        				= ( isset( $this->settings['klarna_checkout_url_at'] ) ) ? $this->settings['klarna_checkout_url_at'] : '';
+$this->klarna_checkout_thanks_url_at 				= ( isset( $this->settings['klarna_checkout_thanks_url_at'] ) ) ? $this->settings['klarna_checkout_thanks_url_at'] : '';
+$this->klarna_checkout_cancellation_terms_url_at 	= ( isset( $this->settings['klarna_checkout_cancellation_terms_url_at'] ) ) ? $this->settings['klarna_checkout_cancellation_terms_url_at'] : '';
+$this->phone_mandatory_at            				= ( isset( $this->settings['phone_mandatory_at'] ) ) ? $this->settings['phone_mandatory_at'] : '';
 
-$this->eid_uk                        = ( isset( $this->settings['eid_uk'] ) ) ? $this->settings['eid_uk'] : '';
-$this->secret_uk                     = ( isset( $this->settings['secret_uk'] ) ) ? html_entity_decode( $this->settings['secret_uk'] ) : '';
-$this->klarna_checkout_url_uk        = ( isset( $this->settings['klarna_checkout_url_uk'] ) ) ? $this->settings['klarna_checkout_url_uk'] : '';
-$this->klarna_checkout_thanks_url_uk = ( isset( $this->settings['klarna_checkout_thanks_url_uk'] ) ) ? $this->settings['klarna_checkout_thanks_url_uk'] : '';
+$this->eid_uk                        				= ( isset( $this->settings['eid_uk'] ) ) ? $this->settings['eid_uk'] : '';
+$this->secret_uk                     				= ( isset( $this->settings['secret_uk'] ) ) ? html_entity_decode( $this->settings['secret_uk'] ) : '';
+$this->klarna_checkout_url_uk        				= ( isset( $this->settings['klarna_checkout_url_uk'] ) ) ? $this->settings['klarna_checkout_url_uk'] : '';
+$this->klarna_checkout_thanks_url_uk 				= ( isset( $this->settings['klarna_checkout_thanks_url_uk'] ) ) ? $this->settings['klarna_checkout_thanks_url_uk'] : '';
 
-$this->eid_us                        = ( isset( $this->settings['eid_us'] ) ) ? $this->settings['eid_us'] : '';
-$this->secret_us                     = ( isset( $this->settings['secret_us'] ) ) ? html_entity_decode( $this->settings['secret_us'] ) : '';
-$this->klarna_checkout_url_us        = ( isset( $this->settings['klarna_checkout_url_us'] ) ) ? $this->settings['klarna_checkout_url_us'] : '';
-$this->klarna_checkout_thanks_url_us = ( isset( $this->settings['klarna_checkout_thanks_url_us'] ) ) ? $this->settings['klarna_checkout_thanks_url_us'] : '';
+$this->eid_us                        				= ( isset( $this->settings['eid_us'] ) ) ? $this->settings['eid_us'] : '';
+$this->secret_us                     				= ( isset( $this->settings['secret_us'] ) ) ? html_entity_decode( $this->settings['secret_us'] ) : '';
+$this->klarna_checkout_url_us        				= ( isset( $this->settings['klarna_checkout_url_us'] ) ) ? $this->settings['klarna_checkout_url_us'] : '';
+$this->klarna_checkout_thanks_url_us 				= ( isset( $this->settings['klarna_checkout_thanks_url_us'] ) ) ? $this->settings['klarna_checkout_thanks_url_us'] : '';
 
-$this->default_eur_country = ( isset( $this->settings['default_eur_country'] ) ) ? $this->settings['default_eur_country'] : '';
+$this->default_eur_country 							= ( isset( $this->settings['default_eur_country'] ) ) ? $this->settings['default_eur_country'] : '';
 
 $this->terms_url = ( isset( $this->settings['terms_url'] ) ) ? $this->settings['terms_url'] : '';
 $this->testmode  = ( isset( $this->settings['testmode'] ) ) ? $this->settings['testmode'] : '';
@@ -264,6 +266,7 @@ switch ( $this->shop_country ) {
 		} else {
 			$klarna_checkout_thanks_url = $this->klarna_checkout_thanks_url_de;
 		}
+		$klarna_checkout_cancellation_terms_url = $this->klarna_checkout_cancellation_terms_url_de;
 		break;
 	case 'AT' :
 		$klarna_country      = 'AT';
@@ -276,6 +279,7 @@ switch ( $this->shop_country ) {
 		} else {
 			$klarna_checkout_thanks_url = $this->klarna_checkout_thanks_url_at;
 		}
+		$klarna_checkout_cancellation_terms_url = $this->klarna_checkout_cancellation_terms_url_at;
 		break;
 	case 'GB' :
 	case 'gb' :

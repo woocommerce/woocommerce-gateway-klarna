@@ -351,6 +351,36 @@ class WC_Gateway_Klarna_Checkout_Variables {
 			return esc_url( get_permalink( wc_get_page_id( 'terms' ) ) );
 		}
 	}
+	
+	public static function get_cancellation_terms_url() {
+		$settings = self::get_klarna_checkout_settings();
+		$country  = self::get_klarna_country();
+		switch ( $country ) {
+			case 'DE' :
+				if ( $settings['klarna_checkout_cancellation_terms_url_de'] ) {
+					$klarna_checkout_cancellation_terms_url = $settings['klarna_checkout_cancellation_terms_url_de'];
+				}
+				break;
+			case 'at' :
+			case 'AT' :
+				if ( $settings['klarna_checkout_cancellation_terms_url_at'] ) {
+					$klarna_checkout_cancellation_terms_url = $settings['klarna_checkout_cancellation_terms_url_at'];
+				}
+				break;
+			default:
+				$klarna_checkout_cancellation_terms_url = '';
+		}
+
+		return apply_filters( 'klarna_checkout_cancellation_terms_url', $klarna_checkout_cancellation_terms_url );
+		
+		
+
+		if ( isset( $settings['cancellation_terms_url'] ) && '' !== $settings['cancellation_terms_url'] ) {
+			return $settings['cancellation_terms_url'];
+		} else {
+			return false;
+		}
+	}
 
 	public static function get_klarna_checkout_testmode() {
 		$settings = self::get_klarna_checkout_settings();

@@ -1,5 +1,12 @@
 *** WooCommerce Gateway Klarna Changelog ***
 
+2018.01.12  - version 2.5.6
+* Update	- Added cancellation_terms_uri (https://developers.klarna.com/en/de/kco-v2/checkout-api#merchant-object-properties) setting for DE & AT.
+* Fix		- Improved subscription renewal error logging.
+* Fix		- Subscription order renewal improvements - grab customer address data from parent order if missing in subscription.
+* Fix		- Fixes bug with move PNO field for Invoice/part payment.
+
+
 2017.12.26  - version 2.5.5
 * Update	- Add shipping email to order if it exist from Klarna.
 * Fix		- Get locale from parent order, if missing in subscription, when sending renewal order data to Klarna.

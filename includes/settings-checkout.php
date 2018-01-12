@@ -263,6 +263,13 @@ return apply_filters( 'klarna_checkout_form_fields', array(
 		'default'     => '',
 		'desc_tip'    => false
 	),
+	'klarna_checkout_cancellation_terms_url_de' => array(
+		'title'       => __( 'Cancellation terms URL - Germany', 'woocommerce-gateway-klarna' ),
+		'type'        => 'text',
+		'description' => __( 'Enter the URL to the page that acts as Cancellation terms page for Klarna Checkout Germany. Leave blank to disable.', 'woocommerce-gateway-klarna' ),
+		'default'     => '',
+		'desc_tip'    => false
+	),
 	'phone_mandatory_de'            => array(
 		'title'    => __( 'Phone Number Mandatory - Germany', 'woocommerce-gateway-klarna' ),
 		'type'     => 'checkbox',
@@ -307,6 +314,13 @@ return apply_filters( 'klarna_checkout_form_fields', array(
 		'title'       => __( 'Custom Thanks Page - Austria', 'woocommerce-gateway-klarna' ),
 		'type'        => 'text',
 		'description' => __( 'Enter the URL to the page that acts as Thanks Page for Klarna Checkout Austria. This page must contain the shortcode [woocommerce_klarna_checkout]. Leave blank to use the Custom Checkout Page as Thanks Page.', 'woocommerce-gateway-klarna' ),
+		'default'     => '',
+		'desc_tip'    => false
+	),
+	'klarna_checkout_cancellation_terms_url_at' => array(
+		'title'       => __( 'Cancellation terms URL - Austria', 'woocommerce-gateway-klarna' ),
+		'type'        => 'text',
+		'description' => __( 'Enter the URL to the page that acts as Cancellation terms page for Klarna Checkout Austria. Leave blank to disable.', 'woocommerce-gateway-klarna' ),
 		'default'     => '',
 		'desc_tip'    => false
 	),

@@ -16,6 +16,7 @@ $kco_klarna_language               = WC_Gateway_Klarna_Checkout_Variables::get_k
 $kco_klarna_checkout_url           = WC_Gateway_Klarna_Checkout_Variables::get_klarna_checkout_url();
 $kco_klarna_checkout_thank_you_url = WC_Gateway_Klarna_Checkout_Variables::get_klarna_checkout_thank_you_url();
 $kco_terms_url                     = WC_Gateway_Klarna_Checkout_Variables::get_terms_url();
+$kco_cancellation_terms_url        = WC_Gateway_Klarna_Checkout_Variables::get_cancellation_terms_url();
 $kco_klarna_server                 = WC_Gateway_Klarna_Checkout_Variables::get_klarna_server();
 $kco_testmode                      = WC_Gateway_Klarna_Checkout_Variables::get_klarna_checkout_testmode();
 $kco_debug                         = WC_Gateway_Klarna_Checkout_Variables::get_klarna_checkout_debug();
