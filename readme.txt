@@ -2,9 +2,9 @@
 Contributors: krokedil, niklashogefjord, slobodanmanic
 Tags: ecommerce, e-commerce, woocommerce, klarna
 Requires at least: 4.2
-Tested up to: 4.4.2
-Requires WooCommerce at least: 2.4
-Tested WooCommerce up to: 2.5.2
+Tested up to: 4.9.1
+Requires WooCommerce at least: 3.0
+Tested WooCommerce up to: 3.2.6
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
