@@ -28,7 +28,6 @@ class WC_Gateway_Klarna_Order {
 	public function __construct( $order = false, $klarna = false ) {
 		$this->order  = $order;
 		$this->klarna = $klarna;
-		$this->log    = new WC_Logger();
 		// Borrow debug setting from Klarna Checkout
 		$klarna_settings = get_option( 'woocommerce_klarna_checkout_settings' );
 		$this->debug     = isset( $klarna_settings['debug'] ) ? $klarna_settings['debug'] : '';

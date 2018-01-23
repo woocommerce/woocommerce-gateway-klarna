@@ -309,11 +309,14 @@ if ( $kco_is_rest ) {
 }
 
 try {
+	if ( $kco_debug == 'yes' ) {
+		WC_Gateway_Klarna::log( 'Klarna Create: Order id: ' . $local_order_id . ' $create: ' . var_export( $create, true ) );
+	}
 	$klarna_order->create( apply_filters( 'kco_create_order', $create ) );
 	$klarna_order->fetch();
 } catch ( Exception $e ) {
 	if ( $kco_debug == 'yes' ) {
-		$kco_log->add( 'klarna', 'Klarna API error: ' . var_export( $e, true ) );
+		//$kco_log->add( 'klarna', 'Klarna API error: ' . var_export( $e, true ) );
 	}
 
 	if ( is_user_logged_in() && $kco_debug ) {

@@ -971,7 +971,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 * @since 1.0.0
 	 */
 	function check_checkout_listener() {
-		$this->log->add( 'klarna', 'Checkout listener hit.' );
+		WC_Gateway_Klarna::log( 'Klarna Listener Order ID: ' . $_GET['sid']  . ' $_GET: ' . var_export( $_GET, true ) );		
 		if ( isset( $_GET['validate'] ) ) {
 			exit;
 		}

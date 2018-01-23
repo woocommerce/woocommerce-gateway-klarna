@@ -30,7 +30,7 @@ $ty_is_rest             = WC_Gateway_Klarna_Checkout_Variables::is_rest();
 
 // Debug.
 if ( 'yes' === $ty_debug ) {
-	$ty_log->add( 'klarna', 'Rendering Thank you page...' );
+	//$ty_log->add( 'klarna', 'Rendering Thank you page...' );
 }
 
 $merchant_id   = $ty_klarna_eid;
@@ -75,7 +75,7 @@ try {
 	$klarna_order->fetch();
 } catch ( Exception $e ) {
 	if ( 'yes' === $ty_debug ) {
-		$ty_log->add( 'klarna', 'Klarna API error: ' . var_export( $e, true ) );
+		//$ty_log->add( 'klarna', 'Klarna API error: ' . var_export( $e, true ) );
 	}
 
 	if ( is_user_logged_in() && $ty_debug ) {

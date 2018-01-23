@@ -134,6 +134,8 @@ function init_klarna_gateway() {
 	 */
 	class WC_Gateway_Klarna extends WC_Payment_Gateway {
 
+		public static $log = '';
+
 		/**
 		 * WC_Gateway_Klarna constructor.
 		 */
@@ -169,6 +171,13 @@ function init_klarna_gateway() {
 
 			// Actions.
 			add_action( 'wp_enqueue_scripts', array( $this, 'klarna_load_scripts' ) );
+		}
+
+		public static function log( $message ) {
+			if ( empty( self::$log ) ) {
+				self::$log = new WC_Logger();
+			}
+			self::$log->add( 'klarna', $message );
 		}
 
 		/**
