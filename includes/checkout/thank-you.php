@@ -73,6 +73,7 @@ if ( $ty_is_rest ) {
 
 try {
 	$klarna_order->fetch();
+	WC_Gateway_Klarna::log( 'Klarna Thank you URL: ' . $_SERVER['REQUEST_URI'] . ' Order id: ' . $order_id . ' $klarna_order: ' . var_export( $klarna_order, true ) );
 } catch ( Exception $e ) {
 	if ( 'yes' === $ty_debug ) {
 		//$ty_log->add( 'klarna', 'Klarna API error: ' . var_export( $e, true ) );
