@@ -975,7 +975,7 @@ class WC_Gateway_Klarna_Order {
 				}
 
 				// Item reference
-				$item_reference = (string) $order_item['product_id'];
+				$item_reference = substr( (string) $order_item['product_id'], 0, 64 );
 
 				// Item price
 				$item_price = 'us' == strtolower( $order_billing_country ) ? round( number_format( ( $order_item['line_subtotal'] ) * 100, 0, '', '' ) / $order_item['qty'] ) : round( number_format( ( $order_item['line_subtotal'] + $order_item['line_subtotal_tax'] ) * 100, 0, '', '' ) / $order_item['qty'] );

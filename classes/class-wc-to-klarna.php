@@ -442,7 +442,7 @@ class WC_Gateway_Klarna_WC2K {
 			$item_reference = klarna_wc_get_product_id( $_product );
 		}
 
-		return strval( $item_reference );
+		return substr( (string) $item_reference, 0, 64 );
 	}
 
 	/**
