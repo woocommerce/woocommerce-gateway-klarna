@@ -1107,12 +1107,8 @@ class WC_Gateway_Klarna_K2WC {
 				$klarna_order->acknowledge();
 				$klarna_order->fetch();
 				$klarna_order->updateMerchantReferences( array( 'merchant_reference1' => ltrim( $order->get_order_number(), '#' ) ) );
-				$order->calculate_totals( false );
-				$order->update_status( 'pending' ); // Set status to Pending Payment before completing the order.
-				$order->payment_complete( $klarna_order['klarna_reference'] );
-				$order->set_date_created( current_time( 'timestamp', true ) );
-				delete_post_meta( klarna_wc_get_order_id( $order ), '_kco_incomplete_customer_email' );
-				add_post_meta( klarna_wc_get_order_id( $order ), '_kco_payment_created', time() );
+
+				$transaction_id = $klarna_order['klarna_reference'];
 			}
 		} else { // V2 API.
 			$order->add_order_note( sprintf( __( 'Klarna Checkout payment created. Reservation number: %1$s.  Klarna order number: %2$s', 'woocommerce-gateway-klarna' ), $klarna_order['reservation'], $klarna_order['id'] ) );
@@ -1124,12 +1120,16 @@ class WC_Gateway_Klarna_K2WC {
 			$update['merchant_reference'] = array( 'orderid1' => ltrim( $order->get_order_number(), '#' ) );
 			$klarna_order->update( $update );
 
-			// Confirm local order.
+			$transaction_id = $klarna_order['reservation'];
+		}
+
+		if ( false === apply_filters( 'klarna_finalize_order_in_thank_you_page', false ) ) {
 			$order->calculate_totals( false );
 			$order->update_status( 'pending' ); // Set status to Pending Payment before completing the order.
-			$order->payment_complete( $klarna_order['reservation'] );
+			$order->payment_complete( $transaction_id );
 			$order->set_date_created( current_time( 'timestamp', true ) );
 			delete_post_meta( klarna_wc_get_order_id( $order ), '_kco_incomplete_customer_email' );
+			add_post_meta( klarna_wc_get_order_id( $order ), '_kco_payment_created', time() );
 		}
 
 		return $klarna_order;
