@@ -235,9 +235,7 @@ try {
 				$create['options']['allow_separate_shipping_address'] = true;
 			}
 		}
-		if ( $kco_debug == 'yes' ) {
-			WC_Gateway_Klarna::log( 'Klarna Update: Order id: ' . $local_order_id . ' $update: ' . var_export( $update, true ) );
-		}
+		krokedil_log_events( $local_order_id, 'Update order', $update );		
 		$klarna_order->update( apply_filters( 'kco_update_order', $update ) );
 	} // End if country change.
 } catch ( Exception $e ) {

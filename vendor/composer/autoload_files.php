@@ -7,4 +7,5 @@ $baseDir = dirname($vendorDir);
 
 return array(
     'ad155f8f1cf0d418fe49e248db8c661b' => $vendorDir . '/react/promise/src/functions_include.php',
+    'cad43f73916476d83565191d54c1f14b' => $vendorDir . '/krokedil/krokedil-logger/src/krokedil-order-event-log.php',
 );

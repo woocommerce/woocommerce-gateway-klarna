@@ -318,9 +318,7 @@ class WC_Gateway_Klarna_K2WC {
 			$local_order_id = sanitize_key( $_GET['sid'] ); // Input var okay.
 			$order          = wc_get_order( $local_order_id );
 
-			if ( 'yes' === $this->klarna_debug ) {
-				WC_Gateway_Klarna::log( 'Klarna Listener: Order id: ' . $local_order_id . ' $klarna_order: ' . var_export( $klarna_order, true ) );
-			}
+			krokedil_log_events( $local_order_id, 'Klarna listener hitt', $klarna_order );
 
 			// Check if order was recurring.
 			if ( isset( $klarna_order['recurring_token'] ) ) {

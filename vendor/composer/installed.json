@@ -1,82 +1,33 @@
 [
     {
-        "name": "react/promise",
-        "version": "v2.2.1",
-        "version_normalized": "2.2.1.0",
+        "name": "guzzlehttp/guzzle",
+        "version": "5.3.1",
+        "version_normalized": "5.3.1.0",
         "source": {
             "type": "git",
-            "url": "https://github.com/reactphp/promise.git",
-            "reference": "3b6fca09c7d56321057fa8867c8dbe1abf648627"
+            "url": "https://github.com/guzzle/guzzle.git",
+            "reference": "70f1fa53b71c4647bf2762c09068a95f77e12fb8"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/reactphp/promise/zipball/3b6fca09c7d56321057fa8867c8dbe1abf648627",
-            "reference": "3b6fca09c7d56321057fa8867c8dbe1abf648627",
+            "url": "https://api.github.com/repos/guzzle/guzzle/zipball/70f1fa53b71c4647bf2762c09068a95f77e12fb8",
+            "reference": "70f1fa53b71c4647bf2762c09068a95f77e12fb8",
             "shasum": ""
         },
         "require": {
-            "php": ">=5.4.0"
-        },
-        "time": "2015-07-03T13:48:55+00:00",
-        "type": "library",
-        "extra": {
-            "branch-alias": {
-                "dev-master": "2.0-dev"
-            }
-        },
-        "installation-source": "dist",
-        "autoload": {
-            "psr-4": {
-                "React\\Promise\\": "src/"
-            },
-            "files": [
-                "src/functions_include.php"
-            ]
-        },
-        "notification-url": "https://packagist.org/downloads/",
-        "license": [
-            "MIT"
-        ],
-        "authors": [
-            {
-                "name": "Jan Sorgalla",
-                "email": "jsorgalla@gmail.com"
-            }
-        ],
-        "description": "A lightweight implementation of CommonJS Promises/A for PHP"
-    },
-    {
-        "name": "guzzlehttp/streams",
-        "version": "3.0.0",
-        "version_normalized": "3.0.0.0",
-        "source": {
-            "type": "git",
-            "url": "https://github.com/guzzle/streams.git",
-            "reference": "47aaa48e27dae43d39fc1cea0ccf0d84ac1a2ba5"
-        },
-        "dist": {
-            "type": "zip",
-            "url": "https://api.github.com/repos/guzzle/streams/zipball/47aaa48e27dae43d39fc1cea0ccf0d84ac1a2ba5",
-            "reference": "47aaa48e27dae43d39fc1cea0ccf0d84ac1a2ba5",
-            "shasum": ""
-        },
-        "require": {
+            "guzzlehttp/ringphp": "^1.1",
             "php": ">=5.4.0"
         },
         "require-dev": {
-            "phpunit/phpunit": "~4.0"
+            "ext-curl": "*",
+            "phpunit/phpunit": "^4.0"
         },
-        "time": "2014-10-12T19:18:40+00:00",
+        "time": "2016-07-15T19:28:39+00:00",
         "type": "library",
-        "extra": {
-            "branch-alias": {
-                "dev-master": "3.0-dev"
-            }
-        },
         "installation-source": "dist",
         "autoload": {
             "psr-4": {
-                "GuzzleHttp\\Stream\\": "src/"
+                "GuzzleHttp\\": "src/"
             }
         },
         "notification-url": "https://packagist.org/downloads/",
@@ -90,11 +41,16 @@
                 "homepage": "https://github.com/mtdowling"
             }
         ],
-        "description": "Provides a simple abstraction over streams of data",
+        "description": "Guzzle is a PHP HTTP client library and framework for building RESTful web service clients",
         "homepage": "http://guzzlephp.org/",
         "keywords": [
-            "Guzzle",
-            "stream"
+            "client",
+            "curl",
+            "framework",
+            "http",
+            "http client",
+            "rest",
+            "web service"
         ]
     },
     {
@@ -149,6 +105,58 @@
             }
         ],
         "description": "Provides a simple API and specification that abstracts away the details of HTTP into a single PHP function."
+    },
+    {
+        "name": "guzzlehttp/streams",
+        "version": "3.0.0",
+        "version_normalized": "3.0.0.0",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/guzzle/streams.git",
+            "reference": "47aaa48e27dae43d39fc1cea0ccf0d84ac1a2ba5"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/guzzle/streams/zipball/47aaa48e27dae43d39fc1cea0ccf0d84ac1a2ba5",
+            "reference": "47aaa48e27dae43d39fc1cea0ccf0d84ac1a2ba5",
+            "shasum": ""
+        },
+        "require": {
+            "php": ">=5.4.0"
+        },
+        "require-dev": {
+            "phpunit/phpunit": "~4.0"
+        },
+        "time": "2014-10-12T19:18:40+00:00",
+        "type": "library",
+        "extra": {
+            "branch-alias": {
+                "dev-master": "3.0-dev"
+            }
+        },
+        "installation-source": "dist",
+        "autoload": {
+            "psr-4": {
+                "GuzzleHttp\\Stream\\": "src/"
+            }
+        },
+        "notification-url": "https://packagist.org/downloads/",
+        "license": [
+            "MIT"
+        ],
+        "authors": [
+            {
+                "name": "Michael Dowling",
+                "email": "mtdowling@gmail.com",
+                "homepage": "https://github.com/mtdowling"
+            }
+        ],
+        "description": "Provides a simple abstraction over streams of data",
+        "homepage": "http://guzzlephp.org/",
+        "keywords": [
+            "Guzzle",
+            "stream"
+        ]
     },
     {
         "name": "klarna/checkout",
@@ -241,35 +249,76 @@
         "homepage": "http://developers.klarna.com"
     },
     {
-        "name": "guzzlehttp/guzzle",
-        "version": "5.3.1",
-        "version_normalized": "5.3.1.0",
+        "name": "klarna/php-xmlrpc",
+        "version": "v5.0.0",
+        "version_normalized": "5.0.0.0",
         "source": {
             "type": "git",
-            "url": "https://github.com/guzzle/guzzle.git",
-            "reference": "70f1fa53b71c4647bf2762c09068a95f77e12fb8"
+            "url": "https://github.com/klarna/php-xmlrpc.git",
+            "reference": "c359520ce516b9172697e0355d89e000aede2934"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/guzzle/guzzle/zipball/70f1fa53b71c4647bf2762c09068a95f77e12fb8",
-            "reference": "70f1fa53b71c4647bf2762c09068a95f77e12fb8",
+            "url": "https://api.github.com/repos/klarna/php-xmlrpc/zipball/c359520ce516b9172697e0355d89e000aede2934",
+            "reference": "c359520ce516b9172697e0355d89e000aede2934",
             "shasum": ""
         },
         "require": {
-            "guzzlehttp/ringphp": "^1.1",
-            "php": ">=5.4.0"
+            "ext-curl": "*",
+            "ext-xml": "*",
+            "php": ">=5.4.0",
+            "phpxmlrpc/phpxmlrpc": "~4.0"
         },
         "require-dev": {
-            "ext-curl": "*",
-            "phpunit/phpunit": "^4.0"
+            "apigen/apigen": "4.0.*",
+            "klarna/apigen-theme": "~1.0"
         },
-        "time": "2016-07-15T19:28:39+00:00",
+        "time": "2016-03-16T11:55:44+00:00",
         "type": "library",
         "installation-source": "dist",
         "autoload": {
             "psr-4": {
-                "GuzzleHttp\\": "src/"
+                "": "src/"
             }
+        },
+        "notification-url": "https://packagist.org/downloads/",
+        "license": [
+            "Apache-2.0"
+        ],
+        "authors": [
+            {
+                "name": "Klarna AB",
+                "email": "integration@klarna.com"
+            }
+        ],
+        "description": "PHP SDK for Klarna's XMLRPC API",
+        "homepage": "http://developers.klarna.com"
+    },
+    {
+        "name": "krokedil/krokedil-logger",
+        "version": "1.0.4",
+        "version_normalized": "1.0.4.0",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/krokedil/krokedil-logger.git",
+            "reference": "72c3710d542450d24fde732fa961810777dc8632"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/krokedil/krokedil-logger/zipball/72c3710d542450d24fde732fa961810777dc8632",
+            "reference": "72c3710d542450d24fde732fa961810777dc8632",
+            "shasum": ""
+        },
+        "require": {
+            "php": ">=5.6.0"
+        },
+        "time": "2018-01-30T08:14:34+00:00",
+        "type": "library",
+        "installation-source": "dist",
+        "autoload": {
+            "files": [
+                "src/krokedil-order-event-log.php"
+            ]
         },
         "notification-url": "https://packagist.org/downloads/",
         "license": [
@@ -277,21 +326,18 @@
         ],
         "authors": [
             {
-                "name": "Michael Dowling",
-                "email": "mtdowling@gmail.com",
-                "homepage": "https://github.com/mtdowling"
+                "name": "Krokedil",
+                "email": "info@krokedil.se",
+                "homepage": "https://www.krokedil.se",
+                "role": "Developer"
             }
         ],
-        "description": "Guzzle is a PHP HTTP client library and framework for building RESTful web service clients",
-        "homepage": "http://guzzlephp.org/",
+        "description": "Logging for WooCommerce Gateways",
+        "homepage": "https://www.krokedil.se",
         "keywords": [
-            "client",
-            "curl",
-            "framework",
-            "http",
-            "http client",
-            "rest",
-            "web service"
+            "log",
+            "logging",
+            "woocommerce"
         ]
     },
     {
@@ -348,49 +394,49 @@
         ]
     },
     {
-        "name": "klarna/php-xmlrpc",
-        "version": "v5.0.0",
-        "version_normalized": "5.0.0.0",
+        "name": "react/promise",
+        "version": "v2.2.1",
+        "version_normalized": "2.2.1.0",
         "source": {
             "type": "git",
-            "url": "https://github.com/klarna/php-xmlrpc.git",
-            "reference": "c359520ce516b9172697e0355d89e000aede2934"
+            "url": "https://github.com/reactphp/promise.git",
+            "reference": "3b6fca09c7d56321057fa8867c8dbe1abf648627"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/klarna/php-xmlrpc/zipball/c359520ce516b9172697e0355d89e000aede2934",
-            "reference": "c359520ce516b9172697e0355d89e000aede2934",
+            "url": "https://api.github.com/repos/reactphp/promise/zipball/3b6fca09c7d56321057fa8867c8dbe1abf648627",
+            "reference": "3b6fca09c7d56321057fa8867c8dbe1abf648627",
             "shasum": ""
         },
         "require": {
-            "ext-curl": "*",
-            "ext-xml": "*",
-            "php": ">=5.4.0",
-            "phpxmlrpc/phpxmlrpc": "~4.0"
+            "php": ">=5.4.0"
         },
-        "require-dev": {
-            "apigen/apigen": "4.0.*",
-            "klarna/apigen-theme": "~1.0"
-        },
-        "time": "2016-03-16T11:55:44+00:00",
+        "time": "2015-07-03T13:48:55+00:00",
         "type": "library",
+        "extra": {
+            "branch-alias": {
+                "dev-master": "2.0-dev"
+            }
+        },
         "installation-source": "dist",
         "autoload": {
             "psr-4": {
-                "": "src/"
-            }
+                "React\\Promise\\": "src/"
+            },
+            "files": [
+                "src/functions_include.php"
+            ]
         },
         "notification-url": "https://packagist.org/downloads/",
         "license": [
-            "Apache-2.0"
+            "MIT"
         ],
         "authors": [
             {
-                "name": "Klarna AB",
-                "email": "integration@klarna.com"
+                "name": "Jan Sorgalla",
+                "email": "jsorgalla@gmail.com"
             }
         ],
-        "description": "PHP SDK for Klarna's XMLRPC API",
-        "homepage": "http://developers.klarna.com"
+        "description": "A lightweight implementation of CommonJS Promises/A for PHP"
     }
 ]

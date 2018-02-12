@@ -14,6 +14,7 @@
   "require": {
     "klarna/checkout": "4.0",
     "klarna/kco_rest": "^2.1",
-    "klarna/php-xmlrpc": "^5.0"
+    "klarna/php-xmlrpc": "^5.0",
+    "krokedil/krokedil-logger": "^1.0"
   }
 }

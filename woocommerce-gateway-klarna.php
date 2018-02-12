@@ -117,6 +117,8 @@ function init_klarna_gateway() {
 	define( 'KLARNA_DIR', dirname( __FILE__ ) . '/' );         // Root dir.
 	define( 'KLARNA_LIB', dirname( __FILE__ ) . '/library/' ); // Klarna library dir.
 	define( 'KLARNA_URL', plugin_dir_url( __FILE__ ) );         // Plugin folder URL.
+	define( 'KROKEDIL_LOGGER_GATEWAY', 'klarna_' );
+	define( 'KROKEDIL_LOGGER_ON', true );
 
 	// Set CURLOPT_SSL_VERIFYPEER via constant in library/src/Klarna/Checkout/HTTP/CURLTransport.php.
 	// No need to set it to true if the store doesn't use https.

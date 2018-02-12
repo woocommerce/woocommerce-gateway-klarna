@@ -309,9 +309,7 @@ if ( $kco_is_rest ) {
 }
 
 try {
-	if ( $kco_debug == 'yes' ) {
-		WC_Gateway_Klarna::log( 'Klarna Create: Order id: ' . $local_order_id . ' $create: ' . var_export( $create, true ) );
-	}
+	krokedil_log_events( $local_order_id, 'Create order', $create);	
 	$klarna_order->create( apply_filters( 'kco_create_order', $create ) );
 	$klarna_order->fetch();
 } catch ( Exception $e ) {
