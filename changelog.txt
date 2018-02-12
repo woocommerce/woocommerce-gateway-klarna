@@ -1,5 +1,11 @@
 *** WooCommerce Gateway Klarna Changelog ***
 
+2018.02.12  - version 2.5.7
+* Fix       - Fixes error with WC_Session in WooCommerce 3.3 for Klarna Checkout.
+* Fix       - Limits KCO item reference to 64 characters.
+* Feature   - Introduces klarna_finalize_order_in_thank_you_page filter.
+* Feature   - Introduces klarna_x_forwarded_for filter.
+
 2018.01.12  - version 2.5.6
 * Update	- Added cancellation_terms_uri (https://developers.klarna.com/en/de/kco-v2/checkout-api#merchant-object-properties) setting for DE & AT.
 * Fix		- Improved subscription renewal error logging.

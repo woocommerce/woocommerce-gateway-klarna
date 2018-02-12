@@ -695,7 +695,7 @@ class WC_Gateway_Klarna_Checkout_Ajax {
 
 		// Capture postal code
 		if ( isset( $_REQUEST['postal_code'] ) && is_string( $_REQUEST['postal_code'] ) ) {
-			if ( method_exists( $wc_customer, 'set_billing_postcode' ) ) {
+			if ( method_exists( WC()->customer, 'set_billing_postcode' ) ) {
 				WC()->customer->set_billing_postcode( $_REQUEST['postal_code'] );
 			} else {
 				WC()->customer->set_postcode( $_REQUEST['postal_code'] );
@@ -995,7 +995,7 @@ class WC_Gateway_Klarna_Checkout_Ajax {
 				$klarna_order->update( apply_filters( 'kco_update_order', $update ) );
 			} catch ( Exception $e ) {
 				if ( $klarna_debug == 'yes' ) {
-					$klarna_log->add( 'klarna', 'Klarna API error: ' . var_export( $e, true ) );
+					$klarna_log->add( 'klarna', 'Klarna API error: ' . $e->getMessage() );
 				}
 			}
 		}

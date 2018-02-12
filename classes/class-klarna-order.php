@@ -130,14 +130,14 @@ class WC_Gateway_Klarna_Order {
 					$_product = $order->get_product_from_item( $item );
 					if ( $_product->exists() && $item['qty'] ) {
 						// We manually calculate the tax percentage here
-						if ( $order->get_line_tax( $item ) !== 0 ) {
+						$item_tax_percentage = 0;
+						$item_total_tax = is_callable( array( $item, 'get_total_tax' ) ) ? $item->get_total_tax() : 0;
+						if ( $item_total_tax ) {
 							// Calculate tax percentage
-							$item_tax_percentage = @number_format( ( $order->get_line_tax( $item ) / $order->get_line_total( $item, false ) ) * 100, 2, '.', '' );
-						} else {
-							$item_tax_percentage = 0.00;
+							$item_tax_percentage = @number_format( $item_total_tax / $order->get_line_total( $item, false, false ) * 100, 2, '.', '' );
 						}
 						// apply_filters to item price so we can filter this if needed
-						$klarna_item_price_including_tax = $order->get_item_total( $item, true );
+						$klarna_item_price_including_tax = $order->get_item_total( $item, true, false );
 						$item_price                      = apply_filters( 'klarna_item_price_including_tax', $klarna_item_price_including_tax );
 						// Get SKU or product id
 						$reference = '';
@@ -148,6 +148,7 @@ class WC_Gateway_Klarna_Order {
 						} else {
 							$reference = klarna_wc_get_product_id( $_product );
 						}
+
 						$klarna->addArticle( $qty = $item['qty'],                  // Quantity
 							$artNo = strval( $reference ),          // Article number
 							$title = utf8_decode( $item['name'] ),   // Article name/title
@@ -185,13 +186,13 @@ class WC_Gateway_Klarna_Order {
 			$order_discount = apply_filters( 'klarna_order_discount', $klarna_order_discount );
 
 			$klarna->addArticle(
-			    $qty = 1,
-			    $artNo = '',
-			    $title = __( 'Discount', 'woocommerce-gateway-klarna' ),
-			    $price = -$order_discount,
-			    $vat = 0,
-			    $discount = 0,
-			    $flags = Klarna\XMLRPC\Flags::INC_VAT
+					$qty = 1,
+					$artNo = '',
+					$title = __( 'Discount', 'woocommerce-gateway-klarna' ),
+					$price = -$order_discount,
+					$vat = 0,
+					$discount = 0,
+					$flags = Klarna\XMLRPC\Flags::INC_VAT
 			);
 		}
 		*/
@@ -367,7 +368,7 @@ class WC_Gateway_Klarna_Order {
 						utf8_encode( $reason ) // Description
 					);
 					if ( $ocr ) {
-						$order->add_order_note( sprintf( __( 'Klarna order partially refunded. Refund amount: %s.', 'woocommerce-gateway-klarna' ), wc_price( $amount, array( 'currency' => $order->get_order_currency() ) ) ) );
+						$order->add_order_note( sprintf( __( 'Klarna order partially refunded. Refund amount: %s.', 'woocommerce-gateway-klarna' ), wc_price( $amount, array( 'currency' => $order->get_currency() ) ) ) );
 
 						return true;
 					}
@@ -405,7 +406,7 @@ class WC_Gateway_Klarna_Order {
 				'refunded_amount' => $amount * 100,
 				'description'     => utf8_encode( $reason ),
 			) );
-			$order->add_order_note( sprintf( __( 'Klarna order refunded. Refund amount: %s.', 'woocommerce-gateway-klarna' ), wc_price( $amount, array( 'currency' => $order->get_order_currency() ) ) ) );
+			$order->add_order_note( sprintf( __( 'Klarna order refunded. Refund amount: %s.', 'woocommerce-gateway-klarna' ), wc_price( $amount, array( 'currency' => $order->get_currency() ) ) ) );
 
 			return true;
 		} catch ( Exception $e ) {
@@ -974,7 +975,7 @@ class WC_Gateway_Klarna_Order {
 				}
 
 				// Item reference
-				$item_reference = (string) $order_item['product_id'];
+				$item_reference = substr( (string) $order_item['product_id'], 0, 64 );
 
 				// Item price
 				$item_price = 'us' == strtolower( $order_billing_country ) ? round( number_format( ( $order_item['line_subtotal'] ) * 100, 0, '', '' ) / $order_item['qty'] ) : round( number_format( ( $order_item['line_subtotal'] + $order_item['line_subtotal_tax'] ) * 100, 0, '', '' ) / $order_item['qty'] );

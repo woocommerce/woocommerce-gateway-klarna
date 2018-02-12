@@ -125,3 +125,18 @@ function klarna_wc_get_coupon_code( $coupon ) {
 		return $coupon->code;
 	}
 }
+
+/**
+ * Gets product post object.
+ *
+ * @param $cart_item
+ *
+ * @return mixed
+ */
+function klarna_wc_get_cart_item_data( $cart_item ) {
+	if ( function_exists( 'wc_get_formatted_cart_item_data' ) ) {
+		return wc_get_formatted_cart_item_data( $cart_item, true );
+	} else {
+		return WC()->cart->get_item_data( $cart_item, true );
+	}
+}
