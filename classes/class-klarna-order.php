@@ -368,7 +368,7 @@ class WC_Gateway_Klarna_Order {
 						utf8_encode( $reason ) // Description
 					);
 					if ( $ocr ) {
-						$order->add_order_note( sprintf( __( 'Klarna order partially refunded. Refund amount: %s.', 'woocommerce-gateway-klarna' ), wc_price( $amount, array( 'currency' => $order->get_order_currency() ) ) ) );
+						$order->add_order_note( sprintf( __( 'Klarna order partially refunded. Refund amount: %s.', 'woocommerce-gateway-klarna' ), wc_price( $amount, array( 'currency' => $order->get_currency() ) ) ) );
 
 						return true;
 					}
@@ -406,7 +406,7 @@ class WC_Gateway_Klarna_Order {
 				'refunded_amount' => $amount * 100,
 				'description'     => utf8_encode( $reason ),
 			) );
-			$order->add_order_note( sprintf( __( 'Klarna order refunded. Refund amount: %s.', 'woocommerce-gateway-klarna' ), wc_price( $amount, array( 'currency' => $order->get_order_currency() ) ) ) );
+			$order->add_order_note( sprintf( __( 'Klarna order refunded. Refund amount: %s.', 'woocommerce-gateway-klarna' ), wc_price( $amount, array( 'currency' => $order->get_currency() ) ) ) );
 
 			return true;
 		} catch ( Exception $e ) {

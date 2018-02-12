@@ -83,7 +83,7 @@ if ( ! function_exists( 'klarna_checkout_template_get_cart_contents_html' ) ) {
 					}
 
 					// Meta data.
-					echo WC()->cart->get_item_data( $cart_item );
+					echo klarna_wc_get_cart_item_data( $cart_item );
 					echo '</td>';
 
 					if ( ! in_array( 'price', $hide_columns, true ) ) {

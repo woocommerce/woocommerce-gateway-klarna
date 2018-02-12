@@ -448,7 +448,7 @@ class WC_Gateway_Klarna_K2WC {
 			$this->klarna_log->add( 'klarna', 'Maybe fixing order currency...' );
 		}
 
-		if ( strtoupper( $klarna_order['purchase_currency'] !== $order->get_order_currency ) ) {
+		if ( strtoupper( $klarna_order['purchase_currency'] !== $order->get_currency() ) ) {
 			if ( 'yes' === $this->klarna_debug ) {
 				$this->klarna_log->add( 'klarna', 'Updating order currency...' );
 			}
@@ -1055,7 +1055,9 @@ class WC_Gateway_Klarna_K2WC {
 			update_user_meta( $customer_id, 'billing_first_name', $klarna_order['billing_address']['given_name'] );
 			update_user_meta( $customer_id, 'billing_last_name', $klarna_order['billing_address']['family_name'] );
 			update_user_meta( $customer_id, 'billing_address_1', $received_billing_address_1 );
-			update_user_meta( $customer_id, 'billing_address_2', $klarna_order['billing_address']['care_of'] );
+			if ( isset( $klarna_order['billing_address']['care_of'] ) ) {
+				update_user_meta( $customer_id, 'billing_address_2', $klarna_order['billing_address']['care_of'] );
+			}
 			update_user_meta( $customer_id, 'billing_postcode', $klarna_order['billing_address']['postal_code'] );
 			update_user_meta( $customer_id, 'billing_city', $klarna_order['billing_address']['city'] );
 			update_user_meta( $customer_id, 'billing_country', strtoupper( $klarna_order['billing_address']['country'] ) );
@@ -1068,7 +1070,9 @@ class WC_Gateway_Klarna_K2WC {
 				update_user_meta( $customer_id, 'shipping_first_name', $klarna_order['shipping_address']['given_name'] );
 				update_user_meta( $customer_id, 'shipping_last_name', $klarna_order['shipping_address']['family_name'] );
 				update_user_meta( $customer_id, 'shipping_address_1', $received_shipping_address_1 );
-				update_user_meta( $customer_id, 'shipping_address_2', $klarna_order['shipping_address']['care_of'] );
+				if ( isset( $klarna_order['shipping_address']['care_of'] ) ) {
+					update_user_meta( $customer_id, 'shipping_address_2', $klarna_order['shipping_address']['care_of'] );
+				}
 				update_user_meta( $customer_id, 'shipping_postcode', $klarna_order['shipping_address']['postal_code'] );
 				update_user_meta( $customer_id, 'shipping_city', $klarna_order['shipping_address']['city'] );
 				update_user_meta( $customer_id, 'shipping_country', $klarna_order['shipping_address']['country'] );
