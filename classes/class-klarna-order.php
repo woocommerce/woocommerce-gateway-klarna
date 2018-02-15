@@ -29,18 +29,24 @@ class WC_Gateway_Klarna_Order {
 		$this->order  = $order;
 		$this->klarna = $klarna;
 		$this->log    = new WC_Logger();
-		// Borrow debug setting from Klarna Checkout
+		
+		// Borrow debug setting from Klarna Checkout.
 		$klarna_settings = get_option( 'woocommerce_klarna_checkout_settings' );
 		$this->debug     = isset( $klarna_settings['debug'] ) ? $klarna_settings['debug'] : '';
-		// Cancel order
+
+		// Cancel order.
 		add_action( 'woocommerce_order_status_cancelled', array( $this, 'cancel_klarna_order' ) );
-		// Capture an order
+
+		// Capture an order.
 		add_action( 'woocommerce_order_status_completed', array( $this, 'activate_klarna_order' ) );
-		// Add order item
+
+		// Add order item.
 		add_action( 'woocommerce_ajax_add_order_item_meta', array( $this, 'update_klarna_order_add_item' ), 10, 3 );
-		// Remove order item
+
+		// Remove order item.
 		add_action( 'woocommerce_before_delete_order_item', array( $this, 'update_klarna_order_delete_item' ) );
-		// Edit an order item and save
+
+		// Edit an order item and save.
 		add_action( 'woocommerce_saved_order_items', array( $this, 'update_klarna_order_edit_item' ), 10, 2 );
 	}
 
