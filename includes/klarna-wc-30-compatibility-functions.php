@@ -135,8 +135,8 @@ function klarna_wc_get_coupon_code( $coupon ) {
  */
 function klarna_wc_get_cart_item_data( $cart_item ) {
 	if ( function_exists( 'wc_get_formatted_cart_item_data' ) ) {
-		return wc_get_formatted_cart_item_data( $cart_item, true );
+		return wc_get_formatted_cart_item_data( $cart_item );
 	} else {
-		return WC()->cart->get_item_data( $cart_item, true );
+		return WC()->cart->get_item_data( $cart_item );
 	}
 }
