@@ -1650,7 +1650,7 @@ class WC_Gateway_Klarna_Checkout_Extra {
 			'ajaxurl'               => admin_url( 'admin-ajax.php' ),
 			'klarna_checkout_nonce' => wp_create_nonce( 'klarna_checkout_nonce' ),
 			'version'               => $version,
-			'coupon_success'        => __( 'Coupon added.', 'woocommerce-gateway-klarna' ),
+			'coupon_success'        => __( 'Coupon code applied successfully.', 'woocommerce-gateway-klarna' ),
 			'coupon_fail'           => __( 'Coupon could not be added.', 'woocommerce-gateway-klarna' )
 		) );
 		wp_register_style( 'klarna_checkout', KLARNA_URL . 'assets/css/klarna-checkout.css', array(), WC_KLARNA_VER );

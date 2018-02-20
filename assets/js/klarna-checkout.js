@@ -452,13 +452,9 @@ jQuery(document).ready(function ($) {
 					},
 					success: function (response) {
 						if (response.data.coupon_success) {
-							$('#klarna_checkout_coupon_result').html('<p>' + kcoAjax.coupon_success + '</p>');
-
-							html_string = '<tr class="kco-applied-coupon"><td class="kco-rightalign">Coupon: ' + response.data.coupon + ' <a class="kco-remove-coupon" data-coupon="' + response.data.coupon + '" href="#">(remove)</a></td><td class="kco-rightalign">-' + response.data.amount + '</td></tr>';
-
-							$('tr#kco-page-total').before(html_string);
 							$(input_field).val('');
 							$(kco_widget).html(response.data.widget_html);
+                            $('#klarna_checkout_coupon_result').html('<div class="woocommerce-message" role="alert">' + kcoAjax.coupon_success + '</div>');
 
 							if (typeof window._klarnaCheckout != 'function') {
 								location.reload();
