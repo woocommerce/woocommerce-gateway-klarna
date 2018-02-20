@@ -307,7 +307,7 @@ jQuery(document).ready(function ($) {
 				minMaxFlag = true;
 			}
 		}
-		
+
 		if (!performingAjax) {
 			performingAjax = true;
 			blockCartWidget();

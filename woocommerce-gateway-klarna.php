@@ -283,7 +283,7 @@ add_action( 'init', 'klarna_register_klarna_incomplete_order_status' );
  **/
 function klarna_register_klarna_incomplete_order_status() {
 	$checkout_settings = get_option( 'woocommerce_klarna_checkout_settings' );
-	$show_status = 'yes' !== $checkout_settings['debug'];
+	$show_status = 'yes' === $checkout_settings['debug'];
 
 	register_post_status( 'wc-kco-incomplete', array(
 		'label'                     => 'KCO incomplete',
