@@ -302,12 +302,12 @@ jQuery(document).ready(function ($) {
 		}
 
 		// Check min value
-		if ($(this).attr('max')) {
+		if ($(this).attr('min')) {
 			if($(this).val() < $(this).attr('min')) {
 				minMaxFlag = true;
 			}
 		}
-
+		
 		if (!performingAjax) {
 			performingAjax = true;
 			blockCartWidget();
