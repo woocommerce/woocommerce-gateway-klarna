@@ -370,9 +370,10 @@ class WC_Gateway_Klarna_WC2K {
 		$cart_item_data = $cart_item['data'];
 		$cart_item_post = klarna_wc_get_cart_item_post( $cart_item_data );
 		$item_name      = $cart_item_post->post_title;
+		$item_data      = klarna_wc_get_cart_item_data( $cart_item );
 
 		// Get variations as a string and remove line breaks
-		$item_variations = html_entity_decode( rtrim( WC()->cart->get_item_data( $cart_item, true ) ) ); // Removes new line at the end.
+		$item_variations = html_entity_decode( rtrim( $item_data ) ); // Removes new line at the end.
 		$item_variations = str_replace( "\n", ', ', $item_variations ); // Replaces all other line breaks with commas.
 
 		// Add variations to name.
@@ -380,7 +381,7 @@ class WC_Gateway_Klarna_WC2K {
 			$item_name .= ' [' . $item_variations . ']';
 		}
 
-		return apply_filters('klarna_item_name', strip_tags( $item_name ), $cart_item);
+		return apply_filters( 'klarna_item_name', strip_tags( $item_name ), $cart_item );
 	}
 
 	/**
@@ -441,7 +442,7 @@ class WC_Gateway_Klarna_WC2K {
 			$item_reference = klarna_wc_get_product_id( $_product );
 		}
 
-		return strval( $item_reference );
+		return substr( (string) $item_reference, 0, 64 );
 	}
 
 	/**

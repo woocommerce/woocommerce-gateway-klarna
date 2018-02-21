@@ -1058,7 +1058,7 @@ class Klarna
             $x_fwd = $_SERVER['HTTP_X_FORWARDED_FOR'];
         }
 
-        if (self::$x_forwarded_for && ($x_fwd !== null)) {
+        if (apply_filters( 'klarna_x_forwarded_for', self::$x_forwarded_for ) && ($x_fwd !== null)) {
             $forwarded = explode(',', $x_fwd);
 
             return trim($forwarded[0]);

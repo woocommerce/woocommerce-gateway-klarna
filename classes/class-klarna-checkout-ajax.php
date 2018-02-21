@@ -421,8 +421,8 @@ class WC_Gateway_Klarna_Checkout_Ajax {
 				wp_update_post( $order_details );
 
 				if ( WC_Gateway_Klarna_Checkout_Variables::get_klarna_checkout_debug() === 'yes' ) {
-					//$klarna_log = WC_Gateway_Klarna_Checkout_Variables::get_klarna_checkout_log();
-					//$klarna_log->add( 'klarna', 'ORDERID: ' . $orderid );
+					$klarna_log = WC_Gateway_Klarna_Checkout_Variables::get_klarna_checkout_log();
+					$klarna_log->add( 'klarna', 'ORDERID: ' . $orderid );
 				}
 
 				WC()->session->set( 'klarna_order_note', $order_note );
@@ -575,10 +575,10 @@ class WC_Gateway_Klarna_Checkout_Ajax {
 		}
 
 		if ( $klarna_debug == 'yes' ) {
-			//$klarna_log->add( 'klarna', 'OrderID: ' . WC()->session->get( 'ongoing_klarna_order' ) . '. Customer billing country: ' . WC()->customer->get_billing_country() );
-			//$klarna_log->add( 'klarna', 'OrderID: ' . WC()->session->get( 'ongoing_klarna_order' ) . '. Customer billing postcode: ' . WC()->customer->get_billing_postcode() );
-			//$klarna_log->add( 'klarna', 'OrderID: ' . WC()->session->get( 'ongoing_klarna_order' ) . '. Customer shipping country: ' . WC()->customer->get_billing_country() );
-			//$klarna_log->add( 'klarna', 'OrderID: ' . WC()->session->get( 'ongoing_klarna_order' ) . '. Customer shipping postcode: ' . WC()->customer->get_shipping_postcode() );
+			$klarna_log->add( 'klarna', 'OrderID: ' . WC()->session->get( 'ongoing_klarna_order' ) . '. Customer billing country: ' . WC()->customer->get_billing_country() );
+			$klarna_log->add( 'klarna', 'OrderID: ' . WC()->session->get( 'ongoing_klarna_order' ) . '. Customer billing postcode: ' . WC()->customer->get_billing_postcode() );
+			$klarna_log->add( 'klarna', 'OrderID: ' . WC()->session->get( 'ongoing_klarna_order' ) . '. Customer shipping country: ' . WC()->customer->get_billing_country() );
+			$klarna_log->add( 'klarna', 'OrderID: ' . WC()->session->get( 'ongoing_klarna_order' ) . '. Customer shipping postcode: ' . WC()->customer->get_shipping_postcode() );
 		}
 
 		wp_send_json_success( $data );
@@ -695,7 +695,7 @@ class WC_Gateway_Klarna_Checkout_Ajax {
 
 		// Capture postal code
 		if ( isset( $_REQUEST['postal_code'] ) && is_string( $_REQUEST['postal_code'] ) ) {
-			if ( method_exists( $wc_customer, 'set_billing_postcode' ) ) {
+			if ( method_exists( WC()->customer, 'set_billing_postcode' ) ) {
 				WC()->customer->set_billing_postcode( $_REQUEST['postal_code'] );
 			} else {
 				WC()->customer->set_postcode( $_REQUEST['postal_code'] );
@@ -993,12 +993,9 @@ class WC_Gateway_Klarna_Checkout_Ajax {
 
 			try {
 				$klarna_order->update( apply_filters( 'kco_update_order', $update ) );
-				if ( $kco_debug == 'yes' ) {
-					WC_Gateway_Klarna::log( 'Klarna AJAX Update: Klarna Order id: ' . $klarna_order_id . ' $update: ' . var_export( $update, true ) );
-				}
 			} catch ( Exception $e ) {
 				if ( $klarna_debug == 'yes' ) {
-					//$klarna_log->add( 'klarna', 'Klarna API error: ' . var_export( $e, true ) );
+					$klarna_log->add( 'klarna', 'Klarna API error: ' . $e->getMessage() );
 				}
 			}
 		}
