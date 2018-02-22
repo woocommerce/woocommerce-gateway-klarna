@@ -29,18 +29,24 @@ class WC_Gateway_Klarna_Order {
 		$this->order  = $order;
 		$this->klarna = $klarna;
 		$this->log    = new WC_Logger();
-		// Borrow debug setting from Klarna Checkout
+		
+		// Borrow debug setting from Klarna Checkout.
 		$klarna_settings = get_option( 'woocommerce_klarna_checkout_settings' );
 		$this->debug     = isset( $klarna_settings['debug'] ) ? $klarna_settings['debug'] : '';
-		// Cancel order
+
+		// Cancel order.
 		add_action( 'woocommerce_order_status_cancelled', array( $this, 'cancel_klarna_order' ) );
-		// Capture an order
+
+		// Capture an order.
 		add_action( 'woocommerce_order_status_completed', array( $this, 'activate_klarna_order' ) );
-		// Add order item
+
+		// Add order item.
 		add_action( 'woocommerce_ajax_add_order_item_meta', array( $this, 'update_klarna_order_add_item' ), 10, 3 );
-		// Remove order item
+
+		// Remove order item.
 		add_action( 'woocommerce_before_delete_order_item', array( $this, 'update_klarna_order_delete_item' ) );
-		// Edit an order item and save
+
+		// Edit an order item and save.
 		add_action( 'woocommerce_saved_order_items', array( $this, 'update_klarna_order_edit_item' ), 10, 2 );
 	}
 
@@ -532,7 +538,7 @@ class WC_Gateway_Klarna_Order {
 		$payment_method_option_name = 'woocommerce_' . $payment_method . '_settings';
 		$payment_method_option      = get_option( $payment_method_option_name );
 		// Check if option is enabled
-		if ( 'yes' == $payment_method_option['push_completion'] ) {
+		if ( isset( $payment_method_option['push_completion'] ) && 'yes' === $payment_method_option['push_completion'] ) {
 			// If this reservation was already cancelled, do nothing.
 			if ( get_post_meta( $orderid, '_klarna_order_activated', true ) && ! get_post_meta( $orderid, '_klarna_order_skip_activated_note', true ) ) {
 				$order->add_order_note( __( 'Could not activate Klarna reservation, Klarna reservation is already activated.', 'woocommerce-gateway-klarna' ) );
@@ -873,7 +879,7 @@ class WC_Gateway_Klarna_Order {
 
 		$updatable = false;
 		// Check if option is enabled
-		if ( 'yes' == $payment_method_option['push_update'] ) {
+		if ( isset( $payment_method_option['push_update'] ) && 'yes' === $payment_method_option['push_update'] ) {
 			// Check if order is on hold so it can be edited, and if it hasn't been captured or cancelled
 			if ( 'on-hold' == $order->get_status() && ! get_post_meta( $order_id, '_klarna_order_cancelled', true ) && ! get_post_meta( $order_id, '_klarna_order_activated', true ) ) {
 				$updatable = true;

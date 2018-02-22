@@ -20,7 +20,7 @@ $kco_cancellation_terms_url        = WC_Gateway_Klarna_Checkout_Variables::get_c
 $kco_klarna_server                 = WC_Gateway_Klarna_Checkout_Variables::get_klarna_server();
 $kco_testmode                      = WC_Gateway_Klarna_Checkout_Variables::get_klarna_checkout_testmode();
 $kco_debug                         = WC_Gateway_Klarna_Checkout_Variables::get_klarna_checkout_debug();
-$kco_log                           = WC_Gateway_Klarna_Checkout_Variables::get_klarna_checkout_log();
+//$kco_log                           = WC_Gateway_Klarna_Checkout_Variables::get_klarna_checkout_log();
 $kco_is_rest                       = WC_Gateway_Klarna_Checkout_Variables::is_rest();
 $kco_show_kco                      = WC_Gateway_Klarna_Checkout_Variables::show_kco();
 $kco_add_std_checkout_button       = WC_Gateway_Klarna_Checkout_Variables::add_std_checkout_button();
@@ -91,7 +91,7 @@ if ( wc_notice_count( 'error' ) > 0 ) {
 
 	// Debug.
 	if ( $kco_debug == 'yes' ) {
-		$kco_log->add( 'klarna', 'Rendering Checkout page...' );
+		//$kco_log->add( 'klarna', 'Rendering Checkout page...' );
 	}
 
 	// Mobile or desktop browser.
@@ -196,7 +196,7 @@ if ( wc_notice_count( 'error' ) > 0 ) {
 		$klarna_to_wc->set_rest( $kco_is_rest );
 		$klarna_to_wc->set_eid( $kco_klarna_eid );
 		$klarna_to_wc->set_secret( $kco_klarna_secret );
-		$klarna_to_wc->set_klarna_log( $kco_log );
+		//$klarna_to_wc->set_klarna_log( $kco_log );
 		$klarna_to_wc->set_klarna_debug( $kco_debug );
 		$klarna_to_wc->set_klarna_test_mode( $kco_testmode );
 		$klarna_to_wc->set_klarna_server( $kco_klarna_server );

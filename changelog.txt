@@ -1,5 +1,13 @@
 *** WooCommerce Gateway Klarna Changelog ***
 
+2018.02.22  - version 2.5.8
+* Fix       - Fixes PHP notices in WC_Gateway_Klarna_Order class.
+* Fix       - Sets flat cart item data display to false in KCO page.
+* Fix       - Fixes admin link to KCO Incomplete orders (#153).
+* Fix       - Fixes the "reduce quantity to zero does not remove it" issue (#155).
+* Fix       - Fixes success message missing when coupon added for KCO (#132).
+* Update    - Adds Krokedil logger class.
+
 2018.02.12  - version 2.5.7
 * Fix       - Fixes error with WC_Session in WooCommerce 3.3 for Klarna Checkout.
 * Fix       - Limits KCO item reference to 64 characters.

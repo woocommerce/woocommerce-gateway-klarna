@@ -420,11 +420,6 @@ class WC_Gateway_Klarna_Checkout_Ajax {
 
 				wp_update_post( $order_details );
 
-				if ( WC_Gateway_Klarna_Checkout_Variables::get_klarna_checkout_debug() === 'yes' ) {
-					$klarna_log = WC_Gateway_Klarna_Checkout_Variables::get_klarna_checkout_log();
-					$klarna_log->add( 'klarna', 'ORDERID: ' . $orderid );
-				}
-
 				WC()->session->set( 'klarna_order_note', $order_note );
 				$this->ajax_update_klarna_order();
 			}
@@ -575,10 +570,11 @@ class WC_Gateway_Klarna_Checkout_Ajax {
 		}
 
 		if ( $klarna_debug == 'yes' ) {
-			$klarna_log->add( 'klarna', 'OrderID: ' . WC()->session->get( 'ongoing_klarna_order' ) . '. Customer billing country: ' . WC()->customer->get_billing_country() );
-			$klarna_log->add( 'klarna', 'OrderID: ' . WC()->session->get( 'ongoing_klarna_order' ) . '. Customer billing postcode: ' . WC()->customer->get_billing_postcode() );
-			$klarna_log->add( 'klarna', 'OrderID: ' . WC()->session->get( 'ongoing_klarna_order' ) . '. Customer shipping country: ' . WC()->customer->get_billing_country() );
-			$klarna_log->add( 'klarna', 'OrderID: ' . WC()->session->get( 'ongoing_klarna_order' ) . '. Customer shipping postcode: ' . WC()->customer->get_shipping_postcode() );
+			$klarna_order = WC()->session->get( 'ongoing_klarna_order' );
+			krokedil_log_events( $klarna_order, 'Iframe change CB billing country', WC()->customer->get_billing_country() );
+			krokedil_log_events( $klarna_order, 'Iframe change CB billing postcode', WC()->customer->get_billing_postcode() );
+			krokedil_log_events( $klarna_order, 'Iframe change CB shipping country', WC()->customer->get_shipping_country() );
+			krokedil_log_events( $klarna_order, 'Iframe change CB shipping postcode', WC()->customer->get_shipping_postcode() );
 		}
 
 		wp_send_json_success( $data );
@@ -995,7 +991,7 @@ class WC_Gateway_Klarna_Checkout_Ajax {
 				$klarna_order->update( apply_filters( 'kco_update_order', $update ) );
 			} catch ( Exception $e ) {
 				if ( $klarna_debug == 'yes' ) {
-					$klarna_log->add( 'klarna', 'Klarna API error: ' . $e->getMessage() );
+					krokedil_log_events( $klarna_order_id, 'AJAX update Klarna order exception', $e->getMessage() );
 				}
 			}
 		}

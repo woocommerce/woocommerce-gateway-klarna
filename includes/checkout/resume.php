@@ -235,12 +235,12 @@ try {
 				$create['options']['allow_separate_shipping_address'] = true;
 			}
 		}
-
+		krokedil_log_events( $local_order_id, 'Update order', $update );		
 		$klarna_order->update( apply_filters( 'kco_update_order', $update ) );
 	} // End if country change.
 } catch ( Exception $e ) {
 	if ( 'yes' === $kco_debug ) {
-		$kco_log->add( 'klarna', 'Klarna API error: ' . var_export( $e, true ) );
+		//$kco_log->add( 'klarna', 'Klarna API error: ' . var_export( $e, true ) );
 	}
 
 	if ( is_user_logged_in() && $kco_debug ) {

@@ -8,6 +8,7 @@ class ComposerStaticInitb30f53f6e8207a5323c472de4b590c63
 {
     public static $files = array (
         'ad155f8f1cf0d418fe49e248db8c661b' => __DIR__ . '/..' . '/react/promise/src/functions_include.php',
+        'cad43f73916476d83565191d54c1f14b' => __DIR__ . '/..' . '/krokedil/krokedil-logger/src/krokedil-order-event-log.php',
     );
 
     public static $prefixLengthsPsr4 = array (

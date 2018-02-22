@@ -67,8 +67,6 @@ class WC_Gateway_Klarna_Order_Validate {
 		} else {
 			header( 'HTTP/1.0 303 See Other' );
 			if ( ! $all_in_stock ) {
-				$logger = new WC_Logger();
-				$logger->add( 'klarna', 'Stock validation failed for SKU ' . $cart_item['reference'] );
 				header( 'Location: ' . wc_get_cart_url() . '?stock_validate_failed' );
 			} elseif ( ! $shipping_chosen ) {
 				header( 'Location: ' . wc_get_checkout_url() . '?no_shipping' );

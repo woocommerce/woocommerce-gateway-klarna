@@ -11,7 +11,7 @@
  * Plugin Name:     WooCommerce Klarna Gateway
  * Plugin URI:      https://woocommerce.com/products/klarna/
  * Description:     Extends WooCommerce. Provides a <a href="http://www.klarna.se" target="_blank">Klarna</a> gateway for WooCommerce.
- * Version:         2.5.7
+ * Version:         2.5.8
  * Author:          WooCommerce
  * Author URI:      https://woocommerce.com/
  * Developer:       Krokedil
@@ -28,7 +28,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 if ( ! defined( 'WC_KLARNA_VER' ) ) {
-	define( 'WC_KLARNA_VER', '2.5.7' );
+	define( 'WC_KLARNA_VER', '2.5.8' );
 }
 
 /**
@@ -117,6 +117,8 @@ function init_klarna_gateway() {
 	define( 'KLARNA_DIR', dirname( __FILE__ ) . '/' );         // Root dir.
 	define( 'KLARNA_LIB', dirname( __FILE__ ) . '/library/' ); // Klarna library dir.
 	define( 'KLARNA_URL', plugin_dir_url( __FILE__ ) );         // Plugin folder URL.
+	define( 'KROKEDIL_LOGGER_GATEWAY', 'klarna_' );
+	define( 'KROKEDIL_LOGGER_ON', true );
 
 	// Set CURLOPT_SSL_VERIFYPEER via constant in library/src/Klarna/Checkout/HTTP/CURLTransport.php.
 	// No need to set it to true if the store doesn't use https.
@@ -133,6 +135,8 @@ function init_klarna_gateway() {
 	 * @package WC_Gateway_Klarna
 	 */
 	class WC_Gateway_Klarna extends WC_Payment_Gateway {
+
+		public static $log = '';
 
 		/**
 		 * WC_Gateway_Klarna constructor.
@@ -169,6 +173,13 @@ function init_klarna_gateway() {
 
 			// Actions.
 			add_action( 'wp_enqueue_scripts', array( $this, 'klarna_load_scripts' ) );
+		}
+
+		public static function log( $message ) {
+			if ( empty( self::$log ) ) {
+				self::$log = new WC_Logger();
+			}
+			self::$log->add( 'klarna', $message );
 		}
 
 		/**
@@ -283,7 +294,7 @@ add_action( 'init', 'klarna_register_klarna_incomplete_order_status' );
  **/
 function klarna_register_klarna_incomplete_order_status() {
 	$checkout_settings = get_option( 'woocommerce_klarna_checkout_settings' );
-	$show_status = 'yes' !== $checkout_settings['debug'];
+	$show_status = 'yes' === $checkout_settings['debug'];
 
 	register_post_status( 'wc-kco-incomplete', array(
 		'label'                     => 'KCO incomplete',
