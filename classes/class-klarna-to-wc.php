@@ -318,7 +318,7 @@ class WC_Gateway_Klarna_K2WC {
 			$local_order_id = sanitize_key( $_GET['sid'] ); // Input var okay.
 			$order          = wc_get_order( $local_order_id );
 
-			krokedil_log_events( $local_order_id, 'Klarna listener hitt', $klarna_order );
+			krokedil_log_events( $local_order_id, 'Klarna listener hit.', $klarna_order );
 
 			// Check if order was recurring.
 			if ( isset( $klarna_order['recurring_token'] ) ) {
@@ -634,9 +634,6 @@ class WC_Gateway_Klarna_K2WC {
 	 */
 	public static function add_order_addresses( $order, $klarna_order ) {
 		$order_id = klarna_wc_get_order_id( $order );
-
-
-		$order_id = $order_id;
 
 		// Different names on the returned street address if it's a German purchase or not.
 		if ( 'DE' === $_GET['scountry'] || 'AT' === $_GET['scountry'] ) { // Input var okay.
