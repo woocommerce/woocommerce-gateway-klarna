@@ -1017,7 +1017,9 @@ class WC_Gateway_Klarna_K2WC {
 			}
 
 			$customer_id = $user->ID;
-			update_post_meta( klarna_wc_get_order_id( $order ), '_customer_user', $customer_id );
+			if ( ! $order->get_customer_id() ) {
+				$order->set_customer_id( apply_filters( 'woocommerce_checkout_customer_id', $customer_id ) );
+			}
 		} else {
 			// Create new user.
 			$checkout_settings = get_option( 'woocommerce_klarna_checkout_settings' );
@@ -1025,7 +1027,9 @@ class WC_Gateway_Klarna_K2WC {
 			if ( 'yes' === $checkout_settings['create_customer_account'] ) {
 				$customer_id = wc_create_new_customer( $klarna_order['billing_address']['email'] );
 				if ( is_int( $customer_id ) ) {
-					update_post_meta( klarna_wc_get_order_id( $order ), '_customer_user', $customer_id );
+					if ( ! $order->get_customer_id() ) {
+						$order->set_customer_id( apply_filters( 'woocommerce_checkout_customer_id', $customer_id ) );
+					}
 					$order->add_order_note( sprintf( __( 'New customer created (user ID %s).', 'klarna' ), $customer_id, $klarna_order['id'] ) );
 				} elseif ( is_wp_error( $customer_id ) ) {
 					//$this->klarna_log->add( 'klarna', 'Error creating new customer account: ' . $customer_id->get_error_code() . ' - ' . $customer_id->get_error_message() );
