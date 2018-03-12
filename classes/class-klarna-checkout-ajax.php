@@ -144,7 +144,7 @@ class WC_Gateway_Klarna_Checkout_Ajax {
 
 			WC()->session->set( 'applied_coupons', $applied_coupons );
 			WC()->cart->calculate_totals();
-			
+
 			wc_clear_notices(); // This notice handled by Klarna plugin
 
 			WC()->cart->calculate_shipping();
