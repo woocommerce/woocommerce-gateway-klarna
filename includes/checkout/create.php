@@ -313,13 +313,13 @@ try {
 	$klarna_order->fetch();
 } catch ( Exception $e ) {
 	if ( 'yes' === $kco_debug ) {
-		$kco_log->add( 'klarna', 'Klarna API error: ' . $e->getMessage() );
+		$kco_log->add( 'klarna', 'Klarna API error: ' . $e->getCode() . ' - ' . $e->getMessage() );
 	}
 
 	if ( is_user_logged_in() && $kco_debug ) {
 		// The purchase was denied or something went wrong, print the message:
 		echo '<div class="woocommerce-error">';
-		echo esc_html( $e->getMessage() );
+		echo esc_html( $e->getCode() . ' - ' . $e->getMessage() );
 		echo '</div>';
 	}
 }

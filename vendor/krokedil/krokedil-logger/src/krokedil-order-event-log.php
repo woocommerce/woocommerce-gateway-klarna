@@ -50,58 +50,64 @@ function krokedi_load_admin_scripts() {
 }
 
 function krokedil_log_events( $order_id, $title, $data ) {
-	if ( null === $order_id ) {
-		if ( WC()->session->get( '_krokedil_events_session' ) ) {
-			$events = WC()->session->get( '_krokedil_events_session' );
+	if ( WC()->session ) {
+		if ( null === $order_id ) {
+			if ( WC()->session->get( '_krokedil_events_session' ) ) {
+				$events = WC()->session->get( '_krokedil_events_session' );
+			} else {
+				$events = array();
+			}
+			$event    = array(
+				'title'     => $title,
+				'data'      => $data,
+				'timestamp' => current_time( 'Y-m-d H:i:s' )
+			);
+			$events[] = $event;
+			WC()->session->set( '_krokedil_events_session', $events );
 		} else {
-			$events = array();
-		}
-		$event    = array(
-			'title'     => $title,
-			'data'      => $data,
-			'timestamp' => current_time( 'Y-m-d H:i:s' )
-		);
-		$events[] = $event;
-		WC()->session->set( '_krokedil_events_session', $events );
-	} else {
-		if ( get_post_meta( $order_id, '_krokedil_order_events' ) ) {
-			$events = get_post_meta( $order_id, '_krokedil_order_events', true );
-		} else {
-			$events = array();
-		}
+			if ( get_post_meta( $order_id, '_krokedil_order_events' ) ) {
+				$events = get_post_meta( $order_id, '_krokedil_order_events', true );
+			} else {
+				$events = array();
+			}
 
-		$event = array(
-			'title'     => $title,
-			'data'      => $data,
-			'timestamp' => current_time( 'Y-m-d H:i:s' )
-		);
+			$event = array(
+				'title'     => $title,
+				'data'      => $data,
+				'timestamp' => current_time( 'Y-m-d H:i:s' )
+			);
 
-		$events[] = $event;
-		update_post_meta( $order_id, '_krokedil_order_events', $events );
+			$events[] = $event;
+			update_post_meta( $order_id, '_krokedil_order_events', $events );
+		}
 	}
 }
 
 function krokedil_log_response( $order_id, $response ) {
-	if ( null === $order_id ) {
-		$events = WC()->session->get( '_krokedil_events_session' );
-		end( $events );
-		$event                        = key( $events );
-		$events[ $event ]['response'] = $response;
-		WC()->session->set( '_krokedil_events_session', $events );
-	} else {
-		$events = get_post_meta( $order_id, '_krokedil_order_events', true );
-		end( $events );
-		$event                        = key( $events );
-		$events[ $event ]['response'] = $response;
-		update_post_meta( $order_id, '_krokedil_order_events', $events );
+	if ( WC()->session ) {
+		if ( null === $order_id ) {
+			$events = WC()->session->get( '_krokedil_events_session' );
+			end( $events );
+			$event                        = key( $events );
+			$events[ $event ]['response'] = $response;
+			WC()->session->set( '_krokedil_events_session', $events );
+		} else {
+			$events = get_post_meta( $order_id, '_krokedil_order_events', true );
+			end( $events );
+			$event                        = key( $events );
+			$events[ $event ]['response'] = $response;
+			update_post_meta( $order_id, '_krokedil_order_events', $events );
+		}
 	}
 }
 
 function krokedil_add_sessions_to_events( $order_id ) {
-	if ( WC()->session->get( '_krokedil_events_session' ) ) {
-		$session_events = WC()->session->get( '_krokedil_events_session' );
-		update_post_meta( $order_id, '_krokedil_order_events', $session_events );
-		WC()->session->__unset( '_krokedil_events_session' );
+	if ( WC()->session ) {
+		if ( WC()->session->get( '_krokedil_events_session' ) ) {
+			$session_events = WC()->session->get( '_krokedil_events_session' );
+			update_post_meta( $order_id, '_krokedil_order_events', $session_events );
+			WC()->session->__unset( '_krokedil_events_session' );
+		}
 	}
 }
 

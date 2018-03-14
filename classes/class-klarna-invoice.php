@@ -271,7 +271,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 					}
 				} catch ( Exception $e ) {
 					if ( $this->debug == 'yes' ) {
-						$this->log->add( 'klarna', 'Klarna API error: ' . var_export( $e, true ) );
+						parent::log( 'klarna', 'Klarna API error: ' . var_export( $e, true ) );
 					}
 
 					$order->add_order_note( sprintf( __( 'Klarna order update failed. Error code %s. Error message %s', 'woocommerce-gateway-klarna' ), $e->getCode(), utf8_encode( $e->getMessage() ) ) );
@@ -312,7 +312,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 			$order = wc_get_order( $orderid );
 			if ( ! $this->can_refund_order( $order ) ) {
 				if ( $this->debug == 'yes' ) {
-					$this->log->add( 'klarna', 'Refund Failed: No Klarna invoice ID.' );
+					parent::log( 'klarna', 'Refund Failed: No Klarna invoice ID.' );
 				}
 				$order->add_order_note( __( 'This order cannot be refunded. Please make sure it is activated.', 'woocommerce-gateway-klarna' ) );
 
@@ -674,7 +674,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 				case Klarna\XMLRPC\Flags::ACCEPTED :
 					$order->add_order_note( __( 'Klarna payment completed. Klarna Invoice number: ', 'woocommerce-gateway-klarna' ) . $invno );
 					if ( $this->debug == 'yes' ) {
-						$this->log->add( 'klarna', __( 'Klarna payment completed. Klarna Invoice number: ', 'woocommerce-gateway-klarna' ) . $invno );
+						parent::log( 'klarna', __( 'Klarna payment completed. Klarna Invoice number: ', 'woocommerce-gateway-klarna' ) . $invno );
 					}
 					update_post_meta( $order_id, '_klarna_order_reservation', $invno );
 					update_post_meta( $order_id, '_transaction_id', $invno );
@@ -691,7 +691,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 					wp_schedule_single_event( time() + 7200, 'check_klarna_pending', array( $order_id ) );
 					$order->add_order_note( __( 'Order is PENDING APPROVAL by Klarna. Please visit Klarna Online for the latest status on this order. Klarna reservation number: ', 'woocommerce-gateway-klarna' ) . $invno );
 					if ( $this->debug == 'yes' ) {
-						$this->log->add( 'klarna', __( 'Order is PENDING APPROVAL by Klarna. Please visit Klarna Online for the latest status on this order. Klarna reservation number: ', 'woocommerce-gateway-klarna' ) . $invno );
+						parent::log( 'klarna', __( 'Order is PENDING APPROVAL by Klarna. Please visit Klarna Online for the latest status on this order. Klarna reservation number: ', 'woocommerce-gateway-klarna' ) . $invno );
 					}
 					$order->update_status( 'on-hold' ); // Change order status to On Hold
 					$woocommerce->cart->empty_cart(); // Remove cart
@@ -704,7 +704,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 				case Klarna\XMLRPC\Flags::DENIED : // Order is denied, store it in a database.
 					$order->add_order_note( __( 'Klarna payment denied.', 'woocommerce-gateway-klarna' ) );
 					if ( $this->debug == 'yes' ) {
-						$this->log->add( 'klarna', __( 'Klarna payment denied.', 'woocommerce-gateway-klarna' ) );
+						parent::log( 'klarna', __( 'Klarna payment denied.', 'woocommerce-gateway-klarna' ) );
 					}
 					wc_add_notice( __( 'Klarna payment denied.', 'woocommerce-gateway-klarna' ), 'error' );
 
@@ -713,7 +713,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 				default: // Unknown response, store it in a database.
 					$order->add_order_note( __( 'Unknown response from Klarna.', 'woocommerce-gateway-klarna' ) );
 					if ( $this->debug == 'yes' ) {
-						$this->log->add( 'klarna', __( 'Unknown response from Klarna.', 'woocommerce-gateway-klarna' ) );
+						parent::log( 'klarna', __( 'Unknown response from Klarna.', 'woocommerce-gateway-klarna' ) );
 					}
 					wc_add_notice( __( 'Unknown response from Klarna.', 'woocommerce-gateway-klarna' ), 'error' );
 
@@ -725,7 +725,7 @@ class WC_Gateway_Klarna_Invoice extends WC_Gateway_Klarna {
 			wc_add_notice( sprintf( __( '%s (Error code: %s)', 'woocommerce-gateway-klarna' ), utf8_encode( $e->getMessage() ), $e->getCode() ), 'error' );
 
 			if ( $this->debug == 'yes' ) {
-				$this->log->add( 'klarna', 'Klarna API error: ' . var_export( $e, true ) );
+				parent::log( 'klarna', 'Klarna API error: ' . var_export( $e, true ) );
 			}
 
 			$order->update_status( 'failed', sprintf( __( '%s (Error code: %s).', 'woocommerce-gateway-klarna' ), utf8_encode( $e->getMessage() ), $e->getCode() ) );

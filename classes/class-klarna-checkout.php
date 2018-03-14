@@ -23,6 +23,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		$this->id           = 'klarna_checkout';
 		$this->method_title = __( 'Klarna Checkout', 'woocommerce-gateway-klarna' );
 		$this->has_fields   = false;
+		$this->logger       = new WC_Logger();
 		// Load the form fields.
 		$this->init_form_fields();
 		// Load the settings.
@@ -423,12 +424,16 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		}
 
 		$order_id = klarna_wc_get_order_id( $order );
-		
+
+		$subscriptions = wcs_get_subscriptions_for_renewal_order( $order_id );
+		reset( $subscriptions );
+		$subscription_id = key( $subscriptions );
+
 		// Reccuring token
 		$klarna_recurring_token = get_post_meta( $order_id, '_klarna_recurring_token', true );
 		// If the recurring token isn't stored in the subscription, grab it from parent order.
 		if( empty( $klarna_recurring_token ) ) {
-			$klarna_recurring_token = get_post_meta( WC_Subscriptions_Renewal_Order::get_parent_order_id( $order_id ), '_klarna_recurring_token', true );
+			$klarna_recurring_token = get_post_meta( $subscription_id, '_klarna_recurring_token', true );
 		}
 		if( empty( $klarna_recurring_token ) ) {
 			$order->add_order_note( __( 'Klarna recurring token could not be retrieved.', 'woocommerce-gateway-klarna' ) );
@@ -438,7 +443,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		$klarna_locale          	= get_post_meta( $order_id, '_klarna_locale', true );
 		// If the locale isn't stored in the subscription, grab it from parent order.
 		if( empty( $klarna_locale ) ) {
-			$klarna_locale = get_post_meta( WC_Subscriptions_Renewal_Order::get_parent_order_id( $order_id ), '_klarna_locale', true );	
+			$klarna_locale = get_post_meta( $subscription_id, '_klarna_locale', true );
 		}
 		if( empty( $klarna_locale ) ) {
 			$klarna_locale = 'en-gb';
@@ -457,53 +462,53 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		// Billing country - including fallback check
 		$billing_country         	= get_post_meta( $order_id, '_billing_country', true ) ? get_post_meta( $order_id, '_billing_country', true ) : $klarna_country;
 		if( empty( $billing_country ) ) {
-			$billing_country = get_post_meta( WC_Subscriptions_Renewal_Order::get_parent_order_id( $order_id ), '_billing_country', true );	
+			$billing_country = get_post_meta( $subscription_id, '_billing_country', true );
 		}
 		
 		// Shipping country - including fallback check
 		$shipping_country         	= get_post_meta( $order_id, '_shipping_country', true ) ? get_post_meta( $order_id, '_shipping_country', true ) : $klarna_country;
 		if( empty( $shipping_country ) ) {
-			$shipping_country = get_post_meta( WC_Subscriptions_Renewal_Order::get_parent_order_id( $order_id ), '_billing_country', true );	
+			$shipping_country = get_post_meta( $subscription_id, '_billing_country', true );
 		}
 		
 		// Billing postcode
-		$billing_postcode	= get_post_meta( $order_id, '_billing_postcode', true ) ? get_post_meta( $order_id, '_billing_postcode', true ) : get_post_meta( WC_Subscriptions_Renewal_Order::get_parent_order_id( $order_id ), '_billing_postcode', true );
+		$billing_postcode	= get_post_meta( $order_id, '_billing_postcode', true ) ? get_post_meta( $order_id, '_billing_postcode', true ) : get_post_meta( $subscription_id, '_billing_postcode', true );
 		
 		// Shipping postcode
-		$shipping_postcode	= get_post_meta( $order_id, '_shipping_postcode', true ) ? get_post_meta( $order_id, '_shipping_postcode', true ) : get_post_meta( WC_Subscriptions_Renewal_Order::get_parent_order_id( $order_id ), '_shipping_postcode', true );
+		$shipping_postcode	= get_post_meta( $order_id, '_shipping_postcode', true ) ? get_post_meta( $order_id, '_shipping_postcode', true ) : get_post_meta( $subscription_id, '_shipping_postcode', true );
 		
 		// Billing email
-		$billing_email	= get_post_meta( $order_id, '_billing_email', true ) ? get_post_meta( $order_id, '_billing_email', true ) : get_post_meta( WC_Subscriptions_Renewal_Order::get_parent_order_id( $order_id ), '_billing_email', true );
+		$billing_email	= get_post_meta( $order_id, '_billing_email', true ) ? get_post_meta( $order_id, '_billing_email', true ) : get_post_meta( $subscription_id, '_billing_email', true );
 		
 		// Shipping email
 		$shipping_email	= get_post_meta( $order_id, '_shipping_email', true ) ? get_post_meta( $order_id, '_shipping_email', true ) : $billing_email;
 		
 		// Billing city
-		$billing_city	= get_post_meta( $order_id, '_billing_city', true ) ? get_post_meta( $order_id, '_billing_city', true ) : get_post_meta( WC_Subscriptions_Renewal_Order::get_parent_order_id( $order_id ), '_billing_city', true );
+		$billing_city	= get_post_meta( $order_id, '_billing_city', true ) ? get_post_meta( $order_id, '_billing_city', true ) : get_post_meta( $subscription_id, '_billing_city', true );
 		
 		// Shipping city
-		$shipping_city	= get_post_meta( $order_id, '_shipping_city', true ) ? get_post_meta( $order_id, '_shipping_city', true ) : get_post_meta( WC_Subscriptions_Renewal_Order::get_parent_order_id( $order_id ), '_shipping_city', true );
+		$shipping_city	= get_post_meta( $order_id, '_shipping_city', true ) ? get_post_meta( $order_id, '_shipping_city', true ) : get_post_meta( $subscription_id, '_shipping_city', true );
 		
 		// Billing first name
-		$billing_first_name	= get_post_meta( $order_id, '_billing_first_name', true ) ? get_post_meta( $order_id, '_billing_first_name', true ) : get_post_meta( WC_Subscriptions_Renewal_Order::get_parent_order_id( $order_id ), '_billing_first_name', true );
+		$billing_first_name	= get_post_meta( $order_id, '_billing_first_name', true ) ? get_post_meta( $order_id, '_billing_first_name', true ) : get_post_meta( $subscription_id, '_billing_first_name', true );
 		
 		// Shipping first name
-		$shipping_first_name	= get_post_meta( $order_id, '_shipping_first_name', true ) ? get_post_meta( $order_id, '_shipping_first_name', true ) : get_post_meta( WC_Subscriptions_Renewal_Order::get_parent_order_id( $order_id ), '_shipping_first_name', true );
+		$shipping_first_name	= get_post_meta( $order_id, '_shipping_first_name', true ) ? get_post_meta( $order_id, '_shipping_first_name', true ) : get_post_meta( $subscription_id, '_shipping_first_name', true );
 		
 		// Billing last name
-		$billing_last_name	= get_post_meta( $order_id, '_billing_last_name', true ) ? get_post_meta( $order_id, '_billing_last_name', true ) : get_post_meta( WC_Subscriptions_Renewal_Order::get_parent_order_id( $order_id ), '_billing_last_name', true );
+		$billing_last_name	= get_post_meta( $order_id, '_billing_last_name', true ) ? get_post_meta( $order_id, '_billing_last_name', true ) : get_post_meta( $subscription_id, '_billing_last_name', true );
 		
 		// Shipping last name
-		$shipping_last_name	= get_post_meta( $order_id, '_shipping_last_name', true ) ? get_post_meta( $order_id, '_shipping_last_name', true ) : get_post_meta( WC_Subscriptions_Renewal_Order::get_parent_order_id( $order_id ), '_shipping_last_name', true );
+		$shipping_last_name	= get_post_meta( $order_id, '_shipping_last_name', true ) ? get_post_meta( $order_id, '_shipping_last_name', true ) : get_post_meta( $subscription_id, '_shipping_last_name', true );
 		
 		// Billing address 1
-		$billing_address_1	= get_post_meta( $order_id, '_billing_address_1', true ) ? get_post_meta( $order_id, '_billing_address_1', true ) : get_post_meta( WC_Subscriptions_Renewal_Order::get_parent_order_id( $order_id ), '_billing_address_1', true );
+		$billing_address_1	= get_post_meta( $order_id, '_billing_address_1', true ) ? get_post_meta( $order_id, '_billing_address_1', true ) : get_post_meta( $subscription_id, '_billing_address_1', true );
 		
 		// Shipping address 1
-		$shipping_address_1	= get_post_meta( $order_id, '_shipping_address_1', true ) ? get_post_meta( $order_id, '_shipping_address_1', true ) : get_post_meta( WC_Subscriptions_Renewal_Order::get_parent_order_id( $order_id ), '_shipping_address_1', true );
+		$shipping_address_1	= get_post_meta( $order_id, '_shipping_address_1', true ) ? get_post_meta( $order_id, '_shipping_address_1', true ) : get_post_meta( $subscription_id, '_shipping_address_1', true );
 		
 		// Billing phone
-		$billing_phone	= get_post_meta( $order_id, '_billing_phone', true ) ? get_post_meta( $order_id, '_billing_phone', true ) : get_post_meta( WC_Subscriptions_Renewal_Order::get_parent_order_id( $order_id ), '_billing_phone', true );
+		$billing_phone	= get_post_meta( $order_id, '_billing_phone', true ) ? get_post_meta( $order_id, '_billing_phone', true ) : get_post_meta( $subscription_id, '_billing_phone', true );
 		
 		// Shipping phone
 		$shipping_phone	= get_post_meta( $order_id, '_shipping_phone', true ) ? get_post_meta( $order_id, '_shipping_phone', true ) : $billing_phone;
@@ -631,7 +636,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			return true;
 		} catch ( Klarna_Checkout_ApiErrorException $e ) {
 			if ( $this->debug == 'yes' ) {
-				$this->log->add( 'klarna', 'Klarna subscription payment API error: ' . var_export( $e, true ) );
+				$this->logger->add( 'klarna', 'Klarna subscription payment API error: ' . $e->__toString() );
 			}
 			$pay_load = $e->getPayload();
 			if( 402 == $e->getCode() ) {
@@ -756,7 +761,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 				$klarna_order->update( apply_filters( 'kco_update_order', $update ) );
 			} catch ( Exception $e ) {
 				if ( $this->debug == 'yes' ) {
-					$this->log->add( 'klarna', 'Klarna API error: ' . var_export( $e, true ) );
+					$this->logger->add( 'klarna', 'Klarna API error: ' . $e->__toString() );
 				}
 			}
 		}
@@ -951,7 +956,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		$klarna_to_wc->set_rest( $this->is_rest() );
 		$klarna_to_wc->set_eid( $this->klarna_eid );
 		$klarna_to_wc->set_secret( $this->klarna_secret );
-		$klarna_to_wc->set_klarna_log( $this->log );
+		$klarna_to_wc->set_klarna_log( $this->logger );
 		$klarna_to_wc->set_klarna_debug( $this->debug );
 		$klarna_to_wc->set_klarna_test_mode( $this->testmode );
 		$klarna_to_wc->set_klarna_server( $this->klarna_server );
@@ -971,7 +976,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 * @since 1.0.0
 	 */
 	function check_checkout_listener() {
-		WC_Gateway_Klarna::log( 'Klarna Listener Order ID: ' . $_GET['sid']  . ' $_GET: ' . var_export( $_GET, true ) );		
+		// WC_Gateway_Klarna::log( 'Klarna Listener Order ID: ' . $_GET['sid']  . ' $_GET: ' . var_export( $_GET, true ) );
 		if ( isset( $_GET['validate'] ) ) {
 			exit;
 		}
@@ -1047,7 +1052,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			$klarna_to_wc->set_eid( $klarna_eid );
 			$klarna_to_wc->set_secret( $klarna_secret );
 			$klarna_to_wc->set_klarna_order_uri( $_GET['klarna_order'] );
-			$klarna_to_wc->set_klarna_log( $this->log );
+			$klarna_to_wc->set_klarna_log( $this->logger );
 			$klarna_to_wc->set_klarna_test_mode( $this->testmode );
 			$klarna_to_wc->set_klarna_debug( $this->debug );
 			$klarna_to_wc->set_klarna_server( $this->klarna_server );
@@ -1209,7 +1214,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			$order = wc_get_order( $orderid );
 			if ( ! $this->can_refund_order( $order ) ) {
 				if ( $this->debug == 'yes' ) {
-					$this->log->add( 'klarna', 'Refund Failed: No Klarna invoice ID.' );
+					$this->logger->add( 'klarna', 'Refund Failed: No Klarna invoice ID.' );
 				}
 				$order->add_order_note( __( 'This order cannot be refunded. Please make sure it is activated.', 'woocommerce-gateway-klarna' ) );
 

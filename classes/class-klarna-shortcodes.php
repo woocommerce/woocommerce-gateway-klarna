@@ -474,7 +474,24 @@ class WC_Gateway_Klarna_Shortcodes {
 					?>
 				</td>
 				<td id="kco-page-shipping-total" class="kco-rightalign">
-					<?php echo WC()->cart->get_cart_shipping_total(); ?>
+					<?php
+					// @TODO: Check available methods in all packages, not just last one.
+					if ( empty( $available_methods ) ) {
+					    if ( '' === WC()->customer->get_shipping_country() || '' === WC()->customer->get_shipping_postcode() ) {
+					        WC()->customer->set_calculated_shipping( false );
+                        } else {
+					        WC()->customer->set_calculated_shipping( true );
+                        }
+
+						if ( WC()->customer->has_calculated_shipping() ) {
+							echo apply_filters( is_cart() ? 'woocommerce_cart_no_shipping_available_html' : 'woocommerce_no_shipping_available_html', wpautop( __( 'There are no shipping methods available. Please ensure that your address has been entered correctly, or contact us if you need any help.', 'woocommerce' ) ) );
+						} else {
+							echo wpautop( __( 'Enter your full address to see shipping costs.', 'woocommerce' ) );
+						}
+					} else {
+						echo WC()->cart->get_cart_shipping_total();
+					}
+					?>
 				</td>
 			<?php } ?>
 		</tr>
