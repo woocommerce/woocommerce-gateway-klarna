@@ -1,5 +1,11 @@
 *** WooCommerce Gateway Klarna Changelog ***
 
+2018.03.14  - version 2.5.9
+* Fix       - Fixes compatibility with WooCommerce Subscriptions 2.0+.
+* Fix       - Preserves logged in customer ID for KCO orders with different email.
+* Fix       - Fixes error caused by logging.
+* Update    - Updates how shipping price is displayed in KCO cart widget if shipping has not been calculated.
+
 2018.02.22  - version 2.5.8
 * Fix       - Fixes PHP notices in WC_Gateway_Klarna_Order class.
 * Fix       - Sets flat cart item data display to false in KCO page.
