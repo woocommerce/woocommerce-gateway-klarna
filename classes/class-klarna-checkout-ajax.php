@@ -991,7 +991,7 @@ class WC_Gateway_Klarna_Checkout_Ajax {
 				$klarna_order->update( apply_filters( 'kco_update_order', $update ) );
 			} catch ( Exception $e ) {
 				if ( $klarna_debug == 'yes' ) {
-					krokedil_log_events( $klarna_order_id, 'AJAX update Klarna order exception', $e->getMessage() );
+					krokedil_log_events( $klarna_order_id, 'AJAX update Klarna order exception', $e->getCode() . ' - ' . $e->getMessage() );
 				}
 			}
 		}

@@ -82,7 +82,7 @@ try {
 	if ( is_user_logged_in() && $ty_debug ) {
 		// The purchase was denied or something went wrong, print the message.
 		echo '<div>';
-		echo esc_html( $e->getMessage() );
+		echo esc_html( $e->getCode() . ' - ' . $e->getMessage() );
 		echo '</div>';
 	}
 }
