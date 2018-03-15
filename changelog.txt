@@ -1,5 +1,8 @@
 *** WooCommerce Gateway Klarna Changelog ***
 
+2018.03.15  - version 2.5.10
+* Fix       - Fixes validation check for orders that do not need shipping.
+
 2018.03.14  - version 2.5.9
 * Fix       - Fixes compatibility with WooCommerce Subscriptions 2.0+.
 * Fix       - Preserves logged in customer ID for KCO orders with different email.

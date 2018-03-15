@@ -476,7 +476,7 @@ class WC_Gateway_Klarna_Shortcodes {
 				<td id="kco-page-shipping-total" class="kco-rightalign">
 					<?php
 					// @TODO: Check available methods in all packages, not just last one.
-					if ( empty( $available_methods ) ) {
+					if ( empty( $available_methods ) && WC()->cart->needs_shipping() ) {
 					    if ( '' === WC()->customer->get_shipping_country() || '' === WC()->customer->get_shipping_postcode() ) {
 					        WC()->customer->set_calculated_shipping( false );
                         } else {
