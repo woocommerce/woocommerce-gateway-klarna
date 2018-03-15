@@ -32,8 +32,9 @@ class WC_Gateway_Klarna_Order_Validate {
 
 		do_action( 'kco_before_validate_checkout', $data );
 
-		$all_in_stock = true;
+		$all_in_stock    = true;
 		$shipping_chosen = false;
+		$shipping_needed = false;
 
 		if ( is_array( $data['order_lines'] ) ) {
 			$cart_items = $data['order_lines']; // V3.
@@ -54,6 +55,10 @@ class WC_Gateway_Klarna_Order_Validate {
 					if ( ! $cart_item_product->has_enough_stock( $cart_item['quantity'] ) ) {
 						$all_in_stock = false;
 					}
+
+					if ( $cart_item_product->needs_shipping() ) {
+						$shipping_needed = true;
+					}
 				}
 			} elseif ( 'shipping_fee' === $cart_item['type'] ) {
 				$shipping_chosen = true;
@@ -62,7 +67,7 @@ class WC_Gateway_Klarna_Order_Validate {
 
 		do_action( 'kco_validate_checkout', $data, $all_in_stock, $shipping_chosen );
 
-		if ( $all_in_stock && $shipping_chosen ) {
+		if ( $all_in_stock && ( $shipping_chosen || ! $shipping_needed ) ) {
 			header( 'HTTP/1.0 200 OK' );
 		} else {
 			header( 'HTTP/1.0 303 See Other' );
@@ -77,4 +82,5 @@ class WC_Gateway_Klarna_Order_Validate {
 	} // End function validate_checkout_listener.
 
 }
+
 $wc_gateway_klarna_order_validate = new WC_Gateway_Klarna_Order_Validate();
