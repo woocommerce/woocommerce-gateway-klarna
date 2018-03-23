@@ -23,7 +23,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		$this->id           = 'klarna_checkout';
 		$this->method_title = __( 'Klarna Checkout', 'woocommerce-gateway-klarna' );
 		$this->has_fields   = false;
-		$this->logger       = new WC_Logger();
+		//$this->logger       = new WC_Logger();
 		// Load the form fields.
 		$this->init_form_fields();
 		// Load the settings.
@@ -636,7 +636,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			return true;
 		} catch ( Klarna_Checkout_ApiErrorException $e ) {
 			if ( $this->debug == 'yes' ) {
-				$this->logger->add( 'klarna', 'Klarna subscription payment API error: ' . $e->__toString() );
+				//$this->logger->add( 'klarna', 'Klarna subscription payment API error: ' . $e->__toString() );
 			}
 			$pay_load = $e->getPayload();
 			if( 402 == $e->getCode() ) {
@@ -761,7 +761,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 				$klarna_order->update( apply_filters( 'kco_update_order', $update ) );
 			} catch ( Exception $e ) {
 				if ( $this->debug == 'yes' ) {
-					$this->logger->add( 'klarna', 'Klarna API error: ' . $e->__toString() );
+					//$this->logger->add( 'klarna', 'Klarna API error: ' . $e->__toString() );
 				}
 			}
 		}
@@ -956,7 +956,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		$klarna_to_wc->set_rest( $this->is_rest() );
 		$klarna_to_wc->set_eid( $this->klarna_eid );
 		$klarna_to_wc->set_secret( $this->klarna_secret );
-		$klarna_to_wc->set_klarna_log( $this->logger );
+		//$klarna_to_wc->set_klarna_log( $this->logger );
 		$klarna_to_wc->set_klarna_debug( $this->debug );
 		$klarna_to_wc->set_klarna_test_mode( $this->testmode );
 		$klarna_to_wc->set_klarna_server( $this->klarna_server );
