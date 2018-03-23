@@ -440,7 +440,7 @@ class WC_Gateway_Klarna_Checkout_Ajax {
 		$klarna_server = WC_Gateway_Klarna_Checkout_Variables::get_klarna_server();
 		$klarna_country = WC_Gateway_Klarna_Checkout_Variables::get_klarna_country();
 		$klarna_debug = WC_Gateway_Klarna_Checkout_Variables::get_klarna_checkout_debug();
-		$klarna_log = WC_Gateway_Klarna_Checkout_Variables::get_klarna_checkout_log();
+		//$klarna_log = WC_Gateway_Klarna_Checkout_Variables::get_klarna_checkout_log();
 
 		if ( ! wp_verify_nonce( $_REQUEST['nonce'], 'klarna_checkout_nonce' ) ) {
 			exit( 'Nonce can not be verified.' );
@@ -908,7 +908,7 @@ class WC_Gateway_Klarna_Checkout_Ajax {
 		$klarna_testmode = WC_Gateway_Klarna_Checkout_Variables::get_klarna_checkout_testmode();
 		$klarna_server = WC_Gateway_Klarna_Checkout_Variables::get_klarna_server();
 		$klarna_debug = WC_Gateway_Klarna_Checkout_Variables::get_klarna_checkout_debug();
-		$klarna_log = WC_Gateway_Klarna_Checkout_Variables::get_klarna_checkout_log();
+		//$klarna_log = WC_Gateway_Klarna_Checkout_Variables::get_klarna_checkout_log();
 
 		// Check if Euro is selected, get correct country
 		if ( 'EUR' == get_woocommerce_currency() && WC()->session->get( 'klarna_euro_country' ) ) {

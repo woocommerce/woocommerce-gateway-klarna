@@ -313,7 +313,7 @@ try {
 	$klarna_order->fetch();
 } catch ( Exception $e ) {
 	if ( 'yes' === $kco_debug ) {
-		$kco_log->add( 'klarna', 'Klarna API error: ' . $e->getCode() . ' - ' . $e->getMessage() );
+		//$kco_log->add( 'klarna', 'Klarna API error: ' . $e->getCode() . ' - ' . $e->getMessage() );
 	}
 
 	if ( is_user_logged_in() && $kco_debug ) {
