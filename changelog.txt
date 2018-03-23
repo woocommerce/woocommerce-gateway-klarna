@@ -1,5 +1,8 @@
 *** WooCommerce Gateway Klarna Changelog ***
 
+2018.03.23  - version 2.5.11
+* Fix       - Logging improvements to avoid PHP errors.
+
 2018.03.15  - version 2.5.10
 * Fix       - Fixes validation check for orders that do not need shipping.
 
