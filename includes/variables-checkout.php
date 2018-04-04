@@ -125,7 +125,7 @@ endif;
 
 // We need to check if WPML is active
 if ( ! is_admin() ) {
-	if ( null !== WC()->session && WC()->session->get( 'client_currency' ) ) {
+	if( method_exists( WC()->session, 'client_currency' ) ) {
 		$customer_selected_currency = WC()->session->get( 'client_currency' );
 	} else {
 		$customer_selected_currency = get_woocommerce_currency();
