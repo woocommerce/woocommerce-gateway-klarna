@@ -645,6 +645,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			$pay_load = $e->getPayload();
 			if( 402 == $e->getCode() ) {
 				$order->add_order_note( sprintf( __( 'Klarna subscription payment failed. Error code: %s. Reason: %s. Payment method: %s.', 'woocommerce-gateway-klarna' ), $e->getCode(), $pay_load['reason'], $pay_load['payment_method']['type'] ) );
+				update_post_meta( $order_id, 'klarna_subscription_renewal_status', $e->getCode() );
 			} else {
 				$internal_message = '';
 				if( isset( $pay_load['internal_message'] ) ) {
