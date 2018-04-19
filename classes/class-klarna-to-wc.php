@@ -1032,7 +1032,7 @@ class WC_Gateway_Klarna_K2WC {
 					}
 					$order->add_order_note( sprintf( __( 'New customer created (user ID %s).', 'klarna' ), $customer_id, $klarna_order['id'] ) );
 				} elseif ( is_wp_error( $customer_id ) ) {
-					//$this->klarna_log->add( 'klarna', 'Error creating new customer account: ' . $customer_id->get_error_code() . ' - ' . $customer_id->get_error_message() );
+					$order->add_order_note( sprintf( __( 'Error creating new customer account: %s', 'klarna' ), var_export($customer_id, true) ) );
 				}
 			}
 		}
