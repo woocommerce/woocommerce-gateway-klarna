@@ -139,11 +139,11 @@ class WC_Klarna_Get_Address {
 					});
 
 					function klarnainfo(type, info, value) {
-
+						
 						if (type == 'company') {
 							var adress = info[0][value];
 							var orgno_getadress = "";
-
+							
 							jQuery("#billing_first_name").val(adress['fname']);
 							jQuery("#billing_last_name").val(adress['lname']);
 							jQuery("#billing_company").val(adress['company']); //.prop( "readonly", true );
@@ -171,6 +171,7 @@ class WC_Klarna_Get_Address {
 
 								jQuery("#billing_first_name").val(adress['fname']); //.prop( "readonly", true );
 								jQuery("#billing_last_name").val(adress['lname']); //.prop( "readonly", true );
+								jQuery("#billing_company").val(adress['company']);
 								jQuery("#billing_address_1").val(adress['street']); //.prop( "readonly", true );
 								jQuery("#billing_address_2").val(adress['careof']);
 								jQuery("#billing_postcode").val(adress['zip']); //.prop( "readonly", true );
@@ -178,6 +179,7 @@ class WC_Klarna_Get_Address {
 
 								jQuery("#shipping_first_name").val(adress['fname']); //.prop( "readonly", true );
 								jQuery("#shipping_last_name").val(adress['lname']); //.prop( "readonly", true );
+								jQuery("#shipping_company").val(adress['company']);
 								jQuery("#shipping_address_1").val(adress['street']); //.prop( "readonly", true );
 								jQuery("#shipping_address_2").val(adress['careof']);
 								jQuery("#shipping_postcode").val(adress['zip']); //.prop( "readonly", true );
@@ -362,7 +364,7 @@ class WC_Klarna_Get_Address {
 				$pcStorage = 'json',          // PClass storage.
 				$pcURI = '/srv/pclasses.json' // PClass storage URI path.
 			);
-
+			
 			$pno_getadress = $_REQUEST['pno_getadress']; // Input var okay.
 			$return        = array();
 
@@ -392,7 +394,7 @@ class WC_Klarna_Get_Address {
 				);
 
 			}
-
+			
 			wp_send_json( $return );
 		} else {
 			echo '';
