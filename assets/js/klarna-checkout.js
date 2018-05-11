@@ -243,6 +243,13 @@ jQuery(document).ready(function ($) {
 
 	// Update shipping (v2)
 	$(document).on('change', 'table#kco-totals #kco-page-shipping input[type="radio"], .woocommerce-checkout-review-order-table #shipping_method input[type="radio"]', function (event) {
+		var id = $(this).val(); 
+		update_klarna_shipping( id );
+	});
+	$(document.body).on('klarna_update_shipping', function (event) { 
+		update_klarna_shipping( 'stidner' );
+	});
+	function update_klarna_shipping( id ) {
 		if (!performingAjax) {
 			performingAjax = true;
 			blockCartWidget();
@@ -252,8 +259,7 @@ jQuery(document).ready(function ($) {
 					api.suspend();
 				});
 			}
-
-			new_method = $(this).val();
+			new_method = id;
 			kco_widget = $('#klarna-checkout-widget');
 
 			$(document.body).trigger('kco_widget_update_shipping', new_method);
@@ -269,15 +275,18 @@ jQuery(document).ready(function ($) {
 						nonce: kcoAjax.klarna_checkout_nonce
 					},
 					success: function (response) {
-						$(kco_widget).html(response.data.widget_html);
+						$('#klarna-checkout-widget').html(response.data.widget_html);
 					},
 					error: function (response) {
 						console.log('update shipping AJAX error');
 						console.log(response);
 					},
 					complete: function () {
+						console.log( 'complete' );
 						if (typeof window._klarnaCheckout == 'function') {
+							console.log('klarna if');
 							window._klarnaCheckout(function (api) {
+								console.log('klarnaCheckout window');
 								api.resume();
 							});
 						}
@@ -288,7 +297,7 @@ jQuery(document).ready(function ($) {
 				}
 			);
 		}
-	});
+	}
 
 	// Update cart (v2)
 	$(document).on('change', '.product-quantity input[type=number]', function (event) {
@@ -337,7 +346,7 @@ jQuery(document).ready(function ($) {
 					},
 					success: function (response) {
 						if (response.success) {
-							$(kco_widget).html(response.data.widget_html);
+							$('#klarna-checkout-widget').html(response.data.widget_html);
 						} else {
 							window.location.href = response.data.cart_url;
 						}
@@ -393,7 +402,7 @@ jQuery(document).ready(function ($) {
 						if (0 == response.data.item_count) {
 							location.reload();
 						} else {
-							$(kco_widget).html(response.data.widget_html);
+							$('#klarna-checkout-widget').html(response.data.widget_html);
 							$(item_row).remove();
 
 							if (typeof window._klarnaCheckout != 'function') {
@@ -453,7 +462,7 @@ jQuery(document).ready(function ($) {
 					success: function (response) {
 						if (response.data.coupon_success) {
 							$(input_field).val('');
-							$(kco_widget).html(response.data.widget_html);
+							$('#klarna-checkout-widget').html(response.data.widget_html);
                             $('#klarna_checkout_coupon_result').html('<div class="woocommerce-message" role="alert">' + kcoAjax.coupon_success + '</div>');
 
 							if (typeof window._klarnaCheckout != 'function') {
@@ -514,7 +523,7 @@ jQuery(document).ready(function ($) {
 					},
 					success: function (response) {
 						$(clicked_el).closest('tr').remove();
-						$(kco_widget).html(response.data.widget_html);
+						$('#klarna-checkout-widget').html(response.data.widget_html);
 
 						// Remove WooCommerce notification
 						$('#klarna-checkout-widget .woocommerce-info + .woocommerce-message').remove();
@@ -575,7 +584,10 @@ jQuery(document).ready(function ($) {
 									}
 
 									if ('' != data.email) {
+										console.log('hello world!');
 										kco_widget = $('#klarna-checkout-widget');
+										console.log( 'id ' + $('#klarna-checkout-widget') );
+										console.log( 'var ' + kco_widget );
 
 										$(document.body).trigger('kco_widget_update', data);
 
@@ -599,7 +611,7 @@ jQuery(document).ready(function ($) {
 													return;
 												}
 
-												$(kco_widget).html(response.data.widget_html);
+												$('#klarna-checkout-widget').html(response.data.widget_html);
 												$(document.body).trigger('kco_widget_updated', response);
 												unblockCartWidget();
 
@@ -645,7 +657,7 @@ jQuery(document).ready(function ($) {
 									}
 								})
 									.done(function (response) {
-										$(kco_widget).html(response.data.widget_html);
+										$('#klarna-checkout-widget').html(response.data.widget_html);
 
 										window._klarnaCheckout(function (api) {
 											api.resume();
@@ -707,7 +719,7 @@ jQuery(document).ready(function ($) {
 											nonce: kcoAjax.klarna_checkout_nonce
 										},
 										success: function (response) {
-											$(kco_widget).html(response.data.widget_html);
+											$('#klarna-checkout-widget').html(response.data.widget_html);
 										},
 										error: function (response) {
 											console.log('shipping_address_change AJAX error');
@@ -743,7 +755,7 @@ jQuery(document).ready(function ($) {
 								nonce: kcoAjax.klarna_checkout_nonce
 							},
 							success: function (response) {
-								$(kco_widget).html(response.data.widget_html);
+								$('#klarna-checkout-widget').html(response.data.widget_html);
 							},
 							error: function (response) {
 								console.log('shipping_option_change AJAX error');

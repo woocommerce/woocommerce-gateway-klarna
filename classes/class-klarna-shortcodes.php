@@ -251,7 +251,8 @@ class WC_Gateway_Klarna_Shortcodes {
 			'order_note'    => '',
 			'coupon_form'   => '',
 			'hide_columns'  => '',
-			'only_shipping' => ''
+			'only_shipping' => '',
+			'no_shipping'   => '',
 		), $atts );
 
 		$widget_class = '';
@@ -306,9 +307,8 @@ class WC_Gateway_Klarna_Shortcodes {
 			$atts = WC()->session->get( 'kco_widget_atts' );
 		} else {
 			// Set empty defaults.
-			$atts = array( 'order_note' => '', 'coupon_form' => '', 'hide_columns' => '', 'only_shipping' => '' );
+			$atts = array( 'order_note' => '', 'coupon_form' => '', 'hide_columns' => '', 'only_shipping' => '', 'no_shipping' => '' );
 		}
-
 		do_action( 'kco_widget_before_calculation', $atts );
 		WC()->cart->calculate_shipping();
 		WC()->cart->calculate_fees();
@@ -352,7 +352,7 @@ class WC_Gateway_Klarna_Shortcodes {
 									class="amount"><?php echo WC()->cart->get_cart_subtotal(); ?></span></td>
 						</tr>
 
-						<?php echo $this->klarna_checkout_get_shipping_options_row_html(); // Shipping options ?>
+						<?php echo $this->klarna_checkout_get_shipping_options_row_html( $atts ); // Shipping options ?>
 
 						<?php echo $this->klarna_checkout_get_fees_row_html(); // Fees ?>
 
@@ -406,7 +406,10 @@ class WC_Gateway_Klarna_Shortcodes {
 	 *
 	 * @since  2.0
 	 **/
-	function klarna_checkout_get_shipping_options_row_html() {
+	function klarna_checkout_get_shipping_options_row_html( $atts ) {
+		if( 'yes' === $atts['no_shipping'] ) {
+			return null;
+		}
 		ob_start();
 
 		if ( ! defined( 'WOOCOMMERCE_CART' ) ) {
@@ -474,7 +477,7 @@ class WC_Gateway_Klarna_Shortcodes {
 					?>
 				</td>
 				<td id="kco-page-shipping-total" class="kco-rightalign">
-					<?php
+				<?php
 					// @TODO: Check available methods in all packages, not just last one.
 					if ( empty( $available_methods ) && WC()->cart->needs_shipping() ) {
 					    if ( '' === WC()->customer->get_shipping_country() || '' === WC()->customer->get_shipping_postcode() ) {
