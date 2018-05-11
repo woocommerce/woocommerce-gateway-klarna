@@ -1,5 +1,15 @@
 *** WooCommerce Gateway Klarna Changelog ***
 
+2018.05.11  - version 2.5.12
+* Tweak		- Added Stidner shipping plugin compatibility support.
+* Tweak		- Add 402 status as post meta klarna_subscription_renewal_status (to be able to query the amount of declined renewal purchases).
+* Fix		- Switched from calculating tax rate to getting the stored tax rate in the order when doing refunds.
+* Fix		- Avoid php error if client_currency (WPML check) doesn’t exist in session.
+* Fix		- Get subscription data from parent order if missing in renewal order.
+* Fix		- Adds order note if customer/user can’t be created on subscription signups.
+* Fix		- Populate Billing company field correct in get address call (KPM).
+
+
 2018.03.23  - version 2.5.11
 * Fix       - Logging improvements to avoid PHP errors.
 
