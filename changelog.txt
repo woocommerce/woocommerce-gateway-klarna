@@ -8,7 +8,7 @@
 * Fix		- Get subscription data from parent order if missing in renewal order.
 * Fix		- Adds order note if customer/user can’t be created on subscription signups.
 * Fix		- Populate Billing company field correct in get address call (KPM).
-
+* Fix		- PHP fatal error fix for KCO V3 in push notification listener.
 
 2018.03.23  - version 2.5.11
 * Fix       - Logging improvements to avoid PHP errors.
