@@ -216,6 +216,7 @@ function init_klarna_gateway() {
 	require_once 'classes/class-klarna-status.php';                        // WooCommerce status page extension.
 	require_once 'classes/class-klarna-cross-sells.php';                   // Klarna Checkout cross-sells.
 	require_once 'includes/klarna-wc-30-compatibility-functions.php';      // WooCommerce 3.0 compatibility methods.
+	require_once 'classes/class-klarna-gdpr.php';                          // WooCommerce 3.0 compatibility methods.
 
 	/**
 	 * Register Klarna Payment Method Display widget.
