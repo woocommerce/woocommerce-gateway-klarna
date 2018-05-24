@@ -1,5 +1,9 @@
 *** WooCommerce Gateway Klarna Changelog ***
 
+2018.05.24  - version 2.5.14
+* Feature	- Added support for wp_add_privacy_policy_content (for GDPR compliance). More info: https://core.trac.wordpress.org/attachment/ticket/43473/PRIVACY-POLICY-CONTENT-HOOK.md.
+* Fix		- Added try catch to parse json in Krokedil logger on order page.
+
 2018.05.11  - version 2.5.13
 * Fix		- PHP fatal error fix for KCO V3 in push notification listener.
 
