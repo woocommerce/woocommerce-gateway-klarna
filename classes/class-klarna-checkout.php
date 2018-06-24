@@ -417,10 +417,15 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 **/
 	function process_subscription_payment( $amount_to_charge, $order ) {
 		if ( 0 == $amount_to_charge ) {
-			// Payment complete
-			$order->payment_complete();
+			// Double check the amount by calculating order totals
+			$order->calculate_totals( false );
 
-			return true;
+			if ( 0 == $order->get_total() ) {
+
+				// Payment complete
+				$order->payment_complete();
+				return true;
+			}
 		}
 
 		$order_id = klarna_wc_get_order_id( $order );
