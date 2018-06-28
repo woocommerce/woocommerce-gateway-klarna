@@ -70,7 +70,7 @@ class WC_Klarna_Payment_Method_Display_Widget extends WP_Widget {
 				$klarna_locale = 'sv_se';
 		}
 
-		echo "<img style='display:block;width:100%;height:auto;' src='https://cdn.klarna.com/1.0/shared/image/generic/badge/$klarna_locale/checkout/$design-$color.png?width=$width' />";
+		echo "<img style='display:block;width:100%;max-width:{$width}px' src='https://cdn.klarna.com/1.0/shared/image/generic/badge/$klarna_locale/checkout/$design-$color.png?width=$width' alt='Klarna' />";
 
 		echo $args['after_widget'];
 	}
