@@ -53,12 +53,6 @@ if ( 'NO' == $this->klarna_helper->get_klarna_country() ) { ?>
 	<?php
 	// For countries other than NO do the old thing
 } else {
-	// Mobile or desktop browser
-	if ( wp_is_mobile() ) {
-		$klarna_layout = 'mobile';
-	} else {
-		$klarna_layout = 'desktop';
-	}
 	// Script for displaying the terms link
 	?>
 	<script type="text/javascript">
@@ -93,8 +87,7 @@ if ( 'NO' == $this->klarna_helper->get_klarna_country() ) { ?>
 				el: 'klarna-invoice-terms',
 				eid: '<?php echo $this->klarna_helper->get_eid(); ?>',
 				locale: klarna_invoice_current_locale,
-				charge: '<?php echo $this->get_invoice_fee_price();?>',
-				type: '<?php echo $klarna_layout;?>',
+				charge: '<?php echo $this->get_invoice_fee_price();?>'
 			});
 		});
 	</script>
