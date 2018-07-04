@@ -1538,6 +1538,12 @@ class WC_Gateway_Klarna_Checkout_Extra {
 	 *
 	 **/
 	public function change_checkout_url( $url ) {
+
+		// Don't change the url if this is a subscription switch
+		if( isset( $_GET['switch-subscription'] ) || ( method_exists( 'WC_Subscriptions_Switcher', 'cart_contains_switches' ) && WC_Subscriptions_Switcher::cart_contains_switches() ) ) {
+			return $url;
+		}
+
 		if ( ! is_admin() ) {
 			$klarna_checkout_url = WC_Gateway_Klarna_Checkout_Variables::get_klarna_checkout_url();
 			$klarna_country = WC_Gateway_Klarna_Checkout_Variables::get_klarna_country();
