@@ -246,8 +246,8 @@ jQuery(document).ready(function ($) {
 		var id = $(this).val(); 
 		update_klarna_shipping( id );
 	});
-	$(document.body).on('klarna_update_shipping', function (event) { 
-		update_klarna_shipping( 'stidner' );
+	$(document.body).on('klarna_update_shipping', function (event, id) { 
+		update_klarna_shipping( id );
 	});
 	function update_klarna_shipping( id ) {
 		if (!performingAjax) {
