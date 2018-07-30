@@ -133,6 +133,35 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 
 		// Use an existing order when paying for a manual subscription renewal via "Pay Order" page
 		add_action( 'template_redirect', array( $this, 'use_ongoing_order_for_kco' ) );
+
+		// Maybe remove KCO sessions on thank you page. Check is performed even i KCO is the selected payment method or not.
+		add_action( 'woocommerce_thankyou', array( $this, 'maybe_clear_kco_sessions' ), 20 );
+	}
+
+	/**
+	 * Function maybe_clear_kco_sessions()
+	 * Check if Klarna sessions needs to be cleared when purchase is done.
+	 */
+	public function maybe_clear_kco_sessions( $order_id ) {
+		// Clear session and empty cart.
+		if ( method_exists( WC()->session, '__unset' ) ) {
+			if( WC()->session->get( 'klarna_checkout' ) ) {
+				WC()->session->__unset( 'klarna_checkout' );
+			}
+			if( WC()->session->get( 'klarna_checkout_country' ) ) {
+				WC()->session->__unset( 'klarna_checkout_country' );
+			}
+			if( WC()->session->get( 'ongoing_klarna_order' ) ) {
+				WC()->session->__unset( 'ongoing_klarna_order' );
+			}
+			if( WC()->session->get( 'klarna_order_note' ) ) {
+				WC()->session->__unset( 'klarna_order_note' );
+			}
+			if( WC()->session->get( 'klarna_separate_shipping' ) ) {
+				WC()->session->__unset( 'klarna_separate_shipping' );
+			}
+		}
+		
 	}
 
 	function use_ongoing_order_for_kco() {
