@@ -367,20 +367,24 @@ class WC_Gateway_Klarna_WC2K {
 	 * @return string $item_name Cart item name.
 	 */
 	public function get_item_name( $cart_item ) {
-		$cart_item_data = $cart_item['data'];
-		$cart_item_post = klarna_wc_get_cart_item_post( $cart_item_data );
-		$item_name      = $cart_item_post->post_title;
-		$item_data      = klarna_wc_get_cart_item_data( $cart_item );
+		if ( method_exists( $cart_item, 'get_name' ) ) {
+			$item_name = $cart_item['data']->get_name();
+		} else {
+			$cart_item_data = $cart_item['data'];
+			$cart_item_post = klarna_wc_get_cart_item_post( $cart_item_data );
+			$item_name      = $cart_item_post->post_title;
+			$item_data      = klarna_wc_get_cart_item_data( $cart_item );
 
-		// Get variations as a string and remove line breaks
-		$item_variations = html_entity_decode( rtrim( $item_data ) ); // Removes new line at the end.
-		$item_variations = str_replace( "\n", ', ', $item_variations ); // Replaces all other line breaks with commas.
+			// Get variations as a string and remove line breaks
+			$item_variations = html_entity_decode( rtrim( $item_data ) ); // Removes new line at the end.
+			$item_variations = str_replace( "\n", ', ', $item_variations ); // Replaces all other line breaks with commas.
 
-		// Add variations to name.
-		if ( '' !== $item_variations ) {
-			$item_name .= ' [' . $item_variations . ']';
+			// Add variations to name.
+			if ( '' !== $item_variations ) {
+				$item_name .= ' [' . $item_variations . ']';
+			}
 		}
-
+		
 		return apply_filters( 'klarna_item_name', strip_tags( $item_name ), $cart_item );
 	}
 

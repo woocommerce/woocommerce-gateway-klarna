@@ -81,7 +81,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			'subscription_amount_changes',
 			'subscription_date_changes',
 			'subscription_payment_method_change',
-			// 'subscription_payment_method_change_admin',
+			'subscription_payment_method_change_admin',
 			'multiple_subscriptions'
 		);
 		// Add link to KCO page in standard checkout
@@ -133,6 +133,35 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 
 		// Use an existing order when paying for a manual subscription renewal via "Pay Order" page
 		add_action( 'template_redirect', array( $this, 'use_ongoing_order_for_kco' ) );
+
+		// Maybe remove KCO sessions on thank you page. Check is performed even i KCO is the selected payment method or not.
+		add_action( 'woocommerce_thankyou', array( $this, 'maybe_clear_kco_sessions' ), 20 );
+	}
+
+	/**
+	 * Function maybe_clear_kco_sessions()
+	 * Check if Klarna sessions needs to be cleared when purchase is done.
+	 */
+	public function maybe_clear_kco_sessions( $order_id ) {
+		// Clear session and empty cart.
+		if ( method_exists( WC()->session, '__unset' ) ) {
+			if( WC()->session->get( 'klarna_checkout' ) ) {
+				WC()->session->__unset( 'klarna_checkout' );
+			}
+			if( WC()->session->get( 'klarna_checkout_country' ) ) {
+				WC()->session->__unset( 'klarna_checkout_country' );
+			}
+			if( WC()->session->get( 'ongoing_klarna_order' ) ) {
+				WC()->session->__unset( 'ongoing_klarna_order' );
+			}
+			if( WC()->session->get( 'klarna_order_note' ) ) {
+				WC()->session->__unset( 'klarna_order_note' );
+			}
+			if( WC()->session->get( 'klarna_separate_shipping' ) ) {
+				WC()->session->__unset( 'klarna_separate_shipping' );
+			}
+		}
+		
 	}
 
 	function use_ongoing_order_for_kco() {
@@ -419,7 +448,6 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		if ( 0 == $amount_to_charge ) {
 			// Payment complete
 			$order->payment_complete();
-
 			return true;
 		}
 
@@ -1539,6 +1567,12 @@ class WC_Gateway_Klarna_Checkout_Extra {
 	 *
 	 **/
 	public function change_checkout_url( $url ) {
+
+		// Don't change the url if this is a subscription switch
+		if( isset( $_GET['switch-subscription'] ) || ( method_exists( 'WC_Subscriptions_Switcher', 'cart_contains_switches' ) && WC_Subscriptions_Switcher::cart_contains_switches() ) ) {
+			return $url;
+		}
+
 		if ( ! is_admin() ) {
 			$klarna_checkout_url = WC_Gateway_Klarna_Checkout_Variables::get_klarna_checkout_url();
 			$klarna_country = WC_Gateway_Klarna_Checkout_Variables::get_klarna_country();
