@@ -1,5 +1,14 @@
 *** WooCommerce Gateway Klarna Changelog ***
 
+2018.07.30	- version 2.5.15
+* Tweak		- Move unset kco sessions to maybe_clear_kco_sessions() function.
+* Tweak		- Added supports subscription_payment_method_change_admin for KCO.
+* Tweak		- Updated JS event klarna_update_shipping in KCO page so other plugins can update shipping method info and trigger that update to Klarna.
+* Fix		- Fixes so HTML tags being stripped ocht in KCO logs.
+* Fix		- Fixes problem with order started with Swish as payment method but then cancelling and switch to KCO.
+* Fix		- Don't change to KCO checkout url if customer is making a subscription switch (then use the regular checkout instead).
+* Fix		- Added check for subscription limit for customer in validation callback.
+
 2018.05.24  - version 2.5.14
 * Feature	- Added support for wp_add_privacy_policy_content (for GDPR compliance). More info: https://core.trac.wordpress.org/attachment/ticket/43473/PRIVACY-POLICY-CONTENT-HOOK.md.
 * Fix		- Added try catch to parse json in Krokedil logger on order page.
