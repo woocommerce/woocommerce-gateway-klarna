@@ -321,8 +321,24 @@ class WC_Gateway_Klarna_K2WC {
 		if ( 'checkout_complete' === $klarna_order['status'] || 'AUTHORIZED' === $klarna_order['status'] ) {
 			$local_order_id = sanitize_key( $_GET['sid'] ); // Input var okay.
 			$order          = wc_get_order( $local_order_id );
+
+			// Log callback for v2
+			if( 'v2' === sanitize_key( $_GET['klarna-api'] ) ) {
+				// Remove html_snippet from what we're logging
+				$log_order = array();
+				$log_order['id'] = $klarna_order['id'];
+				$log_order['reservation'] = $klarna_order['reservation'];
+				$log_order['purchase_country'] = $klarna_order['purchase_country'];
+				$log_order['purchase_currency'] = $klarna_order['purchase_currency'];
+				$log_order['locale'] = $klarna_order['locale'];
+				$log_order['status'] = $klarna_order['status'];
+				$log_order['cart'] = $klarna_order['cart'];
+				$log_order['customer'] = $klarna_order['customer'];
+				$log_order['options'] = $klarna_order['options'];
+				$log_order['merchant'] = $klarna_order['merchant'];
+				krokedil_log_events( $local_order_id, 'Klarna listener hit.', $log_order );
+			}
 			
-			krokedil_log_events( $local_order_id, 'Klarna listener hit.', (array) $klarna_order );
 
 			// Check if order was recurring.
 			if ( isset( $klarna_order['recurring_token'] ) ) {
