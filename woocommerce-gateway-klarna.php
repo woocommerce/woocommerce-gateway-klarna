@@ -120,6 +120,7 @@ function init_klarna_gateway() {
 	define( 'KLARNA_DIR', dirname( __FILE__ ) . '/' );         // Root dir.
 	define( 'KLARNA_LIB', dirname( __FILE__ ) . '/library/' ); // Klarna library dir.
 	define( 'KLARNA_URL', plugin_dir_url( __FILE__ ) );         // Plugin folder URL.
+	define( 'KLARNA_MAIN_FILE', __FILE__ );
 	define( 'KROKEDIL_LOGGER_GATEWAY', 'klarna_' );
 	define( 'KROKEDIL_LOGGER_ON', true );
 
@@ -217,6 +218,7 @@ function init_klarna_gateway() {
 	require_once 'classes/class-klarna-cross-sells.php';                   // Klarna Checkout cross-sells.
 	require_once 'includes/klarna-wc-30-compatibility-functions.php';      // WooCommerce 3.0 compatibility methods.
 	require_once 'classes/class-klarna-gdpr.php';                          // WooCommerce 3.0 compatibility methods.
+	require_once 'classes/class-klarna-banners.php';                          // WooCommerce 3.0 compatibility methods.
 
 	/**
 	 * Register Klarna Payment Method Display widget.
