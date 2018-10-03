@@ -11,17 +11,16 @@
  * Plugin Name:     WooCommerce Klarna Gateway
  * Plugin URI:      https://krokedil.com/klarna-for-woocommerce-v2/
  * Description:     Extends WooCommerce. Provides a <a href="https://www.klarna.com/" target="_blank">Klarna</a> gateway for WooCommerce.
- * Version:         2.5.15
- * Author:          WooCommerce
+ * Version:         2.5.16
+ * Author:          Krokedil
  * Author URI:      https://woocommerce.com/
  * Developer:       Krokedil
  * Developer URI:   http://krokedil.com/
  * Text Domain:     woocommerce-gateway-klarna
  * Domain Path:     /languages
  * WC requires at least: 3.0.
- * WC tested up to: 3.4.4
- * Woo: 18624:4edd8b595d6d4b76f31b313ba4e4f3f6
- * Copyright:       © 2009-2018 WooCommerce.
+ * WC tested up to: 3.4.5
+ * Copyright:       © 2010-2018 Krokedil.
  * License:         GNU General Public License v3.0
  * License URI:     http://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -31,8 +30,19 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 if ( ! defined( 'WC_KLARNA_VER' ) ) {
-	define( 'WC_KLARNA_VER', '2.5.15' );
+	define( 'WC_KLARNA_VER', '2.5.16' );
 }
+
+/**
+ * Plugin updates
+ */
+require 'includes/plugin_update_check.php';
+$MyUpdateChecker = new PluginUpdateChecker_2_0 (
+    'https://kernl.us/api/v1/updates/5bb4bcffcbec8e10be4760f7/',
+    __FILE__,
+    'woocommerce-gateway-klarna',
+    1
+);
 
 /**
  * Show welcome notice
@@ -59,17 +69,6 @@ function woocommerce_gateway_klarna_welcome_notice() {
 }
 add_action( 'admin_notices', 'woocommerce_gateway_klarna_welcome_notice' );
 
-/**
- * Required functions.
- */
-if ( ! function_exists( 'woothemes_queue_update' ) ) {
-	require_once( 'woo-includes/woo-functions.php' );
-}
-
-/**
- * Plugin updates.
- */
-woothemes_queue_update( plugin_basename( __FILE__ ), '4edd8b595d6d4b76f31b313ba4e4f3f6', '18624' );
 
 /**
  * Check if update is from 1.x to 2.x
