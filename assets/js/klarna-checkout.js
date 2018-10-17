@@ -284,7 +284,6 @@ jQuery(document).ready(function ($) {
 					complete: function () {
 						console.log( 'complete' );
 						if (typeof window._klarnaCheckout == 'function') {
-							console.log('klarna if');
 							window._klarnaCheckout(function (api) {
 								console.log('klarnaCheckout window');
 								api.resume();
@@ -584,7 +583,6 @@ jQuery(document).ready(function ($) {
 									}
 
 									if ('' != data.email) {
-										console.log('hello world!');
 										kco_widget = $('#klarna-checkout-widget');
 										console.log( 'id ' + $('#klarna-checkout-widget') );
 										console.log( 'var ' + kco_widget );

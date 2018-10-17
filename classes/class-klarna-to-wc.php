@@ -204,13 +204,17 @@ class WC_Gateway_Klarna_K2WC {
 		if ( ! defined( 'WOOCOMMERCE_CART' ) ) {
 			define( 'WOOCOMMERCE_CART', true );
 		}
-
+		
 		if ( WC()->session->get( 'ongoing_klarna_order' ) && wc_get_order( WC()->session->get( 'ongoing_klarna_order' ) ) ) {
 			$orderid = WC()->session->get( 'ongoing_klarna_order' );
 			$order   = wc_get_order( $orderid );
 		} elseif ( WC()->session->get( 'order_awaiting_payment' ) && wc_get_order( WC()->session->get( 'order_awaiting_payment' ) ) ) {
+			// An order exist, probably started with another payment method.
 			$orderid = WC()->session->get( 'order_awaiting_payment' );
 			$order   = wc_get_order( $orderid );
+			// Set ongoing_klarna_order for this order_id.
+			WC()->session->set( 'ongoing_klarna_order', klarna_wc_get_order_id( $order ) );
+			$order->add_order_note( __( 'Changed to Klarna Checkout as payment method.', 'woocommerce-gateway-klarna' ) );
 		} else {
 			// Create order in WooCommerce if we have an email.
 			$order = $this->create_order();
@@ -317,8 +321,24 @@ class WC_Gateway_Klarna_K2WC {
 		if ( 'checkout_complete' === $klarna_order['status'] || 'AUTHORIZED' === $klarna_order['status'] ) {
 			$local_order_id = sanitize_key( $_GET['sid'] ); // Input var okay.
 			$order          = wc_get_order( $local_order_id );
+
+			// Log callback for v2
+			if( 'v2' === sanitize_key( $_GET['klarna-api'] ) ) {
+				// Remove html_snippet from what we're logging
+				$log_order = array();
+				$log_order['id'] = $klarna_order['id'];
+				$log_order['reservation'] = $klarna_order['reservation'];
+				$log_order['purchase_country'] = $klarna_order['purchase_country'];
+				$log_order['purchase_currency'] = $klarna_order['purchase_currency'];
+				$log_order['locale'] = $klarna_order['locale'];
+				$log_order['status'] = $klarna_order['status'];
+				$log_order['cart'] = $klarna_order['cart'];
+				$log_order['customer'] = $klarna_order['customer'];
+				$log_order['options'] = $klarna_order['options'];
+				$log_order['merchant'] = $klarna_order['merchant'];
+				krokedil_log_events( $local_order_id, 'Klarna listener hit.', $log_order );
+			}
 			
-			krokedil_log_events( $local_order_id, 'Klarna listener hit.', (array) $klarna_order );
 
 			// Check if order was recurring.
 			if ( isset( $klarna_order['recurring_token'] ) ) {
