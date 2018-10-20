@@ -53,7 +53,7 @@ class Klarna_Checkout_UserAgent
         $this->_fields = array(
             'Library' => array(
                 'name' => 'Krokedil',
-                'version' => '4.0.0',
+                'version' => '4.0.0_plugin_' . WC_KLARNA_VER,
             ),
             'OS' => array(
                 'name' => php_uname('s'),

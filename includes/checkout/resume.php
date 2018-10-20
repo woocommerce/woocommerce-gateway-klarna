@@ -245,7 +245,7 @@ try {
 
 	if ( is_user_logged_in() && $kco_debug ) {
 		// Something went wrong, print the message.
-		echo '<div class="woocommerce-error">';
+		echo '<div class="kco-error woocommerce-error">';
 			echo wp_kses_post( $e->getCode() . ' - ' . $e->getMessage() );
 		echo '</div>';
 	}

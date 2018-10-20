@@ -10,7 +10,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Start new session
-
 // Check if country was set in WC session
 // Used when changing countries in KCO page
 $kco_session_country = WC()->session->get( 'klarna_country', '' );
@@ -76,42 +75,52 @@ $order_key     = get_post_meta( $local_order_id, '_order_key', true );
 if ( $kco_is_rest ) {
 	$merchant_terms_uri        = $kco_terms_url;
 	$merchant_checkout_uri     = esc_url_raw( add_query_arg( 'klarnaListener', 'checkout', $kco_klarna_checkout_url ) );
-	$merchant_push_uri         = add_query_arg( array(
-		'sid'          => $local_order_id,
-		'scountry'     => $kco_klarna_country,
-		'klarna_order' => '{checkout.order.id}',
-		'wc-api'       => 'WC_Gateway_Klarna_Checkout',
-		'klarna-api'   => 'rest'
-	), $push_uri_base );
-	$merchant_confirmation_uri = add_query_arg( array(
-		'klarna_order'   => '{checkout.order.id}',
-		'sid'            => $local_order_id,
-		'scountry'       => $kco_klarna_country,
-		'order-received' => $local_order_id,
-		'thankyou'       => 'yes',
-		'key'            => $order_key
-	), $kco_klarna_checkout_thank_you_url );
-	$address_update_uri        = add_query_arg( array(
-		'address_update' => 'yes',
-		'sid'            => $local_order_id,
-	), $kco_klarna_checkout_url );
+	$merchant_push_uri         = add_query_arg(
+		array(
+			'sid'          => $local_order_id,
+			'scountry'     => $kco_klarna_country,
+			'klarna_order' => '{checkout.order.id}',
+			'wc-api'       => 'WC_Gateway_Klarna_Checkout',
+			'klarna-api'   => 'rest',
+		), $push_uri_base
+	);
+	$merchant_confirmation_uri = add_query_arg(
+		array(
+			'klarna_order'   => '{checkout.order.id}',
+			'sid'            => $local_order_id,
+			'scountry'       => $kco_klarna_country,
+			'order-received' => $local_order_id,
+			'thankyou'       => 'yes',
+			'key'            => $order_key,
+		), $kco_klarna_checkout_thank_you_url
+	);
+	$address_update_uri        = add_query_arg(
+		array(
+			'address_update' => 'yes',
+			'sid'            => $local_order_id,
+		), $kco_klarna_checkout_url
+	);
 } else { // V2
 	$merchant_terms_uri        = $kco_terms_url;
 	$merchant_checkout_uri     = esc_url_raw( add_query_arg( 'klarnaListener', 'checkout', $kco_klarna_checkout_url ) );
-	$merchant_push_uri         = add_query_arg( array(
-		'sid'          => $local_order_id,
-		'scountry'     => $kco_klarna_country,
-		'klarna_order' => '{checkout.order.id}',
-		'klarna-api'   => 'v2'
-	), $push_uri_base );
-	$merchant_confirmation_uri = add_query_arg( array(
-		'klarna_order'   => '{checkout.order.id}',
-		'sid'            => $local_order_id,
-		'scountry'       => $kco_klarna_country,
-		'order-received' => $local_order_id,
-		'thankyou'       => 'yes',
-		'key'            => $order_key
-	), $kco_klarna_checkout_thank_you_url );
+	$merchant_push_uri         = add_query_arg(
+		array(
+			'sid'          => $local_order_id,
+			'scountry'     => $kco_klarna_country,
+			'klarna_order' => '{checkout.order.id}',
+			'klarna-api'   => 'v2',
+		), $push_uri_base
+	);
+	$merchant_confirmation_uri = add_query_arg(
+		array(
+			'klarna_order'   => '{checkout.order.id}',
+			'sid'            => $local_order_id,
+			'scountry'       => $kco_klarna_country,
+			'order-received' => $local_order_id,
+			'thankyou'       => 'yes',
+			'key'            => $order_key,
+		), $kco_klarna_checkout_thank_you_url
+	);
 }
 
 // Different format for V3 and V2
@@ -137,7 +146,7 @@ if ( $kco_is_rest ) {
 	if ( is_ssl() && 'yes' === $kco_validate_stock ) {
 		$create['merchant']['validation_uri'] = get_home_url() . '/wc-api/WC_Gateway_Klarna_Order_Validate/';
 	}
-	if( $kco_cancellation_terms_url ) {
+	if ( $kco_cancellation_terms_url ) {
 		$create['merchant']['cancellation_terms_uri'] = $kco_cancellation_terms_url;
 	}
 }
@@ -173,7 +182,7 @@ $klarna_tax_total   = 0;
 foreach ( $cart as $item ) {
 	if ( $kco_is_rest ) {
 		$create['order_lines'][] = $item;
-		$klarna_order_total      += $item['total_amount'];
+		$klarna_order_total     += $item['total_amount'];
 
 		// Process sales_tax item differently
 		if ( array_key_exists( 'type', $item ) && 'sales_tax' == $item['type'] ) {
@@ -255,25 +264,26 @@ if ( class_exists( 'WC_Subscriptions_Cart' ) && WC_Subscriptions_Cart::cart_cont
 			'subscription_name'            => 'Subscription: ' . get_the_title( $subscription_product_id ),
 			'start_time'                   => date( 'Y-m-d\TH:i' ),
 			'end_time'                     => $end_time,
-			'auto_renewal_of_subscription' => true
+			'auto_renewal_of_subscription' => true,
 		);
 		if ( get_current_user_id() ) {
 			$klarna_subscription_info['customer_account_info'] = array(
-				'unique_account_identifier' => (string) get_current_user_id()
+				'unique_account_identifier' => (string) get_current_user_id(),
 			);
 		}
 
 		$klarna_subscription = array( $klarna_subscription_info );
 
-		$body_attachment = json_encode( array(
-			'subscription' => $klarna_subscription
-		) );
+		$body_attachment = json_encode(
+			array(
+				'subscription' => $klarna_subscription,
+			)
+		);
 
 		if ( $body_attachment ) {
 			$create['attachment']['content_type'] = 'application/vnd.klarna.internal.emd-v2+json';
 			$create['attachment']['body']         = $body_attachment;
 		}
-
 	}
 }
 
@@ -308,17 +318,19 @@ if ( $kco_is_rest ) {
 	$klarna_order = new Klarna_Checkout_Order( $connector, $kco_klarna_server );
 }
 
+WC_Gateway_Klarna::log( 'Create request order data: ' . var_export( $create, true ) );
+
 try {
 	$klarna_order->create( apply_filters( 'kco_create_order', $create ) );
 	$klarna_order->fetch();
 } catch ( Exception $e ) {
 	if ( 'yes' === $kco_debug ) {
-		//$kco_log->add( 'klarna', 'Klarna API error: ' . $e->getCode() . ' - ' . $e->getMessage() );
+		// $kco_log->add( 'klarna', 'Klarna API error: ' . $e->getCode() . ' - ' . $e->getMessage() );
 	}
 
 	if ( is_user_logged_in() && $kco_debug ) {
 		// The purchase was denied or something went wrong, print the message:
-		echo '<div class="woocommerce-error">';
+		echo '<div class="kco-error woocommerce-error">';
 		echo esc_html( $e->getCode() . ' - ' . $e->getMessage() );
 		echo '</div>';
 	}
