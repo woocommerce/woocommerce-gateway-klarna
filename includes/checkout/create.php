@@ -318,6 +318,8 @@ if ( $kco_is_rest ) {
 	$klarna_order = new Klarna_Checkout_Order( $connector, $kco_klarna_server );
 }
 
+WC_Gateway_Klarna::log( 'Create request order data: ' . var_export( $create, true ) );
+
 try {
 	$klarna_order->create( apply_filters( 'kco_create_order', $create ) );
 	$klarna_order->fetch();
