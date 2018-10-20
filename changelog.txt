@@ -1,5 +1,13 @@
 *** WooCommerce Gateway Klarna Changelog ***
 
+2018.10.20	- version 2.5.16
+* Tweak		- Remove woocommerce.com license handling. Add updates via kernl.us.
+* Tweak		- Added Klarna v2 to v3 banner.
+* Tweak		- Added logging of create request.
+* Tweak		- Add plugin version number to user agent sent to klarna.
+* Fix		- Removed html-snippet from logging in Klarna listener log.
+* Fix		- Added check to remove unneeded (401) error message in KCO checkout page.
+
 2018.07.30	- version 2.5.15
 * Tweak		- Move unset kco sessions to maybe_clear_kco_sessions() function.
 * Tweak		- Added supports subscription_payment_method_change_admin for KCO.
