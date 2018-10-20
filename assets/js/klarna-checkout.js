@@ -767,4 +767,26 @@ jQuery(document).ready(function ($) {
 		});
 	}
 
+	// Check if error message is shown aswell as a loaded iframe.
+	function checkForIframeAndError() {
+		if( $('#klarna-checkout-container').length > -1 && $('.kco-error').length > -1  ) {
+			return true;
+		}
+		return false;
+	}
+
+	// Remove any error message if iframe is loaded
+	$('body').ajaxComplete( function() {
+		if( checkForIframeAndError() ) {
+			$('.kco-error').hide();
+		}
+	});
+	$('body').change( function() {
+		if( checkForIframeAndError() ) {
+			$('.kco-error').hide();
+		}
+	});
+	if( checkForIframeAndError() ) {
+		$('.kco-error').hide();
+	}
 });
