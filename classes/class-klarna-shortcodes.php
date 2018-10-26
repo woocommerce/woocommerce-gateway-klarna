@@ -311,6 +311,7 @@ class WC_Gateway_Klarna_Shortcodes {
 		}
 		do_action( 'kco_widget_before_calculation', $atts );
 		WC()->cart->calculate_shipping();
+		WC()->customer->set_calculated_shipping();
 		WC()->cart->calculate_fees();
 		WC()->cart->calculate_totals();
 		?>
