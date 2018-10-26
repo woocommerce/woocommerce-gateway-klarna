@@ -11,7 +11,7 @@
  * Plugin Name:     WooCommerce Klarna Gateway
  * Plugin URI:      https://krokedil.com/klarna-for-woocommerce-v2/
  * Description:     Extends WooCommerce. Provides a <a href="https://www.klarna.com/" target="_blank">Klarna</a> gateway for WooCommerce.
- * Version:         2.5.16
+ * Version:         2.6.0
  * Author:          Krokedil
  * Author URI:      https://woocommerce.com/
  * Developer:       Krokedil
@@ -19,7 +19,7 @@
  * Text Domain:     woocommerce-gateway-klarna
  * Domain Path:     /languages
  * WC requires at least: 3.0.
- * WC tested up to: 3.4.5
+ * WC tested up to: 3.4.7
  * Copyright:       © 2010-2018 Krokedil.
  * License:         GNU General Public License v3.0
  * License URI:     http://www.gnu.org/licenses/gpl-3.0.html
@@ -30,7 +30,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 if ( ! defined( 'WC_KLARNA_VER' ) ) {
-	define( 'WC_KLARNA_VER', '2.5.16' );
+	define( 'WC_KLARNA_VER', '2.6.0' );
 }
 
 /**
