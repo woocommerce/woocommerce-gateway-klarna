@@ -34,7 +34,7 @@ class UserAgent implements UserAgentInterface
     /**
      * Version of the SDK.
      */
-    const VERSION = '2.1.0_plugin_' . WC_KLARNA_VER;
+    const VERSION = '2.1.0';
 
     /**
      * Components of the user agent.

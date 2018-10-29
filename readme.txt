@@ -33,10 +33,13 @@ Klarna is a great payment alternative for merchants and customers in Sweden, Nor
 Documentation can be found at http://docs.woothemes.com/document/klarna/
 
 
-
-
 == CREDITS	 ==
 
 Huge thanks to: 
 Vincent Suurenbroek - Dutch translation
 Kenneth Bårdseng & Jarle Dahl Bergersen - Norwegian translation
+
+
+== CHANGELOG ==
+= 2018.10.29	- version 2.6.1 =
+* Fix			- Reverted plugin version number in User agent sent to Klarna. Caused issues with Order Management API calls.
