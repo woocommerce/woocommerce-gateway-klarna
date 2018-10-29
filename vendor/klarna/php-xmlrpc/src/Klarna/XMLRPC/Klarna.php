@@ -39,7 +39,7 @@ class Klarna
      *
      * @var string
      */
-    protected $proto = '4.1_plugin_' . WC_KLARNA_VER;
+    protected $proto = '4.1';
 
     /**
      * The encoding used in Klarna.
