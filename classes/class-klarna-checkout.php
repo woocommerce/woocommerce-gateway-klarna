@@ -1591,6 +1591,12 @@ class WC_Gateway_Klarna_Checkout_Extra {
 			return $url;
 		}
 
+		// Don't change the url if Klarna Checkout is not available.
+		$available_gateways = WC()->payment_gateways->get_available_payment_gateways();
+		if ( false === array_key_exists( 'klarna_checkout', $available_gateways ) ) {
+			return $url;
+		}
+
 		if ( ! is_admin() ) {
 			$klarna_checkout_url = WC_Gateway_Klarna_Checkout_Variables::get_klarna_checkout_url();
 			$klarna_country      = WC_Gateway_Klarna_Checkout_Variables::get_klarna_country();
