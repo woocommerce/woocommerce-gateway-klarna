@@ -245,7 +245,7 @@ try {
 				$create['options']['allow_separate_shipping_address'] = true;
 			}
 		}
-
+		WC_Gateway_Klarna::log( 'Update request order data: ' . stripslashes_deep( wp_json_encode( $update ) ) );
 		krokedil_log_events( $local_order_id, 'Update order', $update );
 		$klarna_order->update( apply_filters( 'kco_update_order', $update ) );
 	} // End if country change.
