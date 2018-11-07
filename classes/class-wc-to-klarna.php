@@ -189,7 +189,7 @@ class WC_Gateway_Klarna_WC2K {
 		} // End if().
 
 		// Process shipping.
-		if ( WC()->shipping->get_packages() && WC()->session->get( 'chosen_shipping_methods' ) ) {
+		if ( WC()->shipping->get_packages() && WC()->session->get( 'chosen_shipping_methods' )[0] ) {
 			$shipping_name       = $this->get_shipping_name();
 			$shipping_reference  = $this->get_shipping_reference();
 			$shipping_amount     = $this->get_shipping_amount();
