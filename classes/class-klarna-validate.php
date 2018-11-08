@@ -35,7 +35,7 @@ class WC_Gateway_Klarna_Order_Validate {
 		$all_in_stock            = true;
 		$shipping_chosen         = false;
 		$shipping_needed         = false;
-		$is_subscription_limited = true;
+		$is_subscription_limited = false;
 
 		if ( isset( $data['order_lines'] ) && is_array( $data['order_lines'] ) ) {
 			$cart_items = $data['order_lines']; // V3.
@@ -63,7 +63,7 @@ class WC_Gateway_Klarna_Order_Validate {
 						$shipping_needed = true;
 					}
 					if ( class_exists( 'WC_Subscriptions_Product' ) && WC_Subscriptions_Product::is_subscription( $cart_item_product ) ) {
-						$is_subscription_limited = self::check_subscription_product_limit( $product, $customer );
+						$is_subscription_limited = self::is_product_limited_for_user( $cart_item_product, $customer );
 					}
 				}
 			} elseif ( 'shipping_fee' === $cart_item['type'] ) {
@@ -73,16 +73,17 @@ class WC_Gateway_Klarna_Order_Validate {
 
 		do_action( 'kco_validate_checkout', $data, $all_in_stock, $shipping_chosen );
 
-		if ( $all_in_stock && $is_subscription_limited && ( $shipping_chosen || ! $shipping_needed ) ) {
+		if ( $all_in_stock && ! $is_subscription_limited && ( $shipping_chosen || ! $shipping_needed ) ) {
 			header( 'HTTP/1.0 200 OK' );
 		} else {
 			header( 'HTTP/1.0 303 See Other' );
+			global $klarna_checkout_url;
 			if ( ! $all_in_stock ) {
 				header( 'Location: ' . wc_get_cart_url() . '?stock_validate_failed' );
 			} elseif ( ! $shipping_chosen ) {
-				header( 'Location: ' . wc_get_checkout_url() . '?no_shipping' );
-			} elseif ( ! $is_subscription_limited ) {
-				header( 'Location: ' . wc_get_checkout_url() . '?subscription_limit' );
+				header( 'Location: ' . $klarna_checkout_url . '?no_shipping' );
+			} elseif ( $is_subscription_limited ) {
+				header( 'Location: ' . $klarna_checkout_url . '?subscription_limit' );
 			}
 		}
 
@@ -122,7 +123,7 @@ class WC_Gateway_Klarna_Order_Validate {
 	 * @param object $customer Customer data from Klarna.
 	 * @return bool
 	 */
-	public static function check_subscription_product_limit( $product, $customer ) {
+	public static function is_product_limited_for_user( $product, $customer ) {
 		$customer_mail = $customer['email'];
 		$user          = get_user_by( 'email', $customer_mail );
 		$user_id       = $user->ID;
