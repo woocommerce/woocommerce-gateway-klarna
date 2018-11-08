@@ -1106,7 +1106,9 @@ class WC_Gateway_Klarna_K2WC {
 				update_user_meta( $customer_id, 'shipping_first_name', $klarna_order['billing_address']['given_name'] );
 				update_user_meta( $customer_id, 'shipping_last_name', $klarna_order['billing_address']['family_name'] );
 				update_user_meta( $customer_id, 'shipping_address_1', $received_billing_address_1 );
-				update_user_meta( $customer_id, 'shipping_address_2', $klarna_order['billing_address']['care_of'] );
+				if ( isset( $klarna_order['billing_address']['care_of'] ) ) {
+					update_user_meta( $customer_id, 'shipping_address_2', $klarna_order['billing_address']['care_of'] );
+				}
 				update_user_meta( $customer_id, 'shipping_postcode', $klarna_order['billing_address']['postal_code'] );
 				update_user_meta( $customer_id, 'shipping_city', $klarna_order['billing_address']['city'] );
 				update_user_meta( $customer_id, 'shipping_country', strtoupper( $klarna_order['billing_address']['country'] ) );
