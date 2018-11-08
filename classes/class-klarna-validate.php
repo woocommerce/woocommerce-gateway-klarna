@@ -56,10 +56,10 @@ class WC_Gateway_Klarna_Order_Validate {
 					$cart_item_product = wc_get_product( $cart_item['reference'] );
 				}
 				if ( $cart_item_product ) {
-					if ( ! self::has_enough_stock( $cart_item_product, $cart_item['quantity'] ) ) {
+					if ( ! self::product_has_enough_stock( $cart_item_product, $cart_item['quantity'] ) ) {
 						$all_in_stock = false;
 					}
-					if ( ! self::check_product_needs_shipping( $cart_item_product ) ) {
+					if ( self::product_needs_shipping( $cart_item_product ) ) {
 						$shipping_needed = true;
 					}
 					if ( class_exists( 'WC_Subscriptions_Product' ) && WC_Subscriptions_Product::is_subscription( $cart_item_product ) ) {
@@ -95,7 +95,7 @@ class WC_Gateway_Klarna_Order_Validate {
 	 * @param object $product WooCommerce Product.
 	 * @return bool
 	 */
-	public static function has_enough_stock( $product, $quantity ) {
+	public static function product_has_enough_stock( $product, $quantity ) {
 		if ( ! $product->has_enough_stock( $quantity ) ) {
 			return false;
 		}
@@ -108,7 +108,7 @@ class WC_Gateway_Klarna_Order_Validate {
 	 * @param object $product WooCommerce Product.
 	 * @return bool
 	 */
-	public static function check_product_needs_shipping( $product ) {
+	public static function product_needs_shipping( $product ) {
 		if ( $product->needs_shipping() ) {
 			return true;
 		}
