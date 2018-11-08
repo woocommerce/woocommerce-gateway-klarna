@@ -30,7 +30,7 @@ $ty_is_rest             = WC_Gateway_Klarna_Checkout_Variables::is_rest();
 
 // Debug.
 if ( 'yes' === $ty_debug ) {
-	//$ty_log->add( 'klarna', 'Rendering Thank you page...' );
+	// $ty_log->add( 'klarna', 'Rendering Thank you page...' );
 }
 
 $merchant_id   = $ty_klarna_eid;
@@ -42,21 +42,29 @@ $order         = wc_get_order( $order_id );
 // Connect to Klarna.
 if ( $ty_is_rest ) {
 	if ( 'yes' === $ty_testmode ) {
-		if ( in_array( strtoupper( $ty_klarna_country ), apply_filters( 'klarna_is_rest_countries_eu', array(
-			'DK',
-			'GB',
-			'NL'
-		) ) ) ) {
+		if ( in_array(
+			strtoupper( $ty_klarna_country ), apply_filters(
+				'klarna_is_rest_countries_eu', array(
+					'DK',
+					'GB',
+					'NL',
+				)
+			)
+		) ) {
 			$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_TEST_BASE_URL;
 		} elseif ( in_array( strtoupper( $ty_klarna_country ), apply_filters( 'klarna_is_rest_countries_na', array( 'US' ) ) ) ) {
 			$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::NA_TEST_BASE_URL;
 		}
 	} else {
-		if ( in_array( strtoupper( $ty_klarna_country ), apply_filters( 'klarna_is_rest_countries_eu', array(
-			'DK',
-			'GB',
-			'NL'
-		) ) ) ) {
+		if ( in_array(
+			strtoupper( $ty_klarna_country ), apply_filters(
+				'klarna_is_rest_countries_eu', array(
+					'DK',
+					'GB',
+					'NL',
+				)
+			)
+		) ) {
 			$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_BASE_URL;
 		} elseif ( in_array( strtoupper( $ty_klarna_country ), apply_filters( 'klarna_is_rest_countries_na', array( 'US' ) ) ) ) {
 			$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::NA_BASE_URL;
@@ -73,10 +81,10 @@ if ( $ty_is_rest ) {
 
 try {
 	$klarna_order->fetch();
-	WC_Gateway_Klarna::log( 'Klarna Thank you URL: ' . $_SERVER['REQUEST_URI'] . ' Order id: ' . $order_id . ' $klarna_order: ' . var_export( $klarna_order, true ) );
+	// WC_Gateway_Klarna::log( 'Klarna Thank you URL: ' . $_SERVER['REQUEST_URI'] . ' Order id: ' . $order_id . ' $klarna_order: ' . var_export( $klarna_order, true ) );
 } catch ( Exception $e ) {
 	if ( 'yes' === $ty_debug ) {
-		//$ty_log->add( 'klarna', 'Klarna API error: ' . var_export( $e, true ) );
+		// $ty_log->add( 'klarna', 'Klarna API error: ' . var_export( $e, true ) );
 	}
 
 	if ( is_user_logged_in() && $ty_debug ) {
@@ -148,7 +156,7 @@ $posted_data = array(
 // In some cases the order confirmation callback from Klarna happens after the display of the thankyou page.
 // In these cases we need to add customer address to the order here. Plugins like WCS needs this when woocommerce_checkout_order_processed hook is run.
 if ( '' === get_post_meta( $order_id, '_billing_address_1', true ) ) {
-	include_once( KLARNA_DIR . 'classes/class-klarna-to-wc.php' );
+	include_once KLARNA_DIR . 'classes/class-klarna-to-wc.php';
 	WC_Gateway_Klarna_K2WC::add_order_addresses( $order, $klarna_order );
 }
 
