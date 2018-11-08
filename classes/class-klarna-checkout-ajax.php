@@ -1019,7 +1019,7 @@ class WC_Gateway_Klarna_Checkout_Ajax {
 					$update['cart']['items'][] = $item;
 				}
 			}
-			
+			WC_Gateway_Klarna::log( 'Update request order data: ' . stripslashes_deep( wp_json_encode( $update ) ) );
 			try {
 				$klarna_order->update( apply_filters( 'kco_update_order', $update ) );
 			} catch ( Exception $e ) {
