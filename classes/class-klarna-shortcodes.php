@@ -36,9 +36,11 @@ class WC_Gateway_Klarna_Shortcodes {
 			return;
 		}
 
-		$atts = shortcode_atts( array(
-			'col' => '',
-		), $atts );
+		$atts = shortcode_atts(
+			array(
+				'col' => '',
+			), $atts
+		);
 
 		$widget_class = '';
 
@@ -54,11 +56,15 @@ class WC_Gateway_Klarna_Shortcodes {
 			echo apply_filters(
 				'klarna_checkout_must_be_logged_in_message',
 				sprintf(
-					__( 'You must be logged in to checkout. %s or %s.', 'woocommerce-gateway-klarna' ),
-					'<a href="' . esc_url( wc_get_page_permalink( 'myaccount' ) ) . '" title="' . __( 'Login', 'woocommerce-gateway-klarna'
+					__( 'You must be logged in to checkout. %1$s or %2$s.', 'woocommerce-gateway-klarna' ),
+					'<a href="' . esc_url( wc_get_page_permalink( 'myaccount' ) ) . '" title="' . __(
+						'Login', 'woocommerce-gateway-klarna'
 					) . '">' . __( 'Login', 'woocommerce-gateway-klarna' ) . '</a>',
-					'<a href="' . esc_url( wc_get_page_permalink( 'myaccount' ) ) . '" title="' . __( 'create an account',
-						'woocommerce-gateway-klarna' ) . '">' . __( 'create an account', 'woocommerce-gateway-klarna'
+					'<a href="' . esc_url( wc_get_page_permalink( 'myaccount' ) ) . '" title="' . __(
+						'create an account',
+						'woocommerce-gateway-klarna'
+					) . '">' . __(
+						'create an account', 'woocommerce-gateway-klarna'
 					) . '</a>'
 				)
 			);
@@ -171,7 +177,7 @@ class WC_Gateway_Klarna_Shortcodes {
 			$klarna_checkout_enabled_countries = array();
 			foreach ( $klarna_checkout_countries as $klarna_checkout_country_code => $klarna_checkout_country ) {
 				$lowercase_country_code = strtolower( $klarna_checkout_country_code );
-				if ( isset( $checkout_settings["eid_$lowercase_country_code"] ) && isset( $checkout_settings["secret_$lowercase_country_code"] ) ) {
+				if ( isset( $checkout_settings[ "eid_$lowercase_country_code" ] ) && isset( $checkout_settings[ "secret_$lowercase_country_code" ] ) ) {
 					if ( array_key_exists( $klarna_checkout_country_code, WC()->countries->get_allowed_countries() ) ) {
 						$klarna_checkout_enabled_countries[ $klarna_checkout_country_code ] = $klarna_checkout_country;
 					}
@@ -187,7 +193,7 @@ class WC_Gateway_Klarna_Shortcodes {
 				$kco_euro_country = WC()->session->get( 'klarna_euro_country' );
 			} else {
 				$checkout_settings = get_option( 'woocommerce_klarna_checkout_settings' );
-				$kco_euro_country = $checkout_settings['default_eur_country'];
+				$kco_euro_country  = $checkout_settings['default_eur_country'];
 			}
 
 			echo '<div class="woocommerce"><p>';
@@ -246,14 +252,16 @@ class WC_Gateway_Klarna_Shortcodes {
 		WC()->cart->calculate_fees();
 		WC()->cart->calculate_totals();
 
-		$atts = shortcode_atts( array(
-			'col'           => '',
-			'order_note'    => '',
-			'coupon_form'   => '',
-			'hide_columns'  => '',
-			'only_shipping' => '',
-			'no_shipping'   => '',
-		), $atts );
+		$atts = shortcode_atts(
+			array(
+				'col'           => '',
+				'order_note'    => '',
+				'coupon_form'   => '',
+				'hide_columns'  => '',
+				'only_shipping' => '',
+				'no_shipping'   => '',
+			), $atts
+		);
 
 		$widget_class = '';
 
@@ -278,7 +286,8 @@ class WC_Gateway_Klarna_Shortcodes {
 				<?php echo $this->klarna_checkout_get_kco_widget_html( $atts ); ?>
 			</div>
 
-			<?php return ob_get_clean();
+			<?php
+			return ob_get_clean();
 		}
 	}
 
@@ -302,12 +311,18 @@ class WC_Gateway_Klarna_Shortcodes {
 		if ( $atts ) {
 			// When the shortcode is first rendered we store attributes into session.
 			WC()->session->set( 'kco_widget_atts', $atts );
-		} else if ( WC()->session->get( 'kco_widget_atts' ) ) {
+		} elseif ( WC()->session->get( 'kco_widget_atts' ) ) {
 			// Then we pull them from the session on widget refresh.
 			$atts = WC()->session->get( 'kco_widget_atts' );
 		} else {
 			// Set empty defaults.
-			$atts = array( 'order_note' => '', 'coupon_form' => '', 'hide_columns' => '', 'only_shipping' => '', 'no_shipping' => '' );
+			$atts = array(
+				'order_note'    => '',
+				'coupon_form'   => '',
+				'hide_columns'  => '',
+				'only_shipping' => '',
+				'no_shipping'   => '',
+			);
 		}
 		do_action( 'kco_widget_before_calculation', $atts );
 		WC()->cart->calculate_shipping();
@@ -324,7 +339,7 @@ class WC_Gateway_Klarna_Shortcodes {
 					</tbody>
 				</table>
 			</div>
-		<?php }  else { ?>
+		<?php } else { ?>
 			<?php do_action( 'kco_widget_before_coupon', $atts ); ?>
 
 			<!-- Coupons -->
@@ -339,7 +354,7 @@ class WC_Gateway_Klarna_Shortcodes {
 				<?php do_action( 'kco_widget_before_cart_items', $atts ); ?>
 
 				<!-- Cart items -->
-				<?php do_action( 'klarna_checkout_get_cart_contents_html', $atts );?>
+				<?php do_action( 'klarna_checkout_get_cart_contents_html', $atts ); ?>
 
 				<?php do_action( 'kco_widget_before_totals', $atts ); ?>
 
@@ -371,7 +386,7 @@ class WC_Gateway_Klarna_Shortcodes {
 						</tbody>
 					</table>
 				</div>
-			<?php }  ?>
+			<?php } ?>
 
 			<?php do_action( 'kco_widget_before_order_note', $atts ); ?>
 
@@ -387,13 +402,16 @@ class WC_Gateway_Klarna_Shortcodes {
 						}
 						?>
 						<textarea id="klarna-checkout-order-note" class="input-text" name="klarna-checkout-order-note"
-						          placeholder="<?php _e( 'Notes about your order, e.g. special notes for delivery.', 'woocommerce-gateway-klarna' ); ?>"><?php echo $order_note; ?></textarea>
+								  placeholder="<?php _e( 'Notes about your order, e.g. special notes for delivery.', 'woocommerce-gateway-klarna' ); ?>"><?php echo $order_note; ?></textarea>
 					</form>
 				</div>
-			<?php }
+			<?php
+}
 
-			do_action('kco_widget_after', $atts ); ?>
-		<?php }
+			do_action( 'kco_widget_after', $atts );
+			?>
+		<?php
+}
 
 		return ob_get_clean();
 	}
@@ -408,7 +426,7 @@ class WC_Gateway_Klarna_Shortcodes {
 	 * @since  2.0
 	 **/
 	function klarna_checkout_get_shipping_options_row_html( $atts ) {
-		if( 'yes' === $atts['no_shipping'] ) {
+		if ( 'yes' === $atts['no_shipping'] ) {
 			return null;
 		}
 		ob_start();
@@ -448,24 +466,26 @@ class WC_Gateway_Klarna_Shortcodes {
 						?>
 						<?php if ( ! empty( $available_methods ) ) { ?>
 
-							<?php if ( apply_filters( 'kco_hide_singular_shipping_method', true ) && 1 === count( $available_methods ) ) {
+							<?php
+							if ( apply_filters( 'kco_hide_singular_shipping_method', true ) && 1 === count( $available_methods ) ) {
 								$method = current( $available_methods );
-								echo wp_kses_post( $method->get_label() ); ?>
+								echo wp_kses_post( $method->get_label() );
+								?>
 								<input type="hidden" name="shipping_method[<?php echo esc_attr( $index ); ?>]"
-								       data-index="<?php echo esc_attr( $index ); ?>"
-								       id="shipping_method_<?php echo esc_attr( $index ); ?>"
-								       value="<?php echo esc_attr( $method->id ); ?>" class="shipping_method"/>
+									   data-index="<?php echo esc_attr( $index ); ?>"
+									   id="shipping_method_<?php echo esc_attr( $index ); ?>"
+									   value="<?php echo esc_attr( $method->id ); ?>" class="shipping_method"/>
 							<?php } else { ?>
 								<p style="margin: 0 0 0.5em !important; padding: 0 !important;"><?php _e( 'Shipping', 'woocommerce-gateway-klarna' ); ?></p>
 								<ul id="shipping_method">
 									<?php foreach ( $available_methods as $method ) : ?>
 										<li>
 											<input style="margin-left:3px" type="radio"
-											       name="shipping_method[<?php echo esc_attr( $index ); ?>]"
-											       data-index="<?php echo esc_attr( $index ); ?>"
-											       id="shipping_method_<?php echo esc_attr( $index ); ?>_<?php echo esc_attr( sanitize_title( $method->id ) ); ?>"
-											       value="<?php echo esc_attr( $method->id ); ?>" <?php checked( $method->id, $chosen_method ); ?>
-											       class="shipping_method"/>
+												   name="shipping_method[<?php echo esc_attr( $index ); ?>]"
+												   data-index="<?php echo esc_attr( $index ); ?>"
+												   id="shipping_method_<?php echo esc_attr( $index ); ?>_<?php echo esc_attr( sanitize_title( $method->id ) ); ?>"
+												   value="<?php echo esc_attr( $method->id ); ?>" <?php checked( $method->id, $chosen_method ); ?>
+												   class="shipping_method"/>
 											<label
 												for="shipping_method_<?php echo esc_attr( $index ); ?>_<?php echo esc_attr( sanitize_title( $method->id ) ); ?>"><?php echo wp_kses_post( wc_cart_totals_shipping_method_label( $method ) ); ?></label>
 										</li>
@@ -480,21 +500,21 @@ class WC_Gateway_Klarna_Shortcodes {
 				<td id="kco-page-shipping-total" class="kco-rightalign">
 				<?php
 					// @TODO: Check available methods in all packages, not just last one.
-					if ( empty( $available_methods ) && WC()->cart->needs_shipping() ) {
-					    if ( '' === WC()->customer->get_shipping_country() || '' === WC()->customer->get_shipping_postcode() ) {
-					        WC()->customer->set_calculated_shipping( false );
-                        } else {
-					        WC()->customer->set_calculated_shipping( true );
-                        }
-
-						if ( WC()->customer->has_calculated_shipping() ) {
-							echo apply_filters( is_cart() ? 'woocommerce_cart_no_shipping_available_html' : 'woocommerce_no_shipping_available_html', wpautop( __( 'There are no shipping methods available. Please ensure that your address has been entered correctly, or contact us if you need any help.', 'woocommerce' ) ) );
-						} else {
-							echo wpautop( __( 'Enter your full address to see shipping costs.', 'woocommerce' ) );
-						}
+				if ( empty( $available_methods ) && WC()->cart->needs_shipping() ) {
+					if ( '' === WC()->customer->get_shipping_country() || '' === WC()->customer->get_shipping_postcode() ) {
+						WC()->customer->set_calculated_shipping( false );
 					} else {
-						echo WC()->cart->get_cart_shipping_total();
+						WC()->customer->set_calculated_shipping( true );
 					}
+
+					if ( WC()->customer->has_calculated_shipping() ) {
+						echo apply_filters( is_cart() ? 'woocommerce_cart_no_shipping_available_html' : 'woocommerce_no_shipping_available_html', wpautop( __( 'There are no shipping methods available. Please ensure that your address has been entered correctly, or contact us if you need any help.', 'woocommerce' ) ) );
+					} else {
+						echo wpautop( __( 'Enter your full address to see shipping costs.', 'woocommerce' ) );
+					}
+				} else {
+					echo WC()->cart->get_cart_shipping_total();
+				}
 					?>
 				</td>
 			<?php } ?>
@@ -545,18 +565,28 @@ class WC_Gateway_Klarna_Shortcodes {
 	function klarna_checkout_get_coupon_rows_html() {
 		ob_start();
 
-		foreach ( WC()->cart->get_coupons() as $code => $coupon ) { ?>
+		foreach ( WC()->cart->get_coupons() as $code => $coupon ) {
+		?>
 			<tr class="kco-applied-coupon">
 				<td>
-					<?php echo apply_filters( 'woocommerce_cart_totals_coupon_label', esc_html( __( 'Coupon:',
-							'woocommerce-gateway-klarna' ) . ' ' . klarna_wc_get_coupon_code( $coupon ) ), $coupon ); ?>
+					<?php
+					echo apply_filters(
+						'woocommerce_cart_totals_coupon_label', esc_html(
+							__(
+								'Coupon:',
+								'woocommerce-gateway-klarna'
+							) . ' ' . klarna_wc_get_coupon_code( $coupon )
+						), $coupon
+					);
+							?>
 					<a class="kco-remove-coupon" data-coupon="<?php echo klarna_wc_get_coupon_code( $coupon ); ?>"
 					   href="#"><?php _e( '(remove)', 'woocommerce-gateway-klarna' ); ?></a>
 				</td>
 				<td class="kco-rightalign">
 					-<?php echo wc_price( WC()->cart->get_coupon_discount_amount( $code, WC()->cart->display_cart_ex_tax ) ); ?></td>
 			</tr>
-		<?php }
+		<?php
+		}
 
 		return ob_get_clean();
 	}
@@ -570,24 +600,31 @@ class WC_Gateway_Klarna_Shortcodes {
 		ob_start();
 		if ( wc_tax_enabled() && 'excl' === WC()->cart->tax_display_cart ) {
 			if ( 'itemized' === get_option( 'woocommerce_tax_total_display' ) ) {
-				foreach ( WC()->cart->get_tax_totals() as $code => $tax ) { ?>
+				foreach ( WC()->cart->get_tax_totals() as $code => $tax ) {
+				?>
 					<tr class="kco-tax-rate kco-tax-rate-<?php echo sanitize_title( $code ); ?>">
 						<td><?php echo esc_html( $tax->label ); ?></td>
 						<td class="kco-rightalign"
-						    data-title="<?php echo esc_html( $tax->label ); ?>"><?php echo wp_kses_post( $tax->formatted_amount ); ?></td>
+							data-title="<?php echo esc_html( $tax->label ); ?>"><?php echo wp_kses_post( $tax->formatted_amount ); ?></td>
 					</tr>
-				<?php }
-			} else { ?>
+				<?php
+				}
+			} else {
+			?>
 				<tr class="tax-total">
 					<td><?php echo esc_html( WC()->countries->tax_or_vat() ); ?></td>
-					<td class="kco-rightalign" data-title="<?php echo esc_html( WC()->countries->tax_or_vat() );
-					?>"><?php wc_cart_totals_taxes_total_html(); ?></td>
+					<td class="kco-rightalign" data-title="
+					<?php
+					echo esc_html( WC()->countries->tax_or_vat() );
+					?>
+					"><?php wc_cart_totals_taxes_total_html(); ?></td>
 				</tr>
-			<?php }
+			<?php
+			}
 		}
 
 		return ob_get_clean();
 	}
 }
 
-$wc_klarna_checkout_shortcodes = new WC_Gateway_Klarna_Shortcodes;
+$wc_klarna_checkout_shortcodes = new WC_Gateway_Klarna_Shortcodes();
