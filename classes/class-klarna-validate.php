@@ -37,14 +37,14 @@ class WC_Gateway_Klarna_Order_Validate {
 		$shipping_needed         = false;
 		$is_subscription_limited = true;
 
-		if ( is_array( $data['order_lines'] ) ) {
+		if ( isset( $data['order_lines'] ) && is_array( $data['order_lines'] ) ) {
 			$cart_items = $data['order_lines']; // V3.
-		} elseif ( is_array( $data['cart']['items'] ) ) {
+		} elseif ( isset( $data['cart']['items'] ) && is_array( $data['cart']['items'] ) ) {
 			$cart_items = $data['cart']['items']; // V2.
 		}
 
-		if ( is_array( $data['cart']['billing_address'] ) ) {
-			$customer = $data['cart']['billing_address'];
+		if ( is_array( $data['billing_address'] ) ) {
+			$customer = $data['billing_address'];
 		}
 
 		foreach ( $cart_items as $cart_item ) {
