@@ -123,6 +123,12 @@ if ( wc_notice_count( 'error' ) > 0 ) {
 			echo '</div>';
 		}
 
+		if ( isset( $_GET['subscription_limit'] ) ) {
+			echo '<div class="woocommerce-error">';
+			esc_html_e( 'You have an active subscription to this product already.', 'woocommerce-subscriptions' );
+			echo '</div>';
+		}
+
 		// Add button to Standard Checkout Page if this is enabled in the settings.
 		if ( 'yes' === $kco_add_std_checkout_button ) {
 			echo '<div class="woocommerce">';
