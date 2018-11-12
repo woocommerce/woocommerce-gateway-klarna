@@ -110,10 +110,22 @@ class WC_Gateway_Klarna_Order_Validate {
 	 * @return bool
 	 */
 	public static function product_needs_shipping( $product ) {
-		if ( $product->needs_shipping() ) {
-			return true;
+
+		if ( $product->is_virtual() ) {
+			$needs_shipping = false;
+		} else {
+			if ( class_exists( 'WC_Subscriptions_Product' ) && WC_Subscriptions_Product::is_subscription( $product ) ) {
+				if ( 0 === WC_Subscriptions_Product::get_trial_length( $product ) ) {
+					$needs_shipping = true;
+				} else {
+					$needs_shipping = false;
+				}
+			} else {
+				$needs_shipping = true;
+			}
 		}
-		return false;
+
+		return $needs_shipping;
 	}
 
 	/**
