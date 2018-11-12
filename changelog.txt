@@ -1,5 +1,16 @@
 *** WooCommerce Gateway Klarna Changelog ***
 
+2018.11.12	- version 2.6.2
+* Tweak		- Code cleaning.
+* Fix		- Check if klarna_checkout exist in get_available_payment_gateways before change_checkout_url (URL to checkout page). Props to @jonathan-dejong.
+* Fix		- Bug fix in product stock check in validate callback.
+* Fix		- Bug fix in check_subscription_product_limit in validate callback.
+* Fix		- Improved product_needs_shipping check in validate callback (allow virtual products + supscription products with free frial).
+* Fix		- Add improved error message in checkout page for subscription_limit validation
+* Fix		- Only send shipping line item to Klarna if one exist in cart.
+* Fix		- Logging improvements.
+* Fix		- PHP notice fix.
+
 2018.10.29	- version 2.6.1
 * Fix		- Reverted plugin version number in User agent sent to Klarna. Caused issues with Order Management API calls.
 

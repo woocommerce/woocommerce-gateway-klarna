@@ -20,7 +20,7 @@ $kco_cancellation_terms_url        = WC_Gateway_Klarna_Checkout_Variables::get_c
 $kco_klarna_server                 = WC_Gateway_Klarna_Checkout_Variables::get_klarna_server();
 $kco_testmode                      = WC_Gateway_Klarna_Checkout_Variables::get_klarna_checkout_testmode();
 $kco_debug                         = WC_Gateway_Klarna_Checkout_Variables::get_klarna_checkout_debug();
-//$kco_log                           = WC_Gateway_Klarna_Checkout_Variables::get_klarna_checkout_log();
+// $kco_log                           = WC_Gateway_Klarna_Checkout_Variables::get_klarna_checkout_log();
 $kco_is_rest                       = WC_Gateway_Klarna_Checkout_Variables::is_rest();
 $kco_show_kco                      = WC_Gateway_Klarna_Checkout_Variables::show_kco();
 $kco_add_std_checkout_button       = WC_Gateway_Klarna_Checkout_Variables::add_std_checkout_button();
@@ -91,7 +91,7 @@ if ( wc_notice_count( 'error' ) > 0 ) {
 
 	// Debug.
 	if ( $kco_debug == 'yes' ) {
-		//$kco_log->add( 'klarna', 'Rendering Checkout page...' );
+		// $kco_log->add( 'klarna', 'Rendering Checkout page...' );
 	}
 
 	// Mobile or desktop browser.
@@ -123,6 +123,12 @@ if ( wc_notice_count( 'error' ) > 0 ) {
 			echo '</div>';
 		}
 
+		if ( isset( $_GET['subscription_limit'] ) ) {
+			echo '<div class="woocommerce-error">';
+			esc_html_e( 'You have an active subscription to this product already.', 'woocommerce-subscriptions' );
+			echo '</div>';
+		}
+
 		// Add button to Standard Checkout Page if this is enabled in the settings.
 		if ( 'yes' === $kco_add_std_checkout_button ) {
 			echo '<div class="woocommerce">';
@@ -137,28 +143,36 @@ if ( wc_notice_count( 'error' ) > 0 ) {
 		$sharedSecret = $kco_klarna_secret;
 
 		// Process cart contents and prepare them for Klarna.
-		include_once( KLARNA_DIR . 'classes/class-wc-to-klarna.php' );
+		include_once KLARNA_DIR . 'classes/class-wc-to-klarna.php';
 		$wc_to_klarna = new WC_Gateway_Klarna_WC2K( $kco_is_rest, $kco_klarna_country );
 		$cart         = $wc_to_klarna->process_cart_contents();
 
 		// Initiate Klarna.
 		if ( $kco_is_rest ) {
 			if ( 'yes' === $kco_testmode ) {
-				if ( in_array( strtoupper( $kco_klarna_country ), apply_filters( 'klarna_is_rest_countries_eu', array(
-					'DK',
-					'GB',
-					'NL'
-				) ) ) ) {
+				if ( in_array(
+					strtoupper( $kco_klarna_country ), apply_filters(
+						'klarna_is_rest_countries_eu', array(
+							'DK',
+							'GB',
+							'NL',
+						)
+					)
+				) ) {
 					$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_TEST_BASE_URL;
 				} elseif ( in_array( strtoupper( $kco_klarna_country ), apply_filters( 'klarna_is_rest_countries_na', array( 'US' ) ) ) ) {
 					$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::NA_TEST_BASE_URL;
 				}
 			} else {
-				if ( in_array( strtoupper( $kco_klarna_country ), apply_filters( 'klarna_is_rest_countries_eu', array(
-					'DK',
-					'GB',
-					'NL'
-				) ) ) ) {
+				if ( in_array(
+					strtoupper( $kco_klarna_country ), apply_filters(
+						'klarna_is_rest_countries_eu', array(
+							'DK',
+							'GB',
+							'NL',
+						)
+					)
+				) ) {
 					$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_BASE_URL;
 				} elseif ( in_array( strtoupper( $kco_klarna_country ), apply_filters( 'klarna_is_rest_countries_na', array( 'US' ) ) ) ) {
 					$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::NA_BASE_URL;
@@ -191,12 +205,12 @@ if ( wc_notice_count( 'error' ) > 0 ) {
 			return $result->get_error_message();
 		}
 		// Update the local order
-		include_once( KLARNA_DIR . 'classes/class-klarna-to-wc.php' );
+		include_once KLARNA_DIR . 'classes/class-klarna-to-wc.php';
 		$klarna_to_wc = new WC_Gateway_Klarna_K2WC();
 		$klarna_to_wc->set_rest( $kco_is_rest );
 		$klarna_to_wc->set_eid( $kco_klarna_eid );
 		$klarna_to_wc->set_secret( $kco_klarna_secret );
-		//$klarna_to_wc->set_klarna_log( $kco_log );
+		// $klarna_to_wc->set_klarna_log( $kco_log );
 		$klarna_to_wc->set_klarna_debug( $kco_debug );
 		$klarna_to_wc->set_klarna_test_mode( $kco_testmode );
 		$klarna_to_wc->set_klarna_server( $kco_klarna_server );
@@ -264,11 +278,11 @@ if ( wc_notice_count( 'error' ) > 0 ) {
 		 * Check if Klarna order already exists and if country was changed
 		 */
 		if ( WC()->session->get( 'klarna_checkout' ) && WC()->session->get( 'klarna_checkout_country' ) === klarna_wc_get_customer_country( WC()->customer ) ) {
-			include( KLARNA_DIR . 'includes/checkout/resume.php' );
+			include KLARNA_DIR . 'includes/checkout/resume.php';
 		}
 		// If it doesn't, create Klarna order
 		if ( $klarna_order == null ) {
-			include( KLARNA_DIR . 'includes/checkout/create.php' );
+			include KLARNA_DIR . 'includes/checkout/create.php';
 		}
 
 		// Store location of checkout session

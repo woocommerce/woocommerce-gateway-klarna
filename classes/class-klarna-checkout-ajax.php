@@ -21,74 +21,100 @@ class WC_Gateway_Klarna_Checkout_Ajax {
 
 		// Add coupon
 		add_action( 'wp_ajax_klarna_checkout_coupons_callback', array( $this, 'klarna_checkout_coupons_callback' ) );
-		add_action( 'wp_ajax_nopriv_klarna_checkout_coupons_callback', array(
-			$this,
-			'klarna_checkout_coupons_callback'
-		) );
+		add_action(
+			'wp_ajax_nopriv_klarna_checkout_coupons_callback', array(
+				$this,
+				'klarna_checkout_coupons_callback',
+			)
+		);
 
 		// Remove coupon
-		add_action( 'wp_ajax_klarna_checkout_remove_coupon_callback', array(
-			$this,
-			'klarna_checkout_remove_coupon_callback'
-		) );
-		add_action( 'wp_ajax_nopriv_klarna_checkout_remove_coupon_callback', array(
-			$this,
-			'klarna_checkout_remove_coupon_callback'
-		) );
+		add_action(
+			'wp_ajax_klarna_checkout_remove_coupon_callback', array(
+				$this,
+				'klarna_checkout_remove_coupon_callback',
+			)
+		);
+		add_action(
+			'wp_ajax_nopriv_klarna_checkout_remove_coupon_callback', array(
+				$this,
+				'klarna_checkout_remove_coupon_callback',
+			)
+		);
 
 		// Cart quantity
-		add_action( 'wp_ajax_klarna_checkout_cart_callback_update', array(
-			$this,
-			'klarna_checkout_cart_callback_update'
-		) );
-		add_action( 'wp_ajax_nopriv_klarna_checkout_cart_callback_update', array(
-			$this,
-			'klarna_checkout_cart_callback_update'
-		) );
+		add_action(
+			'wp_ajax_klarna_checkout_cart_callback_update', array(
+				$this,
+				'klarna_checkout_cart_callback_update',
+			)
+		);
+		add_action(
+			'wp_ajax_nopriv_klarna_checkout_cart_callback_update', array(
+				$this,
+				'klarna_checkout_cart_callback_update',
+			)
+		);
 
 		// Cart remove
-		add_action( 'wp_ajax_klarna_checkout_cart_callback_remove', array(
-			$this,
-			'klarna_checkout_cart_callback_remove'
-		) );
-		add_action( 'wp_ajax_nopriv_klarna_checkout_cart_callback_remove', array(
-			$this,
-			'klarna_checkout_cart_callback_remove'
-		) );
+		add_action(
+			'wp_ajax_klarna_checkout_cart_callback_remove', array(
+				$this,
+				'klarna_checkout_cart_callback_remove',
+			)
+		);
+		add_action(
+			'wp_ajax_nopriv_klarna_checkout_cart_callback_remove', array(
+				$this,
+				'klarna_checkout_cart_callback_remove',
+			)
+		);
 
 		// Shipping method selector
 		add_action( 'wp_ajax_klarna_checkout_shipping_callback', array( $this, 'klarna_checkout_shipping_callback' ) );
-		add_action( 'wp_ajax_nopriv_klarna_checkout_shipping_callback', array(
-			$this,
-			'klarna_checkout_shipping_callback'
-		) );
+		add_action(
+			'wp_ajax_nopriv_klarna_checkout_shipping_callback', array(
+				$this,
+				'klarna_checkout_shipping_callback',
+			)
+		);
 
 		// Shipping option inside KCO iframe
-		add_action( 'wp_ajax_kco_iframe_shipping_option_change_cb', array(
-			$this,
-			'kco_iframe_shipping_option_change_cb'
-		) );
-		add_action( 'wp_ajax_nopriv_kco_iframe_shipping_option_change_cb', array(
-			$this,
-			'kco_iframe_shipping_option_change_cb'
-		) );
+		add_action(
+			'wp_ajax_kco_iframe_shipping_option_change_cb', array(
+				$this,
+				'kco_iframe_shipping_option_change_cb',
+			)
+		);
+		add_action(
+			'wp_ajax_nopriv_kco_iframe_shipping_option_change_cb', array(
+				$this,
+				'kco_iframe_shipping_option_change_cb',
+			)
+		);
 
 		// Country selector
 		add_action( 'wp_ajax_klarna_checkout_country_callback', array( $this, 'klarna_checkout_country_callback' ) );
-		add_action( 'wp_ajax_nopriv_klarna_checkout_country_callback', array(
-			$this,
-			'klarna_checkout_country_callback'
-		) );
+		add_action(
+			'wp_ajax_nopriv_klarna_checkout_country_callback', array(
+				$this,
+				'klarna_checkout_country_callback',
+			)
+		);
 
 		// Order note
-		add_action( 'wp_ajax_klarna_checkout_order_note_callback', array(
-			$this,
-			'klarna_checkout_order_note_callback'
-		) );
-		add_action( 'wp_ajax_nopriv_klarna_checkout_order_note_callback', array(
-			$this,
-			'klarna_checkout_order_note_callback'
-		) );
+		add_action(
+			'wp_ajax_klarna_checkout_order_note_callback', array(
+				$this,
+				'klarna_checkout_order_note_callback',
+			)
+		);
+		add_action(
+			'wp_ajax_nopriv_klarna_checkout_order_note_callback', array(
+				$this,
+				'klarna_checkout_order_note_callback',
+			)
+		);
 
 		/**
 		 * KCO iframe JS event callbacks
@@ -98,24 +124,32 @@ class WC_Gateway_Klarna_Checkout_Ajax {
 		add_action( 'wp_ajax_kco_iframe_change_cb', array( $this, 'kco_iframe_change_cb' ) );
 		add_action( 'wp_ajax_nopriv_kco_iframe_change_cb', array( $this, 'kco_iframe_change_cb' ) );
 
-		add_action( 'wp_ajax_kco_iframe_shipping_address_change_v2_cb', array(
-			$this,
-			'kco_iframe_shipping_address_change_v2_cb'
-		) );
-		add_action( 'wp_ajax_nopriv_kco_iframe_shipping_address_change_v2_cb', array(
-			$this,
-			'kco_iframe_shipping_address_change_v2_cb'
-		) );
+		add_action(
+			'wp_ajax_kco_iframe_shipping_address_change_v2_cb', array(
+				$this,
+				'kco_iframe_shipping_address_change_v2_cb',
+			)
+		);
+		add_action(
+			'wp_ajax_nopriv_kco_iframe_shipping_address_change_v2_cb', array(
+				$this,
+				'kco_iframe_shipping_address_change_v2_cb',
+			)
+		);
 
 		// V3
-		add_action( 'wp_ajax_kco_iframe_shipping_address_change_cb', array(
-			$this,
-			'kco_iframe_shipping_address_change_cb'
-		) );
-		add_action( 'wp_ajax_nopriv_kco_iframe_shipping_address_change_cb', array(
-			$this,
-			'kco_iframe_shipping_address_change_cb'
-		) );
+		add_action(
+			'wp_ajax_kco_iframe_shipping_address_change_cb', array(
+				$this,
+				'kco_iframe_shipping_address_change_cb',
+			)
+		);
+		add_action(
+			'wp_ajax_nopriv_kco_iframe_shipping_address_change_cb', array(
+				$this,
+				'kco_iframe_shipping_address_change_cb',
+			)
+		);
 
 	}
 
@@ -156,7 +190,7 @@ class WC_Gateway_Klarna_Checkout_Ajax {
 			$data['amount']         = $amount;
 			$data['coupon_success'] = $coupon_success;
 			$data['coupon']         = $coupon;
-			$data['widget_html']    .= $this->klarna_checkout_get_kco_widget_html();
+			$data['widget_html']   .= $this->klarna_checkout_get_kco_widget_html();
 
 			if ( WC()->session->get( 'klarna_checkout' ) ) {
 				$this->ajax_update_klarna_order();
@@ -381,7 +415,7 @@ class WC_Gateway_Klarna_Checkout_Ajax {
 			// Get new checkout URL
 			$lowercase_country = strtolower( $new_country );
 			$checkout_settings = get_option( 'woocommerce_klarna_checkout_settings' );
-			$data['new_url']   = $checkout_settings["klarna_checkout_url_$lowercase_country"];
+			$data['new_url']   = $checkout_settings[ "klarna_checkout_url_$lowercase_country" ];
 			// Send data back to JS function
 			$data['klarna_euro_country'] = $new_country;
 		}
@@ -415,7 +449,7 @@ class WC_Gateway_Klarna_Checkout_Ajax {
 
 				$order_details = array(
 					'ID'           => $orderid,
-					'post_excerpt' => $order_note
+					'post_excerpt' => $order_note,
 				);
 
 				wp_update_post( $order_details );
@@ -436,12 +470,11 @@ class WC_Gateway_Klarna_Checkout_Ajax {
 	 * @since  2.0
 	 **/
 	function kco_iframe_change_cb() {
-		$klarna_secret = WC_Gateway_Klarna_Checkout_Variables::get_klarna_secret();
-		$klarna_server = WC_Gateway_Klarna_Checkout_Variables::get_klarna_server();
+		$klarna_secret  = WC_Gateway_Klarna_Checkout_Variables::get_klarna_secret();
+		$klarna_server  = WC_Gateway_Klarna_Checkout_Variables::get_klarna_server();
 		$klarna_country = WC_Gateway_Klarna_Checkout_Variables::get_klarna_country();
-		$klarna_debug = WC_Gateway_Klarna_Checkout_Variables::get_klarna_checkout_debug();
-		//$klarna_log = WC_Gateway_Klarna_Checkout_Variables::get_klarna_checkout_log();
-
+		$klarna_debug   = WC_Gateway_Klarna_Checkout_Variables::get_klarna_checkout_debug();
+		// $klarna_log = WC_Gateway_Klarna_Checkout_Variables::get_klarna_checkout_log();
 		if ( ! wp_verify_nonce( $_REQUEST['nonce'], 'klarna_checkout_nonce' ) ) {
 			exit( 'Nonce can not be verified.' );
 		}
@@ -475,7 +508,7 @@ class WC_Gateway_Klarna_Checkout_Ajax {
 					$coupons_before = count( WC()->cart->get_applied_coupons() );
 					WC()->cart->check_customer_coupons( array( 'billing_email' => WC()->customer->get_billing_email() ) );
 					if ( count( WC()->cart->get_applied_coupons() ) < $coupons_before ) {
-						$coupon              = new WC_Coupon();
+						$coupon               = new WC_Coupon();
 						$data['widget_html'] .= '<div class="woocommerce-error">' . $coupon->get_coupon_error( WC_Coupon::E_WC_COUPON_USAGE_LIMIT_REACHED ) . '</div>';
 					}
 				}
@@ -493,10 +526,12 @@ class WC_Gateway_Klarna_Checkout_Ajax {
 			$klarna_order->fetch();
 
 			$update['merchant']['push_uri']         = add_query_arg( array( 'sid' => $orderid ), $klarna_order['merchant']['push_uri'] );
-			$update['merchant']['confirmation_uri'] = add_query_arg( array(
-				'sid'            => $orderid,
-				'order-received' => $orderid
-			), $klarna_order['merchant']['confirmation_uri'] );
+			$update['merchant']['confirmation_uri'] = add_query_arg(
+				array(
+					'sid'            => $orderid,
+					'order-received' => $orderid,
+				), $klarna_order['merchant']['confirmation_uri']
+			);
 
 			$klarna_order->update( $update );
 		}
@@ -741,7 +776,7 @@ class WC_Gateway_Klarna_Checkout_Ajax {
 					$coupons_before = count( WC()->cart->get_applied_coupons() );
 					WC()->cart->check_customer_coupons( array( 'billing_email' => WC()->customer->get_billing_email() ) );
 					if ( count( WC()->cart->get_applied_coupons() ) < $coupons_before ) {
-						$coupon              = new WC_Coupon();
+						$coupon               = new WC_Coupon();
 						$data['widget_html'] .= '<div class="woocommerce-error">' . $coupon->get_coupon_error( WC_Coupon::E_WC_COUPON_USAGE_LIMIT_REACHED ) . '</div>';
 					}
 				}
@@ -831,7 +866,6 @@ class WC_Gateway_Klarna_Checkout_Ajax {
 	}
 
 	// Helpers
-
 	/**
 	 * Creates a WooCommerce order, or updates if already created
 	 *
@@ -859,7 +893,7 @@ class WC_Gateway_Klarna_Checkout_Ajax {
 		}
 
 		// Update the local order
-		include_once( KLARNA_DIR . 'classes/class-klarna-to-wc.php' );
+		include_once KLARNA_DIR . 'classes/class-klarna-to-wc.php';
 
 		$klarna_to_wc = new WC_Gateway_Klarna_K2WC();
 		$klarna_to_wc->set_rest( WC_Gateway_Klarna_Checkout_Variables::is_rest() );
@@ -900,24 +934,23 @@ class WC_Gateway_Klarna_Checkout_Ajax {
 	 * @since  2.0
 	 **/
 	function ajax_update_klarna_order() {
-		$settings = WC_Gateway_Klarna_Checkout_Variables::get_klarna_checkout_settings();
-		$klarna_eid = WC_Gateway_Klarna_Checkout_Variables::get_klarna_eid();
-		$klarna_secret = WC_Gateway_Klarna_Checkout_Variables::get_klarna_secret();
-		$klarna_is_rest = WC_Gateway_Klarna_Checkout_Variables::is_rest();
-		$klarna_country = WC_Gateway_Klarna_Checkout_Variables::get_klarna_country();
+		$settings        = WC_Gateway_Klarna_Checkout_Variables::get_klarna_checkout_settings();
+		$klarna_eid      = WC_Gateway_Klarna_Checkout_Variables::get_klarna_eid();
+		$klarna_secret   = WC_Gateway_Klarna_Checkout_Variables::get_klarna_secret();
+		$klarna_is_rest  = WC_Gateway_Klarna_Checkout_Variables::is_rest();
+		$klarna_country  = WC_Gateway_Klarna_Checkout_Variables::get_klarna_country();
 		$klarna_testmode = WC_Gateway_Klarna_Checkout_Variables::get_klarna_checkout_testmode();
-		$klarna_server = WC_Gateway_Klarna_Checkout_Variables::get_klarna_server();
-		$klarna_debug = WC_Gateway_Klarna_Checkout_Variables::get_klarna_checkout_debug();
-		//$klarna_log = WC_Gateway_Klarna_Checkout_Variables::get_klarna_checkout_log();
-
+		$klarna_server   = WC_Gateway_Klarna_Checkout_Variables::get_klarna_server();
+		$klarna_debug    = WC_Gateway_Klarna_Checkout_Variables::get_klarna_checkout_debug();
+		// $klarna_log = WC_Gateway_Klarna_Checkout_Variables::get_klarna_checkout_log();
 		// Check if Euro is selected, get correct country
 		if ( 'EUR' == get_woocommerce_currency() && WC()->session->get( 'klarna_euro_country' ) ) {
 			$klarna_c = strtolower( WC()->session->get( 'klarna_euro_country' ) );
 
 			if ( in_array( strtoupper( $klarna_c ), array( 'DE', 'FI', 'NL' ), true ) ) {
 				// Add correct EID & secret specific to country if the curency is EUR and the country is DE or FI.
-				$eid          = $settings["eid_$klarna_c"];
-				$sharedSecret = html_entity_decode( $settings["secret_$klarna_c"] );
+				$eid          = $settings[ "eid_$klarna_c" ];
+				$sharedSecret = html_entity_decode( $settings[ "secret_$klarna_c" ] );
 			} else {
 				// Otherwise use the general eid and secret (filterable) if we're using EUR as currency for a global KCO checkout
 				$eid          = $klarna_eid;
@@ -953,9 +986,9 @@ class WC_Gateway_Klarna_Checkout_Ajax {
 		}
 
 		// Process cart contents and prepare them for Klarna
-		include_once( KLARNA_DIR . 'classes/class-wc-to-klarna.php' );
+		include_once KLARNA_DIR . 'classes/class-wc-to-klarna.php';
 
-		$wc_to_klarna = new WC_Gateway_Klarna_WC2K( $klarna_is_rest , $klarna_country );
+		$wc_to_klarna = new WC_Gateway_Klarna_WC2K( $klarna_is_rest, $klarna_country );
 		$cart         = $wc_to_klarna->process_cart_contents();
 
 		if ( 0 === count( $cart ) ) {
@@ -969,7 +1002,7 @@ class WC_Gateway_Klarna_Checkout_Ajax {
 
 				foreach ( $cart as $item ) {
 					$update['order_lines'][] = $item;
-					$klarna_order_total      += $item['total_amount'];
+					$klarna_order_total     += $item['total_amount'];
 					// Process sales_tax item differently
 					if ( array_key_exists( 'type', $item ) && 'sales_tax' == $item['type'] ) {
 						$klarna_tax_total += $item['total_amount'];
@@ -986,7 +1019,7 @@ class WC_Gateway_Klarna_Checkout_Ajax {
 					$update['cart']['items'][] = $item;
 				}
 			}
-
+			WC_Gateway_Klarna::log( 'Update request order data: ' . stripslashes_deep( wp_json_encode( $update ) ) );
 			try {
 				$klarna_order->update( apply_filters( 'kco_update_order', $update ) );
 			} catch ( Exception $e ) {
