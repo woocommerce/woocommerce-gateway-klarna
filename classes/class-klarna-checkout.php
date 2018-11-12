@@ -1098,7 +1098,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			$klarna_to_wc->set_eid( $klarna_eid );
 			$klarna_to_wc->set_secret( $klarna_secret );
 			$klarna_to_wc->set_klarna_order_uri( $_GET['klarna_order'] );
-			$klarna_to_wc->set_klarna_log( $this->logger );
+			// $klarna_to_wc->set_klarna_log( $this->logger );
 			$klarna_to_wc->set_klarna_test_mode( $this->testmode );
 			$klarna_to_wc->set_klarna_debug( $this->debug );
 			$klarna_to_wc->set_klarna_server( $this->klarna_server );
