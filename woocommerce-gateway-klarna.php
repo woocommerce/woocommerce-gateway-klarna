@@ -11,7 +11,7 @@
  * Plugin Name:     WooCommerce Klarna Gateway
  * Plugin URI:      https://krokedil.com/klarna-for-woocommerce-v2/
  * Description:     Extends WooCommerce. Provides a <a href="https://www.klarna.com/" target="_blank">Klarna</a> gateway for WooCommerce.
- * Version:         2.6.1
+ * Version:         2.6.2
  * Author:          Krokedil
  * Author URI:      https://woocommerce.com/
  * Developer:       Krokedil
@@ -19,7 +19,7 @@
  * Text Domain:     woocommerce-gateway-klarna
  * Domain Path:     /languages
  * WC requires at least: 3.0.
- * WC tested up to: 3.4.7
+ * WC tested up to: 3.5.1
  * Copyright:       © 2010-2018 Krokedil.
  * License:         GNU General Public License v3.0
  * License URI:     http://www.gnu.org/licenses/gpl-3.0.html
@@ -30,18 +30,18 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 if ( ! defined( 'WC_KLARNA_VER' ) ) {
-	define( 'WC_KLARNA_VER', '2.6.1' );
+	define( 'WC_KLARNA_VER', '2.6.2' );
 }
 
 /**
  * Plugin updates
  */
 require 'includes/plugin_update_check.php';
-$MyUpdateChecker = new PluginUpdateChecker_2_0 (
-    'https://kernl.us/api/v1/updates/5bb4bcffcbec8e10be4760f7/',
-    __FILE__,
-    'woocommerce-gateway-klarna',
-    1
+$MyUpdateChecker = new PluginUpdateChecker_2_0(
+	'https://kernl.us/api/v1/updates/5bb4bcffcbec8e10be4760f7/',
+	__FILE__,
+	'woocommerce-gateway-klarna',
+	1
 );
 
 /**
@@ -50,7 +50,7 @@ $MyUpdateChecker = new PluginUpdateChecker_2_0 (
 function woocommerce_gateway_klarna_welcome_notice() {
 	// Check if either one of three payment methods is configured.
 	if ( false === get_option( 'woocommerce_klarna_invoice_settings' ) && false === get_option( 'woocommerce_klarna_part_payment_settings' ) && false === get_option( 'woocommerce_klarna_checkout_settings' ) ) {
-		$html = '<div class="updated">';
+		$html  = '<div class="updated">';
 		$html .= '<p>';
 		$html .= __( 'Thank you for choosing Klarna as your payment provider. WooCommerce Klarna Gateway is almost ready. Please visit <a href="admin.php?page=wc-settings&tab=checkout&section=wc_gateway_klarna_checkout">Klarna Checkout</a>, <a href="admin.php?page=wc-settings&tab=checkout&section=wc_gateway_klarna_invoice">Klarna Invoice</a> or <a href="admin.php?page=wc-settings&tab=checkout&section=wc_gateway_klarna_part_payment">Klarna Part Payment</a> settings to enter your EID and shared secret for countries you have an agreement for with Klarna. ', 'woocommerce-gateway-klarna' );
 		$html .= '</p>';
@@ -60,7 +60,7 @@ function woocommerce_gateway_klarna_welcome_notice() {
 	}
 
 	if ( version_compare( PHP_VERSION, '5.4', '<' ) ) {
-		$html = '<div class="error">';
+		$html  = '<div class="error">';
 		$html .= __( '<p><strong>WooCommerce Gateway Klarna</strong> plugin requires PHP version 5.4 or greater.</p>', 'woocommerce-gateway-klarna' );
 		$html .= '</div>';
 
@@ -160,10 +160,10 @@ function init_klarna_gateway() {
 			$this->shop_language = strtoupper( $iso_code[0] ); // Country ISO code (SE).
 
 			switch ( $this->shop_language ) {
-				case 'NB' :
+				case 'NB':
 					$this->shop_language = 'NO';
 					break;
-				case 'SV' :
+				case 'SV':
 					$this->shop_language = 'SE';
 					break;
 			}
@@ -299,16 +299,18 @@ add_action( 'init', 'klarna_register_klarna_incomplete_order_status' );
  **/
 function klarna_register_klarna_incomplete_order_status() {
 	$checkout_settings = get_option( 'woocommerce_klarna_checkout_settings' );
-	$show_status = 'yes' === $checkout_settings['debug'];
+	$show_status       = 'yes' === $checkout_settings['debug'];
 
-	register_post_status( 'wc-kco-incomplete', array(
-		'label'                     => 'KCO incomplete',
-		'public'                    => false,
-		'exclude_from_search'       => false,
-		'show_in_admin_all_list'    => false,
-		'show_in_admin_status_list' => $show_status,
-		'label_count'               => _n_noop( 'KCO incomplete <span class="count">(%s)</span>', 'KCO incomplete <span class="count">(%s)</span>' ),
-	) );
+	register_post_status(
+		'wc-kco-incomplete', array(
+			'label'                     => 'KCO incomplete',
+			'public'                    => false,
+			'exclude_from_search'       => false,
+			'show_in_admin_all_list'    => false,
+			'show_in_admin_status_list' => $show_status,
+			'label_count'               => _n_noop( 'KCO incomplete <span class="count">(%s)</span>', 'KCO incomplete <span class="count">(%s)</span>' ),
+		)
+	);
 }
 
 add_filter( 'wc_order_statuses', 'klarna_add_kco_incomplete_to_order_statuses' );
@@ -415,7 +417,7 @@ if ( ! empty( $_POST ) ) { // Input var okay.
  * Function used to Init Klarna Template Functions - This makes them pluggable by plugins and themes.
  */
 function wc_klarna_include_template_functions() {
-	include_once( 'includes/klarna-template-functions.php' );
+	include_once 'includes/klarna-template-functions.php';
 }
 add_action( 'after_setup_theme', 'wc_klarna_include_template_functions', 11 );
 
@@ -435,8 +437,8 @@ if ( 'yes' === $should_filter ) {
 	if ( is_array( $checkout_settings ) ) {
 		foreach ( $checkout_settings as $cs_key => $cs_value ) {
 			if ( strpos( $cs_key, 'klarna_checkout_thanks_url_' ) !== false && '' !== $cs_value ) {
-				$clean_thank_you_uri = explode( '?', $cs_value );
-				$clean_thank_you_uri = $clean_thank_you_uri[0];
+				$clean_thank_you_uri        = explode( '?', $cs_value );
+				$clean_thank_you_uri        = $clean_thank_you_uri[0];
 				$thank_you_pages[ $cs_key ] = substr( $clean_thank_you_uri, 0 - $length );
 			}
 		}

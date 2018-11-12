@@ -4,7 +4,7 @@ Tags: ecommerce, e-commerce, woocommerce, klarna
 Requires at least: 4.2
 Tested up to: 4.9.8
 WC requires at least: 3.0.0
-WC tested up to: 3.4.7
+WC tested up to: 3.5.1
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -41,5 +41,17 @@ Kenneth Bårdseng & Jarle Dahl Bergersen - Norwegian translation
 
 
 == CHANGELOG ==
+
+= 2018.11.12	- version 2.6.2 =
+* Tweak			- Code cleaning.
+* Fix			- Check if klarna_checkout exist in get_available_payment_gateways before change_checkout_url (URL to checkout page). Props to @jonathan-dejong.
+* Fix			- Bug fix in product stock check in validate callback.
+* Fix			- Bug fix in check_subscription_product_limit in validate callback.
+* Fix			- Improved product_needs_shipping check in validate callback (allow virtual products + supscription products with free frial).
+* Fix			- Add improved error message in checkout page for subscription_limit validation
+* Fix			- Only send shipping line item to Klarna if one exist in cart.
+* Fix			- Logging improvements.
+* Fix			- PHP notice fix.
+
 = 2018.10.29	- version 2.6.1 =
 * Fix			- Reverted plugin version number in User agent sent to Klarna. Caused issues with Order Management API calls.
