@@ -13,6 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /**
  * Class that handles Klarna orders.
+ *
  * @property WC_Logger log
  */
 class WC_Gateway_Klarna_Order {
@@ -22,14 +23,14 @@ class WC_Gateway_Klarna_Order {
 	 *
 	 * @since 2.0.0
 	 *
-	 * @param bool|order $order order object
+	 * @param bool|order  $order order object
 	 * @param bool|Klarna $klarna Klarna object in V2, not needed for Rest
 	 */
 	public function __construct( $order = false, $klarna = false ) {
 		$this->order  = $order;
 		$this->klarna = $klarna;
 		$this->log    = new WC_Logger();
-		
+
 		// Borrow debug setting from Klarna Checkout.
 		$klarna_settings = get_option( 'woocommerce_klarna_checkout_settings' );
 		$this->debug     = isset( $klarna_settings['debug'] ) ? $klarna_settings['debug'] : '';
@@ -69,8 +70,8 @@ class WC_Gateway_Klarna_Order {
 	 * @since  2.0
 	 **/
 	function add_addresses() {
-		$order  = $this->order;
-		$klarna = $this->klarna;
+		$order    = $this->order;
+		$klarna   = $this->klarna;
 		$order_id = klarna_wc_get_order_id( $order );
 
 		if ( get_post_meta( $order_id, '_billing_address_2', true ) ) {
@@ -137,7 +138,7 @@ class WC_Gateway_Klarna_Order {
 					if ( $_product->exists() && $item['qty'] ) {
 						// We manually calculate the tax percentage here
 						$item_tax_percentage = 0;
-						$item_total_tax = is_callable( array( $item, 'get_total_tax' ) ) ? $item->get_total_tax() : 0;
+						$item_total_tax      = is_callable( array( $item, 'get_total_tax' ) ) ? $item->get_total_tax() : 0;
 						if ( $item_total_tax ) {
 							// Calculate tax percentage
 							$item_tax_percentage = @number_format( $item_total_tax / $order->get_line_total( $item, false, false ) * 100, 2, '.', '' );
@@ -155,13 +156,14 @@ class WC_Gateway_Klarna_Order {
 							$reference = klarna_wc_get_product_id( $_product );
 						}
 
-						$klarna->addArticle( $qty = $item['qty'],                  // Quantity
-							$artNo = strval( $reference ),          // Article number
-							$title = utf8_decode( $item['name'] ),   // Article name/title
-							$price = $item_price,                   // Price including tax
-							$vat = round( $item_tax_percentage ), // Tax
+						$klarna->addArticle(
+							$qty      = $item['qty'],                  // Quantity
+							$artNo    = strval( $reference ),          // Article number
+							$title    = utf8_decode( $item['name'] ),   // Article name/title
+							$price    = $item_price,                   // Price including tax
+							$vat      = round( $item_tax_percentage ), // Tax
 							$discount = 0,                             // Discount is applied later
-							$flags = Klarna\XMLRPC\Flags::INC_VAT           // Price is including VAT.
+							$flags    = Klarna\XMLRPC\Flags::INC_VAT           // Price is including VAT.
 						);
 					}
 				}
@@ -260,12 +262,19 @@ class WC_Gateway_Klarna_Order {
 		$klarna = $this->klarna;
 		if ( $order->get_total_shipping() > 0 ) {
 			// We manually calculate the shipping tax percentage here
-			$calculated_shipping_tax_percentage = ( $order->get_shipping_tax() / $order->get_total_shipping() ) * 100; //25.00
-			$calculated_shipping_tax_decimal    = ( $order->get_shipping_tax() / $order->get_total_shipping() ) + 1; //0.25
+			$calculated_shipping_tax_percentage = ( $order->get_shipping_tax() / $order->get_total_shipping() ) * 100; // 25.00
+			$calculated_shipping_tax_decimal    = ( $order->get_shipping_tax() / $order->get_total_shipping() ) + 1; // 0.25
 			// apply_filters to Shipping so we can filter this if needed
 			$klarna_shipping_price_including_tax = $order->get_total_shipping() * $calculated_shipping_tax_decimal;
 			$shipping_price                      = apply_filters( 'klarna_shipping_price_including_tax', $klarna_shipping_price_including_tax );
-			$klarna->addArticle( $qty = 1, $artNo = 'SHIPPING', $title = $order->get_shipping_method(), $price = $shipping_price, $vat = round( $calculated_shipping_tax_percentage ), $discount = 0, $flags = Klarna\XMLRPC\Flags::INC_VAT + Klarna\XMLRPC\Flags::IS_SHIPMENT // Price is including VAT and is shipment fee
+			$klarna->addArticle(
+				$qty                             = 1,
+				$artNo                           = 'SHIPPING',
+				$title                           = $order->get_shipping_method(),
+				$price                           = $shipping_price,
+				$vat                             = round( $calculated_shipping_tax_percentage ),
+				$discount                        = 0,
+				$flags                           = Klarna\XMLRPC\Flags::INC_VAT + Klarna\XMLRPC\Flags::IS_SHIPMENT // Price is including VAT and is shipment fee
 			);
 		}
 	}
@@ -276,19 +285,27 @@ class WC_Gateway_Klarna_Order {
 	 * @since  2.0
 	 **/
 	function set_addresses( $klarna_billing, $klarna_shipping, $ship_to_billing_address ) {
-		$order  = $this->order;
-		$klarna = $this->klarna;
-		$klarna_billing_address         = $klarna_billing['address'];
-		$klarna_billing_house_number    = $klarna_billing['house_number'];
-		$klarna_billing_house_extension = $klarna_billing['house_extension'];
+		$order                           = $this->order;
+		$klarna                          = $this->klarna;
+		$klarna_billing_address          = $klarna_billing['address'];
+		$klarna_billing_house_number     = $klarna_billing['house_number'];
+		$klarna_billing_house_extension  = $klarna_billing['house_extension'];
 		$klarna_shipping_address         = $klarna_shipping['address'];
 		$klarna_shipping_house_number    = $klarna_shipping['house_number'];
 		$klarna_shipping_house_extension = $klarna_shipping['house_extension'];
 		// Billing address
-		$addr_billing = new Klarna\XMLRPC\Address( $email = $order->get_billing_email(), $telno = '', // We skip the normal land line phone, only one is needed.
-			$cellno = $order->get_billing_phone(), $fname = utf8_decode( $order->get_billing_first_name() ), $lname = utf8_decode( $order->get_billing_last_name() ), $careof = utf8_decode( $order->get_billing_address_2() ),  // No care of, C/O.
-			$street = utf8_decode( $klarna_billing_address ), // For DE and NL specify street number in houseNo.
-			$zip = utf8_decode( $order->get_billing_postcode() ), $city = utf8_decode( $order->get_billing_city() ), $country = utf8_decode( $order->get_billing_country() ), $houseNo = utf8_decode( $klarna_billing_house_number ), // For DE and NL we need to specify houseNo.
+		$addr_billing = new Klarna\XMLRPC\Address(
+			$email    = $order->get_billing_email(),
+			$telno    = '', // We skip the normal land line phone, only one is needed.
+			$cellno   = $order->get_billing_phone(),
+			$fname    = utf8_decode( $order->get_billing_first_name() ),
+			$lname    = utf8_decode( $order->get_billing_last_name() ),
+			$careof   = utf8_decode( $order->get_billing_address_2() ),  // No care of, C/O.
+			$street   = utf8_decode( $klarna_billing_address ), // For DE and NL specify street number in houseNo.
+			$zip      = utf8_decode( $order->get_billing_postcode() ),
+			$city     = utf8_decode( $order->get_billing_city() ),
+			$country  = utf8_decode( $order->get_billing_country() ),
+			$houseNo  = utf8_decode( $klarna_billing_house_number ), // For DE and NL we need to specify houseNo.
 			$houseExt = utf8_decode( $klarna_billing_house_extension ) // Only required for NL.
 		);
 		// Add Company if one is set
@@ -298,22 +315,38 @@ class WC_Gateway_Klarna_Order {
 		// Shipping address
 		if ( $order->get_shipping_method() == '' || $ship_to_billing_address == 'yes' ) {
 			// Use billing address if Shipping is disabled in Woocommerce
-			$addr_shipping = new Klarna\XMLRPC\Address( $email = $order->get_billing_email(), $telno = '', //We skip the normal land line phone, only one is needed.
-				$cellno = $order->get_billing_phone(), $fname = utf8_decode( $order->get_billing_first_name() ), $lname = utf8_decode( $order->get_billing_last_name() ), $careof = utf8_decode( $order->get_billing_address_2() ),  // No care of, C/O.
-				$street = utf8_decode( $klarna_billing_address ), // For DE and NL specify street number in houseNo.
-				$zip = utf8_decode( $order->get_billing_postcode() ), $city = utf8_decode( $order->get_billing_city() ), $country = utf8_decode( $order->get_billing_country() ), $houseNo = utf8_decode( $klarna_billing_house_number ), // For DE and NL we need to specify houseNo.
-				$houseExt = utf8_decode( $klarna_billing_house_extension ) // Only required for NL.
+			$addr_shipping = new Klarna\XMLRPC\Address(
+				$email     = $order->get_billing_email(),
+				$telno     = '', // We skip the normal land line phone, only one is needed.
+				$cellno    = $order->get_billing_phone(),
+				$fname     = utf8_decode( $order->get_billing_first_name() ),
+				$lname     = utf8_decode( $order->get_billing_last_name() ),
+				$careof    = utf8_decode( $order->get_billing_address_2() ),  // No care of, C/O.
+				$street    = utf8_decode( $klarna_billing_address ), // For DE and NL specify street number in houseNo.
+				$zip       = utf8_decode( $order->get_billing_postcode() ),
+				$city      = utf8_decode( $order->get_billing_city() ),
+				$country   = utf8_decode( $order->get_billing_country() ),
+				$houseNo   = utf8_decode( $klarna_billing_house_number ), // For DE and NL we need to specify houseNo.
+				$houseExt  = utf8_decode( $klarna_billing_house_extension ) // Only required for NL.
 			);
 			// Add Company if one is set
 			if ( $order->get_billing_company() ) {
 				$addr_shipping->setCompanyName( utf8_decode( $order->get_billing_company() ) );
 			}
 		} else {
-			$addr_shipping = new Klarna\XMLRPC\Address( $email = $order->get_billing_email(), $telno = '', //We skip the normal land line phone, only one is needed.
-				$cellno = $order->get_billing_phone(), $fname = utf8_decode( $order->get_shipping_first_name() ), $lname = utf8_decode( $order->get_shipping_last_name() ), $careof = utf8_decode( $order->get_shipping_address_2() ),  // No care of, C/O.
-				$street = utf8_decode( $klarna_shipping_address ), // For DE and NL specify street number in houseNo.
-				$zip = utf8_decode( $order->get_shipping_postcode() ), $city = utf8_decode( $order->get_shipping_city() ), $country = utf8_decode( $order->get_shipping_country() ), $houseNo = utf8_decode( $klarna_shipping_house_number ), // For DE and NL we need to specify houseNo.
-				$houseExt = utf8_decode( $klarna_shipping_house_extension ) // Only required for NL.
+			$addr_shipping = new Klarna\XMLRPC\Address(
+				$email     = $order->get_billing_email(),
+				$telno     = '', // We skip the normal land line phone, only one is needed.
+				$cellno    = $order->get_billing_phone(),
+				$fname     = utf8_decode( $order->get_shipping_first_name() ),
+				$lname     = utf8_decode( $order->get_shipping_last_name() ),
+				$careof    = utf8_decode( $order->get_shipping_address_2() ),  // No care of, C/O.
+				$street    = utf8_decode( $klarna_shipping_address ), // For DE and NL specify street number in houseNo.
+				$zip       = utf8_decode( $order->get_shipping_postcode() ),
+				$city      = utf8_decode( $order->get_shipping_city() ),
+				$country   = utf8_decode( $order->get_shipping_country() ),
+				$houseNo   = utf8_decode( $klarna_shipping_house_number ), // For DE and NL we need to specify houseNo.
+				$houseExt  = utf8_decode( $klarna_shipping_house_extension ) // Only required for NL.
 			);
 			// Add Company if one is set
 			if ( $order->get_shipping_company() ) {
@@ -337,6 +370,7 @@ class WC_Gateway_Klarna_Order {
 		 * Check if return amount is equal to order total, if yes
 		 * refund entire order.
 		 */
+
 		if ( $order->get_total() == $amount ) {
 			try {
 				$ocr = $klarna->creditInvoice( $invNo ); // Invoice number
@@ -349,7 +383,7 @@ class WC_Gateway_Klarna_Order {
 				if ( $this->debug == 'yes' ) {
 					$this->log->add( 'klarna', 'Klarna API error: ' . var_export( $e, true ) );
 				}
-				$order->add_order_note( sprintf( __( 'Klarna order refund failed. Error code %s. Error message %s', 'woocommerce-gateway-klarna' ), $e->getCode(), utf8_encode( $e->getMessage() ) ) );
+				$order->add_order_note( sprintf( __( 'Klarna order refund failed. Error code %1$s. Error message %2$s', 'woocommerce-gateway-klarna' ), $e->getCode(), utf8_encode( $e->getMessage() ) ) );
 
 				return false;
 			}
@@ -365,8 +399,8 @@ class WC_Gateway_Klarna_Order {
 			 */
 			if ( 1 == count( $order->get_taxes() ) ) {
 				$tax_items = $order->get_items( 'tax' );
-				foreach( $tax_items as $tax_item ) {
-					$rate_id = $tax_item->get_rate_id();
+				foreach ( $tax_items as $tax_item ) {
+					$rate_id  = $tax_item->get_rate_id();
 					$tax_rate = round( intval( WC_Tax::_get_tax_rate( $rate_id )['tax_rate'] ), 0 );
 				}
 				try {
@@ -386,7 +420,7 @@ class WC_Gateway_Klarna_Order {
 					if ( $this->debug == 'yes' ) {
 						$this->log->add( 'klarna', 'Klarna API error: ' . var_export( $e, true ) );
 					}
-					$order->add_order_note( sprintf( __( 'Klarna order refund failed. Error code %s. Error message %s', 'woocommerce-gateway-klarna' ), $e->getCode(), utf8_encode( $e->getMessage() ) ) );
+					$order->add_order_note( sprintf( __( 'Klarna order refund failed. Error code %1$s. Error message %2$s', 'woocommerce-gateway-klarna' ), $e->getCode(), utf8_encode( $e->getMessage() ) ) );
 
 					return false;
 				}
@@ -412,10 +446,12 @@ class WC_Gateway_Klarna_Order {
 		$order    = $this->order;
 		$order_id = klarna_wc_get_order_id( $order );
 		try {
-			$k_order->refund( array(
-				'refunded_amount' => $amount * 100,
-				'description'     => utf8_encode( $reason ),
-			) );
+			$k_order->refund(
+				array(
+					'refunded_amount' => $amount * 100,
+					'description'     => utf8_encode( $reason ),
+				)
+			);
 			$order->add_order_note( sprintf( __( 'Klarna order refunded. Refund amount: %s.', 'woocommerce-gateway-klarna' ), wc_price( $amount, array( 'currency' => $order->get_currency() ) ) ) );
 
 			return true;
@@ -423,7 +459,7 @@ class WC_Gateway_Klarna_Order {
 			if ( $this->debug == 'yes' ) {
 				$this->log->add( 'klarna', 'Klarna API error: ' . var_export( $e, true ) );
 			}
-			$order->add_order_note( sprintf( __( 'Klarna order refund failed. Error code %s. Error message %s', 'woocommerce-gateway-klarna' ), $e->getCode(), utf8_encode( $e->getMessage() ) ) );
+			$order->add_order_note( sprintf( __( 'Klarna order refund failed. Error code %1$s. Error message %2$s', 'woocommerce-gateway-klarna' ), $e->getCode(), utf8_encode( $e->getMessage() ) ) );
 
 			return false;
 		}
@@ -444,15 +480,15 @@ class WC_Gateway_Klarna_Order {
 		}
 		// Country and language
 		switch ( $country ) {
-			case 'NO' :
-			case 'NB' :
+			case 'NO':
+			case 'NB':
 				$klarna_country  = 'NO';
 				$klarna_language = 'nb-no';
 				$klarna_currency = 'NOK';
 				$klarna_eid      = $klarna_settings['eid_no'];
 				$klarna_secret   = $klarna_settings['secret_no'];
 				break;
-			case 'FI' :
+			case 'FI':
 				$klarna_country = 'FI';
 				// Check if WPML is used and determine if Finnish or Swedish is used as language
 				if ( class_exists( 'woocommerce_wpml' ) && defined( 'ICL_LANGUAGE_CODE' ) && strtoupper( ICL_LANGUAGE_CODE ) == 'SV' ) {
@@ -464,43 +500,43 @@ class WC_Gateway_Klarna_Order {
 				$klarna_eid      = $klarna_settings['eid_fi'];
 				$klarna_secret   = $klarna_settings['secret_fi'];
 				break;
-			case 'SE' :
-			case 'SV' :
+			case 'SE':
+			case 'SV':
 				$klarna_country  = 'SE';
 				$klarna_language = 'sv-se';
 				$klarna_currency = 'SEK';
 				$klarna_eid      = $klarna_settings['eid_se'];
 				$klarna_secret   = $klarna_settings['secret_se'];
 				break;
-			case 'DE' :
+			case 'DE':
 				$klarna_country  = 'DE';
 				$klarna_language = 'de-de';
 				$klarna_currency = 'EUR';
 				$klarna_eid      = $klarna_settings['eid_de'];
 				$klarna_secret   = $klarna_settings['secret_de'];
 				break;
-			case 'AT' :
+			case 'AT':
 				$klarna_country  = 'AT';
 				$klarna_language = 'de-at';
 				$klarna_currency = 'EUR';
 				$klarna_eid      = $klarna_settings['eid_at'];
 				$klarna_secret   = $klarna_settings['secret_at'];
 				break;
-			case 'GB' :
+			case 'GB':
 				$klarna_country  = 'gb';
 				$klarna_language = 'en-gb';
 				$klarna_currency = 'gbp';
 				$klarna_eid      = $klarna_settings['eid_uk'];
 				$klarna_secret   = html_entity_decode( $klarna_settings['secret_uk'] );
 				break;
-			case 'US' :
+			case 'US':
 				$klarna_country  = 'us';
 				$klarna_language = 'en-us';
 				$klarna_currency = 'usd';
 				$klarna_eid      = $klarna_settings['eid_us'];
 				$klarna_secret   = html_entity_decode( $klarna_settings['secret_us'] );
 				break;
-			case 'NL' :
+			case 'NL':
 				$klarna_country  = 'NL';
 				$klarna_language = 'nl-NL';
 				$klarna_currency = 'EUR';
@@ -537,7 +573,7 @@ class WC_Gateway_Klarna_Order {
 	 * @since  2.0
 	 **/
 	function activate_klarna_order( $orderid ) {
-		$order = wc_get_order( $orderid );
+		$order                      = wc_get_order( $orderid );
 		$payment_method             = $this->get_order_payment_method( $order );
 		$payment_method_option_name = 'woocommerce_' . $payment_method . '_settings';
 		$payment_method_option      = get_option( $payment_method_option_name );
@@ -579,8 +615,8 @@ class WC_Gateway_Klarna_Order {
 			$rno            = get_post_meta( $orderid, '_klarna_order_reservation', true );
 			$payment_method = get_post_meta( $orderid, '_payment_method', true );
 			// Get country - either from stored _klarna_credentials_country or _billing_country (backwords compat)
-			if( get_post_meta( $orderid, '_klarna_credentials_country', true ) ) {
-				$country =  get_post_meta( $orderid, '_klarna_credentials_country', true );
+			if ( get_post_meta( $orderid, '_klarna_credentials_country', true ) ) {
+				$country = get_post_meta( $orderid, '_klarna_credentials_country', true );
 			} else {
 				$country = get_post_meta( $orderid, '_billing_country', true );
 			}
@@ -594,11 +630,14 @@ class WC_Gateway_Klarna_Order {
 			$klarna = new Klarna\XMLRPC\Klarna();
 			$this->configure_klarna( $klarna, $country, $payment_method );
 			try {
-				$result = $klarna->activate( $rno, null, // OCR Number
-					Klarna\XMLRPC\Flags::RSRV_SEND_BY_EMAIL );
+				$result = $klarna->activate(
+					$rno,
+					null, // OCR Number
+					Klarna\XMLRPC\Flags::RSRV_SEND_BY_EMAIL
+				);
 				$risk   = $result[0]; // returns 'ok' or 'no_risk'
 				$invNo  = $result[1]; // returns invoice number
-				$order->add_order_note( sprintf( __( 'Klarna order activated. Invoice number %s - risk status %s.', 'woocommerce-gateway-klarna' ), $invNo, $risk ) );
+				$order->add_order_note( sprintf( __( 'Klarna order activated. Invoice number %1$s - risk status %2$s.', 'woocommerce-gateway-klarna' ), $invNo, $risk ) );
 				update_post_meta( $orderid, '_klarna_order_activated', time() );
 				update_post_meta( $orderid, '_klarna_invoice_number', $invNo );
 				update_post_meta( $orderid, '_transaction_id', $invNo );
@@ -606,7 +645,7 @@ class WC_Gateway_Klarna_Order {
 				if ( $this->debug == 'yes' ) {
 					$this->log->add( 'klarna', 'Klarna API error: ' . var_export( $e, true ) );
 				}
-				$order->add_order_note( sprintf( __( 'Klarna order activation failed. Error code %s. Error message %s', 'woocommerce-gateway-klarna' ), $e->getCode(), utf8_encode( $e->getMessage() ) ) );
+				$order->add_order_note( sprintf( __( 'Klarna order activation failed. Error code %1$s. Error message %2$s', 'woocommerce-gateway-klarna' ), $e->getCode(), utf8_encode( $e->getMessage() ) ) );
 			}
 		}
 	}
@@ -620,8 +659,8 @@ class WC_Gateway_Klarna_Order {
 		$order           = wc_get_order( $orderid );
 		$klarna_settings = get_option( 'woocommerce_klarna_checkout_settings' );
 		// Get country - either from stored _klarna_credentials_country or _billing_country (backwords compat)
-		if( get_post_meta( $orderid, '_klarna_credentials_country', true ) ) {
-			$country =  get_post_meta( $orderid, '_klarna_credentials_country', true );
+		if ( get_post_meta( $orderid, '_klarna_credentials_country', true ) ) {
+			$country = get_post_meta( $orderid, '_klarna_credentials_country', true );
 		} else {
 			$country = get_post_meta( $orderid, '_billing_country', true );
 		}
@@ -643,13 +682,13 @@ class WC_Gateway_Klarna_Order {
 		}
 		if ( 'gb' === strtolower( $country ) || 'dk' === strtolower( $country ) || 'nl' === strtolower( $country ) ) {
 			if ( 'gb' === strtolower( $country ) ) {
-				$eid = $klarna_settings['eid_uk'];
+				$eid    = $klarna_settings['eid_uk'];
 				$secret = html_entity_decode( $klarna_settings['secret_uk'] );
 			} elseif ( 'dk' === strtolower( $country ) ) {
-				$eid = $klarna_settings['eid_dk'];
+				$eid    = $klarna_settings['eid_dk'];
 				$secret = html_entity_decode( $klarna_settings['secret_dk'] );
 			} elseif ( 'nl' === strtolower( $country ) ) {
-				$eid = $klarna_settings['eid_nl'];
+				$eid    = $klarna_settings['eid_nl'];
 				$secret = html_entity_decode( $klarna_settings['secret_nl'] );
 			}
 			$connector = Klarna\Rest\Transport\Connector::create( $eid, $secret, $klarna_server_url );
@@ -676,7 +715,7 @@ class WC_Gateway_Klarna_Order {
 			if ( $this->debug == 'yes' ) {
 				$this->log->add( 'klarna', 'Klarna API error: ' . var_export( $e, true ) );
 			}
-			$order->add_order_note( sprintf( __( 'Klarna order activation failed. Error code %s. Error message %s', 'woocommerce-gateway-klarna' ), $e->getCode(), utf8_encode( $e->getMessage() ) ) );
+			$order->add_order_note( sprintf( __( 'Klarna order activation failed. Error code %1$s. Error message %2$s', 'woocommerce-gateway-klarna' ), $e->getCode(), utf8_encode( $e->getMessage() ) ) );
 		}
 	}
 
@@ -686,7 +725,7 @@ class WC_Gateway_Klarna_Order {
 	 * @since  2.0
 	 **/
 	function cancel_klarna_order( $orderid ) {
-		$order = wc_get_order( $orderid );
+		$order                      = wc_get_order( $orderid );
 		$payment_method             = $this->get_order_payment_method( $order );
 		$payment_method_option_name = 'woocommerce_' . $payment_method . '_settings';
 		$payment_method_option      = get_option( $payment_method_option_name );
@@ -718,15 +757,15 @@ class WC_Gateway_Klarna_Order {
 		$order = wc_get_order( $orderid );
 		// Klarna reservation number and billing country must be set
 		if ( get_post_meta( $orderid, '_klarna_order_reservation', true ) && get_post_meta( $orderid, '_billing_country', true ) && ! get_post_meta( $orderid, '_klarna_order_activated', true ) ) {
-			$rno            = get_post_meta( $orderid, '_klarna_order_reservation', true );
+			$rno = get_post_meta( $orderid, '_klarna_order_reservation', true );
 			// Get country - either from stored _klarna_credentials_country or _billing_country (backwords compat)
-			if( get_post_meta( $orderid, '_klarna_credentials_country', true ) ) {
-				$country =  get_post_meta( $orderid, '_klarna_credentials_country', true );
+			if ( get_post_meta( $orderid, '_klarna_credentials_country', true ) ) {
+				$country = get_post_meta( $orderid, '_klarna_credentials_country', true );
 			} else {
 				$country = get_post_meta( $orderid, '_billing_country', true );
 			}
 			$payment_method = get_post_meta( $orderid, '_payment_method', true );
-			$klarna = new Klarna\XMLRPC\Klarna();
+			$klarna         = new Klarna\XMLRPC\Klarna();
 			$this->configure_klarna( $klarna, $country, $payment_method );
 			try {
 				$klarna->cancelReservation( $rno );
@@ -736,7 +775,7 @@ class WC_Gateway_Klarna_Order {
 				if ( $this->debug == 'yes' ) {
 					$this->log->add( 'klarna', 'Klarna API error: ' . var_export( $e, true ) );
 				}
-				$order->add_order_note( sprintf( __( 'Klarna order cancellation failed. Error code %s. Error message %s', 'woocommerce-gateway-klarna' ), $e->getCode(), utf8_encode( $e->getMessage() ) ) );
+				$order->add_order_note( sprintf( __( 'Klarna order cancellation failed. Error code %1$s. Error message %2$s', 'woocommerce-gateway-klarna' ), $e->getCode(), utf8_encode( $e->getMessage() ) ) );
 			}
 		}
 	}
@@ -750,8 +789,8 @@ class WC_Gateway_Klarna_Order {
 		$order           = wc_get_order( $orderid );
 		$klarna_settings = get_option( 'woocommerce_klarna_checkout_settings' );
 		// Get country - either from stored _klarna_credentials_country or _billing_country (backwords compat)
-		if( get_post_meta( $orderid, '_klarna_credentials_country', true ) ) {
-			$country =  get_post_meta( $orderid, '_klarna_credentials_country', true );
+		if ( get_post_meta( $orderid, '_klarna_credentials_country', true ) ) {
+			$country = get_post_meta( $orderid, '_klarna_credentials_country', true );
 		} else {
 			$country = get_post_meta( $orderid, '_billing_country', true );
 		}
@@ -773,13 +812,13 @@ class WC_Gateway_Klarna_Order {
 		}
 		if ( 'gb' === strtolower( $country ) || 'dk' === strtolower( $country ) || 'nl' === strtolower( $country ) ) {
 			if ( 'gb' === strtolower( $country ) ) {
-				$eid = $klarna_settings['eid_uk'];
+				$eid    = $klarna_settings['eid_uk'];
 				$secret = html_entity_decode( $klarna_settings['secret_uk'] );
 			} elseif ( 'dk' === strtolower( $country ) ) {
-				$eid = $klarna_settings['eid_dk'];
+				$eid    = $klarna_settings['eid_dk'];
 				$secret = html_entity_decode( $klarna_settings['secret_dk'] );
 			} elseif ( 'nl' === strtolower( $country ) ) {
-				$eid = $klarna_settings['eid_nl'];
+				$eid    = $klarna_settings['eid_nl'];
 				$secret = html_entity_decode( $klarna_settings['secret_nl'] );
 			}
 
@@ -798,7 +837,7 @@ class WC_Gateway_Klarna_Order {
 			if ( $this->debug == 'yes' ) {
 				$this->log->add( 'klarna', 'Klarna API error: ' . var_export( $e, true ) );
 			}
-			$order->add_order_note( sprintf( __( 'Klarna order cancelation failed. Error code %s. Error message %s', 'woocommerce-gateway-klarna' ), $e->getCode(), utf8_encode( $e->getMessage() ) ) );
+			$order->add_order_note( sprintf( __( 'Klarna order cancelation failed. Error code %1$s. Error message %2$s', 'woocommerce-gateway-klarna' ), $e->getCode(), utf8_encode( $e->getMessage() ) ) );
 		}
 	}
 
@@ -810,13 +849,18 @@ class WC_Gateway_Klarna_Order {
 	function update_klarna_order_add_item( $itemid, $item ) {
 		// Get item row from the database table, needed for order id
 		global $wpdb;
-		$item_row = $wpdb->get_row( $wpdb->prepare( "
+		$item_row = $wpdb->get_row(
+			$wpdb->prepare(
+				"
 			SELECT      order_id
 			FROM        {$wpdb->prefix}woocommerce_order_items
 			WHERE       order_item_id = %d
-		", $itemid ) );
-		$orderid = $item_row->order_id;
-		$order   = wc_get_order( $orderid );
+		",
+				$itemid
+			)
+		);
+		$orderid  = $item_row->order_id;
+		$order    = wc_get_order( $orderid );
 		if ( $this->order_is_updatable( $order ) ) {
 			if ( 'rest' == get_post_meta( $orderid, '_klarna_api', true ) ) {
 				$this->update_order_rest( $orderid );
@@ -835,13 +879,18 @@ class WC_Gateway_Klarna_Order {
 	function update_klarna_order_delete_item( $itemid ) {
 		// Get item row from the database table, needed for order id
 		global $wpdb;
-		$item_row = $wpdb->get_row( $wpdb->prepare( "
+		$item_row = $wpdb->get_row(
+			$wpdb->prepare(
+				"
 			SELECT      order_id
 			FROM        {$wpdb->prefix}woocommerce_order_items
 			WHERE       order_item_id = %d
-		", $itemid ) );
-		$orderid = $item_row->order_id;
-		$order   = wc_get_order( $orderid );
+		",
+				$itemid
+			)
+		);
+		$orderid  = $item_row->order_id;
+		$order    = wc_get_order( $orderid );
 		if ( $this->order_is_updatable( $order ) ) {
 			if ( 'rest' == get_post_meta( $orderid, '_klarna_api', true ) ) {
 				$this->update_order_rest( $orderid, $itemid );
@@ -879,7 +928,7 @@ class WC_Gateway_Klarna_Order {
 		$payment_method             = $this->get_order_payment_method( $order );
 		$payment_method_option_name = 'woocommerce_' . $payment_method . '_settings';
 		$payment_method_option      = get_option( $payment_method_option_name );
-		$order_id = klarna_wc_get_order_id( $order );
+		$order_id                   = klarna_wc_get_order_id( $order );
 
 		$updatable = false;
 		// Check if option is enabled
@@ -899,23 +948,23 @@ class WC_Gateway_Klarna_Order {
 	 * @since  2.0
 	 *
 	 * @param $orderid
-	 * @param bool $itemid
+	 * @param bool    $itemid
 	 */
 	function update_order( $orderid, $itemid = false ) {
-		$order       = wc_get_order( $orderid );
-		$this->order = $order;
+		$order          = wc_get_order( $orderid );
+		$this->order    = $order;
 		$rno            = get_post_meta( $orderid, '_klarna_order_reservation', true );
 		$payment_method = get_post_meta( $orderid, '_payment_method', true );
 		// Get country - either from stored _klarna_credentials_country or _billing_country (backwords compat)
-		if( get_post_meta( $orderid, '_klarna_credentials_country', true ) ) {
-			$country =  get_post_meta( $orderid, '_klarna_credentials_country', true );
+		if ( get_post_meta( $orderid, '_klarna_credentials_country', true ) ) {
+			$country = get_post_meta( $orderid, '_klarna_credentials_country', true );
 		} else {
 			$country = get_post_meta( $orderid, '_billing_country', true );
 		}
 		$klarna = new Klarna\XMLRPC\Klarna();
 		$this->configure_klarna( $klarna, $country, $payment_method );
 		$this->klarna = $klarna;
-		if ( 'AT' !== $country  && 'DE' !== $country ) {
+		if ( 'AT' !== $country && 'DE' !== $country ) {
 			$this->add_addresses();
 		}
 		$this->process_order_items( $itemid );
@@ -931,7 +980,7 @@ class WC_Gateway_Klarna_Order {
 			if ( $this->debug == 'yes' ) {
 				$this->log->add( 'klarna', 'Klarna API error: ' . var_export( $e, true ) );
 			}
-			$order->add_order_note( sprintf( __( 'Klarna order update failed. Error code %s. Error message %s', 'woocommerce-gateway-klarna' ), $e->getCode(), utf8_encode( $e->getMessage() ) ) );
+			$order->add_order_note( sprintf( __( 'Klarna order update failed. Error code %1$s. Error message %2$s', 'woocommerce-gateway-klarna' ), $e->getCode(), utf8_encode( $e->getMessage() ) ) );
 		}
 	}
 
@@ -941,7 +990,7 @@ class WC_Gateway_Klarna_Order {
 	 * @since  2.0
 	 *
 	 * @param $orderid
-	 * @param bool $itemid
+	 * @param bool    $itemid
 	 *
 	 * @return bool|WP_Error
 	 */
@@ -949,8 +998,8 @@ class WC_Gateway_Klarna_Order {
 		$order           = wc_get_order( $orderid );
 		$klarna_settings = get_option( 'woocommerce_klarna_checkout_settings' );
 		// Get country - either from stored _klarna_credentials_country or _billing_country (backwords compat)
-		if( get_post_meta( $orderid, '_klarna_credentials_country', true ) ) {
-			$country =  get_post_meta( $orderid, '_klarna_credentials_country', true );
+		if ( get_post_meta( $orderid, '_klarna_credentials_country', true ) ) {
+			$country = get_post_meta( $orderid, '_klarna_credentials_country', true );
 		} else {
 			$country = get_post_meta( $orderid, '_billing_country', true );
 		}
@@ -967,17 +1016,17 @@ class WC_Gateway_Klarna_Order {
 
 				if ( function_exists( 'wc_display_item_meta' ) ) {
 					$meta_args = array(
-						'echo' => false,
-						'before' => '(',
-						'after' => ')',
-						'separator' => ', '
+						'echo'      => false,
+						'before'    => '(',
+						'after'     => ')',
+						'separator' => ', ',
 					);
 					$item_meta = wc_display_item_meta( $order_item, $meta_args );
 
 					$item_name .= ' ' . wp_strip_all_tags( $item_meta );
 				} else {
 					if ( isset( $order_item['item_meta'] ) ) { // Append item meta to the title, if it exists
-						$item_meta  = new WC_Order_Item_Meta( $order_item['item_meta'] );
+						$item_meta = new WC_Order_Item_Meta( $order_item['item_meta'] );
 						if ( $meta = $item_meta->display( true, true ) ) {
 							$item_name .= ' (' . $meta . ')';
 						}
@@ -1007,8 +1056,8 @@ class WC_Gateway_Klarna_Order {
 				$item_tax_amount = 'us' == strtolower( $order_billing_country ) ? 0 : round( $order_item['line_tax'] * 100 );
 
 				// Item tax rate
-				$item_tax_rate = 'us' == strtolower( $order_billing_country ) ? 0 : round( $order_item['line_subtotal_tax'] / $order_item['line_subtotal'], 2 ) * 100 * 100;
-				$klarna_item = array(
+				$item_tax_rate         = 'us' == strtolower( $order_billing_country ) ? 0 : round( $order_item['line_subtotal_tax'] / $order_item['line_subtotal'], 2 ) * 100 * 100;
+				$klarna_item           = array(
 					'reference'             => $item_reference,
 					'name'                  => $item_name,
 					'quantity'              => $item_quantity,
@@ -1016,7 +1065,7 @@ class WC_Gateway_Klarna_Order {
 					'tax_rate'              => $item_tax_rate,
 					'total_amount'          => $item_total_amount,
 					'total_tax_amount'      => $item_tax_amount,
-					'total_discount_amount' => $item_discount_amount
+					'total_discount_amount' => $item_discount_amount,
 				);
 				$updated_order_lines[] = $klarna_item;
 				$updated_order_total   = $updated_order_total + $item_total_amount;
@@ -1044,10 +1093,10 @@ class WC_Gateway_Klarna_Order {
 				// apply_filters to item price so we can filter this if needed
 				$klarna_item_price_including_tax = ( $item['line_total'] + $item['line_tax'] ) * 100;
 				$item_price                      = apply_filters( 'klarna_fee_price_including_tax', $klarna_item_price_including_tax );
-				$item_price = 'us' == strtolower( $order_billing_country ) ? $item['line_total'] * 100 : $item_price;
-				$tax_rate   = 'us' == strtolower( $order_billing_country ) ? 0 : round( $item_tax_percentage );
-				$tax_amount = 'us' == strtolower( $order_billing_country ) ? 0 : $item['line_tax'];
-				$klarna_item = array(
+				$item_price                      = 'us' == strtolower( $order_billing_country ) ? $item['line_total'] * 100 : $item_price;
+				$tax_rate                        = 'us' == strtolower( $order_billing_country ) ? 0 : round( $item_tax_percentage );
+				$tax_amount                      = 'us' == strtolower( $order_billing_country ) ? 0 : $item['line_tax'];
+				$klarna_item                     = array(
 					'reference'             => strval( $item['name'] ),
 					'name'                  => $item['name'],
 					'quantity'              => 1,
@@ -1055,21 +1104,21 @@ class WC_Gateway_Klarna_Order {
 					'tax_rate'              => $tax_rate,
 					'total_amount'          => $item_price,
 					'total_tax_amount'      => $tax_amount,
-					'total_discount_amount' => 0
+					'total_discount_amount' => 0,
 				);
-				$updated_order_lines[] = $klarna_item;
-				$updated_order_total   = $updated_order_total + $item_price;
-				$updated_tax_total     = $updated_tax_total + $item['line_tax'];
+				$updated_order_lines[]           = $klarna_item;
+				$updated_order_total             = $updated_order_total + $item_price;
+				$updated_tax_total               = $updated_tax_total + $item['line_tax'];
 			}
 		}
 		// Process shipping
 		if ( $order->get_total_shipping() > 0 ) {
 			// We manually calculate the shipping tax percentage here
 			$calculated_shipping_tax_percentage = ( $order->get_shipping_tax() / $order->get_total_shipping() ) * 100;
-			$tax_rate   = 'us' == strtolower( $order_billing_country ) ? 0 : round( $calculated_shipping_tax_percentage ) * 100;
-			$tax_amount = 'us' == strtolower( $order_billing_country ) ? 0 : round( $order->get_shipping_tax() ) * 100;
-			$unit_price = 'us' == strtolower( $order_billing_country ) ? round( $order->get_total_shipping() * 100 ) : round( $order->get_total_shipping() + $order->get_shipping_tax() ) * 100;
-			$klarna_item = array(
+			$tax_rate                           = 'us' == strtolower( $order_billing_country ) ? 0 : round( $calculated_shipping_tax_percentage ) * 100;
+			$tax_amount                         = 'us' == strtolower( $order_billing_country ) ? 0 : round( $order->get_shipping_tax() ) * 100;
+			$unit_price                         = 'us' == strtolower( $order_billing_country ) ? round( $order->get_total_shipping() * 100 ) : round( $order->get_total_shipping() + $order->get_shipping_tax() ) * 100;
+			$klarna_item                        = array(
 				'type'                  => 'shipping_fee',
 				'reference'             => 'SHIPPING',
 				'name'                  => strval( $order->get_shipping_method() ),
@@ -1078,11 +1127,11 @@ class WC_Gateway_Klarna_Order {
 				'tax_rate'              => $tax_rate,
 				'total_amount'          => $unit_price,
 				'total_tax_amount'      => $tax_amount,
-				'total_discount_amount' => 0
+				'total_discount_amount' => 0,
 			);
-			$updated_order_lines[] = $klarna_item;
-			$updated_order_total   = $updated_order_total + $unit_price;
-			$updated_tax_total     = $updated_tax_total + $tax_amount;
+			$updated_order_lines[]              = $klarna_item;
+			$updated_order_total                = $updated_order_total + $unit_price;
+			$updated_tax_total                  = $updated_tax_total + $tax_amount;
 		}
 		// Process discount
 		foreach ( $order->get_items( 'coupon' ) as $coupon_id => $coupon_data ) {
@@ -1094,9 +1143,9 @@ class WC_Gateway_Klarna_Order {
 			if ( 'yes' !== $klarna_settings['send_discounts_separately'] && 'smart_coupon' !== klarna_wc_get_coupon_discount_type( $coupon ) ) {
 				break;
 			}
-			$coupon_name   = $coupon_data['name'];
-			$coupon_amount = $coupon_data['discount_amount'] * 100;
-			$klarna_item = array(
+			$coupon_name           = $coupon_data['name'];
+			$coupon_amount         = $coupon_data['discount_amount'] * 100;
+			$klarna_item           = array(
 				'type'                  => 'discount',
 				'reference'             => 'DISCOUNT',
 				'name'                  => strval( $coupon_name ),
@@ -1105,7 +1154,7 @@ class WC_Gateway_Klarna_Order {
 				'tax_rate'              => 0,
 				'total_amount'          => - $coupon_amount,
 				'total_tax_amount'      => 0,
-				'total_discount_amount' => 0
+				'total_discount_amount' => 0,
 			);
 			$updated_order_lines[] = $klarna_item;
 			$updated_order_total   = $updated_order_total - $coupon_amount;
@@ -1114,7 +1163,7 @@ class WC_Gateway_Klarna_Order {
 		if ( 'us' == strtolower( $order_billing_country ) ) {
 			$sales_tax = round( ( $order->get_cart_tax() + $order->get_shipping_tax() ) * 100 );
 			// Add sales tax line item
-			$klarna_item = array(
+			$klarna_item           = array(
 				'type'                  => 'sales_tax',
 				'reference'             => __( 'Sales Tax', 'woocommerce-gateway-klarna' ),
 				'name'                  => __( 'Sales Tax', 'woocommerce-gateway-klarna' ),
@@ -1123,7 +1172,7 @@ class WC_Gateway_Klarna_Order {
 				'tax_rate'              => 0,
 				'total_amount'          => $sales_tax,
 				'total_discount_amount' => 0,
-				'total_tax_amount'      => 0
+				'total_tax_amount'      => 0,
 			);
 			$updated_order_lines[] = $klarna_item;
 			$updated_order_total   = $updated_order_total + $sales_tax;
@@ -1146,13 +1195,13 @@ class WC_Gateway_Klarna_Order {
 		}
 		if ( 'gb' === strtolower( $country ) || 'dk' === strtolower( $country ) || 'nl' === strtolower( $country ) ) {
 			if ( 'gb' === strtolower( $country ) ) {
-				$eid = $klarna_settings['eid_uk'];
+				$eid    = $klarna_settings['eid_uk'];
 				$secret = html_entity_decode( $klarna_settings['secret_uk'] );
 			} elseif ( 'dk' === strtolower( $country ) ) {
-				$eid = $klarna_settings['eid_dk'];
+				$eid    = $klarna_settings['eid_dk'];
 				$secret = html_entity_decode( $klarna_settings['secret_dk'] );
 			} elseif ( 'nl' === strtolower( $country ) ) {
-				$eid = $klarna_settings['eid_nl'];
+				$eid    = $klarna_settings['eid_nl'];
 				$secret = html_entity_decode( $klarna_settings['secret_nl'] );
 			}
 
@@ -1164,12 +1213,14 @@ class WC_Gateway_Klarna_Order {
 		$k_order         = new Klarna\Rest\OrderManagement\Order( $connector, $klarna_order_id );
 		$k_order->fetch();
 		try {
-			$k_order->updateAuthorization( array(
-				'order_amount'     => $updated_order_total,
-				'order_tax_amount' => $updated_tax_total,
-				'description'      => 'Updating WooCommerce order',
-				'order_lines'      => $updated_order_lines
-			) );
+			$k_order->updateAuthorization(
+				array(
+					'order_amount'     => $updated_order_total,
+					'order_tax_amount' => $updated_tax_total,
+					'description'      => 'Updating WooCommerce order',
+					'order_lines'      => $updated_order_lines,
+				)
+			);
 			$order->add_order_note( sprintf( __( 'Klarna order updated.', 'woocommerce-gateway-klarna' ) ) );
 
 			return true;
@@ -1177,7 +1228,7 @@ class WC_Gateway_Klarna_Order {
 			if ( $this->debug == 'yes' ) {
 				$this->log->add( 'klarna', 'Klarna API error: ' . $e->getCode() . ' - ' . $e->getMessage() );
 			}
-			$order->add_order_note( sprintf( __( 'Klarna order update failed. Error code %s. Error message %s', 'woocommerce-gateway-klarna' ), $e->getCode(), utf8_encode( $e->getMessage() ) ) );
+			$order->add_order_note( sprintf( __( 'Klarna order update failed. Error code %1$s. Error message %2$s', 'woocommerce-gateway-klarna' ), $e->getCode(), utf8_encode( $e->getMessage() ) ) );
 
 			return new WP_Error( $e->getCode(), utf8_encode( $e->getMessage() ) );
 		}
@@ -1200,4 +1251,4 @@ class WC_Gateway_Klarna_Order {
 
 }
 
-$wc_gateway_klarna_order = new WC_Gateway_Klarna_Order;
+$wc_gateway_klarna_order = new WC_Gateway_Klarna_Order();
