@@ -64,11 +64,11 @@ class WC_Gateway_Klarna_Order {
 		$this->set_addresses( $klarna_billing, $klarna_shipping, $ship_to_billing_address );
 	}
 
-	/**
-	 * Add shipping and billing address to Klarna update order.
-	 *
-	 * @since  2.0
-	 **/
+		/**
+		 * Add shipping and billing address to Klarna update order.
+		 *
+		 * @since  2.0
+		 **/
 	function add_addresses() {
 		$order    = $this->order;
 		$klarna   = $this->klarna;
@@ -364,13 +364,20 @@ class WC_Gateway_Klarna_Order {
 	 * @since  2.0
 	 **/
 	function refund_order( $amount, $reason = '', $invNo ) {
-		$order  = $this->order;
-		$klarna = $this->klarna;
+		$order     = $this->order;
+		$klarna    = $this->klarna;
+		$refund_id = self::get_refunded_order_id( $order->get_id() );
+
+		if ( ! empty( $refund_id ) ) {
+			$refund_order                = wc_get_order( $refund_id );
+			$refunded_items              = $refund_order->get_items();
+			$refund_items_got_full_price = self::check_refund_items_got_full_price( $refunded_items, $order );
+		}
+
 		/**
 		 * Check if return amount is equal to order total, if yes
 		 * refund entire order.
 		 */
-
 		if ( $order->get_total() == $amount ) {
 			try {
 				$ocr = $klarna->creditInvoice( $invNo ); // Invoice number
@@ -387,27 +394,83 @@ class WC_Gateway_Klarna_Order {
 
 				return false;
 			}
-			/**
-			 * If return amount is not equal to order total, maybe perform
-			 * good-will partial refund.
-			 */
+		}
+
+		/**
+		 * If we got refunded items and all item prices are the same as in the original order - perform a line item refund.
+		 */
+		if ( ! empty( $refunded_items ) && $refund_items_got_full_price ) {
+			// Cart.
+			foreach ( $refunded_items as $item ) {
+				$product = $item->get_product();
+				$klarna->addArtNo( abs( $item['qty'] ), self::get_item_reference( $product ) );
+			}
+			// Shipping.
+			if ( $refund_order->get_shipping_total() < 0 ) {
+				$klarna->addArtNo( 1, self::get_refund_shipping_reference( $refund_order ) );
+			}
+			try {
+				$ocr = $klarna->creditPart( $invNo ); // Invoice number
+				if ( $ocr ) {
+					$order->add_order_note( sprintf( __( 'Klarna order refunded.', 'woocommerce-gateway-klarna' ), $ocr ) );
+
+					return true;
+				}
+			} catch ( Exception $e ) {
+				if ( $this->debug == 'yes' ) {
+					$this->log->add( 'klarna', 'Klarna API error: ' . var_export( $e, true ) );
+				}
+				$order->add_order_note( sprintf( __( 'Klarna order refund failed. Error code %1$s. Error message %2$s', 'woocommerce-gateway-klarna' ), $e->getCode(), utf8_encode( $e->getMessage() ) ) );
+
+				return false;
+			}
 		} else {
 			/**
-			 * Tax rate needs to be specified for good-will refunds.
-			 * Check if there's only one tax rate in the entire order.
-			 * If yes, go ahead with good-will refund.
+			 * If we don't have any refunded items, or if item prices differ from the original order.
+			 * Use Klarnas returnAmount feature (good-will refunds).
 			 */
-			if ( 1 == count( $order->get_taxes() ) ) {
-				$tax_items = $order->get_items( 'tax' );
-				foreach ( $tax_items as $tax_item ) {
-					$rate_id  = $tax_item->get_rate_id();
-					$tax_rate = round( intval( WC_Tax::_get_tax_rate( $rate_id )['tax_rate'] ), 0 );
+			if ( ! empty( $refunded_items ) ) {
+				// We got items in the refund order, lets add each item as a return amount.
+				$refund_status = true;
+				foreach ( $refunded_items as $item ) {
+					try {
+						$product    = $item->get_product();
+						$item_price = round( ( $item->get_total() + $item->get_total_tax() ) / $item['qty'], 2 );
+						$_tax       = new WC_Tax();
+						$tmp_rates  = $_tax->get_rates( $product->get_tax_class() );
+						$vat        = array_shift( $tmp_rates );
+						if ( isset( $vat['rate'] ) ) {
+							$item_tax_rate = round( $vat['rate'] );
+						} else {
+							$item_tax_rate = 0;
+						}
+						$ocr = $klarna->returnAmount( // returns 1 on success
+							$invNo,                // Invoice number
+							$item_price,           // Amount given as a discount.
+							$item_tax_rate,             // VAT (%)
+							Klarna\XMLRPC\Flags::INC_VAT,  // Amount including VAT.
+							utf8_encode( sprintf( __( 'Refund for SKU %s.', 'woocommerce-gateway-klarna' ), self::get_item_reference( $product ) ) ) // Description
+						);
+						if ( $ocr ) {
+							$order->add_order_note( sprintf( __( 'Klarna order partially refunded. Refund amount: %s.', 'woocommerce-gateway-klarna' ), wc_price( $item_price, array( 'currency' => $order->get_currency() ) ) ) );
+						}
+					} catch ( Exception $e ) {
+						if ( $this->debug == 'yes' ) {
+							$this->log->add( 'klarna', 'Klarna API error: ' . var_export( $e, true ) );
+						}
+						$order->add_order_note( sprintf( __( 'Klarna order refund failed. Error code %1$s. Error message %2$s', 'woocommerce-gateway-klarna' ), $e->getCode(), utf8_encode( $e->getMessage() ) ) );
+						$refund_status = false;
+					}
 				}
+				return $refund_status;
+			} else {
+				// Merchant have only entered an amount in the Refund amount field.
+				// Lets send the amount with 0 tax rate.
 				try {
 					$ocr = $klarna->returnAmount( // returns 1 on success
 						$invNo,                // Invoice number
 						$amount,               // Amount given as a discount.
-						$tax_rate,             // VAT (%)
+						0,             // VAT (%)
 						Klarna\XMLRPC\Flags::INC_VAT,  // Amount including VAT.
 						utf8_encode( $reason ) // Description
 					);
@@ -424,14 +487,8 @@ class WC_Gateway_Klarna_Order {
 
 					return false;
 				}
-				/**
-				 * If there are multiple tax rates, bail and leave order note.
-				 */
-			} else {
-				$order->add_order_note( __( 'Refund failed. WooCommerce Klarna partial refund not possible for orders containing items with different tax rates.', 'woocommerce-gateway-klarna' ) );
-
-				return false;
 			}
+			return false;
 		}
 
 		return false;
@@ -852,10 +909,10 @@ class WC_Gateway_Klarna_Order {
 		$item_row = $wpdb->get_row(
 			$wpdb->prepare(
 				"
-			SELECT      order_id
-			FROM        {$wpdb->prefix}woocommerce_order_items
-			WHERE       order_item_id = %d
-		",
+				SELECT      order_id
+				FROM        {$wpdb->prefix}woocommerce_order_items
+				WHERE       order_item_id = %d
+			",
 				$itemid
 			)
 		);
@@ -882,10 +939,10 @@ class WC_Gateway_Klarna_Order {
 		$item_row = $wpdb->get_row(
 			$wpdb->prepare(
 				"
-			SELECT      order_id
-			FROM        {$wpdb->prefix}woocommerce_order_items
-			WHERE       order_item_id = %d
-		",
+				SELECT      order_id
+				FROM        {$wpdb->prefix}woocommerce_order_items
+				WHERE       order_item_id = %d
+			",
 				$itemid
 			)
 		);
@@ -1249,6 +1306,108 @@ class WC_Gateway_Klarna_Order {
 		return $payment_method;
 	}
 
+	/**
+	 * Get item reference.
+	 *
+	 * Returns SKU or product ID.
+	 *
+	 * @since  2.6.0
+	 * @access public
+	 *
+	 * @param  object $_product WC_Product.
+	 *
+	 * @return string $item_reference Cart item reference.
+	 */
+	public static function get_item_reference( $_product ) {
+		if ( $_product->get_sku() ) {
+			$item_reference = $_product->get_sku();
+		} elseif ( klarna_wc_get_product_variation_id( $_product ) ) {
+			$item_reference = klarna_wc_get_product_variation_id( $_product );
+		} else {
+			$item_reference = klarna_wc_get_product_id( $_product );
+		}
+
+		return substr( (string) $item_reference, 0, 64 );
+	}
+
+	/**
+	 * Gets refunded order
+	 *
+	 * @param int $order_id
+	 * @return string
+	 */
+	public static function get_refunded_order_id( $order_id ) {
+		$query_args = array(
+			'fields'         => 'id=>parent',
+			'post_type'      => 'shop_order_refund',
+			'post_status'    => 'any',
+			'posts_per_page' => -1,
+		);
+		$refunds    = get_posts( $query_args );
+		$refund_id  = array_search( $order_id, $refunds );
+		if ( is_array( $refund_id ) ) {
+			foreach ( $refund_id as $key => $value ) {
+				if ( ! get_post_meta( $value, '_krokedil_refunded' ) ) {
+					$refund_id = $value;
+					break;
+				}
+			}
+		}
+		return $refund_id;
+	}
+
+	/**
+	 * Gets refunded shipping reference
+	 *
+	 * @param int $order_id
+	 * @return string
+	 */
+	public static function get_refund_shipping_reference( $refund_order ) {
+		$shipping_method_id   = reset( $refund_order->get_items( 'shipping' ) )->get_method_id();
+		$shipping_instance_id = reset( $refund_order->get_items( 'shipping' ) )->get_instance_id();
+
+		return $shipping_method_id . ':' . $shipping_instance_id;
+	}
+
+	public static function check_refund_items_got_full_price( $refunded_items, $original_order ) {
+		if ( empty( $refunded_items ) ) {
+			return false;
+		}
+
+		$refund_items_got_full_price = true;
+
+		// Go through all refund items and check if the refunded price is the same as the order line price in the origianal order.
+		foreach ( $refunded_items as $item ) {
+
+			$item_price = round( ( $item->get_total() + $item->get_total_tax() ) / $item['qty'] );
+			if ( $item['variation_id'] ) {
+				$product_id = $item['variation_id'];
+			} else {
+				$product_id = $item['product_id'];
+			}
+
+			// For each refunded order line get the corresponding order line from the original order.
+			$original_order_items = $original_order->get_items();
+			foreach ( $original_order_items as $original_order_item ) {
+				if ( $original_order_item['variation_id'] ) {
+					$original_order_product_id = $original_order_item['variation_id'];
+				} else {
+					$original_order_product_id = $original_order_item['product_id'];
+				}
+
+				// When we get a match, get the price and break from the forech loop.
+				if ( $original_order_product_id == $product_id ) {
+					$original_order_item_price = round( ( $original_order_item->get_total() + $original_order_item->get_total_tax() ) / $original_order_item['qty'] );
+					// If the price don't match, then we change $refund_items_got_full_price to false.
+					if ( $original_order_item_price !== $item_price ) {
+						$refund_items_got_full_price = false;
+					}
+					break;
+				}
+			}
+		}
+		return $refund_items_got_full_price;
+	}
 }
 
 $wc_gateway_klarna_order = new WC_Gateway_Klarna_Order();
