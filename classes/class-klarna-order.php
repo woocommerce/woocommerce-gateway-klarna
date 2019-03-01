@@ -1369,6 +1369,14 @@ class WC_Gateway_Klarna_Order {
 		return $shipping_method_id . ':' . $shipping_instance_id;
 	}
 
+	/**
+	 * Go through all refund items and check if the refunded price is
+	 * the same as the order line price in the origianal order.
+	 *
+	 * @param array  $refunded_items refunded order items.
+	 * @param object $original_order original Woocommerce order.
+	 * @return bool
+	 */
 	public static function check_refund_items_got_full_price( $refunded_items, $original_order ) {
 		if ( empty( $refunded_items ) ) {
 			return false;
