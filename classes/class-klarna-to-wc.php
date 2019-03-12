@@ -496,7 +496,9 @@ class WC_Gateway_Klarna_K2WC {
 		} else {
 			foreach ( WC()->cart->get_cart() as $cart_item_key => $values ) {
 				$item_id = $order->add_product(
-					$values['data'], $values['quantity'], array(
+					$values['data'],
+					$values['quantity'],
+					array(
 						'variation' => $values['variation'],
 						'totals'    => array(
 							'subtotal'     => $values['line_subtotal'],
@@ -993,7 +995,8 @@ class WC_Gateway_Klarna_K2WC {
 		}
 
 		$new_customer_data = apply_filters(
-			'woocommerce_new_customer_data', array(
+			'woocommerce_new_customer_data',
+			array(
 				'user_login' => $username,
 				'user_pass'  => $password,
 				'user_email' => $email,
@@ -1152,12 +1155,15 @@ class WC_Gateway_Klarna_K2WC {
 		}
 
 		if ( false === apply_filters( 'klarna_finalize_order_in_thank_you_page', false ) ) {
-			$order->calculate_totals( false );
-			$order->update_status( 'pending' ); // Set status to Pending Payment before completing the order.
-			$order->payment_complete( $transaction_id );
-			$order->set_date_created( current_time( 'timestamp', true ) );
-			delete_post_meta( klarna_wc_get_order_id( $order ), '_kco_incomplete_customer_email' );
-			add_post_meta( klarna_wc_get_order_id( $order ), '_kco_payment_created', time() );
+			// If the order already has been finalized in Woo, don't run payment_complete again.
+			if ( ! $order->has_status( array( 'processing', 'completed' ) ) ) {
+				$order->calculate_totals( false );
+				$order->update_status( 'pending' ); // Set status to Pending Payment before completing the order.
+				$order->payment_complete( $transaction_id );
+				$order->set_date_created( current_time( 'timestamp', true ) );
+				delete_post_meta( klarna_wc_get_order_id( $order ), '_kco_incomplete_customer_email' );
+				add_post_meta( klarna_wc_get_order_id( $order ), '_kco_payment_created', time() );
+			}
 		}
 
 		return $klarna_order;
