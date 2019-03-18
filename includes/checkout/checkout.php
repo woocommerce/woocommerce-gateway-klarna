@@ -57,9 +57,8 @@ if ( ! array_key_exists( strtoupper( $kco_klarna_country ), WC()->countries->get
 do_action( 'woocommerce_check_cart_items' );
 
 if ( wc_notice_count( 'error' ) > 0 && apply_filters( 'klarna_kco_checkout_redirect_on_notice', true ) ) {
-	$checkout_url = wc_get_checkout_url();
 	$cart_url = wc_get_cart_url();
-	if ( $checkout_url !== $cart_url ) {
+	if ( $kco_klarna_checkout_url !== $cart_url ) {
 		wp_safe_redirect( $cart_url );
 	}
 } else {
