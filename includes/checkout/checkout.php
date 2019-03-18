@@ -57,8 +57,10 @@ if ( ! array_key_exists( strtoupper( $kco_klarna_country ), WC()->countries->get
 do_action( 'woocommerce_check_cart_items' );
 
 if ( wc_notice_count( 'error' ) > 0 && apply_filters( 'klarna_kco_checkout_redirect_on_notice', true ) ) {
-	$cart_url = wc_get_cart_url();
-	if ( $kco_klarna_checkout_url !== $cart_url ) {
+	$cart_url  = wc_get_cart_url();
+	$cart_path = wp_parse_url( trailingslashit( $cart_url ), PHP_URL_PATH );
+	$kco_path  = wp_parse_url( trailingslashit( $kco_klarna_checkout_url ), PHP_URL_PATH );
+	if ( $cart_path !== $kco_path ) {
 		wp_safe_redirect( $cart_url );
 	}
 } else {
