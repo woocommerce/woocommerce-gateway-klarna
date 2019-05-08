@@ -74,8 +74,8 @@ try {
 
 			// Extra merchant data
 			$subscription_product_id = false;
-			if ( ! empty( $woocommerce->cart->cart_contents ) ) {
-				foreach ( $woocommerce->cart->cart_contents as $cart_item ) {
+			if ( ! empty( WC()->cart->cart_contents ) ) {
+				foreach ( WC()->cart->cart_contents as $cart_item ) {
 					if ( WC_Subscriptions_Product::is_subscription( $cart_item['product_id'] ) ) {
 						$subscription_product_id = $cart_item['product_id'];
 						break;
