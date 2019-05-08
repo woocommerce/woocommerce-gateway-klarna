@@ -22,7 +22,8 @@ class WC_Gateway_Klarna_Checkout_Ajax {
 		// Add coupon
 		add_action( 'wp_ajax_klarna_checkout_coupons_callback', array( $this, 'klarna_checkout_coupons_callback' ) );
 		add_action(
-			'wp_ajax_nopriv_klarna_checkout_coupons_callback', array(
+			'wp_ajax_nopriv_klarna_checkout_coupons_callback',
+			array(
 				$this,
 				'klarna_checkout_coupons_callback',
 			)
@@ -30,13 +31,15 @@ class WC_Gateway_Klarna_Checkout_Ajax {
 
 		// Remove coupon
 		add_action(
-			'wp_ajax_klarna_checkout_remove_coupon_callback', array(
+			'wp_ajax_klarna_checkout_remove_coupon_callback',
+			array(
 				$this,
 				'klarna_checkout_remove_coupon_callback',
 			)
 		);
 		add_action(
-			'wp_ajax_nopriv_klarna_checkout_remove_coupon_callback', array(
+			'wp_ajax_nopriv_klarna_checkout_remove_coupon_callback',
+			array(
 				$this,
 				'klarna_checkout_remove_coupon_callback',
 			)
@@ -44,13 +47,15 @@ class WC_Gateway_Klarna_Checkout_Ajax {
 
 		// Cart quantity
 		add_action(
-			'wp_ajax_klarna_checkout_cart_callback_update', array(
+			'wp_ajax_klarna_checkout_cart_callback_update',
+			array(
 				$this,
 				'klarna_checkout_cart_callback_update',
 			)
 		);
 		add_action(
-			'wp_ajax_nopriv_klarna_checkout_cart_callback_update', array(
+			'wp_ajax_nopriv_klarna_checkout_cart_callback_update',
+			array(
 				$this,
 				'klarna_checkout_cart_callback_update',
 			)
@@ -58,13 +63,15 @@ class WC_Gateway_Klarna_Checkout_Ajax {
 
 		// Cart remove
 		add_action(
-			'wp_ajax_klarna_checkout_cart_callback_remove', array(
+			'wp_ajax_klarna_checkout_cart_callback_remove',
+			array(
 				$this,
 				'klarna_checkout_cart_callback_remove',
 			)
 		);
 		add_action(
-			'wp_ajax_nopriv_klarna_checkout_cart_callback_remove', array(
+			'wp_ajax_nopriv_klarna_checkout_cart_callback_remove',
+			array(
 				$this,
 				'klarna_checkout_cart_callback_remove',
 			)
@@ -73,7 +80,8 @@ class WC_Gateway_Klarna_Checkout_Ajax {
 		// Shipping method selector
 		add_action( 'wp_ajax_klarna_checkout_shipping_callback', array( $this, 'klarna_checkout_shipping_callback' ) );
 		add_action(
-			'wp_ajax_nopriv_klarna_checkout_shipping_callback', array(
+			'wp_ajax_nopriv_klarna_checkout_shipping_callback',
+			array(
 				$this,
 				'klarna_checkout_shipping_callback',
 			)
@@ -81,13 +89,15 @@ class WC_Gateway_Klarna_Checkout_Ajax {
 
 		// Shipping option inside KCO iframe
 		add_action(
-			'wp_ajax_kco_iframe_shipping_option_change_cb', array(
+			'wp_ajax_kco_iframe_shipping_option_change_cb',
+			array(
 				$this,
 				'kco_iframe_shipping_option_change_cb',
 			)
 		);
 		add_action(
-			'wp_ajax_nopriv_kco_iframe_shipping_option_change_cb', array(
+			'wp_ajax_nopriv_kco_iframe_shipping_option_change_cb',
+			array(
 				$this,
 				'kco_iframe_shipping_option_change_cb',
 			)
@@ -96,7 +106,8 @@ class WC_Gateway_Klarna_Checkout_Ajax {
 		// Country selector
 		add_action( 'wp_ajax_klarna_checkout_country_callback', array( $this, 'klarna_checkout_country_callback' ) );
 		add_action(
-			'wp_ajax_nopriv_klarna_checkout_country_callback', array(
+			'wp_ajax_nopriv_klarna_checkout_country_callback',
+			array(
 				$this,
 				'klarna_checkout_country_callback',
 			)
@@ -104,13 +115,15 @@ class WC_Gateway_Klarna_Checkout_Ajax {
 
 		// Order note
 		add_action(
-			'wp_ajax_klarna_checkout_order_note_callback', array(
+			'wp_ajax_klarna_checkout_order_note_callback',
+			array(
 				$this,
 				'klarna_checkout_order_note_callback',
 			)
 		);
 		add_action(
-			'wp_ajax_nopriv_klarna_checkout_order_note_callback', array(
+			'wp_ajax_nopriv_klarna_checkout_order_note_callback',
+			array(
 				$this,
 				'klarna_checkout_order_note_callback',
 			)
@@ -125,13 +138,15 @@ class WC_Gateway_Klarna_Checkout_Ajax {
 		add_action( 'wp_ajax_nopriv_kco_iframe_change_cb', array( $this, 'kco_iframe_change_cb' ) );
 
 		add_action(
-			'wp_ajax_kco_iframe_shipping_address_change_v2_cb', array(
+			'wp_ajax_kco_iframe_shipping_address_change_v2_cb',
+			array(
 				$this,
 				'kco_iframe_shipping_address_change_v2_cb',
 			)
 		);
 		add_action(
-			'wp_ajax_nopriv_kco_iframe_shipping_address_change_v2_cb', array(
+			'wp_ajax_nopriv_kco_iframe_shipping_address_change_v2_cb',
+			array(
 				$this,
 				'kco_iframe_shipping_address_change_v2_cb',
 			)
@@ -139,13 +154,15 @@ class WC_Gateway_Klarna_Checkout_Ajax {
 
 		// V3
 		add_action(
-			'wp_ajax_kco_iframe_shipping_address_change_cb', array(
+			'wp_ajax_kco_iframe_shipping_address_change_cb',
+			array(
 				$this,
 				'kco_iframe_shipping_address_change_cb',
 			)
 		);
 		add_action(
-			'wp_ajax_nopriv_kco_iframe_shipping_address_change_cb', array(
+			'wp_ajax_nopriv_kco_iframe_shipping_address_change_cb',
+			array(
 				$this,
 				'kco_iframe_shipping_address_change_cb',
 			)
@@ -530,7 +547,8 @@ class WC_Gateway_Klarna_Checkout_Ajax {
 				array(
 					'sid'            => $orderid,
 					'order-received' => $orderid,
-				), $klarna_order['merchant']['confirmation_uri']
+				),
+				$klarna_order['merchant']['confirmation_uri']
 			);
 
 			$klarna_order->update( $update );
