@@ -1037,7 +1037,59 @@ class WC_Gateway_Klarna_Checkout_Ajax {
 					$update['cart']['items'][] = $item;
 				}
 			}
+
+			// Check if there's a subscription product in cart.
+			if ( class_exists( 'WC_Subscriptions_Cart' ) && WC_Subscriptions_Cart::cart_contains_subscription() ) {
+				$update['recurring'] = true;
+
+				// Extra merchant data.
+				$subscription_product_id = false;
+				if ( ! empty( WC()->cart->cart_contents ) ) {
+					foreach ( WC()->cart->cart_contents as $cart_item ) {
+						if ( WC_Subscriptions_Product::is_subscription( $cart_item['product_id'] ) ) {
+							$subscription_product_id = $cart_item['product_id'];
+							break;
+						}
+					}
+				}
+
+				if ( $subscription_product_id ) {
+					$subscription_expiration_time = WC_Subscriptions_Product::get_expiration_date( $subscription_product_id );
+					if ( 0 !== $subscription_expiration_time ) {
+						$end_time = date( 'Y-m-d\TH:i', strtotime( $subscription_expiration_time ) );
+					} else {
+						$end_time = date( 'Y-m-d\TH:i', strtotime( '+50 year' ) );
+					}
+
+					$klarna_subscription_info = array(
+						'subscription_name'            => 'Subscription: ' . get_the_title( $subscription_product_id ),
+						'start_time'                   => date( 'Y-m-d\TH:i' ),
+						'end_time'                     => $end_time,
+						'auto_renewal_of_subscription' => true,
+					);
+					if ( get_current_user_id() ) {
+						$klarna_subscription_info['customer_account_info'] = array(
+							'unique_account_identifier' => (string) get_current_user_id(),
+						);
+					}
+
+					$klarna_subscription = array( $klarna_subscription_info );
+
+					$body_attachment = json_encode(
+						array(
+							'subscription' => $klarna_subscription,
+						)
+					);
+
+					if ( $body_attachment ) {
+						$update['attachment']['content_type'] = 'application/vnd.klarna.internal.emd-v2+json';
+						$update['attachment']['body']         = $body_attachment;
+					}
+				}
+			}
+
 			WC_Gateway_Klarna::log( 'Update request order data: ' . stripslashes_deep( wp_json_encode( $update ) ) );
+			krokedil_log_events( $klarna_order_id, 'Update order (ajax)', $create );
 			try {
 				$klarna_order->update( apply_filters( 'kco_update_order', $update ) );
 			} catch ( Exception $e ) {
