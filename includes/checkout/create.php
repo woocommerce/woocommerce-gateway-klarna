@@ -82,7 +82,8 @@ if ( $kco_is_rest ) {
 			'klarna_order' => '{checkout.order.id}',
 			'wc-api'       => 'WC_Gateway_Klarna_Checkout',
 			'klarna-api'   => 'rest',
-		), $push_uri_base
+		),
+		$push_uri_base
 	);
 	$merchant_confirmation_uri = add_query_arg(
 		array(
@@ -92,13 +93,15 @@ if ( $kco_is_rest ) {
 			'order-received' => $local_order_id,
 			'thankyou'       => 'yes',
 			'key'            => $order_key,
-		), $kco_klarna_checkout_thank_you_url
+		),
+		$kco_klarna_checkout_thank_you_url
 	);
 	$address_update_uri        = add_query_arg(
 		array(
 			'address_update' => 'yes',
 			'sid'            => $local_order_id,
-		), $kco_klarna_checkout_url
+		),
+		$kco_klarna_checkout_url
 	);
 } else { // V2
 	$merchant_terms_uri        = $kco_terms_url;
@@ -109,7 +112,8 @@ if ( $kco_is_rest ) {
 			'scountry'     => $kco_klarna_country,
 			'klarna_order' => '{checkout.order.id}',
 			'klarna-api'   => 'v2',
-		), $push_uri_base
+		),
+		$push_uri_base
 	);
 	$merchant_confirmation_uri = add_query_arg(
 		array(
@@ -119,7 +123,8 @@ if ( $kco_is_rest ) {
 			'order-received' => $local_order_id,
 			'thankyou'       => 'yes',
 			'key'            => $order_key,
-		), $kco_klarna_checkout_thank_you_url
+		),
+		$kco_klarna_checkout_thank_you_url
 	);
 }
 
@@ -318,7 +323,8 @@ if ( $kco_is_rest ) {
 	$klarna_order = new Klarna_Checkout_Order( $connector, $kco_klarna_server );
 }
 
-WC_Gateway_Klarna::log( 'Create request order data: ' . var_export( $create, true ) );
+WC_Gateway_Klarna::log( 'Create request order data: ' . stripslashes_deep( wp_json_encode( $create ) ) );
+krokedil_log_events( $local_order_id, 'Create order', $create );
 
 try {
 	$klarna_order->create( apply_filters( 'kco_create_order', $create ) );
