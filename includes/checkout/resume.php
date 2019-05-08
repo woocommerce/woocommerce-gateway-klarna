@@ -50,22 +50,22 @@ try {
 
 		// Colors
 		if ( '' !== $kco_color_options['color_button'] ) {
-			$create['options']['color_button'] = $kco_color_options['color_button'];
+			$update['options']['color_button'] = $kco_color_options['color_button'];
 		}
 		if ( '' !== $kco_color_options['color_button_text'] ) {
-			$create['options']['color_button_text'] = $kco_color_options['color_button_text'];
+			$update['options']['color_button_text'] = $kco_color_options['color_button_text'];
 		}
 		if ( '' !== $kco_color_options['color_checkbox'] ) {
-			$create['options']['color_checkbox'] = $kco_color_options['color_checkbox'];
+			$update['options']['color_checkbox'] = $kco_color_options['color_checkbox'];
 		}
 		if ( '' !== $kco_color_options['color_checkbox_checkmark'] ) {
-			$create['options']['color_checkbox_checkmark'] = $kco_color_options['color_checkbox_checkmark'];
+			$update['options']['color_checkbox_checkmark'] = $kco_color_options['color_checkbox_checkmark'];
 		}
 		if ( '' !== $kco_color_options['color_header'] ) {
-			$create['options']['color_header'] = $kco_color_options['color_header'];
+			$update['options']['color_header'] = $kco_color_options['color_header'];
 		}
 		if ( '' !== $kco_color_options['color_link'] ) {
-			$create['options']['color_link'] = $kco_color_options['color_link'];
+			$update['options']['color_link'] = $kco_color_options['color_link'];
 		}
 
 		// Check if there's a subscription product in cart
@@ -259,7 +259,7 @@ try {
 				$update['merchant']['validation_uri'] = get_home_url() . '/wc-api/WC_Gateway_Klarna_Order_Validate/';
 			}
 			if ( $kco_cancellation_terms_url ) {
-				$create['merchant']['cancellation_terms_uri'] = $kco_cancellation_terms_url;
+				$update['merchant']['cancellation_terms_uri'] = $kco_cancellation_terms_url;
 			}
 		}
 
@@ -297,7 +297,7 @@ try {
 		} else {
 			// Allow separate shipping address
 			if ( 'yes' == $kco_allow_separate_shipping ) {
-				$create['options']['allow_separate_shipping_address'] = true;
+				$update['options']['allow_separate_shipping_address'] = true;
 			}
 		}
 		WC_Gateway_Klarna::log( 'Update request order data: ' . stripslashes_deep( wp_json_encode( $update ) ) );
