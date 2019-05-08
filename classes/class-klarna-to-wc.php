@@ -336,6 +336,10 @@ class WC_Gateway_Klarna_K2WC {
 				$log_order['customer']          = $klarna_order['customer'];
 				$log_order['options']           = $klarna_order['options'];
 				$log_order['merchant']          = $klarna_order['merchant'];
+
+				if ( isset( $klarna_order['recurring_token'] ) ) {
+					$log_order['recurring_token'] = $klarna_order['recurring_token'];
+				}
 				krokedil_log_events( $local_order_id, 'Klarna listener hit.', $log_order );
 			}
 
