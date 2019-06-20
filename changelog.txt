@@ -1,5 +1,14 @@
 *** WooCommerce Gateway Klarna Changelog ***
 
+2019.06.12	- version 2.7.0
+* Feature   - Support for partial refunds.
+* Tweak     - Updated Swedish translation files.
+* Tweak     - Logging improvements.
+* Fix       - Don't try to run payment_complete (and change order status to pending) if the order already has status Processing or Completed.
+* Fix       - Subscription support: Set recurring=true even in update requests to Klarna.
+* Fix       - Update order request fix for options data (colors settings).
+* Fix       - PHP fatal error fix. Don't try to check for client_currency if WC session isn't available.
+
 2018.11.12	- version 2.6.2
 * Tweak		- Code cleaning.
 * Fix		- Check if klarna_checkout exist in get_available_payment_gateways before change_checkout_url (URL to checkout page). Props to @jonathan-dejong.

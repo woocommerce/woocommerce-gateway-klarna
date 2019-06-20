@@ -2,9 +2,9 @@
 Contributors: krokedil, niklashogefjord, slobodanmanic
 Tags: ecommerce, e-commerce, woocommerce, klarna
 Requires at least: 4.2
-Tested up to: 4.9.8
+Tested up to: 5.2.2
 WC requires at least: 3.0.0
-WC tested up to: 3.5.1
+WC tested up to: 3.6.4
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -41,6 +41,15 @@ Kenneth Bårdseng & Jarle Dahl Bergersen - Norwegian translation
 
 
 == CHANGELOG ==
+
+= 2019.06.12    - version 2.7.0 =
+* Feature       - Support for partial refunds.
+* Tweak         - Updated Swedish translation files.
+* Tweak         - Logging improvements.
+* Fix           - Don't try to run payment_complete (and change order status to pending) if the order already has status Processing or Completed.
+* Fix           - Subscription support: Set recurring=true even in update requests to Klarna.
+* Fix           - Update order request fix for options data (colors settings).
+* Fix           - PHP fatal error fix. Don't try to check for client_currency if WC session isn't available.
 
 = 2018.11.12	- version 2.6.2 =
 * Tweak			- Code cleaning.
