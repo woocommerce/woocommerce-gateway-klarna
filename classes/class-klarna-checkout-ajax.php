@@ -960,6 +960,7 @@ class WC_Gateway_Klarna_Checkout_Ajax {
 		$klarna_testmode = WC_Gateway_Klarna_Checkout_Variables::get_klarna_checkout_testmode();
 		$klarna_server   = WC_Gateway_Klarna_Checkout_Variables::get_klarna_server();
 		$klarna_debug    = WC_Gateway_Klarna_Checkout_Variables::get_klarna_checkout_debug();
+		$klarna_order_id = WC()->session->get( 'klarna_checkout' );
 		// $klarna_log = WC_Gateway_Klarna_Checkout_Variables::get_klarna_checkout_log();
 		// Check if Euro is selected, get correct country
 		if ( 'EUR' == get_woocommerce_currency() && WC()->session->get( 'klarna_euro_country' ) ) {
@@ -994,12 +995,11 @@ class WC_Gateway_Klarna_Checkout_Ajax {
 				}
 			}
 
-			$klarna_order_id = WC()->session->get( 'klarna_checkout' );
-			$connector       = Klarna\Rest\Transport\Connector::create( $eid, $sharedSecret, $klarna_server_url );
-			$klarna_order    = new \Klarna\Rest\Checkout\Order( $connector, $klarna_order_id );
+			$connector    = Klarna\Rest\Transport\Connector::create( $eid, $sharedSecret, $klarna_server_url );
+			$klarna_order = new \Klarna\Rest\Checkout\Order( $connector, $klarna_order_id );
 		} else {
 			$connector    = Klarna_Checkout_Connector::create( $sharedSecret, $klarna_server );
-			$klarna_order = new Klarna_Checkout_Order( $connector, WC()->session->get( 'klarna_checkout' ) );
+			$klarna_order = new Klarna_Checkout_Order( $connector, $klarna_order_id );
 			$klarna_order->fetch();
 		}
 
@@ -1089,7 +1089,7 @@ class WC_Gateway_Klarna_Checkout_Ajax {
 			}
 
 			WC_Gateway_Klarna::log( 'Update request order data: ' . stripslashes_deep( wp_json_encode( $update ) ) );
-			krokedil_log_events( $klarna_order_id, 'Update order (ajax)', $create );
+			krokedil_log_events( $klarna_order_id, 'Update order (ajax)', $update );
 			try {
 				$klarna_order->update( apply_filters( 'kco_update_order', $update ) );
 			} catch ( Exception $e ) {
