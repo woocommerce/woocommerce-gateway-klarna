@@ -407,7 +407,28 @@ class WC_Gateway_Klarna_Order {
 			}
 			// Shipping.
 			if ( $refund_order->get_shipping_total() < 0 ) {
-				$klarna->addArtNo( 1, self::get_refund_shipping_reference( $refund_order ) );
+				if ( abs( $refund_order->get_shipping_total() ) == $order->get_shipping_total() ) {
+					// Full shipping refund.
+					$klarna->addArtNo( 1, self::get_refund_shipping_reference( $refund_order ) );
+				} else {
+					// Partial shipping refund.
+					$shipping_price_incl_tax = abs( round( $refund_order->get_shipping_total() + $refund_order->get_shipping_tax(), 2 ) );
+					if ( $refund_order->get_shipping_tax() < 0 ) {
+						$shipping_tax = round( ( abs( $refund_order->get_shipping_tax() ) / abs( $refund_order->get_shipping_total() ) ) * 100, 2 );
+					} else {
+						$shipping_tax = 0;
+					}
+					$ocr_shipping = $klarna->returnAmount( // returns 1 on success
+						$invNo,                // Invoice number
+						$shipping_price_incl_tax,           // Amount given as a discount.
+						$shipping_tax,             // VAT (%)
+						Klarna\XMLRPC\Flags::INC_VAT,  // Amount including VAT.
+						utf8_encode( sprintf( __( 'Shipping refund', 'woocommerce-gateway-klarna' ), $shipping_price_incl_tax ) ) // Description
+					);
+					if ( $ocr_shipping ) {
+						$order->add_order_note( sprintf( __( 'Shipping cost partially refunded in Klarna. Refund amount: %s.', 'woocommerce-gateway-klarna' ), wc_price( $shipping_price_incl_tax, array( 'currency' => $order->get_currency() ) ) ) );
+					}
+				}
 			}
 			try {
 				$ocr = $klarna->creditPart( $invNo ); // Invoice number
@@ -426,7 +447,7 @@ class WC_Gateway_Klarna_Order {
 			}
 		} else {
 			/**
-			 * If we don't have any refunded items, or if item prices differ from the original order.
+			 * If we got refunded items but prices differ from the original order.
 			 * Use Klarnas returnAmount feature (good-will refunds).
 			 */
 			if ( ! empty( $refunded_items ) ) {
@@ -462,30 +483,105 @@ class WC_Gateway_Klarna_Order {
 						$refund_status = false;
 					}
 				}
+
+				// Mauybe refund shipping.
+				if ( $refund_order->get_shipping_total() < 0 ) {
+					if ( abs( $refund_order->get_shipping_total() ) == $order->get_shipping_total() ) {
+						// Full shipping refund.
+						$klarna->addArtNo( 1, self::get_refund_shipping_reference( $refund_order ) );
+					} else {
+						// Partial shipping refund.
+						$shipping_price_incl_tax = abs( round( $refund_order->get_shipping_total() + $refund_order->get_shipping_tax(), 2 ) );
+						if ( $refund_order->get_shipping_tax() < 0 ) {
+							$shipping_tax = round( ( abs( $refund_order->get_shipping_tax() ) / abs( $refund_order->get_shipping_total() ) ) * 100, 2 );
+						} else {
+							$shipping_tax = 0;
+						}
+						$ocr_shipping = $klarna->returnAmount( // returns 1 on success
+							$invNo,                // Invoice number
+							$shipping_price_incl_tax,           // Amount given as a discount.
+							$shipping_tax,             // VAT (%)
+							Klarna\XMLRPC\Flags::INC_VAT,  // Amount including VAT.
+							utf8_encode( sprintf( __( 'Shipping refund', 'woocommerce-gateway-klarna' ), $shipping_price_incl_tax ) ) // Description
+						);
+						if ( $ocr_shipping ) {
+							$order->add_order_note( sprintf( __( 'Shipping cost partially refunded in Klarna. Refund amount: %s.', 'woocommerce-gateway-klarna' ), wc_price( $shipping_price_incl_tax, array( 'currency' => $order->get_currency() ) ) ) );
+						}
+					}
+				}
 				return $refund_status;
 			} else {
-				// Merchant have only entered an amount in the Refund amount field.
-				// Lets send the amount with 0 tax rate.
-				try {
-					$ocr = $klarna->returnAmount( // returns 1 on success
-						$invNo,                // Invoice number
-						$amount,               // Amount given as a discount.
-						0,             // VAT (%)
-						Klarna\XMLRPC\Flags::INC_VAT,  // Amount including VAT.
-						utf8_encode( $reason ) // Description
-					);
-					if ( $ocr ) {
-						$order->add_order_note( sprintf( __( 'Klarna order partially refunded. Refund amount: %s.', 'woocommerce-gateway-klarna' ), wc_price( $amount, array( 'currency' => $order->get_currency() ) ) ) );
+				/**
+				 * We don't have any refunded items.
+				 * Use Klarnas returnAmount feature (good-will refunds) unless it is a full refund of shipping.
+				 */
 
-						return true;
-					}
-				} catch ( Exception $e ) {
-					if ( $this->debug == 'yes' ) {
-						$this->log->add( 'klarna', 'Klarna API error: ' . var_export( $e, true ) );
-					}
-					$order->add_order_note( sprintf( __( 'Klarna order refund failed. Error code %1$s. Error message %2$s', 'woocommerce-gateway-klarna' ), $e->getCode(), utf8_encode( $e->getMessage() ) ) );
+				// Check if the refund order include shipping.
+				if ( $refund_order->get_shipping_total() < 0 ) {
+					if ( abs( $refund_order->get_shipping_total() ) == $order->get_shipping_total() ) {
+						// Full shipping refund.
+						$klarna->addArtNo( 1, self::get_refund_shipping_reference( $refund_order ) );
+						try {
+							$ocr = $klarna->creditPart( $invNo ); // Invoice number
+							if ( $ocr ) {
+								$order->add_order_note( sprintf( __( 'Klarna shipping refunded.', 'woocommerce-gateway-klarna' ), $ocr ) );
 
-					return false;
+								return true;
+							}
+						} catch ( Exception $e ) {
+							if ( $this->debug == 'yes' ) {
+								$this->log->add( 'klarna', 'Klarna API error: ' . var_export( $e, true ) );
+							}
+							$order->add_order_note( sprintf( __( 'Klarna shipping refund failed. Error code %1$s. Error message %2$s', 'woocommerce-gateway-klarna' ), $e->getCode(), utf8_encode( $e->getMessage() ) ) );
+
+							return false;
+						}
+					} else {
+						// Partial shipping refund.
+						$shipping_price_incl_tax = abs( round( $refund_order->get_shipping_total() + $refund_order->get_shipping_tax(), 2 ) );
+						if ( $refund_order->get_shipping_tax() < 0 ) {
+							$shipping_tax = round( ( abs( $refund_order->get_shipping_tax() ) / abs( $refund_order->get_shipping_total() ) ) * 100, 2 );
+						} else {
+							$shipping_tax = 0;
+						}
+						$ocr_shipping = $klarna->returnAmount( // returns 1 on success
+							$invNo,                // Invoice number
+							$shipping_price_incl_tax,           // Amount given as a discount.
+							$shipping_tax,             // VAT (%)
+							Klarna\XMLRPC\Flags::INC_VAT,  // Amount including VAT.
+							utf8_encode( sprintf( __( 'Shipping refund', 'woocommerce-gateway-klarna' ), $shipping_price_incl_tax ) ) // Description
+						);
+						if ( $ocr_shipping ) {
+							$order->add_order_note( sprintf( __( 'Shipping cost partially refunded in Klarna. Refund amount: %s.', 'woocommerce-gateway-klarna' ), wc_price( $shipping_price_incl_tax, array( 'currency' => $order->get_currency() ) ) ) );
+							return true;
+						} else {
+							return false;
+						}
+					}
+				} else {
+					// Merchant have only entered an amount in the Refund amount field.
+					// Lets send the amount with 0 tax rate.
+					try {
+						$ocr = $klarna->returnAmount( // returns 1 on success
+							$invNo,                // Invoice number
+							$amount,               // Amount given as a discount.
+							0,             // VAT (%)
+							Klarna\XMLRPC\Flags::INC_VAT,  // Amount including VAT.
+							utf8_encode( $reason ) // Description
+						);
+						if ( $ocr ) {
+							$order->add_order_note( sprintf( __( 'Klarna order partially refunded. Refund amount: %s.', 'woocommerce-gateway-klarna' ), wc_price( $amount, array( 'currency' => $order->get_currency() ) ) ) );
+
+							return true;
+						}
+					} catch ( Exception $e ) {
+						if ( $this->debug == 'yes' ) {
+							$this->log->add( 'klarna', 'Klarna API error: ' . var_export( $e, true ) );
+						}
+						$order->add_order_note( sprintf( __( 'Klarna order refund failed. Error code %1$s. Error message %2$s', 'woocommerce-gateway-klarna' ), $e->getCode(), utf8_encode( $e->getMessage() ) ) );
+
+						return false;
+					}
 				}
 			}
 			return false;
