@@ -484,7 +484,7 @@ class WC_Gateway_Klarna_Order {
 					}
 				}
 
-				// Mauybe refund shipping.
+				// Maybe refund shipping.
 				if ( $refund_order->get_shipping_total() < 0 ) {
 					if ( abs( $refund_order->get_shipping_total() ) == $order->get_shipping_total() ) {
 						// Full shipping refund.
