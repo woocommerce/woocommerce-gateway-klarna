@@ -43,7 +43,7 @@ Kenneth Bårdseng & Jarle Dahl Bergersen - Norwegian translation
 == CHANGELOG ==
 
 = 2019.07.02    - version 2.7.2 =
-* Fix           - Bug fix in shipping refund in cases where product order lines where pariatlly refunded.
+* Fix           - Bug fix in shipping refund in cases where product order lines where partially refunded.
 
 = 2019.06.28    - version 2.7.1 =
 * Fix           - Refund improvements. Partial refund feature now supports refunding partial product and shipping amount.
