@@ -489,6 +489,17 @@ class WC_Gateway_Klarna_Order {
 					if ( abs( $refund_order->get_shipping_total() ) == $order->get_shipping_total() ) {
 						// Full shipping refund.
 						$klarna->addArtNo( 1, self::get_refund_shipping_reference( $refund_order ) );
+						try {
+							$ocr = $klarna->creditPart( $invNo ); // Invoice number
+							if ( $ocr ) {
+								$order->add_order_note( sprintf( __( 'Klarna shipping refunded.', 'woocommerce-gateway-klarna' ), $ocr ) );
+							}
+						} catch ( Exception $e ) {
+							if ( $this->debug == 'yes' ) {
+								$this->log->add( 'klarna', 'Klarna API error: ' . var_export( $e, true ) );
+							}
+							$order->add_order_note( sprintf( __( 'Klarna shipping refund failed. Error code %1$s. Error message %2$s', 'woocommerce-gateway-klarna' ), $e->getCode(), utf8_encode( $e->getMessage() ) ) );
+						}
 					} else {
 						// Partial shipping refund.
 						$shipping_price_incl_tax = abs( round( $refund_order->get_shipping_total() + $refund_order->get_shipping_tax(), 2 ) );
