@@ -1,7 +1,10 @@
 *** WooCommerce Gateway Klarna Changelog ***
 
+2019.07.02  - version 2.7.2
+* Fix       - Bug fix in shipping refund in cases where product order lines where pariatlly refunded.
+
 2019.06.28  - version 2.7.1
-* Fixed     - Refund improvements. Partial refund feature now supports refunding partial product and shipping amount.
+* Fix       - Refund improvements. Partial refund feature now supports refunding partial product and shipping amount.
 
 2019.06.12	- version 2.7.0
 * Feature   - Support for partial refunds.
