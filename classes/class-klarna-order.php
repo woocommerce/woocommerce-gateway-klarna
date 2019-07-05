@@ -400,7 +400,7 @@ class WC_Gateway_Klarna_Order {
 		 * If we got refunded items and all item prices are the same as in the original order - perform a line item refund.
 		 */
 		if ( ! empty( $refunded_items ) && $refund_items_got_full_price ) {
-			// Cart.
+			// Products.
 			foreach ( $refunded_items as $item ) {
 				$product = $item->get_product();
 				$klarna->addArtNo( abs( $item['qty'] ), self::get_item_reference( $product ) );
@@ -456,7 +456,7 @@ class WC_Gateway_Klarna_Order {
 				foreach ( $refunded_items as $item ) {
 					try {
 						$product    = $item->get_product();
-						$item_price = round( ( $item->get_total() + $item->get_total_tax() ) / $item['qty'], 2 );
+						$item_price = abs( round( $item->get_total() + $item->get_total_tax(), 2 ) );
 						$_tax       = new WC_Tax();
 						$tmp_rates  = $_tax->get_rates( $product->get_tax_class() );
 						$vat        = array_shift( $tmp_rates );
