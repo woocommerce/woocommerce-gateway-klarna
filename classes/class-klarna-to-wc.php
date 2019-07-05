@@ -366,6 +366,9 @@ class WC_Gateway_Klarna_K2WC {
 			// Add order customer info.
 			$this->add_order_customer_info( $order, $klarna_order );
 
+			// Save used shipping SKU (in case we need it for refunds).
+			$this->save_shipping_sku( $order, $klarna_order );
+
 			do_action( 'kco_before_confirm_order', $local_order_id );
 
 			// Confirm the order in Klarna's system.
@@ -374,6 +377,15 @@ class WC_Gateway_Klarna_K2WC {
 
 			// Other plugins and themes can hook into here.
 			do_action( 'klarna_after_kco_push_notification', $local_order_id, $klarna_order );
+		}
+	}
+
+	public function save_shipping_sku( $order, $klarna_order ) {
+		foreach ( $klarna_order['cart']['items'] as $item ) {
+			if ( 'shipping_fee' === $item['type'] ) {
+				update_post_meta( klarna_wc_get_order_id( $order ), '_klarna_shipping_sku', sanitize_text_field( $item['reference'] ) );
+				break;
+			}
 		}
 	}
 
