@@ -42,6 +42,9 @@ Kenneth Bårdseng & Jarle Dahl Bergersen - Norwegian translation
 
 == CHANGELOG ==
 
+= 2019.07.08    - version 2.7.4 =
+* Fix           - Version number update/fix.
+
 = 2019.07.05    - version 2.7.3 =
 * Tweak         - Save used shipping sku in WC order so it can be used for reference in refund if needed.
 * Fix           - Refund bugfix in returnAmount used when part of the product amount is refunded.
