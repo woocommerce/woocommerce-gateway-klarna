@@ -20,9 +20,10 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 */
 	public function __construct() {
 		parent::__construct();
-		$this->id           = 'klarna_checkout';
-		$this->method_title = __( 'Klarna Checkout', 'woocommerce-gateway-klarna' );
-		$this->has_fields   = false;
+		$this->id                 = 'klarna_checkout';
+		$this->method_title       = __( 'Klarna Checkout', 'woocommerce-gateway-klarna' );
+		$this->method_description = __( 'The previous Klarna Checkout (KCOv2) replaces standard WooCommerce checkout page.', 'woocommerce-gateway-klarna' );
+		$this->has_fields         = false;
 		// $this->logger       = new WC_Logger();
 		// Load the form fields.
 		$this->init_form_fields();
@@ -49,7 +50,8 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		}
 		// Actions
 		add_action(
-			'woocommerce_update_options_payment_gateways_' . $this->id, array(
+			'woocommerce_update_options_payment_gateways_' . $this->id,
+			array(
 				$this,
 				'process_admin_options',
 			)
@@ -58,7 +60,8 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		add_action( 'woocommerce_api_wc_gateway_klarna_checkout', array( $this, 'check_checkout_listener' ) );
 		// Validate listener
 		add_action(
-			'woocommerce_api_wc_gateway_klarna_order_validate', array(
+			'woocommerce_api_wc_gateway_klarna_order_validate',
+			array(
 				'WC_Gateway_Klarna_Order_Validate',
 				'validate_checkout_listener',
 			)
@@ -93,10 +96,13 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			// Process subscription payment
 			// add_action( 'woocommerce_scheduled_subscription_renewal_klarna_checkout', array( $this, 'scheduled_subscription_payment' ), 10, 2 );
 			add_action(
-				'woocommerce_scheduled_subscription_payment_klarna_checkout', array(
+				'woocommerce_scheduled_subscription_payment_klarna_checkout',
+				array(
 					$this,
 					'scheduled_subscription_payment',
-				), 10, 2
+				),
+				10,
+				2
 			);
 			// Do not copy invoice number to recurring orders
 			// add_filter( 'woocommerce_subscriptions_renewal_order_meta_query', array( $this, 'kco_recurring_do_not_copy_meta_data' ), 10, 4 );
@@ -109,7 +115,8 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 
 		// Register new order status
 		add_filter(
-			'woocommerce_valid_order_statuses_for_payment_complete', array(
+			'woocommerce_valid_order_statuses_for_payment_complete',
+			array(
 				$this,
 				'kco_incomplete_payment_complete',
 			)
@@ -736,8 +743,10 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		if ( $this->is_rest() ) {
 			if ( $this->testmode == 'yes' ) {
 				if ( in_array(
-					strtoupper( $this->klarna_country ), apply_filters(
-						'klarna_is_rest_countries_eu', array(
+					strtoupper( $this->klarna_country ),
+					apply_filters(
+						'klarna_is_rest_countries_eu',
+						array(
 							'DK',
 							'GB',
 							'NL',
@@ -750,8 +759,10 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 				}
 			} else {
 				if ( in_array(
-					strtoupper( $this->klarna_country ), apply_filters(
-						'klarna_is_rest_countries_eu', array(
+					strtoupper( $this->klarna_country ),
+					apply_filters(
+						'klarna_is_rest_countries_eu',
+						array(
 							'DK',
 							'GB',
 							'NL',
@@ -872,7 +883,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		<table class="form-table">
 			<?php $this->generate_settings_html(); ?>
 		</table><!--/.form-table-->
-	<?php
+		<?php
 	}
 
 	/**
@@ -1335,8 +1346,10 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 */
 	function is_rest() {
 		if ( in_array(
-			strtoupper( $this->klarna_country ), apply_filters(
-				'klarna_is_rest_countries', array(
+			strtoupper( $this->klarna_country ),
+			apply_filters(
+				'klarna_is_rest_countries',
+				array(
 					'US',
 					'DK',
 					'GB',
@@ -1564,7 +1577,7 @@ class WC_Gateway_Klarna_Checkout_Extra {
 		$checkout_settings = get_option( 'woocommerce_klarna_checkout_settings' );
 		if ( $post->ID == $checkout_page_id ) {
 			if ( '' != $checkout_settings['color_button'] || '' != $checkout_settings['color_button_text'] ) {
-			?>
+				?>
 				<style>
 					a.std-checkout-button,
 					.klarna_checkout_coupon input[type="submit"] {
@@ -1573,7 +1586,7 @@ class WC_Gateway_Klarna_Checkout_Extra {
 						color: <?php echo $checkout_settings['color_button_text']; ?> !important;
 					}
 				</style>
-			<?php
+				<?php
 			}
 		}
 	}
@@ -1714,7 +1727,9 @@ class WC_Gateway_Klarna_Checkout_Extra {
 		}
 		wp_register_script( 'klarna_checkout', KLARNA_URL . 'assets/js/klarna-checkout.js', array(), WC_KLARNA_VER, true );
 		wp_localize_script(
-			'klarna_checkout', 'kcoAjax', array(
+			'klarna_checkout',
+			'kcoAjax',
+			array(
 				'ajaxurl'               => admin_url( 'admin-ajax.php' ),
 				'klarna_checkout_nonce' => wp_create_nonce( 'klarna_checkout_nonce' ),
 				'version'               => $version,
@@ -1755,7 +1770,9 @@ class WC_Gateway_Klarna_Checkout_Extra {
 				if ( in_array( $clean_req_uri, $checkout_pages ) || in_array( $clean_req_uri, $thank_you_pages ) || apply_filters( 'klarna_checkout_enqueuer', '' ) ) {
 					wp_enqueue_script( 'jquery' );
 					wp_enqueue_script(
-						'wc-checkout', $frontend_script_path . 'checkout' . $suffix . '.js', array(
+						'wc-checkout',
+						$frontend_script_path . 'checkout' . $suffix . '.js',
+						array(
 							'jquery',
 							'woocommerce',
 							'wc-country-select',
@@ -1827,8 +1844,10 @@ class WC_Gateway_Klarna_Checkout_Extra {
 	function is_rest() {
 		$this->klarna_country = WC()->session->get( 'klarna_country' );
 		if ( in_array(
-			strtoupper( $this->klarna_country ), apply_filters(
-				'klarna_is_rest_countries', array(
+			strtoupper( $this->klarna_country ),
+			apply_filters(
+				'klarna_is_rest_countries',
+				array(
 					'US',
 					'DK',
 					'GB',
