@@ -4,7 +4,7 @@ Tags: ecommerce, e-commerce, woocommerce, klarna
 Requires at least: 4.2
 Tested up to: 5.2.2
 WC requires at least: 3.0.0
-WC tested up to: 3.6.4
+WC tested up to: 3.6.5
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -41,6 +41,12 @@ Kenneth Bårdseng & Jarle Dahl Bergersen - Norwegian translation
 
 
 == CHANGELOG ==
+
+= 2019.08.12    - version 2.7.5 =
+* Tweak         - Add Action woocommerce_after_shipping_rate after kco widget shipping. Props to @hedqvist.
+* Tweak         - Add js trigger kco_shipping_address_change_v2_cb. Props to @hedqvist.
+* Tweak         - Added KCO method description to display that v2 is an old platform.
+* Tweak         - Removed CSS that hides manual refund button for orders made via KCO.
 
 = 2019.07.08    - version 2.7.4 =
 * Fix           - Version number update/fix.
