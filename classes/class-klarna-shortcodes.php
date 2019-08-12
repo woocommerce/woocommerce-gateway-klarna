@@ -488,6 +488,7 @@ class WC_Gateway_Klarna_Shortcodes {
 												   class="shipping_method"/>
 											<label
 												for="shipping_method_<?php echo esc_attr( $index ); ?>_<?php echo esc_attr( sanitize_title( $method->id ) ); ?>"><?php echo wp_kses_post( wc_cart_totals_shipping_method_label( $method ) ); ?></label>
+											<?php do_action( 'woocommerce_after_shipping_rate', $method, $index ); ?>
 										</li>
 									<?php endforeach; ?>
 								</ul>

@@ -656,7 +656,7 @@ jQuery(document).ready(function ($) {
 								})
 									.done(function (response) {
 										$('#klarna-checkout-widget').html(response.data.widget_html);
-
+										$(document.body).trigger('kco_shipping_address_change_v2_cb', data, response);
 										window._klarnaCheckout(function (api) {
 											api.resume();
 										});
