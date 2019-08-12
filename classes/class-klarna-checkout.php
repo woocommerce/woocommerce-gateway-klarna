@@ -125,8 +125,6 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 
 		// Hide "Refunded" and "KCO Incomplete" statuses for KCO orders
 		// add_filter( 'wc_order_statuses', array( $this, 'remove_refunded_and_kco_incomplete' ), 1000 );
-		// Hide "Manual Refund" button for KCO orders
-		add_action( 'admin_head', array( $this, 'remove_refund_manually' ) );
 		// Cancel unpaid orders for KCO orders too
 		add_filter( 'woocommerce_cancel_unpaid_order', array( $this, 'cancel_unpaid_kco' ), 10, 2 );
 		// Validate callback notice
@@ -307,24 +305,6 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		}
 
 		return $order_statuses;
-	}
-
-	/**
-	 * Hide "Refund x Manually" for KCO orders
-	 *
-	 * @since  2.0
-	 **/
-	function remove_refund_manually() {
-		$screen = get_current_screen();
-		if ( 'shop_order' == $screen->id ) {
-			if ( absint( $_GET['post'] ) == $_GET['post'] ) {
-				$order_id = $_GET['post'];
-				$order    = wc_get_order( $order_id );
-				if ( false != $order && 'klarna_checkout' == get_post_meta( $order_id, '_created_via', true ) ) {
-					echo '<style>.do-manual-refund{display:none !important;}</style>';
-				}
-			}
-		}
 	}
 
 	/**
