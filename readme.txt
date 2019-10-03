@@ -2,9 +2,9 @@
 Contributors: krokedil, niklashogefjord, slobodanmanic
 Tags: ecommerce, e-commerce, woocommerce, klarna
 Requires at least: 4.2
-Tested up to: 5.2.2
+Tested up to: 5.2.3
 WC requires at least: 3.0.0
-WC tested up to: 3.6.5
+WC tested up to: 3.7.0
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -41,6 +41,9 @@ Kenneth Bårdseng & Jarle Dahl Bergersen - Norwegian translation
 
 
 == CHANGELOG ==
+
+= 2019.10.03    - version 2.7.6 =
+* Fix           - Only try to set session klarna_country during get_klarna_country() function if WC session exist.
 
 = 2019.08.12    - version 2.7.5 =
 * Tweak         - Added action woocommerce_after_shipping_rate after kco widget shipping. Props to @hedqvist.
