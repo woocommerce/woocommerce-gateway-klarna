@@ -40,4 +40,4 @@ class WC_Gateway_Klarna_GDPR {
 		}
 	}
 }
-new Klarna_Checkout_For_Woocommerce_GDPR();
+new WC_Gateway_Klarna_GDPR();

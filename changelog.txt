@@ -1,5 +1,71 @@
 *** WooCommerce Gateway Klarna Changelog ***
 
+2019.08.12  - version 2.7.5
+* Tweak     - Added action woocommerce_after_shipping_rate after kco widget shipping. Props to @hedqvist.
+* Tweak     - Added js trigger kco_shipping_address_change_v2_cb. Props to @hedqvist.
+* Tweak     - Added KCO method description to display that v2 is an old platform.
+* Tweak     - Removed CSS that hides manual refund button for orders made via KCO.
+* Tweak     - Added filter klarna_kco_checkout_redirect_on_notice. Props to @jonathan-dejong.
+* Fix       - Prevent possible infinite loop on checkout. Props to @jonathan-dejong.
+
+2019.07.08  - version 2.7.4
+* Fix       - Version number update/fix.
+
+2019.07.05  - version 2.7.3
+* Tweak     - Save used shipping sku in WC order so it can be used for reference in refund if needed.
+* Fixed     - Refund bugfix in returnAmount used when part of the product amount is refunded.
+
+2019.07.02  - version 2.7.2
+* Fix       - Bug fix in shipping refund in cases where product order lines where partially refunded.
+
+2019.06.28  - version 2.7.1
+* Fix       - Refund improvements. Partial refund feature now supports refunding partial product and shipping amount.
+
+2019.06.12	- version 2.7.0
+* Feature   - Support for partial refunds.
+* Tweak     - Updated Swedish translation files.
+* Tweak     - Logging improvements.
+* Fix       - Don't try to run payment_complete (and change order status to pending) if the order already has status Processing or Completed.
+* Fix       - Subscription support: Set recurring=true even in update requests to Klarna.
+* Fix       - Update order request fix for options data (colors settings).
+* Fix       - PHP fatal error fix. Don't try to check for client_currency if WC session isn't available.
+
+2018.11.12	- version 2.6.2
+* Tweak		- Code cleaning.
+* Fix		- Check if klarna_checkout exist in get_available_payment_gateways before change_checkout_url (URL to checkout page). Props to @jonathan-dejong.
+* Fix		- Bug fix in product stock check in validate callback.
+* Fix		- Bug fix in check_subscription_product_limit in validate callback.
+* Fix		- Improved product_needs_shipping check in validate callback (allow virtual products + supscription products with free frial).
+* Fix		- Add improved error message in checkout page for subscription_limit validation
+* Fix		- Only send shipping line item to Klarna if one exist in cart.
+* Fix		- Logging improvements.
+* Fix		- PHP notice fix.
+
+2018.10.29	- version 2.6.1
+* Fix		- Reverted plugin version number in User agent sent to Klarna. Caused issues with Order Management API calls.
+
+2018.10.26	- version 2.6.0
+* Tweak		- Remove woocommerce.com license handling. Add updates via kernl.us.
+* Tweak		- Added Klarna v2 to v3 banner.
+* Tweak		- Added logging of create request.
+* Tweak		- Add plugin version number to user agent sent to klarna.
+* Fix		- Added set_calculated_shipping for customer. Caused issues with WC 3.5.0 for some merchants.
+* Fix		- Removed html-snippet from logging in Klarna listener log.
+* Fix		- Added check to remove unneeded (401) error message in KCO checkout page.
+
+2018.07.30	- version 2.5.15
+* Tweak		- Move unset kco sessions to maybe_clear_kco_sessions() function.
+* Tweak		- Added supports subscription_payment_method_change_admin for KCO.
+* Tweak		- Updated JS event klarna_update_shipping in KCO page so other plugins can update shipping method info and trigger that update to Klarna.
+* Fix		- Fixes so HTML tags being stripped ocht in KCO logs.
+* Fix		- Fixes problem with order started with Swish as payment method but then cancelling and switch to KCO.
+* Fix		- Don't change to KCO checkout url if customer is making a subscription switch (then use the regular checkout instead).
+* Fix		- Added check for subscription limit for customer in validation callback.
+
+2018.05.24  - version 2.5.14
+* Feature	- Added support for wp_add_privacy_policy_content (for GDPR compliance). More info: https://core.trac.wordpress.org/attachment/ticket/43473/PRIVACY-POLICY-CONTENT-HOOK.md.
+* Fix		- Added try catch to parse json in Krokedil logger on order page.
+
 2018.05.11  - version 2.5.13
 * Fix		- PHP fatal error fix for KCO V3 in push notification listener.
 

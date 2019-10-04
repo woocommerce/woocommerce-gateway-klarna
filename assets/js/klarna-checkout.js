@@ -246,8 +246,8 @@ jQuery(document).ready(function ($) {
 		var id = $(this).val(); 
 		update_klarna_shipping( id );
 	});
-	$(document.body).on('klarna_update_shipping', function (event) { 
-		update_klarna_shipping( 'stidner' );
+	$(document.body).on('klarna_update_shipping', function (event, id) { 
+		update_klarna_shipping( id );
 	});
 	function update_klarna_shipping( id ) {
 		if (!performingAjax) {
@@ -284,7 +284,6 @@ jQuery(document).ready(function ($) {
 					complete: function () {
 						console.log( 'complete' );
 						if (typeof window._klarnaCheckout == 'function') {
-							console.log('klarna if');
 							window._klarnaCheckout(function (api) {
 								console.log('klarnaCheckout window');
 								api.resume();
@@ -584,7 +583,6 @@ jQuery(document).ready(function ($) {
 									}
 
 									if ('' != data.email) {
-										console.log('hello world!');
 										kco_widget = $('#klarna-checkout-widget');
 										console.log( 'id ' + $('#klarna-checkout-widget') );
 										console.log( 'var ' + kco_widget );
@@ -658,7 +656,7 @@ jQuery(document).ready(function ($) {
 								})
 									.done(function (response) {
 										$('#klarna-checkout-widget').html(response.data.widget_html);
-
+										$(document.body).trigger('kco_shipping_address_change_v2_cb', data, response);
 										window._klarnaCheckout(function (api) {
 											api.resume();
 										});
@@ -769,4 +767,26 @@ jQuery(document).ready(function ($) {
 		});
 	}
 
+	// Check if error message is shown aswell as a loaded iframe.
+	function checkForIframeAndError() {
+		if( $('#klarna-checkout-container').length > -1 && $('.kco-error').length > -1  ) {
+			return true;
+		}
+		return false;
+	}
+
+	// Remove any error message if iframe is loaded
+	$('body').ajaxComplete( function() {
+		if( checkForIframeAndError() ) {
+			$('.kco-error').hide();
+		}
+	});
+	$('body').change( function() {
+		if( checkForIframeAndError() ) {
+			$('.kco-error').hide();
+		}
+	});
+	if( checkForIframeAndError() ) {
+		$('.kco-error').hide();
+	}
 });

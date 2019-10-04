@@ -147,7 +147,7 @@ function krokedil_meta_contents() {
 		echo '<h4>' . $event['title'] . '</h4>';
 		echo '<h5 class="krokedil_timestamp" data-event-nr="' . $i . '"><a href="#krokedil_event_nr_' . $i . '">Time: ' . $event['timestamp'] . '</a></h5>';
 		echo '</div>';
-		echo '<div class="krokedil_json krokedil_hidden" id="krokedil_event_nr_' . $i . '">' . json_encode( $event['data'] ) . '</div>';
+		echo '<div class="krokedil_json krokedil_hidden" id="krokedil_event_nr_' . $i . '">' . strip_tags( json_encode( $event['data'] ) ) . '</div>';
 		echo '</div>';
 	}
 	echo '<small>Version of plugin used for order: ' . krokedil_get_order_version() . '</small>';

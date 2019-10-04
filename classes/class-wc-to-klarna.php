@@ -24,7 +24,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Process shipping
  * - Rest and V2
  * Returns array formatted for Klarna
- *
  */
 class WC_Gateway_Klarna_WC2K {
 
@@ -146,7 +145,7 @@ class WC_Gateway_Klarna_WC2K {
 					);
 				}
 
-				$cart[]      = $klarna_item;
+				$cart[]       = $klarna_item;
 				$order_total += $item_quantity * $item_price;
 			} // End if().
 		} // End foreach().
@@ -184,13 +183,13 @@ class WC_Gateway_Klarna_WC2K {
 					);
 				}
 
-				$cart[]      = $klarna_fee_item;
+				$cart[]       = $klarna_fee_item;
 				$order_total += (int) $cart_fee->amount * 100;
 			}
 		} // End if().
 
 		// Process shipping.
-		if ( WC()->shipping->get_packages() && WC()->session->get( 'chosen_shipping_methods' ) ) {
+		if ( WC()->shipping->get_packages() && WC()->session->get( 'chosen_shipping_methods' )[0] ) {
 			$shipping_name       = $this->get_shipping_name();
 			$shipping_reference  = $this->get_shipping_reference();
 			$shipping_amount     = $this->get_shipping_amount();
@@ -224,7 +223,7 @@ class WC_Gateway_Klarna_WC2K {
 					'tax_rate'   => $shipping_tax_rate,
 				);
 			}
-			$cart[]      = $shipping;
+			$cart[]       = $shipping;
 			$order_total += $shipping_amount;
 		} // End if().
 
@@ -367,18 +366,22 @@ class WC_Gateway_Klarna_WC2K {
 	 * @return string $item_name Cart item name.
 	 */
 	public function get_item_name( $cart_item ) {
-		$cart_item_data = $cart_item['data'];
-		$cart_item_post = klarna_wc_get_cart_item_post( $cart_item_data );
-		$item_name      = $cart_item_post->post_title;
-		$item_data      = klarna_wc_get_cart_item_data( $cart_item );
+		if ( method_exists( $cart_item, 'get_name' ) ) {
+			$item_name = $cart_item['data']->get_name();
+		} else {
+			$cart_item_data = $cart_item['data'];
+			$cart_item_post = klarna_wc_get_cart_item_post( $cart_item_data );
+			$item_name      = $cart_item_post->post_title;
+			$item_data      = klarna_wc_get_cart_item_data( $cart_item );
 
-		// Get variations as a string and remove line breaks
-		$item_variations = html_entity_decode( rtrim( $item_data ) ); // Removes new line at the end.
-		$item_variations = str_replace( "\n", ', ', $item_variations ); // Replaces all other line breaks with commas.
+			// Get variations as a string and remove line breaks
+			$item_variations = html_entity_decode( rtrim( $item_data ) ); // Removes new line at the end.
+			$item_variations = str_replace( "\n", ', ', $item_variations ); // Replaces all other line breaks with commas.
 
-		// Add variations to name.
-		if ( '' !== $item_variations ) {
-			$item_name .= ' [' . $item_variations . ']';
+			// Add variations to name.
+			if ( '' !== $item_variations ) {
+				$item_name .= ' [' . $item_variations . ']';
+			}
 		}
 
 		return apply_filters( 'klarna_item_name', strip_tags( $item_name ), $cart_item );
@@ -704,7 +707,7 @@ class WC_Gateway_Klarna_WC2K {
 	public function get_shipping_tax_rate() {
 		if ( 'us' !== $this->klarna_country && WC()->cart->shipping_tax_total > 0 ) {
 			$shipping_tax_rates = WC_Tax::get_shipping_tax_rates();
-			$first_rate = array_shift( $shipping_tax_rates );
+			$first_rate         = array_shift( $shipping_tax_rates );
 
 			$shipping_tax_rate = round( $first_rate['rate'] * 100 );
 		} else {

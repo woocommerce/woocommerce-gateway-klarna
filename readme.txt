@@ -2,9 +2,9 @@
 Contributors: krokedil, niklashogefjord, slobodanmanic
 Tags: ecommerce, e-commerce, woocommerce, klarna
 Requires at least: 4.2
-Tested up to: 4.9.5
+Tested up to: 5.2.3
 WC requires at least: 3.0.0
-WC tested up to: 3.3.5
+WC tested up to: 3.7.0
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -33,10 +33,58 @@ Klarna is a great payment alternative for merchants and customers in Sweden, Nor
 Documentation can be found at http://docs.woothemes.com/document/klarna/
 
 
-
-
 == CREDITS	 ==
 
 Huge thanks to: 
 Vincent Suurenbroek - Dutch translation
 Kenneth Bårdseng & Jarle Dahl Bergersen - Norwegian translation
+
+
+== CHANGELOG ==
+
+= 2019.10.03    - version 2.7.6 =
+* Fix           - Only try to set session klarna_country during get_klarna_country() function if WC session exist.
+
+= 2019.08.12    - version 2.7.5 =
+* Tweak         - Added action woocommerce_after_shipping_rate after kco widget shipping. Props to @hedqvist.
+* Tweak         - Added js trigger kco_shipping_address_change_v2_cb. Props to @hedqvist.
+* Tweak         - Added KCO method description to display that v2 is an old platform.
+* Tweak         - Removed CSS that hides manual refund button for orders made via KCO.
+* Tweak         - Added filter klarna_kco_checkout_redirect_on_notice. Props to @jonathan-dejong.
+* Fix           - Prevent possible infinite loop on checkout. Props to @jonathan-dejong.
+
+= 2019.07.08    - version 2.7.4 =
+* Fix           - Version number update/fix.
+
+= 2019.07.05    - version 2.7.3 =
+* Tweak         - Save used shipping sku in WC order so it can be used for reference in refund if needed.
+* Fix           - Refund bugfix in returnAmount used when part of the product amount is refunded.
+
+= 2019.07.02    - version 2.7.2 =
+* Fix           - Bug fix in shipping refund in cases where product order lines where partially refunded.
+
+= 2019.06.28    - version 2.7.1 =
+* Fix           - Refund improvements. Partial refund feature now supports refunding partial product and shipping amount.
+
+= 2019.06.12    - version 2.7.0 =
+* Feature       - Support for partial refunds.
+* Tweak         - Updated Swedish translation files.
+* Tweak         - Logging improvements.
+* Fix           - Don't try to run payment_complete (and change order status to pending) if the order already has status Processing or Completed.
+* Fix           - Subscription support: Set recurring=true even in update requests to Klarna.
+* Fix           - Update order request fix for options data (colors settings).
+* Fix           - PHP fatal error fix. Don't try to check for client_currency if WC session isn't available.
+
+= 2018.11.12	- version 2.6.2 =
+* Tweak			- Code cleaning.
+* Fix			- Check if klarna_checkout exist in get_available_payment_gateways before change_checkout_url (URL to checkout page). Props to @jonathan-dejong.
+* Fix			- Bug fix in product stock check in validate callback.
+* Fix			- Bug fix in check_subscription_product_limit in validate callback.
+* Fix			- Improved product_needs_shipping check in validate callback (allow virtual products + supscription products with free frial).
+* Fix			- Add improved error message in checkout page for subscription_limit validation
+* Fix			- Only send shipping line item to Klarna if one exist in cart.
+* Fix			- Logging improvements.
+* Fix			- PHP notice fix.
+
+= 2018.10.29	- version 2.6.1 =
+* Fix			- Reverted plugin version number in User agent sent to Klarna. Caused issues with Order Management API calls.

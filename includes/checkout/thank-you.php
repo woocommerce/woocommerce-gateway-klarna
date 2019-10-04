@@ -30,7 +30,7 @@ $ty_is_rest             = WC_Gateway_Klarna_Checkout_Variables::is_rest();
 
 // Debug.
 if ( 'yes' === $ty_debug ) {
-	//$ty_log->add( 'klarna', 'Rendering Thank you page...' );
+	// $ty_log->add( 'klarna', 'Rendering Thank you page...' );
 }
 
 $merchant_id   = $ty_klarna_eid;
@@ -42,21 +42,33 @@ $order         = wc_get_order( $order_id );
 // Connect to Klarna.
 if ( $ty_is_rest ) {
 	if ( 'yes' === $ty_testmode ) {
-		if ( in_array( strtoupper( $ty_klarna_country ), apply_filters( 'klarna_is_rest_countries_eu', array(
-			'DK',
-			'GB',
-			'NL'
-		) ) ) ) {
+		if ( in_array(
+			strtoupper( $ty_klarna_country ),
+			apply_filters(
+				'klarna_is_rest_countries_eu',
+				array(
+					'DK',
+					'GB',
+					'NL',
+				)
+			)
+		) ) {
 			$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_TEST_BASE_URL;
 		} elseif ( in_array( strtoupper( $ty_klarna_country ), apply_filters( 'klarna_is_rest_countries_na', array( 'US' ) ) ) ) {
 			$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::NA_TEST_BASE_URL;
 		}
 	} else {
-		if ( in_array( strtoupper( $ty_klarna_country ), apply_filters( 'klarna_is_rest_countries_eu', array(
-			'DK',
-			'GB',
-			'NL'
-		) ) ) ) {
+		if ( in_array(
+			strtoupper( $ty_klarna_country ),
+			apply_filters(
+				'klarna_is_rest_countries_eu',
+				array(
+					'DK',
+					'GB',
+					'NL',
+				)
+			)
+		) ) {
 			$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_BASE_URL;
 		} elseif ( in_array( strtoupper( $ty_klarna_country ), apply_filters( 'klarna_is_rest_countries_na', array( 'US' ) ) ) ) {
 			$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::NA_BASE_URL;
@@ -73,10 +85,10 @@ if ( $ty_is_rest ) {
 
 try {
 	$klarna_order->fetch();
-	WC_Gateway_Klarna::log( 'Klarna Thank you URL: ' . $_SERVER['REQUEST_URI'] . ' Order id: ' . $order_id . ' $klarna_order: ' . var_export( $klarna_order, true ) );
+	// WC_Gateway_Klarna::log( 'Klarna Thank you URL: ' . $_SERVER['REQUEST_URI'] . ' Order id: ' . $order_id . ' $klarna_order: ' . var_export( $klarna_order, true ) );
 } catch ( Exception $e ) {
 	if ( 'yes' === $ty_debug ) {
-		//$ty_log->add( 'klarna', 'Klarna API error: ' . var_export( $e, true ) );
+		// $ty_log->add( 'klarna', 'Klarna API error: ' . var_export( $e, true ) );
 	}
 
 	if ( is_user_logged_in() && $ty_debug ) {
@@ -148,7 +160,7 @@ $posted_data = array(
 // In some cases the order confirmation callback from Klarna happens after the display of the thankyou page.
 // In these cases we need to add customer address to the order here. Plugins like WCS needs this when woocommerce_checkout_order_processed hook is run.
 if ( '' === get_post_meta( $order_id, '_billing_address_1', true ) ) {
-	include_once( KLARNA_DIR . 'classes/class-klarna-to-wc.php' );
+	include_once KLARNA_DIR . 'classes/class-klarna-to-wc.php';
 	WC_Gateway_Klarna_K2WC::add_order_addresses( $order, $klarna_order );
 }
 
@@ -162,12 +174,15 @@ echo $snippet;
  * plugins like MonsterInsights pull data they need.
  */
 if ( true === apply_filters( 'klarna_finalize_order_in_thank_you_page', false ) ) {
-	$order->calculate_totals( false );
-	$order->update_status( 'pending' ); // Set status to Pending Payment before completing the order.
-	$order->payment_complete( $order_uri );
-	$order->set_date_created( current_time( 'timestamp', true ) );
-	delete_post_meta( klarna_wc_get_order_id( $order ), '_kco_incomplete_customer_email' );
-	add_post_meta( klarna_wc_get_order_id( $order ), '_kco_payment_created', time() );
+	// If the order already has been finalized in Woo, don't run payment_complete again.
+	if ( ! $order->has_status( array( 'processing', 'completed' ) ) ) {
+		$order->calculate_totals( false );
+		$order->update_status( 'pending' ); // Set status to Pending Payment before completing the order.
+		$order->payment_complete( $order_uri );
+		$order->set_date_created( current_time( 'timestamp', true ) );
+		delete_post_meta( klarna_wc_get_order_id( $order ), '_kco_incomplete_customer_email' );
+		add_post_meta( klarna_wc_get_order_id( $order ), '_kco_payment_created', time() );
+	}
 }
 
 do_action( 'klarna_after_kco_confirmation', $order_id, $klarna_order );
@@ -175,12 +190,5 @@ do_action( 'klarna_after_kco_confirmation', $order_id, $klarna_order );
 if ( ! did_action( 'woocommerce_thankyou' ) ) {
 	do_action( 'woocommerce_thankyou', $order_id );
 }
-
-// Clear session and empty cart.
-WC()->session->__unset( 'klarna_checkout' );
-WC()->session->__unset( 'klarna_checkout_country' );
-WC()->session->__unset( 'ongoing_klarna_order' );
-WC()->session->__unset( 'klarna_order_note' );
-WC()->session->__unset( 'klarna_separate_shipping' );
 
 wc_clear_cart_after_payment(); // Clear cart.
